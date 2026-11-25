@@ -1,0 +1,15 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "memory_metrics",
+  "workstreamId" : "ws-20261011T141651Z-MBC2",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "runId" : "run-1791728580831",
+  "readCount" : 0,
+  "uniqueReadCount" : 0,
+  "repeatedReadCount" : 0,
+  "allowedRepeatedReadCount" : 0,
+  "unexplainedRepeatedReadCount" : 0,
+  "workingSetHitCount" : 0,
+  "workingSetHitRate" : 0.0,
+  "generatedAt" : "2026-10-11T14:24:29.005425Z"
+}

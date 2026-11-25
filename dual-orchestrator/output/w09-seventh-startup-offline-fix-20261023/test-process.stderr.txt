@@ -1,0 +1,12 @@
+test_both_candidate_consumers_stop_before_following_action (test_process_check.ProcessCheckTest.test_both_candidate_consumers_stop_before_following_action) ... ok
+test_cold_cli_permission_failure_and_success (test_process_check.ProcessCheckTest.test_cold_cli_permission_failure_and_success) ... ok
+test_failures_never_become_absent (test_process_check.ProcessCheckTest.test_failures_never_become_absent) ... ok
+test_invalid_pid_rejected_before_command (test_process_check.ProcessCheckTest.test_invalid_pid_rejected_before_command) ... ok
+test_present_pid_including_reused_pid_is_rejected (test_process_check.ProcessCheckTest.test_present_pid_including_reused_pid_is_rejected) ... ok
+test_successful_complete_snapshot_proves_absence_only (test_process_check.ProcessCheckTest.test_successful_complete_snapshot_proves_absence_only) ... ok
+test_timeout_and_spawn_failure_are_unknown (test_process_check.ProcessCheckTest.test_timeout_and_spawn_failure_are_unknown) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.078s
+
+OK

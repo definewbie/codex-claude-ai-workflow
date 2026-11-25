@@ -1,0 +1,2 @@
+Exception in thread "main" java.lang.AssertionError: wrong attribution UNAVAILABLE/0/0/0
+	at dev.dual.adapter.acpx.RealUsageProof.main(RealUsageProof.java:21)

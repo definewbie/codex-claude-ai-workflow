@@ -1,0 +1,10 @@
+用户已批准本次计划返修。保持已通过复评的六文件设计/范围、全部GOAL验收、DECIMAL128独立原值和展示不影响建议的成对测试，不改GOAL、不写实现代码。
+当前计划未能进入EXECUTION的三个具体接线缺项必须修正：
+1. verification_bindings 应对GOAL acceptance_criteria AC-1、AC-2、AC-3、AC-4、AC-5逐项且全量绑定；TR-1..TR-4是测试要求，不能代替AC编号。
+2. 原operator已用review record-readiness正式登记材料：ref=.agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/verification-readiness/okx-ac-availability-20261027-01.json；sha256=1212daf7ab19146a19336a41ac32668c60a31d76f48a6bf0292d361006129d08。将此真实ref/SHA用于environment_refs和feasibility_refs，精确消费下列声明method、executor、evidence_kind、detail_owner。提示词manifest不能作为环境/可行性事实。不得伪造别的引用。
+method=在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。
+executor=AGENT
+evidence_kind=PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS
+detail_owner=implement.claude_self_test_report
+3. GOAL要求真实程序工具观察+本次源码对应的Surefire报告，不统一强制底层actual_exit字段。现有计划四条actual_exit_required=true/expected_exit_code=0超出了已获批标准，且本案当前未证明该接口路径提供actual exit。按GOAL消除这一统一附加要求，保持具体测试确实通过与产品CLI退出语义不回归；actual/reported/status如实区分，不造process exit。若确有明确实际退出码要求必须保持并具名证明来源，不能靠声明替代测量。
+你正在修订计划；修正材料应再经原另一客户端独立复评，不自批EXECUTION。

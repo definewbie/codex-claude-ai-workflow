@@ -1,0 +1,36 @@
+{
+  "checks": [
+    {
+      "name": "wrapper",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "exists": true,
+      "sha256": "0aa69b6f1ff164f7282d6a58c83ffb902db5d417609ebb1d5827857f5db1abd9",
+      "unchanged": true
+    },
+    {
+      "name": "dist",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist/cli.js",
+      "exists": true,
+      "sha256": "e6c7915a4b46eec6fe338c7f71efdb28658d64d3f43d38907e4919e84bc17854",
+      "unchanged": true
+    },
+    {
+      "name": "global",
+      "path": "/Users/kriswang/.acpx/config.json",
+      "exists": true,
+      "sha256": "6213952d843458bda48342d9d132587177dc6279f1f5f63799bde1e81185f6d6",
+      "unchanged": true
+    },
+    {
+      "name": "project",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.acpxrc.json",
+      "exists": false,
+      "sha256": null,
+      "unchanged": true
+    }
+  ],
+  "metadata_not_executed": true,
+  "provider_or_client_launches": 0,
+  "fresh_effective_config_not_claimed": true,
+  "rechecked_after_package": true
+}

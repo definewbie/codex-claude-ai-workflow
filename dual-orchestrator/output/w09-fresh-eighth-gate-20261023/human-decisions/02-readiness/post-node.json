@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-plan-claude_plan-022",
+  "nodeDefinitionId": "plan.claude_plan",
+  "kind": "TASK",
+  "handlerType": "acpx.agent_run",
+  "status": "READY",
+  "stageId": "stage-plan",
+  "iterationId": "iter-003",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/binding.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json"
+  ],
+  "inputTransition": {
+    "condition": "unconditional",
+    "loop_reason": "Human resolution requires a fresh author and independent review",
+    "required": true,
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_instance_id": "node-gate-human_plan_approval-021",
+    "source_node_sha256": "6160f67bf0002235a32b0b8dadb6c739da61f32f944366dbed6828ba1d30e6e6",
+    "transition_type": "loop"
+  },
+  "outputRefs": [],
+  "result": {},
+  "runRef": null,
+  "latestExecutionId": "",
+  "startedAt": null,
+  "finishedAt": null
+}

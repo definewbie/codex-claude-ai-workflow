@@ -1,0 +1,100 @@
+{
+  "status": "PASS",
+  "command": "rtk proxy mvn -q clean test",
+  "exit_code": 0,
+  "single_clean_reactor": true,
+  "modules": {
+    "dual-adapter-acpx": {
+      "tests": 436,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 34
+    },
+    "dual-adapter-git": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 2
+    },
+    "dual-cli": {
+      "tests": 94,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 26
+    },
+    "dual-core": {
+      "tests": 126,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 16
+    },
+    "dual-flow-liteflow": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 4
+    },
+    "dual-ledger-file": {
+      "tests": 153,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 23
+    },
+    "dual-runtime": {
+      "tests": 720,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 80
+    },
+    "dual-server": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 13
+    }
+  },
+  "total": {
+    "tests": 1631,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": 198
+  },
+  "identity_inputs": 637,
+  "identity_drift": [],
+  "live_provider_runs": 0,
+  "native_client_runs": 0,
+  "extra_agents": 0,
+  "focused_attempts": [
+    {
+      "log": "protocol-focused.log",
+      "exit_code": 1,
+      "classification": "FAIL: test author used absent accessors, not a production red proof"
+    },
+    {
+      "log": "protocol-focused-2.log",
+      "exit_code": 1,
+      "classification": "FAIL: test consumed events out of sequence, not a production red proof"
+    },
+    {
+      "log": "protocol-focused-3.log",
+      "exit_code": 0
+    },
+    {
+      "log": "permission-focused.log",
+      "exit_code": 0
+    }
+  ],
+  "smoke_retirement_checks": 8,
+  "boundary_maturity": "offline slice PROVEN; native identity and complete batch remain unfinished",
+  "B03": "IN_PROGRESS",
+  "real_gate": "NO-GO"
+}

@@ -1,0 +1,115 @@
+{
+  "checked_at": "2026-10-23T09:41:56.881800+08:00",
+  "status": "PAUSED_AT_CURRENT_READINESS_HUMAN_GATE",
+  "experiment": "IN_PROGRESS_NOT_TERMINAL_GATE_PASS_OR_FAIL",
+  "workstream": "ws-20261023T005431Z-9YYF",
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "WAITING_FOR_HUMAN",
+    "activeNodeInstanceIds": [
+      "node-gate-human_plan_approval-021"
+    ],
+    "openGateIds": [
+      "gate-node-gate-human_plan_approval-021"
+    ],
+    "lastEventId": "evt-000021",
+    "updatedAt": "2026-10-23T01:36:15.133131Z",
+    "commitSequence": 82
+  },
+  "gate_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_plan_approval-021.json",
+  "gate_sha256": "bfd1feaf4b80342899934094622b9595c1662ccb5f1ec67220e18d9a8cc9978a",
+  "readiness_reason": "VERIFICATION_READINESS_REQUIRED",
+  "readiness_detail": "missing environment or feasibility reference",
+  "review_subject": {
+    "sidecar": {
+      "ref": ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719040009/outputs/plan-claude.contract.json",
+      "sha256": "b2e9d853cc6d80f39b737950b1ae085310b87d916fd37f918c73bd4a2ee931bd"
+    },
+    "nodeInstanceId": "node-plan-claude_plan-017",
+    "nodeId": "plan.claude_plan",
+    "runId": "run-1792719040009",
+    "artifactType": "plan_result"
+  },
+  "reviewer_sidecar": {
+    "ref": ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json",
+    "sha256": "6e96fdcba384c87642aecf835d96584f82a29119bce0c2fed976644d4c09bd3a"
+  },
+  "plan_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719040009/outputs/plan-claude.plan.json",
+  "plan_sha256": "a1885c22b17f097409fbb7d51e96ec1d8aec013dd46924f1429475c9ed6d76cf",
+  "goal": {
+    "ref": ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+    "sha256": "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+  },
+  "actual_tokens": 563916,
+  "completed_calls": 8,
+  "active_seconds": 913.668,
+  "reservation_for_future_readiness_revision": {
+    "input": {
+      "actual_tokens": 563916,
+      "completed_calls": 8,
+      "active_seconds": 913.668,
+      "remaining_mainline": [
+        "implement.claude_implement",
+        "implement.claude_self_test_report",
+        "acceptance.codex_verifier_review"
+      ],
+      "new_extra_calls": [
+        "plan.claude_plan",
+        "plan.codex_plan_review"
+      ],
+      "measurement_complete": true,
+      "external_pending": false
+    },
+    "result": {
+      "result": "ALLOW_BUDGET_ONLY",
+      "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+      "required_token_reserve": 775000,
+      "required_call_reserve": 6,
+      "remaining_tokens": 1136084,
+      "remaining_calls": 10,
+      "warning": false
+    },
+    "authorization": false
+  },
+  "frozen_check": "PASS",
+  "history_files_unchanged": 239,
+  "host_dependencies_unchanged": true,
+  "git_observation": [
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "git",
+        "-C",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+        "ls-files"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "rtk",
+        "proxy",
+        "git",
+        "-C",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "draft_declarations_committed": false,
+  "product_write_authority": false,
+  "next_action_requires_user": "Confirm availability declaration and authorize original record-readiness then revise-for-exact-refs, independent review and later current EXECUTION approval",
+  "no_next_dispatch": true
+}

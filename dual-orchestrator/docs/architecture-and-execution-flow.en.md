@@ -167,14 +167,15 @@ self-test, acceptance, failure classification or delivery, and handoff.
 
 ## 4. Current Status
 
-The main lifecycle is functionally closed. The strongest current boundary is
-the artifact contract: the orchestrator no longer treats free-form Markdown as
+The artifact contract is an established boundary: the orchestrator does not treat free-form Markdown as
 the machine source of truth. Agents may write rich human-readable reports, but
 routing depends on typed structured artifacts and explicit lifecycle state.
 
-P0 status is `Done with known limits`; see
-[testing/p0-closure-report.md](testing/p0-closure-report.md). Current validated
-capabilities:
+The historical 2026-06-19 MVP status was `Done with known limits`; see
+[testing/p0-closure-report.md](testing/p0-closure-report.md). Current lifecycle
+convergence remains B03 `IN_PROGRESS`, with real runs `NO-GO`; use the
+[main worklist](plans/20260927-dual-lifecycle-worklist.zh-CN.md). The historical
+report does not establish current admission. That MVP's validated capabilities included:
 
 - safe worktree execution with the original repository kept clean;
 - typed artifacts before routing;

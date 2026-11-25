@@ -1,0 +1,37 @@
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -34,14 +34,14 @@
+ |---|---|---|---|---|
+ | W00 对账与建立完整覆盖地图 | R3 §7.1；文档索引不持有运行 authority | 本文 §3 覆盖所有相关 dirty 文件；§4 映射测试与缺口；冻结身份可复核；CC 材料层 PASS | 2 LOW 处置及限制见 §8；后续材料实质变化重核受影响结论，不以本次抽样代替产品证明 | 材料任务收口；独立评审与作者修订核验分列，不是产品能力完成 |
+ | W01 人工决定→作者修订→复评→重新批准；失败原因→合法补足后续作 | I1/I1.a；core/ledger/revision/recovery | B03 合法续作与返修/重批，B05 C 单族独立 PASS，最新受控序列见 §23 | 其余诊断族 UNKNOWN，按用户 C/真实反复阻塞触发，不自动第二族；单族及合法离线流程不外推 I1.a 全体 | 本族 CLOSED/PASS；完整 W01 未关闭，真实能力按 Gate |
+-| W02 输入准备→provider→验证→发布→node/run/recovery | I2；adapter、唯一 outcome/finalizer、恢复 read model | B01/B03/B04 离线与独立 PASS；E02 常驻、权限双通道/固定完成/失败保真，见 §23 | 真实 native/工具能力待 Gate；首版全量声明已接受，具体运行中补声明入口未证，真实反复阻塞才重评 | 实施/具名离线链有据；总体真实能力未证 |
++| W02 输入准备→provider→验证→发布→node/run/recovery | I2；adapter、唯一 outcome/finalizer、恢复 read model | B01/B03/B04 离线与独立 PASS；E02 常驻、权限双通道/固定完成/失败保真；首例后的兼容性/摘要前向修复与新凭证见 §23.5 | 真实 native/工具能力待 Gate；首版全量声明已接受，具体运行中补声明入口未证，真实反复阻塞才重评 | 实施/具名离线链有据；总体真实能力未证 |
+ | W03 目标批准→只读设计/计划/复评→精确执行批准→首次实现 | I3/I1；TaskContract/proposal/qualification/adapter | B03 分期合同、B04 原生 C/X 接线与独立 PASS，见 §23 | G01 分期提示已纠正并配对验证，见 §23.1；实际选定 native 装配/合法请求续作按 Gate 核验 | 编译/控制链与提示修正离线有据；CC 受影响独立 PASS 已接收，真实 NO-GO |
+ | W04 必需验证可行→实现→自测→独立验收；缺材料补证据 | I4/I1/I2；D05、EvidenceCollection、ExternalVerificationEvidence | B03 D05 程序/模型/人工分立、实际退出码按批准条款、漂移与合法复用、返修/补证据离线有据，见 §23 | fresh 各验收项绑定实际方法/环境/权限/责任/证据出口，未知工具不假装可用，不默认通用环境认证 | D05 接线离线有据；具体 fresh 出口 Gate 前核齐 |
+ | W05 同冻结身份中断恢复；外部未知人工裁定；终态不重开 | I5/I1；D06/D07 ledger/runtime/worker/kernel | B02 holder、B03 本地协议/构造与身份、B04/B05/B06 写点/冷 JVM 独立 PASS，见 §23 | kernel 内部 I/O 专项与部署拓扑未全证，保留；首 Gate 限单 JVM 路由/ClassLoader，实际身份/停止核验不能以测试 JVM 代替 | 具名协议离线有据；I5 全故障/部署普适性未关闭 |
+ | W06 验收满足→候选批准→目标 Git 应用→实际提交→交付确认/中断处置 | I6，§4 交付行；candidate、DeliveryApplicationService、Git、query | T12；B06 四变体×inline/worker 受控完整批准链接临时真实 Git apply/人工实际 commit/finalize；写点、冷 JVM、拒绝/续作与同源投影证据见 §22.3；CC 批末独立 PASS 见 §22.4 | 本批实施/离线接线范围收口；LOW-1 查询锁序常驻化已登记，现有一次性反证仍有效；真实目标 Git、浏览器视觉与真实客户端未证，归组合准入/Gate；不自动 commit 或盲目重 apply | W04 验收/批准；W05 本地边界；B06/W06/D09 批次 CLOSED / PASS（离线范围）；真实交付证明未关闭，NO-GO 保持 |
+ | W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | 单一示例/typed 去重/受限 correction 已有；本轮逐字段案头表完成，见 §23 | G01 已在既有 prompt/template owner 修正并扫 intake/design/plan/reviewer/implement，共同保留严格身份；实际模型负担待真实 Gate，不承诺 token 节省 | 案头审计和 G01 离线修正已获 CC 合并独立 PASS；真实回应负担 NOT PROVEN |
+-| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 历史查询 LOW 常驻 6/0 与隔离反证；§23.1 本轮单轮 1755/206/0、654 输入同一性及新发行核验；CC PASS 接收见 §23.2 | 本轮 G01/G02–G04 见 §23.1；G05 本地批准/实际初始化前提见 §23.3；真实握手、业务 occurrence/工具证据在获准运行内核验；browser/真实 worker 未证，首个 CLI/INLINE 不关闭整体 W08 | 准备批次 CLOSED/PASS（离线）；CC 合并独立 PASS 见 §23.2；G05 本地准备见 §23.3；首次真实运行已授权并在接口核验处停止，见 §23.4 |
+-| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh Python 任务与 Gate 已受审；§23.3 G05 本地准备已批准并建立新实例，真实流程未执行 | 首次真实运行授权及停止证据见 §23.4；会话identity可选/必填冲突与旧失败报告漂移待受影响评审/修复；不自动retry/第二样本，未触发分支不冒填PASS | 本地准备 PASS；首次真实 Gate FAIL / WAITING_FOR_RECOVERY，见 §23.4；没有模型 prompt 或产品交付 |
++| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 历史查询 LOW 常驻 6/0 与隔离反证；§23.1 本轮单轮 1755/206/0、654 输入同一性及新发行核验；CC PASS 接收见 §23.2；首例后1768/206/0及新发行候选见 §23.5（待本轮CC） | 本轮 G01/G02–G04 见 §23.1；G05 本地批准/实际初始化前提见 §23.3；真实握手、业务 occurrence/工具证据在获准运行内核验；browser/真实 worker 未证，首个 CLI/INLINE 不关闭整体 W08 | 准备批次 CLOSED/PASS（离线）；CC 合并独立 PASS 见 §23.2；G05 本地准备见 §23.3；首次真实运行已授权并在接口核验处停止，见 §23.4；前向修复/新发行待受影响CC，见 §23.5 |
++| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh Python 任务与 Gate 已受审；§23.3 G05 本地准备已批准并建立新实例，首例在prompt前停止，无真实业务交付 | 首次真实运行授权及停止证据见 §23.4；两处前向修复/离线证明/新发行与fresh候选见 §23.5，待CC合并复审及当次运行授权；不自动retry/第二样本，未触发分支不冒填PASS | 本地准备 PASS；首次真实 Gate FAIL / WAITING_FOR_RECOVERY，见 §23.4；没有模型 prompt 或产品交付 |
+ 
+ ### 2.1 次序、依赖与独立评审触发
+ 
+@@ -777,3 +777,16 @@
+ 仅本次具名原生session经既有close通道关闭，show确认closed=true，连接关闭有记录；无真实exit_code/PID子树闭合证据，不把记录关闭说成物理全停或新attempt资格。原账本及77文件快照保留，target/worktree未写产品、未apply/产品commit；未启动Codex/额外agent、不自动retry、不救样本。
+ 
+ **下一步**：CC独立核会话identity语义、原生合法形态与投影来源/同族影响，再明确有界根因修复和成对回归，重新冻结发行及受影响Gate。不能直接删校验、复制acpSessionId假造agentSessionId或手改ledger；本次Gate已停止，修复/后续fresh运行不由本次授权自动延伸。
++
++
++### 23.5 W09 首例评审接收与有界前向修复（2026-10-10）
++
++用户带回《W09 首次真实 Gate 阻塞》独立评审：FAIL 分类成立、F01 agentSessionId 可选字段误拒、F02 FailureSummaryWriter 旧原因漂移。作者直接对码后按原 owner/既定方向完成修复与离线证明，当前 **AUTHOR_OFFLINE_PASS / REFROZEN_CANDIDATE / AWAITING_CC / FRESH_REAL_RUN_NOT_AUTHORIZED**。这是未来合法形态的 root-cause forward fix，不是首例 rescue；接收记录见[review-disposition](../../output/w09-interface-forward-fix-20261010/review-disposition.md)。
++
++生产只改 AcpxSessionCompatibility 与 FailureSummaryWriter。record/ACP两种身份及schema/name/canonical cwd/open/protocol原必需guard保留；engine内部ID缺席/null记NOT_PROVIDED，存在合法字符串记PROVIDED，异常提供仍拒，绝不复制ACP ID。原主调用/correction共用检查，无新native版本锁。摘要存在typed outcome时只消费其primaryReason/recoveryCategory/retryPolicy；parse_error为次级证据，真实artifact主因与非agent展示保留；损坏typed primary不可fallback旧原因。runtime/ledger/权限/合同/scope/批准/交付控制协议均未改。
++
++本轮8源码文件（生产2）相对开工前dirty单列；共享夹具从默认恒有engine ID改为合法缺席，有字段且与ACP不同的正向保留；原reconnect/rebuild/权限本地接口兄弟路径承接。先红6个预期断言失败/0错误；43聚焦全绿；4个隔离旧owner预期失败与4个当前对照PASS。最终单轮clean **1768 tests / 206 suites / 0 failure/error/skipped**、654输入前后相同，未拼接旧凭证。新package/CLI/server字节核验、14资源和6次CLI help/定义validate通过；选定wrapper/dist/config原字节一致，不当新原生连接实证。详见[assessment](../../output/w09-interface-forward-fix-20261010/assessment.md)、test-results/release-identity/artifact-verification。
++
++原首例FAIL/current状态及77个归档索引文件原样保留，没有手改ledger、resume或产品提交。目录核验第一次把未入索引的两个空lock文件当差异，口径INVALID已修正并留证，不改原文件。新发行不续作旧binary绑定实例；本轮没有真实native/provider调用、installer、额外agent或新target。
++
++**下一步动作**：[CC合并受影响复审](../../output/w09-interface-forward-fix-20261010/cc-review-prompt.txt)，同时审修复/证据/新发行与[fresh第二次Gate候选](../../output/w09-interface-forward-fix-20261010/fresh-second-gate.md)。通过并处置必须项后交用户当次运行授权，再新建目标/workstream；不为两处补记单开轮次、不自动用原剩余17调用，不关闭W项或宣称真实主流程已闭合。当前候选沿用原产品目标/验收与18顶层/600s/60min/160k上限提案，关键和最终人门/产品commit责任保持。

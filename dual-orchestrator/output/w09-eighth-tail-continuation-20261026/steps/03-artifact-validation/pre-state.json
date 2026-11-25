@@ -1,0 +1,50 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-implement-artifact_validation-033"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000033",
+    "updatedAt": "2026-10-26T01:19:09.082523Z",
+    "commitSequence": 127
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-implement-artifact_validation-033",
+    "nodeDefinitionId": "implement.artifact_validation",
+    "kind": "TASK",
+    "handlerType": "artifact.validate",
+    "status": "READY",
+    "stageId": "stage-implement",
+    "iterationId": "iter-003",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.stderr.log",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.transcript.log",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/binding.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/verification-observations.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.contract.json"
+    ],
+    "inputTransition": {
+      "condition": "unconditional",
+      "transition_type": "normal",
+      "required": true,
+      "source_node_instance_id": "node-implement-self_test_decision-032",
+      "source_node_sha256": "697f2df64089869aab8b4960d0f3a2739d5136909e6093bbf0ceadc3692c1f21",
+      "purpose": "Only verified complete self-test evidence may enter artifact validation."
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 1976.2719193335622
+}

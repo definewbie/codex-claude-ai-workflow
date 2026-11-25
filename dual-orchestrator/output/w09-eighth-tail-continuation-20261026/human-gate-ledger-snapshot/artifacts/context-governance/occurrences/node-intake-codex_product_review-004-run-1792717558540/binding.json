@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "node_instance_id" : "node-intake-codex_product_review-004",
+  "run_id" : "run-1792717558540",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/stage-scope-policy.json",
+      "sha256" : "a7fac938a91a170e393fb98535fdf4cb85f201612c473daa43bddbfb8ae8fa15"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/file-summaries.json",
+      "sha256" : "5b77caeee6c0c0f105f43ef357eaef0530f981850952f145c4401a5f01711ef8"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/repo-map.json",
+      "sha256" : "1b0dab35435a88dafa755d1adaa93de5bc2c0b95636824d6ab1d30b4df103011"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/planned-report.json",
+      "sha256" : "1abfbc4f12f596cb7c90078c00b348dd55f942545a07784170ed71d2607747f6"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/agent-capability-catalog.json",
+      "sha256" : "3f1c81bf0376e2f11525b1bd3c7f70c4dafb1f6373dac70b030b125f68e3d170"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/read-reuse-contract.json",
+      "sha256" : "1191d66a490104bb83b5e75db3ac3b387ec17f0606d49bbfdbeb9f435bb4adda"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/working-set.json",
+      "sha256" : "ff21a01a8c5a27c5a7dfa8a0e4a9ce5a0c11accf4f355347784e49eb3595b0df"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/file-relevance-plan.json",
+      "sha256" : "e602d826c0a54e213a933e665ab12a0850733f775099d886495e9c6bbaf2f099"
+    }
+  }
+}

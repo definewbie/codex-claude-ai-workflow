@@ -1,0 +1,39 @@
+{
+  "config_path": "/Users/kriswang/.acpx/config.json",
+  "exists": true,
+  "kind": "sanitized static config inspection; no native executable called",
+  "config_sha256": "6213952d843458bda48342d9d132587177dc6279f1f5f63799bde1e81185f6d6",
+  "agent_commands": {
+    "claude": {
+      "present": true,
+      "sha256": "32db51df37608a32549ef22d29a458a835ab3614c5e82ab6157bc5975349460e",
+      "claude_env_wrapper": true,
+      "named_acp_package": true,
+      "declared_acp_version": "0.70.0"
+    },
+    "codex": {
+      "present": true,
+      "sha256": "89300aed45f7272a568bc6e306ff92713a0dc7ca6db21705b4a6a9693faa7eb8",
+      "claude_env_wrapper": false,
+      "named_acp_package": true,
+      "declared_acp_version": "1.10.0"
+    }
+  },
+  "nonsecret_env": {
+    "DUAL_ACPX_EXECUTABLE": "UNSET",
+    "DUAL_ACPX_COMMAND_TIMEOUT_SECONDS": "UNSET",
+    "DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS": "UNSET",
+    "DUAL_FLOW_KERNEL": "UNSET",
+    "DUAL_CONTEXT_MEMORY_ENABLED": "UNSET",
+    "DUAL_CONTEXT_GOVERNANCE_ENABLED": "UNSET",
+    "DUAL_SESSION_COMPACTION_EXPERIMENT": "UNSET"
+  },
+  "path_resolution": {
+    "java": "/usr/bin/java",
+    "node": "/usr/local/bin/node",
+    "python3": "/opt/homebrew/bin/python3",
+    "acpx": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/acpx",
+    "claude": "/opt/homebrew/bin/claude",
+    "codex": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
+  }
+}

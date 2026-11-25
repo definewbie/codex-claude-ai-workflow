@@ -1,0 +1,26 @@
+[
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+    "sha256": "5b865fe6d32ce2af8fb822e47052fb9bdb9a60fcf43cb9248170e0000c0d6013",
+    "start": 126,
+    "end": 182
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java",
+    "sha256": "12271f14298dfd956640d45d407c2d8de915c579044739114522e0c029ccb30d",
+    "start": 27,
+    "end": 44
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java",
+    "sha256": "c6fb4c855fbcf55f112b629c89a855f5f1a60d0d9abf304329f323a2ebd1182c",
+    "start": 234,
+    "end": 307
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java",
+    "sha256": "6563f657259a9c2a1ca6cd0c4e1b46e65eda4bd6968c101642cd5af63584deec",
+    "start": 115,
+    "end": 188
+  }
+]

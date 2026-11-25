@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "java",
+    "-Xlog:class+load=debug:file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-local-preflight-20261010/start-classloading.log:uptime,level,tags",
+    "-jar",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+    "start",
+    "--workdir=/private/tmp/dual-w09-newlines-20261010/target",
+    "--worktree-dir=/private/tmp/dual-w09-newlines-20261010/worktree",
+    "--branch=codex/w09-newlines-20261010",
+    "--workflow-variant=terminal-delivery",
+    "--prompt-language=zh-CN",
+    "--task-file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-local-preflight-20261010/task-requirement.md"
+  ],
+  "pid": 21372,
+  "started_at": "2026-10-10T13:56:43.208837+08:00",
+  "mode": "local start without --run",
+  "provider_calls_expected": 0
+}

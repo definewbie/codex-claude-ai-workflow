@@ -1,0 +1,42 @@
+Conclusion
+
+The core lesson of this chapter is that your agent’s capability comes from learning
+dynamics and inference strategy, not model size. Rewards connect actions to
+consequences, trajectories preserve reasoning, and rollouts turn experience into
+structure. With KL as the safety rope, GRPO and GSPO transform relative
+comparisons into stable policy updates, so agents improve their process, not just
+their answers.
+
+You then learned how to teach agents efficiently. RULER provides consistent,
+rubric-driven judgment without handcrafted metrics, and ART turns judged
+trajectories into updates that make tool use more reliable. Hybrid rewards combine
+hard programmatic checks with qualitative assessments of reasoning, producing a
+training loop that is interpretable, data efficient, and aligned with how your agents
+actually operate.
+
+Reasoning doesn’t end at training time. Test time compute changes the game: by
+allocating more thinking during inference, smaller models can improve by
+exploring and refining alternative solutions. MCTS organizes that thinking, and
+AB-MCTS adapts breadth and depth with Bayesian updates, so agents explore
+when uncertain and refine when confident. Search becomes a first-class part of
+reasoning, not an afterthought.
+
+Finally, you moved from single agents to system-level learning. rLLM generalizes
+the pattern by treating workflows themselves as trainable programs. Planner and
+executor, solver and judge, and tree search can all produce trajectories, receive
+rewards, and improve together as a coordinated system. This closes the gap
+between design and deployment: the same control flow that runs your agents in
+production becomes the loop that makes them better.
+
+Taken together, these components demystify the magic behind agency: relative
+evaluation for signal, KL for stability, ART for trajectory centric training, AB-
+MCTS for adaptive inference, and rLLM to make the whole workflow learn. In
+Chapter 4, you’ll learn how to select an LLM and understand the trade-offs that
+shape your agents’ performance.
+
+
+
+   1       This quote is one of the three laws proposed by the British science fiction writer.
+
+   2      Zhihong Shao et al. “DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open
+     Language Models" (2024).

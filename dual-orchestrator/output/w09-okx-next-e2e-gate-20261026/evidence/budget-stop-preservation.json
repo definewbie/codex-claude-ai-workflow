@@ -1,0 +1,44 @@
+{
+  "source_head_unchanged": true,
+  "source_status_sha256_unchanged": true,
+  "source_status_command": "git status --porcelain=v1 --untracked-files=all",
+  "source_entry_count": 92,
+  "source_working_file_count": 301,
+  "source_working_files_unchanged": true,
+  "target_and_workspace_product_git_clean": true,
+  "frozen_runtime_inputs_unchanged": true,
+  "old_stops_unchanged": true,
+  "named_sessions": [
+    {
+      "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793026771764",
+      "acpxRecordId": "75fd08fd-0532-4728-8c47-1571b2008d04",
+      "acpSessionId": "0ee31408-0839-4aa7-86a8-1b8a0a05aed2",
+      "closed": true,
+      "closedAt": "2026-10-26T15:23:07.006Z",
+      "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree"
+    },
+    {
+      "name": "codex-reviewer-ws-20261026T142203Z-7SNA",
+      "acpxRecordId": "01a178bd-309e-7f13-b4f7-a9538baf1173",
+      "acpSessionId": "01a178bd-3b1b-7ec3-9116-3baa6222627a",
+      "closed": true,
+      "closedAt": "2026-10-26T15:23:07.485Z",
+      "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree"
+    },
+    {
+      "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793027503466",
+      "acpxRecordId": "8473c12f-45d4-4593-b904-65a370d0d6ab",
+      "acpSessionId": "018f2a65-ea48-4381-a094-1b16d8219f1e",
+      "closed": true,
+      "closedAt": "2026-10-26T15:23:07.832Z",
+      "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree"
+    }
+  ],
+  "all_runs_finished": true,
+  "pending_mutations": 0,
+  "ledger_unchanged_by_cleanup": true,
+  "stop_sha256_unchanged": true,
+  "active_seconds_after_cleanup": 687.5472866639196,
+  "model_calls_during_cleanup": 0,
+  "no_process_subtree_stop_claim": true
+}

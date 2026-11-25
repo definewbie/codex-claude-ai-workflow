@@ -1,0 +1,7 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 D04 同版源码核验做独立材料评审，遵守 AGENTS.md。
+
+入口：output/d04-native-source-audit-20260929/assessment.md；身份/源码索引及原始材料在同目录，详设 §8.19、主清单 §9.12 已同步。请自行重建协议→分派→权限检查→副作用→结果/恢复链，检查失败切面和兄弟入口，不预设报告结论。
+
+重点判断证据是否支持当前断言；既有调用前拦截机制是否值得在现有 adapter 方向内继续核验；本地与托管网络工具是否被正确区分。按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 说明仍缺什么，区分材料正确与 D04 可冻结。
+
+只读评审，给分级发现、证据和未核验范围。不要运行 native/provider/注入探针、启动额外 agent、修改代码或文档，也不要转入 Rust 开发；无需重审无关历史材料。

@@ -1,0 +1,31 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-context-design_codex_arch_review-010",
+  "nodeDefinitionId" : "context.design_codex_arch_review",
+  "kind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "COMPLETED",
+  "stageId" : "stage-context",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315448415/outputs/design-claude.stderr.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315448415/outputs/design-claude.transcript.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315448415/outputs/design-claude.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-design-claude_design-009-run-1789315448415/binding.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315448415/outputs/design-claude.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/context/node-context-design_codex_arch_review-010.md" ],
+  "result" : {
+    "context_package" : ".agent/workstreams/ws-20260913T160342Z-TVXE/context/node-context-design_codex_arch_review-010.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20260913T160342Z-TVXE/context/node-context-design_codex_arch_review-010.json",
+    "target_node" : "design.codex_arch_review",
+    "profile" : "architecture_review",
+    "sections" : [ "input_artifacts", "iteration_history", "review_evidence", "human_feedback", "recent_agent_outputs", "ledger_pointers" ],
+    "input_ref_count" : 5,
+    "generated_at" : "2026-09-13T16:04:18.983047Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315458937-4b3c3667",
+  "startedAt" : "2026-09-13T16:04:18.945594Z",
+  "finishedAt" : "2026-09-13T16:04:18.992945Z"
+}

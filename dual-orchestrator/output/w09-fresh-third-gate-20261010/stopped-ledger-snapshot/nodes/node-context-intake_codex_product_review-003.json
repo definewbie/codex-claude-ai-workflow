@@ -1,0 +1,33 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-context-intake_codex_product_review-003",
+  "nodeDefinitionId" : "context.intake_codex_product_review",
+  "kind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "COMPLETED",
+  "stageId" : "stage-context",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/outputs/intake-claude-brainstorm.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/outputs/intake-claude-brainstorm.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/outputs/intake-claude-brainstorm.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791636537680/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/outputs/intake-claude-brainstorm.contract.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-44bd6b6d7b341527.ref.json" ],
+  "inputTransition" : {
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256" : "c40017e03c9beac3443219ec952d566f047681f441239c30d5a074cb63eed336",
+    "source_node_instance_id" : "node-intake-claude_brainstorm-002",
+    "required" : true,
+    "transition_type" : "normal",
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_codex_product_review-003.md", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-44bd6b6d7b341527.ref.json" ],
+  "result" : {
+    "context_package" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_codex_product_review-003.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_codex_product_review-003.json",
+    "target_node" : "intake.codex_product_review",
+    "profile" : "product_review",
+    "sections" : [ "input_artifacts", "review_evidence", "recent_agent_outputs", "ledger_pointers" ],
+    "input_ref_count" : 6,
+    "generated_at" : "2026-10-10T12:51:17.787702Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1791636677684-1ae37898",
+  "startedAt" : "2026-10-10T12:51:17.696341Z",
+  "finishedAt" : "2026-10-10T12:51:17.803952Z"
+}

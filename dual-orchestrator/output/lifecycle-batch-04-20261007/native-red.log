@@ -1,0 +1,230 @@
+TAP version 13
+# Subtest: exact permission ask returns the offered option and exposes the original RPC signal
+not ok 1 - exact permission ask returns the offered option and exposes the original RPC signal
+  ---
+  duration_ms: 2.463584
+  location: '/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1390:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   _meta: {
+    +     acpx: {
+    +       permissionEscalation: {
+    +         action: 'escalate',
+    +         matchedRule: 'edit',
+    +         message: 'Permission escalation required for edit file',
+    +         sessionId: 's-exact',
+    +         timestamp: '2026-10-07T12:22:08.344Z',
+    +         toolCallId: 'call-1',
+    +         toolKind: 'edit',
+    +         toolName: 'edit',
+    +         toolTitle: 'edit file',
+    +         type: 'permission_escalation'
+    +       }
+    +     }
+    +   },
+    +   outcome: {
+    +     optionId: 'reject',
+    -   outcome: {
+    -     optionId: 'allow-second',
+          outcome: 'selected'
+        }
+      }
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    outcome:
+      outcome: 'selected'
+      optionId: 'allow-second'
+  actual:
+    outcome:
+      outcome: 'selected'
+      optionId: 'reject'
+    _meta:
+      acpx:
+        permissionEscalation:
+          type: 'permission_escalation'
+          sessionId: 's-exact'
+          toolCallId: 'call-1'
+          toolName: 'edit'
+          toolTitle: 'edit file'
+          toolKind: 'edit'
+          action: 'escalate'
+          matchedRule: 'edit'
+          message: 'Permission escalation required for edit file'
+          timestamp: '2026-10-07T12:22:08.344Z'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1409:12)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: exact permission ask never falls back after callback failure or invalid choice
+not ok 2 - exact permission ask never falls back after callback failure or invalid choice
+  ---
+  duration_ms: 0.444959
+  location: '/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1412:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   _meta: {
+    +     acpx: {
+    +       permissionEscalation: {
+    +         action: 'escalate',
+    +         matchedRule: 'edit',
+    +         message: 'Permission escalation required for edit file',
+    +         sessionId: 's-exact',
+    +         timestamp: '2026-10-07T12:22:08.346Z',
+    +         toolCallId: 'call-1',
+    +         toolKind: 'edit',
+    +         toolName: 'edit',
+    +         toolTitle: 'edit file',
+    +         type: 'permission_escalation'
+    +       }
+    +     }
+    +   },
+    +   outcome: {
+    +     optionId: 'reject',
+    +     outcome: 'selected'
+    -   outcome: {
+    -     outcome: 'cancelled'
+        }
+      }
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    outcome:
+      outcome: 'cancelled'
+  actual:
+    outcome:
+      outcome: 'selected'
+      optionId: 'reject'
+    _meta:
+      acpx:
+        permissionEscalation:
+          type: 'permission_escalation'
+          sessionId: 's-exact'
+          toolCallId: 'call-1'
+          toolName: 'edit'
+          toolTitle: 'edit file'
+          toolKind: 'edit'
+          action: 'escalate'
+          matchedRule: 'edit'
+          message: 'Permission escalation required for edit file'
+          timestamp: '2026-10-07T12:22:08.346Z'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1419:16)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: exact lane retains auto reads and explicit denial without asking a human
+not ok 3 - exact lane retains auto reads and explicit denial without asking a human
+  ---
+  duration_ms: 0.176333
+  location: '/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1422:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+        outcome: {
+    +     optionId: 'reject',
+    -     optionId: 'allow',
+          outcome: 'selected'
+        }
+      }
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    outcome:
+      outcome: 'selected'
+      optionId: 'allow'
+  actual:
+    outcome:
+      outcome: 'selected'
+      optionId: 'reject'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1427:12)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: exact lane refuses stale RPCs, unowned sessions and replies after cancellation
+not ok 4 - exact lane refuses stale RPCs, unowned sessions and replies after cancellation
+  ---
+  duration_ms: 0.177917
+  location: '/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1431:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   _meta: {
+    +     acpx: {
+    +       permissionEscalation: {
+    +         action: 'escalate',
+    +         matchedRule: 'edit',
+    +         message: 'Permission escalation required for edit file',
+    +         sessionId: 'another',
+    +         timestamp: '2026-10-07T12:22:08.347Z',
+    +         toolCallId: 'call-1',
+    +         toolKind: 'edit',
+    +         toolName: 'edit',
+    +         toolTitle: 'edit file',
+    +         type: 'permission_escalation'
+    +       }
+    +     }
+    +   },
+    +   outcome: {
+    +     optionId: 'reject',
+    +     outcome: 'selected'
+    -   outcome: {
+    -     outcome: 'cancelled'
+        }
+      }
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    outcome:
+      outcome: 'cancelled'
+  actual:
+    outcome:
+      outcome: 'selected'
+      optionId: 'reject'
+    _meta:
+      acpx:
+        permissionEscalation:
+          type: 'permission_escalation'
+          sessionId: 'another'
+          toolCallId: 'call-1'
+          toolName: 'edit'
+          toolTitle: 'edit file'
+          toolKind: 'edit'
+          action: 'escalate'
+          matchedRule: 'edit'
+          message: 'Permission escalation required for edit file'
+          timestamp: '2026-10-07T12:22:08.347Z'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1436:12)
+    async Test.run (node:internal/test_runner/test:935:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 0
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 105.415459

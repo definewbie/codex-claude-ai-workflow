@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.runtime.handler.ContractQualificationSequenceTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 1.818 s <<< FAILURE! -- in dev.dual.runtime.handler.ContractQualificationSequenceTest
+dev.dual.runtime.handler.ContractQualificationSequenceTest.realContractApprovalRecordsActualChecksAndNormalContinuationStillCompletes -- Time elapsed: 1.807 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: actual approval must carry its checker observations ==> Unexpected null value, expected: <java.util.Map> but was: <null>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertInstanceOf.assertInstanceOf(AssertInstanceOf.java:49)
+	at org.junit.jupiter.api.AssertInstanceOf.assertInstanceOf(AssertInstanceOf.java:35)
+	at org.junit.jupiter.api.Assertions.assertInstanceOf(Assertions.java:3630)
+	at dev.dual.runtime.handler.ContractQualificationSequenceTest.realContractApprovalRecordsActualChecksAndNormalContinuationStillCompletes(ContractQualificationSequenceTest.java:22)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+

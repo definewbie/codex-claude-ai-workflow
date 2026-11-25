@@ -1,0 +1,79 @@
+{
+  "scope": "mandatory missing provider stops before turn; no model endpoint configured",
+  "results": [
+    {
+      "name": "base",
+      "command": [
+        "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+        "exec",
+        "--strict-config",
+        "--ignore-user-config",
+        "--ignore-rules",
+        "--skip-git-repo-check",
+        "-c",
+        "model_provider=\"d04_intentionally_missing_provider\"",
+        "Never dispatched: invalid provider precondition."
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Error: Model provider `d04_intentionally_missing_provider` not found\n"
+    },
+    {
+      "name": "enabled_tools",
+      "command": [
+        "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+        "exec",
+        "--strict-config",
+        "--ignore-user-config",
+        "--ignore-rules",
+        "--skip-git-repo-check",
+        "-c",
+        "model_provider=\"d04_intentionally_missing_provider\"",
+        "-c",
+        "enabled_tools=[]",
+        "Never dispatched: invalid provider precondition."
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Error loading config.toml: unknown configuration field `enabled_tools` in -c/--config override\n"
+    },
+    {
+      "name": "code_exclusions",
+      "command": [
+        "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+        "exec",
+        "--strict-config",
+        "--ignore-user-config",
+        "--ignore-rules",
+        "--skip-git-repo-check",
+        "-c",
+        "model_provider=\"d04_intentionally_missing_provider\"",
+        "-c",
+        "features.code_mode.excluded_tool_namespaces=[\"collaboration\"]",
+        "Never dispatched: invalid provider precondition."
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Error: Model provider `d04_intentionally_missing_provider` not found\n"
+    },
+    {
+      "name": "structured_disabled",
+      "command": [
+        "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+        "exec",
+        "--strict-config",
+        "--ignore-user-config",
+        "--ignore-rules",
+        "--skip-git-repo-check",
+        "-c",
+        "model_provider=\"d04_intentionally_missing_provider\"",
+        "-c",
+        "features.multi_agent_v2.enabled=false",
+        "Never dispatched: invalid provider precondition."
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Error: Model provider `d04_intentionally_missing_provider` not found\n"
+    }
+  ]
+}

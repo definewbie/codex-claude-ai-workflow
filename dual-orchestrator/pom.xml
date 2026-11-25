@@ -36,6 +36,20 @@
         <liteflow.version>2.16.0</liteflow.version>
     </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Runtime identity tests must observe the actual JVM classpath.
+                         Manifest-only Surefire overwrites java.class.path with a synthetic value. -->
+                    <useManifestOnlyJar>false</useManifestOnlyJar>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

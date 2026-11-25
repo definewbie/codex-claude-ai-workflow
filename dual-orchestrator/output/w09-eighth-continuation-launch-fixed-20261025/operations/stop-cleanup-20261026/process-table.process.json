@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/opt/homebrew/Cellar/rtk/0.42.3/bin/rtk",
+    "proxy",
+    "/bin/ps",
+    "-axo",
+    "pid=,ppid=,lstart=,command="
+  ],
+  "purpose": "Successful full process observation; not a process-tree stop guarantee"
+}

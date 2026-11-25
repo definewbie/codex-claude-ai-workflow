@@ -1,0 +1,1895 @@
+{
+  "scope": "Java lexical constructor/provider sites; not a semantic call graph or approved edit list",
+  "entries": [
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredAdapterFixture.java",
+      "line": 26,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "c7da2f780dd89cf815a6a7f3b4c49754c002fe9acadb3d7ccd4f423fbfaa2895",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredManifestDispatchTest.java",
+      "line": 125,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "22fef2ffc78e96169dfac0d3fad0e3786e1acd815a54c405719de0ff64d886df",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredManifestDispatchTest.java",
+      "line": 150,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "22fef2ffc78e96169dfac0d3fad0e3786e1acd815a54c405719de0ff64d886df",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredReferenceCorrectionSequenceTest.java",
+      "line": 61,
+      "text": "f.runtime = f.runtime(new WorkflowFileLedger());",
+      "sha256": "3dd12d1d23e9115e4d86aa2a5b51895f1a03533167b9bef630c2fbc9136b514d",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredReferenceCorrectionSequenceTest.java",
+      "line": 131,
+      "text": "var persisted = new WorkflowFileLedger().loadNode(f.paths, node.nodeInstanceId());",
+      "sha256": "3dd12d1d23e9115e4d86aa2a5b51895f1a03533167b9bef630c2fbc9136b514d",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredReferenceCorrectionSequenceTest.java",
+      "line": 149,
+      "text": "final WorkflowFileLedger ledger = new WorkflowFileLedger();",
+      "sha256": "3dd12d1d23e9115e4d86aa2a5b51895f1a03533167b9bef630c2fbc9136b514d",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java",
+      "line": 108,
+      "text": "var cold = new WorkflowFileLedger(FlowKernelProvider.create(\"liteflow\"));",
+      "sha256": "c235e339cae7ea042fb07cf5ff68f862c233b12a38c1bcb6fbc6b548ba074bb5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java",
+      "line": 187,
+      "text": "var cold = new WorkflowFileLedger(FlowKernelProvider.create(\"liteflow\"));",
+      "sha256": "c235e339cae7ea042fb07cf5ff68f862c233b12a38c1bcb6fbc6b548ba074bb5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java",
+      "line": 210,
+      "text": "final WorkflowFileLedger ledger = new WorkflowFileLedger(FlowKernelProvider.create(\"liteflow\"));",
+      "sha256": "c235e339cae7ea042fb07cf5ff68f862c233b12a38c1bcb6fbc6b548ba074bb5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java",
+      "line": 67,
+      "text": "f.ledger = new WorkflowFileLedger();",
+      "sha256": "800ccd07de2a3e885e702fc83da3a492b2ee83eca699f0cddfcb5eab7582c716",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java",
+      "line": 136,
+      "text": "f.ledger = new WorkflowFileLedger();",
+      "sha256": "800ccd07de2a3e885e702fc83da3a492b2ee83eca699f0cddfcb5eab7582c716",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java",
+      "line": 183,
+      "text": "WorkflowFileLedger ledger = new WorkflowFileLedger();",
+      "sha256": "800ccd07de2a3e885e702fc83da3a492b2ee83eca699f0cddfcb5eab7582c716",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CliLedgerFactory.java",
+      "line": 14,
+      "text": "return new WorkflowFileLedger(FlowKernelProvider.create(configuredKernel()));",
+      "sha256": "523e18c8413e462be44f7057e2b888afe3ab948e5e3037b9432b134c3b70cd93",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ProjectionsRefreshCommand.java",
+      "line": 40,
+      "text": "new WorkflowFileLedger().refreshProjections(paths);",
+      "sha256": "1307a65467b3b0ff75cc2e6cd89eb3d7e68d5f8c6fcc3021cecb0d93a5dd79c1",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/CliNextActionHintsTest.java",
+      "line": 139,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "0bc54b3e9f52d1c3c57a1859c1d32c64fdeb8c0e37989dbea3b31e29ca7214ae",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/RecoveryNetworkCommandTest.java",
+      "line": 21,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f56c2ecc4a5feb9ef3a464c1445c3391dab9da3ec7cb8b44e89563ff6764643e",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/RecoveryShowCommandTest.java",
+      "line": 143,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "877563b94c05ac8afe6f69eb43ae747f045fa2d63ccb9b3e859db37e017949c0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/RecoveryStaleCommandTest.java",
+      "line": 32,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "c6674b6615789faa5315e88f9cdad9ec6300f087332cadc8fc3417e507a65297",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/RetryCommandTest.java",
+      "line": 23,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "43552f380319f1968bb310150b5f0a5d744a6db5156763307c349293a79e10eb",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/RetryCommandTest.java",
+      "line": 35,
+      "text": "var after = new WorkflowFileLedger().loadNode(paths, id);",
+      "sha256": "43552f380319f1968bb310150b5f0a5d744a6db5156763307c349293a79e10eb",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/ReviewDecideCommandTest.java",
+      "line": 42,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "559f1225b48f27e8e61f00f85ef00ac715a427069e30fdc167169687da7ab820",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/ReviewDecideCommandTest.java",
+      "line": 78,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "559f1225b48f27e8e61f00f85ef00ac715a427069e30fdc167169687da7ab820",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/ReviewDecideCommandTest.java",
+      "line": 111,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "559f1225b48f27e8e61f00f85ef00ac715a427069e30fdc167169687da7ab820",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/ReviewPacketCliHintsTest.java",
+      "line": 40,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "de62a3e676b6a5bde5adc32dfa14071bbc0b65ba1bc38d92321233be82c009bc",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/ReviewPacketCliHintsTest.java",
+      "line": 84,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "de62a3e676b6a5bde5adc32dfa14071bbc0b65ba1bc38d92321233be82c009bc",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/ReviewRequestActionCommandTest.java",
+      "line": 23,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "55f577d562e82c6701a6fb5e50ef8c3f1b5dab01251f08484fcf352eba1c8aeb",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/ReviewRequestActionCommandTest.java",
+      "line": 46,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "55f577d562e82c6701a6fb5e50ef8c3f1b5dab01251f08484fcf352eba1c8aeb",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/ReviewShowCommandTest.java",
+      "line": 39,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "1f24b260fb42abce2a80110971b38dd7c1efcdba36c273233875f0e9cb832ce8",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/SessionsReapCommandTest.java",
+      "line": 36,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "9927fec6df949916fe425dddd29c807134a96018410410a8fea239bfba3708a5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/SessionsReapCommandTest.java",
+      "line": 46,
+      "text": "new WorkflowFileLedger().loadCurrent(paths(\"ws-running\")).status());",
+      "sha256": "9927fec6df949916fe425dddd29c807134a96018410410a8fea239bfba3708a5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/SessionsReapCommandTest.java",
+      "line": 77,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "9927fec6df949916fe425dddd29c807134a96018410410a8fea239bfba3708a5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/SessionsReapCommandTest.java",
+      "line": 104,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "9927fec6df949916fe425dddd29c807134a96018410410a8fea239bfba3708a5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/SessionsReapCommandTest.java",
+      "line": 137,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "9927fec6df949916fe425dddd29c807134a96018410410a8fea239bfba3708a5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/SessionsReapCommandTest.java",
+      "line": 183,
+      "text": "new WorkflowFileLedger().initialize(paths, \"wf-\" + workstreamId, definition);",
+      "sha256": "9927fec6df949916fe425dddd29c807134a96018410410a8fea239bfba3708a5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/StatusCommandTest.java",
+      "line": 63,
+      "text": "new WorkflowFileLedger().initialize(paths, \"wf-status\", definition);",
+      "sha256": "80f7042b358bcb079029392c75cf23d430ac9d6f36e5b5c5f54410fc939f114c",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/StatusCommandTest.java",
+      "line": 124,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "80f7042b358bcb079029392c75cf23d430ac9d6f36e5b5c5f54410fc939f114c",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/TimelineCommandTest.java",
+      "line": 44,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3ca585a82cc219b2f4bb1700b0351f842963077c7c1be53c7bd19be3f30e6925",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/WatchCommandTest.java",
+      "line": 44,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f406a5dd13550346d3e1400fef67d9e98d0334685004946179c606a093bb84a4",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/FlowKernelProviderTest.java",
+      "line": 13,
+      "text": "assertEquals(FlowKernelProvider.LITEFLOW, FlowKernelProvider.normalize(null));",
+      "sha256": "46f4e1fe0e0dfe743ffe0497661839178f4aa054a51281b7fb2834298e9a7c67",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/FlowKernelProviderTest.java",
+      "line": 14,
+      "text": "assertEquals(FlowKernelProvider.LITEFLOW, FlowKernelProvider.normalize(\"\"));",
+      "sha256": "46f4e1fe0e0dfe743ffe0497661839178f4aa054a51281b7fb2834298e9a7c67",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/FlowKernelProviderTest.java",
+      "line": 15,
+      "text": "assertInstanceOf(LiteFlowPrototypeKernel.class, FlowKernelProvider.create(null));",
+      "sha256": "46f4e1fe0e0dfe743ffe0497661839178f4aa054a51281b7fb2834298e9a7c67",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/FlowKernelProviderTest.java",
+      "line": 20,
+      "text": "assertEquals(FlowKernelProvider.BUILTIN, FlowKernelProvider.normalize(\" BUILTIN \"));",
+      "sha256": "46f4e1fe0e0dfe743ffe0497661839178f4aa054a51281b7fb2834298e9a7c67",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/FlowKernelProviderTest.java",
+      "line": 21,
+      "text": "assertInstanceOf(BuiltInFlowOrchestrationKernel.class, FlowKernelProvider.create(\"builtin\"));",
+      "sha256": "46f4e1fe0e0dfe743ffe0497661839178f4aa054a51281b7fb2834298e9a7c67",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/FlowKernelProviderTest.java",
+      "line": 26,
+      "text": "var error = assertThrows(IllegalArgumentException.class, () -> FlowKernelProvider.create(\"unknown\"));",
+      "sha256": "46f4e1fe0e0dfe743ffe0497661839178f4aa054a51281b7fb2834298e9a7c67",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/LiteFlowLedgerBoundaryTest.java",
+      "line": 202,
+      "text": "return new WorkflowFileLedger(new LiteFlowPrototypeKernel());",
+      "sha256": "ff2488f483d57c69cd2e913232f542a7a6ae5446051a293b49cf04b0414d864f",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 27,
+      "text": "private final WorkflowFileLedger ledger = new WorkflowFileLedger();",
+      "sha256": "8810b33f4816d325b40e02e190fc870aef40ac9f2cf2237954c46841624e6c74",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/ConditionalEdgeRoutingTest.java",
+      "line": 31,
+      "text": "ledger = new WorkflowFileLedger();",
+      "sha256": "252afe943fb4800572a0ced2c2331dcfd8e21f5fa0a0289f8e838ce8b61e5b89",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/ExecutionNetworkGrantStoreTest.java",
+      "line": 18,
+      "text": "final WorkflowFileLedger ledger = new WorkflowFileLedger();",
+      "sha256": "931d488715690e2e01326ae783e62c63e8a4d7d35378c02781930f37728b1847",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/HumanActionRequestTest.java",
+      "line": 20,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "d233cc4efb738dce53c434039455bddb3bdbca0be0bc1b04b89f71b80617bc9e",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/HumanActionRequestTest.java",
+      "line": 26,
+      "text": "assertEquals(recorded, new WorkflowFileLedger().requestAction(paths, request));",
+      "sha256": "d233cc4efb738dce53c434039455bddb3bdbca0be0bc1b04b89f71b80617bc9e",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/HumanActionRequestTest.java",
+      "line": 40,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "d233cc4efb738dce53c434039455bddb3bdbca0be0bc1b04b89f71b80617bc9e",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/HumanActionRequestTest.java",
+      "line": 55,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "d233cc4efb738dce53c434039455bddb3bdbca0be0bc1b04b89f71b80617bc9e",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/HumanActionRequestTest.java",
+      "line": 67,
+      "text": "new WorkflowFileLedger().requestAction(paths, request);",
+      "sha256": "d233cc4efb738dce53c434039455bddb3bdbca0be0bc1b04b89f71b80617bc9e",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/HumanActionRequestTest.java",
+      "line": 84,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "d233cc4efb738dce53c434039455bddb3bdbca0be0bc1b04b89f71b80617bc9e",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 31,
+      "text": "blockAtomicWrite(eventOnly.workflowDefinitionJson(), () -> new WorkflowFileLedger().initialize(",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 34,
+      "text": "var eventOnlyRestart = new WorkflowFileLedger();",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 41,
+      "text": "blockAtomicWrite(currentWithoutEntry.nodeJson(entryNodeId), () -> new WorkflowFileLedger().initialize(",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 44,
+      "text": "var missingEntryRestart = new WorkflowFileLedger();",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 71,
+      "text": "var restart = new WorkflowFileLedger();",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 99,
+      "text": "var restart = new WorkflowFileLedger();",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 113,
+      "text": "route(new RestartFixture(new WorkflowFileLedger(), terminalOnly.paths(), terminalOnly.definition()));",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 118,
+      "text": "route(new RestartFixture(new WorkflowFileLedger(), successorWritten.paths(), successorWritten.definition()));",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 123,
+      "text": "route(new RestartFixture(new WorkflowFileLedger(), eventWritten.paths(), eventWritten.definition()));",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 129,
+      "text": "var restart = new WorkflowFileLedger();",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 139,
+      "text": "var restart = new WorkflowFileLedger();",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 146,
+      "text": "var restart = new WorkflowFileLedger();",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 152,
+      "text": "var restart = new WorkflowFileLedger();",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 190,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 199,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java",
+      "line": 216,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "4ce302f022706fb7ec262f48c8c09af8551c6a14788aec9f1f61e3d6fd1f2154",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/ParallelFanOutTest.java",
+      "line": 31,
+      "text": "ledger = new WorkflowFileLedger();",
+      "sha256": "b52d07159761f17ce41a0ed2467d5fe8013cb215df486256381abffc3c5c292c",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/RetryFailureContextTest.java",
+      "line": 18,
+      "text": "final WorkflowFileLedger ledger = new WorkflowFileLedger();",
+      "sha256": "0254b508814c7d75c02e6efae2d8f1b5852530fb5f4dcc276789c50e2a480cd8",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 43,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 78,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 106,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 161,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 201,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 235,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 280,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 322,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 397,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 435,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 473,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 521,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 594,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 664,
+      "text": "new WorkflowFileLedger().completeAndRoute(completePaths, definition, completeDecision.nodeInstanceId(),",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 670,
+      "text": "new WorkflowFileLedger().completeAndRoute(incompletePaths, definition, incompleteDecision.nodeInstanceId(),",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 676,
+      "text": "var incompleteLedger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 712,
+      "text": "var blockedLedger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 744,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 776,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 825,
+      "text": "() -> new WorkflowFileLedger().completeAndRoute(paths, definition, decision.nodeInstanceId(),",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 842,
+      "text": "() -> new WorkflowFileLedger().completeAndRoute(paths, definition, decision.nodeInstanceId(),",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 860,
+      "text": "() -> new WorkflowFileLedger().completeAndRoute(paths, definition, decision.nodeInstanceId(),",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 957,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1008,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1051,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1094,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1148,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1178,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1229,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1275,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1304,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1338,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1365,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1396,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1435,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1471,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1508,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1555,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1589,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1621,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1687,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1767,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1823,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1854,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1886,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1909,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1937,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1956,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 1979,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 2007,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 2075,
+      "text": "new WorkflowFileLedger().initialize(paths, \"wf-\" + workstreamId, definition);",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java",
+      "line": 2080,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "95e37593522dc766f663f99e33779380bd812ad2abb7413cb1315c38dbb191f0",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java",
+      "line": 32,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "9286ce733113c10b0d7279cf144b8b79498a5c5e6e472fc6a49d1fdcf053b548",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java",
+      "line": 50,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "9286ce733113c10b0d7279cf144b8b79498a5c5e6e472fc6a49d1fdcf053b548",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java",
+      "line": 73,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "9286ce733113c10b0d7279cf144b8b79498a5c5e6e472fc6a49d1fdcf053b548",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java",
+      "line": 125,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "9286ce733113c10b0d7279cf144b8b79498a5c5e6e472fc6a49d1fdcf053b548",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java",
+      "line": 150,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "9286ce733113c10b0d7279cf144b8b79498a5c5e6e472fc6a49d1fdcf053b548",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkstreamAttentionEvaluatorTest.java",
+      "line": 28,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f5a82101dd99a4ed66e519e691b715b616a0afa0b424d11a4087e6543615d0c5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkstreamAttentionEvaluatorTest.java",
+      "line": 51,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f5a82101dd99a4ed66e519e691b715b616a0afa0b424d11a4087e6543615d0c5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkstreamAttentionEvaluatorTest.java",
+      "line": 94,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f5a82101dd99a4ed66e519e691b715b616a0afa0b424d11a4087e6543615d0c5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkstreamAttentionEvaluatorTest.java",
+      "line": 129,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f5a82101dd99a4ed66e519e691b715b616a0afa0b424d11a4087e6543615d0c5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkstreamAttentionEvaluatorTest.java",
+      "line": 157,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f5a82101dd99a4ed66e519e691b715b616a0afa0b424d11a4087e6543615d0c5",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/AcceptedDeliveryCandidateResolver.java",
+      "line": 30,
+      "text": "this(new ObjectMapper().findAndRegisterModules(), new WorkflowFileLedger(), new DeliveryCandidateWriter());",
+      "sha256": "4ca82424dd402f3bad10718658f57ba7bef3947f9cc89cd29176572e4af50ed8",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 34,
+      "text": "new WorkflowFileLedger(),",
+      "sha256": "0a035ac6aa530522103b439919377d901986594c4ca18fec4a4ff73b705829ca",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputLineageVerifier.java",
+      "line": 28,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "1558a98205c8635cb885d422c8fd3a73b514994bf6f78f6609ca59d90a7ffe5f",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "line": 46,
+      "text": "private final WorkflowFileLedger ledger = new WorkflowFileLedger();",
+      "sha256": "b9e9e7999b9de918a14554848edf11bba883e4b37a129778e200ae55cce724ec",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 49,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "ca89b47141b785835be0cbdcdbdcbfdf08aee6b3e36396fe4b2a3f1b28975738",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 167,
+      "text": "var producer = new WorkflowFileLedger().loadNode(paths, entry.document().nodeInstanceId());",
+      "sha256": "ca89b47141b785835be0cbdcdbdcbfdf08aee6b3e36396fe4b2a3f1b28975738",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 186,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "ca89b47141b785835be0cbdcdbdcbfdf08aee6b3e36396fe4b2a3f1b28975738",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 257,
+      "text": "var producer = new WorkflowFileLedger().loadNode(paths, entry.document().nodeInstanceId());",
+      "sha256": "ca89b47141b785835be0cbdcdbdcbfdf08aee6b3e36396fe4b2a3f1b28975738",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 53,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 65,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 100,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 129,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 156,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 177,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 196,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 219,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 270,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 318,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 341,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 358,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 389,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 417,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 441,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 459,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 478,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 495,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 512,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 531,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 552,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 576,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java",
+      "line": 595,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "579d0334b0790fa559dfb68911c9b8a6249828d853b641ff7a2aab524c160db3",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/StaleRunningRecoveryTest.java",
+      "line": 35,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "94482036f23d0cfed45a88628972c1df6b75bdee21f19d903a75b7515123038e",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/StaleRunningRecoveryTest.java",
+      "line": 65,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "94482036f23d0cfed45a88628972c1df6b75bdee21f19d903a75b7515123038e",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/StaleRunningRecoveryTest.java",
+      "line": 90,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "94482036f23d0cfed45a88628972c1df6b75bdee21f19d903a75b7515123038e",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeEventTest.java",
+      "line": 76,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3f16fe4e40007f92e1c9e144d6b8ab82b170384a561d5492741220e61d532efd",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeEventTest.java",
+      "line": 131,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3f16fe4e40007f92e1c9e144d6b8ab82b170384a561d5492741220e61d532efd",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeEventTest.java",
+      "line": 161,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3f16fe4e40007f92e1c9e144d6b8ab82b170384a561d5492741220e61d532efd",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeEventTest.java",
+      "line": 191,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3f16fe4e40007f92e1c9e144d6b8ab82b170384a561d5492741220e61d532efd",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java",
+      "line": 64,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f7b781eaa6b16e47a3c383ad787c99fce11600c571c050090dc8e56e66e4e16a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java",
+      "line": 137,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f7b781eaa6b16e47a3c383ad787c99fce11600c571c050090dc8e56e66e4e16a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java",
+      "line": 187,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f7b781eaa6b16e47a3c383ad787c99fce11600c571c050090dc8e56e66e4e16a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java",
+      "line": 223,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f7b781eaa6b16e47a3c383ad787c99fce11600c571c050090dc8e56e66e4e16a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java",
+      "line": 259,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f7b781eaa6b16e47a3c383ad787c99fce11600c571c050090dc8e56e66e4e16a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java",
+      "line": 286,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f7b781eaa6b16e47a3c383ad787c99fce11600c571c050090dc8e56e66e4e16a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java",
+      "line": 343,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f7b781eaa6b16e47a3c383ad787c99fce11600c571c050090dc8e56e66e4e16a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java",
+      "line": 406,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f7b781eaa6b16e47a3c383ad787c99fce11600c571c050090dc8e56e66e4e16a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java",
+      "line": 447,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f7b781eaa6b16e47a3c383ad787c99fce11600c571c050090dc8e56e66e4e16a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java",
+      "line": 462,
+      "text": "var coldResult = new WorkflowRuntime(new WorkflowFileLedger(), registry)",
+      "sha256": "f7b781eaa6b16e47a3c383ad787c99fce11600c571c050090dc8e56e66e4e16a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java",
+      "line": 497,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f7b781eaa6b16e47a3c383ad787c99fce11600c571c050090dc8e56e66e4e16a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairInterruptionTest.java",
+      "line": 34,
+      "text": "var cold = new WorkflowFileLedger();",
+      "sha256": "98956c19e36ea02be691797c4b4200f27601f660937f1a08d2cd85eb940556f8",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairInterruptionTest.java",
+      "line": 55,
+      "text": "var cold = new WorkflowFileLedger();",
+      "sha256": "98956c19e36ea02be691797c4b4200f27601f660937f1a08d2cd85eb940556f8",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java",
+      "line": 83,
+      "text": "assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, new WorkflowFileLedger().loadCurrent(f.paths).status());",
+      "sha256": "9763738c7c476da19b440ff14e58623f4009ab8755b9943c8e2acec2ed4b3660",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java",
+      "line": 186,
+      "text": "final WorkflowFileLedger ledger = new WorkflowFileLedger();",
+      "sha256": "9763738c7c476da19b440ff14e58623f4009ab8755b9943c8e2acec2ed4b3660",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentRunMetadataFinalizerTest.java",
+      "line": 653,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f6e28de7f61477ee04519d995cdad6ff061e729ae4ba55e245bfb542e09216af",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentRunMetadataFinalizerTest.java",
+      "line": 728,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "f6e28de7f61477ee04519d995cdad6ff061e729ae4ba55e245bfb542e09216af",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredInputFixture.java",
+      "line": 84,
+      "text": "record(new TaskHandler.TaskContext(root, ws, author, new WorkflowFileLedger().loadCoreNode(paths, nodeId)), run);",
+      "sha256": "c922a565ec0f31c3ce7f49fbe059f5a7048eb877869e17f087427e58d0e26281",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java",
+      "line": 249,
+      "text": "final WorkflowFileLedger ledger = new WorkflowFileLedger();",
+      "sha256": "8ea6e87a157c15f1950322c63e3fc9265cf246f17550abb7d1a0b253ab7d6e21",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageFixture.java",
+      "line": 58,
+      "text": "new WorkflowFileLedger().initialize(",
+      "sha256": "85310c6926bba6593bbc9e4db9550580e4dac7347864d30588a17a9600d22711",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 21,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 35,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 55,
+      "text": "var current = new WorkflowFileLedger().loadCurrent(paths);",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 81,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 89,
+      "text": "var cold = new WorkflowFileLedger().loadNode(paths, nodeId);",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 109,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 127,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 131,
+      "text": "ledger = new WorkflowFileLedger(new dev.dual.core.flow.FlowOrchestrationKernel() {",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 145,
+      "text": "var cold = new WorkflowFileLedger();",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 157,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 165,
+      "text": "var next = new WorkflowFileLedger().loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "line": 223,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "ce5cb9eb1caff03a92b5f1d0702390b52baf75b0254219c7add9531c26664621",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ExternalVerificationEvidenceTest.java",
+      "line": 17,
+      "text": "final WorkflowFileLedger ledger = new WorkflowFileLedger();",
+      "sha256": "5a6489c3a3858391333a893bfb62149bf40f1d18ba70dda2fb75c4634017a9c1",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ExternalVerificationEvidenceTest.java",
+      "line": 111,
+      "text": "assertEquals(submission, ExternalVerificationEvidence.submit(new WorkflowFileLedger(), paths, preparation,",
+      "sha256": "5a6489c3a3858391333a893bfb62149bf40f1d18ba70dda2fb75c4634017a9c1",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ExternalVerificationEvidenceTest.java",
+      "line": 129,
+      "text": "var acceptance = new WorkflowFileLedger().loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());",
+      "sha256": "5a6489c3a3858391333a893bfb62149bf40f1d18ba70dda2fb75c4634017a9c1",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ExternalVerificationEvidenceTest.java",
+      "line": 201,
+      "text": "if (afterNode) failing = new WorkflowFileLedger(new dev.dual.core.flow.FlowOrchestrationKernel() {",
+      "sha256": "5a6489c3a3858391333a893bfb62149bf40f1d18ba70dda2fb75c4634017a9c1",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ExternalVerificationEvidenceTest.java",
+      "line": 216,
+      "text": "assertThrows(Exception.class, () -> ExternalVerificationEvidence.submit(new WorkflowFileLedger(), paths, preparation, \"r\", List.of(material), declaration, \"note\"));",
+      "sha256": "5a6489c3a3858391333a893bfb62149bf40f1d18ba70dda2fb75c4634017a9c1",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java",
+      "line": 32,
+      "text": "var ledger = new WorkflowFileLedger(kernel);",
+      "sha256": "fa9d7f925e2f536fda40330d8b4c78f2ce7635e06dab20a0784ce7e8619979fe",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java",
+      "line": 74,
+      "text": "var ledger = new WorkflowFileLedger(kernel);",
+      "sha256": "fa9d7f925e2f536fda40330d8b4c78f2ce7635e06dab20a0784ce7e8619979fe",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java",
+      "line": 111,
+      "text": "var cold = new WorkflowFileLedger(coldKernel);",
+      "sha256": "fa9d7f925e2f536fda40330d8b4c78f2ce7635e06dab20a0784ce7e8619979fe",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SmallWorkflowProfileGateIntegrationTest.java",
+      "line": 195,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "9bd6335948a3ef16af904355fa46525fa8ad8b852b80f22fef894ba8a66b7f53",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/WorkflowIntegrationTest.java",
+      "line": 108,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "e97f0849305a5064682b6fc20edc604132977da4c3f29ab69e7ee2ce34090250",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java",
+      "line": 95,
+      "text": "var definition = new WorkflowFileLedger().loadDefinition(paths);",
+      "sha256": "3d5e08ea348a2f8fc6fdc15c9adffba353a9724f41f9a21250c4572d792484b9",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java",
+      "line": 113,
+      "text": "new WorkflowFileLedger().resolveOpenGate(paths, definition, \"revise\", \"explicit human revision \" + i);",
+      "sha256": "3d5e08ea348a2f8fc6fdc15c9adffba353a9724f41f9a21250c4572d792484b9",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java",
+      "line": 115,
+      "text": "assertEquals(WorkflowStatus.RUNNING, new WorkflowFileLedger().loadCurrent(paths).status());",
+      "sha256": "3d5e08ea348a2f8fc6fdc15c9adffba353a9724f41f9a21250c4572d792484b9",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java",
+      "line": 136,
+      "text": "new WorkflowFileLedger().initialize(paths, \"wf-\" + id, definition);",
+      "sha256": "3d5e08ea348a2f8fc6fdc15c9adffba353a9724f41f9a21250c4572d792484b9",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java",
+      "line": 159,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d5e08ea348a2f8fc6fdc15c9adffba353a9724f41f9a21250c4572d792484b9",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java",
+      "line": 177,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d5e08ea348a2f8fc6fdc15c9adffba353a9724f41f9a21250c4572d792484b9",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java",
+      "line": 185,
+      "text": "new WorkflowFileLedger().completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED,",
+      "sha256": "3d5e08ea348a2f8fc6fdc15c9adffba353a9724f41f9a21250c4572d792484b9",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/ServerLedgerFactory.java",
+      "line": 14,
+      "text": "return new WorkflowFileLedger(FlowKernelProvider.create(configuredKernel()));",
+      "sha256": "c359d7f68e6e7d7da25fd4c1b0b6826f5f6b12485f7e7e1d500df3c7b0c7ce55",
+      "surface": "production"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/SchedulerServiceTest.java",
+      "line": 40,
+      "text": "var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {",
+      "sha256": "e6976772569fe3893725dd06e67978d9995d8e7c80a68a40af6fea6c412e469a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/SchedulerServiceTest.java",
+      "line": 68,
+      "text": "var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {",
+      "sha256": "e6976772569fe3893725dd06e67978d9995d8e7c80a68a40af6fea6c412e469a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/SchedulerServiceTest.java",
+      "line": 92,
+      "text": "var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {",
+      "sha256": "e6976772569fe3893725dd06e67978d9995d8e7c80a68a40af6fea6c412e469a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/SchedulerServiceTest.java",
+      "line": 118,
+      "text": "var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {",
+      "sha256": "e6976772569fe3893725dd06e67978d9995d8e7c80a68a40af6fea6c412e469a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/SchedulerServiceTest.java",
+      "line": 149,
+      "text": "var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {",
+      "sha256": "e6976772569fe3893725dd06e67978d9995d8e7c80a68a40af6fea6c412e469a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/SchedulerServiceTest.java",
+      "line": 178,
+      "text": "var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {",
+      "sha256": "e6976772569fe3893725dd06e67978d9995d8e7c80a68a40af6fea6c412e469a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/SchedulerServiceTest.java",
+      "line": 197,
+      "text": "new WorkflowFileLedger().initialize(paths, \"wf-\" + workstreamId, simpleDefinition());",
+      "sha256": "e6976772569fe3893725dd06e67978d9995d8e7c80a68a40af6fea6c412e469a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/SchedulerServiceTest.java",
+      "line": 209,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "e6976772569fe3893725dd06e67978d9995d8e7c80a68a40af6fea6c412e469a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/SchedulerServiceTest.java",
+      "line": 219,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "e6976772569fe3893725dd06e67978d9995d8e7c80a68a40af6fea6c412e469a",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 39,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 60,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 78,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 100,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> results.removeFirst());",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 115,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 120,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 132,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 157,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 176,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 193,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 198,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 211,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 216,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 232,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 237,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 250,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 255,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 267,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 272,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 291,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 296,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 313,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 319,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 335,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 341,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 354,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 366,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 371,
+      "text": "var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java",
+      "line": 397,
+      "text": "new WorkflowFileLedger().initialize(paths, \"wf-\" + workstreamId, definition);",
+      "sha256": "3d8f4b93cc4f1606efabf59772e7beefc1a44d78b0c37b21fd89eaf208754b9b",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "line": 354,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "1ef858ebddbea9aa8744ece612f25f0b8df8ebcf6e7646104206d4fa06a0b277",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "line": 660,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "1ef858ebddbea9aa8744ece612f25f0b8df8ebcf6e7646104206d4fa06a0b277",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "line": 678,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "1ef858ebddbea9aa8744ece612f25f0b8df8ebcf6e7646104206d4fa06a0b277",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "line": 703,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "1ef858ebddbea9aa8744ece612f25f0b8df8ebcf6e7646104206d4fa06a0b277",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "line": 761,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "1ef858ebddbea9aa8744ece612f25f0b8df8ebcf6e7646104206d4fa06a0b277",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "line": 824,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "1ef858ebddbea9aa8744ece612f25f0b8df8ebcf6e7646104206d4fa06a0b277",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "line": 899,
+      "text": "new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->",
+      "sha256": "1ef858ebddbea9aa8744ece612f25f0b8df8ebcf6e7646104206d4fa06a0b277",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "line": 969,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "1ef858ebddbea9aa8744ece612f25f0b8df8ebcf6e7646104206d4fa06a0b277",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "line": 1009,
+      "text": "new WorkflowFileLedger().initialize(paths, \"wf-\" + workstreamIdValue, definition);",
+      "sha256": "1ef858ebddbea9aa8744ece612f25f0b8df8ebcf6e7646104206d4fa06a0b277",
+      "surface": "test"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "line": 1044,
+      "text": "var ledger = new WorkflowFileLedger();",
+      "sha256": "1ef858ebddbea9aa8744ece612f25f0b8df8ebcf6e7646104206d4fa06a0b277",
+      "surface": "test"
+    }
+  ]
+}

@@ -27,10 +27,10 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
     public NodeResult execute(TaskContext context) throws IOException {
         var qualifiedContract = qualifiedContract(context);
         if (qualifiedContract.failure() != null) {
-            return qualificationFailure(qualifiedContract.failure());
+            return qualificationFailure(context, qualifiedContract.failure());
         }
         var evidence = CompletionEvidenceLineageResolver.resolveForReport(
-                context.workspaceRoot(), context.workstreamId(), context.instance());
+                context.ledger(), context.workspaceRoot(), context.workstreamId(), context.instance());
         if (evidence.status() != CompletionEvidenceLineageResolver.Status.AVAILABLE) {
             var result = new LinkedHashMap<String, Object>();
             result.put("failure_code", evidence.failureCode());
@@ -89,12 +89,8 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
         builder.append(readOrDefault(workstreamDir.resolve("requirement.md"), "(requirement.md not found)")).append("\n\n");
 
         builder.append("## TaskContract\n\n");
-        var legacyContract = qualifiedContract == null
-                ? TaskContractProjectionVerifier.readLegacyProjection(
-                        context.workspaceRoot(), context.workstreamId()).projection().orElse(null)
-                : null;
-        appendTaskContractSection(builder, qualifiedContract, legacyContract);
-        appendRequirementResolutionSection(builder, qualifiedContract, legacyContract);
+        appendTaskContractSection(builder, qualifiedContract);
+        appendRequirementResolutionSection(builder, qualifiedContract);
 
         appendFailureClassificationSection(builder, workstreamDir);
 
@@ -124,16 +120,13 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
 
     private static void appendTaskContractSection(
             StringBuilder builder,
-            TaskContractProjectionVerifier.QualifiedTaskContract qualifiedContract,
-            TaskContractProjectionVerifier.LegacyProjection legacyContract
+            TaskContractProjectionVerifier.QualifiedTaskContract qualifiedContract
     ) {
-        if (qualifiedContract == null && (legacyContract == null || legacyContract.contract() == null)) {
-            builder.append("(no TaskContract — legacy workflow)\n\n");
+        if (qualifiedContract == null) {
+            builder.append("(qualified contract not available)\n\n");
             return;
         }
-        var contract = qualifiedContract == null
-                ? legacyContract.contract()
-                : qualifiedContract.contract();
+        var contract = qualifiedContract.contract();
         builder.append("- **Contract ID:** ").append(contract.id()).append("\n");
         builder.append("- **Objective:** ").append(contract.objective()).append("\n");
         builder.append("- **Status:** ").append(contract.status()).append("\n");
@@ -141,8 +134,6 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
             builder.append("- **Contract Ref:** ").append(qualifiedContract.contractRef()).append("\n");
             builder.append("- **Contract SHA-256:** ").append(qualifiedContract.sha256()).append("\n");
             builder.append("- **Approval Gate:** ").append(qualifiedContract.approvalGateRef()).append("\n");
-        } else {
-            builder.append("- **Authority:** legacy unqualified projection\n");
         }
         builder.append("- **Scope Included:** ").append(contract.scope().included().isEmpty()
                 ? "(none)"
@@ -150,6 +141,8 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
                         .map(item -> item.operation() + ": " + item.path())
                         .collect(java.util.stream.Collectors.joining(", "))).append("\n");
         builder.append("- **Scope Excluded:** ").append(contract.scope().excluded().isEmpty() ? "(none)" : String.join(", ", contract.scope().excluded())).append("\n");
+        builder.append("- **Nonessential Operation Declarations:**\n");
+        TaskContractArtifactWriter.nonessentialOperationDescriptions(contract).forEach(d -> builder.append("  - ").append(d).append("\n"));
         builder.append("- **Acceptance Criteria:** ").append(contract.acceptanceCriteria().size()).append(" items").append("\n");
         builder.append("- **Non-Goals:** ").append(contract.nonGoals().isEmpty() ? "(none)" : String.join(", ", contract.nonGoals())).append("\n");
         builder.append("- **Contract Gaps Found:** 0\n");
@@ -158,25 +151,13 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
 
     private static void appendRequirementResolutionSection(
             StringBuilder builder,
-            TaskContractProjectionVerifier.QualifiedTaskContract qualifiedContract,
-            TaskContractProjectionVerifier.LegacyProjection legacyContract
+            TaskContractProjectionVerifier.QualifiedTaskContract qualifiedContract
     ) {
-        if (qualifiedContract == null
-                && (legacyContract == null || legacyContract.resolutionDocument().isEmpty())) {
-            return;
-        }
+        if (qualifiedContract == null) return;
         builder.append("## Requirement Resolution\n\n");
-        builder.append("- Source: ").append(qualifiedContract == null
-                ? legacyContract.resolutionRef()
-                : qualifiedContract.resolutionRef()).append("\n");
-        if (qualifiedContract != null) {
-            builder.append("- SHA-256: ").append(qualifiedContract.resolutionSha256()).append("\n");
-        } else {
-            builder.append("- Authority: requirement history only\n");
-        }
-        var json = qualifiedContract == null
-                ? OBJECT_MAPPER.valueToTree(legacyContract.resolutionDocument())
-                : OBJECT_MAPPER.valueToTree(qualifiedContract.resolutionDocument());
+        builder.append("- Source: ").append(qualifiedContract.resolutionRef()).append("\n");
+        builder.append("- SHA-256: ").append(qualifiedContract.resolutionSha256()).append("\n");
+        var json = OBJECT_MAPPER.valueToTree(qualifiedContract.resolutionDocument());
         appendJsonField(builder, "Decision", json.path("decision").asText(""));
         appendJsonField(builder, "Approved By", json.path("approved_by").asText(""));
         appendJsonField(builder, "Gate Ref", json.path("gate_ref").asText(""));
@@ -188,9 +169,10 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
 
     private static QualifiedContract qualifiedContract(TaskContext context) {
         if (!AgentRunGovernanceContext.requiresApprovedTaskContract(context)) {
-            return new QualifiedContract(null, null);
+            return new QualifiedContract(null, TaskContractProjectionVerifier.Failure.of(
+                    "CONTRACT_PHASE_MISSING", "final report requires an explicit EXECUTION phase"));
         }
-        var resolved = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
+        var resolved = TaskContractProjectionVerifier.resolve(context.ledger(), context.workspaceRoot(), context.workstreamId(), TaskContractProjectionVerifier.requiredPhase(context.definition()));
         if (resolved.failure() != null) {
             return new QualifiedContract(null, resolved.failure());
         }
@@ -200,16 +182,8 @@ public final class ReportGenerateFinalHandler implements TaskHandler {
                         "APPROVAL_BINDING_MISSING", "final report requires an approved task contract")));
     }
 
-    private static NodeResult qualificationFailure(TaskContractProjectionVerifier.Failure failure) {
-        return new NodeResult(
-                TaskContractProjectionVerifier.FAILURE_OUTCOME,
-                dev.dual.core.workflow.NodeStatus.FAILED,
-                List.of(),
-                Map.of(
-                        "failure_code", TaskContractProjectionVerifier.FAILURE_OUTCOME,
-                        "reason", failure.reason(),
-                        "error", failure.message()),
-                failure.message());
+    private static NodeResult qualificationFailure(TaskContext context, TaskContractProjectionVerifier.Failure failure) {
+        return TaskContractProjectionVerifier.failureResult(context, failure, failure.message());
     }
 
     private record QualifiedContract(

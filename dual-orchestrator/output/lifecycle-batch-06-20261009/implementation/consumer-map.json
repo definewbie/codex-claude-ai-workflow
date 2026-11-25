@@ -1,0 +1,49 @@
+{
+  "groups": [
+    {
+      "id": "G01",
+      "owner_consumers": "delivery owner.resolve → CLI/API/两 UI",
+      "obligation": "严格 request/stop evidence/同 id 幂等；合法 AUTHORIZE 一次及 CLOSE 单向",
+      "proof": "unknownAtBaseNeedsANewExplicitAuthorizationAndDuplicateDoesNotReapply; humanStopRemainsADeclarationAndCloseStillAllowsAnExactExistingCommit; closedApplicationCannotBeReopenedButPureCloseDoesNotInventStop"
+    },
+    {
+      "id": "G02",
+      "owner_consumers": "GitPatchMergeService.apply",
+      "obligation": "当前 before 身份在 ProcessBuilder 前重核",
+      "proof": "GitPatchMergeServiceTest.failedReceiptSuppliesNoPatchAndCleanHeadDriftStartsNoChild; apply-window-proof.json"
+    },
+    {
+      "id": "G03",
+      "owner_consumers": "实际 Process callbacks → L07 → stopBasis",
+      "obligation": "启动记录完整返回先于 stdin；退出实测先于 output drain；人工保持类型，活动反证不可覆盖",
+      "proof": "recordsTheActualChildBeforeInputAndItsMeasuredExitAfterApplication; exactCommitCannotReplaceMissingEvidenceThatTheOldApplyStopped; activeProgramObservationCannotBeOverriddenByAnOperatorDeclaration"
+    },
+    {
+      "id": "G04",
+      "owner_consumers": "AcceptedDeliveryCandidateResolver + requirePlanCandidate/requireRequestBinding",
+      "obligation": "完整候选/批准/源/target/common-dir/base/tree/pathsets/runtime/operation 格式；错误身份零应用",
+      "proof": "targetAliasesAreLegalButLinkedWorktreeIsNotTheApprovedTarget; wrongDecisionIdentityAndMalformedDeclarationsProduceNoApplicationOrReceipt; foreignProcessCannotBeUsedAsAProgramTerminationReceipt; old candidate tests retained"
+    },
+    {
+      "id": "G05",
+      "owner_consumers": "DeliveryApplicationService.View → inSnapshot → 各端",
+      "obligation": "同代嵌入；stale/BUSY/pending 零当前许可；人工 commit 与 finalize 分开；历史不抹掉",
+      "proof": "targetLockIsSharedAcrossWorkstreamsAndReadCompositionNeverTakesAnInvertedLock; DeliveryViewServiceTest.ownerActionsAreProjectedForStagingCommitAndHistoryWithoutBeingRecomputed; query-lock-proof.json; ui-verification.json"
+    },
+    {
+      "id": "G06",
+      "owner_consumers": "L07 prepared bytes and live stack",
+      "obligation": "intent/PID/exit/observation 四组 × 八前缀；close/finalize 两组 × 八；新裁定八；真正冷 JVM 的 apply 前缀；固定补齐不是 fresh",
+      "proof": "eachApplicationWritePrefixCanBeRepairedInAColdJvmWithoutStartingGitAgain; closeAndFinalizeWritePrefixesRetainTheirDecisionAndNeverReapply; aPreparedNewAuthorizationRepairsLocallyWithoutRegainingFreshStartAuthority; counterproof/results.json; write-target-proof.json (22 one-off concrete write targets, separately counted)"
+    },
+    {
+      "id": "G07",
+      "owner_consumers": "reference + 中英 quickstart",
+      "obligation": "operation/event 是实际输出承载；UNKNOWN/裁定/人工提交/下一步位置一致",
+      "proof": "documentation.patch; documentation-baseline.json"
+    }
+  ],
+  "normal_continuous_chain": "WorkflowFirstLifecycleSequenceTest.acceptedProductTraversesEveryGateAndTerminalPreventsNewExecution, four variants × inline/worker; real program author/reviewer/approval chain, synthetic external provider and actual temporary Git",
+  "current_classifications": "PROVEN_OFFLINE for listed paths, not native/client/production delivery proof",
+  "deletion_counterproofs": "5 assertion mutants plus separate reversed query-order proof"
+}

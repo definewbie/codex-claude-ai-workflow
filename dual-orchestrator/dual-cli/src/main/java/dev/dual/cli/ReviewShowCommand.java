@@ -27,7 +27,8 @@ public final class ReviewShowCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-        var ledger = CliLedgerFactory.create();
+        try (var snapshot = CliLedgerFactory.create().readSession(paths)) {
+        var ledger = snapshot.ledger();
         var current = ledger.loadCurrent(paths);
         if (current.activeNodeInstanceIds().isEmpty()) {
             System.err.println("No active node for workstream: " + workstreamId);
@@ -59,5 +60,6 @@ public final class ReviewShowCommand implements Callable<Integer> {
         System.out.println(new com.fasterxml.jackson.databind.ObjectMapper().writerWithDefaultPrettyPrinter()
                 .writeValueAsString(node.result().getOrDefault("action_requests", java.util.List.of())));
         return 0;
+        }
     }
 }

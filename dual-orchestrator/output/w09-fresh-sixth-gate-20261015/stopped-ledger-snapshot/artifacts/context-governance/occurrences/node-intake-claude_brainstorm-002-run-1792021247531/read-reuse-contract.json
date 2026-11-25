@@ -1,0 +1,19 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "read_reuse_contract",
+  "workstreamId" : "ws-20261014T234009Z-RN9X",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "targetNodeDefinitionId" : "intake.claude_brainstorm",
+  "iterationId" : "iter-001",
+  "preferExistingEvidence" : true,
+  "avoidRepeatingReads" : [ ],
+  "reusableReadFiles" : [ ],
+  "invalidatedReadFiles" : [ ],
+  "allowedRereadFiles" : [ ],
+  "reuseSource" : "run_history",
+  "requireReasonWhenRereading" : false,
+  "reasonField" : "",
+  "generatedAt" : "2026-10-14T23:40:47.575796Z"
+}

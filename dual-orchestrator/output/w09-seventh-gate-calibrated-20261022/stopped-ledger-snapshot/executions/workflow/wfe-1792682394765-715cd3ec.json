@@ -1,0 +1,13 @@
+{
+  "schemaVersion" : 1,
+  "workflowExecutionId" : "wfe-1792682394765-715cd3ec",
+  "workflowInstanceId" : "wf-ws-20261022T150557Z-Y2KB",
+  "workstreamId" : "ws-20261022T150557Z-Y2KB",
+  "trigger" : "resume",
+  "status" : "WAITING_FOR_RECOVERY",
+  "nodeExecutionIds" : [ "nxe-1792682394810-11c05b13" ],
+  "stopReason" : "workflow stopped at FAILED",
+  "startedAt" : "2026-10-22T15:19:54.765093Z",
+  "finishedAt" : "2026-10-22T15:20:40.181901Z",
+  "durationMs" : 45416
+}

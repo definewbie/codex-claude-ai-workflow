@@ -1,0 +1,28 @@
+{
+  "exit": 1,
+  "tests": [
+    {
+      "suite": "AcpxCompatibilitySequenceTest",
+      "tests": 17,
+      "failures": 2,
+      "errors": 0,
+      "failing_tests": [
+        "optionalEngineIdentityDoesNotBlockPrimaryOrCorrectionOrInventAnIdentity(String)[1]",
+        "optionalEngineIdentityDoesNotBlockPrimaryOrCorrectionOrInventAnIdentity(String)[2]"
+      ]
+    },
+    {
+      "suite": "WorkflowFirstLifecycleSequenceTest",
+      "tests": 18,
+      "failures": 4,
+      "errors": 0,
+      "failing_tests": [
+        "incompleteProcessCannotBeReclassifiedAsMissingArtifactAfterPublicationIsBlocked(boolean)[1]",
+        "incompleteProcessCannotBeReclassifiedAsMissingArtifactAfterPublicationIsBlocked(boolean)[2]",
+        "interfaceFailureKeepsRunNodeRecoveryAndSummaryConsistentAcrossColdRead(boolean)[1]",
+        "interfaceFailureKeepsRunNodeRecoveryAndSummaryConsistentAcrossColdRead(boolean)[2]"
+      ]
+    }
+  ],
+  "meaning": "six expected regressions: legal optional absence and typed primary report; not test author errors"
+}

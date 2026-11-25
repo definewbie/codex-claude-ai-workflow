@@ -78,6 +78,7 @@ public final class StartCommand implements Callable<Integer> {
                 ? repo.gitRoot().getParent().resolve(repo.gitRoot().getFileName() + "-agent-runs").resolve(workstreamId.value())
                 : worktreeDir.toAbsolutePath().normalize();
 
+        var ledger = CliLedgerFactory.create();
         git.createWorktree(repo.gitRoot(), selectedWorktree, selectedBranch);
 
         var now = Instant.now();
@@ -99,16 +100,8 @@ public final class StartCommand implements Callable<Integer> {
         );
 
         var paths = new WorkstreamPaths(selectedWorktree, workstreamId);
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId.value(), "start"))) {
-            new FileLedgerStore().initializeWorkstream(
-                    paths,
-                    workstream,
-                    workspace,
-                    requirement,
-                    WorkstreamSettingsDocument.of(promptLanguage)
-            );
-            CliLedgerFactory.create().initialize(paths, "wf-" + workstreamId.value(), workflowDefinition);
-        }
+        ledger.initialize(paths, workstream, workspace, requirement,
+                WorkstreamSettingsDocument.of(promptLanguage), "wf-" + workstreamId.value(), workflowDefinition);
         registerOperatorWorkspace(repo.gitRoot(), selectedWorktree, workstreamId.value(), firstLine(requirement), "created");
 
         System.out.println("Dual workstream started");
@@ -135,9 +128,7 @@ public final class StartCommand implements Callable<Integer> {
 
         System.out.println();
         System.out.println("Running workflow until next gate...");
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId.value(), "run"))) {
-            return new CliWorkflowLoop().run(selectedWorktree, workstreamId.value(), maxSteps);
-        }
+        return new CliWorkflowLoop().run(selectedWorktree, workstreamId.value(), maxSteps);
     }
 
     private String readRequirement() throws Exception {

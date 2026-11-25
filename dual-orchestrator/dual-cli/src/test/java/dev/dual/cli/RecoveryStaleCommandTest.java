@@ -27,10 +27,10 @@ class RecoveryStaleCommandTest {
     Path tempDir;
 
     @Test
-    void commandReconcilesRunBeforeMovingNodeToRecovery() throws Exception {
+    void commandRecoversLocalStaleNodeWithoutPromotingAnUnboundMutableRun() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-stale-command"));
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-stale-command", new WorkflowDefinition(
+        var ledger = CliLedgerFactory.create();
+        CliTestLedger.initialize(ledger, paths, "wf-stale-command", new WorkflowDefinition(
                 "stale-command", 1, "agent.node",
                 List.of(new NodeDefinition("agent.node", NodeKind.TASK, "agent.task", Map.of())),
                 List.of()));
@@ -38,16 +38,30 @@ class RecoveryStaleCommandTest {
         ledger.markRunning(paths, nodeId, Long.MAX_VALUE);
         var runJson = writeDeadRun(paths);
 
+        var rawBefore = Files.readAllBytes(runJson);
         var command = new RecoveryStaleCommand();
         command.workdir = tempDir;
         command.workstreamId = "ws-stale-command";
         command.note = "deterministic stale close";
 
         assertEquals(0, command.call());
-        assertEquals("INTERRUPTED", MAPPER.readTree(runJson.toFile())
-                .path("executionOutcome").path("status").asText());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(rawBefore, Files.readAllBytes(runJson));
         assertEquals(NodeStatus.FAILED, ledger.loadNode(paths, nodeId).status());
         assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, ledger.loadCurrent(paths).status());
+    }
+
+    @Test
+    void adoptionRejectsWrongDispositionAndConflictingStopBeforeAnyLedgerMutation() throws Exception {
+        var command = new RecoveryStaleCommand();
+        command.workdir = tempDir; command.workstreamId = "ws-no-side-effect";
+        command.decision = tempDir.resolve("decision.json");
+        Files.writeString(command.decision, "{\"disposition\":\"AUTHORIZE_NEW_ATTEMPT\"}");
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, command::call);
+        command.terminateProcess = true;
+        Files.delete(command.decision);
+        var rejected = org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, command::call);
+        org.junit.jupiter.api.Assertions.assertTrue(rejected.getMessage().contains("separate operations"));
+        org.junit.jupiter.api.Assertions.assertFalse(Files.exists(tempDir.resolve(".agent")));
     }
 
     private Path writeDeadRun(WorkstreamPaths paths) throws Exception {

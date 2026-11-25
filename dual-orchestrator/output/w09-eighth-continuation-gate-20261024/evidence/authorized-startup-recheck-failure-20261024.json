@@ -1,0 +1,86 @@
+{
+  "recorded_at": "2026-10-24T21:23:14.235791+08:00",
+  "experiment_result": "INVALID",
+  "primary_reason": "STARTUP_EXECUTION_ENVIRONMENT_DRIFT",
+  "failure_point": "continuation.inspect PATH identity check before Java/provider dispatch",
+  "preflight_exit": 1,
+  "preflight_diagnostic": "AssertionError: PATH drift",
+  "reviewed_path_sha256": "beec02d1d2a5bfdeeb92f7948b616a692ccb13e305ef996aa4b85d017d14fab5",
+  "current_path_sha256": "77b049c0d94872af64dbac3cdc096ff1fa30ca008a8d8ce0edc7677f62155ce3",
+  "executable_resolution": {
+    "java": {
+      "reviewed": "/usr/bin/java",
+      "current": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin/java",
+      "same": false
+    },
+    "python3": {
+      "reviewed": "/opt/homebrew/bin/python3",
+      "current": "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3",
+      "same": false
+    },
+    "node": {
+      "reviewed": "/usr/local/bin/node",
+      "current": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/node",
+      "same": false
+    },
+    "git": {
+      "reviewed": "/opt/homebrew/bin/git",
+      "current": "/opt/homebrew/bin/git",
+      "same": true
+    },
+    "rtk": {
+      "reviewed": "/opt/homebrew/bin/rtk",
+      "current": "/opt/homebrew/bin/rtk",
+      "same": true
+    },
+    "claude": {
+      "reviewed": "/opt/homebrew/bin/claude",
+      "current": "/opt/homebrew/bin/claude",
+      "same": true
+    },
+    "codex": {
+      "reviewed": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "current": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "same": true
+    },
+    "acpx": {
+      "reviewed": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/acpx",
+      "current": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/acpx",
+      "same": true
+    }
+  },
+  "frozen_sources_jars_clients_observer": "PASS before PATH check; independently rechecked",
+  "original_package_402_files_preserved": true,
+  "original_ledger_541_files_preserved": true,
+  "original_stop_preserved": true,
+  "domain_current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-plan-decision-026"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000026",
+    "updatedAt": "2026-10-23T03:02:20.392823Z",
+    "commitSequence": 100
+  },
+  "actual_tokens": 848242,
+  "completed_calls": 10,
+  "new_model_calls": 0,
+  "java_workflow_steps_started": 0,
+  "new_steps_directory_exists": false,
+  "approved_limits": {
+    "total_tokens": 1700000,
+    "requests": 18,
+    "active_seconds": 3600
+  },
+  "unused_tokens": 851758,
+  "unused_requests": 8,
+  "time_note": "No budget reset. Failed recheck shell wall time reported by execution tool: 0.589332875 seconds; not a provider/run duration. No new runtime-duration claim.",
+  "diagnostic_recording_elapsed_seconds": 0.7740464168600738,
+  "next_minimum_action": "Offline reconcile actual launcher environment with reviewed executable selection; establish original PATH bytes if preserved. No baseline overwrite, no product rebuild, no model experiment, no real continuation until preconditions pass and stop disposition is explicit."
+}

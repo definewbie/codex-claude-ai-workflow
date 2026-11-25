@@ -1,0 +1,5 @@
+请对 `/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator` 的 D04 做独立设计与证据复审，遵守 AGENTS.md。只评审，不实现、不运行真实模型、不启动额外 agent。
+
+从 `output/d04-native-boundary-review-20260929/review-package.md` 进入，结合详设 `docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md` §8/§13、主清单及引用的原始证据。不要采信作者的通过判断；核验原生正反证、诊断错误后的离线重判、额外控制面及 adapter 绑定是否足以支持 D04 冻结，是否把必要前置误推到实施后或反过来。
+
+自行重建准备→调用→工具执行→收尾→恢复的控制链与失败切面，覆盖兄弟路径，并检查 Declared by、Proven by、Consumed by、Enforced before、Failure route、Cannot-bypass。给出按严重度排序的发现、证据、未核验范围和冻结判断；评审通过不授权实施。

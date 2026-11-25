@@ -1,0 +1,12 @@
+{
+  "status": "PASS_EXPECTED_ASSERTION_FAILURE",
+  "isolated_copy": "/private/tmp/dual-w08-query-counterproof-20261009",
+  "mutation": "target observe moved inside L snapshot; main workspace untouched",
+  "source_test_sha256": "bf63fd4dedbdfc162e8c3aa69101a9461132d6e3a157474f14d15ce785ba3411",
+  "expected": "resident test fails with target observation must precede ledger lock",
+  "mutant_exit": 1,
+  "tests": 1,
+  "failures": 1,
+  "errors": 0,
+  "workspace_source_mutated": false
+}

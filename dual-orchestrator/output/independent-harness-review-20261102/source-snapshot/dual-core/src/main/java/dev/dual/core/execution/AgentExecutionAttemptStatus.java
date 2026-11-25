@@ -1,0 +1,18 @@
+package dev.dual.core.execution;
+
+public enum AgentExecutionAttemptStatus {
+    PREPARED,
+    RUNNING,
+    PROCESS_STARTED,
+    STREAMING,
+    PROCESS_EXITED,
+    ARTIFACT_EXTRACTED,
+    CONTRACT_VALIDATED,
+    COMPLETED,
+    CONTRACT_FAILED,
+    RECOVERABLE_FAILED,
+    TIMED_OUT,
+    STALLED,
+    INTERRUPTED,
+    RUNTIME_FAILED
+}

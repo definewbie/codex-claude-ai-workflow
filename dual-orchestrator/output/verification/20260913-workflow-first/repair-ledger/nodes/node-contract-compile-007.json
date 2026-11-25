@@ -1,0 +1,32 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-contract-compile-007",
+  "nodeDefinitionId" : "contract.compile",
+  "kind" : "TASK",
+  "handlerType" : "contract.compile",
+  "status" : "COMPLETED",
+  "stageId" : "stage-contract",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315492433/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315492433/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315492433/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1789315492433/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315492433/outputs/intake-codex-product-review.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/task-contract.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/task-contract.md", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/contract-resolution.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/contract-resolution.md" ],
+  "result" : {
+    "contract_id" : "tc-ws-20260913T160441Z-H55W-v1",
+    "contract_status" : "READY_FOR_REVIEW",
+    "contract_version" : 1,
+    "task_contract_sha256" : "210b43abbbb806770be5f157475242be3bd9ccd35c67feef6d73a29fb5fb560b",
+    "contract_resolution_sha256" : "17c59717601776f074fd3efa0a749d05b1f1f1ca5b5e2e089bb847164f2ccaeb",
+    "compilation_pass" : 1,
+    "artifacts" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/task-contract.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/task-contract.md", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/contract-resolution.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/contract-resolution.md" ],
+    "generated_at" : "2026-09-13T16:05:04.865416Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315504814-e1aaf050",
+  "startedAt" : "2026-09-13T16:05:04.829350Z",
+  "finishedAt" : "2026-09-13T16:05:04.876426Z"
+}

@@ -1,0 +1,153 @@
+{
+  "baseline": "653 measured pre-B06 dirty input preimages; new CLI CREATE separately",
+  "source_changes": [
+    {
+      "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java",
+      "operation": "MODIFY",
+      "before_sha256": "6045542d6303cb7997c4446abf1b5f38e3201c4e854e89605869b692577b64cd",
+      "after_sha256": "87f56320408e3297d3ee3d1ed181fb4395621f3cda2f5581cbfbb1a1703cd444",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-adapter-git/src/main/java/dev/dual/adapter/git/GitPatchMergeService.java",
+      "operation": "MODIFY",
+      "before_sha256": "10a24744750dc42eee528dd6ca7e0c42eb97d51071a08669c73a013e394139f4",
+      "after_sha256": "8cab352c7788f16fa11e906819ad7427b459db171711e73ed03dd1976315d256",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-adapter-git/src/test/java/dev/dual/adapter/git/GitPatchMergeServiceTest.java",
+      "operation": "MODIFY",
+      "before_sha256": "c75771ec485de88f8ed1c2b4f6ee100c75ed3a12b16b340c2ff3f652d9a25800",
+      "after_sha256": "ca46db1b930bb47132d2cf70aa82a6d2bf6b6cf03d6a740df8e6fc9a77929e25",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/DeliveryCommand.java",
+      "operation": "MODIFY",
+      "before_sha256": "66f01a01ddf2821d7a0b70547bfff2eab4eafa1ea571e09acd90385c81c13949",
+      "after_sha256": "6da840cc691da49abcc7f5f21d34e17ddb60ac4d3811d2103a4b9897ed2bd97d",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/DeliveryMergeCommand.java",
+      "operation": "MODIFY",
+      "before_sha256": "4347b8dc3f085d08af781d0cfb1e9ee31696d142f2d7e13b41687595368df914",
+      "after_sha256": "40a1bbe68681545866b5d9537fc839528c7122a4f7015f92df89d45ea99ee3b3",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/StatusCommand.java",
+      "operation": "MODIFY",
+      "before_sha256": "cc6a423fa573419480d7f02d4dfd09e13d20512a08d76d15db88dfda270e9b54",
+      "after_sha256": "d083187a010fc9706dd1035947c24aa0f0b0136dba8ece806bfd0180e3d05809",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/SummaryCommand.java",
+      "operation": "MODIFY",
+      "before_sha256": "3420db95f607eeb562c3cd286cb3a7fcbcdf1f207a0da656ff4c3c291d8ba1dc",
+      "after_sha256": "06c6500d18662f8c1609e8ae5f3bbd57311442614141500579be0d64856a2710",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-cli/src/test/java/dev/dual/cli/DeliveryMergeCommandTest.java",
+      "operation": "MODIFY",
+      "before_sha256": "94ea76911a11f93a4848f3d0eac2401d121760d74a1fbad4e412a114ac91feac",
+      "after_sha256": "1b106c175bc051fa45165980f43586c636f1a3bfd5b194ce853d1f483edae534",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryMergePlan.java",
+      "operation": "MODIFY",
+      "before_sha256": "09346829dac30101be00e479de045df3958dfc7e19111a1f43e37a4af40ad73c",
+      "after_sha256": "6dfe7ea3429f264866583d306f1436b9199293fbc1701d72cfe735dc1b97910e",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-ledger-file/src/test/java/dev/dual/ledger/file/DeliveryMergePlanTest.java",
+      "operation": "MODIFY",
+      "before_sha256": "c16c15e5d64f6e6cf48db94fa7ed6f3ea1fe79fbfdd6e9be27cef2d0c0e22e4d",
+      "after_sha256": "0cb9f6073a2bf0f8e25f01c9dbc715f83aebe95c2d6e49e5b28d6aa96357eccf",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "operation": "MODIFY",
+      "before_sha256": "ddf2d6fa4bdd00a6496f0cdf6bdb1bfe3d2d1a62800c845d0e25ef6d16b60db6",
+      "after_sha256": "23d70e487bd444d41a139130c04028f48bf2ef88483105d395f1acaedfe95d35",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-runtime/src/test/java/dev/dual/ledger/file/InterruptedTestLedger.java",
+      "operation": "MODIFY",
+      "before_sha256": "3d861c1b99e7107a4adfaad5fe86d5d4ec52e9e804b8f27c1c99f88549ff050a",
+      "after_sha256": "05d5f6d30d5d44349ceb21dfd6704eb45929091a05fc1158ab37e603bfcbc1d1",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-runtime/src/test/java/dev/dual/runtime/delivery/DeliveryApplicationServiceTest.java",
+      "operation": "MODIFY",
+      "before_sha256": "9e0ce623d51253d480edf5588fe7cf83e4f93a3367eab22216b73b9a3deef9ae",
+      "after_sha256": "8995b67e11159e1142424aa7ed4bf32e02ceeecd5edf60c8786345956b371f79",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-server/src/main/java/dev/dual/server/DeliveryViewService.java",
+      "operation": "MODIFY",
+      "before_sha256": "19a9f628e7b82896b5268bed8a1c6c12137502077838b418180182902b4bfa6b",
+      "after_sha256": "2f86393c415dbe2b8fe27278c4a42929129eae30d6916d34f2f598535cd20076",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java",
+      "operation": "MODIFY",
+      "before_sha256": "0a0e893204c91fa8313fade65f14f17903dc743ebc10f6f1926be7892e77e139",
+      "after_sha256": "e299cb932e1d70ee99703ec401bdf028bb41fdc18c66718161e1529dcc1297e6",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "operation": "MODIFY",
+      "before_sha256": "93772fa8c6df949d457a366ae4d6d0617ceb35b7d2844d155681b245def3ddee",
+      "after_sha256": "555a73ab850d1138041f5b157620cd2eddf932069b9ebfa047d00e7a01ccc7e0",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-server/src/main/resources/static/console.js",
+      "operation": "MODIFY",
+      "before_sha256": "e57a394ead51ca29f45b7a2f27dc5f928c036480bf6e65ff179ee7aba45f8321",
+      "after_sha256": "8a086c6936fd61deea34bd2c1f997f01b04026aa9d3b77c1b00b192f61ed9b98",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-server/src/main/resources/static/mgt/app.js",
+      "operation": "MODIFY",
+      "before_sha256": "18fbde99856db98de1117fbcf99c48527b2faa73b5cc5ded501ac1b08683d35c",
+      "after_sha256": "8974568c8fbb76d1fb4c7f3becd6e0f3b3f03e0fb2058703d5f1f369883839a2",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-server/src/test/java/dev/dual/server/DeliveryViewServiceTest.java",
+      "operation": "MODIFY",
+      "before_sha256": "1f8f991fe7d3068b9d27a6e411e42d4fdf281d97712a3d884ba3e232cbb5efeb",
+      "after_sha256": "2b8b68904cb4db5ce8342cd77387c22220617b6842777bbb7ca1e1b5626c639b",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "operation": "MODIFY",
+      "before_sha256": "9dde1264048a3836bb90fe9ce854a54e96bc097a13304cb20a624c1799cf92a5",
+      "after_sha256": "d4229677289091afa0c10d57e1486f9be7aff54d68c6c11b70ae7b6842f9a8e5",
+      "in_authorized_scope": true
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/DeliveryResolveCommand.java",
+      "operation": "CREATE",
+      "before_sha256": null,
+      "after_sha256": "5c6ded8954be691781c088350c4e021ed90cb008762fa80e56bc00a52e755629",
+      "in_authorized_scope": true
+    }
+  ],
+  "source_scope_valid": true
+}

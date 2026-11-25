@@ -37,8 +37,8 @@ class ReviewPacketCliHintsTest {
                 new NodeDefinition("collect", NodeKind.TASK, "acpx.agent_run", Map.of("expected_artifact", "self_test_report"))),
                 List.of(new EdgeDefinition("first", "completed", "repair"),
                         new EdgeDefinition("repair", "collect_evidence", "collect"), new EdgeDefinition("repair", "submit_evidence", "collect")));
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-repair", definition);
+        var ledger = CliLedgerFactory.create();
+        CliTestLedger.initialize(ledger, paths, "wf-repair", definition);
         ledger.completeAndRoute(paths, definition, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst(),
                 NodeStatus.COMPLETED, "completed", List.of(), Map.of());
         for (boolean nextActions : List.of(false, true)) {
@@ -81,8 +81,8 @@ class ReviewPacketCliHintsTest {
                 ),
                 List.of(new EdgeDefinition("first", "completed", "gate.human_design_approval"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-review-hints", definition);
+        var ledger = CliLedgerFactory.create();
+        CliTestLedger.initialize(ledger, paths, "wf-review-hints", definition);
         var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
                 "completed", List.of("runs/run-1/outputs/codex-review.md"), Map.of());

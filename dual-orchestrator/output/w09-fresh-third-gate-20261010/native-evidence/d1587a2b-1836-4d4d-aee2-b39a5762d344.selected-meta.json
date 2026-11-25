@@ -1,0 +1,29 @@
+{
+  "schema": "acpx.session.v1",
+  "acpx_record_id": "d1587a2b-1836-4d4d-aee2-b39a5762d344",
+  "acp_session_id": "3feafcc2-1d0e-417a-9b69-c140582c8b1c",
+  "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680",
+  "cwd": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+  "closed": true,
+  "protocol_version": 1,
+  "created_at": "2026-10-10T12:48:59.948Z",
+  "last_used_at": "2026-10-10T12:50:24.413Z",
+  "last_seq": 5827,
+  "last_request_id": "3",
+  "request_token_usage": {
+    "ae132360-03cc-43ee-baf3-e9c1cd1de783": {
+      "input_tokens": 9813,
+      "output_tokens": 5913,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 4864,
+      "total_tokens": 20590
+    }
+  },
+  "cumulative_token_usage": {
+    "input_tokens": 9813,
+    "output_tokens": 5913,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 4864,
+    "total_tokens": 20590
+  }
+}

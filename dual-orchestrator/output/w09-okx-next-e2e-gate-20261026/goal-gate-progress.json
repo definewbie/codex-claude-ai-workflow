@@ -1,0 +1,76 @@
+{
+  "state": "WAITING_FOR_CURRENT_GOAL_APPROVAL",
+  "experiment_status": "IN_PROGRESS_NOT_FAIL_NOT_PASS",
+  "workstream": "ws-20261026T142203Z-7SNA",
+  "gate": {
+    "schemaVersion": 1,
+    "gateId": "gate-node-gate-human_requirement_review-006",
+    "nodeInstanceId": "node-gate-human_requirement_review-006",
+    "gateType": "human.review",
+    "status": "open",
+    "allowedActions": [
+      "approve",
+      "revise"
+    ],
+    "openedAt": "2026-10-26T15:06:09.725099Z",
+    "resolvedAt": null,
+    "result": {
+      "subject_input_refs": [
+        ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.stderr.log",
+        ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.transcript.log",
+        ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.json",
+        ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1793027022575/binding.json",
+        ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.contract.json"
+      ],
+      "source_outcome": "READY_FOR_PRODUCT_REVIEW",
+      "source_node_instance_id": "node-intake-decision-005"
+    }
+  },
+  "subject_proposal_id": "node-intake-claude_brainstorm-002:a3f1b1e0eddc1272",
+  "subject_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.contract.json",
+  "subject_sha256": "a3f1b1e0eddc12720355d7db51b4b59b7c17ec61519b40009dc80154266cb772",
+  "review_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.contract.json",
+  "review_sha256": "41148f6e6866b92420110b7aa7e02ff9195c27b9f73f53835711b78ab10aba9a",
+  "tokens": 253090,
+  "requests": 2,
+  "active_seconds": 304.6803318331782,
+  "token_limit": 3000000,
+  "request_limit": 18,
+  "active_seconds_limit": 3600,
+  "remaining_tokens": 2746910,
+  "remaining_requests": 16,
+  "remaining_active_seconds": 3295.319668166822,
+  "post_goal_design_reserve": {
+    "input": {
+      "actual_tokens": 253090,
+      "completed_calls": 2,
+      "active_seconds": 304.6803318331782,
+      "remaining_mainline": [
+        "design.claude_design",
+        "design.codex_arch_review",
+        "plan.claude_plan",
+        "plan.codex_plan_review",
+        "implement.claude_implement",
+        "implement.claude_self_test_report",
+        "acceptance.codex_verifier_review"
+      ],
+      "new_extra_calls": [],
+      "measurement_complete": true,
+      "external_pending": false
+    },
+    "result": {
+      "result": "ALLOW_BUDGET_ONLY",
+      "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+      "required_token_reserve": 2275000,
+      "required_call_reserve": 8,
+      "remaining_tokens": 2746910,
+      "remaining_calls": 16,
+      "warning": false
+    }
+  },
+  "budget_is_not_business_approval": true,
+  "business_or_commit_delegation": false,
+  "pending_mutations": [],
+  "raw_product_scope_is_only_proposed": true,
+  "timestamp": "2026-10-26T23:07:31.264908+08:00"
+}

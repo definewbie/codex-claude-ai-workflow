@@ -1,0 +1,9 @@
+{
+  "fixture_kind": "SYNTHETIC_APPROVED_SUBJECT",
+  "criterion_id": "DEVICE-1",
+  "text": "指定设备触控行为可用；目标明确允许人工声明及材料",
+  "evidence_kind": "OPERATOR_DECLARATION_WITH_MATERIAL",
+  "source_paths": [
+    "src/app.js"
+  ]
+}

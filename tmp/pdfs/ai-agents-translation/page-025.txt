@@ -1,0 +1,38 @@
+       ACCOMPANYING WEBSITE AND BOOK
+                COMMUNITY
+
+     You can find additional material for this book on the accompanying website. The
+      website includes resources such as code examples, use case examples, and
+      supplementary material that extends the topics covered in the chapters.
+
+      There’s also a Discord channel for the book where readers can ask questions, discuss
+      examples, and follow updates.
+
+
+It’s also important to recognize that neither humans nor agents operate with
+unbounded autonomy. Developers are guided by coding standards, project
+requirements, and organizational processes, and their freedom is bounded
+by these structures. Agents are similarly constrained by their workflows,
+operating only within the scope of the tools, permissions, and safeguards
+that are provided to them. Far from being a weakness, this bounded
+autonomy is what makes both systems viable. For humans, structure
+ensures code quality, maintainability, and client satisfaction. For agents,
+constraints ensure safety, reliability, and alignment with the goals set by
+their developers and users.
+
+This parallel highlights why extending pure LLMs with tools makes sense.
+A language model on its own is like a developer cut off from resources like
+StackOverflow, IDEs, or GitHub, capable of reasoning but unable to gather
+new data, verify results, or improve their task output without outside help.
+Just as software teams scale their capabilities by adding better tools,
+resources, and leadership, LLMs extend their capability when embedded in
+agentic workflows and even multiple specialized agents within a MAS.
+Without these upgrades, both remain confined to the limits of their initial
+training and quickly become overwhelmed when faced with complex tasks.
+With tools, feedback, and a divide-and-conquer approach, LLMs can
+iteratively refine, adapt, and solve complex tasks that would otherwise
+exceed their standalone capacity.
+
+I assume in this book that you have a working knowledge of using LLMs.
+Maybe you’ve read the book Hands-On Large Language Models
+(O’Reilly), or a similar work. You don’t need to know how to deploy LLMs

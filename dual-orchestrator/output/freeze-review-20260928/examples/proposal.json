@@ -1,0 +1,33 @@
+{
+  "proposal_id": "proposal-example-1",
+  "objective": "新增 CSV 求和转换器，正确输出并拒绝非法数值",
+  "acceptance_criteria": [
+    {
+      "id": "A1",
+      "text": "合法输入得到正确合计"
+    },
+    {
+      "id": "A2",
+      "text": "非法数值返回明确错误"
+    }
+  ],
+  "test_requirements": [
+    {
+      "id": "T1",
+      "text": "覆盖合法与非法输入"
+    }
+  ],
+  "constraints": [
+    "不修改其他功能"
+  ],
+  "non_goals": [
+    "不增加网络服务"
+  ],
+  "scope": {
+    "included": [],
+    "excluded": [
+      ".git",
+      ".agent"
+    ]
+  }
+}

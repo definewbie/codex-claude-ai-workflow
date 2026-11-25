@@ -1,0 +1,35 @@
+{
+  "schema": "acpx.session.v1",
+  "acpx_record_id": "e67d5ff9-924f-403b-8fc4-98ccd7d42f62",
+  "acp_session_id": "60521b08-07f4-4cc7-b656-71a2af3d7c26",
+  "cwd": "/private/tmp/dual-w09-newlines-20261010-fresh-02/worktree",
+  "name": "claude-main-ws-20261010T085617Z-8SVF-run-1791622684632",
+  "closed": false,
+  "pid": 89301,
+  "agent_started_at": "2026-10-10T08:58:08.635Z",
+  "last_prompt_at": "2026-10-10T09:03:50.847Z",
+  "protocol_version": 1,
+  "cumulative_token_usage": {
+    "input_tokens": 3950,
+    "output_tokens": 4806,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 17792,
+    "total_tokens": 26548
+  },
+  "request_token_usage": {
+    "0ccc06a6-eed9-4321-a981-f0d90158fb0f": {
+      "input_tokens": 17904,
+      "output_tokens": 14305,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 4736,
+      "total_tokens": 36945
+    },
+    "4b68b9ed-3f17-4dcf-b99f-3cab0c0d7248": {
+      "input_tokens": 3950,
+      "output_tokens": 4806,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 17792,
+      "total_tokens": 26548
+    }
+  }
+}

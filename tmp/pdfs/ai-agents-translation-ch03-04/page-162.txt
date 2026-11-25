@@ -1,0 +1,28 @@
+Table 4-4. Comparison of encoder model architectures
+
+                     BERT       NomicBERT  Mod
+ Component  BERT (base)  (large)        (base)        (bas
+
+ Layers         12            24            12            22
+
+ Hidden size     768            1,024          768           768
+
+ Attention      12            16            12            12
+ heads
+
+ Parameters    120M        350M        137M        149M
+
+ Positional       Positional       Positional     RoPE        RoPE
+ encoding       embeddings    embeddings
+
+ Sequence      512           512            2,048           1,024
+ length
+
+ FlashAttention ✗       ✗       ✓       ✓
+ support
+
+
+NeoBERT4 is a recent modernization of the classic BERT architecture and
+performs well on longer sequence lengths, supporting up to 4,096 tokens, as
+shown in Table 4-4. Figure 4-3 compares model throughput in tokens per
+second as a function of sequence length. Higher is better.

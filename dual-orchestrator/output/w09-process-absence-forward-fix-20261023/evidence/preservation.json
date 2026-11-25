@@ -1,0 +1,26 @@
+{
+  "historical_package_files": {
+    "checked_files": 402,
+    "all_unchanged": true,
+    "same_file_set": true
+  },
+  "stopped_ledger_files": {
+    "checked_files": 541,
+    "all_unchanged": true,
+    "same_file_set": true
+  },
+  "original_frozen_check": {
+    "result": "PASS",
+    "source_inputs": 659,
+    "jar_count": 2,
+    "scope": "Read-only original function; source/JAR/acpx/config/observer identity only, no launch"
+  },
+  "no_operations": [
+    "No native/provider/model commands",
+    "No Java run",
+    "No Gate start/resume",
+    "No ledger writes",
+    "No stop marker removal"
+  ],
+  "strict_original_reader_ast_unchanged": true
+}

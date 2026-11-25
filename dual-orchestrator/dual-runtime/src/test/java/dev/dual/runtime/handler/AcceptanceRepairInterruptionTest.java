@@ -31,7 +31,7 @@ class AcceptanceRepairInterruptionTest {
         gate.put("status", "resolved");
         ((ObjectNode) gate.get("result")).put("human_action", "approved");
         JSON.writeValue(gateFile.toFile(), gate);
-        var cold = new WorkflowFileLedger();
+        var cold = dev.dual.runtime.RuntimeTestLedger.ledger();
         var calls = List.copyOf(f.calls);
         var runtime = new WorkflowRuntime(cold, new HandlerRegistry(List.of(), List.of(), List.of(new HumanReviewGateHandler())));
         assertThrows(Exception.class, () -> runtime.resume(new WorkflowCommand(root, f.ws)));
@@ -52,11 +52,11 @@ class AcceptanceRepairInterruptionTest {
         f.step();
         // Reproduce interruption after completed source/successor writes but before advancing current.
         Files.write(f.paths.workflowCurrentJson(), currentBytes);
-        var cold = new WorkflowFileLedger();
+        var cold = dev.dual.runtime.RuntimeTestLedger.ledger();
         var calls = List.copyOf(f.calls);
         var runtime = new WorkflowRuntime(cold, new HandlerRegistry(List.of(), List.of(), List.of()));
-        runtime.resume(new WorkflowCommand(root, f.ws));
-        assertEquals(List.of(source), cold.loadCurrent(f.paths).activeNodeInstanceIds());
+        assertThrows(Exception.class, () -> runtime.resume(new WorkflowCommand(root, f.ws)));
+        assertArrayEquals(currentBytes, Files.readAllBytes(f.paths.workflowCurrentJson()));
         assertThrows(Exception.class, () -> cold.retryActiveNode(f.paths, "completed source is not retryable"));
         assertThrows(Exception.class, () -> cold.abortRecovery(f.paths, "not recovery"));
         assertEquals(calls, f.calls);
@@ -67,15 +67,17 @@ class AcceptanceRepairInterruptionTest {
         var f = new AcceptanceRepairSequenceTest.Fixture(root, "CONTRACT_GAP", "tool.py");
         f.until("acceptance.classify_failure"); f.step();
         f.until("gate.human_requirement_review"); f.approve();
-        f.until("contract.compile");
+        f.until("gate.contract_review");
         var calls = List.copyOf(f.calls);
         var oldInput = f.implementContexts.getFirst();
-        var contract = f.paths.workstreamDir().resolve("artifacts/task-contract.json");
+        var gate = f.ledger.loadNode(f.paths, f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst());
+        var compile = f.ledger.loadNode(f.paths, String.valueOf(gate.inputTransition().get("source_node_instance_id")));
+        var contract = f.root.resolve(compile.outputRefs().stream().filter(r -> r.endsWith("/task-contract.json")).findFirst().orElseThrow());
         Files.writeString(contract, "{\"id\":");
-        assertTrue(TaskContractProjectionVerifier.resolve(root, f.ws).qualified().isEmpty());
+        assertTrue(TaskContractProjectionVerifier.resolve(dev.dual.runtime.RuntimeTestLedger.ledger(), root, f.ws).qualified().isEmpty());
         assertThrows(java.io.IOException.class, () -> AuthoredExecutionContext.prepare(oldInput, "retry-after-partial-write"));
         assertEquals(calls, f.calls);
-        assertEquals(WorkflowStatus.RUNNING, f.ledger.loadCurrent(f.paths).status(),
+        assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, f.ledger.loadCurrent(f.paths).status(),
                 "consumer rejection does not invent a recovery ledger transition");
     }
 
@@ -83,15 +85,16 @@ class AcceptanceRepairInterruptionTest {
     void validNewContractWithOldResolutionCannotReuseApproval() throws Exception {
         var f = new AcceptanceRepairSequenceTest.Fixture(root, "CONTRACT_GAP", "tool.py");
         f.until("acceptance.classify_failure");
-        var contract = f.paths.workstreamDir().resolve("artifacts/task-contract.json");
-        var resolution = f.paths.workstreamDir().resolve("artifacts/contract-resolution.json");
+        var approved = TaskContractProjectionVerifier.resolve(f.ledger, f.root, f.ws).qualified().orElseThrow();
+        var contract = f.root.resolve(approved.contractRef());
+        var resolution = f.root.resolve(approved.resolutionRef());
         var oldResolution = Files.readAllBytes(resolution);
         var changed = (ObjectNode) JSON.readTree(contract.toFile());
         changed.put("objective", "A different but well-formed objective");
         JSON.writeValue(contract.toFile(), changed);
         assertTrue(JSON.readTree(contract.toFile()).isObject());
         assertArrayEquals(oldResolution, Files.readAllBytes(resolution));
-        assertTrue(TaskContractProjectionVerifier.resolve(root, f.ws).qualified().isEmpty());
+        assertTrue(TaskContractProjectionVerifier.resolve(dev.dual.runtime.RuntimeTestLedger.ledger(), root, f.ws).qualified().isEmpty());
         assertThrows(java.io.IOException.class, () -> AuthoredExecutionContext.prepare(
                 f.implementContexts.getFirst(), "retry-mixed-contract-generation"));
     }

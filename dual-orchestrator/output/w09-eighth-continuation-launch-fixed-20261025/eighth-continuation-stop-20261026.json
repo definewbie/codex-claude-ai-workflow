@@ -1,0 +1,173 @@
+{
+  "recorded_at": "2026-10-26T06:51:29.348916+08:00",
+  "case": "EIGHTH_CONTINUATION_LAUNCH_RECONCILED",
+  "workstream": "ws-20261023T005431Z-9YYF",
+  "gate_result": "FAIL",
+  "stop_reason": "STOP_LOSS_TOKEN_LIMIT_EXCEEDED",
+  "no_further_dispatch": true,
+  "user_scope": "Current three-file EXECUTION approval, implementation, self-test and independent acceptance, under unchanged cumulative limits",
+  "business_approval": {
+    "ref": "human-decisions/03-execution-approval/decision-evidence.json",
+    "sha256": "b0e4a187a3c65f5d488c34bb790e2335e8918a4de80641fddf80df664c69cc36",
+    "delegates_final_delivery_or_commit": false
+  },
+  "domain": {
+    "source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/workflow/current.json",
+    "sha256": "3235d8177b71e8fead6c20031e1004cf5b3e416bd9706bc8ad87387d14ee258b",
+    "status": "RUNNING",
+    "commitSequence": 118,
+    "active_node": "node-implement-claude_self_test_report-031",
+    "node_status": "READY",
+    "self_test_node_executed": false,
+    "independent_acceptance_executed": false,
+    "delivery_executed": false
+  },
+  "implementation": {
+    "run_id": "run-1792967793610",
+    "run_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/run.json",
+    "run_sha256": "241d2eaec7d4a574826e10dd77bccef74b08652258933e6eb07ad9e3c550d745",
+    "outcome": {
+      "status": "SUCCESS",
+      "primaryReason": "completed",
+      "nodeMaySucceed": true,
+      "retryPolicy": "NONE",
+      "recoveryCategory": "NONE",
+      "operatorMessage": "The agent produced valid result and artifact evidence.",
+      "secondarySignals": []
+    },
+    "duration_ms": 514166,
+    "process_exit": 0,
+    "correction_requests": 0,
+    "usage": {
+      "inputTokens": 93888,
+      "outputTokens": 37634,
+      "cachedReadTokens": 787264,
+      "cachedWriteTokens": 0,
+      "totalTokens": 918786,
+      "costAmount": 1.803922,
+      "costCurrency": "USD",
+      "source": "acpx_current_transcript",
+      "measurementType": "PROVIDER_RUN_USAGE",
+      "attribution": "EXACT_REQUEST_MATCH",
+      "cumulative": false,
+      "contextUsedTokens": 0,
+      "sessionCostAmount": 1.803922,
+      "sessionCostCurrency": "USD",
+      "providerId": "",
+      "model": "in",
+      "billingMode": "",
+      "providerMetadataSource": "acpx_session_json",
+      "unavailableReason": ""
+    },
+    "products": {
+      "src/normalize_text.py": {
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/src/normalize_text.py",
+        "sha256": "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c",
+        "bytes": 885,
+        "snapshot_ref": "stopped-ledger-snapshot-20261026/product-files/src/normalize_text.py"
+      },
+      "tests/test_normalize_text.py": {
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/tests/test_normalize_text.py",
+        "sha256": "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be",
+        "bytes": 3847,
+        "snapshot_ref": "stopped-ledger-snapshot-20261026/product-files/tests/test_normalize_text.py"
+      },
+      "README.md": {
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/README.md",
+        "sha256": "0af74daeacfdd946a47e88d3b3f28d41ef125285084fd5f1c8735859e5caaae5",
+        "bytes": 2904,
+        "snapshot_ref": "stopped-ledger-snapshot-20261026/product-files/README.md"
+      }
+    },
+    "acceptance_note": "Implementation SUCCESS and scope validation do not prove self-test or independent acceptance. Author-side tool checks are not those later nodes."
+  },
+  "cumulative_budget": {
+    "limits": {
+      "tokens": 1700000,
+      "requests": 18,
+      "active_seconds": 3600
+    },
+    "before_request": {
+      "tokens": 848242,
+      "requests": 10,
+      "active_seconds": 1277.5114308338143,
+      "reserved_tokens": 600000,
+      "reserved_requests": 4
+    },
+    "after_cleanup": {
+      "tokens": 1767028,
+      "requests": 11,
+      "active_seconds": 1798.4491589584516
+    },
+    "token_overrun": 67028,
+    "usage_measurement_complete": true,
+    "request_attribution": "EXACT_REQUEST_MATCH",
+    "source": "Fixed execution/occurrence usage checked against R03 and native completion by unchanged observer",
+    "active_time_note": "Inherited approved active-operation receipts plus this package receipts; not wall-clock authorization wait.",
+    "admission_limit": "Reserve check precedes dispatch; actual request total is available after completion. It is not an intra-request hard token cap."
+  },
+  "cost_identity": {
+    "providerModelIdentity": {
+      "provider": "unknown",
+      "source": "acpx_session_json",
+      "confidence": "low",
+      "model": "in",
+      "billingMode": "pricing_unknown"
+    },
+    "providerId_raw": "",
+    "model_raw": "in",
+    "billingMode_raw": "",
+    "measured_tokens_retained": true,
+    "amount_calculability": "pricing_unknown / provider identity unresolved",
+    "sdk_amount": {
+      "amount": 1.803922,
+      "currency": "USD",
+      "actual_subscription_payment_proven": false
+    },
+    "finding": "Provider/model/billing metadata is incomplete or suspicious; no prior provider identity is borrowed, no historical record is changed."
+  },
+  "cleanup": {
+    "named_session": "claude-main-ws-20261023T005431Z-9YYF-run-1792967793610",
+    "session_closed": true,
+    "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/operations/stop-cleanup-20261026",
+    "process_scope": "Successful current process table found recorded Java/acpx/session main PIDs absent and no matching case identity. No arbitrary subtree-stop guarantee."
+  },
+  "preservation": {
+    "original_packages": {
+      "original-package-sha256.json": 402,
+      "prior-continuation-package-sha256.json": 52
+    },
+    "historical_run_files_unchanged": 237,
+    "historical_stops": [
+      {
+        "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/stop-required.json",
+        "sha256": "b0d1e123671e6f220469254109de3065a823eecf93dbc060be623b26d594fbcc"
+      },
+      {
+        "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/stop-required.json",
+        "sha256": "bcbd4ae0c3e6d47e618b8defe744b58af655f9c4aa98c8a7be8a562111fde80b"
+      }
+    ],
+    "new_stop_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/stop-required.json",
+    "new_stop_sha256": "1a5f70d2096a87f86548686adc5f167d402d73e079a0cd44bc39aea4768c3e5f",
+    "ledger_snapshot_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/stopped-ledger-snapshot-20261026",
+    "ledger_snapshot_file_count": 612,
+    "manifest_ref": "stopped-ledger-manifest-20261026.json",
+    "source_inputs_unchanged": 659,
+    "application_jars_unchanged": 2,
+    "current_observation_proof_ref": "current-observation-proof.json",
+    "current_observation_proof_sha256": "52be1c306cefdca61b080667cc66207fb45c10ad687eb1389eee90bec62b655c",
+    "observer_and_launch_inputs_unchanged": true
+  },
+  "next_minimal_action": {
+    "proposed": "Bounded offline read-only assessment of implementation request cost and provider/model metadata. Then present measured remaining-tail budget for user decision; no code, new experiment, retry, fresh case or further dispatch.",
+    "requires_new_runtime_budget_authorization": true,
+    "does_not": [
+      "Reset cumulative usage or active time",
+      "Clear any stop marker",
+      "Rewrite successful domain result as recovery failure",
+      "Claim acceptance or delivery",
+      "Automatically increase limits"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+Workstream: ws-20261010T124812Z-XCZL
+Workspace: /private/tmp/dual-w09-newlines-20261010-fresh-03/worktree
+Branch: codex/w09-newlines-20261010-fresh-03
+Ledger: /private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL
+
+Workflow:
+  Definition: agent-lifecycle-terminal-delivery@5
+  Status: WAITING_FOR_HUMAN
+  Active nodes: [node-gate-human_requirement_review-011]
+  Open gates: [gate-node-gate-human_requirement_review-011]
+  Active node definition: gate.human_requirement_review
+  Active node status: WAITING
+  Active iteration: iter-002
+
+Delivery:
+  Status: BLOCKED
+  Eligibility: Current workflow is not yet deliverable.
+  Reason: WORKFLOW_NOT_DELIVERABLE - workstream is not completed: WAITING_FOR_HUMAN
+  Changed files: 0
+  Can merge: false
+  Can finalize: false
+  Stop basis: UNKNOWN
+  Next action: workstream is not completed: WAITING_FOR_HUMAN

@@ -1,0 +1,20 @@
+{
+  "rows": [
+    {
+      "name": "compile",
+      "exit": 0
+    },
+    {
+      "name": "historical-sixth",
+      "exit": 0
+    }
+  ],
+  "cases": 4,
+  "diagnostic_recomputed_total": 70801,
+  "old_known_partial_fixed": 51231,
+  "old_correction_fixed": "UNAVAILABLE unchanged",
+  "unknown_field_raws_still_refused": 2,
+  "historical_inputs_unchanged": true,
+  "real_native_provider_calls": 0,
+  "not_new_gate_or_budget_authority": true
+}

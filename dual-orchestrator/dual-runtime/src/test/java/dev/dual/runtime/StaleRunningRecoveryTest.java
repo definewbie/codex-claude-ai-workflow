@@ -2,145 +2,73 @@ package dev.dual.runtime;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.id.DualId;
-import dev.dual.core.workflow.NodeDefinition;
-import dev.dual.core.workflow.NodeKind;
-import dev.dual.core.workflow.NodeStatus;
-import dev.dual.core.workflow.WorkflowDefinition;
-import dev.dual.core.workflow.WorkflowStatus;
-import dev.dual.ledger.file.WorkflowFileLedger;
-import dev.dual.ledger.file.WorkstreamPaths;
+import dev.dual.core.workflow.*;
+import dev.dual.ledger.file.*;
+import dev.dual.runtime.handler.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.nio.file.*;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 class StaleRunningRecoveryTest {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper JSON = new ObjectMapper();
+    @TempDir Path root;
 
-    @TempDir
-    Path tempDir;
+    @Test void liveOriginalExecutorCannotBeTakenOverOrKilledByStaleCommand() throws Exception {
+        var f = fixture();
+        var before = Files.readString(f.paths.nodeJson(f.context.instance().nodeInstanceId()));
+        var failure = assertThrows(IllegalStateException.class, () -> new StaleRunningRecovery(f.ledger).terminateAndRecover(f.paths, "stop"));
+        assertTrue(failure.getMessage().contains("original executor"));
+        assertTrue(ProcessHandle.current().isAlive());
+        assertEquals(before, Files.readString(f.paths.nodeJson(f.context.instance().nodeInstanceId())));
+        assertEquals(NodeStatus.RUNNING, f.ledger.loadNode(f.paths, f.context.instance().nodeInstanceId()).status());
+    }
 
-    @Test
-    void terminateAndRecoverClosesExecutionBeforeInstanceTransition() throws Exception {
-        var paths = new WorkstreamPaths(tempDir, new DualId("ws-stop-loss"));
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-stop-loss", new WorkflowDefinition(
-                "stop-loss", 1, "agent.node",
-                List.of(new NodeDefinition("agent.node", NodeKind.TASK, "agent.task", Map.of())),
-                List.of()));
-        var nodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+    @Test void releasedIntentBecomesUnknownWithoutInferringOutcomeOrKillingMutableRunPid() throws Exception {
+        var f = fixture();
         var process = new ProcessBuilder("sleep", "30").start();
-        ledger.markRunning(paths, nodeId, process.pid());
-        var runJson = writeStartedRun(paths, process.pid());
         try {
-            var result = new StaleRunningRecovery(ledger).terminateAndRecover(paths, "stop-loss");
-
-            assertEquals(1, result.terminatedProcessTrees());
-            assertEquals(1, result.reconciledRuns());
-            assertFalse(process.isAlive());
-            assertEquals("INTERRUPTED", MAPPER.readTree(runJson.toFile())
-                    .path("executionOutcome").path("status").asText());
-            assertTrue(MAPPER.readTree(runJson.toFile()).path("usage").isMissingNode());
-            assertTrue(MAPPER.readTree(runJson.toFile()).path("agentResultAcquisition").isMissingNode());
-            assertEquals(NodeStatus.FAILED, ledger.loadNode(paths, nodeId).status());
-            assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, ledger.loadCurrent(paths).status());
-            assertEquals(List.of("recovery-" + nodeId), ledger.loadCurrent(paths).openGateIds());
-        } finally {
-            process.destroyForcibly();
-        }
+            var run = f.prepared.path().getParent().getParent().resolve("run.json");
+            JSON.writeValue(run.toFile(), Map.of("status", "running", "executionTimeline",
+                    List.of(Map.of("kind", "process_started", "details", Map.of("pid", process.pid())))));
+            var original = Files.readString(run);
+            AgentRunCommitProtocol.releaseExecutor(f.ledger, f.paths, f.prepared.execution());
+            var result = new StaleRunningRecovery(f.ledger).terminateAndRecover(f.paths, "operator wants to stop");
+            assertEquals(0, result.terminatedProcessTrees());
+            assertEquals(0, result.reconciledRuns());
+            assertTrue(process.isAlive(), "mutable telemetry cannot authorize killing a process");
+            assertEquals(original, Files.readString(run), "no synthesized exit status or usage");
+            var node = f.ledger.loadNode(f.paths, f.context.instance().nodeInstanceId());
+            assertEquals("UNKNOWN", node.result().get("external_effect"));
+            assertEquals(false, node.result().get("automatic_retry"));
+            assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.ledger.loadCurrent(f.paths).status());
+            assertThrows(Exception.class, () -> f.ledger.retryActiveNode(f.paths, "must not redispatch unknown effects"));
+        } finally { process.destroyForcibly(); process.waitFor(); }
     }
 
-    @Test
-    void recoverCannotTransitionInstanceWhileDurableProviderProcessIsAlive() throws Exception {
-        var paths = new WorkstreamPaths(tempDir, new DualId("ws-live-provider"));
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-live-provider", new WorkflowDefinition(
-                "live-provider", 1, "agent.node",
-                List.of(new NodeDefinition("agent.node", NodeKind.TASK, "agent.task", Map.of())),
-                List.of()));
-        var nodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
-        ledger.markRunning(paths, nodeId, Long.MAX_VALUE);
-        var process = new ProcessBuilder("sleep", "30").start();
-        writeStartedRun(paths, process.pid());
-        try {
-            var error = assertThrows(IllegalStateException.class,
-                    () -> new StaleRunningRecovery(ledger).recover(paths, "must fail closed"));
-
-            assertTrue(error.getMessage().contains("remain in-flight"));
-            assertEquals(NodeStatus.RUNNING, ledger.loadNode(paths, nodeId).status());
-            assertEquals(WorkflowStatus.RUNNING, ledger.loadCurrent(paths).status());
-            assertTrue(process.isAlive());
-        } finally {
-            process.destroyForcibly();
-        }
+    @Test void absentNativeStopObservationCannotBeReplacedByStaleRecoveryOrRepeatedRecovery() throws Exception {
+        var f = fixture();
+        AgentRunCommitProtocol.releaseExecutor(f.ledger, f.paths, f.prepared.execution());
+        new StaleRunningRecovery(f.ledger).recover(f.paths, "owner stopped");
+        var before = Files.readString(f.paths.nodeJson(f.context.instance().nodeInstanceId()));
+        assertThrows(IllegalStateException.class, () -> new StaleRunningRecovery(f.ledger).recover(f.paths, "retry stale classification"));
+        assertEquals(before, Files.readString(f.paths.nodeJson(f.context.instance().nodeInstanceId())));
+        assertEquals("UNKNOWN", f.ledger.loadNode(f.paths, f.context.instance().nodeInstanceId()).result().get("external_effect"));
     }
 
-    @Test
-    void terminateAndRecoverCannotTransitionWithoutDurableProcessEvidence() throws Exception {
-        var paths = new WorkstreamPaths(tempDir, new DualId("ws-missing-process-evidence"));
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-missing-process-evidence", new WorkflowDefinition(
-                "missing-process-evidence", 1, "agent.node",
-                List.of(new NodeDefinition("agent.node", NodeKind.TASK, "agent.task", Map.of())),
-                List.of()));
-        var nodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
-        ledger.markRunning(paths, nodeId, Long.MAX_VALUE);
-        writeStartedRunWithoutPid(paths);
-
-        var error = assertThrows(IllegalStateException.class,
-                () -> new StaleRunningRecovery(ledger).terminateAndRecover(paths, "must fail closed"));
-
-        assertTrue(error.getMessage().contains("remain in-flight"));
-        assertEquals(NodeStatus.RUNNING, ledger.loadNode(paths, nodeId).status());
-        assertEquals(WorkflowStatus.RUNNING, ledger.loadCurrent(paths).status());
+    private Fixture fixture() throws Exception {
+        var ledger = RuntimeTestLedger.ledger(); var paths = new WorkstreamPaths(root, new DualId("ws-stale"));
+        var definition = new NodeDefinition("agent.node", NodeKind.TASK, "acpx.agent_run", Map.of());
+        RuntimeTestLedger.initialize(ledger, paths, "wf-stale", new WorkflowDefinition("stale", 1, definition.id(), List.of(definition), List.of()));
+        var context = RuntimeTestLedger.claim(new TaskHandler.TaskContext(root, "ws-stale", definition,
+                ledger.loadCoreNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst()), ledger));
+        var dir = paths.runsDir().resolve("one"); Files.createDirectories(dir);
+        var input = dir.resolve("prompt.md"); Files.writeString(input, "offline recovery fixture");
+        var prepared = AgentRunCommitProtocol.prepare(context, dir, List.of(input), Map.of());
+        AgentRunCommitProtocol.qualifyDispatch(context, prepared);
+        AgentRunCommitProtocol.beginExternalCall(context, prepared);
+        return new Fixture(ledger, paths, context, prepared);
     }
-
-    private Path writeStartedRun(WorkstreamPaths paths, long pid) throws Exception {
-        var runJson = paths.runsDir().resolve("run-stop-loss/run.json");
-        Files.createDirectories(runJson.getParent());
-        var startedAt = Instant.now();
-        var run = MAPPER.createObjectNode();
-        run.put("schemaVersion", 3);
-        run.put("status", "running");
-        run.put("runId", "run-stop-loss");
-        run.put("workstreamId", paths.workstreamId().value());
-        run.put("nodeId", "agent.node");
-        run.put("agent", "claude");
-        run.put("startedAt", startedAt.toString());
-        var attempt = run.putObject("executionAttempt");
-        attempt.put("attemptId", "att-stop-loss");
-        attempt.put("runId", "run-stop-loss");
-        attempt.put("workstreamId", "ws-stop-loss");
-        attempt.put("nodeId", "agent.node");
-        attempt.put("agent", "claude");
-        attempt.put("status", "RUNNING");
-        attempt.put("processStatus", "RUNNING");
-        attempt.put("startedAt", startedAt.toString());
-        var event = MAPPER.createObjectNode();
-        event.put("kind", "process_started");
-        event.put("source", "adapter");
-        event.put("sequence", 1);
-        event.put("observedAt", startedAt.toString());
-        event.put("elapsedMs", 0);
-        event.putObject("details").put("pid", pid);
-        run.putArray("executionTimeline").add(event);
-        MAPPER.writerWithDefaultPrettyPrinter().writeValue(runJson.toFile(), run);
-        return runJson;
-    }
-
-    private void writeStartedRunWithoutPid(WorkstreamPaths paths) throws Exception {
-        var runJson = writeStartedRun(paths, 0);
-        var run = (com.fasterxml.jackson.databind.node.ObjectNode) MAPPER.readTree(runJson.toFile());
-        run.withArray("executionTimeline").removeAll();
-        MAPPER.writerWithDefaultPrettyPrinter().writeValue(runJson.toFile(), run);
-    }
+    private record Fixture(WorkflowFileLedger ledger, WorkstreamPaths paths, TaskHandler.TaskContext context, AgentRunCommitProtocol.Prepared prepared) {}
 }

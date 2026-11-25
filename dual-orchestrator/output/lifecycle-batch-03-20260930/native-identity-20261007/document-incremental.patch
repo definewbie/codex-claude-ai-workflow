@@ -1,0 +1,30 @@
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -547,3 +547,12 @@
+ §14 最终验证：单轮 clean test exit 0，1,631/198，零失败/错误/跳过，637 个构建/测试输入前后内容一致；退役脚本 8 项副作用前拒绝检查通过。详见本轮 verification.json 与原始 XML。该结果不替代原生身份接线、真实客户端能力、C/X 或整批独立判断；本次 LOW 合并到 B03 评审，不为首版限制再新增设计轮次。
+ 
+ §14 CC 接收：用户带回 mainline-20261007 切片 PASS，独立认可作者对声明续作出口的纠正。精确口径为“合同变更→作者→复评→批准的同型序列已证，运行中补声明的具体入口未证”；首版规则按用户决定保留，仅当真实合法任务反复因此受阻才再评估。两项 LOW 已落实：英文 README 不再推荐已退役脚本，所有 *.en.md 已扫；架构中英文对照的历史 MVP 状态不再冒称当前已闭合。具体处置与证据见 [评审处置](../../output/lifecycle-batch-03-20260930/mainline-20261007/cc-review-disposition.md) 和 review-followup/。本次不新增测试轮次或独立评审轮次；原生身份接线和 B03 合并批末判断仍未完成，真实 NO-GO 与批外范围不变。
++
++
++## 15. W03 实际启动身份与支持装配检查点（2026-10-07）
++
++用户授权继续 W03 原生身份接线。当前[实际生产入口核对与取舍材料](../../output/lifecycle-batch-03-20260930/native-identity-20261007/assessment.md)完成：既有 resolver 导入原源码的 7 项离线检查通过，当前默认固定版本 npx/环境包装脚本不落在 builtin installed 分支，package-exec 只提供未来解析计划；不把版本常量或一次 config 展示当实际安装身份。
++
++**W03 仍未完成，B03 IN_PROGRESS / 真实运行 NO-GO。** 要在第一次外部调用前固定实际内容，需决定受支持装配。推荐固定本地安装并沿现有 installer/configure/acpx launch owner 接线，保留 Claude Code/GLM 作者与 Codex 评审；候选改变运行时的动态启动支持，未默认获批。若保留任意动态/custom 路径且维持完整保证，成本将超出原先“复用现有 resolver 输出”的预期，按既有成本止损停在决定前。没有修改生产代码、patch、安装包或用户配置，没有 native/provider 或额外 agent。
++
++候选完整工作包、transition/失败切面/兄弟入口与验证义务见报告 §4–§6。当前仅材料与具名缺口证据，不是 producer/consumer 已 ENFORCED；用户决定前不以“未知即相同”或“默认合法路径全部拒绝”完成 W03。不新增 Java 包解析器、引擎或权限平台；C/X 仍批外。后续产品改动通过当前版本单轮回归后才交 B03 合并批末评审，既有 1,631 项不证明新接线。
+--- before/output/lifecycle-batch-03-20260930/progress-and-decision.md
++++ after/output/lifecycle-batch-03-20260930/progress-and-decision.md
+@@ -77,3 +77,12 @@
+ 旧 smoke 显式退役并清理活动使用指南，保留历史字节及合法 intake emitter 测试。实际 native/config identity producer 仍缺，继续工作必须以真实 config/launch owner 的具体增量为依据，不能由版本常量或 Java 第二解析器代替。材料见 [检查点](mainline-20261007/checkpoint.md)，B03 保持 IN_PROGRESS；无真实运行或提交。
+ 
+ 本轮最终单轮 clean test 通过：1,631 tests / 198 suites，零失败/错误/跳过；637 个构建/测试输入前后相同，8 项旧入口退役检查通过。原生身份 producer 未接，不据此收口 B03；本次 LOW 与策略处置纳入批次合并判断。
++
++
++## 2026-10-07 W03 接线前：实际身份生产与装配选择
++
++已完成[具名入口核对及 7 项离线原 resolver 检查](native-identity-20261007/assessment.md)。没有产品/patch/安装/配置改动、native/provider 或额外 agent。现有默认 npx 与环境脚本启动不能直接消费 builtin installed 内容身份；不能用 launcher/config 常量补成实际 adapter/native 同版。
++
++B03 仍 IN_PROGRESS。停止受影响实现并交具体取舍：推荐固定本地安装和直接启动，保留现有 GLM 环境加载及客户端分工；支持范围与成本尚需用户确认。若保留全部动态启动，则要么显式收窄同版保证，要么承担额外解析/握手成本，不能擅自选。完整候选生产/绑定/dispatch/活连接/恢复/投影/回归工作包在报告中，未称为可开工字段规格。
++
++真实运行 NO-GO；当前不是 B03 合并收口评审材料，旧测试绿灯不挪用。无须单独重审两项已完成文档 LOW，也不把本次检查点变为 D04 底层安全实验。

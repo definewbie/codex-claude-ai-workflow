@@ -1,0 +1,34 @@
+[
+  {
+    "name": "broker",
+    "path": "crates/broker",
+    "sha": "d92328eb0a152018e827008d02a1a305e2027082",
+    "size": 0,
+    "url": "https://api.github.com/repos/AgentWorkforce/relay/contents/crates/broker?ref=c3a92d9c179972963756ebce3fcd106679302934",
+    "html_url": "https://github.com/AgentWorkforce/relay/tree/c3a92d9c179972963756ebce3fcd106679302934/crates/broker",
+    "git_url": "https://api.github.com/repos/AgentWorkforce/relay/git/trees/d92328eb0a152018e827008d02a1a305e2027082",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/AgentWorkforce/relay/contents/crates/broker?ref=c3a92d9c179972963756ebce3fcd106679302934",
+      "git": "https://api.github.com/repos/AgentWorkforce/relay/git/trees/d92328eb0a152018e827008d02a1a305e2027082",
+      "html": "https://github.com/AgentWorkforce/relay/tree/c3a92d9c179972963756ebce3fcd106679302934/crates/broker"
+    }
+  },
+  {
+    "name": "relay-pty",
+    "path": "crates/relay-pty",
+    "sha": "71a8fc79ad3a7693bddb8ac3b13edc0bb94bf136",
+    "size": 0,
+    "url": "https://api.github.com/repos/AgentWorkforce/relay/contents/crates/relay-pty?ref=c3a92d9c179972963756ebce3fcd106679302934",
+    "html_url": "https://github.com/AgentWorkforce/relay/tree/c3a92d9c179972963756ebce3fcd106679302934/crates/relay-pty",
+    "git_url": "https://api.github.com/repos/AgentWorkforce/relay/git/trees/71a8fc79ad3a7693bddb8ac3b13edc0bb94bf136",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/AgentWorkforce/relay/contents/crates/relay-pty?ref=c3a92d9c179972963756ebce3fcd106679302934",
+      "git": "https://api.github.com/repos/AgentWorkforce/relay/git/trees/71a8fc79ad3a7693bddb8ac3b13edc0bb94bf136",
+      "html": "https://github.com/AgentWorkforce/relay/tree/c3a92d9c179972963756ebce3fcd106679302934/crates/relay-pty"
+    }
+  }
+]

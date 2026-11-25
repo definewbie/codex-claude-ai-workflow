@@ -1,0 +1,11 @@
+{
+  "current_config_sha256": "924857f60b2c56f27709d7750759ef320b6b142c35da45e68ba067f1da704474",
+  "baseline_sha256": "0ec7e2b53ce588b8720129658f61322784ee023a7bda70b5b1c6f7d5dce70892",
+  "added_project_entry": "[projects.\"/private/tmp/dual-w09-newlines-20261011-fresh-04/target\"]\ntrust_level = \"trusted\"\n\n",
+  "restoration_comparisons": {
+    "remove_block": "0ec7e2b53ce588b8720129658f61322784ee023a7bda70b5b1c6f7d5dce70892",
+    "remove_block_and_previous_newline": "4ca4d2e0f186ccd38988dea60ae2dc904fd2ba22613daefba4f334e75fd346ff"
+  },
+  "byte_exact_match_variant": "remove_block",
+  "no_config_modified": true
+}

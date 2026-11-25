@@ -1,0 +1,24 @@
+{
+  "original_package": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-seventh-gate-20261016",
+  "original_manifest_sha256": "cd218245571d3dc4db61cfa86e71761e7c803a5bf459a47c8a3d80689cb8d2bf",
+  "original_files_verified": 96,
+  "copied_files": {
+    "gate_support.py": "22b709c9e5fa22abd7fdc9059ad9a988a8b8923d1600aa477f91f3f191ec09d5",
+    "check_budget.py": "a10c4c098d4d00f4a7f84d5dba1b6baf8b3b6ea8f76fbd7277c7de66e639d5c6",
+    "test_gate_observer.py": "5d6a067af41aa8944b4dbd482dac43e9c017920376223d1fe662f2d03e580232",
+    "run-one-step.py": "a4ce16d7999624dc86a329db32aac460dfd63ad71e5bcc686ab4d653781bcfdb",
+    "pre-dispatch-recheck.py": "388088e7847232e877d6be46cd2a37a26f3baf7175850630d7400f4ce04005eb",
+    "fresh-seventh-gate.md": "f4cd8c6beadf6ff17507ddf61d06ce8e2357f9305b5380228595bb674f3945dc",
+    "execution-boundaries.md": "643420e2412861cad82961cdb0f04790870532fce9a9a80223da62227c96794c",
+    "verification-exits.md": "497b041059feeaabb2b4939e794b2663682cbec34286c1b279066404d4fd1299",
+    "task-requirement.md": "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+    "selected-release.json": "721be0fe743ad021f7b0004a94f45ecdf77021a9a938ece6ff157fc6b46acdee",
+    "host-environment-identity.json": "6826157086e28201de554a633ed50b6259c82a4782e66ebd19e56e85055e07b0",
+    "old-execution-recheck.json": "6847a9709df858c47af62d99b6dac237abb9b3afb1bed41f1e2f122edb59b6be",
+    "run-authorization.json": "5d132d99628414cd03f46e8343b664a0c84d82e7df06fbd506e72a71d4545105",
+    "local-launch-selection.json": "bed0f2402316e2325a88af67daf26d150e5d278602585049dd96a6d100a8479a"
+  },
+  "old_prepared_case_not_run": true,
+  "reason": "User-approved 1.7M budget calibration; original temporary files missing, new offline-only fixture required; current native/config fingerprints recorded separately for review",
+  "real_run_authorized": false
+}

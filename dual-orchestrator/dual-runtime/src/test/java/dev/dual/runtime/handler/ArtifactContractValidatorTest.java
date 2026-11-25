@@ -33,15 +33,121 @@ class ArtifactContractValidatorTest {
     @TempDir
     Path tempDir;
 
-    private final ArtifactContractValidator validator = new ArtifactContractValidator();
+    private final ArtifactContractValidator validator = new ArtifactContractValidator(dev.dual.runtime.RuntimeTestLedger.ledger());
     private String validatedNodeInstanceId;
+
+    @org.junit.jupiter.api.BeforeEach
+    void canonicalWorkspace() throws Exception { tempDir = tempDir.toRealPath(); }
+
+    private NodeResult completed(List<String> refs, Map<String, Object> supplied) throws Exception {
+        var facts = new java.util.LinkedHashMap<String, Object>(supplied);
+        var runId = String.valueOf(supplied.get("run_id"));
+        var runRef = ".agent/workstreams/ws-1/runs/" + runId + "/run.json";
+        var path = tempDir.resolve(runRef); Files.createDirectories(path.getParent());
+        var run = Files.isRegularFile(path) ? (com.fasterxml.jackson.databind.node.ObjectNode) LEDGER_JSON.readTree(path.toFile())
+                : LEDGER_JSON.createObjectNode();
+        run.put("workstreamId", "ws-1"); run.put("runId", runId);
+        run.set("processResult", LEDGER_JSON.valueToTree(dev.dual.core.execution.ProcessResult.exitedZero()));
+        run.putArray("adapterSignals"); LEDGER_JSON.writeValue(path.toFile(), run);
+        facts.put("run_metadata", runRef);
+        return NodeResult.completed("completed", refs, facts);
+    }
+
+    @Test
+    void inputFailureCannotCarryCandidatesSuccessOrForgedExecutionFacts() throws Exception {
+        var failure = AgentExecutionResultFacts.inputPreparationFailed("INPUT_PREPARATION_FAILED",
+                "TEST_INPUT", List.of("invalid subject"));
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of());
+        assertEquals(failure, validator.validate(tempDir, definition, failure));
+        assertEquals(failure, new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, failure));
+        var withRun = new java.util.LinkedHashMap<>(failure.result());
+        withRun.put("run_metadata", "run.json");
+        var forgedMap = new java.util.LinkedHashMap<>(failure.result());
+        forgedMap.put("input_preparation_failure", Map.of("providerInvoked", false));
+        for (var contradictory : List.of(
+                new NodeResult(failure.outcome(), NodeStatus.COMPLETED, List.of(), failure.result(), failure.errorMessage()),
+                new NodeResult(failure.outcome(), NodeStatus.FAILED, List.of("candidate.json"), failure.result(), failure.errorMessage()),
+                new NodeResult(failure.outcome(), NodeStatus.FAILED, List.of(), withRun, failure.errorMessage()),
+                new NodeResult(failure.outcome(), NodeStatus.FAILED, List.of(), forgedMap, failure.errorMessage()))) {
+            assertThrows(IllegalArgumentException.class, () -> validator.validate(tempDir, definition, contradictory));
+            assertThrows(IllegalArgumentException.class, () -> new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, contradictory));
+        }
+        var unmarkedFailure = new NodeResult("INPUT_PREPARATION_FAILED", NodeStatus.FAILED, List.of(), Map.of(), "no stage fact");
+        var context = AuthoredInputFixture.before(tempDir, "ws-1", "design.codex_arch_review", "run-1");
+        var validated = validator.validate(tempDir, "ws-1", context.instance().nodeInstanceId(), context.definition(),
+                context.instance().inputRefs(), unmarkedFailure);
+        assertEquals("AGENT_RESULT_MISSING", ((Map<?, ?>) validated.result().get("parse_error")).get("code"),
+                "a FAILED status or matching reason alone cannot bypass output validation");
+    }
+
+    @Test
+    void integratedFinalizationRecordsOneDecisionBeforeSuccessfulPublication() throws Exception {
+        var f = finalizationFixture();
+        var result = finalizeCandidate(f);
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertTrue(Files.isRegularFile(tempDir.resolve("review.contract.json")));
+        var run = LEDGER_JSON.readTree(f.runPath().toFile());
+        assertEquals("SUCCESS", run.at("/executionOutcome/status").asText());
+        assertEquals(1, run.path("executionTimeline").size());
+        assertEquals("completed", ((Map<?, ?>) result.result().get("agent_execution_outcome")).get("primaryReason"));
+    }
+
+    @Test
+    void runPublicationLockWriteFailureCannotPublishCandidate() throws Exception {
+        var f = finalizationFixture();
+        Files.createDirectories(f.runPath().getParent().resolve("outputs"));
+        var permissions = Files.getPosixFilePermissions(f.runPath().getParent());
+        try {
+            Files.setPosixFilePermissions(f.runPath().getParent(), java.util.Set.of(java.nio.file.attribute.PosixFilePermission.OWNER_READ, java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE));
+            org.junit.jupiter.api.Assumptions.assumeFalse(Files.isWritable(f.runPath().getParent()),
+                    "requires an unprivileged POSIX file-write boundary");
+            assertThrows(java.io.IOException.class, () -> finalizeCandidate(f));
+            assertFalse(Files.exists(tempDir.resolve("review.contract.json")));
+            assertFalse(LEDGER_JSON.readTree(f.runPath().toFile()).has("executionOutcome"));
+        } finally {
+            Files.setPosixFilePermissions(f.runPath().getParent(), permissions);
+        }
+    }
+
+    @Test
+    void publicationIoFailureRetainsSuccessfulExecutionRatherThanInventingContractFailure() throws Exception {
+        var f = finalizationFixture();
+        Files.createDirectory(tempDir.resolve("review.contract.json"));
+        assertThrows(java.io.IOException.class, () -> finalizeCandidate(f));
+        var run = LEDGER_JSON.readTree(f.runPath().toFile());
+        assertEquals("SUCCESS", run.at("/executionOutcome/status").asText());
+        assertTrue(run.at("/artifactContractResults/0/valid").asBoolean());
+        assertEquals(1, run.path("executionTimeline").size());
+        assertFalse(Files.isRegularFile(tempDir.resolve("review.contract.json")));
+    }
+
+    private record FinalizationFixture(dev.dual.runtime.handler.TaskHandler.TaskContext context,
+                                       Path runPath, NodeResult result) { }
+
+    private FinalizationFixture finalizationFixture() throws Exception {
+        var context = AuthoredInputFixture.before(tempDir, "ws-1", "design.codex_arch_review", "run-1");
+        var ref = write("review.json", envelope("design.codex_arch_review", reviewResult()));
+        var runRef = ".agent/workstreams/ws-1/runs/run-1/run.json";
+        var runPath = tempDir.resolve(runRef);
+        var run = (com.fasterxml.jackson.databind.node.ObjectNode) LEDGER_JSON.readTree(runPath.toFile());
+        run.set("processResult", LEDGER_JSON.valueToTree(dev.dual.core.execution.ProcessResult.exitedZero()));
+        run.putArray("adapterSignals");
+        LEDGER_JSON.writeValue(runPath.toFile(), run);
+        return new FinalizationFixture(context, runPath,
+                completed(List.of(ref), Map.of("run_id", "run-1", "run_metadata", runRef)));
+    }
+
+    private NodeResult finalizeCandidate(FinalizationFixture f) throws Exception {
+        return validator.validateAndFinalize(tempDir, "ws-1", f.context().instance().nodeInstanceId(),
+                f.context().definition(), f.context().instance().inputRefs(), f.result());
+    }
 
     @Test
     void validEnvelopeWritesSidecarAndRoutesTypedDecision() throws Exception {
         var ref = write("review.json", envelope("design.codex_arch_review", reviewResult()));
         var validated = validate("design.codex_arch_review", ref, "run-1");
 
-        assertEquals(NodeStatus.COMPLETED, validated.status());
+        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
         assertEquals("READY_FOR_ARCH_REVIEW", validated.result().get("decision"));
         assertTrue(validated.outputRefs().contains("review.contract.json"));
         assertEquals(
@@ -76,7 +182,7 @@ class ArtifactContractValidatorTest {
 
         var validated = validator.validate(
                 tempDir, "ws-1", context.instance().nodeInstanceId(), node("design.codex_arch_review"),
-                NodeResult.completed("completed", List.of(outputRef), Map.of(
+                completed(List.of(outputRef), Map.of(
                         "run_id", "run-1",
                         "run_metadata", runRef)));
 
@@ -138,18 +244,31 @@ class ArtifactContractValidatorTest {
 
     @Test
     void planResultProducesOccurrenceProjectionWithoutCanonicalPlan() throws Exception {
+        var context = AuthoredInputFixture.before(tempDir, "ws-1", "plan.claude_plan", "run-1");
+        var readinessPath = tempDir.resolve(".agent/workstreams/ws-1/artifacts/verification-readiness/authored-ready.json");
+        var readiness = new TaskContract.Reference(tempDir.relativize(readinessPath).toString(), TaskContractArtifactWriter.sha256(readinessPath));
+        var bindings = List.of("AC-1", "AC-2").stream().map(id -> new TaskContract.VerificationBinding(id, "run project tests", TaskContract.Executor.AGENT,
+                List.of(readiness), List.of(), TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(readiness), "verification-owner", false, null)).toList();
         var plan = new AgentResultEnvelope.PlanResult(
                 "plan_result", "READY_FOR_PLAN_REVIEW", "Plan is ready.", "READY", false,
                 List.of("reviewed design"), List.of("scoped plan"), List.of(), List.of(), List.of(),
                 List.of(), List.of(), "planning complete", emptyFailure(),
-                new AgentResultEnvelope.Plan(
-                        List.of("edit the target"), List.of("src/Main.java"), List.of("README.md"),
-                        List.of("src/Main.java: implement"), List.of("mvn test"), "revert commit",
-                        List.of("integration risk"), List.of("review scope")), List.of());
+                new AgentResultEnvelope.Plan(List.of("edit the target"),
+                List.of("src/Main.java"),
+                List.of("README.md"),
+                List.of("src/Main.java: implement"),
+                List.of("mvn test"),
+                "revert commit",
+                List.of("integration risk"),
+                List.of("review scope"),
+                java.util.List.of(new dev.dual.core.contract.TaskContract.ScopeEntry("src/Main.java", dev.dual.core.contract.TaskContract.ScopeOperation.CREATE)),
+                bindings,
+                java.util.List.of()), List.of());
         var ref = write("plan.json", envelope("plan.claude_plan", plan));
-        var validated = validate("plan.claude_plan", ref, "run-1");
+        var validated = validator.validate(tempDir, "ws-1", context.instance().nodeInstanceId(), context.definition(),
+                context.instance().inputRefs(), completed(List.of(ref), Map.of("run_id", "run-1")));
 
-        assertEquals(NodeStatus.COMPLETED, validated.status());
+        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
         assertEquals("plan_result", artifactContractType(validated));
         assertTrue(validated.outputRefs().contains("plan.plan.json"));
         var contract = AgentOutputContractDocument.read(tempDir.resolve("plan.contract.json"), JSON).orElseThrow();
@@ -173,7 +292,7 @@ class ArtifactContractValidatorTest {
                 envelope("intake.claude_brainstorm", proposal));
         var validated = validate("intake.claude_brainstorm", ref, "run-1");
 
-        assertEquals(NodeStatus.COMPLETED, validated.status());
+        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
         assertTrue(validated.outputRefs().contains(
                 ".agent/workstreams/ws-1/runs/run-1/outputs/intake.contract.json"));
         assertTrue(validated.outputRefs().stream().anyMatch(value -> value.endsWith(".ref.json")));
@@ -194,7 +313,7 @@ class ArtifactContractValidatorTest {
 
         var validated = validator.validate(
                 tempDir, "ws-1", "node-missing-binding", node("intake.claude_brainstorm"),
-                NodeResult.completed("completed", List.of(output), Map.of("run_id", "run-missing-binding")));
+                completed(List.of(output), Map.of("run_id", "run-missing-binding")));
 
         assertEquals(NodeStatus.FAILED, validated.status());
         assertEquals("TASK_CONTRACT_REPOSITORY_FACT_BINDING_INVALID",
@@ -346,7 +465,7 @@ class ArtifactContractValidatorTest {
                         "review_subject_artifact", "task_contract_proposal"));
         var reviewResult = validator.validate(
                 tempDir, "ws-1", "node-review-rejected", reviewNode, List.of(originalRef),
-                NodeResult.completed("completed", List.of(reviewOutput), Map.of("run_id", "run-rejected")));
+                completed(List.of(reviewOutput), Map.of("run_id", "run-rejected")));
         assertEquals(NodeStatus.COMPLETED, reviewResult.status(), reviewResult.result().toString());
         var reviewSidecar = tempDir.resolve(reviewOutput.replace(".json", ".contract.json"));
         AgentOutputLineageFixture.publish(tempDir, "ws-1", reviewSidecar, "iter-001");
@@ -371,16 +490,14 @@ class ArtifactContractValidatorTest {
 
         var validated = validator.validate(
                 tempDir, "ws-1", "node-revision", node("intake.claude_brainstorm"),
-                NodeResult.completed("completed", List.of(revisedOutput, revisionBinding.ref()), Map.of(
+                completed(List.of(revisedOutput, revisionBinding.ref()), Map.of(
                         "run_id", "run-revision",
                         "repository_fact_binding_ref", revisionBinding.ref(),
                         "repository_fact_binding_sha256", revisionBinding.sha256())));
 
         assertEquals(NodeStatus.FAILED, validated.status(), validated.result().toString());
         var artifact = AgentExecutionResultFacts.artifactContractResults(validated).getFirst();
-        assertEquals("TASK_CONTRACT_REVISION_SHAPE_INVALID", artifact.errorCode());
-        assertTrue(validated.result().toString().contains("revision iteration requires task_contract_revision_patch"),
-                validated.result().toString());
+        assertEquals("TASK_CONTRACT_REVISION_BINDING_INVALID", artifact.errorCode());
         assertTrue(validated.outputRefs().stream().noneMatch(ref -> ref.endsWith(".ref.json")),
                 "an invalid revision must not publish a trusted proposal reference");
 
@@ -391,7 +508,6 @@ class ArtifactContractValidatorTest {
                 "READY_FOR_PRODUCT_REVIEW",
                 "Resolve the rejected atomic-registration obligation.",
                 baseReference.proposalId(),
-                baseReference.sha256(),
                 List.of(new AgentResultEnvelope.ObligationPatch(
                         "CO-1",
                         List.of("AC-1"),
@@ -409,46 +525,17 @@ class ArtifactContractValidatorTest {
 
         var patchValidated = validator.validate(
                 tempDir, "ws-1", "node-revision", node("intake.claude_brainstorm"),
-                NodeResult.completed("completed", List.of(patchOutput, patchBinding.ref()), Map.of(
+                completed(List.of(patchOutput, patchBinding.ref()), Map.of(
                         "run_id", "run-patch",
                         "repository_fact_binding_ref", patchBinding.ref(),
                         "repository_fact_binding_sha256", patchBinding.sha256())));
 
-        assertEquals(NodeStatus.COMPLETED, patchValidated.status(), patchValidated.result().toString());
-        var patchSidecarRef = patchValidated.outputRefs().stream()
-                .filter(ref -> ref.endsWith(".contract.json"))
-                .findFirst()
-                .orElseThrow();
-        var patchSidecar = AgentOutputContractDocument.read(tempDir.resolve(patchSidecarRef), JSON).orElseThrow();
-        assertEquals("task_contract_revision_patch", patchSidecar.sourceArtifactType());
-        assertEquals("revision_patch_merge", patchSidecar.proposalDerivation().kind());
-        assertEquals(baseReference, patchSidecar.proposalDerivation().baseProposalReference());
-        assertEquals(patchOutput, patchSidecar.proposalDerivation().patchSourceOutputRef());
-        assertEquals("Registration atomically verifies identity",
-                patchSidecar.taskContractProposal().acceptanceCriteria().getFirst().text());
-        assertEquals("Preserve the local part of email addresses",
-                patchSidecar.taskContractProposal().constraints().get(1).text(),
-                "untouched baseline clauses must remain byte-for-byte equivalent");
-        assertEquals(List.of(new TaskContractProposal.RevisionResponse("CO-1", List.of("AC-1"))),
-                patchSidecar.taskContractProposal().revisionResponses());
-        var patchReferenceRef = patchValidated.outputRefs().stream()
-                .filter(ref -> ref.endsWith(".ref.json"))
-                .findFirst()
-                .orElseThrow();
-        assertTrue(TaskContractProposalReference.readVerified(
-                tempDir, "ws-1", patchReferenceRef, JSON).isPresent());
-        Files.delete(patchBinding.path());
-        assertTrue(TaskContractProposalReference.readVerified(
-                tempDir, "ws-1", patchReferenceRef, JSON).isEmpty(),
-                "a cold proposal reference read must re-verify its immutable repository fact binding");
-
-        var sidecarMap = JSON.readValue(
-                tempDir.resolve(patchSidecarRef).toFile(), new TypeReference<Map<String, Object>>() {});
-        sidecarMap.remove("proposal_derivation");
-        var missingDerivation = AgentOutputContractDocument.from(sidecarMap);
-        assertThrows(IllegalArgumentException.class, () -> TaskContractProposalReference.publishRevisionDerived(
-                tempDir, "ws-1", tempDir.resolve(patchSidecarRef), missingDerivation, JSON));
+        assertEquals(NodeStatus.FAILED,patchValidated.status(),patchValidated.result().toString());
+        assertEquals("TASK_CONTRACT_REVISION_BINDING_INVALID",AgentExecutionResultFacts.artifactContractResults(patchValidated).getFirst().errorCode());
+        assertTrue(patchValidated.outputRefs().stream().noneMatch(ref->ref.endsWith(".contract.json")),
+                "a hand-written revision without R01 cannot publish; real positive chain is covered by continuation sequences");
     }
+
 
     @Test
     void codexReviewSidecarBindsTrustedProposalSubjectFromNodeInputs() throws Exception {
@@ -477,7 +564,7 @@ class ArtifactContractValidatorTest {
                         "review_subject_artifact", "task_contract_proposal"));
         var validated = validator.validate(
                 tempDir, "ws-1", "node-review", reviewNode, List.of(proposalRef),
-                NodeResult.completed("completed", List.of(reviewOutput), Map.of("run_id", "run-2")));
+                completed(List.of(reviewOutput), Map.of("run_id", "run-2")));
 
         assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
         var sidecar = AgentOutputContractDocument.read(
@@ -500,7 +587,7 @@ class ArtifactContractValidatorTest {
 
         var validated = validator.validate(
                 tempDir, "ws-1", "node-review", reviewNode, List.of(),
-                NodeResult.completed("completed", List.of(reviewOutput), Map.of("run_id", "run-2")));
+                completed(List.of(reviewOutput), Map.of("run_id", "run-2")));
 
         assertEquals(NodeStatus.FAILED, validated.status());
         assertTrue(validated.result().toString().contains("REVIEW_SUBJECT_MISSING"), validated.result().toString());
@@ -533,7 +620,7 @@ class ArtifactContractValidatorTest {
                         contractRevisionReview(List.of()))));
         var missing = validator.validate(
                 tempDir, "ws-1", "node-review", reviewNode, List.of(proposalRef),
-                NodeResult.completed("completed", List.of(missingOutput), Map.of("run_id", "run-2")));
+                completed(List.of(missingOutput), Map.of("run_id", "run-2")));
 
         assertEquals(NodeStatus.FAILED, missing.status());
         assertTrue(missing.result().toString().contains("contract_obligations"), missing.result().toString());
@@ -545,7 +632,7 @@ class ArtifactContractValidatorTest {
                         contractRevisionReview(List.of(obligation)))));
         var valid = validator.validate(
                 tempDir, "ws-1", "node-review-valid", reviewNode, List.of(proposalRef),
-                NodeResult.completed("completed", List.of(validOutput), Map.of("run_id", "run-3")));
+                completed(List.of(validOutput), Map.of("run_id", "run-3")));
 
         assertEquals(NodeStatus.COMPLETED, valid.status(), valid.result().toString());
         var sidecar = AgentOutputContractDocument.read(
@@ -557,14 +644,14 @@ class ArtifactContractValidatorTest {
     void missingJsonResultFailsClosed() throws Exception {
         var validated = validator.validate(
                 tempDir, "ws-1", "node-1", node("design.codex_arch_review"),
-                NodeResult.completed("completed", List.of("missing.json"), Map.of("run_id", "run-1")));
+                completed(List.of("missing.json"), Map.of("run_id", "run-1")));
         assertEquals(NodeStatus.FAILED, validated.status());
         assertTrue(String.valueOf(validated.result().get("parse_error")).contains("AGENT_RESULT_MISSING"));
     }
 
     @Test
     void preparedAndNonAgentNodesRemainOutsideTheBoundary() throws Exception {
-        var prepared = NodeResult.completed("completed", List.of(), Map.of("prepared", true));
+        var prepared = completed(List.of(), Map.of("prepared", true));
         assertEquals(prepared, validator.validate(tempDir, node("design.codex_arch_review"), prepared));
 
         var nonAgent = new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "deterministic", Map.of());
@@ -592,7 +679,7 @@ class ArtifactContractValidatorTest {
         }
         return validator.validate(
                 tempDir, "ws-1", validatedNodeInstanceId, node(nodeId),
-                NodeResult.completed("completed", List.copyOf(outputRefs), Map.copyOf(facts)));
+                completed(List.copyOf(outputRefs), Map.copyOf(facts)));
     }
 
     private RepositoryFactBinding.Verified writeInitialIntakeLineage(
@@ -600,6 +687,11 @@ class ArtifactContractValidatorTest {
             String iterationId,
             String runId
     ) throws Exception {
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(tempDir, new dev.dual.core.id.DualId("ws-1"));
+        if (!Files.exists(paths.workstreamJson())) dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "validator-test",
+                new dev.dual.core.workflow.WorkflowDefinition("validator-test", 1, "intake.claude_brainstorm",
+                        List.of(node("intake.claude_brainstorm")), List.of()));
         var binding = writeTrackedInventoryFixture(nodeInstanceId, runId);
         var iterationRef = ".agent/workstreams/ws-1/iterations/" + iterationId + ".json";
         if (!Files.isRegularFile(tempDir.resolve(iterationRef))) {

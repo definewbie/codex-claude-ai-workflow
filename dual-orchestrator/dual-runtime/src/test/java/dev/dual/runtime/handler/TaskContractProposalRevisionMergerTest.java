@@ -26,7 +26,6 @@ class TaskContractProposalRevisionMergerTest {
                 "READY_FOR_PRODUCT_REVIEW",
                 "Resolve obligations",
                 context.previousReference().proposalId(),
-                context.previousReference().sha256(),
                 List.of(
                         new AgentResultEnvelope.ObligationPatch(
                                 "CO-1", List.of("AC-8"),
@@ -63,7 +62,7 @@ class TaskContractProposalRevisionMergerTest {
         var context = context();
         var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "invalid",
-                "stale", "0".repeat(64),
+                "stale",
                 List.of(
                         new AgentResultEnvelope.ObligationPatch(
                                 "CO-X", List.of("AC-8"),
@@ -82,7 +81,6 @@ class TaskContractProposalRevisionMergerTest {
 
         assertFalse(result.valid());
         assertTrue(result.errors().contains("REVISION_BASE_PROPOSAL_ID_MISMATCH"));
-        assertTrue(result.errors().contains("REVISION_BASE_PROPOSAL_SHA256_MISMATCH"));
         assertTrue(result.errors().contains("UNKNOWN_REVISION_OBLIGATION: CO-X"));
         assertTrue(result.errors().contains("DUPLICATE_CLAUSE_PATCH_TARGET: AC-8"));
         assertTrue(result.errors().stream().anyMatch(error -> error.startsWith("MISSING_REVISION_OBLIGATION:")));
@@ -93,7 +91,7 @@ class TaskContractProposalRevisionMergerTest {
         var context = context(List.of(new AgentResultEnvelope.ReviewObligation("CO-1", "Add clause")));
         var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "add",
-                context.previousReference().proposalId(), context.previousReference().sha256(),
+                context.previousReference().proposalId(),
                 List.of(new AgentResultEnvelope.ObligationPatch(
                         "CO-1", List.of("TR-NAMED-BUT-AC-SECTION"),
                         List.of(new AgentResultEnvelope.ClauseChange(
@@ -114,7 +112,7 @@ class TaskContractProposalRevisionMergerTest {
         var context = context(List.of(new AgentResultEnvelope.ReviewObligation("CO-1", "Replace exact clause")));
         var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "replace",
-                context.previousReference().proposalId(), context.previousReference().sha256(),
+                context.previousReference().proposalId(),
                 List.of(new AgentResultEnvelope.ObligationPatch(
                         "CO-1", List.of("AC-MISSING"),
                         List.of(new AgentResultEnvelope.ClauseChange(
@@ -135,7 +133,7 @@ class TaskContractProposalRevisionMergerTest {
         var context = context(List.of(new AgentResultEnvelope.ReviewObligation("CO-1", "Add exact scope")));
         var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "scope",
-                context.previousReference().proposalId(), context.previousReference().sha256(),
+                context.previousReference().proposalId(),
                 List.of(new AgentResultEnvelope.ObligationPatch(
                         "CO-1", List.of("AC-8"), List.of(),
                         List.of(new AgentResultEnvelope.ProposalScopePath("README.md")), List.of())));
@@ -178,20 +176,36 @@ class TaskContractProposalRevisionMergerTest {
         assertEquals("Use the requested baseline only.", clause(merged.proposal(), "C-1").text());
     }
 
-    private static TaskContractRevisionContextResolver.Context context() {
+    @Test
+    void exactIdCannotHideChangedProgramBaseBytes() throws Exception {
+        var context = context();
+        var patch = capturedV14Patch(context, false);
+        Files.writeString(workspace.resolve(context.previousReference().artifactRef()), "changed base");
+        assertTrue(merger.merge(context, patch, workspace).errors()
+                .contains("REVISION_BASE_PROPOSAL_CONTENT_MISMATCH"));
+    }
+
+    private TaskContractRevisionContextResolver.Context context() {
         return context(List.of(
                 new AgentResultEnvelope.ReviewObligation("CO-1", "Fix AC-8"),
                 new AgentResultEnvelope.ReviewObligation("CO-6", "Add exact scope"),
                 new AgentResultEnvelope.ReviewObligation("CO-7", "Add evidence")));
     }
 
-    private static TaskContractRevisionContextResolver.Context context(
+    private TaskContractRevisionContextResolver.Context context(
             List<AgentResultEnvelope.ReviewObligation> obligations
     ) {
+        String hash;
+        try {
+            var file = workspace.resolve(".agent/workstreams/ws-1/runs/previous.contract.json");
+            Files.createDirectories(file.getParent());
+            new dev.dual.ledger.file.AtomicJsonWriter().write(file, proposal());
+            hash = TaskContractArtifactWriter.sha256(file);
+        } catch (Exception failure) { throw new RuntimeException(failure); }
         var reference = new TaskContractProposalReference(
-                1, "node-prev:0123456789abcdef", "ws-1",
+                1, "node-prev:" + hash.substring(0, 16), "ws-1",
                 "intake.claude_brainstorm", "node-prev",
-                ".agent/workstreams/ws-1/runs/previous.contract.json", "a".repeat(64));
+                ".agent/workstreams/ws-1/runs/previous.contract.json", hash);
         return new TaskContractRevisionContextResolver.Context(
                 null, true, proposal(), reference, obligations);
     }
@@ -202,7 +216,7 @@ class TaskContractProposalRevisionMergerTest {
     ) {
         return new AgentResultEnvelope.TaskContractRevisionPatchResult(
                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "Resolve four obligations",
-                context.previousReference().proposalId(), context.previousReference().sha256(),
+                context.previousReference().proposalId(),
                 List.of(
                         replacement("CO-1", "AC-8", AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
                                 "Normalize identifiers.", List.of("src/main/resources/application.yml")),

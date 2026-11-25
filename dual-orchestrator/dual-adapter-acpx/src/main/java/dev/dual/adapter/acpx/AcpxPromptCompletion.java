@@ -10,11 +10,17 @@ package dev.dual.adapter.acpx;
 public record AcpxPromptCompletion(
         String requestId,
         String stopReason,
-        String finalAssistantMessage
+        String finalAssistantMessage,
+        String sessionId
 ) {
     public static final AcpxPromptCompletion EMPTY = new AcpxPromptCompletion("", "", "");
 
+    public AcpxPromptCompletion(String requestId, String stopReason, String finalAssistantMessage) {
+        this(requestId, stopReason, finalAssistantMessage, "");
+    }
+
     public AcpxPromptCompletion {
+        sessionId = sessionId == null ? "" : sessionId;
         requestId = requestId == null ? "" : requestId;
         stopReason = stopReason == null ? "" : stopReason;
         finalAssistantMessage = finalAssistantMessage == null ? "" : finalAssistantMessage;

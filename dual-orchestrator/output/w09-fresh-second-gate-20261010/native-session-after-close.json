@@ -1,0 +1,13 @@
+{
+  "schema": "acpx.session.v1",
+  "acpxRecordId": "e67d5ff9-924f-403b-8fc4-98ccd7d42f62",
+  "acpSessionId": "60521b08-07f4-4cc7-b656-71a2af3d7c26",
+  "agentSessionId": null,
+  "name": "claude-main-ws-20261010T085617Z-8SVF-run-1791622684632",
+  "cwd": "/private/tmp/dual-w09-newlines-20261010-fresh-02/worktree",
+  "closed": true,
+  "protocolVersion": 1,
+  "lastAgentExitCode": null,
+  "lastAgentExitAt": null,
+  "lastAgentExitSignal": null
+}

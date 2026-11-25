@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+    "rev-parse",
+    "HEAD^{tree}"
+  ],
+  "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree",
+  "native_prompt_permitted": false
+}

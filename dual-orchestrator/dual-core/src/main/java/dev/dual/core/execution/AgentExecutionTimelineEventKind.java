@@ -1,10 +1,14 @@
 package dev.dual.core.execution;
 
 public enum AgentExecutionTimelineEventKind {
+    COMMAND_INTENT("command_intent"),
+    COMMAND_RESULT("command_result"),
     PROCESS_STARTED("process_started"),
     PROCESS_WAIT_STARTED("process_wait_started"),
     PROMPT_ACCEPTED("prompt_accepted"),
     PROMPT_COMPLETED("prompt_completed"),
+    NATIVE_PERMISSION_REQUEST("native_permission_request"),
+    NATIVE_PERMISSION_REPLY("native_permission_reply"),
     PERMISSION_DECISION("permission_decision"),
     SESSION_CLOSURE("session_closure"),
     PROCESS_WAIT_COMPLETED("process_wait_completed"),

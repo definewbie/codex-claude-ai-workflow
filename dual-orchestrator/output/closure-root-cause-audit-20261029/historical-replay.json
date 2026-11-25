@@ -1,0 +1,13 @@
+{
+  "original_method_variants_rejected": 5,
+  "isolated_exact_method_variant_accepted": true,
+  "original_validation_plan_retained": [
+    "在本隔离工作树按工作区规则（如 rtk 前缀）使用 JDK 25 与现有 Maven 执行 mvn -o clean test：完整基线回归覆盖服务/CLI 测试、既有非容器回归与全部 MySQL/Testcontainers 容器回归，以本次源码对应的 target/surefire-reports XML/日志为程序依据，核对新阈值测试与既有测试全部执行且 failures=0，不以模型“已通过”正文作数。",
+    "从同一次 Surefire 报告按 AC-1..AC-5 分类核对断言：AC-1 DECIMAL128 原值（0.02、独立字面量 0.06666666666666666666666666666666667、precision()==34、断言前无 setScale）；AC-2 独立样例、0.019/0.020/0.021 边界 -10/0/+10 与 0.0199999999/0.0200000001 成对防绕过；AC-3 四类不可用（阈值为空、沿既有 blockers/unknowns 文案、CLI 不打印数值）与零/负名义金额在读取事实前被既有校验拒绝；AC-4 CLI 固定 contains(“90天累计资金费率阈值=2.000000%”)、“无法精确计算”展示与既有四项断言不回归；AC-5 完整基线回归与既有建议/首次实盘上限 5000/退出语义不回归。",
+    "通过程序工具读取实际变更与 docs/15-Funding-Rate-Break-Even-Threshold.md 进行逐条语义检查：公式与成本口径、整个 90 天累计费率非 APR、防误用例子、可用/不可用条件、历史情景限制与指向 docs/09。",
+    "如实记录原生执行状态与 reported exit；仅当原生程序观察实际提供退出码时才记录 actual exit，不由模型或声明补造；本计划不统一强制 actual_exit 字段，任何跳过或降级（如 Docker 不可用时跳过容器回归）不得记为通过。",
+    "git status/diff 自查改动严格限于六文件，无范围外路径；确认未修改 README、迁移、采集、Web 与组合策略。"
+  ],
+  "scope": "Real historical strings; synthetic isolated GOAL/readiness identity; not historical recovery or full E2E",
+  "input_bytes_unchanged": true
+}

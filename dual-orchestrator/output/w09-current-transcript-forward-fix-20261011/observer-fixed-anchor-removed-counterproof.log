@@ -1,0 +1,15 @@
+test_missing_fixed_completion_and_log_drift_stop (test_gate_observer.ObserverTest.test_missing_fixed_completion_and_log_drift_stop) ... FAIL
+
+======================================================================
+FAIL: test_missing_fixed_completion_and_log_drift_stop (test_gate_observer.ObserverTest.test_missing_fixed_completion_and_log_drift_stop)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-current-transcript-forward-fix-20261011/mutants/observer-fixed-anchor-removed/test_gate_observer.py", line 115, in test_missing_fixed_completion_and_log_drift_stop
+    with self.assertRaisesRegex(AssertionError,'Fixed invocation log drift'): self.measure()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: AssertionError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.003s
+
+FAILED (failures=1)

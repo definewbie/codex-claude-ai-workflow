@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/openai/codex.git",
+  "tag": "rust-v0.153.4",
+  "tagObject": "042fb41b7c813ac7999105e886b2b7aa715b5081",
+  "peeledCommit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "method": "git ls-remote read-only"
+}

@@ -1,0 +1,28 @@
+{
+  "status": "MATCH",
+  "source_root": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator",
+  "source_count": 659,
+  "source_differences": [],
+  "jars": [
+    {
+      "name": "dual-cli",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015/release/dual-cli-0.1.0-SNAPSHOT.jar",
+      "sha256": "6e928a89a364fa24271972bfae3b71fe4b9c909782bfa14ca2d4ef7a36aba3a8",
+      "actual": "6e928a89a364fa24271972bfae3b71fe4b9c909782bfa14ca2d4ef7a36aba3a8",
+      "same": true
+    },
+    {
+      "name": "dual-server",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015/release/dual-server-0.1.0-SNAPSHOT.jar",
+      "sha256": "34197f5f746821f87ff8e363b61995aaf57e8615c6bd57903bc32da6cda05c4e",
+      "actual": "34197f5f746821f87ff8e363b61995aaf57e8615c6bd57903bc32da6cda05c4e",
+      "same": true
+    }
+  ],
+  "native_calls": 0,
+  "supersedes": [
+    "launch-read-only-comparison.json jars subsection",
+    "release-read-only-comparison-corrected.json source subsection"
+  ],
+  "operator_error": "Two inspection helpers used incorrect artifact/path shapes; corrected by explicit named source root and jar path. This is not release drift or product failure."
+}

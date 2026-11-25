@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "prompt",
+  "runId" : "run-1792717427983",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "nodeId" : "intake.claude_brainstorm",
+  "agent" : "claude",
+  "session" : "claude-main-ws-20261023T005431Z-9YYF-run-1792717427983",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "workdir" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+  "artifactPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/prompts/intake-claude-brainstorm.md",
+  "contentType" : "text/markdown",
+  "byteSize" : 17442,
+  "estimatedTokens" : 4361,
+  "lineCount" : 244,
+  "sha256" : "bcf495e620325251ec16a5ae8bfd5b217fabb7fee492b476ec157a712abea08b",
+  "generatedAt" : "2026-10-23T01:05:20.860548Z"
+}

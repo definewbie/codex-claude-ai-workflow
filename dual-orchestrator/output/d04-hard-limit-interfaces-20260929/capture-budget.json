@@ -1,0 +1,17 @@
+{
+  "authorization": "user: 核验现有硬限制接口，有证据后再请 CC 判断冻结",
+  "maxNativeSessions": 2,
+  "maxSecondsPerSession": 30,
+  "maxRequestsPerSession": 1,
+  "realProviderCalls": 0,
+  "toolCalls": 0,
+  "agents": 0,
+  "gateSha256": "8c4de97c54313f915e4dcdd26e91c6f53bea3dbe910fbae00445ff849f879e41",
+  "guardSha256": "9fa7ec72f90190ff4fa230a4075349734aac861b222dd5188860cbb606938727",
+  "parentDriver": "dual-orchestrator/output/d04-native-boundary-review-20260929/probe-guard-repair/prepared-future-probe.py",
+  "parentDriverSha256": "23e2a730900ba44b00cb2e59ce8d1408eb7db71b4d65f29ebccc0a71dd1cb3af",
+  "binary": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+  "binarySha256": "b973d440acac501fd2594a43e7ca9ce41e0a65b9dfb28d0d7a7837c99e1261e3",
+  "host": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex-code-mode-host",
+  "hostSha256": "d8a2222e017342718d16a5dbe092921c628961f812f62f42036b8d960e1ffe56"
+}

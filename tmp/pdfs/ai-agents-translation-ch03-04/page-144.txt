@@ -1,0 +1,36 @@
+bridges the gap between design and deployment, because the learning process
+naturally adapts to the way your agents already reason.
+
+rLLM allows you to train a wide range of agentic systems, including complex
+workflows with multiple reasoning roles, judges, conditional branches, and search
+components. You define a workflow by inheriting from the Workflow base class,
+implementing your logic within a run() method, and returning an Episode
+object that captures trajectories and rewards. The framework then orchestrates
+execution, retry logic, trajectory collection, and PPO/GRPO optimization, so you
+can focus on your agent’s reasoning structure rather than building all of the
+surrounding training infrastructure yourself.
+
+To illustrate this idea, the book’s repository includes a notebook demonstrating a
+solver–judge workflow, a setup where a solver agent proposes answers and a judge
+agent evaluates them to select the best one. Each solver’s reward depends on its
+solution’s correctness, while the judge’s reward reflects whether it chose the
+correct solution. By bundling all trajectories into a single Episode, both solver
+and judge can be trained jointly, allowing the system to evolve as one coordinated
+reasoning process; this process can also be applied to improve the coordination
+between MASs.
+
+In the example notebook, this structure is applied to the 24-game, a classic
+mathematical reasoning challenge. The task provides four numbers—for example,
+3, 3, 4, and 5—and asks the agent to combine them using arithmetic operations (+,
+−, ×, ÷) to reach exactly 24. The solver agents attempt different expressions, and
+the judge evaluates them. Over time, RL helps both components refine their
+reasoning strategies, illustrating how rLLM’s workflow design enables end-to-end
+training across reasoning, judgment, and evaluation.
+
+This way of training marks a clear step forward. Rather than fine-tuning models in
+isolation and combining them afterward, you can teach the entire reasoning
+architecture to grow as a single system. Feedback travels through every part of it,
+connecting judgment, reasoning, and search into one evolving system. RULER
+and ART help your agents evaluate and improve their own behavior, while rLLM
+gives your entire system the ability to learn and reason as a unified, adaptive
+intelligence.

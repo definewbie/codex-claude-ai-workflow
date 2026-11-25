@@ -10,12 +10,13 @@ import picocli.CommandLine.Command;
         description = "Apply and finalize an accepted delivery candidate.",
         subcommands = {
                 DeliveryMergeCommand.class,
-                DeliveryFinalizeCommand.class
+                DeliveryFinalizeCommand.class,
+                DeliveryResolveCommand.class
         }
 )
 public final class DeliveryCommand implements Runnable {
     @Override
     public void run() {
-        System.out.println("Use delivery merge or delivery finalize.");
+        System.out.println("Use delivery merge, delivery finalize, or delivery resolve.");
     }
 }

@@ -1,0 +1,18 @@
+{
+  "status": "PASS_MATERIAL_VERIFICATION",
+  "unrelatedFilesUnchanged": 1316,
+  "changedDocuments": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "oldCodexEvidence": "HASH_UNCHANGED",
+  "installedNativeSDK": "HASH_UNCHANGED",
+  "productionChanges": 0,
+  "providerTaskLaunches": 1,
+  "metadataOnlyLaunches": 1,
+  "internalApiRetryEvents": 2,
+  "automaticTaskReruns": 0,
+  "independentReview": "NOT_PERFORMED",
+  "productStatus": "DESIGN_GAP"
+}

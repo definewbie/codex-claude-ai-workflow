@@ -1,0 +1,120 @@
+{
+  "recorded_at": "2026-10-26T09:31:19.113778+08:00",
+  "workstream": "ws-20261023T005431Z-9YYF",
+  "workflow_status": "COMPLETED",
+  "delivery_status": "APPLIED",
+  "full_e2e_result": "PENDING_USER_COMMIT_AND_ORIGINAL_FINALIZE",
+  "approval": {
+    "user_decision": "批准",
+    "gate_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_acceptance-039.json",
+    "gate_status": "resolved",
+    "human_action": "approve",
+    "candidate_sha256": "5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb",
+    "decision_evidence_ref": "human-decisions/01-final-delivery-approval/decision-evidence.json"
+  },
+  "application": {
+    "owner": "Original DeliveryApplicationService via delivery merge",
+    "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target",
+    "base_commit": "c442fd02fb39d87481bbd940aa5f270947a72a60",
+    "expected_result_tree": "0233afaf8755e44b6c8ab156e311ffbef6e50983",
+    "files": [
+      "README.md",
+      "src/normalize_text.py",
+      "tests/test_normalize_text.py"
+    ],
+    "process": {
+      "pid": 45908,
+      "command_kind": "GIT_APPLY_INDEX",
+      "started_at": "2026-10-26T01:29:15.176Z"
+    },
+    "process_exit": {
+      "pid": 45908,
+      "observation_source": "PROCESS_WAIT_FOR",
+      "actual_exit_code": 0,
+      "started_at": "2026-10-26T01:29:15.176Z",
+      "termination_observed": true,
+      "observed_at": "2026-10-26T01:29:15.247859Z"
+    },
+    "operation_id": "94a18961-bccc-4e97-a394-3a7216c2fdee",
+    "plan_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/delivery/merge-plan.json",
+    "plan_sha256": "796e4c7c661173da78879dcc0f1e235065506bcdb89032457948c4896950b8f2",
+    "cli_receipts_ref": "operations/approved-target-apply",
+    "target_verification_ref": "operations/applied-target-verification",
+    "target_head_still_base": true,
+    "target_index_tree_matches_candidate": true,
+    "target_content_matches_verified_source": true,
+    "unstaged_changes": false,
+    "commit_performed_by_agent": false
+  },
+  "cumulative_budget": {
+    "actual_tokens": 2077707,
+    "token_limit": 3000000,
+    "actual_requests": 13,
+    "request_limit": 18,
+    "active_seconds": 2054.339061667719,
+    "active_seconds_limit": 3600,
+    "this_turn_model_calls": 0,
+    "usage_and_time_not_reset": true
+  },
+  "preservation": {
+    "prior_stops": [
+      {
+        "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/stop-required.json",
+        "sha256": "b0d1e123671e6f220469254109de3065a823eecf93dbc060be623b26d594fbcc"
+      },
+      {
+        "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/stop-required.json",
+        "sha256": "bcbd4ae0c3e6d47e618b8defe744b58af655f9c4aa98c8a7be8a562111fde80b"
+      },
+      {
+        "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/stop-required.json",
+        "sha256": "1a5f70d2096a87f86548686adc5f167d402d73e079a0cd44bc39aea4768c3e5f"
+      }
+    ],
+    "previous_packages_unchanged": true,
+    "source_inputs_unchanged": 659,
+    "jars_unchanged": 2,
+    "snapshot": {
+      "workflow/current.json": {
+        "source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/workflow/current.json",
+        "snapshot_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/delivery-applied-evidence/workflow/current.json",
+        "sha256": "f99d06fa8e59e13ad09ae7008442faa21d5182a18d2b656eb075843ba9602ad2"
+      },
+      "gates/gate-node-gate-human_acceptance-039.json": {
+        "source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_acceptance-039.json",
+        "snapshot_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/delivery-applied-evidence/gates/gate-node-gate-human_acceptance-039.json",
+        "sha256": "ffae851adcea0e8ef9ac176906e3ab02c68eeddf56b03b69b9a0d43c719bb2d6"
+      },
+      "nodes/node-gate-human_acceptance-039.json": {
+        "source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-gate-human_acceptance-039.json",
+        "snapshot_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/delivery-applied-evidence/nodes/node-gate-human_acceptance-039.json",
+        "sha256": "db03dc674db9427924498500fa0863c8113f5c3fdfbd8b1c3716442276280b6d"
+      },
+      "delivery/merge-plan.json": {
+        "source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/delivery/merge-plan.json",
+        "snapshot_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/delivery-applied-evidence/delivery/merge-plan.json",
+        "sha256": "796e4c7c661173da78879dcc0f1e235065506bcdb89032457948c4896950b8f2"
+      },
+      "events.jsonl": {
+        "source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+        "snapshot_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/delivery-applied-evidence/events.jsonl",
+        "sha256": "d4e9cf8b9fee7b2a45bcd10034ba01018a51d4d1909d29797ab477d643694c69"
+      }
+    }
+  },
+  "operator_check_error": {
+    "ref": "operations/pre-apply-schema-check/result.json",
+    "scope": "Local check expected gate status approved but existing schema is resolved + human_action approve; failed before any apply start, corrected check only. Not a product failure or red counterproof."
+  },
+  "next_action": {
+    "owner": "Human user",
+    "action": "Commit the already staged exact three-file candidate in isolated target, then provide SHA",
+    "suggested_command": "rtk proxy /opt/homebrew/Cellar/git/2.47.0/bin/git -C /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target commit -m 'feat: add newline normalization'",
+    "after_commit": "Use original delivery finalize --commit SHA against source worktree; validate clean HEAD, single parent=base and tree=expected, then check delivery COMMITTED.",
+    "not_yet_proven": [
+      "Human commit",
+      "Exact commit finalize",
+      "Full terminal-delivery Gate PASS"
+    ]
+  }
+}

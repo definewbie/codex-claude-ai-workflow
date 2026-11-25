@@ -37,7 +37,7 @@ class SchedulerServiceTest {
         createRunningWorkstream("ws-running");
         createWaitingForHumanWorkstream("ws-human");
         var calls = new AtomicInteger();
-        var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+        var actionService = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command -> {
             calls.incrementAndGet();
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
         });
@@ -65,7 +65,7 @@ class SchedulerServiceTest {
                 "acpx_failure.reason", "quota"
         ));
         var calls = new AtomicInteger();
-        var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+        var actionService = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command -> {
             calls.incrementAndGet();
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
         });
@@ -89,7 +89,7 @@ class SchedulerServiceTest {
                 "acpx_failure.reason", "quota"
         ));
         var calls = new AtomicInteger();
-        var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+        var actionService = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command -> {
             calls.incrementAndGet();
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
         });
@@ -115,7 +115,7 @@ class SchedulerServiceTest {
                 "reason", "AGENT_OUTPUT_CONTRACT_VIOLATION"
         ));
         var calls = new AtomicInteger();
-        var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+        var actionService = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command -> {
             calls.incrementAndGet();
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
         });
@@ -146,7 +146,7 @@ class SchedulerServiceTest {
                 )
         ));
         var calls = new AtomicInteger();
-        var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+        var actionService = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command -> {
             calls.incrementAndGet();
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
         });
@@ -175,7 +175,7 @@ class SchedulerServiceTest {
     void tickDoesNotScheduleFromLegacyInitialStatus() throws Exception {
         paths("ws-legacy");
         var calls = new AtomicInteger();
-        var actionService = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+        var actionService = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command -> {
             calls.incrementAndGet();
             return new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused");
         });
@@ -183,18 +183,16 @@ class SchedulerServiceTest {
 
         var response = scheduler.tick(tempDir, 10, 1, true);
 
-        assertEquals(1, response.get("skipped"));
         assertEquals(0, calls.get());
         var workstreams = (List<Map<String, Object>>) response.get("workstreams");
-        assertEquals("ws-legacy", workstreams.get(0).get("workstreamId"));
-        assertEquals("skipped", workstreams.get(0).get("result"));
-        assertEquals("canonical workflow current is unavailable", workstreams.get(0).get("reason"));
+        assertTrue(workstreams.isEmpty(), "invalid legacy records are not executable scheduler candidates");
+
     }
 
     private void createRunningWorkstream(String workstreamId) throws Exception {
         var paths = paths(workstreamId);
         Files.createDirectories(paths.workstreamDir());
-        new WorkflowFileLedger().initialize(paths, "wf-" + workstreamId, simpleDefinition());
+        ServerTestLedger.initialize(ServerLedgerFactory.create(), paths, "wf-" + workstreamId, simpleDefinition());
     }
 
     private WorkstreamQueryService queryService() {
@@ -206,8 +204,8 @@ class SchedulerServiceTest {
         var paths = paths(workstreamId);
         Files.createDirectories(paths.workstreamDir());
         var definition = gateDefinition();
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-" + workstreamId, definition);
+        var ledger = ServerLedgerFactory.create();
+        ServerTestLedger.initialize(ledger, paths, "wf-" + workstreamId, definition);
         var first = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(paths, definition, first, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
     }
@@ -216,8 +214,8 @@ class SchedulerServiceTest {
         var paths = paths(workstreamId);
         Files.createDirectories(paths.workstreamDir());
         var definition = simpleDefinition();
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-" + workstreamId, definition);
+        var ledger = ServerLedgerFactory.create();
+        ServerTestLedger.initialize(ledger, paths, "wf-" + workstreamId, definition);
         var first = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(paths, definition, first, NodeStatus.FAILED, "failed", List.of("stderr.log"), result);
     }
@@ -226,26 +224,7 @@ class SchedulerServiceTest {
         var workstream = new DualId(workstreamId);
         var workspace = new DualId("workspace-" + workstreamId);
         var paths = new WorkstreamPaths(tempDir, workstream);
-        new FileLedgerStore().initializeWorkstream(
-                paths,
-                Workstream.created(
-                        workstream,
-                        workstreamId,
-                        new Workstream.RepositoryRef(tempDir.resolve("repo"), tempDir.resolve("repo")),
-                        workspace,
-                        Instant.parse("2026-06-01T00:00:00Z")
-                ),
-                Workspace.primaryGitWorktree(
-                        workspace,
-                        workstream,
-                        tempDir.resolve("repo"),
-                        tempDir.resolve("repo-agent-runs").resolve(workstreamId),
-                        "ai/" + workstreamId,
-                        "main",
-                        "abc123"
-                ),
-                "# Requirement\n"
-        );
+
         return paths;
     }
 

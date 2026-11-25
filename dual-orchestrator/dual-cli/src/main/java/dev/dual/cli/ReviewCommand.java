@@ -11,6 +11,7 @@ import picocli.CommandLine.Command;
         subcommands = {
                 ReviewShowCommand.class,
                 ReviewRequestActionCommand.class,
+                ReviewRecordReadinessCommand.class,
                 ReviewPrepareEvidenceCommand.class,
                 ReviewSubmitEvidenceCommand.class,
                 ReviewDecideCommand.class,

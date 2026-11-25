@@ -1,0 +1,45 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-implement-claude_implement-030"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000030",
+    "updatedAt": "2026-10-25T22:36:14.766678Z",
+    "commitSequence": 113
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-implement-claude_implement-030",
+    "nodeDefinitionId": "implement.claude_implement",
+    "kind": "TASK",
+    "handlerType": "acpx.agent_run",
+    "status": "READY",
+    "stageId": "stage-implement",
+    "iterationId": "iter-003",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-implement_claude-029.md"
+    ],
+    "inputTransition": {
+      "transition_type": "normal",
+      "condition": "unconditional",
+      "purpose": "Seed the first Claude intake run with repo-scope context.",
+      "source_node_sha256": "d7c1b482dd3ed23487f7fc60a35e205128a51c248b3b6d9425c21e3495e61627",
+      "source_node_instance_id": "node-context-implement_claude-029",
+      "required": true
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 1277.5114308338143
+}

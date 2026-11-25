@@ -1,0 +1,49 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261026T142203Z-7SNA",
+    "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-context-design_codex_arch_review-009"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000009",
+    "updatedAt": "2026-10-26T15:18:00.725257Z",
+    "commitSequence": 33
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-context-design_codex_arch_review-009",
+    "nodeDefinitionId": "context.design_codex_arch_review",
+    "kind": "TASK",
+    "handlerType": "context.build_package",
+    "status": "READY",
+    "stageId": "stage-context",
+    "iterationId": "iter-001",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.stderr.log",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.transcript.log",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.json",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-design-claude_design-008-run-1793027503466/binding.json",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.contract.json"
+    ],
+    "inputTransition": {
+      "condition": "unconditional",
+      "transition_type": "normal",
+      "required": true,
+      "source_node_instance_id": "node-design-claude_design-008",
+      "source_node_sha256": "8ddd9fe8390df26d1a7b04316f6e3d9a234431347e826381b77b9f4e4afa3fd5",
+      "purpose": "Seed the first Claude intake run with repo-scope context."
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 688.4105064138006
+}

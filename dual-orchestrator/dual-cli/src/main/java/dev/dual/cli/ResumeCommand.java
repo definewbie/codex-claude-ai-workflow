@@ -33,16 +33,15 @@ public final class ResumeCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "resume"))) {
-            var result = new CliWorkflowRuntimeFactory().create()
-                    .resume(new WorkflowCommand(workspaceRoot, workstreamId));
+        var result = new CliWorkflowRuntimeFactory().create()
+                .resume(new WorkflowCommand(workspaceRoot, workstreamId));
 
-            System.out.println("Workstream: " + result.workstreamId());
-            System.out.println("Workflow status: " + result.status());
-            System.out.println("Active node: " + result.activeNode());
-            System.out.println(result.message());
-            CliNextActionHints.print(System.out, result.status(), workspaceRoot, workstreamId);
-            return result.status() == WorkflowStatus.FAILED || result.status() == WorkflowStatus.WAITING_FOR_RECOVERY ? 1 : 0;
-        }
+        System.out.println("Workstream: " + result.workstreamId());
+        System.out.println("Workflow status: " + result.status());
+        System.out.println("Active node: " + result.activeNode());
+        System.out.println(result.message());
+        CliNextActionHints.print(System.out, result.status(), workspaceRoot, workstreamId);
+        return result.status() == WorkflowStatus.FAILED || result.status() == WorkflowStatus.WAITING_FOR_RECOVERY ? 1 : 0;
+
     }
 }

@@ -1,0 +1,32 @@
+{
+  "recorded_at": "2026-10-22T23:24:12.116346+08:00",
+  "gate_result": "INVALID",
+  "gate_reason": "Startup process verification falsely accepted ps permission failure; run cannot prove approved trigger prerequisites",
+  "observed_domain_primary_reason": "session_bootstrap_failed",
+  "domain_state": "WAITING_FOR_RECOVERY",
+  "run_id": "run-1792682394836",
+  "native_command_result_purposes": [
+    "session_ensure",
+    "build_identity"
+  ],
+  "session_ensure_timeout_ms": 45025,
+  "prompt_dispatch_records": 0,
+  "prompt_request_ids": [],
+  "measured_tokens": null,
+  "usage_measurement_type": "UNAVAILABLE",
+  "active_seconds": 48.188,
+  "budget_limit": 1700000,
+  "request_limit": 18,
+  "active_second_limit": 3600,
+  "not_budget_exhaustion": true,
+  "automatic_retry_performed": false,
+  "new_case_started": false,
+  "product_changes": false,
+  "known_execution_post_stop_observation": "strict-post-stop-observation.json",
+  "snapshot_files": 77,
+  "frozen_source_inputs_verified": 659,
+  "frozen_jars_verified": true,
+  "launch_inputs_unchanged": true,
+  "root_cause_of_session_timeout": "NOT_DETERMINED",
+  "next_action": "Offline review of process-check validity and session launch environment; do not retry or create a new case using this Gate"
+}

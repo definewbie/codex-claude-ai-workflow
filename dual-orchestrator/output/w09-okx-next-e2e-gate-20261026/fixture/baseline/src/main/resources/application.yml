@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: ai-crypto-arbitrage
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:crypto_income}?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+    username: ${MYSQL_USER:crypto_income}
+    password: ${MYSQL_PASSWORD:}
+    hikari:
+      data-source-properties:
+        # 让 INSERT ... ON DUPLICATE KEY UPDATE 对"命中但未变更"的行返回 0(真实受影响行数),
+        # 否则 Connector/J 默认的 found-rows 语义会把重复观察误计为新观察
+        useAffectedRows: true
+  flyway:
+    enabled: true
+  jackson:
+    time-zone: UTC
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+server:
+  address: 127.0.0.1
+  port: ${SERVER_PORT:8080}
+
+okx:
+  public-api:
+    base-url: https://openapi.okx.com
+    connect-timeout: 5s
+    request-timeout: 10s

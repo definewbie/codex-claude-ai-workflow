@@ -1,0 +1,26 @@
+{
+  "run_id": "run-1791641578962",
+  "unique_native_tool_call_ids": 3,
+  "native_completed_tool_ids": [
+    {
+      "tool_call_id": "call_f381930f507c47a89ea57d7a",
+      "result_visible": true,
+      "kind": "search"
+    },
+    {
+      "tool_call_id": "call_057d4da0c8914f389de6c67e",
+      "result_visible": true,
+      "kind": "read"
+    },
+    {
+      "tool_call_id": "call_16d3c8d2154e4e8f872f6f59",
+      "result_visible": true,
+      "kind": "read"
+    }
+  ],
+  "typed_tool_update_count": 12,
+  "run_transcript_heuristic_tool_count": 12,
+  "source_anchor": "AcpxTranscriptToolUsageReader.java:61-83,126-137 (per-line telemetry increments; not typed tool-call-id identity)",
+  "interpretation": "Observed telemetry discrepancy; does not change request token source or number of top-level model calls; routing/acceptance must use separate typed evidence. Review causal/use impact before repair.",
+  "not_new_implementation_scope": true
+}

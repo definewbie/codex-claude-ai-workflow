@@ -1,0 +1,49 @@
+{
+ "pre_task_snapshot": "output/cross-month-ledger-review-20261102/source-sha256.json",
+ "snapshot_covers_src_files": 14,
+ "declared_modified": [
+  "dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+  "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewGateActions.java",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+  "dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java",
+  "dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+  "dual-server/src/main/resources/static/console.js",
+  "dual-cli/src/main/java/dev/dual/cli/ReviewDecideCommand.java",
+  "dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java",
+  "dual-runtime/src/test/java/dev/dual/runtime/handler/ContractQualificationSequenceTest.java",
+  "dual-cli/src/test/java/dev/dual/cli/ReviewDecideCommandTest.java"
+ ],
+ "declared_new": [
+  "dual-ledger-file/src/test/java/dev/dual/ledger/file/GateDecisionSubjectBindingTest.java",
+  "dual-runtime/src/test/java/dev/dual/runtime/handler/ReviewGateActionsSubjectBindingTest.java"
+ ],
+ "sha256_after": {
+  "dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java": "e3f977a87380d3ada5503035975d68a5bcca1c144d9ad2025c8e22d957fb8f5c",
+  "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java": "afdeb2af0b3b3313ed73bf85d665c3da2c8637e691827e22f5e247959b80e2cc",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewGateActions.java": "6d39c5b9452e0c096e818a15ab7082cda651838ed262772478090557c28437c6",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java": "fd8438232fd7ef61cdba3f0ff92b19470966da9ce4814c53ee61eb90a01598a2",
+  "dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java": "c5efa92967dfb7f266967938ac0c00f668f47fb2d0202dad6fe15dfa148a07e8",
+  "dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java": "33150db30fa822b2203ba97bf0f865e2b2aa1f38b7a42989c9755747f4d86d70",
+  "dual-server/src/main/resources/static/console.js": "d2e4ea7ed3a4e2270df909aeeb7f9ad4f5098febd2b61554e91bb786d3541672",
+  "dual-cli/src/main/java/dev/dual/cli/ReviewDecideCommand.java": "46063f8abaaa68b3058c499c3991417502aeb6c5369689fb37524826212bfb13",
+  "dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java": "5cbe1c9efd7eb17db4e158352fbdd70489f1de4432e6ba0928a7a8dfbd490b43",
+  "dual-runtime/src/test/java/dev/dual/runtime/handler/ContractQualificationSequenceTest.java": "f269c54f4e135de2380b54d77a5b38b5aa50c0e670108e8d027982da4bca8ef7",
+  "dual-cli/src/test/java/dev/dual/cli/ReviewDecideCommandTest.java": "e68dc9b9e76b48c36f2bf9434713fd2a76f510a458cafd773f9aa27529ef3374",
+  "dual-ledger-file/src/test/java/dev/dual/ledger/file/GateDecisionSubjectBindingTest.java": "1b57a71da3aeadea85ac33cfd6271eddc7224815113ee8b3c1cec20031a3aea6",
+  "dual-runtime/src/test/java/dev/dual/runtime/handler/ReviewGateActionsSubjectBindingTest.java": "0c7f89f9f59925d195326e70df8472469c02c4c5b82a68b72565ffc859c1d6ee"
+ },
+ "unintended_src_changes_outside_declared_set": [],
+ "note": "CAUTION: the pre-task snapshot covers only 14 src files (it is mostly ledger/evidence paths), so it cannot prove scope by itself. Scope is instead established by comparing `git status` of src/ now against the pre-task `git-status-before.txt` captured by Codex on 2026-11-02: the set of dirty src paths must be identical except for the 2 declared new test files. See field `git_status_delta_vs_pre_task`.",
+ "git_status_delta_vs_pre_task": null,
+ "snapshot_scope_proof": {
+  "src_files_covered_by_snapshot": 14,
+  "covered_and_changed": [
+   "dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java"
+  ],
+  "covered_changed_but_outside_declared_set": [],
+  "covered_unchanged_but_in_declared_set__would_contradict_claim": [],
+  "strength": "Only covers 14 src files. Proves nothing unintended changed among those; does NOT prove scope for the rest of src/."
+ },
+ "git_status_note": "Pre-task `git-status-before.txt` (20261028 dir) is an rtk-truncated display ('17103 more lines'), unusable for a full delta. No full pre-task hash set of src/ exists; therefore scope outside the 14 covered files rests on the author's declared hunk list (CHANGES.md), not on independent proof."
+}

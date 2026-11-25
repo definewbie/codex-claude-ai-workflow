@@ -1,0 +1,25 @@
+{
+  "recorded_at": "2026-10-23T11:06:37.179446+08:00",
+  "evidence_origin": "Failure text transcribed from exec tool result, not a saved trigger-time process table",
+  "attempted_command": [
+    "rtk",
+    "proxy",
+    "python3",
+    "-B",
+    "output/w09-fresh-eighth-gate-20261023/run-one-step.py",
+    "22-readiness-plan-decision",
+    "plan.decision"
+  ],
+  "tool_exit": 1,
+  "exception": "process_check.ProcessInspectionError: Known PIDs present: [83976]",
+  "guard_status": "PRESENT",
+  "guard_before": "step mkdir and Java startup",
+  "step_created": false,
+  "unknown_at_trigger": [
+    "process start time",
+    "process command",
+    "process owner identity"
+  ],
+  "later_read_only_proof": "process-present-83976.json",
+  "no_automatic_retry": true
+}

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest
+-------------------------------------------------------------------------------
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 49.89 s -- in dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest

@@ -1,0 +1,6 @@
+{
+  "status": "INTERRUPTED_NOT_ACCEPTANCE",
+  "exit": 130,
+  "reason": "Readonly real replay exposed model clause id objects misclassified as RPC frames; fix before final full reactor",
+  "sources_modified_while_running": false
+}

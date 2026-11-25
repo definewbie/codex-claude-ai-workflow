@@ -1,0 +1,59 @@
+{
+  "counts": {
+    "initialize": 1,
+    "response": 2,
+    "session/resume": 1,
+    "response_error": 1,
+    "session/new": 1,
+    "session/update": 11207,
+    "update.available_commands_update": 2,
+    "session/prompt": 1,
+    "update.usage_update": 3,
+    "update.agent_thought_chunk": 11155,
+    "update.agent_message_chunk": 38,
+    "update.tool_call": 3,
+    "update.tool_call_update": 6
+  },
+  "session_ids": {
+    "e67d5ff9-924f-403b-8fc4-98ccd7d42f62": 1,
+    "60521b08-07f4-4cc7-b656-71a2af3d7c26": 11208
+  },
+  "responses": [
+    {
+      "id": 0,
+      "result_keys": [
+        "protocolVersion",
+        "agentCapabilities",
+        "agentInfo",
+        "authMethods",
+        "_meta"
+      ],
+      "sessionId": null,
+      "has_error": false,
+      "stopReason": null
+    },
+    {
+      "id": 1,
+      "result_keys": [],
+      "sessionId": null,
+      "has_error": true,
+      "stopReason": null
+    },
+    {
+      "id": 2,
+      "result_keys": [
+        "sessionId",
+        "modes",
+        "configOptions"
+      ],
+      "sessionId": "60521b08-07f4-4cc7-b656-71a2af3d7c26",
+      "has_error": false,
+      "stopReason": null
+    }
+  ],
+  "current_record_ids": {
+    "acpx_record_id": "e67d5ff9-924f-403b-8fc4-98ccd7d42f62",
+    "acp_session_id": "60521b08-07f4-4cc7-b656-71a2af3d7c26"
+  },
+  "thought_text_not_reproduced": true
+}

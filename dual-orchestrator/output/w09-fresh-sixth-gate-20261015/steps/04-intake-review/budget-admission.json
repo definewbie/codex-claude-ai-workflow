@@ -1,0 +1,112 @@
+{
+  "input": {
+    "actual_tokens": 8659,
+    "completed_calls": 1,
+    "active_seconds": 48.185,
+    "remaining_mainline": [
+      "intake.codex_product_review",
+      "design.claude_design",
+      "design.codex_arch_review",
+      "plan.claude_plan",
+      "plan.codex_plan_review",
+      "implement.claude_implement",
+      "implement.claude_self_test_report",
+      "acceptance.codex_verifier_review"
+    ],
+    "new_extra_calls": [],
+    "measurement_complete": true,
+    "external_pending": false
+  },
+  "result": {
+    "result": "ALLOW_BUDGET_ONLY",
+    "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+    "required_token_reserve": 1050000,
+    "required_call_reserve": 9,
+    "remaining_tokens": 1691341,
+    "remaining_calls": 17,
+    "warning": false
+  },
+  "observation": {
+    "completed_runs": [
+      {
+        "run_id": "run-1792021247531",
+        "node_id": "intake.claude_brainstorm",
+        "agent": "claude",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 4906,
+          "outputTokens": 3753,
+          "cachedReadTokens": 0,
+          "cachedWriteTokens": 0,
+          "totalTokens": 8659,
+          "costAmount": 0.11835499999999999,
+          "costCurrency": "USD",
+          "source": "acpx_stream",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": 0.11835499999999999,
+          "sessionCostCurrency": "USD",
+          "providerId": "zhipu",
+          "model": "glm-5.3",
+          "billingMode": "subscription_token_only",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "e4d34f6c-2aa7-4011-81a4-42ef0d961aa7",
+            "record_id": "6f351661-60a7-47db-8059-0e743e0e6689",
+            "request_id": "3",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 4906,
+              "outputTokens": 3753,
+              "cachedReadTokens": 0,
+              "cachedWriteTokens": 0,
+              "totalTokens": 8659,
+              "costAmount": 0.11835499999999999,
+              "costCurrency": "USD",
+              "source": "acpx_stream",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": 0.11835499999999999,
+              "sessionCostCurrency": "USD",
+              "providerId": "zhipu",
+              "model": "glm-5.3",
+              "billingMode": "subscription_token_only",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "inputTokens": 4906,
+              "outputTokens": 3753,
+              "cachedReadTokens": 0,
+              "cachedWriteTokens": 0,
+              "totalTokens": 8659
+            },
+            "transcript_ref": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree/.agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021247531/outputs/intake-claude-brainstorm.transcript.log",
+            "transcript_sha256": "7f63e06cdb56b1b8b010d345690736c674bc7a20c2513bff5967ccfd45ededdc",
+            "usage_source_ref": "/Users/kriswang/.acpx/sessions/6f351661-60a7-47db-8059-0e743e0e6689.stream.ndjson",
+            "usage_source_sha256": "e7525055cac6f77bdc51b381738dddf6c22e62494c4f438012b0f5fd65128566"
+          }
+        ]
+      }
+    ],
+    "actual_tokens": 8659,
+    "completed_calls": 1,
+    "measurement_complete": true,
+    "cost_note": "SDK amounts retained; not actual subscription payment. No invented mixed-provider price."
+  }
+}

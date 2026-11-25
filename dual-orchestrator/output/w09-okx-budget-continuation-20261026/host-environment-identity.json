@@ -1,0 +1,27 @@
+{
+  "dependencies": [
+    {
+      "path": "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13",
+      "sha256": "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+      "absent": false
+    },
+    {
+      "path": "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/unittest/__init__.py",
+      "sha256": "7c22ee0c503b75aba5221e3e8189f9bf4632f85a43315ff841ec9d26a68e3551",
+      "absent": false
+    },
+    {
+      "path": "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/importlib/__init__.py",
+      "sha256": "fa3881e319959a527916cef2a0b46e4d3b9fbf8dc631d4571bc930aaa2069f9f",
+      "absent": false
+    },
+    {
+      "path": "/Users/kriswang/work/opensource/maven/bin/mvn",
+      "sha256": "f9381d0cb98abaaf9592dae421eddc497e84ed9bfb723b84c111d1350863c3a2",
+      "absent": false
+    }
+  ],
+  "identity": "75699fd78966a84d628f2068928f08fb2cdfc6919d41d91a9c060068eb2c2771",
+  "environment": "HOST_ONLY_NOT_NATIVE_TOOL_PROOF",
+  "native_tool_execution": false
+}

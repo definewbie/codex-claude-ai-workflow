@@ -41,7 +41,7 @@ class LiteFlowLedgerBoundaryTest {
                 List.of(new EdgeDefinition("gate.review", "revise", "design.claude_design"))
         );
         var ledger = liteFlowLedger();
-        ledger.initialize(paths, "wf-liteflow-revision", definition);
+        FlowTestLedger.initialize(ledger, paths, "wf-liteflow-revision", definition);
 
         var gate = activeNode(ledger, paths);
         ledger.completeAndRoute(paths, definition, gate.nodeInstanceId(), NodeStatus.COMPLETED, "revise", List.of(), Map.of(
@@ -73,7 +73,7 @@ class LiteFlowLedgerBoundaryTest {
                 )
         );
         var ledger = liteFlowLedger();
-        ledger.initialize(paths, "wf-liteflow-revision-limit", definition);
+        FlowTestLedger.initialize(ledger, paths, "wf-liteflow-revision-limit", definition);
 
         var firstGate = activeNode(ledger, paths);
         ledger.completeAndRoute(paths, definition, firstGate.nodeInstanceId(), NodeStatus.COMPLETED, "revise", List.of(), Map.of(
@@ -112,7 +112,7 @@ class LiteFlowLedgerBoundaryTest {
                 )
         );
         var ledger = liteFlowLedger();
-        ledger.initialize(paths, "wf-liteflow-acceptance-reject", definition);
+        FlowTestLedger.initialize(ledger, paths, "wf-liteflow-acceptance-reject", definition);
 
         var decision = activeNode(ledger, paths);
         ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED, "REJECT", List.of("review.md"), Map.of(
@@ -150,7 +150,7 @@ class LiteFlowLedgerBoundaryTest {
                 List.of(new EdgeDefinition("first", "completed", "second"))
         );
         var ledger = liteFlowLedger();
-        ledger.initialize(paths, "wf-liteflow-failed", definition);
+        FlowTestLedger.initialize(ledger, paths, "wf-liteflow-failed", definition);
 
         var first = activeNode(ledger, paths);
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.FAILED, "completed", List.of(), Map.of("exit_code", 4));
@@ -180,7 +180,7 @@ class LiteFlowLedgerBoundaryTest {
                 List.of(new EdgeDefinition("stage.generate_next_prompt", "completed", "gate.human_next_stage_approval"))
         );
         var ledger = liteFlowLedger();
-        ledger.initialize(paths, "wf-liteflow-final-gate", definition);
+        FlowTestLedger.initialize(ledger, paths, "wf-liteflow-final-gate", definition);
 
         var generator = activeNode(ledger, paths);
         ledger.completeAndRoute(paths, definition, generator.nodeInstanceId(), NodeStatus.COMPLETED, "completed", List.of(), Map.of());
@@ -199,7 +199,7 @@ class LiteFlowLedgerBoundaryTest {
     }
 
     private static WorkflowFileLedger liteFlowLedger() {
-        return new WorkflowFileLedger(new LiteFlowPrototypeKernel());
+        return new WorkflowFileLedger(new LiteFlowPrototypeKernel(), Map.of("test_binary", "liteflow-tests-v3"));
     }
 
     private static dev.dual.ledger.file.NodeInstanceDocument activeNode(WorkflowFileLedger ledger, WorkstreamPaths paths) throws IOException {

@@ -28,29 +28,32 @@ final class RoutingEngine {
     private final FlowOrchestrationKernel flowKernel;
     private final GoalSatisfactionWriter goalSatisfactionWriter;
     private final CompletionAuditWriter completionAuditWriter;
+    private final Map<String, String> runtimeIdentity;
 
     RoutingEngine(
             AtomicJsonWriter jsonWriter,
             ObjectMapper objectMapper,
             LedgerEventLog eventLog,
             RevisionTracker revisionTracker,
-            FlowOrchestrationKernel flowKernel
+            FlowOrchestrationKernel flowKernel,
+            Map<String, String> runtimeIdentity
     ) {
         this.jsonWriter = jsonWriter;
         this.objectMapper = objectMapper;
         this.eventLog = eventLog;
         this.revisionTracker = revisionTracker;
         this.flowKernel = flowKernel;
+        this.runtimeIdentity = Map.copyOf(runtimeIdentity);
         this.goalSatisfactionWriter = new GoalSatisfactionWriter(jsonWriter);
         this.completionAuditWriter = new CompletionAuditWriter(jsonWriter);
     }
 
     WorkflowCurrentDocument loadCurrent(WorkstreamPaths paths) throws IOException {
-        return objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);
+        return jsonWriter.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
     }
 
     NodeInstanceDocument loadNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
-        return objectMapper.readValue(paths.nodeJson(nodeInstanceId).toFile(), NodeInstanceDocument.class);
+        return jsonWriter.read(paths.nodeJson(nodeInstanceId), NodeInstanceDocument.class);
     }
 
     void completeAndRoute(
@@ -129,7 +132,7 @@ final class RoutingEngine {
         var lastEventId = current.lastEventId();
         for (var transition : matchingTransitions) {
             var nextDefinition = definition.node(transition.toNodeDefinitionId());
-            var transitionAttributes = ExecutionNetworkGrantStore.forward(paths, node, nextDefinition,
+            var transitionAttributes = ExecutionNetworkGrantStore.forward(jsonWriter, paths, node, nextDefinition,
                     collectionTransition(paths, finished, nextDefinition, effectiveTransitionAttributes(node, transition.attributes())));
             if (nextDefinition.kind() == NodeKind.GATE
                     || !startsNewIteration(transitionAttributes, node.nodeDefinitionId(), outcome, nextDefinition.id())) {
@@ -228,8 +231,12 @@ final class RoutingEngine {
 
         for (var transition : matchingTransitions) {
             var nextDefinition = definition.node(transition.toNodeDefinitionId());
-            var transitionAttributes = ExecutionNetworkGrantStore.forward(paths, node, nextDefinition,
+            var transitionAttributes = ExecutionNetworkGrantStore.forward(jsonWriter, paths, node, nextDefinition,
                     collectionTransition(paths, finished, nextDefinition, effectiveTransitionAttributes(node, transition.attributes())));
+            var occurrenceTransition = new LinkedHashMap<String, Object>(transitionAttributes);
+            occurrenceTransition.put("source_node_instance_id", node.nodeInstanceId());
+            occurrenceTransition.put("source_node_sha256", LedgerSession.sha(jsonWriter.readBytes(paths.nodeJson(node.nodeInstanceId()))));
+            transitionAttributes = Map.copyOf(occurrenceTransition);
             if (!joinReady(paths, current, nodeInstanceId, transitionAttributes)) {
                 lastEventId = LedgerUtils.nextEventId(lastEventId);
                 eventLog.appendEvent(paths, lastEventId, "join_deferred", Map.of(
@@ -333,9 +340,7 @@ final class RoutingEngine {
             routedPayload.put("node_instance_id", nextNodeInstanceId);
             routedPayload.put("gate_id", gateId);
             routedPayload.put("transition", transitionAttributes);
-            if (nextDefinition.kind() == NodeKind.GATE) {
-                routedPayload.put("source_node_instance_id", node.nodeInstanceId());
-            }
+            routedPayload.put("source_node_instance_id", node.nodeInstanceId());
             eventLog.appendEvent(paths, lastEventId, "node_routed", Map.copyOf(routedPayload));
             if (!iterationStartedPayload.isEmpty()) {
                 lastEventId = LedgerUtils.nextEventId(lastEventId);
@@ -416,7 +421,7 @@ final class RoutingEngine {
                 try {
                     result.put("evidence_collection_gate_sha256", java.util.HexFormat.of().formatHex(
                             java.security.MessageDigest.getInstance("SHA-256")
-                                    .digest(Files.readAllBytes(paths.nodeJson(source.nodeInstanceId())))));
+                                    .digest(jsonWriter.readBytes(paths.nodeJson(source.nodeInstanceId())))));
                 } catch (java.security.NoSuchAlgorithmException impossible) { throw new IOException(impossible); }
             }
         } else if (!"loop".equals(attributes.get("transition_type"))
@@ -485,6 +490,24 @@ final class RoutingEngine {
 
     void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
                          EvidenceCollectionBaseline collection, EvidenceSubmission submission) throws IOException {
+        resolveOpenGate(paths, definition, action, note, collection, submission, null);
+    }
+
+    void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
+                         EvidenceCollectionBaseline collection, EvidenceSubmission submission,
+                         ContractQualificationChecks.Decision actualChecks) throws IOException {
+        resolveOpenGate(paths, definition, action, note, collection, submission, actualChecks, null);
+    }
+
+    /**
+     * Resolves the open gate only when it is still the occurrence the decider looked at. The subject is the gate
+     * occurrence identity supplied by the decision entry (never re-derived from "latest"), so a request composed
+     * against an earlier gate is refused before any write instead of resolving whichever gate is open now.
+     * A blank subject keeps the unbound behaviour for callers that predate subject binding.
+     */
+    void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
+                         EvidenceCollectionBaseline collection, EvidenceSubmission submission,
+                         ContractQualificationChecks.Decision actualChecks, String expectedGate) throws IOException {
         if ("submit_evidence".equals(action) != (submission != null))
             throw new IOException("submit_evidence requires the typed material submission API");
         if ("request_action".equals(action == null ? "" : action.trim())) {
@@ -500,6 +523,13 @@ final class RoutingEngine {
         var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
         if (node.kind() != NodeKind.GATE) {
             throw new IOException("active node is not a gate: " + node.nodeDefinitionId());
+        }
+        if (expectedGate != null && !expectedGate.isBlank()) {
+            // Refuse before any gate/subject/qualification work: the decider's view is stale, not the ledger.
+            if (!expectedGate.equals(node.nodeInstanceId())) {
+                throw new IOException("gate decision subject is no longer the open gate: requested " + expectedGate
+                        + " but the open gate is " + node.nodeInstanceId());
+            }
         }
         var outgoingEdges = definition.edgesFrom(node.nodeDefinitionId());
         var canonicalAction = HumanGateActionSemantics.canonicalAction(outgoingEdges, action.trim());
@@ -545,25 +575,26 @@ final class RoutingEngine {
                 throw new IOException("scope revision request budget exhausted; gate remains open");
             }
         }
-        if ("BLOCKED".equals(sourceOutcome) && (note == null || note.isBlank())) {
-            throw new IOException("a decision note is required for a BLOCKED human gate");
-        }
-        var gatePurpose = text(definition.node(node.nodeDefinitionId()).config().get("gate_purpose"));
-        if ("implementation_repair".equals(gatePurpose)
-                && "revise".equals(canonicalAction)
+        if (HumanGateActionSemantics.requiresDecisionNote(canonicalAction, sourceOutcome)
                 && (note == null || note.isBlank())) {
-            throw new IOException("a decision note is required for implementation repair");
+            throw new IOException("a decision note is required for " + canonicalAction + " at "
+                    + node.nodeDefinitionId() + " (" + sourceOutcome + ")");
         }
-        if ("design".equals(gatePurpose)
-                && "revise".equals(canonicalAction)
-                && (note == null || note.isBlank())) {
-            throw new IOException("a decision note is required to revise a design");
-        }
-        if ("plan".equals(gatePurpose) && "revise".equals(canonicalAction)
-                && (note == null || note.isBlank())) {
-            throw new IOException("a decision note is required to revise a plan");
-        }
-        resolveGateDocument(paths, gate, canonicalAction, note);
+        var runtimeSha = ContractQualificationChecks.identity(runtimeIdentity);
+        var checks = actualChecks == null
+                ? new ContractQualificationChecks.Decision(1, ContractQualificationChecks.FAMILY,
+                    ContractQualificationChecks.Coverage.NOT_INVOKED, node.nodeInstanceId(),
+                    text(gate.result().get("source_node_instance_id")), node.inputRefs(), runtimeSha, List.of())
+                : actualChecks;
+        if (!checks.gateNodeInstanceId().equals(node.nodeInstanceId())
+                || !checks.sourceNodeInstanceId().equals(text(gate.result().get("source_node_instance_id")))
+                || !checks.subjectRefs().equals(node.inputRefs()) || !checks.runtimeIdentitySha256().equals(runtimeSha)
+                || actualChecks != null && (!"contract".equals(definition.node(node.nodeDefinitionId()).config().get("gate_purpose"))
+                    || !"approved".equals(canonicalAction)
+                    || checks.familyCoverage() != ContractQualificationChecks.Coverage.COVERED
+                    || checks.checks().stream().anyMatch(c -> c.result() == ContractQualificationChecks.Result.FAILED)))
+            throw new IOException("qualification observations do not bind the current decision");
+        jsonWriter.write(paths.gateJson(gate.gateId()), gate.resolved(canonicalAction, note, checks));
         var humanAuthorizedRevision = "revise".equals(canonicalAction)
                 && note != null
                 && !note.isBlank();
@@ -571,6 +602,7 @@ final class RoutingEngine {
         resolvedNodeResult.put("human_action", canonicalAction);
         resolvedNodeResult.put("requested_action", action);
         resolvedNodeResult.put("note", note == null ? "" : note);
+        resolvedNodeResult.put("decision_checks", checks.toMap());
         if (collection != null) resolvedNodeResult.put("evidence_collection_baseline", collection);
         if (submission != null) resolvedNodeResult.put("external_evidence", submission);
         completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, canonicalAction,
@@ -630,10 +662,10 @@ final class RoutingEngine {
     ) throws IOException {
         for (var gateId : current.openGateIds()) {
             var gatePath = paths.gateJson(gateId);
-            if (!Files.isRegularFile(gatePath)) {
+            if (!jsonWriter.exists(gatePath)) {
                 continue;
             }
-            var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);
+            var gate = jsonWriter.read(gatePath, GateDocument.class);
             if (gate.nodeInstanceId().equals(node.nodeInstanceId()) && "open".equals(gate.status())) {
                 return gate;
             }

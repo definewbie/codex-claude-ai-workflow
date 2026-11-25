@@ -1,0 +1,14 @@
+{
+  "session" : "phase-a-100623ee-f57f-43d3-8218-14837bc24120",
+  "policy" : {
+    "schema" : "claude_execution_policy.v2",
+    "policyRef" : ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/runs/run-e79ad304-ae11-4b0b-ab78-e92a75434b6d/execution-authority/claude-execution-policy.json",
+    "policySha256" : "a8f1454d772247026c8e9204febd8a40c28dde34cb9d2810921aeb05c0ba70e3",
+    "transportDisposition" : "prepare_only"
+  },
+  "pendingGrantSha256" : "8e62b5128bdb899e32dd722d77b683522dca61a65b08634dd3a38753b4054174",
+  "grantRef" : ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority/network-grants/grant-c7f2e9b3-a080-4b40-9eee-ed58e5e509c4.json",
+  "run" : "run-e79ad304-ae11-4b0b-ab78-e92a75434b6d",
+  "node" : "node-target-004",
+  "workstream" : "ws-40f2ccd4-c332-4842-a25b-66cd510f34d4"
+}

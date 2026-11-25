@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "meaning": "Reference integrity and exact-gate linkage only; not causal-effect or implementation PASS.",
+  "retryRecordsChecked": 95,
+  "exactFailurePairsChecked": 85,
+  "casebookCasesChecked": 8,
+  "sourceRefsChecked": 34,
+  "artifacts": [
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/ledger-mechanism-analysis-20261102/retry-linkage.json",
+      "sha256": "797e5510c4700be981b8772d80228f8d6465d0f3cfc9b904380f0f3dbb0ba41f"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/ledger-mechanism-analysis-20261102/mechanism-casebook.json",
+      "sha256": "6c68c71eff8c8acfdd9ddf0e0aa19580a8a05cfd788f77d23543b8573222b561"
+    }
+  ]
+}

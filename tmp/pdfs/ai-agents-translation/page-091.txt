@@ -1,0 +1,41 @@
+Example 2-27. Build research team graph
+research_builder = StateGraph(State)
+
+research_builder.add_node("supervisor", research_supervisor_node)
+research_builder.add_node("search", search_node)
+research_builder.add_node("web_scraper", web_scraper_node)
+research_builder.add_node("exa_search", exa_search_node)
+research_builder.add_node("patent_research", patent_research_node)
+
+research_builder.add_edge(START, "supervisor")
+research_builder.add_edge("search", "supervisor")
+research_builder.add_edge("web_scraper", "supervisor")
+research_builder.add_edge("exa_search", "supervisor")
+research_builder.add_edge("patent_research", "supervisor")
+
+research_graph = research_builder.compile()
+
+    Register supervisor and worker nodes.
+
+   Connect edges so all workers route back to the supervisor.
+
+   Compile the graph into an executable workflow.
+
+To test this setup, you can run the code from Example 2-28.
+
+Example 2-28. Run research team with prompt
+for s in research_graph.stream(
+    {"messages": [("user", """What are AI agents? Are there any
+patents out there
+                              about LLM agents?""")]},
+    {"recursion_limit": 100},
+):
+    print(s)
+    print("---")
+
+   Run the research graph on a query; the supervisor orchestrates which
+    agents act.
+
+This returns a short description of the AI agents and then uses the patent
+tool to check for recent patents. The steps look like this (I’ve left out the
+actual messages between agents for brevity):

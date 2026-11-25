@@ -1,0 +1,149 @@
+{
+  "status": "HUMAN_APPROVED_CUMULATIVE_TAIL_CONTINUATION",
+  "target": "one fresh terminal-delivery mainline through actual acceptance and COMMITTED",
+  "unit": "visible attributable request totalTokens, including cachedRead",
+  "total_stop": 3000000,
+  "warning": 1200000,
+  "top_level_calls": 18,
+  "active_seconds": 3600,
+  "command_timeout_seconds": 600,
+  "next_agent_time_reserve_seconds": 1500,
+  "time_reserve_basis": "two possible 600s prompts plus provisional 300s preparation/cleanup allowance; not a hard runtime bound",
+  "possible_correction_tokens": 150000,
+  "possible_correction_calls": 1,
+  "semantic_loops_max": 2,
+  "extra_connection_prompts_default": 0,
+  "reserves_are": "temporary planning allowances; not p95, prediction intervals or native per-request hard caps",
+  "model_configuration_changes": "NONE_PROPOSED_FOR_THIS_GATE",
+  "stages": [
+    {
+      "node": "intake.claude_brainstorm",
+      "tokens": 40000,
+      "basis": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN",
+      "observed_requests": 9,
+      "observed_cases": 5,
+      "observed_range": [
+        8659,
+        36945
+      ]
+    },
+    {
+      "node": "intake.codex_product_review",
+      "tokens": 50000,
+      "basis": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN",
+      "observed_requests": 6,
+      "observed_cases": 4,
+      "observed_range": [
+        27428,
+        40194
+      ]
+    },
+    {
+      "node": "design.claude_design",
+      "tokens": 150000,
+      "basis": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN",
+      "observed_requests": 3,
+      "observed_cases": 2,
+      "observed_range": [
+        85538,
+        130731
+      ]
+    },
+    {
+      "node": "design.codex_arch_review",
+      "tokens": 90000,
+      "basis": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN",
+      "observed_requests": 2,
+      "observed_cases": 1,
+      "observed_range": [
+        53075,
+        70687
+      ]
+    },
+    {
+      "node": "plan.claude_plan",
+      "tokens": 100000,
+      "basis": "UNMEASURED_PLANNING_ASSUMPTION",
+      "observed_requests": 0,
+      "observed_cases": 0,
+      "observed_range": null
+    },
+    {
+      "node": "plan.codex_plan_review",
+      "tokens": 75000,
+      "basis": "UNMEASURED_PLANNING_ASSUMPTION",
+      "observed_requests": 0,
+      "observed_cases": 0,
+      "observed_range": null
+    },
+    {
+      "node": "implement.claude_implement",
+      "tokens": 200000,
+      "basis": "UNMEASURED_PLANNING_ASSUMPTION",
+      "observed_requests": 0,
+      "observed_cases": 0,
+      "observed_range": null
+    },
+    {
+      "node": "implement.claude_self_test_report",
+      "tokens": 150000,
+      "basis": "UNMEASURED_PLANNING_ASSUMPTION",
+      "observed_requests": 0,
+      "observed_cases": 0,
+      "observed_range": null
+    },
+    {
+      "node": "acceptance.codex_verifier_review",
+      "tokens": 100000,
+      "basis": "UNMEASURED_PLANNING_ASSUMPTION",
+      "observed_requests": 0,
+      "observed_cases": 0,
+      "observed_range": null
+    }
+  ],
+  "illustrative_path": {
+    "nominal_mainline_tokens": 955000,
+    "readiness_plan_rerun_tokens": 175000,
+    "one_design_semantic_loop_tokens": 240000,
+    "one_format_correction_tokens": 150000,
+    "planned_total": 1520000,
+    "unallocated_margin": 1480000,
+    "top_level_calls": 14,
+    "not_guaranteed": "Both intake/design loops use 1610000/16 requests; reserves are assumptions, not per-call caps; every actual dispatch rechecks funds/time/authority"
+  },
+  "real_run_authorized": false,
+  "previous_balance_inherited": true,
+  "calibration_source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-budget-calibration-20261022/budget-proposal.json",
+  "calibration_source_sha256": "b35b6a211e236cf4f2ea92bf94555cd810da5f1e7760ab7c40fd48ff8eb99d1f",
+  "calibrated_scenarios": {
+    "mainline_only": {
+      "tokens": 955000,
+      "requests": 9
+    },
+    "mainline_readiness_one_correction": {
+      "tokens": 1280000,
+      "requests": 12
+    },
+    "mainline_readiness_intake_loop_correction": {
+      "tokens": 1370000,
+      "requests": 14
+    },
+    "mainline_readiness_design_loop_correction": {
+      "tokens": 1520000,
+      "requests": 14
+    },
+    "mainline_readiness_both_loops_correction": {
+      "tokens": 1610000,
+      "requests": 16
+    }
+  },
+  "budget_amendment": {
+    "prior_limit": 1700000,
+    "new_limit": 3000000,
+    "user_decision": "同意，可以提高",
+    "approved_proposal": "累计300万token，18次请求、60分钟与储备规则不变；原停止记录保留；最终人门与commit不委派。",
+    "used_tokens": 1767028,
+    "used_requests": 11,
+    "used_active_seconds": 1798.4491589584516
+  }
+}

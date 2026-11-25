@@ -58,7 +58,7 @@ class PromptGenerateNextStageHandlerTest {
                 "prompt.generate_next_stage", NodeStatus.READY, "stage-handoff", "iter-1",
                 List.of(inputRef), List.of(), Map.of(), null, null, null);
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-handoff", definition, instance));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-handoff", definition, instance, dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals("completed", result.outcome());
         assertEquals("structured-handoff", result.result().get("mode"),
@@ -141,7 +141,7 @@ class PromptGenerateNextStageHandlerTest {
                 "prompt.generate_next_stage", NodeStatus.READY, "stage-handoff", "iter-1",
                 List.of(selfTestRef, acceptanceRef, inputRef), List.of(), Map.of(), null, null, null);
 
-        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-handoff", definition, instance));
+        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-handoff", definition, instance, dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var handoffJson = Files.readString(tempDir.resolve(".agent/workstreams/ws-handoff/artifacts/next-stage/handoff.json"));
         assertTrue(handoffJson.contains("Acceptance (ACCEPT_WITH_NOTES): Blocking build/typecheck gap has been closed."), handoffJson);
@@ -193,7 +193,7 @@ class PromptGenerateNextStageHandlerTest {
                 "prompt.generate_next_stage", NodeStatus.READY, "stage-handoff", "iter-1",
                 List.of(acceptanceRef, inputRef), List.of(), Map.of(), null, null, null);
 
-        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-handoff", definition, instance));
+        handler.execute(new TaskHandler.TaskContext(tempDir, "ws-handoff", definition, instance, dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var handoffJson = Files.readString(tempDir.resolve(".agent/workstreams/ws-handoff/artifacts/next-stage/handoff.json"));
         assertTrue(handoffJson.contains("Acceptance (REJECT): Required build/typecheck evidence is still missing."), handoffJson);

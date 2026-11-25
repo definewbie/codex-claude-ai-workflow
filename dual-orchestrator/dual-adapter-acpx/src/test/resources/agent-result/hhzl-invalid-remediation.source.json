@@ -1,0 +1,12 @@
+{
+  "source": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/outputs/intake-codex-product-review.attempt-1.json",
+  "sha256": "72956cadc7da1033068fe58b77ffcbac7f1ddcd874439ad1b8cdc7428568bbb9",
+  "fixture": "dual-orchestrator/dual-adapter-acpx/src/test/resources/agent-result/hhzl-invalid-remediation.json",
+  "use": "New-version historical-input regression only; no historical-runtime reproduction; no provider calls.",
+  "correction_source": {
+    "source": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/outputs/intake-codex-product-review.contract-correction.json",
+    "sha256": "b33d3a2ecbac2dd8f41ca3728157b5e6cd72be498813ba07be4e04e9c4139502",
+    "fixture": "dual-adapter-acpx/src/test/resources/agent-result/hhzl-invalid-remediation.corrected.json",
+    "bytes": 2401
+  }
+}

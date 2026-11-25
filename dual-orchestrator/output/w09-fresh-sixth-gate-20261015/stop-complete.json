@@ -1,0 +1,7 @@
+{
+  "status": "NAMED_SESSIONS_CLOSED_KNOWN_PIDS_ABSENT_LEDGER_SNAPSHOTTED",
+  "actual_tokens": null,
+  "calls": 4,
+  "snapshot_files": 191,
+  "no_extra_prompt": true
+}

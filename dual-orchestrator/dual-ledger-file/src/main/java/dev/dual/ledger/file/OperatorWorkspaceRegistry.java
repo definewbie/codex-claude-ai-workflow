@@ -98,9 +98,10 @@ public final class OperatorWorkspaceRegistry {
         return next;
     }
 
-    public synchronized OperatorWorkspaceRegistryDocument registerFromLedger(Path effectiveWorkdir, String workstreamId) throws IOException {
+    public OperatorWorkspaceRegistryDocument registerFromLedger(WorkflowFileLedger ledger, Path effectiveWorkdir, String workstreamId) throws IOException {
         var root = effectiveWorkdir.toAbsolutePath().normalize();
-        var status = new FileLedgerStore().loadStatus(root, workstreamId);
+        var paths = new WorkstreamPaths(root, new dev.dual.core.id.DualId(workstreamId));
+        var status = ledger.inspect(paths, (scoped, files) -> scoped.store().loadStatus(root, workstreamId));
         return registerWorkstream(
                 Path.of(status.workspace().originalWorkdir()),
                 root,

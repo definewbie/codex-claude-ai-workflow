@@ -46,22 +46,25 @@ public final class AgentRunGovernanceContext {
         var contractResolution = requiresQualification || "acceptance_review".equals(expectedArtifact)
                 ? ("acceptance_review".equals(expectedArtifact)
                         ? TaskContractProjectionVerifier.resolveRoutedAcceptance(
-                                workspaceRoot,
+                                context.ledger(), workspaceRoot,
                                 context.workstreamId(),
                                 context.definition().id(),
                                 context.instance().inputRefs())
-                        : TaskContractProjectionVerifier.resolve(workspaceRoot, context.workstreamId()))
+                        : TaskContractProjectionVerifier.resolve(context.ledger(), workspaceRoot, context.workstreamId(), TaskContractProjectionVerifier.requiredPhase(context.definition())))
                 : TaskContractProjectionVerifier.Resolution.absent();
         if (contractResolution.failure() != null) {
-            throw qualificationFailure(contractResolution.failure());
+            throw qualificationFailure(context, contractResolution.failure(), "AgentRunGovernanceContext.ensureQualified");
         }
         if (requiresQualification && contractResolution.qualified().isEmpty()) {
-            throw new QualificationException(TaskContractProjectionVerifier.FAILURE_OUTCOME
-                    + ": APPROVAL_BINDING_MISSING: node requires an approved task contract");
+            throw missingBinding(context, ContractQualificationTrace.Rule.APPROVAL_REQUIRED, "APPROVAL_BINDING_MISSING", "node requires an approved task contract");
         }
         if ("acceptance_review".equals(expectedArtifact) && contractResolution.qualified().isEmpty()) {
-            throw new QualificationException(TaskContractProjectionVerifier.FAILURE_OUTCOME
-                    + ": CONTEXT_BINDING_MISSING: acceptance agent has no routed task contract binding");
+            throw missingBinding(context, ContractQualificationTrace.Rule.CONTEXT_REQUIRED, "CONTEXT_BINDING_MISSING", "acceptance agent has no routed task contract binding");
+        }
+        try {
+            VerificationEvidence.verifyAcceptanceInputs(context);
+        } catch (IOException invalid) {
+            throw new QualificationException("VERIFICATION_EVIDENCE_INVALID", invalid.getMessage());
         }
         Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract =
                 contractResolution.qualified();
@@ -75,7 +78,7 @@ public final class AgentRunGovernanceContext {
         var contextDir = workstreamDir.resolve("context");
         Files.createDirectories(contextDir);
 
-        var manifest = EvidenceManifest.rebuild(workspaceRoot, workstreamDir, context.workstreamId(),
+        var manifest = EvidenceManifest.rebuild(context.ledger(), workspaceRoot, workstreamDir, context.workstreamId(),
                 context.instance().inputRefs(), OBJECT_MAPPER, qualifiedContract);
         manifest.write(workstreamDir, OBJECT_MAPPER);
         var governance = RepoScopeGovernance.build(
@@ -94,6 +97,8 @@ public final class AgentRunGovernanceContext {
         builder.append("- Run Id: ").append(runId == null ? "" : runId).append("\n");
         builder.append("- Generated At: ").append(Instant.now()).append("\n\n");
         RepoScopeGovernance.appendMarkdownGuidance(builder, governance, workspaceRoot, true);
+        if (qualifiedContract.isPresent() && qualifiedContract.get().contract().phase() == TaskContract.Phase.GOAL)
+            builder.append(VerificationReadiness.context(context.ledger(), workspaceRoot, context.workstreamId(), qualifiedContract.get()));
         Files.writeString(packagePath, builder.toString(), StandardCharsets.UTF_8);
         return new PreparedContext(
                 workspaceRoot.relativize(packagePath).toString(),
@@ -106,35 +111,42 @@ public final class AgentRunGovernanceContext {
     }
 
     public static Optional<String> trustedTaskContractPayload(
+            dev.dual.ledger.file.WorkflowFileLedger ledger,
             Path workspaceRoot,
             String workstreamId,
             String nodeId,
             java.util.List<String> inputRefs
     ) {
         return TaskContractProjectionVerifier.trustedWrappedPayload(
-                workspaceRoot, workstreamId, nodeId, inputRefs);
+                ledger, workspaceRoot, workstreamId, nodeId, inputRefs);
     }
 
-    private static QualificationException qualificationFailure(TaskContractProjectionVerifier.Failure failure) {
-        return new QualificationException(TaskContractProjectionVerifier.FAILURE_OUTCOME
-                + ": " + failure.reason() + ": " + failure.message());
+    static QualificationException qualificationFailure(TaskHandler.TaskContext context, TaskContractProjectionVerifier.Failure failure, String consumer) {
+        return new QualificationException(failure.reason(), failure.message(),
+                ContractQualificationTrace.continuation(context, failure.reason(), failure.check(), consumer));
+    }
+    private static QualificationException missingBinding(TaskHandler.TaskContext context, ContractQualificationTrace.Rule rule, String code, String message) {
+        var trace = new ContractQualificationTrace(context.ledger(), context.workspaceRoot());
+        trace.rejects(rule, true, dev.dual.ledger.file.ContractQualificationChecks.values(
+                "requiredPhase", context.definition().config().get("required_contract_phase"),
+                "target", context.instance().nodeInstanceId(), "inputRefs", context.instance().inputRefs()));
+        return qualificationFailure(context, trace.failure(rule, code, message), "AgentRunGovernanceContext.ensureQualified");
     }
 
     public static boolean requiresApprovedTaskContract(TaskHandler.TaskContext context) {
-        var configured = context.definition().config().get("requires_approved_task_contract");
-        if (configured == null) {
-            return false;
-        }
-        if (!(configured instanceof Boolean required)) {
-            throw new IllegalArgumentException("requires_approved_task_contract must be a boolean");
-        }
-        return required;
+        return TaskContractProjectionVerifier.requiresContract(context.definition());
     }
 
     public static final class QualificationException extends IOException {
-        QualificationException(String message) {
-            super(message);
+        private final String reason;
+        private final dev.dual.ledger.file.ContractQualificationChecks.ContinuationFailure diagnostic;
+        QualificationException(String reason, String message) { this(reason, message, null); }
+        QualificationException(String reason, String message, dev.dual.ledger.file.ContractQualificationChecks.ContinuationFailure diagnostic) {
+            super(TaskContractProjectionVerifier.FAILURE_OUTCOME + ": " + reason + ": " + message);
+            this.reason = reason; this.diagnostic = diagnostic;
         }
+        public String reason() { return reason; }
+        public dev.dual.core.workflow.NodeResult result() { return AgentExecutionResultFacts.inputPreparationFailed(QUALIFICATION_FAILURE_OUTCOME, reason, java.util.List.of(getMessage()), diagnostic); }
     }
 
     public record PreparedContext(

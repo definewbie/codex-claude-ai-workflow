@@ -1,0 +1,9 @@
+Usage: dualctl delivery finalize [-hV] --commit=<commit> [--workdir=<workdir>]
+                                 <workstreamId>
+Verify and record the commit for an applied delivery candidate.
+      <workstreamId>
+      --commit=<commit>     Commit SHA created in the original repository.
+  -h, --help                Show this help message and exit.
+  -V, --version             Print version information and exit.
+      --workdir=<workdir>   Source worktree directory. Defaults to current
+                              directory.

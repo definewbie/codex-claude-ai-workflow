@@ -122,7 +122,7 @@ public final class CompletionAuditWriter {
 
     private java.util.Map<String, Object> readJson(java.nio.file.Path path) {
         try {
-            return objectMapper.readValue(path.toFile(), MAP_TYPE);
+            return jsonWriter.read(path, MAP_TYPE);
         } catch (IOException ignored) {
             return java.util.Map.of();
         }

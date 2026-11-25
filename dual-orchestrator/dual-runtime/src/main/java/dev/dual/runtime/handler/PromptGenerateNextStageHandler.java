@@ -179,7 +179,7 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
             var path = context.workspaceRoot().resolve(ref).normalize();
             var document = AgentOutputContractDocument.read(path, OBJECT_MAPPER);
             if (document.isPresent() && AgentOutputLineageVerifier.violation(
-                    context.workspaceRoot(), context.workstreamId(), path, document.get()).isEmpty()) {
+                    context.ledger(), context.workspaceRoot(), context.workstreamId(), path, document.get()).isEmpty()) {
                 return document;
             }
         }
@@ -193,7 +193,7 @@ public final class PromptGenerateNextStageHandler implements TaskHandler {
             var sidecar = AgentOutputContractDocument.read(sidecarPath, OBJECT_MAPPER);
             if (sidecar.isEmpty()
                     || AgentOutputLineageVerifier.violation(
-                            context.workspaceRoot(), context.workstreamId(), sidecarPath, sidecar.get()).isPresent()
+                            context.ledger(), context.workspaceRoot(), context.workstreamId(), sidecarPath, sidecar.get()).isPresent()
                     || !sidecar.get().isStageHandoffArtifact()) {
                 continue;
             }

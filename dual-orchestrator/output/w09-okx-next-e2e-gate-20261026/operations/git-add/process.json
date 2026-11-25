@@ -1,0 +1,12 @@
+{
+  "pid": 67922,
+  "argv": [
+    "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+    "-c",
+    "core.autocrlf=false",
+    "-c",
+    "core.hooksPath=/dev/null",
+    "add",
+    "--all"
+  ]
+}

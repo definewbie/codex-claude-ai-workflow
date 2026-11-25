@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/Users/kriswang/work/opensource/maven/bin/mvn",
+    "-o",
+    "-B",
+    "-Dstyle.color=never",
+    "-Dtest=PhaseOneAssessmentServiceTest,SmartArbitrageAllocationCalculatorTest,AssessIncomeCliRunnerTest",
+    "clean",
+    "test"
+  ],
+  "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline",
+  "JAVA_HOME": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home",
+  "exit_code": 0,
+  "elapsed_seconds": 5.139430416049436,
+  "offline_maven": true,
+  "product_started": false
+}

@@ -1,0 +1,9 @@
+{
+  "files": {
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java": "e3df7edb775ee9c9bd88b8fe48da8b384922684d3fcd55689e52bb6b83561020",
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxPromptCompletion.java": "a92780c274d226a7fdb7377db3913965d361de433c581161d7410044df5bc463",
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java": "23dff46be25e81980b83abb3ed5abea450252157448fd8fe71f5ae55f7015840",
+    ".tools/acpx-e1/source/src/acp/client.ts": "3f4204143fd1de4d160d74f4b74a966ffa6e5a12b9b682bb5a594a9309c443b5"
+  },
+  "review_scope": "usage identity/consumer; not native engine development"
+}

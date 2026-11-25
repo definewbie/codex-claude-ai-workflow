@@ -1,0 +1,41 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1791622684598-f52c41c9",
+  "workflowExecutionId" : "wfe-1791622684542-53fcfc3a",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "nodeKind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "FAILED",
+  "agent" : "claude",
+  "session" : "claude-main",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "contextPackageRef" : ".agent/workstreams/ws-20261010T085617Z-8SVF/context/node-context-intake_claude_brainstorm-001.md",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "acpx.agent_run",
+    "agent" : "claude",
+    "session" : "claude-main",
+    "prompt_template" : "intake-claude-brainstorm",
+    "context_package_ref" : ".agent/workstreams/ws-20261010T085617Z-8SVF/context/node-context-intake_claude_brainstorm-001.md",
+    "expected_contract" : "",
+    "node_config" : {
+      "agent" : "claude",
+      "session" : "claude-main",
+      "permission_profile" : "contract_discovery",
+      "prompt_template" : "intake-claude-brainstorm",
+      "expected_artifact" : "task_contract_proposal",
+      "artifact_compiler" : "task_contract_proposal_compiler",
+      "allowed_stage_outcomes" : [ "READY", "BLOCKED" ]
+    },
+    "outcome" : "required_artifact_contract_failed",
+    "node_status" : "FAILED",
+    "output_ref_count" : 6
+  },
+  "nodeExecutionId" : "nxe-1791622684602-4a7db768",
+  "errorMessage" : "The agent result was valid, but one or more required artifact projections failed validation.",
+  "createdAt" : "2026-10-10T08:58:04.598421Z",
+  "claimedAt" : "2026-10-10T08:58:04.611834Z",
+  "completedAt" : "2026-10-10T09:05:23.136717Z"
+}

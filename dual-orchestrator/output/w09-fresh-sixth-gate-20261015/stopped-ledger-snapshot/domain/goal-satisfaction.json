@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261014T234009Z-RN9X",
+  "workflowInstanceId" : "wf-ws-20261014T234009Z-RN9X",
+  "nodeInstanceId" : "node-intake-decision-005",
+  "nodeDefinitionId" : "intake.decision",
+  "iterationId" : "iter-001",
+  "outcome" : "NEEDS_REVISION",
+  "domainOutcome" : "NEEDS_REDESIGN",
+  "reason" : "功能语义与验收要求完整，但排除项提前锁定了文件集合，与文件须经后续设计、计划和执行批准的要求冲突。",
+  "evidenceRefs" : [ ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/binding.json", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.contract.json" ],
+  "sourceResult" : {
+    "decision" : "NEEDS_REVISION",
+    "source" : "contract-sidecar",
+    "summary" : "功能语义与验收要求完整，但排除项提前锁定了文件集合，与文件须经后续设计、计划和执行批准的要求冲突。"
+  },
+  "generatedAt" : "2026-10-14T23:42:46.633711Z"
+}

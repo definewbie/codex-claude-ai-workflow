@@ -1,0 +1,45 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261010T124812Z-XCZL",
+  "updatedAt" : "2026-10-10T14:12:59.051448Z",
+  "items" : [ {
+    "id" : "requirement_resolution:cddfc624",
+    "type" : "requirement_resolution",
+    "stageId" : "",
+    "iterationId" : "",
+    "nodeInstanceId" : "",
+    "nodeExecutionId" : "",
+    "sourceRef" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/contract-resolution.json",
+    "summary" : "requirement_resolution: APPROVE",
+    "claims" : [ "Decision: APPROVE" ],
+    "files" : [ ],
+    "riskTags" : [ ],
+    "status" : "available"
+  }, {
+    "id" : "task_contract:f91145b1",
+    "type" : "task_contract",
+    "stageId" : "",
+    "iterationId" : "",
+    "nodeInstanceId" : "",
+    "nodeExecutionId" : "",
+    "sourceRef" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/task-contract.json",
+    "summary" : "在本地 Python 仓库中实现 normalize_newlines(text: str) -> str:将 CRLF 与单独 CR 统一转换为 LF,完整保留其他字符、空字符串、已有 LF 以及末尾有无换行的状态,并配套 unittest 测试与 README 用法说明。",
+    "claims" : [ "{id=AC-1, text=tests/test_normalize_text.py 以 unittest 覆盖至少八类输入:空字符串、纯 LF 文本、含 CRLF 文本、含单独 CR 文本、混合换行文本、Unicode 内容、末尾有换行、末尾无换行、连续空行;每类用例断言与函数语义对应的明确期望输出,并断言对已规范化结果再次调用 normalize_newlines 输出不变(幂等)。}", "{id=AC-2, text=在仓库中实际执行 unittest(如 python -m unittest 或等价标准库方式),保留的真实输出明确显示运行的用例数且 failures=0、errors=0,输出所列用例与 tests/test_normalize_text.py 源码中的案例一一对应;本任务不要求工具独立测量的真实退出码,但仅凭“测试完成”之类的文字结论不满足本条。}", "{id=AC-3, text=README.md 提供与 src/normalize_text.py 实现一致的用法示例,至少包含导入语句和一段典型混合换行输入及其逐字符可核对的输出表示,并通过实际读取源码/文档或实际执行示例验证该一致性。}", "{id=AC-4, text=normalize_newlines 对任意字符串仅执行换行规范化:每个 CRLF(\\r\\n)与每个单独 CR(\\r)都恰好转换为一个 LF(\\n),其余所有字符(含空串、已有 \\n、末尾换行的有无)逐字符保持不变。}", "{id=AC-5, text=最终交付的实现改动严格限于获批 EXECUTION scope.included 列出的精确仓库相对路径，各路径的 CREATE/MODIFY 操作与获批内容一致；不出现授权集之外任何路径的改动，也不要求每个获批路径都必须发生改动。}", "Decision: READY_FOR_REVIEW" ],
+    "files" : [ ],
+    "riskTags" : [ "实现必须先处理 \\r\\n 再处理单独 \\r(或使用等价的一次性逻辑),否则 CRLF 会被替换成两个 LF;需由 CRLF 与混合换行测试用例防回归。", "README 示例中的回车/换行字符在 Markdown 渲染后不可见,应使用显式转义或 repr 风格表示输入/输出,确保示例可与实际执行逐字符核对。", "当前仓库产品树为空(repo-map 显示 tracked 文件数为 0),三个文件均为新建;测试导入 src 下的模块需以标准库方式处理 sys.path(如基于 __file__ 推导),避免引入安装步骤,具体方式在设计与计划阶段确定。" ],
+    "status" : "available"
+  }, {
+    "id" : "human_decision:81df8787",
+    "type" : "human_decision",
+    "stageId" : "stage-gate",
+    "iterationId" : "iter-002",
+    "nodeInstanceId" : "node-gate-human_requirement_review-011",
+    "nodeExecutionId" : "",
+    "sourceRef" : ".agent/workstreams/ws-20261010T124812Z-XCZL/nodes/node-gate-human_requirement_review-011.json",
+    "summary" : "Human action: approved",
+    "claims" : [ "用户在当前GOAL材料展示后明确批准目标、验收和排除范围；不批准精确实施范围或最终交付。" ],
+    "files" : [ ],
+    "riskTags" : [ ],
+    "status" : "available"
+  } ]
+}

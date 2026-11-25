@@ -1,0 +1,10 @@
+--- /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-startup-offline-fix-20261023/pre-dispatch-recheck.py.candidate
++++ /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/pre-dispatch-recheck.py
+@@ -46,6 +46,7 @@
+ write(OUT/'pre-dispatch-recheck.json',dict(checked_at=datetime.datetime.now().astimezone().isoformat(),
+     status='PASS_READONLY_RECHECK',fresh_run_authorized=authorization['fresh_run_authorized'],
+     dispatch_performed=False,native_provider_calls=0,initial_current_unchanged=True,
++    process_observation=process_observation,
+     budget_input=state,budget_result=admission,
+     next_action='USER_CURRENT_RUN_APPROVAL_REQUIRED' if not authorization['fresh_run_authorized'] else 'CURRENT_APPROVAL_MUST_BE_VERIFIED_BY_OPERATOR_BEFORE_ORIGINAL_RUNNER'))
+ print('Read-only recheck PASS; run authorized='+str(authorization['fresh_run_authorized'])+'; no dispatch')

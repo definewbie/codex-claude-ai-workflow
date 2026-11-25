@@ -1,0 +1,10 @@
+{
+  "status": "PREFLIGHT_ONLY_PENDING_SCOPE_DECISION",
+  "source_resource_files": 593,
+  "source_resource_changes": 0,
+  "tests_run": false,
+  "provider_native_runs": 0,
+  "extra_agents": 0,
+  "git_commit": false,
+  "basis": "current bytes compared with before-source-sha256; new B03 document links checked"
+}

@@ -1,0 +1,38 @@
+the agents and determining when the system has reached its final outcome.
+Figure 4-6 illustrates how these components connect, highlighting the flow
+of information and reasoning within the multi-agent system.
+
+
+
+
+
+             Figure 4-6. Illustration of the research team implemented in LangGraph.
+
+The code in this section focuses on how each agent is defined. The
+complete code, including tools, graph wiring, and routing, is intentionally
+omitted so the focus remains on the division of roles and the architectural
+choices behind them.
+
+Example 4-4 defines the specific skill set for each agent in your team.
+
+Example 4-4. Simple text generation
+EXA_PROMPT = """Role: Research assistant. You can search for all
+recent info
+on Exa Search. Your response should clearly articulate the key
+points you found."""
+
+PATENT_PROMPT = """Role: Market researcher with 20 years of
+experience.
+You are very knowledgeable in patent research and in finding up-to-
+date info
+about patents using the Google Patents API."""
+
+NOTE_PROMPT = """You can read documents and create outlines for the
+document
+writer. Don't ask follow-up questions."""
+
+WRITER_PROMPT = """You can read, write, and edit documents based on
+note-taker's
+outlines. Don't ask follow-up questions."""
+
+ANALYST_PROMPT = """

@@ -69,25 +69,50 @@ public class WorkstreamActionService {
         }
     }
 
+    public Map<String, Object> decideNativePermission(Path root, String workstreamId, String execution, String requestKey, String option, String note) throws Exception {
+        return dev.dual.runtime.handler.NativePermissionRequests.decide(ledger, paths(normalize(root), workstreamId), execution, requestKey, option, note);
+    }
+    public Map<String, Object> cancelNativePermissionWait(Path root, String workstreamId, String execution, String note) throws Exception {
+        return dev.dual.runtime.handler.NativePermissionRequests.cancel(ledger, paths(normalize(root), workstreamId), execution, note == null ? "operator cancelled native permission wait" : note);
+    }
+
+    public dev.dual.core.contract.TaskContract.Reference recordReadiness(Path root, String workstreamId,
+            dev.dual.runtime.handler.VerificationReadiness.Request request) throws Exception {
+        return dev.dual.runtime.handler.VerificationReadiness.record(ledger, normalize(root), workstreamId, request);
+    }
+
     public Map<String, Object> resume(Path workspaceRoot, String workstreamId, int maxSteps) throws Exception {
         var root = normalize(workspaceRoot);
         validateMaxSteps(maxSteps);
         var paths = paths(root, workstreamId);
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api resume"))) {
-            assertResumable(paths, "resume");
-            var response = runLoop(root, workstreamId, maxSteps);
-            maybeCloseTerminalSessions(root, workstreamId);
-            return response;
-        }
+        assertResumable(paths, "resume");
+        var response = runLoop(root, workstreamId, maxSteps);
+        maybeCloseTerminalSessions(root, workstreamId);
+        return response;
+
+    }
+
+    public Map<String, Object> adjudicate(Path workspaceRoot, String workstreamId,
+            dev.dual.runtime.handler.ExecutionRecoveryAdjudication.Request request, String expectedDisposition) throws Exception {
+        if (request == null || !expectedDisposition.equals(request.disposition())) throw new IllegalArgumentException("wrong recovery disposition");
+        dev.dual.runtime.handler.ExecutionRecoveryAdjudication.apply(ledger, paths(normalize(workspaceRoot), workstreamId), request);
+        return actionResponse("recovery.adjudicate", workstreamId, "explicit recovery decision recorded; prior observations retained; no new execution dispatched");
+    }
+
+    public Map<String, Object> stopRecordedSession(Path root, String workstreamId) throws Exception {
+        var paths = paths(normalize(root), workstreamId);
+        var refs = new dev.dual.adapter.acpx.AcpxExecutionRecovery().stop(ledger, paths);
+        var execution = dev.dual.runtime.RecordedExecutionRecovery.active(ledger, paths).orElseThrow();
+        if (execution.status() == dev.dual.ledger.file.NodeExecutionStatus.RUNNING) staleRunningRecovery.recover(paths, "native stop acknowledged");
+        return Map.of("workstream", workstreamId, "native_stop_observations", refs, "external_effect", "UNKNOWN");
     }
 
     public Map<String, Object> retry(Path workspaceRoot, String workstreamId, String note) throws Exception {
         var root = normalize(workspaceRoot);
         var paths = paths(root, workstreamId);
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api retry"))) {
-            assertNotCompleted(paths, "retry");
-            ledger.retryActiveNode(paths, note);
-        }
+        assertNotCompleted(paths, "retry");
+        ledger.retryActiveNode(paths, note);
+
         maybeCloseTerminalSessions(root, workstreamId);
         return actionResponse("retry", workstreamId, "active node marked ready for retry");
     }
@@ -100,12 +125,9 @@ public class WorkstreamActionService {
     ) throws Exception {
         var root = normalize(workspaceRoot);
         var paths = paths(root, workstreamId);
-        try (var ignored = WorkstreamLock.acquire(
-                paths.workstreamDir(),
-                LockOwner.currentProcess(workstreamId, "api approve public WebSearch"))) {
-            assertNotCompleted(paths, "approve public WebSearch");
-            ledger.approvePublicWebSearch(paths, note, publicRepositoryAttested);
-        }
+        assertNotCompleted(paths, "approve public WebSearch");
+        ledger.approvePublicWebSearch(paths, note, publicRepositoryAttested);
+
         return actionResponse(
                 "recovery.approve_public_websearch",
                 workstreamId,
@@ -116,34 +138,31 @@ public class WorkstreamActionService {
                                                 String target, java.util.List<String> domains, String note, boolean cancel) throws Exception {
         var root = normalize(workspaceRoot).toRealPath();
         var paths = paths(root, workstreamId);
-        var store = new dev.dual.ledger.file.ExecutionNetworkGrantStore();
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api network authority"))) {
-            if (cancel) {
-                if (target != null || domains != null || note != null) throw new IllegalArgumentException("cancel cannot include approval fields");
-                store.cancel(paths);
-            } else {
-                store.approve(paths, target, domains, note);
-            }
-            return store.view(paths);
+        var store = new dev.dual.ledger.file.ExecutionNetworkGrantStore(ledger);
+        if (cancel) {
+            if (target != null || domains != null || note != null) throw new IllegalArgumentException("cancel cannot include approval fields");
+            store.cancel(paths);
+        } else {
+            store.approve(paths, target, domains, note);
         }
+        return store.view(paths);
+
     }
 
     public Map<String, Object> recoverStaleRunning(Path workspaceRoot, String workstreamId, String note) throws Exception {
         var root = normalize(workspaceRoot);
         var paths = paths(root, workstreamId);
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api recovery stale"))) {
-            staleRunningRecovery.recover(paths, note);
-        }
+        staleRunningRecovery.recover(paths, note);
+
         maybeCloseTerminalSessions(root, workstreamId);
-        return actionResponse("recovery.stale", workstreamId, "stale running node moved to recovery");
+        return actionResponse("recovery.stale", workstreamId, "recovery state checked: " + ledger.loadCurrent(paths).status());
     }
 
     public Map<String, Object> closeMistakenIteration(Path workspaceRoot, String workstreamId, String note) throws Exception {
         var root = normalize(workspaceRoot);
         var paths = paths(root, workstreamId);
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api recovery close mistaken iteration"))) {
-            ledger.closeMistakenIteration(paths, note);
-        }
+        ledger.closeMistakenIteration(paths, note);
+
         maybeCloseTerminalSessions(root, workstreamId);
         return actionResponse("recovery.close_mistaken_iteration", workstreamId, "mistaken iteration closed");
     }
@@ -151,8 +170,16 @@ public class WorkstreamActionService {
     public Map<String, Object> approve(
             Path workspaceRoot, String workstreamId, String note, boolean runImmediately, int maxSteps
     ) throws Exception {
+        return approve(workspaceRoot, workstreamId, note, runImmediately, maxSteps, null);
+    }
+
+    /** @param expectedGate the gate occurrence the decider saw (from the review packet); refuses a stale view. */
+    public Map<String, Object> approve(
+            Path workspaceRoot, String workstreamId, String note, boolean runImmediately, int maxSteps,
+            String expectedGate
+    ) throws Exception {
         var root = normalize(workspaceRoot);
-        resolveGate(root, workstreamId, "approve", note);
+        dev.dual.runtime.handler.ReviewGateActions.resolve(ledger, paths(root, workstreamId), "approve", note, expectedGate);
         if (runImmediately) {
             var current = ledger.loadCurrent(paths(root, workstreamId));
             if (current.status() == WorkflowStatus.COMPLETED) {
@@ -180,13 +207,13 @@ public class WorkstreamActionService {
         return actionResponse("review.complete", workstreamId, "human gate completed");
     }
 
-    public Map<String, Object> revise(Path workspaceRoot, String workstreamId, String feedback,
+    public Map<String, Object> revise(Path workspaceRoot, String workstreamId, String feedback, String subject,
                                       boolean runImmediately, int maxSteps) throws Exception {
         if (feedback == null || feedback.isBlank()) {
             throw new IllegalArgumentException("feedback is required");
         }
         var root = normalize(workspaceRoot);
-        resolveGate(root, workstreamId, "revise", feedback);
+        dev.dual.runtime.handler.ReviewGateActions.revise(ledger, new WorkstreamPaths(root, new DualId(workstreamId)), subject, feedback);
         if (runImmediately) {
             var response = resume(root, workstreamId, maxSteps);
             response.put("action", "review.revise.run");
@@ -226,10 +253,7 @@ public class WorkstreamActionService {
 
     private void resolveGate(Path root, String workstreamId, String action, String note) throws Exception {
         var paths = paths(root, workstreamId);
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api review " + action))) {
-            assertNotCompleted(paths, "review " + action);
-            dev.dual.runtime.handler.EvidenceCollection.resolveGate(ledger, paths, ledger.loadDefinition(paths), action, note);
-        }
+        dev.dual.runtime.handler.ReviewGateActions.resolve(ledger, paths, action, note);
     }
 
     private Map<String, Object> runLoop(Path root, String workstreamId, int maxSteps) throws Exception {

@@ -1,0 +1,5 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 W08 准备批次做合并独立评审，遵守 AGENTS.md。入口：output/w08-preparation-20261010/assessment.md；同目录含相对开工脏工作区的增量、原始验证、装配元数据、逐条验收出口和更新 Gate。
+
+自行重建 GOAL提案→独立设计/计划复评→精确EXECUTION批准→实现/验证→交付及失败恢复链，核对提示修正是否既解除合法阻塞又保留严格拒绝，装配/证据/发行结论是否有据，以及新 Gate 预算、readiness时序和剩余授权是否可执行、必要且有界。请完整阅读更新 Gate 与纯产品需求，不预设作者结论。
+
+按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给分级发现、证据、未核验范围与下一步。区分程序夹具、宿主观察、元数据与真实能力。只读，不修改、启动额外agent、运行native/provider/installer或真实目标Git；不扩为平台。PASS不授权真实运行或提交。

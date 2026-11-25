@@ -1,0 +1,25 @@
+{
+  "explicit_child_environment": {
+    "DUAL_ACPX_EXECUTABLE": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+    "DUAL_ACPX_COMMAND_TIMEOUT_SECONDS": "600",
+    "DUAL_FLOW_KERNEL": "liteflow",
+    "DUAL_OPERATOR_REGISTRY": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/operator-workspaces.json",
+    "PATH": "/Users/kriswang/.pyenv/versions/3.13.0/bin:/Users/kriswang/.pyenv/libexec:/Users/kriswang/.pyenv/plugins/python-build/bin:/Users/kriswang/.pyenv/plugins/pyenv-virtualenv/bin:/Users/kriswang/.pyenv/plugins/pyenv-update/bin:/Users/kriswang/.pyenv/plugins/pyenv-doctor/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/usr/local/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Users/kriswang/.codex/tmp/arg0-macos/codex-arg0UpOwBW:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.foundry/bin",
+    "JAVA_HOME": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home"
+  },
+  "real_run_authorized": false,
+  "persistent_environment_changed": false,
+  "executables": {
+    "java": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin/java",
+    "python3": "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13",
+    "node": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/node",
+    "git": "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+    "rtk": "/opt/homebrew/Cellar/rtk/0.42.3/bin/rtk",
+    "claude": "/opt/homebrew/Caskroom/claude-code/2.1.277/claude",
+    "codex": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+    "ps": "/bin/ps",
+    "acpx": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx"
+  },
+  "preparation_parent_path_sha256": "2334ee09afb1e709a9a81f436f09a674586981b4862df76a4f05b46d43d5b9d9",
+  "parent_path_is_diagnostic_only": true
+}

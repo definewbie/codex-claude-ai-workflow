@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-26T21:11:54.034414+00:00",
+  "classification": "FAIL",
+  "reason": "PREFLIGHT_READINESS_METHOD_IDENTITY_MISMATCH",
+  "failure_severity": "BOUNDARY_PREFLIGHT",
+  "source_rule": "VerificationReadiness.validateBindings request.method.equals(binding.method)",
+  "runtime_primary_reason_not_claimed": true,
+  "workflow_current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261026T142203Z-7SNA",
+    "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-plan-codex_plan_review-025"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000025",
+    "updatedAt": "2026-10-26T21:09:17.939818Z",
+    "commitSequence": 93
+  },
+  "domain_status_not_rewritten": true,
+  "actual_tokens": 2034803,
+  "completed_calls": 9,
+  "active_seconds_at_detection": 1978.83363307967,
+  "proof_ref": "evidence/plan-method-mismatch-readonly-proof.json",
+  "next_dispatch": "FORBIDDEN_PENDING_BOUNDARY_ANALYSIS_AND_USER_DECISION",
+  "delegation_condition": "Unexpected boundary mismatch exits normal automatic execution envelope",
+  "original_stop_preserved": true
+}

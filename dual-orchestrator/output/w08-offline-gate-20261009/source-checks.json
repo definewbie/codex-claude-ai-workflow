@@ -1,0 +1,406 @@
+[
+  {
+    "path": "dual-core/src/main/java/dev/dual/core/contract/TaskContract.java",
+    "sha256": "f55c6ebe367773b65f68fc1eaa3e04401c669316aaeeedbf88dc505c43f4185c",
+    "anchors": [
+      {
+        "line": 117,
+        "text": "public enum Phase { GOAL, EXECUTION }"
+      },
+      {
+        "line": 137,
+        "text": "public enum EvidenceKind { PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, OPERATOR_DECLARATION_WITH_MATERIAL }"
+      }
+    ]
+  },
+  {
+    "path": "dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java",
+    "sha256": "61a4a30d463e4747c1a70c201ea85fd4ca76bb4a1104b880647c8936bd7c147d",
+    "anchors": [
+      {
+        "line": 36,
+        "text": "if (contract.phase() == TaskContract.Phase.EXECUTION"
+      },
+      {
+        "line": 38,
+        "text": "errors.add(\"READY_FOR_REVIEW requires non-empty scope.included\");"
+      },
+      {
+        "line": 75,
+        "text": "if (contract.phase() == TaskContract.Phase.GOAL) {"
+      },
+      {
+        "line": 77,
+        "text": "errors.add(\"GOAL cannot grant product writes through scope.included\");"
+      },
+      {
+        "line": 80,
+        "text": "errors.add(\"GOAL cannot masquerade as an EXECUTION contract\");"
+      },
+      {
+        "line": 83,
+        "text": "if (contract.goalContract() == null) errors.add(\"EXECUTION requires the approved GOAL reference\");"
+      },
+      {
+        "line": 86,
+        "text": "errors.add(\"EXECUTION requires distinct reviewed design and plan references\");"
+      },
+      {
+        "line": 102,
+        "text": "&& binding.evidenceKind() != TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS)"
+      },
+      {
+        "line": 135,
+        "text": "&& binding.evidenceKind() != TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS)"
+      },
+      {
+        "line": 157,
+        "text": "errors.add(\"scope.included contains null entry\");"
+      },
+      {
+        "line": 161,
+        "text": "errors.add(\"scope.included contains blank path\");"
+      },
+      {
+        "line": 165,
+        "text": "errors.add(\"scope.included operation is required: \" + ref.path());"
+      },
+      {
+        "line": 168,
+        "text": "errors.add(\"scope.included legacy new: prefix is not allowed: \" + ref.path());"
+      },
+      {
+        "line": 171,
+        "text": "errors.add(\"scope.included is not a canonical relative file path: \" + ref.path());"
+      },
+      {
+        "line": 174,
+        "text": "errors.add(\"scope.included contains ledger/context metadata: \" + ref.path());"
+      },
+      {
+        "line": 177,
+        "text": "errors.add(\"scope.included contains duplicate path: \" + ref.path());"
+      },
+      {
+        "line": 187,
+        "text": "for (var included : scope.included()) {"
+      },
+      {
+        "line": 190,
+        "text": "errors.add(\"scope.included overlaps scope.excluded: \" + included.path());"
+      },
+      {
+        "line": 225,
+        "text": "* Strict canonical path check for scope.included entries. Uses canonical"
+      }
+    ]
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/DesignScopeValidator.java",
+    "sha256": "37fea8bdc907f735d68b779b58bcc3e8b076a39ae09d3fb0e7c3f839cc995a2b",
+    "anchors": [
+      {
+        "line": 48,
+        "text": "var resolution = TaskContractProjectionVerifier.resolve(ledger, root, workstreamId, dev.dual.core.contract.TaskContract.Phase.GOAL);"
+      },
+      {
+        "line": 74,
+        "text": "if (contract.phase() == TaskContract.Phase.EXECUTION"
+      }
+    ]
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+    "sha256": "7c06370e8a6c3426224bb173d07b2027192d5325f3e7d6a3d286177e69841557",
+    "anchors": [
+      {
+        "line": 54,
+        "text": "Allowed `result.decision` values: %s"
+      },
+      {
+        "line": 66,
+        "text": "contractRevisionInstruction(nodeId, proposalContext) + authoredRevisionInstruction(exampleResult)"
+      },
+      {
+        "line": 100,
+        "text": "private static String authoredRevisionInstruction(AgentResultEnvelope.AgentResult result) {"
+      },
+      {
+        "line": 102,
+        "text": "return \"\\n`result.revision_responses` is required: return [] when there are no active authored obligations. \""
+      },
+      {
+        "line": 103,
+        "text": "+ \"Otherwise cover every active obligation_id from Required Authored Context exactly once; \""
+      },
+      {
+        "line": 104,
+        "text": "+ \"do not add unknown IDs or omit unresolved obligations. Each entry has exactly obligation_id, \""
+      },
+      {
+        "line": 109,
+        "text": "? \"\\nedit_files must contain unique canonical proposed paths respecting the approved GOAL exclusions. Exact file operations require later EXECUTION approval. \""
+      },
+      {
+        "line": 123,
+        "text": "+ \"Cover each authoritative routed obligation exactly once. Preserve its id and implement its text: \""
+      },
+      {
+        "line": 124,
+        "text": "+ json(context.obligations())"
+      },
+      {
+        "line": 127,
+        "text": "+ \"do not reinterpret them as contract obligations or approval): \""
+      },
+      {
+        "line": 135,
+        "text": "+ \"Across the entire `result.obligation_patches` array, each `clause_changes[].id`, \""
+      },
+      {
+        "line": 137,
+        "text": "+ \"When one evidence ref supports multiple obligations, add it in one most relevant patch only; \""
+      },
+      {
+        "line": 138,
+        "text": "+ \"use each obligation's `resolved_by_clause_ids` to express coverage instead of adding the ref again. \""
+      },
+      {
+        "line": 139,
+        "text": "+ closedItemFields(\"result.obligation_patches\","
+      },
+      {
+        "line": 148,
+        "text": "return \"`result.scope.included` is the exhaustive authorization set for permitted repository changes; \""
+      },
+      {
+        "line": 153,
+        "text": "+ \"as illustrative or non-exhaustive. When a revision obligation identifies a scope gap, \""
+      },
+      {
+        "line": 154,
+        "text": "+ \"update the typed path entries directly and map the obligation to one or more \""
+      },
+      {
+        "line": 159,
+        "text": "+ \"`review_obligation_id` and list one or more clause IDs in `resolved_by_clause_ids`. \""
+      },
+      {
+        "line": 173,
+        "text": "+ \"`result.contract_obligations` must contain one object per contract obligation \""
+      },
+      {
+        "line": 176,
+        "text": "\"result.contract_obligations\","
+      },
+      {
+        "line": 177,
+        "text": "new AgentResultEnvelope.ReviewObligation(\"CO-1\", \"binding contract obligation\"));"
+      },
+      {
+        "line": 180,
+        "text": "return \"For this node, `result.contract_obligations` must remain exactly `[]`; \""
+      },
+      {
+        "line": 181,
+        "text": "+ \"contract obligations are produced only by intake contract review.\";"
+      },
+      {
+        "line": 290,
+        "text": "proposalContext.obligations().isEmpty()"
+      },
+      {
+        "line": 291,
+        "text": "? \"CO-1\" : proposalContext.obligations().getFirst().id(),"
+      },
+      {
+        "line": 361,
+        "text": "List.of(), dev.dual.core.contract.TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS,"
+      },
+      {
+        "line": 441,
+        "text": "List.copyOf(context.obligations()),"
+      },
+      {
+        "line": 447,
+        "text": "+ \"Respond to obligations using existing clause ids; keep clause_changes and evidence_ref_additions empty.\""
+      },
+      {
+        "line": 461,
+        "text": "List<AgentResultEnvelope.ReviewObligation> obligations,"
+      },
+      {
+        "line": 465,
+        "text": "obligations = obligations == null ? List.of() : List.copyOf(obligations);"
+      },
+      {
+        "line": 470,
+        "text": "List<AgentResultEnvelope.ReviewObligation> obligations) {"
+      },
+      {
+        "line": 471,
+        "text": "this(mode, baseProposalId, baseProposalSha256, obligations, \"\");"
+      }
+    ]
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentPromptRenderer.java",
+    "sha256": "62c6b25d7ca4b95a173bb5d1afa867c830577533cb6f83e7fed300790a58251f",
+    "anchors": [
+      {
+        "line": 268,
+        "text": "- `design.planned_files` declares intended changes only; exact paths and operations must be authorized by the approved TaskContract."
+      }
+    ]
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java",
+    "sha256": "c6fb4c855fbcf55f112b629c89a855f5f1a60d0d9abf304329f323a2ebd1182c",
+    "anchors": [
+      {
+        "line": 271,
+        "text": "Only correct the malformed obligation_id slots listed below, using the canonical active obligations"
+      },
+      {
+        "line": 275,
+        "text": "This is the only contract-correction attempt; it does not grant an approval or close an obligation."
+      }
+    ]
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java",
+    "sha256": "3dfd8d2531fab9c496145d8818be233c23e4687c961b444600021cb9b2eae8cf",
+    "anchors": [
+      {
+        "line": 33,
+        "text": "private static final long DEFAULT_SESSION_COMMAND_TIMEOUT_SECONDS = 45;"
+      },
+      {
+        "line": 37,
+        "text": "private static final String SESSION_COMMAND_TIMEOUT_ENV = \"DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS\";"
+      },
+      {
+        "line": 40,
+        "text": "private static final String ACPX_COMMAND_TIMEOUT_ENV = \"DUAL_ACPX_COMMAND_TIMEOUT_SECONDS\";"
+      },
+      {
+        "line": 99,
+        "text": "sessionCommandTimeout, configuredCommandTimeout(System.getenv(ACPX_COMMAND_TIMEOUT_ENV)));"
+      },
+      {
+        "line": 518,
+        "text": "long permissionBudgetMillis(AcpxPermissionProfile profile) {"
+      },
+      {
+        "line": 522,
+        "text": "return request.executionEventSink().permissionRepliesEnabled() && permissionBudgetMillis(request.permissionProfile()) > 0;"
+      },
+      {
+        "line": 761,
+        "text": "outputPath = Files.createTempFile(\"dual-acpx-session-\", \".log\");"
+      },
+      {
+        "line": 1183,
+        "text": "SESSION_COMMAND_TIMEOUT_ENV,"
+      },
+      {
+        "line": 1184,
+        "text": "Duration.ofSeconds(DEFAULT_SESSION_COMMAND_TIMEOUT_SECONDS)"
+      },
+      {
+        "line": 1188,
+        "text": "static Duration configuredCommandTimeout(String value) {"
+      },
+      {
+        "line": 1195,
+        "text": "throw new IllegalArgumentException(ACPX_COMMAND_TIMEOUT_ENV + \" must be a non-negative integer\");"
+      },
+      {
+        "line": 1199,
+        "text": "throw new IllegalArgumentException(ACPX_COMMAND_TIMEOUT_ENV + \" must be a non-negative integer\", failure);"
+      }
+    ]
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxPermissionProfile.java",
+    "sha256": "0e0ccc8e7c904d2cb698c84f7c9c8a28bcaa9da6d6106e8bcb2dee3de29586cc",
+    "anchors": []
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ReviewedAcpxBuildIdentity.java",
+    "sha256": "6439b7b039ab2cd67cee353d7ad0480552b30d7449515513a1c48e127ede07a1",
+    "anchors": [
+      {
+        "line": 31,
+        "text": "\"DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS\", \"DUAL_ACPX_COMMAND_TIMEOUT_SECONDS\", \"API_TIMEOUT_MS\","
+      }
+    ]
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/design-claude.md",
+    "sha256": "b0cdeb5b64c374022598256fc930c32a3e0859ceb6d9d018596aa7f080b5deab",
+    "anchors": [
+      {
+        "line": 19,
+        "text": "Copy exact canonical paths and operations from the approved TaskContract scope; prose cannot authorize other paths."
+      }
+    ]
+  },
+  {
+    "path": "dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+    "sha256": "555a73ab850d1138041f5b157620cd2eddf932069b9ebfa047d00e7a01ccc7e0",
+    "anchors": [
+      {
+        "line": 71,
+        "text": "var observed = includeDelivery ? deliveryViewService.observe(root, id) : null;"
+      },
+      {
+        "line": 74,
+        "text": "return workflowLedger.inspect(paths, (scoped, files) -> {"
+      },
+      {
+        "line": 75,
+        "text": "var result = new LinkedHashMap<>(query.read(new WorkstreamQueryService(objectMapper, scoped, observed == null ? Map.of() : deliveryViewService.inSnapshot(root, id, observed, scoped))));"
+      }
+    ]
+  },
+  {
+    "path": "dual-cli/src/main/java/dev/dual/cli/SummaryCommand.java",
+    "sha256": "06c6500d18662f8c1609e8ae5f3bbd57311442614141500579be0d64856a2710",
+    "anchors": []
+  },
+  {
+    "path": "dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java",
+    "sha256": "0931ce1cfe919b4c269e012a81afa1d5bdebc6fcb5e7c28132e16429735741ff",
+    "anchors": [
+      {
+        "line": 48,
+        "text": "synchronized (FlowExecutorHolder.class) {"
+      },
+      {
+        "line": 77,
+        "text": "FlowExecutorHolder.clean();"
+      },
+      {
+        "line": 84,
+        "text": "synchronized (FlowExecutorHolder.class) {"
+      },
+      {
+        "line": 85,
+        "text": "FlowExecutorHolder.clean();"
+      },
+      {
+        "line": 93,
+        "text": "lastRuleFile = Files.createTempFile(\"dual-liteflow-\", \".xml\");"
+      },
+      {
+        "line": 100,
+        "text": "FlowExecutorHolder.clean();"
+      },
+      {
+        "line": 101,
+        "text": "return FlowExecutorHolder.loadInstance(config);"
+      }
+    ]
+  }
+]

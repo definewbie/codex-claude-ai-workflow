@@ -1,0 +1,206 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest
+-------------------------------------------------------------------------------
+Tests run: 52, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 16.09 s <<< FAILURE! -- in dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest
+dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedAgentRunPrefersTransportUsageWhenNoAcpxSessionStreamExists -- Time elapsed: 0.049 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+{
+  "schemaVersion" : 2,
+  "runId" : "run-1791630377197",
+  "workstreamId" : "ws-test",
+  "nodeId" : "intake.claude_brainstorm",
+  "agent" : "claude",
+  "session" : "claude-main-ws-test",
+  "sessionScope" : "workstream",
+  "sessionSegmentKey" : "ws:ws-test",
+  "sessionScopeReason" : "default:workstream",
+  "stage" : "stage-intake",
+  "semanticIteration" : "iter-001",
+  "sessionCompactionMode" : "off",
+  "sessionCompactionEnabled" : false,
+  "sessionCompactionReason" : "default:off",
+  "sessionCompactionSeedKind" : "",
+  "sessionCompactionSeedPath" : "",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "workdir" : "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-8775714553715065441",
+  "promptPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md",
+  "promptManifestPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md.manifest.json",
+  "outputPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.json",
+  "transcriptPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log",
+  "stderrPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log",
+  "promptMetadataPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md.meta.json",
+  "outputMetadataPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.json.meta.json",
+  "transcriptMetadataPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log.meta.json",
+  "stderrMetadataPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log.meta.json",
+  "command" : [ "claude", "--print" ],
+  "startedAt" : "2026-06-01T00:00:00Z",
+  "finishedAt" : "2026-06-01T00:00:01Z",
+  "durationMs" : 1000,
+  "exitCode" : 0,
+  "status" : "process_exited",
+  "failureReason" : null,
+  "recoverable" : null,
+  "usage" : {
+    "inputTokens" : 12,
+    "outputTokens" : 6,
+    "cachedReadTokens" : 34,
+    "cachedWriteTokens" : 5,
+    "totalTokens" : 57,
+    "costAmount" : null,
+    "costCurrency" : "",
+    "source" : "acpx_stream",
+    "measurementType" : "PROVIDER_RUN_USAGE",
+    "attribution" : "EXACT_PROMPT_MATCH",
+    "cumulative" : false,
+    "contextUsedTokens" : 0,
+    "sessionCostAmount" : null,
+    "sessionCostCurrency" : "",
+    "providerId" : "zhipu",
+    "model" : "glm-5.2",
+    "billingMode" : "subscription_token_only",
+    "providerMetadataSource" : "claude_settings_env",
+    "unavailableReason" : ""
+  },
+  "agentResultAcquisition" : {
+    "schemaVersion" : 2,
+    "correctionAttempted" : false,
+    "maxCorrectionAttempts" : 1,
+    "selectedCandidateOccurrence" : 1,
+    "correctionReason" : "NONE",
+    "correctionDisposition" : "NOT_NEEDED",
+    "occurrences" : [ {
+      "occurrence" : 1,
+      "sessionName" : "claude-main-ws-test",
+      "requestId" : "fixture-prompt",
+      "promptPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md",
+      "outputPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.json",
+      "transcriptPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log",
+      "stderrPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log",
+      "startedAt" : "2026-06-01T00:00:00Z",
+      "finishedAt" : "2026-06-01T00:00:01Z",
+      "durationMs" : 1000,
+      "exitCode" : 0,
+      "stopReason" : "end_turn",
+      "presentationDisposition" : "NOT_NEEDED",
+      "rawAssistantSha256" : "2d0796bb865aa68fc5506939c019df7f85282d87d51eb97db6e3bae6430a3ba0",
+      "candidateSha256" : "2d0796bb865aa68fc5506939c019df7f85282d87d51eb97db6e3bae6430a3ba0",
+      "contractDecodable" : true,
+      "parseErrorCode" : "",
+      "contractSchemaValid" : true,
+      "contractCorrectionDisposition" : "NONE",
+      "contractValidationErrors" : [ ],
+      "usage" : {
+        "inputTokens" : 12,
+        "outputTokens" : 6,
+        "cachedReadTokens" : 34,
+        "cachedWriteTokens" : 5,
+        "totalTokens" : 57,
+        "costAmount" : null,
+        "costCurrency" : "",
+        "source" : "acpx_stream",
+        "measurementType" : "PROVIDER_RUN_USAGE",
+        "attribution" : "EXACT_PROMPT_MATCH",
+        "cumulative" : false,
+        "contextUsedTokens" : 0,
+        "sessionCostAmount" : null,
+        "sessionCostCurrency" : "",
+        "providerId" : "zhipu",
+        "model" : "glm-5.2",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "claude_settings_env",
+        "unavailableReason" : ""
+      },
+      "processResult" : {
+        "command" : "claude --print",
+        "pid" : null,
+        "exitCode" : 0,
+        "usability" : "EXITED_ZERO",
+        "durationMs" : 1000,
+        "stdoutPath" : "",
+        "stderrPath" : "",
+        "interrupted" : false,
+        "timedOut" : false
+      },
+      "adapterSignals" : [ ]
+    } ]
+  },
+  "providerModelIdentity" : {
+    "billingMode" : "subscription_token_only",
+    "model" : "glm-5.2",
+    "confidence" : "high",
+    "source" : "claude_settings_env",
+    "provider" : "zhipu"
+  },
+  "toolUsage" : {
+    "schemaVersion" : 1,
+    "toolCallCount" : 0,
+    "readCount" : 0,
+    "writeCount" : 0,
+    "bashCount" : 0,
+    "otherCount" : 0,
+    "byTool" : { },
+    "toolIds" : [ ],
+    "readFiles" : [ ],
+    "directReadFiles" : [ ],
+    "writeFiles" : [ ],
+    "bashCommands" : [ ],
+    "commandExecutables" : [ ]
+  },
+  "contextGovernanceActualReportPath" : ".agent/workstreams/ws-test/artifacts/context-governance/intake.claude_brainstorm-actual-run-1791630377197.json",
+  "executionAuthority" : {
+    "transportDisposition" : "NETWORK_AUTHORITY_NOT_CONFIGURED"
+  },
+  "processResult" : {
+    "command" : "claude --print",
+    "pid" : null,
+    "exitCode" : 0,
+    "usability" : "EXITED_ZERO",
+    "durationMs" : 1000,
+    "stdoutPath" : "",
+    "stderrPath" : "",
+    "interrupted" : false,
+    "timedOut" : false
+  },
+  "adapterSignals" : [ ],
+  "agentResultContract" : null,
+  "artifactContractResults" : [ ],
+  "executionAttempt" : {
+    "attemptId" : "att-run-1791630377197",
+    "runId" : "run-1791630377197",
+    "workstreamId" : "ws-test",
+    "nodeId" : "intake.claude_brainstorm",
+    "agent" : "claude",
+    "status" : "PROCESS_EXITED",
+    "processStatus" : "EXITED",
+    "failureSignal" : null,
+    "recoverable" : false,
+    "retrySafe" : false,
+    "message" : "process exited",
+    "stderrPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log",
+    "transcriptPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log",
+    "sessionName" : "claude-main-ws-test",
+    "sessionId" : "",
+    "sessionScope" : "workstream",
+    "sessionSegmentKey" : "ws:ws-test",
+    "startedAt" : "2026-06-01T00:00:00Z",
+    "finishedAt" : "2026-06-01T00:00:01Z"
+  },
+  "executionOutcome" : null,
+  "executionTimeline" : [ {
+    "sequence" : 1,
+    "observedAt" : "2026-10-10T11:06:17.213073Z",
+    "source" : "adapter",
+    "kind" : "artifact_extracted",
+    "elapsedMs" : 11358377213
+  } ]
+} ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedAgentRunPrefersTransportUsageWhenNoAcpxSessionStreamExists(AcpxAgentTaskHandlerTest.java:1077)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+

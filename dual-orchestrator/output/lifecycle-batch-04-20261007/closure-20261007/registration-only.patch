@@ -1,0 +1,26 @@
+--- reviewed/output/lifecycle-batch-04-20261007/batch.md
++++ current/output/lifecycle-batch-04-20261007/batch.md
+@@ -1,4 +1,6 @@
+ # B04 原生权限请求与合法续作 · 实施批次
++
++> 2026-10-07 评审接收：当前 B04 **CLOSED / PASS**；内容身份核验通过。以下保留实施交评时记录，待评审字样是历史状态。当前结论、LOW 处置、证据口径校正及未竟边界见 [收口材料](closure-20261007/disposition.md)。不自动开启下一批或真实运行。
+ 
+ 当前状态：IMPLEMENTED / OFFLINE_VERIFIED / AWAITING_CC；实施及当前源码单轮完整 clean 回归已完成，B04 尚未独立评审收口。作者自查不是 CC 独立判断。用户显式批准进入实施；不提交、不安装、不更改用户配置、不启动额外 agent，真实 native/provider/E2E 的 NO-GO 保持。
+ 
+--- reviewed/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ current/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -597,3 +597,14 @@
+ 源码与文档增量以实际 dirty 开工基线单列，不混入 B03 等既有未提交改动；reference 文档前态逆向重建另有标记。own patch 身份更新，但 installer 与用户安装登记未运行/更改；真实 Gate 必须核对实际选定的新装配。C 权威仍在 Dual L，native 不跨读 Java ledger；不宣称对同用户恶意直接调用 CLI 提供独立认证或沙箱防护。
+ 
+ 整体 W03/W05/W08 等不随本批自动关闭；真实客户端权限/停止/工具结果、浏览器 runtime、目标 Git 交付、外部部署及 kernel I/O 专项/最终 E2E仍未证明。首版声明限制与具体补声明入口未证口径不变，真实 NO-GO 保持。未提交、未安装、未调用真实 native/provider、未启额外 agent、未恢复旧样本。作者自查不等于独立结论；只交 B04 合并 CC 评审，不预填 PASS、不自动下一批。提示词随材料提供。
++
++
++## 20. B04 独立评审接收与收口（2026-10-07）
++
++用户带回 CC 合并独立评审 **PASS，B04 可收口，无 WARN/FAIL**。接收时核对 945 项受测输入、69 个增量文件、19 项已登记材料、204 份原始 XML 及主清单，均无漂移。B04 当前 **CLOSED / PASS**，限定于已授权的原生 ask 接口、人工决定、同 L C/X、原调用一次回复、合法续作/失败恢复及统一投影实施和离线证明。§18/§19 的准备/交评状态按历史时点保留，不再作为当前批次状态。原测试与交评登记不改写；评审原文、快照、当前结论与处置见 [收口材料](../../output/lifecycle-batch-04-20261007/closure-20261007/disposition.md)。
++
++最终证据仍为 8 模块单轮 clean 1,701 tests / 204 suites，零失败/错误/跳过；acpx 全量离线 check 1,005 项。对 CC 三处过强概括予以校正：1,005 不是全部真实本地 peers；删除式反证仅按现有具名 mutation 声明；剩余工作并非全需真实模型，离线 failpoint 等既有义务没有撤销。不改变本批 PASS、不新增评审轮次。
++
++LOW-1 已承接为后续真实 Gate 必须项：**实际选定装配/新 patch 身份 + 显式有限预算下桥接启用路径的真实行为**。不能以 source/dist、常量、本地模拟或旧安装替代；installer 未运行，真实能力尚未证明。C authority 的 Dual L 与原 sender 分工保留，不恢复安全沙箱或同用户恶意进程对抗承诺。本轮仅登记此义务，不创建或启动实验/预算。
++
++整体 W03/W05/W08 等不随 B04 自动关闭；真实客户端权限/停止/工具结果、浏览器 runtime、Git 交付、外部部署/多 ClassLoader、kernel I/O 专项及最终 E2E 保持既有未竟/批外状态。原声明限制及具体补声明入口未证不变，真实 NO-GO 不变。此次没有生产/测试代码变化，不重跑充分通过的验证，不提交/安装/调用真实 provider/启 agent/恢复旧样本；不授权或自动开启下一批。后续动作须按总体剩余工作和既有授权判断。

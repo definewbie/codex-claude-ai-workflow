@@ -1,0 +1,95 @@
+{
+  "totals": {
+    "tests": 1540,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "modules": {
+    "dual-cli": {
+      "tests": 88,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-server": {
+      "tests": 73,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-flow-liteflow": {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-ledger-file": {
+      "tests": 139,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-adapter-acpx": {
+      "tests": 418,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-runtime": {
+      "tests": 687,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-adapter-git": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-core": {
+      "tests": 117,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "xml_files": 183,
+  "jar_sha256": "8a411e7dd744d3e551a1152259159995ede1e5e522604f4b6242db5eba62c7ad",
+  "embedded_classes_match": {
+    "dev/dual/core/workflow/HumanGateActionSemantics.class": true,
+    "dev/dual/ledger/file/RoutingEngine.class": true,
+    "dev/dual/ledger/file/RecoveryAssessment.class": true,
+    "dev/dual/runtime/handler/AgentExecutionResultFacts.class": true,
+    "dev/dual/runtime/handler/AgentRunMetadataFinalizer.class": true,
+    "dev/dual/runtime/handler/ArtifactContractValidator.class": true,
+    "dev/dual/runtime/handler/TaskContractRevisionContextResolver.class": true,
+    "dev/dual/runtime/handler/FailureArbiter.class": true,
+    "dev/dual/adapter/acpx/AcpxAgentTaskHandler.class": true
+  },
+  "workflows": {
+    "agent-lifecycle.contract.json": {
+      "sha256": "8b2e5887f8bec6e18b546289822782e159c8ec0584d224ad715eb506cd695603",
+      "nodes": 34,
+      "edges": 60
+    },
+    "agent-lifecycle.terminal-delivery.json": {
+      "sha256": "86abead15904c5106c674f3825d0bf0dff55ca6423b3e1b36e18f3a4fefad24d",
+      "nodes": 31,
+      "edges": 56
+    },
+    "agent-lifecycle.full.json": {
+      "sha256": "914ea4be11a3884e654b4a4627a0d11cdf0385f6d248f058f9927018766e1706",
+      "nodes": 34,
+      "edges": 60
+    },
+    "agent-lifecycle.small-plan-human-review-experiment.json": {
+      "sha256": "5de35224ed473a3220a44ffccca67df330fb80d23678325fd9a45d1badc77ce9",
+      "nodes": 28,
+      "edges": 51
+    }
+  },
+  "xml_mtime_min": "2026-09-13T23:46:04.103959",
+  "xml_mtime_max": "2026-09-13T23:53:04.157595"
+}

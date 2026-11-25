@@ -1,0 +1,9 @@
+{
+  "schema_version" : 1,
+  "proposal_id" : "node-intake-claude_brainstorm-002:1f75f26fa1061e48",
+  "workstream_id" : "ws-20261011T044656Z-BMDJ",
+  "producer_node_id" : "intake.claude_brainstorm",
+  "producer_node_instance_id" : "node-intake-claude_brainstorm-002",
+  "artifact_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694107574/outputs/intake-claude-brainstorm.contract.json",
+  "sha256" : "1f75f26fa1061e48d77f7197a1dab9695d4c55e0e53aff45cecab0ef18440357"
+}

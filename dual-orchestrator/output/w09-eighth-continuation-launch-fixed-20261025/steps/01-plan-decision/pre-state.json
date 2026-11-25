@@ -1,0 +1,49 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-plan-decision-026"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000026",
+    "updatedAt": "2026-10-23T03:02:20.392823Z",
+    "commitSequence": 100
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-plan-decision-026",
+    "nodeDefinitionId": "plan.decision",
+    "kind": "DECISION",
+    "handlerType": "review.decision",
+    "status": "READY",
+    "stageId": "stage-plan",
+    "iterationId": "iter-003",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.stderr.log",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.transcript.log",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/binding.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.contract.json"
+    ],
+    "inputTransition": {
+      "transition_type": "normal",
+      "condition": "unconditional",
+      "purpose": "Seed the first Claude intake run with repo-scope context.",
+      "source_node_sha256": "d8109795168773e98ec73609ff6fc6373bf1ba2c77af679892aed78fdc0aecdf",
+      "source_node_instance_id": "node-plan-codex_plan_review-025",
+      "required": true
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 1269.492860792672
+}

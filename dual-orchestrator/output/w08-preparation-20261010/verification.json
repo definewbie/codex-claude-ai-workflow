@@ -1,0 +1,49 @@
+{
+  "author_self_review": "PASS_OFFLINE_MATERIAL / AWAITING_INDEPENDENT_CC",
+  "source_inputs": 654,
+  "measured_source_changes": [
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentPromptRenderer.java",
+    "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/implement-claude.md",
+    "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/design-codex-review.md",
+    "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/plan-codex-review.md",
+    "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/plan-claude.md",
+    "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/design-claude.md",
+    "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/intake-claude-brainstorm.md",
+    "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/templates/contract-review-principles.md",
+    "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentPromptRendererTest.java",
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/RepoScopeGovernance.java",
+    "dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java"
+  ],
+  "other_measured_source_inputs_unchanged": 642,
+  "documents": 2,
+  "full_reactor_single_run": {
+    "tests": 1755,
+    "suites": 206,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exit": 0
+  },
+  "source_before_after_equal": true,
+  "package_exit": 0,
+  "cli_metadata_validation_commands": 6,
+  "native_acpx_metadata_commands_total": 11,
+  "metadata_client_launches": 0,
+  "live_provider_runs": 0,
+  "installer_runs": 0,
+  "extra_agents": 0,
+  "target_proposal_exists": false,
+  "real_target_git_runs": 0,
+  "project_commits": 0,
+  "real_gate_authorized": false,
+  "runtime_bindings_only_generated_after_authorized_fresh_goal": true,
+  "json_files_parsed": 18,
+  "independent_review": "PENDING_USER_INITIATED_CC",
+  "link_check": {
+    "checked": 224,
+    "new_missing": [],
+    "historical_missing": []
+  },
+  "git_diff_check_exit": 0
+}

@@ -1,0 +1,4347 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index aadc29609110a31fa495c3817914c0f092520be2..a9cdf5f2e8ce7ba621de379554140e8c0d98eb41 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -4,6 +4,12 @@
+ 
+ Repo: https://github.com/openclaw/acpx
+ 
++## Unreleased (Dual maintained patch)
++
++### Changes
++
++- Add finite persisted JSON permission asks and exact once replies through the existing queue owner. Preserve automatic decisions and cancel stale callbacks without fallback, owner recovery or implicit reply retries. Host file/terminal confirmations share the same lane.
++
+ ## 2026.8.28 (v0.13.2)
+ 
+ ### Changes
+diff --git a/agents/Claude.md b/agents/Claude.md
+index 7ea3ead5cc1def3a56e8ed8a641f0d045dedcdd6..70a8cbee01cc16cb64b848a3204057ae9c5ed65d 100644
+--- a/agents/Claude.md
++++ b/agents/Claude.md
+@@ -16,3 +16,15 @@ claiming singleton external resources in an ACP-spawned session.
+ Set `ACPX_CLAUDE_INCLUDE_USER_SETTINGS=1` only when the spawned session needs
+ the user's global Claude settings and no such plugin conflict exists. Ambient
+ credentials and other environment variables are still inherited normally.
++
++## Dual online permission replies (maintained adapter patch)
++
++Use `--permission-replies` only for persisted JSON prompt calls with an explicit
++finite `--timeout` and zero prompt retries. Existing automatic allow/deny rules
++still apply. A genuine ask emits `dual/permission/request` with exact raw request,
++RPC/session/prompt/owner generation, SHA-256 and deadline. Only the original live
++queue callback accepts `permission-reply -s <name> --reply <json>` once; replies
++must identify an offered once option and a committed Dual decision. Do not retry
++this command, recreate a callback after restart, or infer tool completion from
++`consumed: true`. Cancel, mode/model/config changes and expiry close old callbacks.
++Native selection does not approve business scope, independent review or delivery.
+diff --git a/agents/Codex.md b/agents/Codex.md
+index cf0039629693b4c3561d43232d0e397cf440be47..2a4b1361fcd4ff3d8a60d46dd8eccb6eb6107b0d 100644
+--- a/agents/Codex.md
++++ b/agents/Codex.md
+@@ -9,3 +9,15 @@
+ - Switching models can adjust reasoning effort. ACPX saves the accepted effort for an existing selection, or removes that selection if the new model has no effort control.
+ - Reconnecting restores the saved model and effort before prompting, even when the adapter resumes the conversation with different defaults.
+ - Legacy `models` metadata may encode both values in a combined id such as `gpt-5.6-sol[max]`; ACPX uses that form only when the adapter does not advertise the newer model config option.
++
++## Dual online permission replies (maintained adapter patch)
++
++Use `--permission-replies` only for persisted JSON prompt calls with an explicit
++finite `--timeout` and zero prompt retries. Existing automatic allow/deny rules
++still apply. A genuine ask emits `dual/permission/request` with exact raw request,
++RPC/session/prompt/owner generation, SHA-256 and deadline. Only the original live
++queue callback accepts `permission-reply -s <name> --reply <json>` once; replies
++must identify an offered once option and a committed Dual decision. Do not retry
++this command, recreate a callback after restart, or infer tool completion from
++`consumed: true`. Cancel, mode/model/config changes and expiry close old callbacks.
++Native selection does not approve business scope, independent review or delivery.
+diff --git a/docs/CLI.md b/docs/CLI.md
+index 230bc95e7b2d581411c78e249f9ab194dfbbe105..b1aba6f4eed8f66d3b8322ab8efee59079feff25 100644
+--- a/docs/CLI.md
++++ b/docs/CLI.md
+@@ -26,6 +26,7 @@ acpx [global_options] exec [prompt_options] [prompt_text...]
+ acpx [global_options] compare <agent>... '<prompt_text>'
+ acpx [global_options] compare <agent>... --file <path>
+ acpx [global_options] flow run <file> [--input-json <json> | --input-file <path>] [--default-agent <name>]
++acpx [global_options] permission-reply [-s <name>] --reply <json>
+ acpx [global_options] cancel [-s <name>]
+ acpx [global_options] set-mode <mode> [-s <name>]
+ acpx [global_options] set <key> <value> [-s <name>]
+@@ -36,6 +37,7 @@ acpx [global_options] config [show | init]
+ acpx [global_options] <agent> [prompt_options] [prompt_text...]
+ acpx [global_options] <agent> prompt [prompt_options] [prompt_text...]
+ acpx [global_options] <agent> exec [prompt_options] [prompt_text...]
++acpx [global_options] <agent> permission-reply [-s <name>] --reply <json>
+ acpx [global_options] <agent> cancel [-s <name>]
+ acpx [global_options] <agent> set-mode <mode> [-s <name>]
+ acpx [global_options] <agent> set <key> <value> [-s <name>]
+@@ -674,3 +676,20 @@ acpx --format json codex exec 'review latest diff for security issues' \
+            | select(.sessionUpdate=="tool_call" or .sessionUpdate=="tool_call_update")
+            | [(.status // "-"), (.title // "-")] | @tsv'
+ ```
++
++## Maintained Dual permission bridge
++
++`--permission-replies` enables exact online asks for persisted JSON prompts only.
++An explicit finite `--timeout` and `--prompt-retries 0` are required; `exec` is
++unsupported. Existing automatic decisions remain unchanged. Only true asks emit
++`dual/permission/request` containing `requestKey`, `sessionId`, `promptId`,
++`ownerGeneration`, `rpcId`, `rawJson`, `rawSha256`, and `deadlineMs`.
++
++`permission-reply -s <name> --reply <json>` accepts that identity plus an offered
++once `optionId`, `commitRef`, and `commitSha256`. It sends one control request to
++the same live owner; it does not queue another prompt, recover an owner or retry.
++A `dual.native.permission.reply.v1` receipt with `consumed: true` confirms callback
++consumption, not tool execution or business acceptance. Unknown delivery must be
++reconciled externally. Restart, expiry, cancellation or mode/model/config changes
++cannot restore a callback. Host file/terminal confirmation uses the same exact
++lane, retaining existing path and permission-mode checks.
+diff --git a/skills/acpx/SKILL.md b/skills/acpx/SKILL.md
+index bccefb618285594ba349cf4fc544715b4206054d..20145aeeacd7de85fbe31d1b44b54cab4aab15b2 100644
+--- a/skills/acpx/SKILL.md
++++ b/skills/acpx/SKILL.md
+@@ -622,3 +622,15 @@ Repo-scoped review with permissive mode:
+ acpx --cwd ~/repos/shop --approve-all codex -s pr-842 \
+   'review PR #842 for regressions and propose minimal patch'
+ ```
++
++## Dual online permission replies (maintained adapter patch)
++
++Use `--permission-replies` only for persisted JSON prompt calls with an explicit
++finite `--timeout` and zero prompt retries. Existing automatic allow/deny rules
++still apply. A genuine ask emits `dual/permission/request` with exact raw request,
++RPC/session/prompt/owner generation, SHA-256 and deadline. Only the original live
++queue callback accepts `permission-reply -s <name> --reply <json>` once; replies
++must identify an offered once option and a committed Dual decision. Do not retry
++this command, recreate a callback after restart, or infer tool completion from
++`consumed: true`. Cancel, mode/model/config changes and expiry close old callbacks.
++Native selection does not approve business scope, independent review or delivery.
+diff --git a/src/acp/agent-command.ts b/src/acp/agent-command.ts
+index 873283378748a19208987fd6d042f792bc4c31ee..5d8a81261b1b4503e1c1d2abf6a4472ef0b743b6 100644
+--- a/src/acp/agent-command.ts
++++ b/src/acp/agent-command.ts
+@@ -6,6 +6,7 @@ import {
+   resolveWindowsExecutablePath,
+ } from "../spawn-command-options.js";
+ import { type AcpClientOptions } from "../types.js";
++import { loadClaudeExecutionPolicy } from "./claude-execution-policy.js";
+ import { basenameToken, splitCommandLine } from "./client-process.js";
+ 
+ const DEFAULT_AGENT_CLOSE_AFTER_STDIN_END_MS = 100;
+@@ -299,14 +300,16 @@ export async function ensureCopilotAcpSupport(command: string): Promise<void> {
+ 
+ export function buildClaudeCodeOptionsMeta(
+   options: AcpClientOptions["sessionOptions"],
+-  isolateUserSettings = false,
++  claudeAcp = false,
++  cwd = process.cwd(),
+ ): Record<string, unknown> | undefined {
+   const claudeCodeOptions: Record<string, unknown> = {};
+-  if (isolateUserSettings) {
++  if (claudeAcp) {
+     claudeCodeOptions.settingSources = resolveClaudeCodeSettingSources();
+   }
+   if (options) {
+     assignClaudeCodeOptions(claudeCodeOptions, options);
++    assignClaudeExecutionPolicyOptions(claudeCodeOptions, options, claudeAcp, cwd);
+   }
+ 
+   const meta: Record<string, unknown> = {};
+@@ -323,6 +326,27 @@ export function buildClaudeCodeOptionsMeta(
+   return meta;
+ }
+ 
++function assignClaudeExecutionPolicyOptions(
++  target: Record<string, unknown>,
++  options: NonNullable<AcpClientOptions["sessionOptions"]>,
++  claudeAcp: boolean,
++  cwd: string,
++): void {
++  const ref = options.claudeExecutionPolicyRef;
++  const sha256 = options.claudeExecutionPolicySha256;
++  if (ref === undefined && sha256 === undefined) {
++    return;
++  }
++  if (!claudeAcp) {
++    throw new Error("claude execution policy is only supported by claude-agent-acp");
++  }
++  if (!ref || !sha256) {
++    throw new Error("claude execution policy ref and SHA-256 must be provided together");
++  }
++  const policy = loadClaudeExecutionPolicy(cwd, { ref, sha256 });
++  Object.assign(target, policy);
++}
++
+ export function resolveClaudeCodeSettingSources(env: NodeJS.ProcessEnv = process.env): string[] {
+   if (env.ACPX_CLAUDE_INCLUDE_USER_SETTINGS?.trim() === "1") {
+     return ["user", ...CLAUDE_CODE_DEFAULT_SETTING_SOURCES];
+diff --git a/src/acp/auth-env.ts b/src/acp/auth-env.ts
+index 35d20301573ca8255d5426e4bae1398afce2e414..63c4b54b62f8b923273c1a6e287268a7b2cfd0c3 100644
+--- a/src/acp/auth-env.ts
++++ b/src/acp/auth-env.ts
+@@ -43,6 +43,28 @@ function protectedEnvKey(key: string): string {
+   return process.platform === "win32" ? key.toUpperCase() : key;
+ }
+ 
++const CLAUDE_E1_REMOVED_ENV_NAMES = new Set(
++  [
++    "ALL_PROXY",
++    "HTTP_PROXY",
++    "HTTPS_PROXY",
++    "NO_PROXY",
++    "all_proxy",
++    "http_proxy",
++    "https_proxy",
++    "no_proxy",
++    "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB",
++  ].map(protectedEnvKey),
++);
++
++export function finalizeClaudeExecutionPolicyAgentEnvironment(env: NodeJS.ProcessEnv): void {
++  for (const key of Object.keys(env)) {
++    if (CLAUDE_E1_REMOVED_ENV_NAMES.has(protectedEnvKey(key))) {
++      delete env[key];
++    }
++  }
++}
++
+ function isAuthEnvKey(key: string): boolean {
+   return protectedEnvKey(key).startsWith(AUTH_ENV_PREFIX);
+ }
+diff --git a/src/acp/claude-execution-policy.ts b/src/acp/claude-execution-policy.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..9a33cfd1758611d4cae7629feb522514178c60ba
+--- /dev/null
++++ b/src/acp/claude-execution-policy.ts
+@@ -0,0 +1,404 @@
++import { createHash } from "node:crypto";
++import fs from "node:fs";
++import path from "node:path";
++
++export const CLAUDE_EXECUTION_POLICY_SCHEMA = "claude_execution_policy.v2";
++const NETWORK_TRANSPORT_OWNER = "claude_sandbox";
++
++const POLICY_KEYS = new Set([
++  "schema_version",
++  "workstream_id",
++  "node_instance_id",
++  "run_id",
++  "network_transport_owner",
++  "setting_sources",
++  "sandbox",
++  "provider_subprocess_denied_env_names",
++  "generated_at",
++]);
++const SANDBOX_KEYS = new Set([
++  "enabled",
++  "fail_if_unavailable",
++  "allow_unsandboxed_commands",
++  "auto_allow_sandboxed_bash",
++  "network",
++  "filesystem",
++]);
++const NETWORK_KEYS = new Set([
++  "strict_allowlist",
++  "allowed_domains",
++  "allow_local_binding",
++  "allow_unix_sockets",
++]);
++const FILESYSTEM_KEYS = new Set(["allow_read", "allow_write", "deny_read", "deny_write"]);
++const REQUIRED_DENIED_ENV_NAMES = [
++  "ANTHROPIC_API_KEY",
++  "ANTHROPIC_AUTH_TOKEN",
++  "ANTHROPIC_BASE_URL",
++] as const;
++const DOMAIN_PATTERN = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
++const SHA256_PATTERN = /^[a-f0-9]{64}$/;
++const SECRET_LIKE_PATTERN =
++  /(?:bearer\s+|sk-[a-z0-9]|ghp_[a-z0-9]|-----begin [^-]*private key-----)/i;
++
++type JsonObject = Record<string, unknown>;
++
++export type ClaudeExecutionPolicyBinding = {
++  ref: string;
++  sha256: string;
++};
++
++export type ClaudeExecutionPolicyOptions = {
++  settingSources: [];
++  sandbox: JsonObject;
++  managedSettings: { sandbox: JsonObject; permissions: { deny: string[] } };
++};
++
++export function loadClaudeExecutionPolicy(
++  cwd: string,
++  binding: ClaudeExecutionPolicyBinding,
++): ClaudeExecutionPolicyOptions {
++  const policyPath = resolvePolicyPath(cwd, binding.ref);
++  const bytes = fs.readFileSync(policyPath);
++  const actualSha = createHash("sha256").update(bytes).digest("hex");
++  if (!SHA256_PATTERN.test(binding.sha256) || actualSha !== binding.sha256) {
++    throw new Error("claude execution policy SHA-256 mismatch");
++  }
++
++  const raw = bytes.toString("utf8");
++  assertNoDuplicateObjectKeys(raw);
++  const parsed = JSON.parse(raw) as unknown;
++  const policy = requireObject(parsed, "claude execution policy");
++  assertExactKeys(policy, POLICY_KEYS, "claude execution policy");
++  assertText(policy, "schema_version", CLAUDE_EXECUTION_POLICY_SCHEMA);
++  assertIdentifier(policy, "workstream_id");
++  assertIdentifier(policy, "node_instance_id");
++  assertIdentifier(policy, "run_id");
++  assertText(policy, "network_transport_owner", NETWORK_TRANSPORT_OWNER);
++  assertEmptyArray(policy.setting_sources, "setting_sources");
++  assertGeneratedAt(policy.generated_at);
++
++  const sdkSandbox = validatedSandboxOptions(policy.sandbox);
++  assertDeniedEnvironment(policy.provider_subprocess_denied_env_names);
++  if (containsSecretLikeValue(policy)) {
++    throw new Error("claude execution policy contains a secret-like value");
++  }
++  return {
++    settingSources: [],
++    sandbox: sdkSandbox,
++    managedSettings: {
++      sandbox: managedSandboxOptions(sdkSandbox),
++      permissions: {
++        deny: [
++          // Disabling auto-allow alone still permits Claude Code's read-only shell shortcuts.
++          ...(sdkSandbox.autoAllowBashIfSandboxed ? [] : ["Bash"]),
++          ...(requireObject(sdkSandbox.filesystem, "filesystem").denyWrite as string[]).flatMap(
++            (entry) => [`Edit(/${entry})`, `Edit(/${entry}/**)`],
++          ),
++        ],
++      },
++    },
++  };
++}
++
++function validatedSandboxOptions(value: unknown): JsonObject {
++  const sandbox = requireObject(value, "sandbox");
++  assertExactKeys(sandbox, SANDBOX_KEYS, "sandbox");
++  assertBoolean(sandbox, "enabled", true);
++  assertBoolean(sandbox, "fail_if_unavailable", true);
++  assertBoolean(sandbox, "allow_unsandboxed_commands", false);
++  const autoAllowBashIfSandboxed = requireBoolean(sandbox, "auto_allow_sandboxed_bash");
++
++  const network = validatedNetworkOptions(sandbox.network);
++  const filesystem = validatedFilesystemOptions(sandbox.filesystem);
++  return {
++    enabled: true,
++    failIfUnavailable: true,
++    allowUnsandboxedCommands: false,
++    autoAllowBashIfSandboxed,
++    network,
++    filesystem,
++    credentials: {
++      envVars: REQUIRED_DENIED_ENV_NAMES.map((name) => ({ name, mode: "deny" })),
++    },
++  };
++}
++
++function validatedNetworkOptions(value: unknown): JsonObject {
++  const network = requireObject(value, "sandbox.network");
++  assertExactKeys(network, NETWORK_KEYS, "sandbox.network");
++  assertBoolean(network, "strict_allowlist", true);
++  const allowLocalBinding = requireBoolean(network, "allow_local_binding");
++  assertEmptyArray(network.allow_unix_sockets, "sandbox.network.allow_unix_sockets");
++  const allowedDomains = requireStringArray(network.allowed_domains, "allowed_domains");
++  if (
++    allowedDomains.length > 32 ||
++    allowedDomains.some(
++      (domain) =>
++        domain !== domain.toLowerCase() ||
++        domain.length > 253 ||
++        !DOMAIN_PATTERN.test(domain) ||
++        /^[0-9.]+$/.test(domain) ||
++        domain.endsWith(".localhost") ||
++        domain.endsWith(".local") ||
++        domain.split(".").some((label) => label.length > 63),
++    )
++  ) {
++    throw new Error("sandbox.network.allowed_domains contains a non-canonical domain");
++  }
++  return {
++    strictAllowlist: true,
++    allowManagedDomainsOnly: true,
++    allowedDomains,
++    allowLocalBinding,
++    allowAllUnixSockets: false,
++    allowUnixSockets: [],
++  };
++}
++
++function managedSandboxOptions(sandbox: JsonObject): JsonObject {
++  const network = requireObject(sandbox.network, "sandbox.network");
++  const { allowLocalBinding: _allowLocalBinding, ...managedNetwork } = network;
++  return { ...sandbox, network: managedNetwork };
++}
++
++function validatedFilesystemOptions(value: unknown): JsonObject {
++  const filesystem = requireObject(value, "sandbox.filesystem");
++  assertExactKeys(filesystem, FILESYSTEM_KEYS, "sandbox.filesystem");
++  const allowRead = requireCanonicalPaths(filesystem.allow_read, "sandbox.filesystem.allow_read");
++  const allowWrite = requireCanonicalPaths(
++    filesystem.allow_write,
++    "sandbox.filesystem.allow_write",
++  );
++  const denyRead = requireCanonicalPaths(filesystem.deny_read, "sandbox.filesystem.deny_read");
++  const denyWrite = requireCanonicalPaths(filesystem.deny_write, "sandbox.filesystem.deny_write");
++  if (allowRead.length === 0 || allowWrite.length === 0) {
++    throw new Error("sandbox filesystem allow lists must not be empty");
++  }
++  return { allowRead, allowWrite, denyRead, denyWrite };
++}
++
++function assertDeniedEnvironment(value: unknown): void {
++  const deniedEnvNames = requireStringArray(value, "provider_subprocess_denied_env_names");
++  if (
++    deniedEnvNames.length !== REQUIRED_DENIED_ENV_NAMES.length ||
++    deniedEnvNames.some((name, index) => name !== REQUIRED_DENIED_ENV_NAMES[index])
++  ) {
++    throw new Error(
++      "provider_subprocess_denied_env_names must equal the fixed E1 provider deny set",
++    );
++  }
++}
++
++function resolvePolicyPath(cwd: string, ref: string): string {
++  if (!ref || path.isAbsolute(ref) || ref.includes("\0")) {
++    throw new Error("claude execution policy ref must be a relative path");
++  }
++  const root = fs.realpathSync(cwd);
++  const resolved = path.resolve(root, ref);
++  if (resolved === root || !resolved.startsWith(`${root}${path.sep}`)) {
++    throw new Error("claude execution policy ref escapes cwd");
++  }
++  const real = fs.realpathSync(resolved);
++  if (!real.startsWith(`${root}${path.sep}`)) {
++    throw new Error("claude execution policy resolves outside cwd");
++  }
++  return real;
++}
++
++function requireObject(value: unknown, label: string): JsonObject {
++  if (!value || typeof value !== "object" || Array.isArray(value)) {
++    throw new Error(`${label} must be an object`);
++  }
++  return value as JsonObject;
++}
++
++function assertExactKeys(value: JsonObject, expected: ReadonlySet<string>, label: string): void {
++  const actual = Object.keys(value);
++  if (actual.length !== expected.size || actual.some((key) => !expected.has(key))) {
++    throw new Error(`${label} has unknown or missing fields`);
++  }
++}
++
++function assertText(value: JsonObject, key: string, expected: string): void {
++  if (value[key] !== expected) {
++    throw new Error(`${key} must equal ${expected}`);
++  }
++}
++
++function assertIdentifier(value: JsonObject, key: string): void {
++  const text = value[key];
++  if (typeof text !== "string" || !/^[A-Za-z0-9._-]+$/.test(text)) {
++    throw new Error(`${key} must be a canonical identifier`);
++  }
++}
++
++function assertBoolean(value: JsonObject, key: string, expected: boolean): void {
++  if (value[key] !== expected) {
++    throw new Error(`${key} must equal ${expected}`);
++  }
++}
++
++function requireBoolean(value: JsonObject, key: string): boolean {
++  if (typeof value[key] !== "boolean") {
++    throw new Error(`${key} must be a boolean`);
++  }
++  return value[key];
++}
++
++function assertEmptyArray(value: unknown, label: string): void {
++  if (!Array.isArray(value) || value.length !== 0) {
++    throw new Error(`${label} must be an empty array`);
++  }
++}
++
++function assertGeneratedAt(value: unknown): void {
++  if (
++    typeof value !== "string" ||
++    !/^\d{4}-\d{2}-\d{2}T/.test(value) ||
++    Number.isNaN(Date.parse(value))
++  ) {
++    throw new Error("generated_at must be an ISO-8601 timestamp");
++  }
++}
++
++function requireStringArray(value: unknown, label: string): string[] {
++  if (!Array.isArray(value) || !value.every((entry) => typeof entry === "string")) {
++    throw new Error(`${label} must be a string array`);
++  }
++  if (new Set(value).size !== value.length) {
++    throw new Error(`${label} must not contain duplicates`);
++  }
++  return [...value];
++}
++
++function requireCanonicalPaths(value: unknown, label: string): string[] {
++  const paths = requireStringArray(value, label);
++  if (paths.some((entry) => !path.isAbsolute(entry) || path.normalize(entry) !== entry)) {
++    throw new Error(`${label} contains a non-canonical absolute path`);
++  }
++  if (
++    label === "sandbox.filesystem.deny_write" &&
++    paths.some((entry) => /[[\]{}()*?\\\n\r]/.test(entry))
++  ) {
++    throw new Error(
++      "protected filesystem paths must not contain permission-pattern metacharacters",
++    );
++  }
++  return paths;
++}
++
++function containsSecretLikeValue(value: unknown, field = ""): boolean {
++  // This field has already passed domain validation; token-prefix heuristics reject valid DNS names.
++  if (field === "sandbox.network.allowed_domains") {
++    return false;
++  }
++  if (typeof value === "string") {
++    return SECRET_LIKE_PATTERN.test(value);
++  }
++  if (Array.isArray(value)) {
++    return value.some((entry) => containsSecretLikeValue(entry, field));
++  }
++  if (value && typeof value === "object") {
++    return Object.entries(value as JsonObject).some(([key, entry]) =>
++      containsSecretLikeValue(entry, field ? `${field}.${key}` : key),
++    );
++  }
++  return false;
++}
++
++function assertNoDuplicateObjectKeys(raw: string): void {
++  new DuplicateKeyScanner(raw).scan();
++}
++
++class DuplicateKeyScanner {
++  private readonly stack: Array<Set<string> | null> = [];
++  private index = 0;
++  private expectingObjectKey = false;
++
++  constructor(private readonly raw: string) {}
++
++  scan(): void {
++    while (this.index < this.raw.length) {
++      const char = this.raw[this.index];
++      if (/\s/.test(char)) {
++        this.index += 1;
++      } else if (char === '"') {
++        this.consumeString();
++      } else {
++        this.consumeStructural(char);
++      }
++    }
++  }
++
++  private consumeStructural(char: string): void {
++    const action = STRUCTURAL_ACTIONS[char];
++    if (action) {
++      action(this);
++    }
++    this.index += 1;
++  }
++
++  private consumeString(): void {
++    const start = this.index;
++    this.index += 1;
++    this.consumeStringBody();
++    if (this.expectingObjectKey) {
++      this.recordKey(JSON.parse(this.raw.slice(start, this.index)) as string);
++    }
++  }
++
++  private consumeStringBody(): void {
++    let escaped = false;
++    while (this.index < this.raw.length) {
++      const current = this.raw[this.index];
++      this.index += 1;
++      if (escaped) {
++        escaped = false;
++      } else if (current === "\\") {
++        escaped = true;
++      } else if (current === '"') {
++        return;
++      }
++    }
++  }
++
++  private recordKey(key: string): void {
++    const keys = this.stack.at(-1);
++    if (!(keys instanceof Set)) {
++      throw new Error("invalid object-key state in claude execution policy");
++    }
++    if (keys.has(key)) {
++      throw new Error(`claude execution policy contains duplicate key: ${key}`);
++    }
++    keys.add(key);
++    this.expectingObjectKey = false;
++  }
++
++  openObject(): void {
++    this.stack.push(new Set());
++    this.expectingObjectKey = true;
++  }
++
++  openArray(): void {
++    this.stack.push(null);
++    this.expectingObjectKey = false;
++  }
++
++  closeContainer(): void {
++    this.stack.pop();
++    this.expectingObjectKey = false;
++  }
++
++  nextEntry(): void {
++    this.expectingObjectKey = this.stack.at(-1) instanceof Set;
++  }
++}
++
++const STRUCTURAL_ACTIONS: Record<string, (scanner: DuplicateKeyScanner) => void> = {
++  "{": (scanner) => scanner.openObject(),
++  "[": (scanner) => scanner.openArray(),
++  "}": (scanner) => scanner.closeContainer(),
++  "]": (scanner) => scanner.closeContainer(),
++  ",": (scanner) => scanner.nextEntry(),
++};
+diff --git a/src/acp/client.ts b/src/acp/client.ts
+index 5c9b5d2656a59c93c31fb74a954044b14b727426..44058ccfbe6496bcc1fdd67003a5de8af0bbecb9 100644
+--- a/src/acp/client.ts
++++ b/src/acp/client.ts
+@@ -66,6 +66,8 @@ import {
+   decisionToResponse,
+   inferToolKind,
+   resolvePermissionRequestWithDetails,
++  resolveAutomaticPermissionRequest,
++  isOncePermissionOption,
+ } from "../permissions.js";
+ import { getUnsupportedPromptContentMessage, textPrompt } from "../prompt-content.js";
+ import { extractRuntimeSessionId } from "../session/runtime-session-id.js";
+@@ -101,6 +103,7 @@ import {
+ } from "./agent-command.js";
+ import {
+   buildAgentSpawnOptions,
++  finalizeClaudeExecutionPolicyAgentEnvironment,
+   readEnvCredential,
+   resolveConfiguredAuthCredential,
+ } from "./auth-env.js";
+@@ -433,6 +436,7 @@ type AgentLaunchPlan = {
+   geminiAcp: boolean;
+   copilotAcp: boolean;
+   claudeAcp: boolean;
++  claudeExecutionPolicyBound: boolean;
+   spawnOptions: ReturnType<typeof buildAgentSpawnOptions>;
+ };
+ 
+@@ -720,6 +724,7 @@ export class AcpClient {
+   }
+ 
+   updateRuntimeOptions(options: {
++    onPermissionRequestExact?: AcpClientOptions["onPermissionRequestExact"];
+     permissionMode?: PermissionMode;
+     nonInteractivePermissions?: NonInteractivePermissionPolicy;
+     permissionPolicy?: AcpClientOptions["permissionPolicy"];
+@@ -728,6 +733,9 @@ export class AcpClient {
+     suppressSdkConsoleErrors?: boolean;
+     verbose?: boolean;
+   }): void {
++    if (Object.hasOwn(options, "onPermissionRequestExact")) {
++      this.options.onPermissionRequestExact = options.onPermissionRequestExact;
++    }
+     const shouldRefreshPermissionPolicy =
+       options.permissionMode !== undefined || options.nonInteractivePermissions !== undefined;
+     if (options.permissionMode) {
+@@ -815,6 +823,9 @@ export class AcpClient {
+     const launch = await this.resolveAgentLaunchPlan();
+     this.logAgentLaunch(launch);
+     await this.ensureLaunchSupport(launch);
++    if (launch.claudeExecutionPolicyBound) {
++      finalizeClaudeExecutionPolicyAgentEnvironment(launch.spawnOptions.env);
++    }
+     const child = await this.spawnAgentProcess(launch);
+     this.closing = false;
+     this.agentStartedAt = isoNow();
+@@ -868,6 +879,8 @@ export class AcpClient {
+     if (isQoderAcpCommand(spawnCommand, args)) {
+       args = buildQoderAcpCommandArgs(args, this.options);
+     }
++    const claudeAcp = isClaudeAcpCommand(spawnCommand, args);
++    const claudeExecutionPolicyBound = this.resolveClaudeExecutionPolicyBinding(claudeAcp);
+     return {
+       spawnCommand,
+       args,
+@@ -875,7 +888,8 @@ export class AcpClient {
+       devinAcp: isDevinAcpCommand(spawnCommand, args),
+       geminiAcp: isGeminiAcpCommand(spawnCommand, args),
+       copilotAcp: isCopilotAcpCommand(spawnCommand, args),
+-      claudeAcp: isClaudeAcpCommand(spawnCommand, args),
++      claudeAcp,
++      claudeExecutionPolicyBound,
+       spawnOptions: buildAgentSpawnOptions(
+         this.options.cwd,
+         this.options.authCredentials,
+@@ -884,6 +898,21 @@ export class AcpClient {
+     };
+   }
+ 
++  private resolveClaudeExecutionPolicyBinding(claudeAcp: boolean): boolean {
++    const ref = this.options.sessionOptions?.claudeExecutionPolicyRef?.trim();
++    const sha256 = this.options.sessionOptions?.claudeExecutionPolicySha256?.trim();
++    if ([ref, sha256].every((value) => !value)) {
++      return false;
++    }
++    if ([ref, sha256].some((value) => !value)) {
++      throw new Error("claude execution policy ref and SHA-256 must be provided together");
++    }
++    if (!claudeAcp) {
++      throw new Error("claude execution policy is only supported by claude-agent-acp");
++    }
++    return true;
++  }
++
+   private logAgentLaunch(plan: AgentLaunchPlan): void {
+     const launch = plan.resolvedBuiltInLaunch;
+     if (launch?.source === "installed") {
+@@ -948,20 +977,23 @@ export class AcpClient {
+         await this.handleSessionUpdate(params);
+       })
+       .onNotification(methods.client.elicitation.complete, async () => {})
+-      .onRequest(methods.client.session.requestPermission, async ({ params }) => {
+-        return await this.handlePermissionRequest(params);
+-      })
++      .onRequest(
++        methods.client.session.requestPermission,
++        async ({ params, requestId, signal }) => {
++          return await this.handlePermissionRequest(params, requestId, signal);
++        },
++      )
+       .onRequest(methods.client.elicitation.create, async ({ params, requestId, signal }) => {
+         return await this.handleElicitationRequest(params, requestId, signal);
+       })
+       .onRequest(methods.client.fs.readTextFile, async ({ params }) => {
+         return await this.handleReadTextFile(params);
+       })
+-      .onRequest(methods.client.fs.writeTextFile, async ({ params }) => {
+-        return await this.handleWriteTextFile(params);
++      .onRequest(methods.client.fs.writeTextFile, async ({ params, requestId, signal }) => {
++        return await this.handleWriteTextFile(params, requestId, signal);
+       })
+-      .onRequest(methods.client.terminal.create, async ({ params }) => {
+-        return await this.handleCreateTerminal(params);
++      .onRequest(methods.client.terminal.create, async ({ params, requestId, signal }) => {
++        return await this.handleCreateTerminal(params, requestId, signal);
+       })
+       .onRequest(methods.client.terminal.output, async ({ params }) => {
+         return await this.handleTerminalOutput(params);
+@@ -1160,7 +1192,11 @@ export class AcpClient {
+         connection.newSession({
+           cwd: sessionCwd,
+           mcpServers: this.options.mcpServers ?? [],
+-          _meta: buildClaudeCodeOptionsMeta(this.options.sessionOptions, claudeAcp),
++          _meta: buildClaudeCodeOptionsMeta(
++            this.options.sessionOptions,
++            claudeAcp,
++            this.options.cwd,
++          ),
+         }),
+       );
+       result = claudeAcp
+@@ -1972,11 +2008,17 @@ export class AcpClient {
+ 
+   private async handlePermissionRequest(
+     params: RequestPermissionRequest,
++    requestId?: JsonRpcId,
++    requestSignal?: AbortSignal,
+   ): Promise<RequestPermissionResponse> {
+     if (this.cancellingSessionIds.has(params.sessionId)) {
+       return cancelledPermissionResponse();
+     }
+ 
++    if (this.options.onPermissionRequestExact) {
++      return await this.handleExactPermissionRequest(params, requestId, requestSignal);
++    }
++
+     const hostResponse = await this.tryHandlePermissionRequestWithHost(params);
+     if (hostResponse) {
+       return hostResponse;
+@@ -1991,6 +2033,98 @@ export class AcpClient {
+     return response;
+   }
+ 
++  private async handleExactPermissionRequest(
++    params: RequestPermissionRequest,
++    requestId: JsonRpcId | undefined,
++    requestSignal: AbortSignal | undefined,
++  ): Promise<RequestPermissionResponse> {
++    const active = this.activePrompt;
++    if (!active || active.sessionId !== params.sessionId) {
++      this.recordPermissionDecision("cancelled");
++      return cancelledPermissionResponse();
++    }
++    if (requestId == null || !requestSignal) {
++      this.recordPermissionDecision("cancelled");
++      return cancelledPermissionResponse();
++    }
++    const automatic = resolveAutomaticPermissionRequest(
++      params,
++      this.options.permissionMode,
++      this.options.permissionPolicy,
++    );
++    const signal = AbortSignal.any([
++      requestSignal,
++      active.elicitationController.signal,
++      this.cancellationSignalForSession(params.sessionId),
++    ]);
++    let response = cancelledPermissionResponse();
++    if (!signal.aborted) {
++      response = automatic
++        ? automatic.response
++        : await this.askExactPermission(params, requestId, signal);
++    }
++    if (!this.exactPermissionStillCurrent(params.sessionId, signal, active)) {
++      response = cancelledPermissionResponse();
++    }
++    this.recordPermissionDecision(classifyPermissionDecision(params, response));
++    return response;
++  }
++
++  private exactPermissionStillCurrent(
++    sessionId: string,
++    signal: AbortSignal,
++    active: ActivePromptState,
++  ): boolean {
++    return (
++      !signal.aborted &&
++      this.activePrompt === active &&
++      !this.isElicitationSessionCancelling(sessionId)
++    );
++  }
++
++  private async askExactPermission(
++    params: RequestPermissionRequest,
++    requestId: JsonRpcId,
++    signal: AbortSignal,
++  ): Promise<RequestPermissionResponse> {
++    try {
++      const handler = this.options.onPermissionRequestExact;
++      if (!handler) {
++        return cancelledPermissionResponse();
++      }
++      const attempt = Promise.resolve()
++        .then(
++          async () =>
++            await handler(
++              { sessionId: params.sessionId, raw: params, inferredKind: inferToolKind(params) },
++              { requestId, signal },
++            ),
++        )
++        .then((decision) => ({ kind: "response" as const, decision }));
++      const result = await Promise.race([attempt, waitForAbort(signal)]);
++      if (result.kind !== "response" || !result.decision || !("optionId" in result.decision)) {
++        return cancelledPermissionResponse();
++      }
++      return this.exactOfferedChoice(params, result.decision.optionId);
++    } catch (error) {
++      this.log(
++        `exact permission ask failed; cancelling: ${error instanceof Error ? error.message : String(error)}`,
++      );
++      return cancelledPermissionResponse();
++    }
++  }
++
++  private exactOfferedChoice(
++    params: RequestPermissionRequest,
++    optionId: string,
++  ): RequestPermissionResponse {
++    const option = params.options.find((candidate) => candidate.optionId === optionId);
++    if (!option || !isOncePermissionOption(option)) {
++      return cancelledPermissionResponse();
++    }
++    return { outcome: { outcome: "selected", optionId: option.optionId } };
++  }
++
+   private async handleElicitationRequest(
+     request: CreateElicitationRequest,
+     requestId: JsonRpcId,
+@@ -2293,9 +2427,23 @@ export class AcpClient {
+     }
+   }
+ 
+-  private async handleWriteTextFile(params: WriteTextFileRequest): Promise<WriteTextFileResponse> {
++  private async handleWriteTextFile(
++    params: WriteTextFileRequest,
++    requestId?: JsonRpcId,
++    signal?: AbortSignal,
++  ): Promise<WriteTextFileResponse> {
+     try {
+-      return await this.filesystem.writeTextFile(params);
++      return await this.filesystem.writeTextFile(
++        params,
++        this.hostPermissionConfirmation(
++          params.sessionId,
++          "fs/write_text_file",
++          "edit",
++          params,
++          requestId,
++          signal,
++        ),
++      );
+     } catch (error) {
+       this.recordPermissionError(params.sessionId, error);
+       throw error;
+@@ -2304,15 +2452,71 @@ export class AcpClient {
+ 
+   private async handleCreateTerminal(
+     params: CreateTerminalRequest,
++    requestId?: JsonRpcId,
++    signal?: AbortSignal,
+   ): Promise<CreateTerminalResponse> {
+     try {
+-      return await this.terminalManager.createTerminal(params);
++      return await this.terminalManager.createTerminal(
++        params,
++        this.hostPermissionConfirmation(
++          params.sessionId,
++          "terminal/create",
++          "execute",
++          params,
++          requestId,
++          signal,
++        ),
++      );
+     } catch (error) {
+       this.recordPermissionError(params.sessionId, error);
+       throw error;
+     }
+   }
+ 
++  private hostPermissionConfirmation(
++    sessionId: string,
++    method: "fs/write_text_file" | "terminal/create",
++    kind: "edit" | "execute",
++    input: WriteTextFileRequest | CreateTerminalRequest,
++    requestId: JsonRpcId | undefined,
++    signal: AbortSignal | undefined,
++  ): (() => Promise<boolean>) | undefined {
++    if (!this.options.onPermissionRequestExact) {
++      return undefined;
++    }
++    return async () => {
++      const request: RequestPermissionRequest = {
++        sessionId,
++        toolCall: {
++          toolCallId: `host:${method}:${typeof requestId}:${String(requestId)}`,
++          title: method,
++          kind,
++          status: "pending",
++          rawInput: input,
++          _meta: { source: "acpx-host-confirm", method },
++        },
++        options: [
++          {
++            optionId: "acpx-host-allow-once",
++            name: "Allow this host operation once",
++            kind: "allow_once",
++          },
++          {
++            optionId: "acpx-host-reject-once",
++            name: "Reject this host operation",
++            kind: "reject_once",
++          },
++        ],
++      };
++      const response = await this.handleExactPermissionRequest(request, requestId, signal);
++      return (
++        !signal?.aborted &&
++        response.outcome.outcome === "selected" &&
++        response.outcome.optionId === "acpx-host-allow-once"
++      );
++    };
++  }
++
+   private async handleTerminalOutput(
+     params: TerminalOutputRequest,
+   ): Promise<TerminalOutputResponse> {
+diff --git a/src/acp/terminal-manager.ts b/src/acp/terminal-manager.ts
+index 877754643bb01c7ff63ee6bd954425079581563d..2a1570b11aeba752c683d31a43ab5677fb437935 100644
+--- a/src/acp/terminal-manager.ts
++++ b/src/acp/terminal-manager.ts
+@@ -189,7 +189,10 @@ export class TerminalManager {
+     this.nonInteractivePermissions = nonInteractivePermissions ?? "deny";
+   }
+ 
+-  async createTerminal(params: CreateTerminalRequest): Promise<CreateTerminalResponse> {
++  async createTerminal(
++    params: CreateTerminalRequest,
++    confirm?: () => Promise<boolean>,
++  ): Promise<CreateTerminalResponse> {
+     const commandLine = toCommandLine(params.command, params.args);
+     const summary = `terminal/create: ${commandLine}`;
+ 
+@@ -201,7 +204,7 @@ export class TerminalManager {
+     });
+ 
+     try {
+-      if (!(await this.isExecuteApproved(commandLine))) {
++      if (!(await this.isExecuteApproved(commandLine, confirm))) {
+         throw new PermissionDeniedError("Permission denied for terminal/create");
+       }
+ 
+@@ -427,13 +430,19 @@ export class TerminalManager {
+     this.onOperation?.(operation);
+   }
+ 
+-  private async isExecuteApproved(commandLine: string): Promise<boolean> {
++  private async isExecuteApproved(
++    commandLine: string,
++    confirm?: () => Promise<boolean>,
++  ): Promise<boolean> {
+     if (this.permissionMode === "approve-all") {
+       return true;
+     }
+     if (this.permissionMode === "deny-all") {
+       return false;
+     }
++    if (confirm) {
++      return await confirm();
++    }
+     if (
+       this.usesDefaultConfirmExecute &&
+       this.nonInteractivePermissions === "fail" &&
+diff --git a/src/cli-core.ts b/src/cli-core.ts
+index f1663eb4787bf3d08241a675b361139737f5ea4d..6b7df047b60f28d003d126e37f3756f5be5dcbb5 100644
+--- a/src/cli-core.ts
++++ b/src/cli-core.ts
+@@ -10,6 +10,7 @@ import {
+ import { listBuiltInAgents } from "./agent-registry.js";
+ import { InterruptedError } from "./async-control.js";
+ import { configurePublicCli } from "./cli-public.js";
++import { registerBuildInfoCommand } from "./cli/build-info-command.js";
+ import { handlePrompt } from "./cli/command-handlers.js";
+ import { registerAgentCommand, registerDefaultCommands } from "./cli/command-registration.js";
+ import { loadResolvedConfig } from "./cli/config.js";
+@@ -42,6 +43,7 @@ const TOP_LEVEL_VERBS = new Set([
+   "sessions",
+   "status",
+   "config",
++  "build-info",
+   "help",
+ ]);
+ 
+@@ -52,6 +54,8 @@ const TOP_LEVEL_VERSION_VALUE_FLAG_VALUES = [
+   "--non-interactive-permissions",
+   "--permission-policy",
+   "--policy",
++  "--claude-execution-policy-ref",
++  "--claude-execution-policy-sha256",
+   "--format",
+   "--model",
+   "--allowed-tools",
+@@ -547,6 +551,7 @@ export async function main(argv: string[] = process.argv): Promise<void> {
+   const program = createProgram(requestedJsonStrict);
+ 
+   addGlobalFlags(program);
++  registerBuildInfoCommand(program);
+ 
+   configurePublicCli({
+     program,
+diff --git a/src/cli/build-info-command.ts b/src/cli/build-info-command.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..1214587084e278770bd3dedb2444e77d4bd62d49
+--- /dev/null
++++ b/src/cli/build-info-command.ts
+@@ -0,0 +1,28 @@
++import type { Command } from "commander";
++import { CLAUDE_EXECUTION_POLICY_SCHEMA } from "../acp/claude-execution-policy.js";
++import { E1_PATCH_SHA256, E1_UPSTREAM_COMMIT } from "../e1-build-info.generated.js";
++
++export function e1BuildInfoDocument() {
++  return {
++    upstream_commit: E1_UPSTREAM_COMMIT,
++    patch_sha256: E1_PATCH_SHA256,
++    policy_schema: CLAUDE_EXECUTION_POLICY_SCHEMA,
++  };
++}
++
++export function registerBuildInfoCommand(program: Command): void {
++  program
++    .command("build-info")
++    .description("Show the fixed E1 policy transport build identity")
++    .option("--json", "Print build identity as JSON")
++    .action((flags: { json?: boolean }) => {
++      const info = e1BuildInfoDocument();
++      if (flags.json) {
++        process.stdout.write(`${JSON.stringify(info)}\n`);
++        return;
++      }
++      process.stdout.write(
++        `upstream_commit=${info.upstream_commit}\npatch_sha256=${info.patch_sha256}\npolicy_schema=${info.policy_schema}\n`,
++      );
++    });
++}
+diff --git a/src/cli/command-handlers.ts b/src/cli/command-handlers.ts
+index 2aba8a7470b49731b4e7e079ed7d0d67c1439780..dc2cea81b5b085d41259b2ab414874ed907854bb 100644
+--- a/src/cli/command-handlers.ts
++++ b/src/cli/command-handlers.ts
+@@ -47,6 +47,8 @@ import {
+   type StatusFlags,
+ } from "./flags.js";
+ import { emitJsonResult } from "./output/json-output.js";
++import { sendNativePermissionReply } from "./queue/ipc.js";
++import { parseNativePermissionReply } from "./queue/messages.js";
+ import type { SessionListResult } from "./session/contracts.js";
+ 
+ class NoSessionError extends Error {
+@@ -191,6 +193,8 @@ function sessionOptionsFromGlobalFlags(
+     allowedTools: globalFlags.allowedTools,
+     maxTurns: globalFlags.maxTurns,
+     systemPrompt: globalFlags.systemPrompt,
++    claudeExecutionPolicyRef: globalFlags.claudeExecutionPolicyRef,
++    claudeExecutionPolicySha256: globalFlags.claudeExecutionPolicySha256,
+   };
+ }
+ 
+@@ -312,6 +316,17 @@ async function findRoutedSessionOrThrow(
+   );
+ }
+ 
++function validatePermissionReplyFlags(flags: ReturnType<typeof resolveGlobalFlags>): void {
++  if (!flags.permissionReplies) {
++    return;
++  }
++  if (!flags.timeout || flags.format !== "json" || (flags.promptRetries ?? 0) !== 0) {
++    throw new Error(
++      "Online permission replies require JSON, a finite timeout, and zero prompt retries",
++    );
++  }
++}
++
+ export async function handlePrompt(
+   explicitAgentName: string | undefined,
+   promptParts: string[],
+@@ -320,6 +335,7 @@ export async function handlePrompt(
+   config: ResolvedAcpxConfig,
+ ): Promise<void> {
+   const globalFlags = resolveGlobalFlags(command, config);
++  validatePermissionReplyFlags(globalFlags);
+   const outputPolicy = resolveRequestedOutputPolicy(globalFlags);
+   const permissionMode = resolvePermissionMode(globalFlags, config.defaultPermissions);
+   const permissionPolicy = await resolvePermissionPolicyFromFlags(globalFlags);
+@@ -366,14 +382,10 @@ export async function handlePrompt(
+     ttlMs: globalFlags.ttl,
+     maxQueueDepth: config.queueMaxDepth,
+     promptRetries: globalFlags.promptRetries,
++    permissionReplies: globalFlags.permissionReplies,
+     verbose: globalFlags.verbose,
+     waitForCompletion: flags.wait !== false,
+-    sessionOptions: {
+-      model: globalFlags.model,
+-      allowedTools: globalFlags.allowedTools,
+-      maxTurns: globalFlags.maxTurns,
+-      systemPrompt: globalFlags.systemPrompt,
+-    },
++    sessionOptions: sessionOptionsFromGlobalFlags(globalFlags),
+   });
+ 
+   if ("queued" in result) {
+@@ -399,6 +411,9 @@ export async function handleExec(
+ ): Promise<void> {
+   if (config.disableExec) {
+     const globalFlags = resolveGlobalFlags(command, config);
++    if (globalFlags.permissionReplies) {
++      throw new Error("Online permission replies require a persistent queue prompt, not exec");
++    }
+     const outputPolicy = resolveRequestedOutputPolicy(globalFlags);
+     if (outputPolicy.format === "json") {
+       process.stdout.write(
+@@ -455,12 +470,7 @@ export async function handleExec(
+     timeoutMs: globalFlags.timeout,
+     verbose: globalFlags.verbose,
+     promptRetries: globalFlags.promptRetries,
+-    sessionOptions: {
+-      model: globalFlags.model,
+-      allowedTools: globalFlags.allowedTools,
+-      maxTurns: globalFlags.maxTurns,
+-      systemPrompt: globalFlags.systemPrompt,
+-    },
++    sessionOptions: sessionOptionsFromGlobalFlags(globalFlags),
+   });
+ 
+   applyPermissionExitCode(result, outputPolicy.format === "quiet" ? outputFormatter : undefined);
+@@ -554,6 +564,36 @@ function printSetConfigOptionResultByFormat(
+   );
+ }
+ 
++export async function handlePermissionReply(
++  explicitAgentName: string | undefined,
++  flags: StatusFlags & { reply: string },
++  command: Command,
++  config: ResolvedAcpxConfig,
++): Promise<void> {
++  const globalFlags = resolveGlobalFlags(command, config);
++  const agent = resolveAgentInvocation(explicitAgentName, globalFlags, config);
++  const reply = parseNativePermissionReply(JSON.parse(flags.reply));
++  if (!reply) {
++    throw new Error("Malformed exact permission reply");
++  }
++  const record = await findSessionByDirectoryWalk({
++    agentCommand: agent.agentCommand,
++    cwd: agent.cwd,
++    name: resolveSessionNameFromFlags(flags, command),
++    boundary: findGitRepositoryRoot(agent.cwd) ?? agent.cwd,
++  });
++  if (!record || record.acpSessionId !== reply.sessionId) {
++    throw new Error("Permission reply has no matching persistent session");
++  }
++  const consumed = await sendNativePermissionReply(record.acpxRecordId, reply);
++  process.stdout.write(
++    `${JSON.stringify({ schema: "dual.native.permission.reply.v1", consumed, requestKey: reply.requestKey, ownerGeneration: reply.ownerGeneration })}\n`,
++  );
++  if (!consumed) {
++    process.exitCode = EXIT_CODES.PERMISSION_DENIED;
++  }
++}
++
+ export async function handleCancel(
+   explicitAgentName: string | undefined,
+   flags: StatusFlags,
+diff --git a/src/cli/command-registration.ts b/src/cli/command-registration.ts
+index 3a4cd523861881225981fe338401dcf16e768630..3d3ad1859dc322b349e8cde9b2f3b24e5bc65ad7 100644
+--- a/src/cli/command-registration.ts
++++ b/src/cli/command-registration.ts
+@@ -2,6 +2,7 @@ import { Command, Option } from "commander";
+ import { DEFAULT_HISTORY_LIMIT } from "../session/persistence.js";
+ import {
+   handleCancel,
++  handlePermissionReply,
+   handleExec,
+   handlePrompt,
+   handleSessionsClose,
+@@ -241,6 +242,15 @@ export function registerSharedAgentSubcommands(
+     await handleExec(explicitAgentName, promptParts, flags, this, config);
+   });
+ 
++  const replyCommand = parent
++    .command("permission-reply")
++    .description("Reply once to an exact live permission request; never retries")
++    .requiredOption("--reply <json>", "Committed exact reply JSON");
++  addSessionNameOption(replyCommand);
++  replyCommand.action(async function (this: Command, flags: StatusFlags & { reply: string }) {
++    await handlePermissionReply(explicitAgentName, flags, this, config);
++  });
++
+   const cancelCommand = parent.command("cancel").description(descriptions.cancel);
+   addSessionNameOption(cancelCommand);
+   cancelCommand.action(async function (this: Command, flags: StatusFlags) {
+diff --git a/src/cli/flags.ts b/src/cli/flags.ts
+index d8b2ac6ec1aba0961dede5a88c5c0a631880d51c..ee1bc6a68e71f936e0bb97ceab0a31b3c061ad11 100644
+--- a/src/cli/flags.ts
++++ b/src/cli/flags.ts
+@@ -52,6 +52,9 @@ export type GlobalFlags = PermissionFlags & {
+   systemPrompt?: SystemPromptOption;
+   promptRetries?: number;
+   permissionPolicy?: string;
++  permissionReplies?: boolean;
++  claudeExecutionPolicyRef?: string;
++  claudeExecutionPolicySha256?: string;
+ };
+ 
+ export type PromptFlags = {
+@@ -318,7 +321,21 @@ export function addGlobalFlags(command: Command): Command {
+       "--permission-policy <json-or-file>",
+       "Permission policy JSON or path (autoApprove, autoDeny, escalate, defaultAction)",
+     )
++    .option(
++      "--permission-replies",
++      "Expose bounded permission asks to the current queue owner; requires timeout and no prompt retry",
++    )
+     .option("--policy <json-or-file>", "Alias for --permission-policy")
++    .option(
++      "--claude-execution-policy-ref <path>",
++      "Relative path to a fixed claude_execution_policy.v2 document",
++      (value: string) => parseNonEmptyValue("Claude execution policy ref", value),
++    )
++    .option(
++      "--claude-execution-policy-sha256 <sha256>",
++      "Expected SHA-256 of the fixed Claude execution policy",
++      parseSha256,
++    )
+     .option("--format <fmt>", "Output format: text, json, quiet", parseOutputFormat)
+     .option("--suppress-reads", "Suppress raw read-file contents in output")
+     .option("--model <id>", "Agent model id")
+@@ -418,6 +435,7 @@ export function resolveGlobalFlags(command: Command, config: ResolvedAcpxConfig)
+   const jsonStrict = opts.jsonStrict === true;
+   const verbose = opts.verbose === true;
+   assertOutputFlagCompatibility(format, jsonStrict, verbose);
++  const claudeExecutionPolicy = resolveClaudeExecutionPolicyBinding(opts);
+ 
+   return {
+     agent: stringOption(opts.agent),
+@@ -428,6 +446,8 @@ export function resolveGlobalFlags(command: Command, config: ResolvedAcpxConfig)
+       config,
+     ),
+     permissionPolicy: resolvePermissionPolicyOption(opts),
++    ...(opts.permissionReplies === true ? { permissionReplies: true } : {}),
++    ...claudeExecutionPolicy,
+     jsonStrict,
+     suppressReads: opts.suppressReads === true,
+     fs: resolveCapabilityOption(opts.fs),
+@@ -447,6 +467,30 @@ export function resolveGlobalFlags(command: Command, config: ResolvedAcpxConfig)
+   };
+ }
+ 
++function resolveClaudeExecutionPolicyBinding(
++  opts: Record<string, unknown>,
++): Pick<GlobalFlags, "claudeExecutionPolicyRef" | "claudeExecutionPolicySha256"> {
++  const ref = stringOption(opts.claudeExecutionPolicyRef);
++  const sha256 = stringOption(opts.claudeExecutionPolicySha256);
++  if (ref === undefined && sha256 === undefined) {
++    return {};
++  }
++  if (!ref || !sha256) {
++    throw new InvalidArgumentError(
++      "--claude-execution-policy-ref and --claude-execution-policy-sha256 must be provided together",
++    );
++  }
++  return { claudeExecutionPolicyRef: ref, claudeExecutionPolicySha256: sha256 };
++}
++
++export function parseSha256(value: string): string {
++  const normalized = value.trim();
++  if (!/^[a-f0-9]{64}$/.test(normalized)) {
++    throw new InvalidArgumentError("SHA-256 must be 64 lowercase hexadecimal characters");
++  }
++  return normalized;
++}
++
+ function resolveCwdOption(value: unknown): string {
+   return stringOption(value) ?? process.cwd();
+ }
+diff --git a/src/cli/queue/ipc-server.ts b/src/cli/queue/ipc-server.ts
+index 06565023ce1cdf249649b2ba8876fa5a8a110abb..f3675cb6a3d30c62232146006138da483c9fa7ec 100644
+--- a/src/cli/queue/ipc-server.ts
++++ b/src/cli/queue/ipc-server.ts
+@@ -16,6 +16,7 @@ import {
+   type QueueOwnerMessage,
+   type QueueRequest,
+ } from "./messages.js";
++import type { NativePermissionReply } from "./permission-replies.js";
+ 
+ type QueueOwnerSocketLease = {
+   socketPath: string;
+@@ -86,6 +87,7 @@ export type QueueTask = {
+   resumePolicy?: SessionResumePolicy;
+   nonInteractivePermissions?: NonInteractivePermissionPolicy;
+   permissionPolicy?: AcpClientOptions["permissionPolicy"];
++  permissionReplies?: boolean;
+   timeoutMs?: number;
+   suppressSdkConsoleErrors?: boolean;
+   promptRetries?: number;
+@@ -97,6 +99,7 @@ export type QueueTask = {
+ };
+ 
+ export type QueueOwnerControlHandlers = {
++  permissionReply?: (reply: NativePermissionReply) => boolean;
+   cancelPrompt: () => Promise<boolean>;
+   closeSession: (timeoutMs?: number) => Promise<boolean>;
+   setSessionMode: (modeId: string, timeoutMs?: number) => Promise<void>;
+@@ -431,6 +434,18 @@ export class SessionQueueOwner {
+   }
+ 
+   private handleControlQueueRequest(socket: net.Socket, request: QueueRequest): boolean {
++    if (request.type === "permission_reply") {
++      this.handleControlRequest({
++        socket,
++        requestId: request.requestId,
++        run: async () => ({
++          type: "permission_reply_result",
++          requestId: request.requestId,
++          consumed: this.controlHandlers.permissionReply?.(request.reply) ?? false,
++        }),
++      });
++      return true;
++    }
+     if (request.type === "cancel_prompt") {
+       this.handleControlRequest({
+         socket,
+@@ -525,6 +540,7 @@ export class SessionQueueOwner {
+       resumePolicy: request.resumePolicy,
+       nonInteractivePermissions: request.nonInteractivePermissions,
+       permissionPolicy: request.permissionPolicy,
++      permissionReplies: request.permissionReplies,
+       timeoutMs: request.timeoutMs,
+       suppressSdkConsoleErrors: request.suppressSdkConsoleErrors,
+       promptRetries: request.promptRetries,
+diff --git a/src/cli/queue/ipc.ts b/src/cli/queue/ipc.ts
+index ab49ccdf5307646c109301550acd54a3027c1bb9..d29f8d30294373c6b7cfd297f7c141d4831ad3b1 100644
+--- a/src/cli/queue/ipc.ts
++++ b/src/cli/queue/ipc.ts
+@@ -38,6 +38,7 @@ import {
+   type QueueSetModeRequest,
+   type QueueSubmitRequest,
+ } from "./messages.js";
++import type { NativePermissionReply } from "./permission-replies.js";
+ 
+ export { QUEUE_CONNECT_RETRY_MS } from "./ipc-transport.js";
+ export const MAX_MESSAGE_BUFFER_SIZE = 10 * 1024 * 1024;
+@@ -201,6 +202,7 @@ function parseQueueOwnerResponseLine(
+ async function runQueueOwnerRequest<TResult>(options: {
+   owner: QueueOwnerRecord;
+   request: QueueRequest;
++  timeoutMs?: number;
+   onAccepted?: (controls: QueueOwnerRequestControls<TResult>) => void;
+   onMessage: (message: QueueOwnerMessage, controls: QueueOwnerRequestControls<TResult>) => void;
+   onClose: (controls: QueueOwnerRequestControls<TResult>) => void;
+@@ -214,6 +216,7 @@ async function runQueueOwnerRequest<TResult>(options: {
+ 
+   return await new Promise<TResult>((resolve, reject) => {
+     let settled = false;
++    let timer: NodeJS.Timeout | undefined;
+     let buffer = "";
+     const state: QueueOwnerRequestState = {
+       acknowledged: false,
+@@ -224,6 +227,9 @@ async function runQueueOwnerRequest<TResult>(options: {
+         return;
+       }
+       settled = true;
++      if (timer) {
++        clearTimeout(timer);
++      }
+       socket.removeAllListeners();
+       if (!socket.destroyed) {
+         socket.end();
+@@ -236,6 +242,9 @@ async function runQueueOwnerRequest<TResult>(options: {
+         return;
+       }
+       settled = true;
++      if (timer) {
++        clearTimeout(timer);
++      }
+       socket.removeAllListeners();
+       if (!socket.destroyed) {
+         socket.destroy();
+@@ -300,6 +309,12 @@ async function runQueueOwnerRequest<TResult>(options: {
+       options.onClose(controls);
+     });
+ 
++    if (options.timeoutMs != null) {
++      timer = setTimeout(
++        () => finishReject(new Error("Permission reply delivery is unknown; do not resend")),
++        options.timeoutMs,
++      );
++    }
+     socket.write(`${JSON.stringify(options.request)}\n`);
+   });
+ }
+@@ -314,6 +329,7 @@ export type SubmitToQueueOwnerOptions = {
+   resumePolicy?: SessionResumePolicy;
+   nonInteractivePermissions?: NonInteractivePermissionPolicy;
+   permissionPolicy?: PermissionPolicy;
++  permissionReplies?: boolean;
+   outputFormatter: OutputFormatter;
+   errorEmissionPolicy?: OutputErrorEmissionPolicy;
+   timeoutMs?: number;
+@@ -401,6 +417,7 @@ async function submitToQueueOwner(
+     resumePolicy: options.resumePolicy,
+     nonInteractivePermissions: options.nonInteractivePermissions,
+     permissionPolicy: options.permissionPolicy,
++    permissionReplies: options.permissionReplies,
+     timeoutMs: options.timeoutMs,
+     suppressSdkConsoleErrors: options.suppressSdkConsoleErrors,
+     promptRetries: options.promptRetries ?? 0,
+@@ -469,10 +486,12 @@ async function submitControlToQueueOwner<TResponse extends QueueOwnerMessage>(
+   owner: QueueOwnerRecord,
+   request: QueueRequest,
+   isExpectedResponse: (message: QueueOwnerMessage) => message is TResponse,
++  timeoutMs?: number,
+ ): Promise<TResponse | undefined> {
+   return await runQueueOwnerRequest<TResponse>({
+     owner,
+     request,
++    timeoutMs,
+     onMessage: (message, { state, resolve, reject }) => {
+       if (message.type === "error") {
+         reject(
+@@ -534,6 +553,36 @@ async function submitControlToQueueOwner<TResponse extends QueueOwnerMessage>(
+   });
+ }
+ 
++/** One connection, one write. No owner recovery, retry, or generation substitution. */
++export async function sendNativePermissionReply(
++  sessionId: string,
++  reply: NativePermissionReply,
++): Promise<boolean> {
++  if (reply.deadlineMs <= Date.now()) {
++    throw new Error("Permission request expired; do not resend");
++  }
++  const owner = await readQueueOwnerRecord(sessionId);
++  if (!owner || owner.ownerGeneration !== reply.ownerGeneration) {
++    throw new Error("Permission request owner no longer exists");
++  }
++  const response = await submitControlToQueueOwner(
++    owner,
++    {
++      type: "permission_reply",
++      requestId: randomUUID(),
++      ownerGeneration: reply.ownerGeneration,
++      reply,
++    },
++    (message): message is Extract<QueueOwnerMessage, { type: "permission_reply_result" }> =>
++      message.type === "permission_reply_result",
++    Math.max(1, reply.deadlineMs - Date.now()),
++  );
++  if (!response) {
++    throw new Error("Permission reply delivery is unknown; do not resend");
++  }
++  return response.consumed;
++}
++
+ async function submitCancelToQueueOwner(owner: QueueOwnerRecord): Promise<boolean | undefined> {
+   const request: QueueCancelRequest = {
+     type: "cancel_prompt",
+diff --git a/src/cli/queue/messages.ts b/src/cli/queue/messages.ts
+index a6ff34c978de64199dbf5f15141e7ee8077bf72b..aa7c6f0d7393bb0261e8379f2cc7c0c03506b9ad 100644
+--- a/src/cli/queue/messages.ts
++++ b/src/cli/queue/messages.ts
+@@ -20,6 +20,7 @@ import type {
+   SessionResumePolicy,
+   SessionSendResult,
+ } from "../../types.js";
++import type { NativePermissionReply } from "./permission-replies.js";
+ 
+ type QueueSessionOptions = NonNullable<AcpClientOptions["sessionOptions"]>;
+ 
+@@ -33,6 +34,7 @@ export type QueueSubmitRequest = {
+   resumePolicy?: SessionResumePolicy;
+   nonInteractivePermissions?: NonInteractivePermissionPolicy;
+   permissionPolicy?: PermissionPolicy;
++  permissionReplies?: boolean;
+   timeoutMs?: number;
+   suppressSdkConsoleErrors?: boolean;
+   promptRetries?: number;
+@@ -78,8 +80,22 @@ export type QueueCloseSessionRequest = {
+   timeoutMs?: number;
+ };
+ 
++export type QueuePermissionReplyRequest = {
++  type: "permission_reply";
++  requestId: string;
++  ownerGeneration: number;
++  reply: NativePermissionReply;
++};
++export type QueueOwnerPermissionReplyResult = {
++  type: "permission_reply_result";
++  requestId: string;
++  ownerGeneration?: number;
++  consumed: boolean;
++};
++
+ export type QueueRequest =
+   | QueueSubmitRequest
++  | QueuePermissionReplyRequest
+   | QueueCancelRequest
+   | QueueSetModeRequest
+   | QueueSetModelRequest
+@@ -164,6 +180,7 @@ export type QueueOwnerErrorMessage = {
+ 
+ export type QueueOwnerMessage =
+   | QueueOwnerAcceptedMessage
++  | QueueOwnerPermissionReplyResult
+   | QueueOwnerEventMessage
+   | QueueOwnerPermissionEscalationMessage
+   | QueueOwnerResultMessage
+@@ -285,7 +302,16 @@ function parseSessionOptions(value: unknown): QueueSessionOptions | null | undef
+   if (!assignSessionEnv(sessionOptions, record.env)) {
+     return null;
+   }
++  return assignParsedPolicyBinding(sessionOptions, record);
++}
+ 
++function assignParsedPolicyBinding(
++  sessionOptions: QueueSessionOptions,
++  record: Record<string, unknown>,
++): QueueSessionOptions | null {
++  if (!assignSessionPolicyBinding(sessionOptions, record)) {
++    return null;
++  }
+   return sessionOptions;
+ }
+ 
+@@ -354,6 +380,28 @@ function assignSessionEnv(options: QueueSessionOptions, value: unknown): boolean
+   return true;
+ }
+ 
++function assignSessionPolicyBinding(
++  options: QueueSessionOptions,
++  record: Record<string, unknown>,
++): boolean {
++  const ref = record.claudeExecutionPolicyRef;
++  const sha256 = record.claudeExecutionPolicySha256;
++  if (ref == null && sha256 == null) {
++    return true;
++  }
++  if (
++    typeof ref !== "string" ||
++    ref.trim().length === 0 ||
++    typeof sha256 !== "string" ||
++    !/^[a-f0-9]{64}$/.test(sha256)
++  ) {
++    return false;
++  }
++  options.claudeExecutionPolicyRef = ref;
++  options.claudeExecutionPolicySha256 = sha256;
++  return true;
++}
++
+ function parseOwnerGeneration(value: unknown): number | undefined | null {
+   if (value == null) {
+     return undefined;
+@@ -421,6 +469,8 @@ function parseTypedQueueRequest(
+   context: QueueRequestContext,
+ ): QueueRequest | null {
+   switch (request.type) {
++    case "permission_reply":
++      return parsePermissionReplyRequest(request, context);
+     case "submit_prompt":
+       return parseSubmitRequest(request, context);
+     case "cancel_prompt":
+@@ -442,15 +492,87 @@ function parseTypedQueueRequest(
+   }
+ }
+ 
++export function parseNativePermissionReply(value: unknown): NativePermissionReply | null {
++  const reply = asRecord(value);
++  if (
++    !reply ||
++    ![
++      "requestKey",
++      "sessionId",
++      "promptId",
++      "rawSha256",
++      "optionId",
++      "commitRef",
++      "commitSha256",
++    ].every((key) => typeof reply[key] === "string" && reply[key].length > 0)
++  ) {
++    return null;
++  }
++  if (!validPermissionReplyIdentity(reply)) {
++    return null;
++  }
++  return reply as NativePermissionReply;
++}
++
++function validPermissionReplyIdentity(reply: Record<string, unknown>): boolean {
++  const generation =
++    Number.isSafeInteger(reply.ownerGeneration) && Number(reply.ownerGeneration) > 0;
++  const deadline = typeof reply.deadlineMs === "number" && Number.isFinite(reply.deadlineMs);
++  const rpc =
++    typeof reply.rpcId === "string" ||
++    (typeof reply.rpcId === "number" && Number.isFinite(reply.rpcId));
++  const hashes = [reply.rawSha256, reply.commitSha256].every((value) =>
++    /^[a-f0-9]{64}$/.test(String(value)),
++  );
++  return [generation, deadline, rpc, hashes].every(Boolean);
++}
++
++function parsePermissionReplyRequest(
++  request: Record<string, unknown>,
++  context: QueueRequestContext,
++): QueuePermissionReplyRequest | null {
++  const reply = parseNativePermissionReply(request.reply);
++  if (
++    !reply ||
++    context.ownerGeneration === undefined ||
++    reply.ownerGeneration !== context.ownerGeneration
++  ) {
++    return null;
++  }
++  return {
++    type: "permission_reply",
++    requestId: context.requestId,
++    ownerGeneration: context.ownerGeneration,
++    reply,
++  };
++}
++
++function validOnlinePermissionPrompt(
++  parsed: { permissionReplies?: boolean; waitForCompletion: boolean; promptRetries?: number },
++  context: QueueRequestContext,
++): boolean {
++  return (
++    !parsed.permissionReplies ||
++    Boolean(context.timeoutMs && parsed.waitForCompletion && (parsed.promptRetries ?? 0) === 0)
++  );
++}
++
+ function parseSubmitRequest(
+   request: Record<string, unknown>,
+   context: QueueRequestContext,
+ ): QueueSubmitRequest | null {
+   const parsed = parseSubmitRequestFields(request);
+-  if (!parsed) {
++  if (!parsed || !validOnlinePermissionPrompt(parsed, context)) {
+     return null;
+   }
+ 
++  return buildSubmitRequest(parsed, context);
++}
++
++function buildSubmitRequest(
++  parsed: ParsedSubmitRequestFields,
++  context: QueueRequestContext,
++): QueueSubmitRequest {
+   return {
+     type: "submit_prompt",
+     requestId: context.requestId,
+@@ -462,6 +584,9 @@ function parseSubmitRequest(
+     nonInteractivePermissions: parsed.nonInteractivePermissions,
+     ...(parsed.permissionPolicy !== undefined ? { permissionPolicy: parsed.permissionPolicy } : {}),
+     timeoutMs: context.timeoutMs,
++    ...(parsed.permissionReplies !== undefined
++      ? { permissionReplies: parsed.permissionReplies }
++      : {}),
+     ...(parsed.suppressSdkConsoleErrors !== undefined
+       ? { suppressSdkConsoleErrors: parsed.suppressSdkConsoleErrors }
+       : {}),
+@@ -479,6 +604,7 @@ type ParsedSubmitRequestFields = Pick<
+   | "resumePolicy"
+   | "nonInteractivePermissions"
+   | "permissionPolicy"
++  | "permissionReplies"
+   | "suppressSdkConsoleErrors"
+   | "promptRetries"
+   | "waitForCompletion"
+@@ -498,6 +624,7 @@ function parseSubmitRequestFields(
+       isNonInteractivePermissionPolicy,
+     ),
+     permissionPolicy: parseOptionalValue(request.permissionPolicy, isPermissionPolicy),
++    permissionReplies: parseOptionalBoolean(request.permissionReplies),
+     suppressSdkConsoleErrors: parseOptionalBoolean(request.suppressSdkConsoleErrors),
+     promptRetries: parseNonNegativeInteger(request.promptRetries),
+     waitForCompletion:
+@@ -660,6 +787,10 @@ type QueueOwnerMessageParser = (
+ ) => QueueOwnerMessage | null;
+ 
+ const QUEUE_OWNER_MESSAGE_PARSERS: Record<string, QueueOwnerMessageParser> = {
++  permission_reply_result: (message, context) =>
++    typeof message.consumed === "boolean"
++      ? { type: "permission_reply_result", ...context, consumed: message.consumed }
++      : null,
+   accepted: (_message, context) => ({ type: "accepted", ...context }),
+   event: parseEventOwnerMessage,
+   permission_escalation: parsePermissionEscalationOwnerMessage,
+diff --git a/src/cli/queue/owner-env.ts b/src/cli/queue/owner-env.ts
+index a00147f8afd26dcd8bb151ed037007482c8216de..e3a87ba35e4ef28efce37dfa93e108ee91a22b69 100644
+--- a/src/cli/queue/owner-env.ts
++++ b/src/cli/queue/owner-env.ts
+@@ -137,6 +137,11 @@ function assignQueueOwnerSessionOptions(
+   assignSessionMaxTurns(options.sessionOptions, sessionOpts.maxTurns);
+   assignSessionSystemPrompt(options.sessionOptions, sessionOpts.systemPrompt);
+   assignSessionEnv(options.sessionOptions, sessionOpts.env);
++  assignSessionPolicyBinding(
++    options.sessionOptions,
++    sessionOpts.claudeExecutionPolicyRef,
++    sessionOpts.claudeExecutionPolicySha256,
++  );
+ }
+ 
+ function assignSessionModel(
+@@ -181,6 +186,27 @@ function assignSessionSystemPrompt(
+   }
+ }
+ 
++function assignSessionPolicyBinding(
++  options: NonNullable<QueueOwnerRuntimeOptions["sessionOptions"]>,
++  ref: unknown,
++  sha256: unknown,
++): void {
++  if (ref === undefined && sha256 === undefined) {
++    return;
++  }
++  if (
++    typeof ref === "string" &&
++    ref.trim().length > 0 &&
++    typeof sha256 === "string" &&
++    /^[a-f0-9]{64}$/.test(sha256)
++  ) {
++    options.claudeExecutionPolicyRef = ref;
++    options.claudeExecutionPolicySha256 = sha256;
++    return;
++  }
++  throw new Error("queue owner payload has invalid Claude execution policy binding");
++}
++
+ function assignSessionEnv(
+   options: NonNullable<QueueOwnerRuntimeOptions["sessionOptions"]>,
+   value: unknown,
+diff --git a/src/cli/session/contracts.ts b/src/cli/session/contracts.ts
+index 03417bef1e522869f9dab7d47fec10d691de0d95..304bdc7d3580210e2f6822b9aefe6c1801ce15c2 100644
+--- a/src/cli/session/contracts.ts
++++ b/src/cli/session/contracts.ts
+@@ -83,6 +83,7 @@ export type SessionCreateOptions = {
+ } & TimedRunOptions;
+ 
+ export type SessionSendOptions = {
++  permissionReplies?: boolean;
+   sessionId: string;
+   prompt: PromptInput;
+   resumePolicy?: SessionResumePolicy;
+diff --git a/src/cli/session/queue-owner-runtime.ts b/src/cli/session/queue-owner-runtime.ts
+index cbcb0f8b463e15c5aa42e8afcd0ee29ca803bdc0..30d444fbac18e448c8a2634e303cd42b0cc84aec 100644
+--- a/src/cli/session/queue-owner-runtime.ts
++++ b/src/cli/session/queue-owner-runtime.ts
+@@ -6,6 +6,7 @@ import { setPerfGauge } from "../../perf-metrics.js";
+ import { promptToDisplayText } from "../../prompt-content.js";
+ import { applyLifecycleSnapshotToRecord } from "../../runtime/engine/lifecycle.js";
+ import {
++  assertCompatiblePersistentSessionOptions,
+   mergeSessionOptions,
+   sessionOptionsFromRecord,
+ } from "../../runtime/engine/session-options.js";
+@@ -26,6 +27,7 @@ import {
+ } from "../queue/ipc.js";
+ import { refreshQueueOwnerLease } from "../queue/lease-store.js";
+ import { QueueOwnerTurnController } from "../queue/owner-turn-controller.js";
++import { QueuePermissionReplies } from "../queue/permission-replies.js";
+ import {
+   DEFAULT_QUEUE_OWNER_TTL_MS,
+   normalizeQueueOwnerTtlMs,
+@@ -66,6 +68,7 @@ async function submitToRunningOwner(
+     permissionMode: options.permissionMode,
+     nonInteractivePermissions: options.nonInteractivePermissions,
+     permissionPolicy: options.permissionPolicy,
++    permissionReplies: options.permissionReplies,
+     outputFormatter: options.outputFormatter,
+     errorEmissionPolicy: options.errorEmissionPolicy,
+     timeoutMs: options.timeoutMs,
+@@ -350,6 +353,8 @@ function startQueueOwnerHeartbeat(params: {
+ }
+ 
+ export async function runSessionQueueOwner(options: QueueOwnerRuntimeOptions): Promise<void> {
++  const sessionRecord = await resolveSessionRecord(options.sessionId);
++  assertCompatiblePersistentSessionOptions(sessionRecord, options.sessionOptions);
+   const lease = await tryAcquireQueueOwnerLease(options.sessionId, {
+     path: options.mcpConfigPath,
+     fingerprint: options.mcpConfigFingerprint,
+@@ -358,9 +363,9 @@ export async function runSessionQueueOwner(options: QueueOwnerRuntimeOptions): P
+     return;
+   }
+ 
+-  const sessionRecord = await resolveSessionRecord(options.sessionId);
+   let owner: SessionQueueOwner | undefined;
+   let heartbeatTimer: NodeJS.Timeout | undefined;
++  const replies = new QueuePermissionReplies();
+   const sharedClient = createQueueOwnerSharedClient(options, sessionRecord);
+   const ttlMs = normalizeQueueOwnerTtlMs(options.ttlMs);
+   const maxQueueDepth = Math.max(1, Math.round(options.maxQueueDepth ?? 16));
+@@ -402,6 +407,7 @@ export async function runSessionQueueOwner(options: QueueOwnerRuntimeOptions): P
+     try {
+       return await run();
+     } finally {
++      replies.close();
+       turnController.endTurn();
+     }
+   };
+@@ -433,7 +439,9 @@ export async function runSessionQueueOwner(options: QueueOwnerRuntimeOptions): P
+     owner = await SessionQueueOwner.start(
+       lease,
+       {
++        permissionReply: (reply) => replies.reply(reply),
+         cancelPrompt: async () => {
++          replies.close();
+           const accepted = await turnController.requestCancel();
+           if (!accepted) {
+             return false;
+@@ -441,13 +449,20 @@ export async function runSessionQueueOwner(options: QueueOwnerRuntimeOptions): P
+           await applyPendingCancel();
+           return true;
+         },
+-        closeSession: async (timeoutMs?: number) => await closeActiveBackendSession(timeoutMs),
++        closeSession: async (timeoutMs?: number) => {
++          replies.close();
++          return await closeActiveBackendSession(timeoutMs);
++        },
+         setSessionMode: async (modeId: string, timeoutMs?: number) => {
++          replies.close();
+           await turnController.setSessionMode(modeId, timeoutMs);
+         },
+-        setSessionModel: async (modelId: string, timeoutMs?: number) =>
+-          await turnController.setSessionModel(modelId, timeoutMs),
++        setSessionModel: async (modelId: string, timeoutMs?: number) => {
++          replies.close();
++          await turnController.setSessionModel(modelId, timeoutMs);
++        },
+         setSessionConfigOption: async (configId: string, value: string, timeoutMs?: number) => {
++          replies.close();
+           return await turnController.setSessionConfigOption(configId, value, timeoutMs);
+         },
+       },
+@@ -489,6 +504,24 @@ export async function runSessionQueueOwner(options: QueueOwnerRuntimeOptions): P
+ 
+       const turnPromise = runPromptTurn(async () => {
+         try {
++          sharedClient.updateRuntimeOptions({
++            onPermissionRequestExact: task.permissionReplies
++              ? async (request, context) => await replies.ask(request, context)
++              : undefined,
++          });
++          if (task.permissionReplies) {
++            replies.begin({
++              promptId: task.requestId,
++              ownerGeneration: lease.ownerGeneration,
++              deadlineMs: Date.now() + (task.timeoutMs ?? 0),
++              publish: (request) =>
++                task.send({
++                  type: "event",
++                  requestId: task.requestId,
++                  message: { jsonrpc: "2.0", method: "dual/permission/request", params: request },
++                }),
++            });
++          }
+           await runQueuedTask(options.sessionId, task, {
+             sharedClient,
+             verbose: options.verbose,
+@@ -522,6 +555,7 @@ export async function runSessionQueueOwner(options: QueueOwnerRuntimeOptions): P
+     process.off("SIGINT", onSignal);
+     process.off("SIGTERM", onSignal);
+     process.off("SIGHUP", onSignal);
++    replies.close();
+     await shutdown.shutdown();
+   }
+ }
+diff --git a/src/cli/session/runtime.ts b/src/cli/session/runtime.ts
+index 0d90d3c71a4d92cef217bf13264fe80f927a050b..e66b4a8c08db210a707f5ccdac0be4342fbfc6e7 100644
+--- a/src/cli/session/runtime.ts
++++ b/src/cli/session/runtime.ts
+@@ -16,6 +16,7 @@ import {
+ import { runPromptTurn } from "../../runtime/engine/prompt-turn.js";
+ import { connectAndLoadSession } from "../../runtime/engine/reconnect.js";
+ import {
++  assertCompatiblePersistentSessionOptions,
+   mergeSessionOptions,
+   sessionOptionsFromRecord,
+   type SessionAgentOptions,
+@@ -244,6 +245,23 @@ export function mergeConnectedModelState(
+   return nextState;
+ }
+ 
++function mergeConnectedSessionOptions(
++  state: SessionAcpxState | undefined,
++  connectedState: SessionAcpxState | undefined,
++): SessionAcpxState | undefined {
++  if (connectedState?.session_options === undefined) {
++    if (state?.session_options === undefined) {
++      return state;
++    }
++    const nextState = cloneSessionAcpxState(state) ?? {};
++    delete nextState.session_options;
++    return nextState;
++  }
++  const nextState = cloneSessionAcpxState(state) ?? {};
++  nextState.session_options = structuredClone(connectedState.session_options);
++  return nextState;
++}
++
+ function mergeConnectedAdvertisedModelState(
+   nextState: SessionAcpxState,
+   connectedState: SessionAcpxState,
+@@ -633,6 +651,7 @@ async function runSessionPrompt(options: RunSessionPromptOptions): Promise<Sessi
+   const record = await measurePerf("session.resolve_prompt_record", async () => {
+     return await resolveSessionRecord(options.sessionRecordId);
+   });
++  assertCompatiblePersistentSessionOptions(record, options.sessionOptions);
+   const conversation = cloneSessionConversation(record);
+   let acpxState = cloneSessionAcpxState(record.acpx);
+   const promptStartedAt = isoNow();
+@@ -824,6 +843,7 @@ async function runSessionPrompt(options: RunSessionPromptOptions): Promise<Sessi
+           replacingConfigOption: requestedModelId(options.sessionOptions?.model)
+             ? { key: "model" }
+             : undefined,
++          freshSessionOptions: sessionOptions,
+           timeoutMs: options.timeoutMs,
+           verbose: options.verbose,
+           suppressWarnings: options.suppressSdkConsoleErrors,
+@@ -841,6 +861,7 @@ async function runSessionPrompt(options: RunSessionPromptOptions): Promise<Sessi
+         });
+       });
+       acpxState = mergeConnectedModelState(acpxState, record.acpx);
++      acpxState = mergeConnectedSessionOptions(acpxState, record.acpx);
+       flushConnectOutput(connected.loadError);
+       emitConnectPerfMetric(connectStartedAt, options.verbose);
+       return connected;
+@@ -1187,5 +1208,6 @@ export async function sendSessionDirect(options: SessionSendOptions): Promise<Se
+     suppressSdkConsoleErrors: options.suppressSdkConsoleErrors,
+     verbose: options.verbose,
+     client: options.client,
++    sessionOptions: options.sessionOptions,
+   });
+ }
+diff --git a/src/filesystem.ts b/src/filesystem.ts
+index 1cc1789afd98672eeafcac920efb3586fd3f8ab2..72701cfde893be56906dcee233a96ba473f7879c 100644
+--- a/src/filesystem.ts
++++ b/src/filesystem.ts
+@@ -124,7 +124,10 @@ export class FileSystemHandlers {
+     }
+   }
+ 
+-  async writeTextFile(params: WriteTextFileRequest): Promise<WriteTextFileResponse> {
++  async writeTextFile(
++    params: WriteTextFileRequest,
++    confirm?: () => Promise<boolean>,
++  ): Promise<WriteTextFileResponse> {
+     const filePath = this.resolvePathWithinRoot(params.path);
+     const preview = toWritePreview(params.content);
+     const summary = `write_text_file: ${filePath}`;
+@@ -138,7 +141,7 @@ export class FileSystemHandlers {
+     });
+ 
+     try {
+-      if (!(await this.isWriteApproved(filePath, preview))) {
++      if (!(await this.isWriteApproved(filePath, preview, confirm))) {
+         throw new PermissionDeniedError("Permission denied for fs/write_text_file");
+       }
+ 
+@@ -166,13 +169,20 @@ export class FileSystemHandlers {
+     }
+   }
+ 
+-  private async isWriteApproved(filePath: string, preview: string): Promise<boolean> {
++  private async isWriteApproved(
++    filePath: string,
++    preview: string,
++    confirm?: () => Promise<boolean>,
++  ): Promise<boolean> {
+     if (this.permissionMode === "approve-all") {
+       return true;
+     }
+     if (this.permissionMode === "deny-all") {
+       return false;
+     }
++    if (confirm) {
++      return await confirm();
++    }
+     if (
+       this.usesDefaultConfirmWrite &&
+       this.nonInteractivePermissions === "fail" &&
+diff --git a/src/flows/cli.ts b/src/flows/cli.ts
+index b6450f889fc588be44b0b108cff2f0d0c671438c..2d2af532a87978794ff503bdfb43293ca269ad03 100644
+--- a/src/flows/cli.ts
++++ b/src/flows/cli.ts
+@@ -62,6 +62,8 @@ export async function handleFlowRun(
+       model: globalFlags.model,
+       allowedTools: globalFlags.allowedTools,
+       maxTurns: globalFlags.maxTurns,
++      claudeExecutionPolicyRef: globalFlags.claudeExecutionPolicyRef,
++      claudeExecutionPolicySha256: globalFlags.claudeExecutionPolicySha256,
+     },
+   });
+ 
+diff --git a/src/permissions.ts b/src/permissions.ts
+index fb2ed806eb6a8bada5dbac78d52efb19169e52c1..ff78697db0e7ff4a8cf9af52d119282f4977b208 100644
+--- a/src/permissions.ts
++++ b/src/permissions.ts
+@@ -365,6 +365,53 @@ export async function resolvePermissionRequest(
+   return result.response;
+ }
+ 
++/** Existing resolver's automatic branches; undefined means a genuine human ask. */
++export function resolveAutomaticPermissionRequest(
++  params: RequestPermissionRequest,
++  mode: PermissionMode,
++  policy?: PermissionPolicy,
++): ResolvedPermissionRequest | undefined {
++  const options = params.options ?? [];
++  if (options.length === 0) {
++    return { response: cancelled() };
++  }
++  const allow = pickOption(options, ["allow_once", "allow_always"]);
++  const reject = pickOption(options, ["reject_once", "reject_always"]);
++  const match = matchPermissionPolicy(params, policy);
++  if (match) {
++    return resolveAutomaticPolicyChoice(match.action, options, allow, reject);
++  }
++  return resolveModeMatch(options, mode, allow, reject) ?? automaticReadChoice(params, allow);
++}
++
++function resolveAutomaticPolicyChoice(
++  action: "approve" | "deny" | "escalate",
++  options: RequestPermissionRequest["options"],
++  allow: RequestPermissionRequest["options"][number] | undefined,
++  reject: RequestPermissionRequest["options"][number] | undefined,
++): ResolvedPermissionRequest | undefined {
++  if (action === "approve") {
++    return selectedOrFirst(options, allow);
++  }
++  if (action === "deny") {
++    return selectedOrCancelled(reject);
++  }
++  return undefined;
++}
++function automaticReadChoice(
++  params: RequestPermissionRequest,
++  allow: RequestPermissionRequest["options"][number] | undefined,
++): ResolvedPermissionRequest | undefined {
++  return isAutoApprovedReadKind(inferToolKind(params)) && allow
++    ? { response: selected(allow.optionId) }
++    : undefined;
++}
++export function isOncePermissionOption(
++  option: RequestPermissionRequest["options"][number] | undefined,
++): boolean {
++  return option != null && (option.kind === "allow_once" || option.kind === "reject_once");
++}
++
+ export async function resolvePermissionRequestWithDetails(
+   params: RequestPermissionRequest,
+   mode: PermissionMode,
+diff --git a/src/runtime/engine/manager.ts b/src/runtime/engine/manager.ts
+index 6d6bfb9250da0adc695780df57837fb517d5d887..a7ecc76543ab602db48200c38da415536848f459 100644
+--- a/src/runtime/engine/manager.ts
++++ b/src/runtime/engine/manager.ts
+@@ -72,6 +72,7 @@ import {
+ } from "./reconnect.js";
+ import { shouldReuseExistingRecord } from "./reuse-policy.js";
+ import {
++  assertCompatiblePersistentSessionOptions,
+   persistSessionOptions,
+   sessionOptionsFromRecord,
+   type SessionAgentOptions,
+@@ -923,6 +924,9 @@ export class AcpRuntimeManager {
+     );
+     const agent = { cwd, agentCommand, agentArgv };
+     const existing = await this.loadExistingRuntimeSession(input);
++    if (existing && input.mode === "persistent") {
++      assertCompatiblePersistentSessionOptions(existing.record, input.sessionOptions);
++    }
+     if (existing && this.canReuseRuntimeSession(input, agent, existing)) {
+       return await this.reuseRuntimeSession(existing.record);
+     }
+diff --git a/src/runtime/engine/reconnect.ts b/src/runtime/engine/reconnect.ts
+index 974200f819e73504f60522b7a2851f240d03c031..a053941f79ddb780154296812428de492bcc12eb 100644
+--- a/src/runtime/engine/reconnect.ts
++++ b/src/runtime/engine/reconnect.ts
+@@ -42,6 +42,7 @@ import {
+   reconcileAgentSessionId,
+   sessionHasAgentMessages,
+ } from "./lifecycle.js";
++import { persistSessionOptions, type SessionAgentOptions } from "./session-options.js";
+ 
+ export type ConnectedSessionController = {
+   hasActivePrompt: () => boolean;
+@@ -75,6 +76,7 @@ export type ConnectAndLoadSessionOptions = {
+     key: string;
+     resolve?: (record: SessionRecord) => string;
+   };
++  freshSessionOptions?: SessionAgentOptions;
+   timeoutMs?: number;
+   verbose?: boolean;
+   suppressWarnings?: boolean;
+@@ -333,12 +335,16 @@ function restoreOriginalSessionState(params: {
+   params.record.agentSessionId = params.agentSessionId;
+ }
+ 
++function requiresOriginalSession(options: ConnectAndLoadSessionOptions): boolean {
++  return requiresSameSession(options.resumePolicy) || Boolean(options.record.importedFrom);
++}
++
+ export async function connectAndLoadSession(
+   options: ConnectAndLoadSessionOptions,
+ ): Promise<ConnectAndLoadSessionResult> {
+   const record = options.record;
+   const client = options.client;
+-  const sameSessionOnly = requiresSameSession(options.resumePolicy) || Boolean(record.importedFrom);
++  const sameSessionOnly = requiresOriginalSession(options);
+   const originalSessionId = record.acpSessionId;
+   const originalAgentSessionId = record.agentSessionId;
+   const originalAcpx = cloneSessionAcpxState(record.acpx);
+@@ -383,6 +389,10 @@ export async function connectAndLoadSession(
+   pendingAgentSessionId = loadState.pendingAgentSessionId;
+   sessionModels = loadState.sessionModels;
+ 
++  if (createdFreshSession && options.freshSessionOptions !== undefined) {
++    persistSessionOptions(record, options.freshSessionOptions);
++  }
++
+   const preferenceReplay = await replaySessionPreferences({
+     client,
+     record,
+diff --git a/src/runtime/engine/session-options.ts b/src/runtime/engine/session-options.ts
+index 57674e40779b845ac7f554325fbcfae8c0452e96..1c15fc443b4a2b263ee9a6a738b93e09b5d0f1e0 100644
+--- a/src/runtime/engine/session-options.ts
++++ b/src/runtime/engine/session-options.ts
+@@ -17,6 +17,8 @@ export type SessionAgentOptions = {
+    * passing them to acpx.
+    */
+   env?: Record<string, string>;
++  claudeExecutionPolicyRef?: string;
++  claudeExecutionPolicySha256?: string;
+ };
+ 
+ export function mergeSessionOptions(
+@@ -29,9 +31,34 @@ export function mergeSessionOptions(
+   assignDefinedOption(merged, "maxTurns", preferred?.maxTurns);
+   assignDefinedOption(merged, "systemPrompt", preferred?.systemPrompt);
+   assignDefinedOption(merged, "env", mergeEnvRecords(fallback?.env, preferred?.env));
++  assignPolicyBinding(merged, preferred);
+   return Object.keys(merged).length > 0 ? merged : undefined;
+ }
+ 
++export function assertCompatiblePersistentSessionOptions(
++  record: SessionRecord,
++  requested: SessionAgentOptions | undefined,
++): void {
++  if (
++    executionPolicyBindingKey(sessionOptionsFromRecord(record)) !==
++    executionPolicyBindingKey(requested)
++  ) {
++    throw new Error("CLAUDE_EXECUTION_POLICY_CONFLICT: persistent session policy binding differs");
++  }
++}
++
++function executionPolicyBindingKey(options: SessionAgentOptions | undefined): string {
++  return [options?.claudeExecutionPolicyRef, options?.claudeExecutionPolicySha256].join("\0");
++}
++
++function assignPolicyBinding(
++  target: SessionAgentOptions,
++  source: SessionAgentOptions | undefined,
++): void {
++  assignDefinedOption(target, "claudeExecutionPolicyRef", source?.claudeExecutionPolicyRef);
++  assignDefinedOption(target, "claudeExecutionPolicySha256", source?.claudeExecutionPolicySha256);
++}
++
+ function mergeEnvRecords(
+   fallback: Record<string, string> | undefined,
+   preferred: Record<string, string> | undefined,
+@@ -88,6 +115,16 @@ export function sessionOptionsFromRecord(record: SessionRecord): SessionAgentOpt
+     storedSystemPromptOption(stored.system_prompt),
+   );
+   assignStoredOption(sessionOptions, "env", storedEnvRecord(stored.env));
++  assignStoredOption(
++    sessionOptions,
++    "claudeExecutionPolicyRef",
++    nonEmptyString(stored.claude_execution_policy_ref),
++  );
++  assignStoredOption(
++    sessionOptions,
++    "claudeExecutionPolicySha256",
++    storedSha256(stored.claude_execution_policy_sha256),
++  );
+ 
+   return Object.keys(sessionOptions).length > 0 ? sessionOptions : undefined;
+ }
+@@ -103,6 +140,12 @@ function persistedSessionOptions(
+     max_turns: typeof options.maxTurns === "number" ? options.maxTurns : undefined,
+     system_prompt: normalizeSystemPromptOption(options.systemPrompt),
+     env: storedEnvRecord(options.env),
++    ...(nonEmptyString(options.claudeExecutionPolicyRef) !== undefined
++      ? { claude_execution_policy_ref: nonEmptyString(options.claudeExecutionPolicyRef) }
++      : {}),
++    ...(storedSha256(options.claudeExecutionPolicySha256) !== undefined
++      ? { claude_execution_policy_sha256: storedSha256(options.claudeExecutionPolicySha256) }
++      : {}),
+   } satisfies PersistedSessionOptions;
+   return hasPersistedSessionOptions(next) ? next : undefined;
+ }
+@@ -113,7 +156,9 @@ function hasPersistedSessionOptions(options: PersistedSessionOptions): boolean {
+     options.allowed_tools !== undefined ||
+     options.max_turns !== undefined ||
+     options.system_prompt !== undefined ||
+-    options.env !== undefined
++    options.env !== undefined ||
++    options.claude_execution_policy_ref !== undefined ||
++    options.claude_execution_policy_sha256 !== undefined
+   );
+ }
+ 
+@@ -173,3 +218,8 @@ function storedSystemPromptOption(value: unknown): SystemPromptOption | undefine
+ function nonEmptyString(value: unknown): string | undefined {
+   return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+ }
++
++function storedSha256(value: unknown): string | undefined {
++  const text = nonEmptyString(value);
++  return text && /^[a-f0-9]{64}$/.test(text) ? text : undefined;
++}
+diff --git a/src/session/conversation-model.ts b/src/session/conversation-model.ts
+index 45826afc139304eb0cc1edc93a3674db12d2cc03..c69ab7a93e758eff1dfeeaded70781a8b83b8e89 100644
+--- a/src/session/conversation-model.ts
++++ b/src/session/conversation-model.ts
+@@ -594,6 +594,12 @@ function cloneSessionOptions(
+       ? { system_prompt: cloneSystemPromptOption(options.system_prompt) }
+       : {}),
+     ...(options.env !== undefined ? { env: { ...options.env } } : {}),
++    ...(options.claude_execution_policy_ref !== undefined
++      ? { claude_execution_policy_ref: options.claude_execution_policy_ref }
++      : {}),
++    ...(options.claude_execution_policy_sha256 !== undefined
++      ? { claude_execution_policy_sha256: options.claude_execution_policy_sha256 }
++      : {}),
+   };
+ }
+ 
+diff --git a/src/session/persistence/parse.ts b/src/session/persistence/parse.ts
+index 8c1efdbb0d7c23bf40c699dd2ca6afce51949027..8cc28cc48d465e3283aab98480eeff56abef0deb 100644
+--- a/src/session/persistence/parse.ts
++++ b/src/session/persistence/parse.ts
+@@ -514,6 +514,11 @@ function assignParsedSessionOptions(state: SessionAcpxState, raw: unknown): void
+   assignSessionOptionMaxTurns(parsedSessionOptions, sessionOptions.max_turns);
+   assignSessionOptionSystemPrompt(parsedSessionOptions, sessionOptions.system_prompt);
+   assignSessionOptionEnv(parsedSessionOptions, sessionOptions.env);
++  assignSessionOptionPolicyBinding(
++    parsedSessionOptions,
++    sessionOptions.claude_execution_policy_ref,
++    sessionOptions.claude_execution_policy_sha256,
++  );
+ 
+   if (Object.keys(parsedSessionOptions).length > 0) {
+     state.session_options = parsedSessionOptions;
+@@ -582,6 +587,22 @@ function assignSessionOptionEnv(
+   }
+ }
+ 
++function assignSessionOptionPolicyBinding(
++  options: NonNullable<SessionAcpxState["session_options"]>,
++  ref: unknown,
++  sha256: unknown,
++): void {
++  if (
++    typeof ref === "string" &&
++    ref.trim().length > 0 &&
++    typeof sha256 === "string" &&
++    /^[a-f0-9]{64}$/.test(sha256)
++  ) {
++    options.claude_execution_policy_ref = ref;
++    options.claude_execution_policy_sha256 = sha256;
++  }
++}
++
+ function parseEventLog(raw: unknown, sessionId: string): SessionEventLog {
+   const record = asRecord(raw);
+   if (!record || !hasValidEventLogCore(record)) {
+diff --git a/src/types.ts b/src/types.ts
+index 17d7b6a9a980289228398298cb0c7595534d4b5a..64b4c0092035b2fe3b41b6a0f758f0870d14a200 100644
+--- a/src/types.ts
++++ b/src/types.ts
+@@ -29,6 +29,12 @@ export type AcpPermissionDecision =
+   | { outcome: "reject_always" }
+   | { outcome: "cancel" };
+ 
++export type AcpExactPermissionDecision = { optionId: string } | { cancel: true };
++export type AcpPermissionRequestContext = {
++  requestId: JsonRpcId;
++  signal: AbortSignal;
++};
++
+ export const ACP_ELICITATION_MODES = ["form", "url"] as const;
+ export type AcpElicitationMode = (typeof ACP_ELICITATION_MODES)[number];
+ export type AcpElicitationRequest = CreateElicitationRequest;
+@@ -252,12 +258,19 @@ export type AcpClientOptions = {
+     maxTurns?: number;
+     systemPrompt?: string | { append: string };
+     env?: Record<string, string>;
++    claudeExecutionPolicyRef?: string;
++    claudeExecutionPolicySha256?: string;
+   };
+   onAcpMessage?: (direction: AcpMessageDirection, message: AcpJsonRpcMessage) => void;
+   onAcpOutputMessage?: (direction: AcpMessageDirection, message: AcpJsonRpcMessage) => void;
+   onSessionUpdate?: (notification: SessionNotification) => void;
+   onClientOperation?: (operation: ClientOperation) => void;
+   onPermissionEscalation?: (event: PermissionEscalationEvent) => void;
++  /** Opt-in exact online asks. Automatic policy outcomes still resolve locally. */
++  onPermissionRequestExact?: (
++    req: AcpPermissionRequest,
++    ctx: AcpPermissionRequestContext,
++  ) => Promise<AcpExactPermissionDecision | undefined>;
+   onPermissionRequest?: (
+     req: AcpPermissionRequest,
+     ctx: { signal: AbortSignal },
+@@ -402,6 +415,8 @@ export type SessionAcpxState = {
+     max_turns?: number;
+     system_prompt?: string | { append: string };
+     env?: Record<string, string>;
++    claude_execution_policy_ref?: string;
++    claude_execution_policy_sha256?: string;
+   };
+ };
+ 
+diff --git a/test/build-info-command.test.ts b/test/build-info-command.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..8544c568301576486c223a028357039697653908
+--- /dev/null
++++ b/test/build-info-command.test.ts
+@@ -0,0 +1,13 @@
++import assert from "node:assert/strict";
++import test from "node:test";
++import { CLAUDE_EXECUTION_POLICY_SCHEMA } from "../src/acp/claude-execution-policy.js";
++import { e1BuildInfoDocument } from "../src/cli/build-info-command.js";
++import { E1_PATCH_SHA256, E1_UPSTREAM_COMMIT } from "../src/e1-build-info.generated.js";
++
++test("E1 build info exposes only the frozen transport identity", () => {
++  assert.deepEqual(e1BuildInfoDocument(), {
++    upstream_commit: E1_UPSTREAM_COMMIT,
++    patch_sha256: E1_PATCH_SHA256,
++    policy_schema: CLAUDE_EXECUTION_POLICY_SCHEMA,
++  });
++});
+diff --git a/test/claude-execution-policy.test.ts b/test/claude-execution-policy.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..9538122dca1a67e8c890ac3430e4e2f30fb668a3
+--- /dev/null
++++ b/test/claude-execution-policy.test.ts
+@@ -0,0 +1,279 @@
++import assert from "node:assert/strict";
++import { createHash } from "node:crypto";
++import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
++import os from "node:os";
++import path from "node:path";
++import test from "node:test";
++import { buildClaudeCodeOptionsMeta, isClaudeAcpCommand } from "../src/acp/agent-command.js";
++import { loadClaudeExecutionPolicy } from "../src/acp/claude-execution-policy.js";
++
++const DENIED_ENV_NAMES = ["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL"];
++
++test("non-execute policy denies Bash in managed permissions and forwarded metadata", async () => {
++  const fixture = await policyFixture((raw) =>
++    raw.replace('"auto_allow_sandboxed_bash":true', '"auto_allow_sandboxed_bash":false'),
++  );
++  const options = loadClaudeExecutionPolicy(fixture.root, fixture.binding);
++  assert.equal(options.sandbox.autoAllowBashIfSandboxed, false);
++  assert.equal(options.managedSettings.sandbox.autoAllowBashIfSandboxed, false);
++  assert.ok(options.managedSettings.permissions.deny.includes("Bash"));
++  const meta = buildClaudeCodeOptionsMeta(
++    {
++      claudeExecutionPolicyRef: fixture.binding.ref,
++      claudeExecutionPolicySha256: fixture.binding.sha256,
++    },
++    true,
++    fixture.root,
++  );
++  assert.ok(meta);
++  assert.deepEqual((meta.claudeCode as { options: unknown }).options, options);
++  const execute = await policyFixture();
++  const executeOptions = loadClaudeExecutionPolicy(execute.root, execute.binding);
++  assert.equal(executeOptions.sandbox.autoAllowBashIfSandboxed, true);
++  assert.ok(!executeOptions.managedSettings.permissions.deny.includes("Bash"));
++});
++
++test("Bash approval must be a boolean rather than a truthy permission", async () => {
++  for (const value of ['"false"', "null", "1"]) {
++    const fixture = await policyFixture((raw) =>
++      raw.replace('"auto_allow_sandboxed_bash":true', `"auto_allow_sandboxed_bash":${value}`),
++    );
++    assert.throws(
++      () => loadClaudeExecutionPolicy(fixture.root, fixture.binding),
++      /auto_allow_sandboxed_bash must be a boolean/,
++    );
++  }
++});
++
++test("Claude execution policy separates local binding option from managed restrictions", async () => {
++  const fixture = await policyFixture((raw) =>
++    raw.replace('"allow_local_binding":false', '"allow_local_binding":true'),
++  );
++  const options = loadClaudeExecutionPolicy(fixture.root, fixture.binding);
++
++  assert.deepEqual(options.settingSources, []);
++  assert.equal(options.sandbox.enabled, true);
++  assert.equal(options.sandbox.failIfUnavailable, true);
++  assert.equal(options.sandbox.allowUnsandboxedCommands, false);
++  assert.deepEqual(
++    (options.sandbox.credentials as { envVars: unknown[] }).envVars,
++    DENIED_ENV_NAMES.map((name) => ({ name, mode: "deny" })),
++  );
++  assert.equal(
++    (options.sandbox.network as { allowLocalBinding?: boolean }).allowLocalBinding,
++    true,
++  );
++  assert.equal(
++    (options.managedSettings.sandbox.network as { allowLocalBinding?: boolean }).allowLocalBinding,
++    undefined,
++  );
++  assert.equal(
++    (options.managedSettings.sandbox.network as { strictAllowlist?: boolean }).strictAllowlist,
++    true,
++  );
++});
++
++test("Claude execution policy preserves a false local binding option", async () => {
++  const fixture = await policyFixture();
++  const options = loadClaudeExecutionPolicy(fixture.root, fixture.binding);
++
++  assert.equal(
++    (options.sandbox.network as { allowLocalBinding?: boolean }).allowLocalBinding,
++    false,
++  );
++  assert.equal(
++    (options.managedSettings.sandbox.network as { allowLocalBinding?: boolean }).allowLocalBinding,
++    undefined,
++  );
++});
++
++test("production wrapper command shape is recognized as Claude ACP", () => {
++  assert.equal(
++    isClaudeAcpCommand("/opt/dual/acpx-claude-agent-env.sh", [
++      "npx",
++      "-y",
++      "@agentclientprotocol/claude-agent-acp@0.70.0",
++    ]),
++    true,
++  );
++});
++
++test("validated DNS names are not mistaken for token prefixes", async () => {
++  const fixture = await policyFixture((raw) =>
++    raw.replace('"example.com"', '"task-api.example.org"'),
++  );
++  const options = loadClaudeExecutionPolicy(fixture.root, fixture.binding);
++  assert.deepEqual((options.sandbox.network as { allowedDomains: string[] }).allowedDomains, [
++    "task-api.example.org",
++  ]);
++  const invalid = await policyFixture((raw) =>
++    raw.replace('"example.com"', '"https://sk-a.example.org"'),
++  );
++  assert.throws(
++    () => loadClaudeExecutionPolicy(invalid.root, invalid.binding),
++    /non-canonical domain/,
++  );
++});
++
++test("control file protection covers sandbox processes and native file tools", async () => {
++  const fixture = await policyFixture((raw) =>
++    raw.replace(
++      '"deny_write":[]',
++      '"deny_write":["/control/nodes","/control/execution-authority"]',
++    ),
++  );
++  const options = loadClaudeExecutionPolicy(fixture.root, fixture.binding);
++  assert.deepEqual((options.sandbox.filesystem as { denyWrite: string[] }).denyWrite, [
++    "/control/nodes",
++    "/control/execution-authority",
++  ]);
++  assert.deepEqual(options.managedSettings.permissions.deny, [
++    "Edit(//control/nodes)",
++    "Edit(//control/nodes/**)",
++    "Edit(//control/execution-authority)",
++    "Edit(//control/execution-authority/**)",
++  ]);
++  const meta = buildClaudeCodeOptionsMeta(
++    {
++      claudeExecutionPolicyRef: fixture.binding.ref,
++      claudeExecutionPolicySha256: fixture.binding.sha256,
++    },
++    true,
++    fixture.root,
++  );
++  assert.ok(meta);
++  assert.deepEqual((meta.claudeCode as { options: unknown }).options, options);
++});
++
++test("Claude ACP metadata consumes the fixed policy while other agents reject it", async () => {
++  const fixture = await policyFixture();
++  const sessionOptions = {
++    claudeExecutionPolicyRef: fixture.binding.ref,
++    claudeExecutionPolicySha256: fixture.binding.sha256,
++  };
++  const meta = buildClaudeCodeOptionsMeta(sessionOptions, true, fixture.root);
++  assert(meta);
++  const options = (meta.claudeCode as { options: Record<string, unknown> }).options;
++  assert.deepEqual(options.settingSources, []);
++  assert.equal((options.sandbox as { enabled: boolean }).enabled, true);
++  assert.ok(options.managedSettings);
++  assert.equal(options.env, undefined);
++
++  assert.throws(
++    () => buildClaudeCodeOptionsMeta(sessionOptions, false, fixture.root),
++    /only supported by claude-agent-acp/,
++  );
++});
++
++test("fixed Claude execution policy rejects duplicate fields before parsing", async () => {
++  const fixture = await policyFixture((raw) =>
++    raw.replace(
++      '"schema_version":"claude_execution_policy.v2"',
++      '"schema_version":"claude_execution_policy.v2","schema_version":"claude_execution_policy.v2"',
++    ),
++  );
++  assert.throws(() => loadClaudeExecutionPolicy(fixture.root, fixture.binding), /duplicate key/);
++});
++
++test("fixed Claude execution policy rejects SHA drift, unknown fields, and path escape", async () => {
++  const fixture = await policyFixture();
++  assert.throws(
++    () => loadClaudeExecutionPolicy(fixture.root, { ...fixture.binding, sha256: "0".repeat(64) }),
++    /SHA-256 mismatch/,
++  );
++
++  const unknown = await policyFixture((raw) => raw.replace(/}$/, ',"settings":{}}'));
++  assert.throws(
++    () => loadClaudeExecutionPolicy(unknown.root, unknown.binding),
++    /unknown or missing/,
++  );
++  assert.throws(
++    () => loadClaudeExecutionPolicy(fixture.root, { ...fixture.binding, ref: "../policy.json" }),
++    /escapes cwd/,
++  );
++});
++
++test("fixed Claude execution policy rejects weakened network, escape, and credential controls", async () => {
++  const weakenedNetwork = await policyFixture((raw) =>
++    raw.replace('"strict_allowlist":true', '"strict_allowlist":false'),
++  );
++  assert.throws(
++    () => loadClaudeExecutionPolicy(weakenedNetwork.root, weakenedNetwork.binding),
++    /strict_allowlist must equal true/,
++  );
++  const escapeEnabled = await policyFixture((raw) =>
++    raw.replace('"allow_unsandboxed_commands":false', '"allow_unsandboxed_commands":true'),
++  );
++  assert.throws(
++    () => loadClaudeExecutionPolicy(escapeEnabled.root, escapeEnabled.binding),
++    /allow_unsandboxed_commands must equal false/,
++  );
++  const missingCredential = await policyFixture((raw) =>
++    raw.replace('"ANTHROPIC_AUTH_TOKEN",', ""),
++  );
++  assert.throws(
++    () => loadClaudeExecutionPolicy(missingCredential.root, missingCredential.binding),
++    /fixed E1 provider deny set/,
++  );
++});
++
++test("fixed Claude execution policy rejects old schema, wrong owner, and proxy credential fields", async () => {
++  const oldSchema = await policyFixture((raw) =>
++    raw.replace("claude_execution_policy.v2", "claude_execution_policy.v1"),
++  );
++  assert.throws(() => loadClaudeExecutionPolicy(oldSchema.root, oldSchema.binding), /must equal/);
++
++  const wrongOwner = await policyFixture((raw) =>
++    raw.replace('"network_transport_owner":"claude_sandbox"', '"network_transport_owner":"dual"'),
++  );
++  assert.throws(() => loadClaudeExecutionPolicy(wrongOwner.root, wrongOwner.binding), /must equal/);
++
++  const proxyCredential = await policyFixture((raw) =>
++    raw.replace('"ANTHROPIC_BASE_URL"]', '"ANTHROPIC_BASE_URL","HTTPS_PROXY"]'),
++  );
++  assert.throws(
++    () => loadClaudeExecutionPolicy(proxyCredential.root, proxyCredential.binding),
++    /fixed E1 provider deny set/,
++  );
++});
++
++async function policyFixture(transform: (raw: string) => string = (raw) => raw) {
++  const root = await mkdtemp(path.join(os.tmpdir(), "acpx-e1-policy-"));
++  const policyDir = path.join(root, "runs", "run-1", "execution-authority");
++  await mkdir(policyDir, { recursive: true });
++  const document = {
++    schema_version: "claude_execution_policy.v2",
++    workstream_id: "ws-1",
++    node_instance_id: "node-1",
++    run_id: "run-1",
++    network_transport_owner: "claude_sandbox",
++    setting_sources: [],
++    sandbox: {
++      enabled: true,
++      fail_if_unavailable: true,
++      allow_unsandboxed_commands: false,
++      auto_allow_sandboxed_bash: true,
++      network: {
++        strict_allowlist: true,
++        allowed_domains: ["example.com"],
++        allow_local_binding: false,
++        allow_unix_sockets: [],
++      },
++      filesystem: {
++        allow_read: [root],
++        allow_write: [root, os.tmpdir()],
++        deny_read: [],
++        deny_write: [],
++      },
++    },
++    provider_subprocess_denied_env_names: DENIED_ENV_NAMES,
++    generated_at: "2026-08-29T00:00:00.000Z",
++  };
++  const raw = transform(JSON.stringify(document));
++  const ref = path.relative(root, path.join(policyDir, "claude-execution-policy.json"));
++  await writeFile(path.join(root, ref), raw);
++  return {
++    root,
++    binding: { ref, sha256: createHash("sha256").update(raw).digest("hex") },
++  };
++}
+diff --git a/test/client.test.ts b/test/client.test.ts
+index b813e216fde20c4f0c677098d217a7158a415997..fd36e3ee35ba3dcd87f6e0c2861387723bf3c44e 100644
+--- a/test/client.test.ts
++++ b/test/client.test.ts
+@@ -1,8 +1,16 @@
+ import assert from "node:assert/strict";
++import { createHash } from "node:crypto";
++import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
++import os from "node:os";
+ import path from "node:path";
+ import { PassThrough } from "node:stream";
+ import test from "node:test";
+-import type { RequestPermissionRequest, RequestPermissionResponse } from "@agentclientprotocol/sdk";
++import { pathToFileURL } from "node:url";
++import type {
++  RequestPermissionRequest,
++  RequestPermissionResponse,
++  JsonRpcId,
++} from "@agentclientprotocol/sdk";
+ import {
+   AcpClient,
+   buildAgentSpawnOptions,
+@@ -35,6 +43,7 @@ test("parseAcpJsonMessageLine preserves object-shaped protocol values", () => {
+ });
+ 
+ type ClientInternals = {
++  resolveAgentLaunchPlan: () => Promise<unknown>;
+   selectAuthMethod?: (methods: Array<{ id: string }>) =>
+     | {
+         methodId: string;
+@@ -48,6 +57,8 @@ type ClientInternals = {
+   ) => Promise<void>;
+   handlePermissionRequest?: (
+     params: RequestPermissionRequest,
++    requestId?: string | number,
++    requestSignal?: AbortSignal,
+   ) => Promise<RequestPermissionResponse>;
+   handleReadTextFile?: (params: {
+     sessionId: string;
+@@ -55,16 +66,24 @@ type ClientInternals = {
+     line?: number | null;
+     limit?: number | null;
+   }) => Promise<{ content: string }>;
+-  handleWriteTextFile?: (params: {
+-    sessionId: string;
+-    path: string;
+-    content: string;
+-  }) => Promise<Record<string, never>>;
+-  handleCreateTerminal?: (params: {
+-    sessionId: string;
+-    command: string;
+-    args?: string[];
+-  }) => Promise<{ terminalId: string }>;
++  handleWriteTextFile?: (
++    params: {
++      sessionId: string;
++      path: string;
++      content: string;
++    },
++    requestId?: string | number,
++    signal?: AbortSignal,
++  ) => Promise<Record<string, never>>;
++  handleCreateTerminal?: (
++    params: {
++      sessionId: string;
++      command: string;
++      args?: string[];
++    },
++    requestId?: string | number,
++    signal?: AbortSignal,
++  ) => Promise<{ terminalId: string }>;
+   notePromptPermissionFailure?: (
+     sessionId: string,
+     error: PermissionPromptUnavailableError,
+@@ -813,6 +832,171 @@ test("AcpClient createSession forwards claudeCode options in _meta", async () =>
+   });
+ });
+ 
++for (const autoAllowBash of [true, false]) {
++  test(`AcpClient createSession forwards bound Bash capability ${autoAllowBash} in _meta`, async () => {
++    const cwd = await mkdtemp(path.join(os.tmpdir(), "acpx-client-e1-policy-"));
++    const policyDir = path.join(cwd, "runs", "run-1", "execution-authority");
++    await mkdir(policyDir, { recursive: true });
++    const policy = JSON.stringify({
++      schema_version: "claude_execution_policy.v2",
++      workstream_id: "ws-1",
++      node_instance_id: "node-1",
++      run_id: "run-1",
++      network_transport_owner: "claude_sandbox",
++      setting_sources: [],
++      sandbox: {
++        enabled: true,
++        fail_if_unavailable: true,
++        allow_unsandboxed_commands: false,
++        auto_allow_sandboxed_bash: autoAllowBash,
++        network: {
++          strict_allowlist: true,
++          allowed_domains: ["example.com"],
++          allow_local_binding: true,
++          allow_unix_sockets: [],
++        },
++        filesystem: {
++          allow_read: [cwd],
++          allow_write: [cwd, os.tmpdir()],
++          deny_read: [],
++          deny_write: [],
++        },
++      },
++      provider_subprocess_denied_env_names: [
++        "ANTHROPIC_API_KEY",
++        "ANTHROPIC_AUTH_TOKEN",
++        "ANTHROPIC_BASE_URL",
++      ],
++      generated_at: "2026-08-29T00:00:00.000Z",
++    });
++    const ref = path.join("runs", "run-1", "execution-authority", "policy.json");
++    await writeFile(path.join(cwd, ref), policy);
++    const client = makeClient({
++      agentCommand: "npx -y @agentclientprotocol/claude-agent-acp",
++      cwd,
++      sessionOptions: {
++        claudeExecutionPolicyRef: ref,
++        claudeExecutionPolicySha256: createHash("sha256").update(policy).digest("hex"),
++      },
++    });
++
++    let capturedParams: Record<string, unknown> | undefined;
++    asInternals(client).connection = {
++      newSession: async (params: Record<string, unknown>) => {
++        capturedParams = params;
++        return { sessionId: "session-e1-policy" };
++      },
++    };
++
++    await client.createSession(cwd);
++    const options =
++      (capturedParams?._meta as { claudeCode?: { options?: Record<string, unknown> } })?.claudeCode
++        ?.options ?? {};
++    assert.deepEqual(options.settingSources, []);
++    assert.equal((options.sandbox as { enabled?: boolean }).enabled, true);
++    assert.equal(
++      (options.sandbox as { network?: { allowLocalBinding?: boolean } }).network?.allowLocalBinding,
++      true,
++    );
++    assert.equal(
++      (options.managedSettings as { sandbox?: { failIfUnavailable?: boolean } }).sandbox
++        ?.failIfUnavailable,
++      true,
++    );
++    assert.equal(
++      (
++        options.managedSettings as {
++          sandbox?: { network?: { allowLocalBinding?: boolean } };
++        }
++      ).sandbox?.network?.allowLocalBinding,
++      undefined,
++    );
++    assert.equal(options.env, undefined);
++    assert.equal(
++      (options.sandbox as { autoAllowBashIfSandboxed?: boolean }).autoAllowBashIfSandboxed,
++      autoAllowBash,
++    );
++    assert.equal(
++      (options.managedSettings as { permissions: { deny: string[] } }).permissions.deny.includes(
++        "Bash",
++      ),
++      !autoAllowBash,
++    );
++  });
++}
++
++test("AcpClient rejects incomplete or non-Claude policy bindings before launch", async () => {
++  const incomplete = makeClient({
++    agentCommand: "npx -y @agentclientprotocol/claude-agent-acp@0.70.0",
++    sessionOptions: { claudeExecutionPolicyRef: "runs/run-1/policy.json" },
++  });
++  await assert.rejects(
++    asInternals(incomplete).resolveAgentLaunchPlan(),
++    /ref and SHA-256 must be provided together/,
++  );
++
++  const nonClaude = makeClient({
++    agentCommand: "node ./test/mock-agent.js",
++    sessionOptions: {
++      claudeExecutionPolicyRef: "runs/run-1/policy.json",
++      claudeExecutionPolicySha256: "0".repeat(64),
++    },
++  });
++  await assert.rejects(
++    asInternals(nonClaude).resolveAgentLaunchPlan(),
++    /only supported by claude-agent-acp/,
++  );
++});
++
++test("AcpClient start scrubs the final E1 Claude child env before spawn", async () => {
++  const canaries = {
++    ALL_PROXY: "parent-all",
++    HTTP_PROXY: "parent-http",
++    HTTPS_PROXY: "parent-https",
++    NO_PROXY: "parent-no-proxy",
++  };
++  await withEnv(canaries, async () => {
++    const observed = await captureAgentLaunchEnvironment({
++      claude: true,
++      boundPolicy: true,
++      sessionEnv: {
++        all_proxy: "session-all",
++        http_proxy: "session-http",
++        https_proxy: "session-https",
++        no_proxy: "session-no-proxy",
++        CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: "1",
++        CLAUDE_CODE_EXECUTABLE: "/opt/claude",
++      },
++    });
++
++    for (const name of [
++      "ALL_PROXY",
++      "HTTP_PROXY",
++      "HTTPS_PROXY",
++      "NO_PROXY",
++      "all_proxy",
++      "http_proxy",
++      "https_proxy",
++      "no_proxy",
++      "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB",
++    ]) {
++      assert.equal(observed[name], null, `${name} must be absent in the spawned E1 child`);
++    }
++    assert.equal(observed.CLAUDE_CODE_EXECUTABLE, "/opt/claude");
++  });
++});
++
++test("AcpClient start preserves proxy env for unbound Claude and non-Claude siblings", async () => {
++  for (const claude of [true, false]) {
++    const observed = await captureAgentLaunchEnvironment({
++      claude,
++      boundPolicy: false,
++      sessionEnv: { HTTP_PROXY: `sibling-${claude}` },
++    });
++    assert.equal(observed.HTTP_PROXY, `sibling-${claude}`);
++  }
++});
++
+ test("AcpClient creates built-in Claude sessions without user settings by default", async () => {
+   const cwd = path.resolve("/tmp/acpx-client-claude-settings");
+   const client = makeClient({
+@@ -1506,6 +1690,103 @@ test("AcpClient close resets in-memory state and shuts down terminal manager", a
+   assert.equal(internals.closing, true);
+ });
+ 
++const OBSERVED_LAUNCH_ENV_NAMES = [
++  "ALL_PROXY",
++  "HTTP_PROXY",
++  "HTTPS_PROXY",
++  "NO_PROXY",
++  "all_proxy",
++  "http_proxy",
++  "https_proxy",
++  "no_proxy",
++  "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB",
++  "CLAUDE_CODE_EXECUTABLE",
++] as const;
++
++async function captureAgentLaunchEnvironment(options: {
++  claude: boolean;
++  boundPolicy: boolean;
++  sessionEnv: Record<string, string>;
++}): Promise<Record<string, string | null>> {
++  const cwd = await mkdtemp(path.join(os.tmpdir(), "acpx-client-launch-env-"));
++  const marker = path.join(cwd, "observed-env.json");
++  const launcher = path.join(cwd, "capture-agent-env.mjs");
++  const mockAgentUrl = pathToFileURL(path.resolve("dist-test/test/mock-agent.js")).href;
++  await writeFile(
++    launcher,
++    [
++      'import fs from "node:fs";',
++      `const names = ${JSON.stringify(OBSERVED_LAUNCH_ENV_NAMES)};`,
++      `fs.writeFileSync(${JSON.stringify(marker)}, JSON.stringify(Object.fromEntries(names.map((name) => [name, process.env[name] ?? null]))));`,
++      `await import(${JSON.stringify(mockAgentUrl)});`,
++    ].join("\n"),
++  );
++
++  const binding = options.boundPolicy ? await writeClaudeExecutionPolicyFixture(cwd) : undefined;
++  const client = makeClient({
++    agentCommand: `${JSON.stringify(process.execPath)} ${JSON.stringify(launcher)}${options.claude ? " --claude-agent-acp" : ""}`,
++    cwd,
++    sessionOptions: {
++      env: options.sessionEnv,
++      ...(binding
++        ? {
++            claudeExecutionPolicyRef: binding.ref,
++            claudeExecutionPolicySha256: binding.sha256,
++          }
++        : {}),
++    },
++  });
++  try {
++    await client.start();
++    if (binding) {
++      await client.createSession(cwd);
++    }
++    return JSON.parse(await readFile(marker, "utf8")) as Record<string, string | null>;
++  } finally {
++    await client.close();
++  }
++}
++
++async function writeClaudeExecutionPolicyFixture(cwd: string) {
++  const policyDir = path.join(cwd, "runs", "run-1", "execution-authority");
++  await mkdir(policyDir, { recursive: true });
++  const policy = JSON.stringify({
++    schema_version: "claude_execution_policy.v2",
++    workstream_id: "ws-1",
++    node_instance_id: "node-1",
++    run_id: "run-1",
++    network_transport_owner: "claude_sandbox",
++    setting_sources: [],
++    sandbox: {
++      enabled: true,
++      fail_if_unavailable: true,
++      allow_unsandboxed_commands: false,
++      auto_allow_sandboxed_bash: true,
++      network: {
++        strict_allowlist: true,
++        allowed_domains: ["example.com"],
++        allow_local_binding: false,
++        allow_unix_sockets: [],
++      },
++      filesystem: {
++        allow_read: [cwd],
++        allow_write: [cwd, os.tmpdir()],
++        deny_read: [],
++        deny_write: [],
++      },
++    },
++    provider_subprocess_denied_env_names: [
++      "ANTHROPIC_API_KEY",
++      "ANTHROPIC_AUTH_TOKEN",
++      "ANTHROPIC_BASE_URL",
++    ],
++    generated_at: "2026-08-29T00:00:00.000Z",
++  });
++  const ref = path.join("runs", "run-1", "execution-authority", "policy.json");
++  await writeFile(path.join(cwd, ref), policy);
++  return { ref, sha256: createHash("sha256").update(policy).digest("hex") };
++}
++
+ function makeClient(
+   overrides: Partial<ConstructorParameters<typeof AcpClient>[0]> = {},
+ ): AcpClient {
+@@ -1610,3 +1891,222 @@ function restoreDescriptor(
+     delete (target as Record<string, unknown>)[key];
+   }
+ }
++
++// B04: ACP peers below are synthetic; these tests make no native/model call.
++test("exact permission ask returns the offered option and exposes the original RPC signal", async () => {
++  const requestSignal = new AbortController();
++  let calls = 0;
++  const options = {
++    permissionMode: "approve-reads" as const,
++    permissionPolicy: { escalate: ["edit"] },
++    onPermissionRequestExact: async (
++      request: { raw: RequestPermissionRequest },
++      context: { requestId: JsonRpcId; signal: AbortSignal },
++    ) => {
++      calls++;
++      assert.equal(context.requestId, "rpc-17");
++      assert.equal(context.signal.aborted, false);
++      assert.equal(request.raw.sessionId, "s-exact");
++      return { optionId: "allow-second" };
++    },
++  };
++  const client = makeClient(options);
++  Object.assign(client, {
++    activePrompt: { sessionId: "s-exact", elicitationController: new AbortController() },
++  });
++  const request = makePermissionRequest("s-exact", "edit");
++  request.options.push({
++    kind: "allow_once",
++    optionId: "allow-second",
++    name: "Allow specific offered choice",
++  });
++  const response = await asInternals(client).handlePermissionRequest?.(
++    request,
++    "rpc-17",
++    requestSignal.signal,
++  );
++  assert.deepEqual(response, { outcome: { outcome: "selected", optionId: "allow-second" } });
++  assert.equal(calls, 1);
++});
++
++test("exact permission ask never falls back after callback failure or invalid choice", async () => {
++  for (const callback of [
++    async () => undefined,
++    async () => {
++      throw new Error("host unavailable");
++    },
++    async () => ({ optionId: "not-offered" }),
++    async () => ({ optionId: "persistent" }),
++  ]) {
++    const options = {
++      permissionMode: "approve-all" as const,
++      permissionPolicy: { escalate: ["edit"] },
++      onPermissionRequestExact: callback,
++    };
++    const client = makeClient(options);
++    Object.assign(client, {
++      activePrompt: { sessionId: "s-exact", elicitationController: new AbortController() },
++    });
++    const request = makePermissionRequest("s-exact", "edit");
++    request.options.push({ kind: "allow_always", optionId: "persistent", name: "Always" });
++    assert.deepEqual(
++      await asInternals(client).handlePermissionRequest?.(request, 8, new AbortController().signal),
++      { outcome: { outcome: "cancelled" } },
++    );
++  }
++});
++
++test("exact lane retains auto reads and explicit denial without asking a human", async () => {
++  let calls = 0;
++  const options = {
++    permissionMode: "approve-reads" as const,
++    permissionPolicy: { autoDeny: ["edit"] },
++    onPermissionRequestExact: async () => {
++      calls++;
++      return { optionId: "allow" };
++    },
++  };
++  const client = makeClient(options);
++  Object.assign(client, {
++    activePrompt: { sessionId: "s-exact", elicitationController: new AbortController() },
++  });
++  const read = makePermissionRequest("s-exact", "read");
++  read.toolCall.title = "read file";
++  assert.deepEqual(
++    await asInternals(client).handlePermissionRequest?.(read, 1, new AbortController().signal),
++    { outcome: { outcome: "selected", optionId: "allow" } },
++  );
++  assert.deepEqual(
++    await asInternals(client).handlePermissionRequest?.(
++      makePermissionRequest("s-exact", "edit"),
++      2,
++      new AbortController().signal,
++    ),
++    { outcome: { outcome: "selected", optionId: "reject" } },
++  );
++  assert.equal(calls, 0);
++});
++
++test("exact lane refuses stale RPCs, unowned sessions and replies after cancellation", async () => {
++  let release: ((value: { optionId: string }) => void) | undefined;
++  const options = {
++    permissionMode: "approve-reads" as const,
++    permissionPolicy: { escalate: ["edit"] },
++    onPermissionRequestExact: async () =>
++      await new Promise<{ optionId: string }>((resolve) => {
++        release = resolve;
++      }),
++  };
++  const client = makeClient(options);
++  Object.assign(client, {
++    activePrompt: { sessionId: "s-exact", elicitationController: new AbortController() },
++  });
++  assert.deepEqual(
++    await asInternals(client).handlePermissionRequest?.(
++      makePermissionRequest("another", "edit"),
++      1,
++      new AbortController().signal,
++    ),
++    { outcome: { outcome: "cancelled" } },
++  );
++  assert.deepEqual(
++    await asInternals(client).handlePermissionRequest?.(makePermissionRequest("s-exact", "edit")),
++    { outcome: { outcome: "cancelled" } },
++  );
++  const signal = new AbortController();
++  const pending = asInternals(client).handlePermissionRequest?.(
++    makePermissionRequest("s-exact", "edit"),
++    4,
++    signal.signal,
++  );
++  await Promise.resolve();
++  signal.abort();
++  release?.({ optionId: "allow" });
++  assert.deepEqual(await pending, { outcome: { outcome: "cancelled" } });
++});
++
++test("host write and terminal confirmation use exact RPC choices before their effects", async () => {
++  const cwd = await mkdtemp(path.join(os.tmpdir(), "acpx-host-permission-"));
++  const calls: Array<{ method: unknown; rpc: JsonRpcId }> = [];
++  let allow = false;
++  const client = makeClient({
++    cwd,
++    permissionMode: "approve-reads",
++    permissionPolicy: { escalate: ["edit", "execute"] },
++    onPermissionRequestExact: async (request, context) => {
++      calls.push({ method: request.raw.toolCall._meta?.method, rpc: context.requestId });
++      return { optionId: allow ? "acpx-host-allow-once" : "acpx-host-reject-once" };
++    },
++  });
++  Object.assign(client, {
++    activePrompt: { sessionId: "host-session", elicitationController: new AbortController() },
++  });
++  const signal = new AbortController();
++  const file = path.join(cwd, "product.txt");
++  const write = asInternals(client).handleWriteTextFile?.bind(client);
++  assert.ok(write);
++  const params = { sessionId: "host-session", path: file, content: "legal product edit" };
++  await assert.rejects(write(params, 31, signal.signal), PermissionDeniedError);
++  await assert.rejects(readFile(file));
++  allow = true;
++  await write(params, 32, signal.signal);
++  assert.equal(await readFile(file, "utf8"), "legal product edit");
++  const terminal = await asInternals(client).handleCreateTerminal?.(
++    { sessionId: "host-session", command: process.execPath, args: ["-e", "process.exit(0)"] },
++    33,
++    signal.signal,
++  );
++  assert.ok(terminal?.terminalId);
++  signal.abort();
++  await assert.rejects(
++    write({ ...params, content: "late" }, 34, signal.signal),
++    PermissionDeniedError,
++  );
++  assert.equal(await readFile(file, "utf8"), "legal product edit");
++  assert.deepEqual(calls, [
++    { method: "fs/write_text_file", rpc: 31 },
++    { method: "fs/write_text_file", rpc: 32 },
++    { method: "terminal/create", rpc: 33 },
++  ]);
++  await asInternals(client).terminalManager?.shutdown();
++});
++
++test("actual local ACP peer receives the exact offered permission response", async () => {
++  const cwd = await mkdtemp(path.join(os.tmpdir(), "acpx-local-peer-"));
++  const received: JsonRpcId[] = [];
++  let optionId = "allow";
++  const client = makeClient({
++    cwd,
++    agentCommand: process.execPath,
++    agentArgv: [process.execPath, path.resolve("dist-test/test/mock-agent.js")],
++    permissionMode: "approve-reads",
++    permissionPolicy: { escalate: ["edit"] },
++    onPermissionRequestExact: async (_request, context) => {
++      received.push(context.requestId);
++      return { optionId };
++    },
++  });
++  try {
++    await client.start();
++    const session = await client.createSession(cwd);
++    assert.equal(
++      (await client.prompt(session.sessionId, "permission edit product")).stopReason,
++      "end_turn",
++    );
++    optionId = "reject";
++    assert.equal(
++      (await client.prompt(session.sessionId, "permission edit product")).stopReason,
++      "end_turn",
++    );
++    assert.equal(received.length, 2);
++    assert.notEqual(received[0], received[1]);
++    assert.deepEqual(client.getPermissionStats(), {
++      requested: 2,
++      approved: 1,
++      denied: 1,
++      cancelled: 0,
++    });
++  } finally {
++    await client.close();
++  }
++});
+diff --git a/test/connect-load.test.ts b/test/connect-load.test.ts
+index a7961fa5025c0185900eebdda9f999eb0242ec09..b14663bcfb4fa735714ed80b697cb84329388db1 100644
+--- a/test/connect-load.test.ts
++++ b/test/connect-load.test.ts
+@@ -356,6 +356,11 @@ test("connectAndLoadSession falls back to createSession when load returns resour
+       agentCommand: "agent",
+       cwd,
+       acpx: {
++        session_options: {
++          allowed_tools: ["OldTool"],
++          claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++          claude_execution_policy_sha256: "a".repeat(64),
++        },
+         current_model_id: "old-model",
+         available_models: ["old-model"],
+         model_control: "config_option",
+@@ -406,6 +411,11 @@ test("connectAndLoadSession falls back to createSession when load returns resour
+       record,
+       timeoutMs: 1_000,
+       activeController: ACTIVE_CONTROLLER,
++      freshSessionOptions: {
++        allowedTools: ["Read"],
++        claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++        claudeExecutionPolicySha256: "a".repeat(64),
++      },
+     });
+ 
+     assert.equal(result.resumed, false);
+@@ -417,6 +427,15 @@ test("connectAndLoadSession falls back to createSession when load returns resour
+     assert.equal(record.acpx?.config_options, undefined);
+     assert.equal(record.acpx?.current_model_id, undefined);
+     assert.equal(record.acpx?.model_control, undefined);
++    assert.deepEqual(record.acpx?.session_options, {
++      model: undefined,
++      allowed_tools: ["Read"],
++      max_turns: undefined,
++      system_prompt: undefined,
++      env: undefined,
++      claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++      claude_execution_policy_sha256: "a".repeat(64),
++    });
+   });
+ });
+ 
+diff --git a/test/prompt-runner.test.ts b/test/prompt-runner.test.ts
+index 932a9f077333ba5f48cb3cd0e15253c13712f541..12ffd5ffeb418ab6497dd3cfe4a39090165c5ecb 100644
+--- a/test/prompt-runner.test.ts
++++ b/test/prompt-runner.test.ts
+@@ -14,12 +14,104 @@ import { sendSessionDirect } from "../src/cli/session/runtime.js";
+ import { resolveSessionRecord } from "../src/session/persistence/repository.js";
+ import {
+   makeSessionRecord as makeSessionRecordFixture,
++  sessionFilePath,
+   withTempHome as withTempHomeFixture,
+   writeSessionRecordFile as writeSessionRecord,
+ } from "./runtime-test-helpers.js";
+ 
+ const MOCK_AGENT_PATH = fileURLToPath(new URL("./mock-agent.js", import.meta.url));
+ 
++test("sendSessionDirect rejects an unbound request before changing a bound record", async () => {
++  await withTempHome(async (homeDir) => {
++    const cwd = path.join(homeDir, "workspace");
++    await fs.mkdir(cwd, { recursive: true });
++    const record = makeSessionRecord({
++      acpxRecordId: "direct-policy-conflict",
++      acpSessionId: "direct-policy-conflict-backend",
++      agentCommand: `node ${JSON.stringify(MOCK_AGENT_PATH)} --supports-load-session`,
++      cwd,
++      acpx: {
++        session_options: {
++          claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++          claude_execution_policy_sha256: "a".repeat(64),
++        },
++      },
++    });
++    await writeSessionRecord(homeDir, record);
++    const recordPath = sessionFilePath(homeDir, record.acpxRecordId);
++    const before = await fs.readFile(recordPath, "utf8");
++
++    await assert.rejects(
++      sendSessionDirect({
++        sessionId: record.acpxRecordId,
++        prompt: [{ type: "text", text: "must not be recorded" }],
++        permissionMode: "approve-all",
++        outputFormatter: createOutputFormatter("quiet"),
++        timeoutMs: 5_000,
++      }),
++      /CLAUDE_EXECUTION_POLICY_CONFLICT/,
++    );
++
++    assert.equal(await fs.readFile(recordPath, "utf8"), before);
++  });
++});
++
++test("sendSessionDirect checkpoints replacement options after a fresh-session fallback", async () => {
++  await withTempHome(async (homeDir) => {
++    const cwd = path.join(homeDir, "workspace");
++    await fs.mkdir(cwd, { recursive: true });
++    const agentCommand = `node ${JSON.stringify(MOCK_AGENT_PATH)} --supports-load-session --load-session-fails-on-empty`;
++    const policyRef = "runs/run-1/execution-authority/policy.json";
++    const policySha256 = "a".repeat(64);
++    const record = makeSessionRecord({
++      acpxRecordId: "direct-fresh-policy-replacement",
++      acpSessionId: "stale-policy-session",
++      agentCommand,
++      cwd,
++      messages: [],
++      acpx: {
++        session_options: {
++          allowed_tools: ["OldTool"],
++          claude_execution_policy_ref: policyRef,
++          claude_execution_policy_sha256: policySha256,
++        },
++      },
++    });
++    await writeSessionRecord(homeDir, record);
++    const client = new AcpClient({
++      agentCommand,
++      cwd,
++      permissionMode: "approve-all",
++    });
++
++    try {
++      await sendSessionDirect({
++        sessionId: record.acpxRecordId,
++        prompt: [{ type: "text", text: "checkpoint the fresh session" }],
++        permissionMode: "approve-all",
++        outputFormatter: createOutputFormatter("quiet"),
++        client,
++        timeoutMs: 5_000,
++        sessionOptions: {
++          allowedTools: ["Read"],
++          claudeExecutionPolicyRef: policyRef,
++          claudeExecutionPolicySha256: policySha256,
++        },
++      });
++    } finally {
++      await client.close();
++    }
++
++    const persisted = await resolveSessionRecord(record.acpxRecordId);
++    assert.notEqual(persisted.acpSessionId, "stale-policy-session");
++    assert.deepEqual(persisted.acpx?.session_options, {
++      allowed_tools: ["Read"],
++      claude_execution_policy_ref: policyRef,
++      claude_execution_policy_sha256: policySha256,
++    });
++  });
++});
++
+ test("sendSessionDirect closes a shared client after reconnect preference failure", async () => {
+   await withTempHome(async (homeDir) => {
+     const cwd = path.join(homeDir, "workspace");
+diff --git a/test/queue-messages.test.ts b/test/queue-messages.test.ts
+index 93d9eca90360b084c1362bf3aebbf1ba934857d6..f4fe4310abca7cec1f3418be0b49906afeff23f3 100644
+--- a/test/queue-messages.test.ts
++++ b/test/queue-messages.test.ts
+@@ -69,6 +69,8 @@ test("parseQueueRequest accepts prompt session options", () => {
+       env: {
+         GIT_AUTHOR_EMAIL: "agent@example.local",
+       },
++      claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++      claudeExecutionPolicySha256: "a".repeat(64),
+     },
+     waitForCompletion: true,
+   });
+@@ -91,6 +93,8 @@ test("parseQueueRequest accepts prompt session options", () => {
+       env: {
+         GIT_AUTHOR_EMAIL: "agent@example.local",
+       },
++      claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++      claudeExecutionPolicySha256: "a".repeat(64),
+     },
+   });
+ });
+@@ -122,6 +126,19 @@ test("parseQueueRequest rejects invalid prompt session options", () => {
+     }),
+     null,
+   );
++  assert.equal(
++    parseQueueRequest({
++      type: "submit_prompt",
++      requestId: "req-session-options-incomplete-policy",
++      message: "hello",
++      permissionMode: "approve-reads",
++      sessionOptions: {
++        claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++      },
++      waitForCompletion: true,
++    }),
++    null,
++  );
+ });
+ 
+ test("parseQueueOwnerMessage accepts typed queue error payload", () => {
+diff --git a/test/queue-owner-env.test.ts b/test/queue-owner-env.test.ts
+index ac8a5b5d67358570319ef0883fab91667d44db70..4f2aea576846eb43fd84dfada0a06c35d447de48 100644
+--- a/test/queue-owner-env.test.ts
++++ b/test/queue-owner-env.test.ts
+@@ -39,6 +39,8 @@ describe("parseQueueOwnerPayload", () => {
+           env: {
+             GIT_AUTHOR_EMAIL: "agent@example.local",
+           },
++          claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++          claudeExecutionPolicySha256: "a".repeat(64),
+         },
+       }),
+     );
+@@ -75,6 +77,8 @@ describe("parseQueueOwnerPayload", () => {
+       env: {
+         GIT_AUTHOR_EMAIL: "agent@example.local",
+       },
++      claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++      claudeExecutionPolicySha256: "a".repeat(64),
+     });
+   });
+ 
+@@ -107,6 +111,21 @@ describe("parseQueueOwnerPayload", () => {
+         message: /Invalid mcpServers\[0\] in queue owner payload\.url: expected non-empty string/,
+       },
+     );
++    assert.throws(
++      () =>
++        parseQueueOwnerPayload(
++          JSON.stringify({
++            sessionId: "session-1",
++            permissionMode: "deny-all",
++            sessionOptions: {
++              claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++            },
++          }),
++        ),
++      {
++        message: "queue owner payload has invalid Claude execution policy binding",
++      },
++    );
+   });
+ });
+ 
+diff --git a/test/queue-owner-lifecycle.test.ts b/test/queue-owner-lifecycle.test.ts
+index 21bb361f86bcdfb14dc1c85e344f99bbaf3e26c3..3f5f8fb70bc8c420b889368e15bb99fdec4694a6 100644
+--- a/test/queue-owner-lifecycle.test.ts
++++ b/test/queue-owner-lifecycle.test.ts
+@@ -135,7 +135,56 @@ function waitForProcessExit(
+   });
+ }
+ 
++async function assertQueueOwnerRejectsPolicyMismatch(): Promise<void> {
++  await withTempHome("acpx-queue-policy-conflict-", async (homeDir) => {
++    const cwd = path.join(homeDir, "workspace");
++    await fs.mkdir(cwd, { recursive: true });
++    const record = makeSessionRecord({
++      acpxRecordId: "queue-policy-conflict",
++      acpSessionId: "queue-policy-conflict-session",
++      agentCommand: `node ${JSON.stringify(MOCK_AGENT_PATH)}`,
++      cwd,
++      acpx: {
++        session_options: {
++          claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++          claude_execution_policy_sha256: "a".repeat(64),
++        },
++      },
++    });
++    await writeSessionRecordFile(homeDir, record);
++    const lockPath = queueLockFilePath(record.acpxRecordId, homeDir);
++    const payload = JSON.stringify({
++      sessionId: record.acpxRecordId,
++      permissionMode: "approve-reads",
++      sessionOptions: {
++        claudeExecutionPolicyRef: "runs/run-2/execution-authority/policy.json",
++        claudeExecutionPolicySha256: "b".repeat(64),
++      },
++    });
++    const child = spawn(process.execPath, [CLI_PATH, "__queue-owner"], {
++      env: {
++        ...process.env,
++        HOME: homeDir,
++        ACPX_QUEUE_OWNER_PAYLOAD: payload,
++      },
++      stdio: ["ignore", "ignore", "pipe"],
++    });
++    const stderrChunks: Buffer[] = [];
++    child.stderr?.on("data", (chunk: Buffer) => stderrChunks.push(chunk));
++
++    const { code } = await waitForProcessExit(child);
++    const stderr = Buffer.concat(stderrChunks).toString("utf8");
++    assert.notEqual(code, 0);
++    assert.match(stderr, /CLAUDE_EXECUTION_POLICY_CONFLICT/);
++    assert.equal(await fileExists(lockPath), false);
++  });
++}
++
+ describe("queue owner lifecycle — graceful SIGTERM shutdown", () => {
++  it("rejects a policy mismatch before acquiring its lease", async () => {
++    await assertQueueOwnerRejectsPolicyMismatch();
++  });
++
+   it("exits with code 0 and releases its lease when it receives SIGTERM", async () => {
+     if (process.platform === "win32") {
+       // SIGTERM semantics differ on Windows; skip this test.
+diff --git a/test/runtime-manager.test.ts b/test/runtime-manager.test.ts
+index 8762e30828b6f37f206c62691845023e56ee8a9a..1ecdad91527b1d82f7c79cb29e5bfe65e0ddf891 100644
+--- a/test/runtime-manager.test.ts
++++ b/test/runtime-manager.test.ts
+@@ -5,6 +5,7 @@ import type { SessionModelState } from "../src/acp/model-support.js";
+ import { AcpxOperationalError } from "../src/errors.js";
+ import { AcpRuntimeManager } from "../src/runtime/engine/manager.js";
+ import {
++  assertCompatiblePersistentSessionOptions,
+   mergeSessionOptions,
+   persistSessionOptions,
+   sessionOptionsFromRecord,
+@@ -4529,6 +4530,40 @@ test("mergeSessionOptions merges session env per key with preferred overriding f
+   });
+ });
+ 
++test("persistent policy compatibility rejects either one-sided binding", () => {
++  const bound = makeSessionRecord({
++    acpxRecordId: "bound-policy-record",
++    acpSessionId: "bound-policy-session",
++    agentCommand: "codex --acp",
++    cwd: "/workspace",
++    acpx: {
++      session_options: {
++        claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++        claude_execution_policy_sha256: "a".repeat(64),
++      },
++    },
++  });
++  const unbound = makeSessionRecord({
++    acpxRecordId: "unbound-policy-record",
++    acpSessionId: "unbound-policy-session",
++    agentCommand: "codex --acp",
++    cwd: "/workspace",
++  });
++
++  assert.throws(
++    () => assertCompatiblePersistentSessionOptions(bound, undefined),
++    /CLAUDE_EXECUTION_POLICY_CONFLICT/,
++  );
++  assert.throws(
++    () =>
++      assertCompatiblePersistentSessionOptions(unbound, {
++        claudeExecutionPolicyRef: "runs/run-1/execution-authority/policy.json",
++        claudeExecutionPolicySha256: "a".repeat(64),
++      }),
++    /CLAUDE_EXECUTION_POLICY_CONFLICT/,
++  );
++});
++
+ test("AcpRuntimeManager ignores sessionOptions when reusing an existing persistent record", async () => {
+   const existing = makeSessionRecord({
+     acpxRecordId: "reuse-key",
+@@ -4560,6 +4595,91 @@ test("AcpRuntimeManager ignores sessionOptions when reusing an existing persiste
+   assert.equal(record.acpx?.session_options, undefined);
+ });
+ 
++test("AcpRuntimeManager rejects a different Claude execution policy on persistent reuse", async () => {
++  const existing = makeSessionRecord({
++    acpxRecordId: "policy-reuse-key",
++    acpSessionId: "sid-existing-policy",
++    agentCommand: "codex --acp",
++    cwd: "/workspace",
++    acpx: {
++      session_options: {
++        claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++        claude_execution_policy_sha256: "a".repeat(64),
++      },
++    },
++  });
++  const store = new InMemorySessionStore([existing]);
++  const manager = new AcpRuntimeManager(
++    createRuntimeOptions({ cwd: "/workspace", sessionStore: store }),
++    {
++      clientFactory: () => {
++        throw new Error("clientFactory must not run after a policy conflict");
++      },
++    },
++  );
++
++  await assert.rejects(
++    async () =>
++      await manager.ensureSession({
++        sessionKey: "policy-reuse-key",
++        agent: "codex",
++        mode: "persistent",
++        cwd: "/workspace",
++        sessionOptions: {
++          claudeExecutionPolicyRef: "runs/run-2/execution-authority/policy.json",
++          claudeExecutionPolicySha256: "b".repeat(64),
++        },
++      }),
++    /CLAUDE_EXECUTION_POLICY_CONFLICT/,
++  );
++});
++
++test("AcpRuntimeManager rejects a policy change before reset-on-ensure replacement", async () => {
++  const existing = makeSessionRecord({
++    acpxRecordId: "policy-reset-key",
++    acpSessionId: "sid-existing-policy-reset",
++    agentCommand: "codex --acp",
++    cwd: "/workspace",
++    acpx: {
++      reset_on_next_ensure: true,
++      session_options: {
++        claude_execution_policy_ref: "runs/run-1/execution-authority/policy.json",
++        claude_execution_policy_sha256: "a".repeat(64),
++      },
++    },
++  });
++  const store = new InMemorySessionStore([existing]);
++  const before = await store.load(existing.acpxRecordId);
++  let factoryCalls = 0;
++  const manager = new AcpRuntimeManager(
++    createRuntimeOptions({ cwd: "/workspace", sessionStore: store }),
++    {
++      clientFactory: () => {
++        factoryCalls += 1;
++        throw new Error("clientFactory must not run after a policy conflict");
++      },
++    },
++  );
++
++  await assert.rejects(
++    manager.ensureSession({
++      sessionKey: existing.acpxRecordId,
++      agent: "codex",
++      mode: "persistent",
++      cwd: "/workspace",
++      sessionOptions: {
++        claudeExecutionPolicyRef: "runs/run-2/execution-authority/policy.json",
++        claudeExecutionPolicySha256: "b".repeat(64),
++      },
++    }),
++    /CLAUDE_EXECUTION_POLICY_CONFLICT/,
++  );
++
++  assert.equal(factoryCalls, 0);
++  assert.deepEqual(await store.load(existing.acpxRecordId), before);
++  assert.deepEqual(store.savedRecordIds, []);
++});
++
+ test("AcpRuntimeManager getStatus surfaces token usage breakdowns and available commands", async () => {
+   const record = makeSessionRecord(
+     {
+diff --git a/test/spawn-options.test.ts b/test/spawn-options.test.ts
+index fb76197392c6a16ac0305757ab4f5dd81eb42b74..301d8c450da7d3fb11fd4672110776de327eec0c 100644
+--- a/test/spawn-options.test.ts
++++ b/test/spawn-options.test.ts
+@@ -5,6 +5,7 @@ import os from "node:os";
+ import path from "node:path";
+ import test from "node:test";
+ import { resolveClaudeCodeExecutable } from "../src/acp/agent-command.js";
++import { finalizeClaudeExecutionPolicyAgentEnvironment } from "../src/acp/auth-env.js";
+ import { resolveAgentSessionCwd, runTimedExecFile } from "../src/acp/client-process.js";
+ import { buildAgentSpawnOptions, buildSpawnCommandOptions } from "../src/acp/client.js";
+ import { buildTerminalSpawnOptions } from "../src/acp/terminal-manager.js";
+@@ -57,6 +58,38 @@ test("buildAgentSpawnOptions leaves the agent env untouched when no session env
+   assert.equal(options.env.ACPX_TEST_SESSION_ENV_INJECTED, undefined);
+ });
+ 
++test("Claude E1 finalizer removes proxy and ambient scrub values after all env merges", () => {
++  const options = buildAgentSpawnOptions("/tmp/acpx-agent", undefined, {
++    HTTP_PROXY: "session-proxy",
++    https_proxy: "session-proxy",
++    CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: "1",
++    CLAUDE_CODE_EXECUTABLE: "/opt/claude",
++    ACPX_UNRELATED: "preserved",
++  });
++
++  finalizeClaudeExecutionPolicyAgentEnvironment(options.env);
++
++  assert.equal(options.env.HTTP_PROXY, undefined);
++  assert.equal(options.env.https_proxy, undefined);
++  assert.equal(options.env.CLAUDE_CODE_SUBPROCESS_ENV_SCRUB, undefined);
++  assert.equal(options.env.CLAUDE_CODE_EXECUTABLE, "/opt/claude");
++  assert.equal(options.env.ACPX_UNRELATED, "preserved");
++});
++
++test("Claude E1 finalizer removes case variants on Windows", () => {
++  return withPlatform("win32", () => {
++    const env = {
++      Http_Proxy: "mixed-proxy",
++      Claude_Code_Subprocess_Env_Scrub: "1",
++      ACPX_UNRELATED: "preserved",
++    };
++
++    finalizeClaudeExecutionPolicyAgentEnvironment(env);
++
++    assert.deepEqual(env, { ACPX_UNRELATED: "preserved" });
++  });
++});
++
+ test("spawned agent child process receives session env with parent-override precedence", async () => {
+   const script =
+     "process.stdout.write(JSON.stringify({injected:process.env.ACPX_TEST_E2E_INJECTED,parent:process.env.ACPX_TEST_E2E_PARENT}))";
+diff --git a/src/cli/queue/permission-replies.ts b/src/cli/queue/permission-replies.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..ab2198856189a8858ab1127fd77edf021f283b32
+--- /dev/null
++++ b/src/cli/queue/permission-replies.ts
+@@ -0,0 +1,192 @@
++import { createHash, randomUUID } from "node:crypto";
++import type { JsonRpcId, RequestPermissionRequest } from "@agentclientprotocol/sdk";
++import { isOncePermissionOption } from "../../permissions.js";
++import type {
++  AcpExactPermissionDecision,
++  AcpPermissionRequest,
++  AcpPermissionRequestContext,
++} from "../../types.js";
++
++export type NativePermissionRequest = {
++  schema: "dual.native.permission.request.v1";
++  requestKey: string;
++  sessionId: string;
++  promptId: string;
++  ownerGeneration: number;
++  rpcId: JsonRpcId;
++  rawJson: string;
++  rawSha256: string;
++  deadlineMs: number;
++};
++export type NativePermissionReply = Omit<NativePermissionRequest, "schema" | "rawJson"> & {
++  optionId: string;
++  commitRef: string;
++  commitSha256: string;
++};
++type Pending = {
++  request: NativePermissionRequest;
++  raw: RequestPermissionRequest;
++  consumed: boolean;
++  finish: (decision: AcpExactPermissionDecision) => void;
++};
++type Turn = {
++  promptId: string;
++  ownerGeneration: number;
++  deadlineMs: number;
++  publish: (request: NativePermissionRequest) => void;
++};
++
++/** Lives only in the existing queue owner. Disk commits never recreate callbacks. */
++export class QueuePermissionReplies {
++  private turn?: Turn;
++  private readonly pending = new Map<string, Pending>();
++  private readonly seenRpcIds = new Set<string>();
++
++  begin(turn: Turn): void {
++    this.close();
++    if (
++      !Number.isSafeInteger(turn.ownerGeneration) ||
++      turn.ownerGeneration <= 0 ||
++      !Number.isFinite(turn.deadlineMs) ||
++      turn.deadlineMs <= Date.now()
++    ) {
++      throw new Error("Online permission asks require a current owner and finite turn deadline");
++    }
++    this.turn = turn;
++  }
++
++  close(): void {
++    this.turn = undefined;
++    for (const pending of this.pending.values()) {
++      pending.finish({ cancel: true });
++    }
++    this.pending.clear();
++    this.seenRpcIds.clear();
++  }
++
++  async ask(
++    request: AcpPermissionRequest,
++    context: AcpPermissionRequestContext,
++  ): Promise<AcpExactPermissionDecision> {
++    const turn = this.turn;
++    if (
++      !turn ||
++      context.signal.aborted ||
++      turn.deadlineMs <= Date.now() ||
++      context.requestId == null
++    ) {
++      return { cancel: true };
++    }
++    const rpcKey = JSON.stringify([request.sessionId, typeof context.requestId, context.requestId]);
++    if (this.seenRpcIds.has(rpcKey)) {
++      return { cancel: true };
++    }
++    this.seenRpcIds.add(rpcKey);
++    const rawJson = JSON.stringify(request.raw);
++    const envelope: NativePermissionRequest = {
++      schema: "dual.native.permission.request.v1",
++      requestKey: randomUUID(),
++      sessionId: request.sessionId,
++      promptId: turn.promptId,
++      ownerGeneration: turn.ownerGeneration,
++      rpcId: context.requestId,
++      rawJson,
++      rawSha256: createHash("sha256").update(rawJson).digest("hex"),
++      deadlineMs: turn.deadlineMs,
++    };
++    return await this.waitForReply(turn, envelope, context.signal);
++  }
++
++  private async waitForReply(
++    turn: Turn,
++    request: NativePermissionRequest,
++    signal: AbortSignal,
++  ): Promise<AcpExactPermissionDecision> {
++    return await new Promise((resolve) => {
++      let timer: NodeJS.Timeout | undefined;
++      const finish = (decision: AcpExactPermissionDecision) => {
++        const item = this.pending.get(request.requestKey);
++        if (!item || item.consumed) {
++          return;
++        }
++        // Consumption is synchronous with the guard; no await and no reset on send failure.
++        item.consumed = true;
++        if (timer) {
++          clearTimeout(timer);
++        }
++        signal.removeEventListener("abort", abort);
++        resolve(decision);
++      };
++      const abort = () => finish({ cancel: true });
++      const copy: RequestPermissionRequest = JSON.parse(
++        request.rawJson,
++      ) as RequestPermissionRequest;
++      this.pending.set(request.requestKey, { request, raw: copy, consumed: false, finish });
++      signal.addEventListener("abort", abort, { once: true });
++      timer = setTimeout(abort, Math.max(0, request.deadlineMs - Date.now()));
++      if (signal.aborted || this.turn !== turn) {
++        abort();
++        return;
++      }
++      try {
++        turn.publish(request);
++      } catch {
++        abort();
++      }
++    });
++  }
++
++  reply(reply: NativePermissionReply): boolean {
++    const item = this.pending.get(reply.requestKey);
++    const turn = this.turn;
++    if (!item || !turn) {
++      return false;
++    }
++    if (!matchesCurrentTurn(item.request, reply, turn)) {
++      return false;
++    }
++    if (!validUnconsumedCommit(item, reply)) {
++      return false;
++    }
++    const option = item.raw.options.find((candidate) => candidate.optionId === reply.optionId);
++    if (!option || !isOncePermissionOption(option)) {
++      return false;
++    }
++    item.finish({ optionId: option.optionId });
++    return true;
++  }
++}
++
++function validUnconsumedCommit(item: Pending, reply: NativePermissionReply): boolean {
++  return (
++    !item.consumed &&
++    Date.now() < item.request.deadlineMs &&
++    Boolean(reply.commitRef) &&
++    /^[a-f0-9]{64}$/.test(reply.commitSha256)
++  );
++}
++
++function matchesCurrentTurn(
++  request: NativePermissionRequest,
++  reply: NativePermissionReply,
++  turn: Turn,
++): boolean {
++  return (
++    matchesRequest(request, reply) &&
++    turn.promptId === reply.promptId &&
++    turn.ownerGeneration === reply.ownerGeneration
++  );
++}
++
++function matchesRequest(request: NativePermissionRequest, reply: NativePermissionReply): boolean {
++  const keys = [
++    "requestKey",
++    "sessionId",
++    "promptId",
++    "ownerGeneration",
++    "rpcId",
++    "rawSha256",
++    "deadlineMs",
++  ] as const;
++  return keys.every((key) => request[key] === reply[key]);
++}
+diff --git a/test/permission-cli.test.ts b/test/permission-cli.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..16401e05c1a2d803f658f53d037e7a26e8039101
+--- /dev/null
++++ b/test/permission-cli.test.ts
+@@ -0,0 +1,123 @@
++import assert from "node:assert/strict";
++import { spawn } from "node:child_process";
++import { once } from "node:events";
++import { mkdtemp, rm } from "node:fs/promises";
++import os from "node:os";
++import path from "node:path";
++import test from "node:test";
++import { fileURLToPath } from "node:url";
++import type { NativePermissionRequest } from "../src/cli/queue/permission-replies.js";
++const cli = fileURLToPath(new URL("../src/cli.js", import.meta.url));
++const peer = fileURLToPath(new URL("./mock-agent.js", import.meta.url));
++function launch(home: string, args: string[]) {
++  const child = spawn(process.execPath, [cli, ...args], {
++    env: { ...process.env, HOME: home },
++    stdio: ["ignore", "pipe", "pipe"],
++  });
++  let output = "";
++  let error = "";
++  child.stdout.setEncoding("utf8");
++  child.stderr.setEncoding("utf8");
++  child.stdout.on("data", (chunk: string) => {
++    output += chunk;
++  });
++  child.stderr.on("data", (chunk: string) => {
++    error += chunk;
++  });
++  const done = once(child, "close").then(([code]) => ({ code, output, error }));
++  return { child, done };
++}
++async function command(home: string, args: string[]) {
++  return await launch(home, args).done;
++}
++
++test("CLI live ask -> exact IPC reply -> original ACP continuation; saved old reply cannot replay", async () => {
++  for (const optionId of ["allow", "reject"]) {
++    const home = await mkdtemp(path.join(os.tmpdir(), "acpx-permission-cli-"));
++    const base = [
++      "--agent",
++      `${JSON.stringify(process.execPath)} ${JSON.stringify(peer)}`,
++      "--cwd",
++      home,
++      "--format",
++      "json",
++      "--ttl",
++      "0",
++    ];
++    try {
++      const created = await command(home, [...base, "sessions", "new", "--name", "exact"]);
++      assert.equal(created.code, 0, created.error);
++      const original = launch(home, [
++        ...base,
++        "--permission-replies",
++        "--timeout",
++        "10",
++        "--prompt-retries",
++        "0",
++        "--permission-policy",
++        JSON.stringify({ escalate: ["edit"] }),
++        "prompt",
++        "-s",
++        "exact",
++        "permission edit approved-product",
++      ]);
++      let buffer = "";
++      const request = await new Promise<NativePermissionRequest>((resolve, reject) => {
++        const timer = setTimeout(() => {
++          original.child.kill();
++          reject(new Error("legal ask never reached stdout"));
++        }, 8000);
++        original.child.stdout.on("data", (chunk: string) => {
++          buffer += chunk;
++          let lineEnd = buffer.indexOf("\n");
++          while (lineEnd >= 0) {
++            const line = buffer.slice(0, lineEnd);
++            buffer = buffer.slice(lineEnd + 1);
++            const event = JSON.parse(line) as { method?: string; params?: NativePermissionRequest };
++            if (event.method === "dual/permission/request" && event.params) {
++              clearTimeout(timer);
++              resolve(event.params);
++            }
++            lineEnd = buffer.indexOf("\n");
++          }
++        });
++      });
++      const { schema: _schema, rawJson: _raw, ...identity } = request;
++      const reply = {
++        ...identity,
++        optionId,
++        commitRef: "offline-fixture-C",
++        commitSha256: "a".repeat(64),
++      };
++      const result = await command(home, [
++        ...base,
++        "permission-reply",
++        "-s",
++        "exact",
++        "--reply",
++        JSON.stringify(reply),
++      ]);
++      assert.equal(result.code, 0, result.error);
++      assert.equal((JSON.parse(result.output) as { consumed: boolean }).consumed, true);
++      const completed = await original.done;
++      assert.equal(
++        completed.code,
++        optionId === "reject" ? 5 : 0,
++        completed.error + completed.output,
++      );
++      assert.match(completed.output, new RegExp(`permission selected:${optionId}`));
++      const repeated = await command(home, [
++        ...base,
++        "permission-reply",
++        "-s",
++        "exact",
++        "--reply",
++        JSON.stringify(reply),
++      ]);
++      assert.notEqual(repeated.code, 0, "ended request cannot regain IPC authority");
++    } finally {
++      await command(home, [...base, "sessions", "close", "exact"]);
++      await rm(home, { recursive: true, force: true });
++    }
++  }
++});
+diff --git a/test/permission-replies.test.ts b/test/permission-replies.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..b2127b763ceaa063d407d99646360aec63755954
+--- /dev/null
++++ b/test/permission-replies.test.ts
+@@ -0,0 +1,250 @@
++import assert from "node:assert/strict";
++import test from "node:test";
++import type { RequestPermissionRequest } from "@agentclientprotocol/sdk";
++import {
++  SessionQueueOwner,
++  tryAcquireQueueOwnerLease,
++  releaseQueueOwnerLease,
++  sendNativePermissionReply,
++} from "../src/cli/queue/ipc.js";
++import { parseQueueRequest } from "../src/cli/queue/messages.js";
++import {
++  QueuePermissionReplies,
++  type NativePermissionRequest,
++  type NativePermissionReply,
++} from "../src/cli/queue/permission-replies.js";
++import {
++  withTempHome,
++  queuePaths,
++  writeQueueOwnerLock,
++  createSingleRequestServer,
++  listenServer,
++  closeServer,
++} from "./queue-test-helpers.js";
++
++function raw(sessionId = "session"): RequestPermissionRequest {
++  return {
++    sessionId,
++    toolCall: { toolCallId: "tool", title: "edit", kind: "edit" },
++    options: [
++      { optionId: "allow-exact", kind: "allow_once", name: "Allow once" },
++      { optionId: "deny-exact", kind: "reject_once", name: "Deny once" },
++    ],
++  };
++}
++function response(
++  request: NativePermissionRequest,
++  optionId = "allow-exact",
++): NativePermissionReply {
++  const { schema: _schema, rawJson: _raw, ...identity } = request;
++  return { ...identity, optionId, commitRef: "execution.json", commitSha256: "a".repeat(64) };
++}
++function active(deadlineMs = Date.now() + 10000) {
++  const replies = new QueuePermissionReplies();
++  const requests: NativePermissionRequest[] = [];
++  replies.begin({
++    promptId: "prompt",
++    ownerGeneration: 7,
++    deadlineMs,
++    publish: (request) => requests.push(request),
++  });
++  const ask = (rpcId: string | number, signal = new AbortController().signal) =>
++    replies.ask(
++      { raw: raw(), sessionId: "session", inferredKind: "edit" },
++      { requestId: rpcId, signal },
++    );
++  return { replies, requests, ask };
++}
++
++test("concurrent asks retain exact per-request allow/deny decisions; repeats never send twice", async () => {
++  const { replies, requests, ask } = active();
++  const a = ask("A");
++  const b = ask("B");
++  assert.equal(requests.length, 2);
++  assert.equal(replies.reply(response(requests[1], "deny-exact")), true);
++  assert.equal(replies.reply(response(requests[0])), true);
++  assert.deepEqual(await a, { optionId: "allow-exact" });
++  assert.deepEqual(await b, { optionId: "deny-exact" });
++  assert.equal(replies.reply(response(requests[0])), false);
++  assert.deepEqual(await ask("A"), { cancel: true });
++  replies.close();
++});
++
++test("wrong owner/prompt/session/RPC/hash/deadline/choice does not poison a legal ask", async () => {
++  const { replies, requests, ask } = active();
++  const pending = ask(12);
++  const valid = response(requests[0]);
++  const invalid = [
++    { ownerGeneration: 8 },
++    { promptId: "another" },
++    { sessionId: "other" },
++    { rpcId: "12" },
++    { rawSha256: "b".repeat(64) },
++    { deadlineMs: valid.deadlineMs + 1 },
++    { optionId: "missing" },
++    { commitSha256: "" },
++  ];
++  for (const change of invalid) {
++    assert.equal(replies.reply({ ...valid, ...change }), false);
++  }
++  assert.equal(replies.reply(valid), true);
++  assert.deepEqual(await pending, { optionId: "allow-exact" });
++  replies.close();
++});
++
++test("cancel/turn replacement/owner restart never restore an old callback from a commit", async () => {
++  const { replies, requests, ask } = active();
++  const controller = new AbortController();
++  const pending = ask(1, controller.signal);
++  const old = response(requests[0]);
++  controller.abort();
++  assert.deepEqual(await pending, { cancel: true });
++  assert.equal(replies.reply(old), false);
++  replies.close();
++  replies.begin({
++    promptId: "next",
++    ownerGeneration: 8,
++    deadlineMs: Date.now() + 10000,
++    publish: () => {},
++  });
++  assert.equal(replies.reply(old), false);
++  assert.equal(new QueuePermissionReplies().reply(old), false);
++  replies.close();
++});
++
++test("deadline and request publication failure cancel instead of falling through", async () => {
++  const { replies, requests, ask } = active(Date.now() + 40);
++  const pending = ask(1);
++  assert.deepEqual(await pending, { cancel: true });
++  assert.equal(replies.reply(response(requests[0])), false);
++  replies.close();
++  replies.begin({
++    promptId: "next",
++    ownerGeneration: 8,
++    deadlineMs: Date.now() + 10000,
++    publish: () => {
++      throw new Error("broken output");
++    },
++  });
++  assert.deepEqual(
++    await replies.ask(
++      { raw: raw(), sessionId: "session", inferredKind: "edit" },
++      { requestId: 1, signal: new AbortController().signal },
++    ),
++    { cancel: true },
++  );
++  replies.close();
++});
++
++test("wire rejects absent/changed generations, unbounded asks and prompt retry", async () => {
++  const { replies, requests, ask } = active();
++  const pending = ask(1);
++  const reply = response(requests[0]);
++  const wire = { type: "permission_reply", requestId: "ipc", ownerGeneration: 7, reply };
++  assert.ok(parseQueueRequest(wire));
++  assert.equal(parseQueueRequest({ ...wire, ownerGeneration: undefined }), null);
++  assert.equal(parseQueueRequest({ ...wire, ownerGeneration: 8 }), null);
++  const submit = {
++    type: "submit_prompt",
++    requestId: "p",
++    message: "task",
++    permissionMode: "approve-reads",
++    permissionReplies: true,
++    waitForCompletion: true,
++    timeoutMs: 1000,
++    promptRetries: 0,
++  };
++  assert.ok(parseQueueRequest(submit));
++  assert.equal(parseQueueRequest({ ...submit, timeoutMs: undefined }), null);
++  assert.equal(parseQueueRequest({ ...submit, promptRetries: 1 }), null);
++  assert.equal(parseQueueRequest({ ...submit, waitForCompletion: false }), null);
++  replies.close();
++  await pending;
++});
++
++test("live IPC replies bypass queued prompts and never recreate consumed callbacks", async () => {
++  await withTempHome(async () => {
++    const lease = await tryAcquireQueueOwnerLease("permission-ipc");
++    assert.ok(lease);
++    const replies = new QueuePermissionReplies();
++    const requests: NativePermissionRequest[] = [];
++    replies.begin({
++      promptId: "live-prompt",
++      ownerGeneration: lease.ownerGeneration,
++      deadlineMs: Date.now() + 5000,
++      publish: (request) => requests.push(request),
++    });
++    const owner = await SessionQueueOwner.start(lease, {
++      permissionReply: (reply) => replies.reply(reply),
++      cancelPrompt: async () => {
++        replies.close();
++        return true;
++      },
++      closeSession: async () => true,
++      setSessionMode: async () => {},
++      setSessionModel: async () => {},
++      setSessionConfigOption: async () => ({ configOptions: [] }),
++    });
++    try {
++      const a = replies.ask(
++        { raw: raw(), sessionId: "session", inferredKind: "edit" },
++        { requestId: "A", signal: new AbortController().signal },
++      );
++      const b = replies.ask(
++        { raw: raw(), sessionId: "session", inferredKind: "edit" },
++        { requestId: "B", signal: new AbortController().signal },
++      );
++      assert.equal(
++        await sendNativePermissionReply(lease.sessionId, response(requests[1], "deny-exact")),
++        true,
++      );
++      assert.deepEqual(await b, { optionId: "deny-exact" });
++      assert.equal(await sendNativePermissionReply(lease.sessionId, response(requests[0])), true);
++      assert.deepEqual(await a, { optionId: "allow-exact" });
++      assert.equal(await sendNativePermissionReply(lease.sessionId, response(requests[0])), false);
++      await assert.rejects(
++        sendNativePermissionReply(lease.sessionId, {
++          ...response(requests[0]),
++          ownerGeneration: lease.ownerGeneration + 1,
++        }),
++      );
++      assert.equal(
++        await owner.nextTask(10),
++        undefined,
++        "reply is a control, never a new queued prompt",
++      );
++    } finally {
++      replies.close();
++      await owner.close();
++      await releaseQueueOwnerLease(lease);
++    }
++  });
++});
++
++test("lost or silent IPC receipt makes one attempt and no owner recovery or resend", async () => {
++  for (const silent of [false, true]) {
++    await withTempHome(async (dir) => {
++      const sessionId = "lost-permission";
++      const paths = queuePaths(dir, sessionId);
++      await writeQueueOwnerLock({ ...paths, pid: process.pid, sessionId, ownerGeneration: 7 });
++      let attempts = 0;
++      const server = createSingleRequestServer((socket) => {
++        attempts++;
++        if (!silent) {
++          socket.destroy();
++        }
++      });
++      await listenServer(server, paths.socketPath);
++      const { replies, requests, ask } = active(Date.now() + 200);
++      const pending = ask(1);
++      try {
++        await assert.rejects(sendNativePermissionReply(sessionId, response(requests[0])));
++        assert.equal(attempts, 1);
++      } finally {
++        replies.close();
++        await pending;
++        await closeServer(server);
++      }
++    });
++  }
++});
+diff --git a/src/e1-build-info.generated.ts b/src/e1-build-info.generated.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..9a90743a01d3d6004c1547e26175406f9257663d
+--- /dev/null
++++ b/src/e1-build-info.generated.ts
+@@ -0,0 +1,3 @@
++// Replaced by the installer after reviewed patch verification.
++export const E1_UPSTREAM_COMMIT = "UNBUILT";
++export const E1_PATCH_SHA256 = "UNBUILT";

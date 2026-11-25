@@ -1,0 +1,82 @@
+--- before/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -1,6 +1,6 @@
+ # Dual 生命周期可靠性：详细设计候选
+ 
+-日期：2026-09-28。阶段：P0。状态：候选版获用户带回的 CC 设计层 PASS（1 WARN、3 LOW）；本轮修订及 D04 静态核验未经独立复审，处置见 §14。仍不是 Implementation Ready，不授权代码实施、提交或真实运行。
++日期：2026-09-28。阶段：P0。状态：候选修订及 D04 静态报告获用户带回的 CC 复审 PASS（新增 1 LOW）；READY 正向表示与 BUSY/pending 设计义务已确认解决。本次补 provider 集合限制选项，增量未经独立复审，处置见 §14.1。仍不是 Implementation Ready，不授权代码实施、提交或真实运行。
+ 
+ 上位契约：[R3](20260923-dual-lifecycle-reliability-design.zh-CN.md)。唯一工作索引：[主清单](20260927-dual-lifecycle-worklist.zh-CN.md)。本文展开 D01–D10，不另建工作清单或降低 R3 验收。全文“增加、迁移、必须”描述拟议目标；现状另行标明。未落实的能力不能用于当前运行准入。
+ 
+@@ -327,6 +327,7 @@
+ | 调整选择（均未授权实施） | 目标适合性与成本 | 尚须核验 |
+ |---|---|---|
+ | 优先细化现有 adapter 的强制只读绑定 | 保留现有多 agent/acpx 主流程；让角色约束绑定真正执行 policy，而非依赖 mode 名称。需维护受审 adapter 增量及版本身份，不新建权限平台 | Claude/Codex 各自的强制接口、逐 turn/恢复/模式变更不可放宽、原生与 ACP 工具面、必要只读功能仍可用；不能只改 ReadOnly 常量就称完成 |
++| 限制只读阶段可选 provider 集合 | 仅在某 provider 的强制只读已获证明时才成立。例如若仅 Claude 可证明，可提议只读作者/评审均使用 Claude；会改变现有 Claude 作者／Codex 评审的跨 provider 分工。同 provider 的独立角色/session 不等于保留异构评审，不能假定质量等价 | Claude 当前也未证明强制只读；须核验允许集合的完整工具/session 面、禁止静默回退，并评估评审质量、独立角色及 provider/model 约束。分工改变须用户明确选择，不能自动替换 Codex 评审来让 D04 通过 |
+ | 外层 OS 进程隔离 | 可独立约束子进程的本地文件写入；须区分程序控制 writer 与模型进程，新增平台及部署维护成本 | 支持操作系统、进程树/链接/外部 Git 目录、可写运行 scratch 与不可写产品/control、远端工具副作用边界 |
+ | 拷贝执行工作区 | 限制回写原工作区的风险，但允许模型写副本不满足当前“执行面只读”的承诺；还需隔离宿主与控制文件 | 若选此项须先明确是否改变验收目标；路径/证据身份、回传与误回写风险不能被拷贝动作本身消除 |
+ 
+@@ -424,7 +425,7 @@
+ |---|---|---|
+ | D01 | gate checks/continuation_failure 字段及三类诊断、缺证据规则 | 逐个现有前置 code/rule 与消费者的枚举映射；和 D06 exact write set 绑定；独立评审 |
+ | D02 | 阶段顺序、原因冲突、领域校验与发布分离、常驻回归位置 | contained permission “非必需”证据如何从现有 signal 与义务精确关联；若无关联需明确不能容纳的范围；独立评审 |
+-| D03 | 两阶段同模型、四变体逐门迁移与批准失效；§2.3 明确 READY 无人门、decision 固化及独立资格投影 | 正向账本表示独立复核，完整 JSON（含 reviewed_candidate）、与 D06 逐写点绑定、compiler/qualification/authored/各投影 consumer 迁移对照及新旧格式/伪批准拒绝测试设计 |
++| D03 | 两阶段同模型、四变体逐门迁移与批准失效；§2.3 READY 无人门、decision 固化及独立资格投影已获 CC 独立复核（§14.1） | 完整 JSON（含 reviewed_candidate）、与 D06 逐写点绑定、compiler/qualification/authored/各投影 consumer 迁移对照及新旧格式/伪批准拒绝测试设计 |
+ | D04 | 实际代码缺口、所需绑定/收尾；§8.1 静态证据否定 pinned Codex 常规 mode 即只读的假设，并提交选择 | 用户决定调整方向后，继续 pinned Claude/Codex 有效 readonly 绑定与 writer 归属核验；强制能力仍未证明，不以 prompt/收尾或内部审计代替 |
+ | D05 | 必需项/出口字段、可信边界、四检查点 | 对代表性合法任务填完整样本（含 operator 路径），逐项验证已有 evidence 是否足够，避免 schema 有字段但无可用生产者 |
+ | D06 | 推荐 prepared、字段/写序/reader/event 规则 | 全部写集/读会话入口清单、M6 函数级桥接；核实 atomic move 与锁装配；方案独立评审 |
+@@ -433,13 +434,13 @@
+ | D09 | 全部已知 apply/finalize 窗口、既有状态扩展、target 锁 | Git 可观察事实与实际方法逐窗绑定、人工裁定复用入口；candidate no-change 现有语义核验，不凭本文新增 |
+ | D10 | 机器/语义字段分工、严格身份保留方案 | 重复提示/格式 correction 证据逐字段盘点，确定确有价值的删重或有据保留 |
+ 
+-这些剩余项属于同一次详细设计的证据核验与字段冻结，继续更新本文；不另开一套架构评估，也不立刻实施看哪条能过。本轮 D04 已按 R3 提交 adapter 绑定／OS 隔离／拷贝工作区的具体取舍；没有替用户批准该调整。其余未冻结项仍为真实待办，不因文档修订或候选版 PASS 自动关闭。
++这些剩余项属于同一次详细设计的证据核验与字段冻结，继续更新本文；不另开一套架构评估，也不立刻实施看哪条能过。本轮 D04 已按 R3 提交 adapter 绑定／限制只读 provider 集合／OS 隔离／拷贝工作区的具体取舍；没有替用户批准该调整。其余未冻结项仍为真实待办，不因文档修订或候选版 PASS 自动关闭。
+ 
+ Boundary Review（作者自查）：DESIGN GAP。Source of truth 沿 R3 owner；投影无新增权力；本地 prepared 是持久化机制，不代作业务决定；外部未知不自动重放。无接受“以后再说”的产品债务，未冻结项明确阻塞对应实施。未运行测试/provider，未启动额外 agent，未修改源代码或既有 ledger；既有 97 项离线结果不能证明本文新方案。后续独立评审须挑战方案与剩余阻塞的必要性，不预设 PASS。
+ 
+ ## 14. 本次评审处置与核验边界
+ 
+-用户带回的 [CC 原始评审](../../output/detailed-design-review-20260928/cc-review.txt) 为候选设计 PASS（1 WARN、3 LOW）。这是候选方案的评审结论，不是冻结版通过，更不是实施授权。
++用户带回的 [CC 原始评审](../../output/detailed-design-review-20260928/cc-review.txt) 为候选设计 PASS（1 WARN、3 LOW）。以下保留该轮处置记录，最新复审见 §14.1。这是候选方案的评审结论，不是冻结版通过，更不是实施授权。
+ 
+ - WARN-1：在 §2.3/§11/§13 补正向账本表示、owner/消费者、D06 写集及投影区别；作者已修订，须独立复核，D03 未冻结。
+ - LOW-1：contained permission 与非必需义务的精确关联仍列 D02 冻结项；本轮未完成，缺关联证据不容纳的默认保持。
+@@ -449,3 +450,15 @@
+ - CC 对 Claude-only policy binding 此前仅按命名推断；本轮直接核验 AcpxAgentTransport.validateExecutionPolicyBinding：非 Claude 携该 binding 会拒绝。补证不延伸为只读有效性结论。
+ 
+ 本轮文档修订、静态可行性证据与[材料校验](../../output/detailed-design-review-20260928/material-verification.json)独立保存，旧报告/指纹不覆盖。D04 发现常规模式映射不足后，先给出取舍，不继续默认其可行或启动适配器修改。所有产品项仍 DESIGN GAP；本次没有重跑 97 项测试，没有真实调用、历史样本恢复或提交。
++
++### 14.1 修订版与 D04 报告复审处置
++
++用户本轮粘贴的 CC 复审结论为 PASS，无新增 WARN/FAIL，新增 LOW-1“选项表缺限制只读阶段 provider 集合变体”。[复审摘要与处置](../../output/detailed-design-review-20260928-r2/review-disposition.md)标明来源及未核验范围；不是本 agent 发起或完成的独立评审。
++
++原 WARN-1 的正向账本表示与 LOW-2 的 BUSY/pending 投影义务经 CC 确认解决；§13 D03 已移除“正向表示独立复核”这一已完成项，其 JSON、逐消费者迁移与写集冻结仍未完成。原 LOW-3 守线维持；D02 的 signal/义务关联（首轮 LOW-1）仍未完成，与本轮新 LOW-1 分开记录。
++
++本轮新 LOW-1 已在 §8.1 补一行，说明条件、跨 provider 分工代价和强制能力/质量验证义务。它不是可自动启用的 fallback，也不改变推荐顺序；Claude 本身的强制只读尚未证明。旧 D04 报告与 source-index 保留受审字节，本次新增选项以本文为准。
++
++复审认可已检查事实及推论边界，不等于穷尽所有底层能力或证明运行时隔离；其未逐行复读的源码及所有运行时行为仍未核验。不能把仓库已有 patched acpx 的维护经验等同于修改 provider adapter 无新增成本；其发布包、依赖与审计维护仍须纳入选择。
++
++作者本轮仅补文档及状态同步，[材料校验](../../output/detailed-design-review-20260928-r2/material-verification.json)不替代独立复审。产品成熟度仍 DESIGN GAP，D04 方向待用户决定；无新增 authority、实施、提交、真实运行或历史恢复授权。其余 §13 枚举工作仍在原范围内，并不因 D04 等待而全部转为需要新授权。
+--- before/20260927-dual-lifecycle-worklist.zh-CN.md
++++ dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -258,6 +258,6 @@
+ 
+ ### 8.1 详细设计候选评审后的进度（2026-09-28）
+ 
+-[详细设计 §14](20260928-dual-lifecycle-detailed-design.zh-CN.md#14-本次评审处置与核验边界)登记用户带回的候选版 CC PASS（1 WARN、3 LOW）。WARN-1 的 READY 正向账本表示及 LOW-2 的 BUSY/pending 投影义务已由作者补入，LOW-3 的入口逐项改/不改及理由补入 D06 冻结要求；这些增量未获独立复审。LOW-1 的 signal/非必需义务关联仍待 D02 冻结。本清单原有 D02 常驻回归及 W08 UI/report 两项文字修订已经存在，本次未重复计作新增成果。
+-
+-D04 的[本机静态核验与选项](../../output/detailed-design-review-20260928/d04-feasibility.md)发现：pinned Codex adapter 常规 read-only mode 实际传 workspaceWrite；现有模式名不能证明执行面只读。已向用户提交 adapter 强制绑定、OS 隔离和拷贝工作区的差异与成本，待方向决定，不擅自变更 adapter authority 或降低验收。D01–D10 仍未整体冻结，W01–W09 均未 Promoted；本次仅改三份文档及保存核验证据。
++[详细设计 §14](20260928-dual-lifecycle-detailed-design.zh-CN.md#14-本次评审处置与核验边界)登记候选版及后续修订版的 CC PASS。最新复审确认 READY 正向账本表示和 BUSY/pending 投影义务解决，LOW-3 守线维持；D03 独立复核项已移到完成侧，但 JSON/写集/消费者迁移仍待冻结。本轮新增 LOW-1 的 provider 集合限制选项已由作者补入 §8.1，增量未经独立复审。首轮 LOW-1 的 signal/非必需义务关联仍待 D02 冻结。本清单原有 D02 常驻回归及 W08 UI/report 两项文字修订已经存在，本次未重复计作新增成果。
++
++D04 的[本机静态核验与选项](../../output/detailed-design-review-20260928/d04-feasibility.md)发现：pinned Codex adapter 常规 read-only mode 实际传 workspaceWrite；现有模式名不能证明执行面只读。已向用户提交 adapter 强制绑定、限制只读 provider 集合、OS 隔离和拷贝工作区的差异与成本（新增选项以详细设计 §8.1 为准），待方向决定，不擅自变更 adapter authority、评审分工或降低验收。D01–D10 仍未整体冻结，W01–W09 均未 Promoted；本次仅改三份文档及保存核验证据。
+--- before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -3,7 +3,7 @@
+ ## 当前入口：2026-09-28 生命周期详细设计候选
+ 
+ 用户已要求进入下一步：形成必要详细设计及普通核验；CC 仍由用户自行发起，不直接调用，不自动进入实现。
+-当前契约入口：[完整生命周期可靠性设计](20260923-dual-lifecycle-reliability-design.zh-CN.md)；[D01–D10 详细设计候选](20260928-dual-lifecycle-detailed-design.zh-CN.md)已获用户带回的 CC PASS（1 WARN、3 LOW），不是冻结版通过。本次补 READY 正向账本表示、BUSY/pending 投影及入口分类要求，增量未经独立复审；D02 关联语义和 §13 枚举工作仍未完成。
++当前契约入口：[完整生命周期可靠性设计](20260923-dual-lifecycle-reliability-design.zh-CN.md)；[D01–D10 详细设计候选](20260928-dual-lifecycle-detailed-design.zh-CN.md)修订版与 D04 报告已获用户带回的 CC 复审 PASS（新增 1 LOW，无 WARN/FAIL）。READY 正向表示、BUSY/pending 设计义务经独立确认；D03 仅移除已完成的表示复核项。本次补“限制只读 provider 集合”选项及其跨 provider 评审分工代价，增量未经独立复审；D02 关联语义和 §13 其余枚举工作仍未完成，不是冻结版通过。
+ 优先核验 D04 已发现实际阻塞：[pinned Codex adapter 的 read-only mode 使用 workspaceWrite](../../output/detailed-design-review-20260928/d04-feasibility.md)，不能用模式名称作只读证明。只读保存来源/指纹及取舍，待用户决定是否允许优先细化现有 adapter 的强制只读绑定；未改 adapter、配置或源代码，未启动 session/provider。D04 未冻结，实施、提交、真实运行仍未授权。
+ 9·13 控制链设计保留为第一批参考；当前已有未提交实现及序列测试，尚未证明整体组合可靠交付。
+ 2026-09-27 补记（R3）已获用户带回的第三轮 CC 设计层 PASS：前两轮问题均确认为设计层解决，无新增 WARN/FAIL，仅余 INFO-1。本次补记其前向记录/历史不回填边界，并澄清“无记录不等于未检查”，此澄清未经独立复审。整体设计评审收口；对账材料见下，I1 字段/写序及 I3/I4/I5/I6 等详细设计缺口仍在，不能据 PASS 开工。

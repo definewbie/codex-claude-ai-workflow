@@ -1,0 +1,170 @@
+{
+  "date": "2026-10-26",
+  "status": "FRESH_OFFLINE_ASSEMBLED_AWAITING_CC_AND_RUN_APPROVAL",
+  "target_phase": "P0",
+  "user_confirmed": [
+    "bounded break-even threshold product slice",
+    "isolated committed-baseline preparation"
+  ],
+  "not_authorized": [
+    "new 3M/18/3600 runtime budget",
+    "new native/provider execution",
+    "business gate delegation",
+    "commit delegation"
+  ],
+  "fixed_baseline": {
+    "commit": "931db5db8fc468c61eb2c441d21a1da7facf69a1",
+    "file_count": 305,
+    "archive_ref": "source-baseline.tar",
+    "manifest_ref": "baseline-manifest.json"
+  },
+  "evidence_layers": [
+    {
+      "type": "related baseline targeted",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "ref": "evidence/baseline-targeted-receipt.json"
+    },
+    {
+      "type": "single existing non-container baseline run",
+      "tests": 114,
+      "suites": 31,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "ref": "evidence/baseline-non-container-receipt.json",
+      "not_additive_with_targeted": true
+    },
+    {
+      "type": "single default full existing Java baseline run",
+      "tests": 166,
+      "suites": 42,
+      "mysql_suites": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "elapsed_seconds": 129.59139483305626,
+      "ref": "evidence/baseline-full-receipt.json",
+      "not_additive_with_prior_runs": true
+    },
+    {
+      "type": "offline budget comparisons",
+      "cases": 24,
+      "ref": "budget-dry-run.json",
+      "not_product_tests": true
+    },
+    {
+      "type": "read-only runtime input comparison",
+      "source_inputs": 659,
+      "jar_count": 2,
+      "source_and_jars_match": true,
+      "client_config_entries": 33,
+      "client_config_differences": 0,
+      "ref": "evidence/release-comparison-final.json"
+    },
+    {
+      "type": "future feature/E2E",
+      "status": "NOT_IMPLEMENTED_NOT_RUN"
+    }
+  ],
+  "budget": {
+    "status": "PROPOSED_NOT_APPROVED",
+    "new_token_ceiling": 3000000,
+    "requests": 18,
+    "active_seconds": 3600,
+    "nominal_mainline_plus_correction": 2365000,
+    "with_readiness_repeat_and_design_repair": 2940000,
+    "with_extra_intake_repair": 3030000,
+    "extra_intake_path_exceeds_ceiling": true,
+    "previous_balance_inherited": false
+  },
+  "self_review": {
+    "result": "WARN",
+    "not_independent_cc_review": true,
+    "blockers": [
+      "fresh assembly awaits independent CC review",
+      "new 3M/18/3600 budget and current Gate/runtime not approved",
+      "current native Maven/Docker verification exit must be established through original readiness before EXECUTION; host baseline not native proof"
+    ],
+    "smallest_next_action": "Independent read-only CC review of assembled Gate; user current budget/Gate/runtime decision; if approved rerun readonly external-state/identity/usage/reserve checks before original one-step entry."
+  },
+  "operator_errors": [
+    {
+      "ref": "evidence/launch-read-only-comparison.json",
+      "classification": "inspection artifact name mistaken for path; jars subsection superseded"
+    },
+    {
+      "ref": "evidence/release-read-only-comparison-corrected.json",
+      "classification": "inspection used wrong relative source root; source subsection superseded"
+    },
+    {
+      "classification": "post-test inspection compared source paths to suite names; normalized to class names and rechecked all 11; not a test or product failure"
+    },
+    {
+      "classification": "final inspection queried a nonexistent authorization key; reread actual real_run_authorized=false, budget_approved=false; authorization file unchanged; not a product failure"
+    },
+    {
+      "ref": "evidence/fresh-assembly-tests-attempt-01.log",
+      "classification": "test expected later AssertionError but missing binary was already rejected with FileNotFoundError at frozen_check; test expectation corrected, no production weakening"
+    },
+    {
+      "classification": "false-auth original elapsed receipt linked once into operations/authorization-guard/result.json after initialization, from its measured value; no estimate or reset"
+    }
+  ],
+  "preservation": "evidence/preservation-after-assembly.json",
+  "activity_summary": {
+    "model_calls": 0,
+    "exchange_requests": 0,
+    "native_sessions": 0,
+    "product_source_changes": 0,
+    "original_dirty_tree_changes": 0,
+    "application_starts": 0,
+    "docker_starts": 0,
+    "trades": 0,
+    "new_workstream_created": true,
+    "test_application_contexts_and_temporary_mysql_started": true,
+    "application_starts_meaning": "production application starts; test application contexts excluded",
+    "docker_starts_meaning": "Docker daemon starts by agent; user started it; tests created temporary containers",
+    "java_offline_initializations": 1,
+    "isolated_git_baseline_commits": 1
+  },
+  "review_entry": "cc-review-prompt.txt",
+  "docker_current": {
+    "status": "AVAILABLE_CACHED_IMAGES_VERIFIED",
+    "ref": "evidence/docker-ready-recheck-20261026.json",
+    "historical_unavailable_receipts_preserved": true
+  },
+  "cc_review_disposition": "cc-review-disposition.md",
+  "mysql_suite_count_confirmation": "evidence/mysql-suite-count-confirmation.json",
+  "fresh_instance": {
+    "parent": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case",
+    "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/target",
+    "workspace": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree",
+    "workstream": "ws-20261026T142203Z-7SNA",
+    "ledger": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA"
+  },
+  "fresh_assembly": {
+    "tests": 29,
+    "assembly_tests": 17,
+    "observer_tests": 12,
+    "ref": "evidence/fresh-assembly-tests-final.json",
+    "isolated_counterproof": 3,
+    "counterproof_ref": "evidence/fresh-counterproof.json",
+    "actual_java_scope": "start WITHOUT --run only",
+    "real_native_java_execution": "NOT_RUN",
+    "business_approvals": 0
+  },
+  "assembly_review_entry": "cc-review-prompt.txt",
+  "assembly_current": {
+    "tokens": 0,
+    "requests": 0,
+    "active_seconds_at_final_readonly_audit": 4.59889724990353,
+    "launch_sha256": "ed183a55113d8c86a56e92f4b058b24a2106f1a85be6331b41c5a111b8d3be29",
+    "run_authorized": false,
+    "budget_approved": false,
+    "read_only_ref": "evidence/fresh-read-only-recheck.json",
+    "git_identity_ref": "evidence/final-git-identity.json"
+  }
+}

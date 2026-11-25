@@ -1,0 +1,2111 @@
+package dev.dual.ledger.file;
+
+import dev.dual.core.id.DualId;
+import dev.dual.core.workflow.EdgeDefinition;
+import dev.dual.core.workflow.EdgeCondition;
+import dev.dual.core.workflow.NodeDefinition;
+import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.NodeStatus;
+import dev.dual.core.workflow.TransitionMetadata;
+import dev.dual.core.workflow.WorkflowDefinition;
+import dev.dual.core.workflow.WorkflowStatus;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class WorkflowFileLedgerTest {
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void initializesWorkflowLedgerAndCurrentSnapshot() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-test"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "intake.claude_brainstorm",
+                List.of(new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-test", definition);
+
+        assertTrue(Files.exists(paths.workflowDefinitionJson()));
+        assertTrue(Files.exists(paths.workflowInstanceJson()));
+        assertTrue(Files.exists(paths.workflowCurrentJson()));
+        assertEquals(1, Files.list(paths.nodesDir()).count());
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("workflow_started"));
+
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.RUNNING, current.status());
+        assertEquals(List.of("node-intake-claude_brainstorm-001"), current.activeNodeInstanceIds());
+        assertTrue(current.openGateIds().isEmpty());
+
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        assertEquals(NodeStatus.READY, node.status());
+        assertEquals("intake.claude_brainstorm", node.nodeDefinitionId());
+        assertEquals("iter-001", node.iterationId());
+        assertTrue(Files.readString(paths.iterationJson("iter-001")).contains("\"triggerAction\" : \"workflow_started\""));
+    }
+
+    @Test
+    void loadDefinitionRejectsFrozenHiddenGateEdge() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-hidden-frozen-edge"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "visible-gate-action",
+                1,
+                "gate.review",
+                List.of(
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("revise"))),
+                        new NodeDefinition("next", NodeKind.TASK, "noop.task", Map.of())),
+                List.of(new EdgeDefinition("gate.review", "revise", "next"))
+        );
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-hidden-frozen-edge", definition);
+        var frozen = Files.readString(paths.workflowDefinitionJson())
+                .replace("\"allowed_actions\" : [ \"revise\" ]", "\"allowed_actions\" : [ \"approve\" ]");
+        assertTrue(frozen.contains("\"allowed_actions\" : [ \"approve\" ]"));
+        Files.writeString(paths.workflowDefinitionJson(), frozen);
+
+        var error = assertThrows(Exception.class, () -> ledger.loadDefinition(paths));
+
+        assertTrue(error.getMessage().contains("gate.review"));
+        assertTrue(error.getMessage().contains("revise"));
+    }
+
+    @Test
+    void completesNodeAndActivatesNextNodeByOutcome() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-route"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("second", NodeKind.GATE, "human.review", Map.of())
+                ),
+                List.of(new EdgeDefinition("first", "completed", "second"))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-route", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, "completed", List.of("first-output.md"), Map.of("ok", true));
+
+        var next = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, next.status());
+        assertEquals(1, next.activeNodeInstanceIds().size());
+        assertEquals(List.of("gate-" + next.activeNodeInstanceIds().get(0)), next.openGateIds());
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("node_routed"));
+
+        var completed = ledger.loadNode(paths, node.nodeInstanceId());
+        assertEquals(NodeStatus.COMPLETED, completed.status());
+        assertEquals(List.of("first-output.md"), completed.outputRefs());
+        assertEquals(Map.of("ok", true), completed.result());
+        assertTrue(completed.finishedAt() != null);
+
+        var nextNode = ledger.loadNode(paths, next.activeNodeInstanceIds().get(0));
+        assertEquals("second", nextNode.nodeDefinitionId());
+        assertEquals(NodeKind.GATE, nextNode.kind());
+        assertEquals(NodeStatus.WAITING, nextNode.status());
+        assertEquals("iter-001", nextNode.iterationId());
+        assertEquals(List.of("first-output.md"), nextNode.inputRefs());
+        assertTrue(Files.exists(paths.gateJson("gate-" + nextNode.nodeInstanceId())));
+        assertEquals(node.nodeInstanceId(), nextNode.result().get("source_node_instance_id"));
+        var gate = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules().readValue(
+                paths.gateJson("gate-" + nextNode.nodeInstanceId()).toFile(), GateDocument.class);
+        assertEquals(node.nodeInstanceId(), gate.result().get("source_node_instance_id"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains(
+                "\"source_node_instance_id\":\"" + node.nodeInstanceId() + "\""));
+    }
+
+    @Test
+    void resolvingGatePersistsGateResolutionDocument() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-gate-resolution"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_requirement_review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("approved", "revise")
+                        )),
+                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("first", "completed", "gate.human_requirement_review"),
+                        new EdgeDefinition("gate.human_requirement_review", "approved", "contract.compile")
+                )
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-gate-resolution", definition);
+        var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
+                "completed", List.of("first-output.md"), Map.of());
+
+        var waiting = ledger.loadCurrent(paths);
+        var gateId = waiting.openGateIds().get(0);
+        ledger.resolveOpenGate(paths, definition, "approved", "mandatory review confirmed");
+
+        var gateJson = Files.readString(paths.gateJson(gateId));
+        assertTrue(gateJson.contains("\"status\" : \"resolved\""));
+        assertTrue(gateJson.contains("\"human_action\" : \"approved\""));
+        assertTrue(gateJson.contains("\"note\" : \"mandatory review confirmed\""));
+        assertTrue(gateJson.contains("\"subject_input_refs\" : [ \"first-output.md\" ]"));
+        assertTrue(gateJson.contains("\"source_node_instance_id\" : \"" + first.nodeInstanceId() + "\""));
+        assertTrue(gateJson.contains("\"resolvedAt\""));
+    }
+
+    @Test
+    void resolveOpenGateNormalizesApproveToApprovedWhenWorkflowUsesApprovedOutcome() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-gate-approve-normalized"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_requirement_review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("approve", "revise")
+                        )),
+                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("first", "completed", "gate.human_requirement_review"),
+                        new EdgeDefinition("gate.human_requirement_review", "approved", "contract.compile")
+                )
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-gate-approve-normalized", definition);
+        var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
+                "completed", List.of("first-output.md"), Map.of());
+
+        ledger.resolveOpenGate(paths, definition, "approve", "human clicked approve");
+
+        var current = ledger.loadCurrent(paths);
+        var next = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        assertEquals("contract.compile", next.nodeDefinitionId());
+
+        var completedGate = Files.readString(paths.nodeJson("node-gate-human_requirement_review-002"));
+        assertTrue(completedGate.contains("\"human_action\" : \"approved\""));
+        assertTrue(completedGate.contains("\"requested_action\" : \"approve\""));
+    }
+
+    @Test
+    void unsupportedGateActionIsRejectedBeforeAnyLedgerWrite() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-unsupported-gate-action"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "unsupported-gate-action",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("approve", "revise"))),
+                        new NodeDefinition("next", NodeKind.TASK, "noop.task", Map.of())),
+                List.of(
+                        new EdgeDefinition("first", "READY", "gate.review"),
+                        new EdgeDefinition("gate.review", "approved", "next"))
+        );
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-unsupported-gate-action", definition);
+        var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
+                "READY", List.of(), Map.of());
+        var current = ledger.loadCurrent(paths);
+        var gateNodeId = current.activeNodeInstanceIds().getFirst();
+        var gateId = current.openGateIds().getFirst();
+        var before = List.of(
+                Files.readString(paths.workflowCurrentJson()),
+                Files.readString(paths.nodeJson(gateNodeId)),
+                Files.readString(paths.gateJson(gateId)),
+                Files.readString(paths.eventsJsonl())
+        );
+
+        var error = assertThrows(IOException.class,
+                () -> ledger.resolveOpenGate(paths, definition, "delete", "unsupported"));
+
+        assertTrue(error.getMessage().contains("unsupported gate action"));
+        assertEquals(before, List.of(
+                Files.readString(paths.workflowCurrentJson()),
+                Files.readString(paths.nodeJson(gateNodeId)),
+                Files.readString(paths.gateJson(gateId)),
+                Files.readString(paths.eventsJsonl())
+        ));
+    }
+
+    @Test
+    void contractClarificationStartsTypedProposalRevisionBeforeCompilerCanRun() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-contract-clarify"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle", 1, "contract.compile",
+                List.of(
+                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
+                        new NodeDefinition("gate.contract_review", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("approve", "clarify"),
+                                "max_revisions", 3)),
+                        new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of(
+                        new EdgeDefinition("contract.compile", "completed", "gate.contract_review"),
+                        new EdgeDefinition("gate.contract_review", "clarify", "intake.claude_brainstorm", null,
+                                new TransitionMetadata("loop", "", true, "", "",
+                                        "Human requested a typed task-contract clarification"))));
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-contract-clarify", definition);
+        var compiler = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        var compiledRefs = List.of(
+                ".agent/workstreams/ws-contract-clarify/artifacts/task-contract.json",
+                ".agent/workstreams/ws-contract-clarify/artifacts/contract-resolution.json");
+        ledger.completeAndRoute(paths, definition, compiler.nodeInstanceId(), NodeStatus.COMPLETED,
+                "completed", compiledRefs, Map.of());
+
+        var waiting = ledger.loadCurrent(paths);
+        var gate = ledger.loadNode(paths, waiting.activeNodeInstanceIds().getFirst());
+        ledger.resolveOpenGate(paths, definition, "clarify", "Require E.164 phone identifiers");
+
+        var current = ledger.loadCurrent(paths);
+        var next = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
+        assertEquals("intake.claude_brainstorm", next.nodeDefinitionId());
+        assertEquals(compiledRefs, next.inputRefs());
+        assertFalse(next.iterationId().equals(gate.iterationId()));
+        var iteration = new com.fasterxml.jackson.databind.ObjectMapper()
+                .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+                .readValue(paths.iterationJson(next.iterationId()).toFile(), WorkflowIterationDocument.class);
+        assertEquals(gate.nodeInstanceId(), iteration.triggerNodeInstanceId());
+        assertEquals("clarify", iteration.triggerAction());
+        assertEquals("intake.claude_brainstorm", iteration.targetNodeDefinitionId());
+        assertEquals("Require E.164 phone identifiers", iteration.reason());
+    }
+
+    @Test
+    void writesTimelineProjectionFromWorkflowAndNodes() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-timeline"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("second", NodeKind.GATE, "human.review", Map.of())
+                ),
+                List.of(new EdgeDefinition("first", "completed", "second"))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-timeline", definition);
+        writeRun(paths, "run-claude", "claude", "completed", 100, false);
+        writeRun(paths, "run-codex", "codex", "failed", 300, true);
+        var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
+                "completed", List.of("first-output.md"), Map.of("ok", true));
+
+        assertTrue(Files.exists(paths.timelineJson()));
+        var timeline = Files.readString(paths.timelineJson());
+        assertTrue(timeline.contains("\"schemaVersion\""));
+        assertTrue(timeline.contains("\"workstreamId\" : \"ws-timeline\""));
+        assertTrue(timeline.contains("\"workflowStatus\" : \"WAITING_FOR_HUMAN\""));
+        assertTrue(timeline.contains("\"activeNodeInstanceIds\""));
+        assertTrue(timeline.contains("\"nodeDefinitionId\" : \"first\""));
+        assertTrue(timeline.contains("\"status\" : \"COMPLETED\""));
+        assertTrue(timeline.contains("\"nodeDefinitionId\" : \"second\""));
+        assertTrue(timeline.contains("\"status\" : \"WAITING\""));
+        assertTrue(timeline.contains("\"durationMs\""));
+
+        assertTrue(Files.exists(paths.workstreamMetricsJson()));
+        assertTrue(Files.exists(paths.workstreamMetricsMarkdown()));
+        var metrics = Files.readString(paths.workstreamMetricsJson());
+        assertTrue(metrics.contains("\"workstreamId\" : \"ws-timeline\""));
+        assertTrue(metrics.contains("\"workflowStatus\" : \"WAITING_FOR_HUMAN\""));
+        assertTrue(metrics.contains("\"nodeCount\" : 2"));
+        assertTrue(metrics.contains("\"gateCount\" : 1"));
+        assertTrue(metrics.contains("\"completedCount\" : 1"));
+        assertTrue(metrics.contains("\"waitingCount\" : 1"));
+        assertTrue(metrics.contains("\"totalNodeDurationMs\""));
+        assertTrue(metrics.contains("\"longestNodes\""));
+        assertTrue(metrics.contains("\"providerMetrics\""));
+        assertTrue(metrics.contains("\"claude\""));
+        assertTrue(metrics.contains("\"codex\""));
+        assertTrue(metrics.contains("\"recoverableFailureCount\" : 1"));
+        var metricsMarkdown = Files.readString(paths.workstreamMetricsMarkdown());
+        assertTrue(metricsMarkdown.contains("# Workstream Metrics"));
+        assertTrue(metricsMarkdown.contains("## Provider Metrics"));
+        assertTrue(metricsMarkdown.contains("| claude | 1 | 1 | 0 | 0 | 100 | 100 |"));
+        assertTrue(metricsMarkdown.contains("| codex | 1 | 0 | 1 | 1 | 300 | 300 |"));
+    }
+
+    private void writeRun(WorkstreamPaths paths, String runId, String agent, String status, long durationMs,
+                          boolean recoverable) throws Exception {
+        var runDir = paths.runsDir().resolve(runId);
+        Files.createDirectories(runDir);
+        Files.writeString(runDir.resolve("run.json"), """
+                {
+                  "schemaVersion": 1,
+                  "runId": "%s",
+                  "workstreamId": "%s",
+                  "nodeId": "agent.node",
+                  "agent": "%s",
+                  "durationMs": %d,
+                  "status": "%s",
+                  "recoverable": %s
+                }
+                """.formatted(runId, paths.workstreamId().value(), agent, durationMs, status, recoverable));
+    }
+
+    @Test
+    void revisionOutcomeStartsNextWorkflowIteration() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-revision"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "gate.review",
+                List.of(
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of()),
+                        new NodeDefinition("design.claude_design", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(new EdgeDefinition("gate.review", "revise", "design.claude_design"))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-revision", definition);
+        var current = ledger.loadCurrent(paths);
+        var gate = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, gate.nodeInstanceId(), NodeStatus.COMPLETED, "revise", List.of(), Map.of(
+                "human_action", "revise",
+                "note", "Narrow the design before implementation."
+        ));
+
+        var routed = ledger.loadCurrent(paths);
+        var next = ledger.loadNode(paths, routed.activeNodeInstanceIds().get(0));
+        assertEquals("design.claude_design", next.nodeDefinitionId());
+        assertEquals("iter-002", next.iterationId());
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"parentIterationId\" : \"iter-001\""));
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"triggerAction\" : \"revise\""));
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"targetNodeDefinitionId\" : \"design.claude_design\""));
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("Narrow the design before implementation."));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("iteration_started"));
+    }
+
+    @Test
+    void loopTransitionMetadataStartsNextWorkflowIteration() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-loop-metadata"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "review.decision",
+                List.of(
+                        new NodeDefinition("review.decision", NodeKind.DECISION, "noop.decision", Map.of()),
+                        new NodeDefinition("design.claude_design", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(new EdgeDefinition("review.decision", "BACK_TO_DESIGN", "design.claude_design",
+                        EdgeCondition.unconditional(),
+                        TransitionMetadata.loop("review requested design changes")))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-loop-metadata", definition);
+        var decision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED,
+                "BACK_TO_DESIGN", List.of("review.md"), Map.of("reason", "missing architecture constraints"));
+
+        var next = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        assertEquals("iter-002", next.iterationId());
+        assertTrue(next.inputTransition().toString().contains("transition_type=loop"));
+        var iteration = Files.readString(paths.iterationJson("iter-002"));
+        assertTrue(iteration.contains("\"triggerAction\" : \"BACK_TO_DESIGN\""));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("review requested design changes"));
+    }
+
+    @Test
+    void acceptanceRejectClassificationRoutesToRepairIteration() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-acceptance-repair-loop"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle-full",
+                3,
+                "acceptance.classify_failure",
+                List.of(
+                        new NodeDefinition("acceptance.classify_failure", NodeKind.TASK,
+                                "acceptance.failure_classify", Map.of()),
+                        new NodeDefinition("context.implement_claude", NodeKind.TASK,
+                                "context.build_package", Map.of())
+                ),
+                List.of(new EdgeDefinition(
+                        "acceptance.classify_failure",
+                        "REJECT_IMPLEMENTATION_BUG",
+                        "context.implement_claude",
+                        EdgeCondition.unconditional(),
+                        TransitionMetadata.loop("Acceptance rejected because implementation repair is required")
+                ))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-acceptance-repair-loop", definition);
+        var classify = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, classify.nodeInstanceId(), NodeStatus.COMPLETED,
+                "REJECT_IMPLEMENTATION_BUG",
+                List.of(".agent/workstreams/ws-acceptance-repair-loop/artifacts/failure-classification.json"),
+                Map.of(
+                        "review_decision", "REJECT",
+                        "category", "IMPLEMENTATION_BUG",
+                        "reasoning", "Verifier found a concrete acceptance failure."
+                ));
+
+        var current = ledger.loadCurrent(paths);
+        var repair = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        var goal = Files.readString(paths.goalSatisfactionJson());
+        var events = Files.readString(paths.eventsJsonl());
+
+        assertEquals(WorkflowStatus.RUNNING, current.status());
+        assertEquals("context.implement_claude", repair.nodeDefinitionId());
+        assertEquals("iter-002", repair.iterationId());
+        assertEquals("loop", repair.inputTransition().get("transition_type"));
+        assertTrue(repair.inputTransition().get("loop_reason").toString().contains("implementation repair"));
+        assertTrue(goal.contains("\"domainOutcome\" : \"NEEDS_REPAIR\""));
+        assertTrue(events.contains("iteration_started"));
+        assertTrue(events.contains("REJECT_IMPLEMENTATION_BUG"));
+        assertFalse(current.activeNodeInstanceIds().isEmpty(), "semantic repair must not complete the workflow");
+    }
+
+    @Test
+    void loopTransitionMetadataRespectsRevisionLimit() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-loop-limit"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "review.decision",
+                List.of(
+                        new NodeDefinition("review.decision", NodeKind.DECISION, "noop.decision", Map.of(
+                                "max_revisions", 1
+                        )),
+                        new NodeDefinition("design.claude_design", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(new EdgeDefinition("review.decision", "BACK_TO_DESIGN", "design.claude_design",
+                        EdgeCondition.unconditional(),
+                        TransitionMetadata.loop("review requested design changes")))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-loop-limit", definition);
+        var firstDecision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, firstDecision.nodeInstanceId(), NodeStatus.COMPLETED,
+                "BACK_TO_DESIGN", List.of("review-1.md"), Map.of());
+        assertEquals("iter-002", ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0)).iterationId());
+
+        var secondDecision = new NodeInstanceDocument(
+                1,
+                "node-review-decision-999",
+                "review.decision",
+                NodeKind.DECISION,
+                "noop.decision",
+                NodeStatus.READY,
+                "stage-review",
+                "iter-002",
+                List.of(),
+                Map.of(),
+                List.of(),
+                Map.of(),
+                "",
+                "",
+                null,
+                null
+        );
+        Files.write(paths.nodeJson(secondDecision.nodeInstanceId()), new com.fasterxml.jackson.databind.ObjectMapper()
+                .findAndRegisterModules()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsBytes(secondDecision));
+        var current = ledger.loadCurrent(paths);
+        var injectedCurrent = new WorkflowCurrentDocument(
+                current.schemaVersion(),
+                current.workstreamId(),
+                current.workflowInstanceId(),
+                current.workflowId(),
+                current.definitionVersion(),
+                WorkflowStatus.RUNNING,
+                List.of(secondDecision.nodeInstanceId()),
+                List.of(),
+                current.lastEventId(),
+                current.updatedAt(),
+                current.commitSequence()
+        );
+        Files.write(paths.workflowCurrentJson(), new com.fasterxml.jackson.databind.ObjectMapper()
+                .findAndRegisterModules()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsBytes(injectedCurrent));
+
+        ledger.completeAndRoute(paths, definition, secondDecision.nodeInstanceId(), NodeStatus.COMPLETED,
+                "BACK_TO_DESIGN", List.of("review-2.md"), Map.of());
+
+        var stopped = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, stopped.status());
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("revision_limit_reached"));
+    }
+
+    @Test
+    void revisionOutcomeStopsAtRecoveryWhenRevisionLimitIsReached() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-revision-limit"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "gate.review",
+                List.of(
+                        new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of("max_revisions", 1)),
+                        new NodeDefinition("design.claude_design", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("gate.review", "revise", "design.claude_design"),
+                        new EdgeDefinition("design.claude_design", "completed", "gate.review")
+                )
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-revision-limit", definition);
+        var firstGate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, firstGate.nodeInstanceId(), NodeStatus.COMPLETED, "revise", List.of(), Map.of(
+                "note", "First revision."
+        ));
+        var design = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, design.nodeInstanceId(), NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+        var secondGate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, secondGate.nodeInstanceId(), NodeStatus.COMPLETED, "revise", List.of(), Map.of(
+                "human_action", "revise",
+                "note", "A caller-provided human action must not bypass the revision limit."
+        ));
+
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, current.status());
+        assertEquals(List.of(secondGate.nodeInstanceId()), current.activeNodeInstanceIds());
+        assertFalse(Files.exists(paths.iterationJson("iter-003")));
+        var stoppedGate = ledger.loadNode(paths, secondGate.nodeInstanceId());
+        assertEquals(NodeStatus.BLOCKED, stoppedGate.status());
+        assertTrue(Files.exists(paths.currentFailureMarkdown()),
+                "Revision-limit recovery should write current-failure.md for operator visibility");
+        var summary = Files.readString(paths.currentFailureMarkdown());
+        assertTrue(summary.contains("revision_limit_reached"));
+        assertTrue(summary.contains(secondGate.nodeDefinitionId()));
+        var events = Files.readString(paths.eventsJsonl());
+        assertTrue(events.contains("revision_limit_reached"));
+        assertTrue(events.contains("\"max_revisions\":1"));
+    }
+
+    @Test
+    void selfTestDecisionRoutesCompleteIncompleteAndBlockedWithoutBypass() throws Exception {
+        var definition = new WorkflowDefinition(
+                "self-test-repair",
+                1,
+                "implement.self_test_decision",
+                List.of(
+                        new NodeDefinition("implement.self_test_decision", NodeKind.DECISION,
+                                "review.decision", Map.of("max_revisions", 1)),
+                        new NodeDefinition("implement.artifact_validation", NodeKind.TASK,
+                                "noop.task", Map.of()),
+                        new NodeDefinition("context.implement_claude", NodeKind.TASK,
+                                "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_implementation_repair", NodeKind.GATE,
+                                "human.review", Map.of("allowed_actions", List.of("revise"), "max_revisions", 1))
+                ),
+                List.of(
+                        new EdgeDefinition("implement.self_test_decision", "SELF_TEST_COMPLETE",
+                                "implement.artifact_validation"),
+                        new EdgeDefinition("implement.self_test_decision", "SELF_TEST_INCOMPLETE",
+                                "context.implement_claude", dev.dual.core.workflow.EdgeCondition.configEquals(
+                                        "continuation_kind", "IMPLEMENTATION_REPAIR"),
+                                new dev.dual.core.workflow.TransitionMetadata("loop", "", true, "", "", "self-test incomplete")),
+                        new EdgeDefinition("implement.self_test_decision", "SELF_TEST_INCOMPLETE",
+                                "gate.human_implementation_repair", dev.dual.core.workflow.EdgeCondition.configEquals(
+                                        "continuation_kind", "HUMAN_REVIEW"),
+                                dev.dual.core.workflow.TransitionMetadata.normal()),
+                        new EdgeDefinition("implement.self_test_decision", "BLOCKED",
+                                "gate.human_implementation_repair"),
+                        new EdgeDefinition("context.implement_claude", "completed",
+                                "implement.self_test_decision"),
+                        new EdgeDefinition("gate.human_implementation_repair", "revise",
+                                "context.implement_claude", null,
+                                new dev.dual.core.workflow.TransitionMetadata("loop", "", true, "", "", "human repair"))
+                )
+        );
+
+        var completePaths = initializedPaths("ws-self-test-complete", definition);
+        var completeDecision = activeNode(completePaths);
+        LedgerTestFixture.ledger().completeAndRoute(completePaths, definition, completeDecision.nodeInstanceId(),
+                NodeStatus.COMPLETED, "SELF_TEST_COMPLETE", List.of("self-test.json"), Map.of());
+        assertEquals("implement.artifact_validation", activeNode(completePaths).nodeDefinitionId());
+
+        var incompletePaths = initializedPaths("ws-self-test-incomplete", definition);
+        var incompleteDecision = activeNode(incompletePaths);
+        LedgerTestFixture.ledger().completeAndRoute(incompletePaths, definition, incompleteDecision.nodeInstanceId(),
+                NodeStatus.COMPLETED, "SELF_TEST_INCOMPLETE", List.of("self-test.json"),
+                Map.of("continuation_kind", "IMPLEMENTATION_REPAIR"));
+        var repair = activeNode(incompletePaths);
+        assertEquals("context.implement_claude", repair.nodeDefinitionId());
+        assertEquals("iter-002", repair.iterationId());
+        var incompleteLedger = LedgerTestFixture.ledger();
+        incompleteLedger.completeAndRoute(incompletePaths, definition, repair.nodeInstanceId(),
+                NodeStatus.COMPLETED, "completed", List.of("implementation.json"), Map.of());
+        var repeatedDecision = activeNode(incompletePaths);
+        incompleteLedger.completeAndRoute(incompletePaths, definition, repeatedDecision.nodeInstanceId(),
+                NodeStatus.COMPLETED, "SELF_TEST_INCOMPLETE", List.of("self-test-2.json"),
+                Map.of("continuation_kind", "IMPLEMENTATION_REPAIR"));
+        assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, incompleteLedger.loadCurrent(incompletePaths).status());
+        var repairGate = activeNode(incompletePaths);
+        assertEquals("gate.human_implementation_repair", repairGate.nodeDefinitionId());
+        assertEquals(List.of("self-test-2.json"), repairGate.inputRefs());
+        assertEquals("revision_limit_reached", repairGate.result().get("reason"));
+        assertEquals("SELF_TEST_INCOMPLETE", repairGate.result().get("revision_limit_original_outcome"));
+        assertEquals(1, repairGate.result().get("max_revisions"));
+        assertEquals(1, repairGate.result().get("current_revision_count"));
+        var repairGateDocument = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules()
+                .readValue(incompletePaths.gateJson(
+                        incompleteLedger.loadCurrent(incompletePaths).openGateIds().getFirst()).toFile(), GateDocument.class);
+        assertEquals("BLOCKED", repairGateDocument.result().get("source_outcome"));
+        var limitedDecision = incompleteLedger.loadNode(incompletePaths, repeatedDecision.nodeInstanceId());
+        assertEquals(NodeStatus.COMPLETED, limitedDecision.status());
+        assertEquals("revision_limit_reached", limitedDecision.result().get("reason"));
+        assertEquals("SELF_TEST_INCOMPLETE", limitedDecision.result().get("revision_limit_original_outcome"));
+        assertTrue(Files.readString(incompletePaths.eventsJsonl()).contains("revision_limit_reached"));
+        var missingRepairNote = assertThrows(IOException.class,
+                () -> incompleteLedger.resolveOpenGate(incompletePaths, definition, "revise", ""));
+        assertTrue(missingRepairNote.getMessage().contains("decision note is required"));
+        incompleteLedger.resolveOpenGate(incompletePaths, definition, "revise",
+                "Repair the product defect proven by the latest self-test.");
+        var authorizedRepair = activeNode(incompletePaths);
+        assertEquals("context.implement_claude", authorizedRepair.nodeDefinitionId());
+        assertEquals("iter-003", authorizedRepair.iterationId());
+        assertEquals(List.of("self-test-2.json"), authorizedRepair.inputRefs());
+
+        var blockedPaths = initializedPaths("ws-self-test-blocked", definition);
+        var blockedDecision = activeNode(blockedPaths);
+        var blockedLedger = LedgerTestFixture.ledger();
+        blockedLedger.completeAndRoute(blockedPaths, definition, blockedDecision.nodeInstanceId(),
+                NodeStatus.COMPLETED, "BLOCKED", List.of("self-test.json"), Map.of());
+        assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, blockedLedger.loadCurrent(blockedPaths).status());
+        var error = assertThrows(IOException.class,
+                () -> blockedLedger.resolveOpenGate(blockedPaths, definition, "revise", ""));
+        assertTrue(error.getMessage().contains("decision note is required"));
+        blockedLedger.resolveOpenGate(blockedPaths, definition, "revise", "Repair the reported test blocker.");
+        assertEquals("context.implement_claude", activeNode(blockedPaths).nodeDefinitionId());
+    }
+
+    @Test
+    void declaredChangeScopeViolationRequiresHumanNoteBeforeRepairIteration() throws Exception {
+        var definition = new WorkflowDefinition(
+                "scope-repair", 1, "implement.artifact_validation",
+                List.of(
+                        new NodeDefinition("implement.artifact_validation", NodeKind.TASK, "artifact.validate",
+                                Map.of("route_scope_violation", true)),
+                        new NodeDefinition("gate.human_implementation_repair", NodeKind.GATE, "human.review",
+                                Map.of("allowed_actions", List.of("revise"),
+                                        "gate_purpose", "implementation_repair")),
+                        new NodeDefinition("context.implement_claude", NodeKind.TASK,
+                                "context.build_package", Map.of())),
+                List.of(
+                        new EdgeDefinition("implement.artifact_validation", "CHANGE_SCOPE_VIOLATION",
+                                "gate.human_implementation_repair"),
+                        new EdgeDefinition("gate.human_implementation_repair", "revise",
+                                "context.implement_claude", null,
+                                new dev.dual.core.workflow.TransitionMetadata(
+                                        "loop", "", true, "", "", "Human authorized implementation repair"))));
+        var paths = initializedPaths("ws-scope-repair", definition);
+        var validation = activeNode(paths);
+        var ledger = LedgerTestFixture.ledger();
+
+        ledger.completeAndRoute(paths, definition, validation.nodeInstanceId(), NodeStatus.COMPLETED,
+                "CHANGE_SCOPE_VIOLATION", List.of("scope-occurrence.json"),
+                Map.of("change_scope_status", "FAIL"));
+
+        assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, ledger.loadCurrent(paths).status());
+        assertEquals("gate.human_implementation_repair", activeNode(paths).nodeDefinitionId());
+        assertThrows(IOException.class, () -> ledger.resolveOpenGate(paths, definition, "revise", ""));
+        ledger.resolveOpenGate(paths, definition, "revise", "Repair only the compiled TaskContract scope.");
+        var repair = activeNode(paths);
+        assertEquals("context.implement_claude", repair.nodeDefinitionId());
+        assertEquals("iter-002", repair.iterationId());
+        assertEquals(List.of("scope-occurrence.json"), repair.inputRefs());
+    }
+
+    @Test
+    void scopeRevisionRequestCannotResolveWrongSourceMissingNoteOrMissingRoute() throws Exception {
+        for (int scenario = 0; scenario < 3; scenario++) {
+            var source = scenario == 0 ? "SELF_TEST_INCOMPLETE" : "CHANGE_SCOPE_VIOLATION";
+            var action = "request_scope_revision";
+            var edges = new java.util.ArrayList<EdgeDefinition>();
+            edges.add(new EdgeDefinition("source", source, "gate.human_implementation_repair"));
+            if (scenario != 2) {
+                edges.add(new EdgeDefinition("gate.human_implementation_repair", action, "next"));
+            }
+            var definition = new WorkflowDefinition("scope-request", 1, "source", List.of(
+                    new NodeDefinition("source", NodeKind.TASK, "noop.task", Map.of()),
+                    new NodeDefinition("gate.human_implementation_repair", NodeKind.GATE, "human.review",
+                            Map.of("gate_purpose", "implementation_repair", "allowed_actions", List.of(action))),
+                    new NodeDefinition("next", NodeKind.TASK, "noop.task", Map.of())), edges);
+            var paths = initializedPaths("ws-request-" + scenario, definition);
+            var ledger = LedgerTestFixture.ledger();
+            ledger.completeAndRoute(paths, definition, activeNode(paths).nodeInstanceId(), NodeStatus.COMPLETED,
+                    source, List.of(), Map.of());
+            var gate = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+                    .readValue(paths.gateJson("gate-" + activeNode(paths).nodeInstanceId()).toFile(), GateDocument.class);
+            assertEquals(scenario == 0 ? List.of() : List.of(action), gate.allowedActions());
+            var before = persistedState(paths);
+            var note = scenario == 1 ? "" : "Please retain the helper.";
+            var failure = assertThrows(IOException.class, () -> ledger.resolveOpenGate(paths, definition, action,
+                    note));
+            assertTrue(failure.getMessage().contains("scope revision"));
+            assertEquals(before, persistedState(paths), "rejection must precede every durable write");
+        }
+    }
+
+    private Map<String, String> persistedState(WorkstreamPaths paths) throws IOException {
+        var snapshot = new java.util.TreeMap<String, String>();
+        try (var files = Files.walk(paths.workstreamDir())) {
+            for (var path : files.filter(Files::isRegularFile).toList()) {
+                snapshot.put(paths.workstreamDir().relativize(path).toString(), Files.readString(path));
+            }
+        }
+        return snapshot;
+    }
+
+    @Test
+    void ambiguousRevisionLimitBlockedRoutesFailClosed() throws Exception {
+        var definition = new WorkflowDefinition(
+                "ambiguous-revision-limit",
+                1,
+                "decision",
+                List.of(
+                        new NodeDefinition("decision", NodeKind.DECISION, "review.decision", Map.of("max_revisions", 0)),
+                        new NodeDefinition("repair", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.repair.one", NodeKind.GATE, "human.review", Map.of()),
+                        new NodeDefinition("gate.repair.two", NodeKind.GATE, "human.review", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("decision", "REVISE", "repair", null,
+                                new dev.dual.core.workflow.TransitionMetadata("loop", "", true, "", "", "repair")),
+                        new EdgeDefinition("decision", "BLOCKED", "gate.repair.one"),
+                        new EdgeDefinition("decision", "BLOCKED", "gate.repair.two")
+                )
+        );
+        var paths = initializedPaths("ws-ambiguous-limit-gate", definition);
+        var decision = activeNode(paths);
+
+        var error = assertThrows(IOException.class,
+                () -> LedgerTestFixture.ledger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
+                        NodeStatus.COMPLETED, "REVISE", List.of("evidence.json"), Map.of()));
+
+        assertTrue(error.getMessage().contains("exactly one human gate"));
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    @Test
+    void revisionLimitBlockedRouteToNonGateFailsClosed() throws Exception {
+        var definition = revisionLimitDefinition(
+                new NodeDefinition("blocked.target", NodeKind.TASK, "noop.task", Map.of()),
+                new EdgeDefinition("decision", "BLOCKED", "blocked.target")
+        );
+        var paths = initializedPaths("ws-limit-non-gate", definition);
+        var decision = activeNode(paths);
+
+        var error = assertThrows(IOException.class,
+                () -> LedgerTestFixture.ledger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
+                        NodeStatus.COMPLETED, "REVISE", List.of("evidence.json"), Map.of()));
+
+        assertTrue(error.getMessage().contains("exactly one human gate"));
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    @Test
+    void revisionLimitBlockedGateCannotStartAnotherIteration() throws Exception {
+        var definition = revisionLimitDefinition(
+                new NodeDefinition("gate.repair", NodeKind.GATE, "human.review", Map.of()),
+                new EdgeDefinition("decision", "BLOCKED", "gate.repair", null,
+                        new dev.dual.core.workflow.TransitionMetadata("loop", "", true, "", "", "invalid gate loop"))
+        );
+        var paths = initializedPaths("ws-limit-loop-gate", definition);
+        var decision = activeNode(paths);
+
+        var error = assertThrows(IOException.class,
+                () -> LedgerTestFixture.ledger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
+                        NodeStatus.COMPLETED, "REVISE", List.of("evidence.json"), Map.of()));
+
+        assertTrue(error.getMessage().contains("must not start an iteration"));
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    private WorkflowDefinition revisionLimitDefinition(NodeDefinition blockedTarget, EdgeDefinition blockedEdge) {
+        return new WorkflowDefinition(
+                "revision-limit-declared-blocked-route",
+                1,
+                "decision",
+                List.of(
+                        new NodeDefinition("decision", NodeKind.DECISION, "review.decision", Map.of("max_revisions", 0)),
+                        new NodeDefinition("repair", NodeKind.TASK, "noop.task", Map.of()),
+                        blockedTarget
+                ),
+                List.of(
+                        new EdgeDefinition("decision", "REVISE", "repair", null,
+                                new dev.dual.core.workflow.TransitionMetadata("loop", "", true, "", "", "repair")),
+                        blockedEdge
+                )
+        );
+    }
+
+    @Test
+    void revisionBudgetCountsExactRepairTargetInsteadOfSharedStage() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-exact-repair-target"));
+        Files.createDirectories(paths.iterationsDir());
+        new AtomicJsonWriter().write(paths.iterationJson("iter-001"),
+                WorkflowIterationDocument.initial("context.intake_claude_brainstorm", Instant.now()));
+        new AtomicJsonWriter().write(paths.iterationJson("iter-002"), WorkflowIterationDocument.revision(
+                "iter-002", 2, "iter-001", "node-intake", "NEEDS_REVISION",
+                "context.intake_claude_brainstorm", "intake repair", Instant.now()));
+        new AtomicJsonWriter().write(paths.iterationJson("iter-003"), WorkflowIterationDocument.revision(
+                "iter-003", 3, "iter-002", "node-self-test", "SELF_TEST_INCOMPLETE",
+                "context.implement_claude", "implementation repair", Instant.now()));
+
+        var writer = new AtomicJsonWriter();
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules();
+        var tracker = new RevisionTracker(writer, mapper, new LedgerEventLog(writer, mapper));
+
+        writeCompletedTriggerNode(paths, "node-intake", "intake.decision", "iter-001");
+        writeCompletedTriggerNode(paths, "node-self-test", "implement.self_test_decision", "iter-002");
+
+        assertEquals(1, tracker.revisionCount(
+                paths, "intake.decision", "context.intake_claude_brainstorm"));
+        assertEquals(1, tracker.revisionCount(
+                paths, "implement.self_test_decision", "context.implement_claude"));
+        assertEquals(0, tracker.revisionCount(
+                paths, "acceptance.decision", "context.implement_claude"));
+    }
+
+    @Test
+    void revisionBudgetSeparatesDifferentOwnersOfTheSameRepairTarget() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-repair-owner-budget"));
+        Files.createDirectories(paths.iterationsDir());
+        new AtomicJsonWriter().write(paths.iterationJson("iter-001"),
+                WorkflowIterationDocument.initial("context.intake_claude_brainstorm", Instant.now()));
+        new AtomicJsonWriter().write(paths.iterationJson("iter-002"), WorkflowIterationDocument.revision(
+                "iter-002", 2, "iter-001", "node-self-test", "SELF_TEST_INCOMPLETE",
+                "context.implement_claude", "self-test repair", Instant.now()));
+        new AtomicJsonWriter().write(paths.iterationJson("iter-003"), WorkflowIterationDocument.revision(
+                "iter-003", 3, "iter-002", "node-acceptance", "revise",
+                "context.implement_claude", "acceptance repair", Instant.now()));
+        writeCompletedTriggerNode(paths, "node-self-test", "implement.self_test_decision", "iter-001");
+        writeCompletedTriggerNode(paths, "node-acceptance", "gate.human_acceptance", "iter-002");
+
+        var writer = new AtomicJsonWriter();
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules();
+        var tracker = new RevisionTracker(writer, mapper, new LedgerEventLog(writer, mapper));
+
+        assertEquals(1, tracker.revisionCount(
+                paths, "implement.self_test_decision", "context.implement_claude"));
+        assertEquals(1, tracker.revisionCount(
+                paths, "gate.human_acceptance", "context.implement_claude"));
+    }
+
+    @Test
+    void acceptanceRejectRoutesToClassifierBeforeStartingRepairIteration() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-acceptance-reject"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle-full",
+                3,
+                "acceptance.decision",
+                List.of(
+                        new NodeDefinition("acceptance.decision", NodeKind.DECISION, "review.decision", Map.of("max_revisions", 1)),
+                        new NodeDefinition("acceptance.classify_failure", NodeKind.TASK, "acceptance.failure_classify", Map.of()),
+                        new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("acceptance.decision", "REJECT", "acceptance.classify_failure"),
+                        new EdgeDefinition("acceptance.classify_failure", "REJECT_IMPLEMENTATION_BUG", "context.implement_claude")
+                )
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-acceptance-reject", definition);
+        var decision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED, "REJECT", List.of("review.md"), Map.of(
+                "decision", "REJECT",
+                "summary", "README has a factual error."
+        ));
+
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.RUNNING, current.status());
+        var classifier = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        assertEquals("acceptance.classify_failure", classifier.nodeDefinitionId());
+        assertEquals("iter-001", classifier.iterationId());
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+
+        ledger.completeAndRoute(paths, definition, classifier.nodeInstanceId(), NodeStatus.COMPLETED,
+                "REJECT_IMPLEMENTATION_BUG", List.of("failure-classification.json"), Map.of(
+                        "review_decision", "REJECT",
+                        "category", "IMPLEMENTATION_BUG"
+                ));
+
+        var timeline = Files.readString(paths.timelineJson());
+        assertTrue(timeline.contains("\"displayName\" : \"acceptance.classify_failure\""));
+
+        current = ledger.loadCurrent(paths);
+        var repair = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        assertEquals("context.implement_claude", repair.nodeDefinitionId());
+        assertEquals("iter-002", repair.iterationId());
+        assertTrue(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    @Test
+    void acceptanceWithNotesDisplaysClassifierAsNotesClassification() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-acceptance-notes"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle-full",
+                3,
+                "acceptance.decision",
+                List.of(
+                        new NodeDefinition("acceptance.decision", NodeKind.DECISION, "review.decision", Map.of()),
+                        new NodeDefinition("acceptance.classify_failure", NodeKind.TASK, "acceptance.failure_classify", Map.of()),
+                        new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("acceptance.decision", "ACCEPT_WITH_NOTES", "acceptance.classify_failure"),
+                        new EdgeDefinition("acceptance.classify_failure", "NOTED_REVIEW_NOISE", "acceptance.generate_final_report")
+                )
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-acceptance-notes", definition);
+        var decision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED,
+                "ACCEPT_WITH_NOTES", List.of("review.md"), Map.of(
+                        "decision", "ACCEPT_WITH_NOTES",
+                        "summary", "Accepted with non-blocking notes."
+                ));
+
+        var classifier = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, classifier.nodeInstanceId(), NodeStatus.COMPLETED,
+                "NOTED_REVIEW_NOISE", List.of("failure-classification.json"), Map.of(
+                        "review_decision", "ACCEPT_WITH_NOTES",
+                        "category", "REVIEW_NOISE"
+                ));
+
+        var timeline = Files.readString(paths.timelineJson());
+        assertTrue(timeline.contains("\"nodeDefinitionId\" : \"acceptance.classify_failure\""));
+        assertTrue(timeline.contains("\"displayName\" : \"acceptance.classify_notes\""));
+    }
+
+    @Test
+    void finalNextStageGateRejectsApproveAndCompleteEndsWorkflow() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-next-stage"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "stage.generate_next_prompt",
+                List.of(
+                        new NodeDefinition("stage.generate_next_prompt", NodeKind.TASK, "prompt.generate_next_stage", Map.of()),
+                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("revise", "complete"),
+                                "max_revisions", 1
+                        )),
+                        new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("stage.generate_next_prompt", "completed", "gate.human_next_stage_approval")
+                )
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-next-stage", definition);
+        var current = ledger.loadCurrent(paths);
+        var generator = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        var nextPrompt = ".agent/workstreams/ws-next-stage/artifacts/next-stage/next-stage-prompt.md";
+        ledger.completeAndRoute(paths, definition, generator.nodeInstanceId(), NodeStatus.COMPLETED, "completed", List.of(nextPrompt), Map.of(
+                "prompt_path", nextPrompt
+        ));
+
+        var error = assertThrows(IOException.class,
+                () -> ledger.resolveOpenGate(paths, definition, "approved", "continue to next stage"));
+        assertTrue(error.getMessage().contains("final next-stage gate cannot be approved"));
+
+        ledger.resolveOpenGate(paths, definition, "complete", "finish workstream");
+
+        var routed = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.COMPLETED, routed.status());
+        assertTrue(routed.activeNodeInstanceIds().isEmpty());
+        assertTrue(routed.openGateIds().isEmpty());
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+    }
+
+    @Test
+    void closesMistakenIterationStartedByHistoricalFinalGateApproval() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-close-mistaken"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "before.final_gate",
+                List.of(
+                        new NodeDefinition("before.final_gate", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of("max_revisions", 1)),
+                        new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("intake.decision", NodeKind.DECISION, "review.decision", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("before.final_gate", "completed", "gate.human_next_stage_approval"),
+                        new EdgeDefinition("gate.human_next_stage_approval", "revise", "intake.claude_brainstorm"),
+                        new EdgeDefinition("intake.claude_brainstorm", "completed", "intake.decision")
+                )
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-close-mistaken", definition);
+        var beforeGate = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, beforeGate, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+        var gate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.resolveOpenGate(paths, definition, "revise", "historical bad route");
+        new AtomicJsonWriter().write(paths.iterationJson("iter-002"), WorkflowIterationDocument.revision(
+                "iter-002",
+                2,
+                "iter-001",
+                gate.nodeInstanceId(),
+                "approved",
+                "intake.claude_brainstorm",
+                "Historical final gate approval opened this iteration.",
+                Instant.now()
+        ));
+
+        var intake = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, intake.nodeInstanceId(), NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+        var decision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.BLOCKED, "revision_limit_reached", List.of(), Map.of(
+                "reason", "Accidental next iteration should be closed."
+        ));
+
+        ledger.closeMistakenIteration(paths, "iter-003 already completed");
+
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.COMPLETED, current.status());
+        assertTrue(current.activeNodeInstanceIds().isEmpty());
+        assertTrue(current.openGateIds().isEmpty());
+        var skipped = ledger.loadNode(paths, decision.nodeInstanceId());
+        assertEquals(NodeStatus.SKIPPED, skipped.status());
+        assertEquals(true, skipped.result().get("closed_as_mistaken_iteration"));
+        var events = Files.readString(paths.eventsJsonl());
+        assertTrue(events.contains("mistaken_iteration_closed"));
+        assertTrue(events.contains("workflow_completed"));
+        assertTrue(events.contains("close_mistaken_iteration"));
+    }
+
+    @Test
+    void rejectDecisionStartsNextWorkflowIteration() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reject"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "acceptance.decision",
+                List.of(
+                        new NodeDefinition("acceptance.decision", NodeKind.DECISION, "review.decision", Map.of()),
+                        new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of())
+                ),
+                List.of(new EdgeDefinition("acceptance.decision", "REJECT", "context.implement_claude"))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-reject", definition);
+        var current = ledger.loadCurrent(paths);
+        var decision = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED, "REJECT", List.of(), Map.of(
+                "decision", "REJECT",
+                "summary", "Acceptance evidence is incomplete."
+        ));
+
+        var routed = ledger.loadCurrent(paths);
+        var next = ledger.loadNode(paths, routed.activeNodeInstanceIds().get(0));
+        assertEquals("context.implement_claude", next.nodeDefinitionId());
+        assertEquals("iter-002", next.iterationId());
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("\"triggerAction\" : \"REJECT\""));
+        assertTrue(Files.readString(paths.iterationJson("iter-002")).contains("Acceptance evidence is incomplete."));
+    }
+
+    @Test
+    void completesWorkflowWhenOutcomeHasNoEdge() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-complete"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "only",
+                List.of(new NodeDefinition("only", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-complete", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+
+        var completed = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.COMPLETED, completed.status());
+        assertTrue(completed.activeNodeInstanceIds().isEmpty());
+        assertTrue(completed.openGateIds().isEmpty());
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("workflow_completed"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains(completed.lastEventId()));
+        assertTrue(Files.isRegularFile(paths.completionAuditJson()));
+        var audit = Files.readString(paths.completionAuditJson());
+        assertTrue(audit.contains("\"lifecycleState\" : \"ENDED\""));
+        assertTrue(audit.contains("\"workflowStatus\" : \"COMPLETED\""));
+        assertTrue(audit.contains("\"finalNodeDefinitionId\" : \"only\""));
+        assertFalse(audit.contains("handoff.json is missing"));
+        assertFalse(audit.contains("next-stage prompt is missing"));
+    }
+
+    @Test
+    void terminalAcceptanceProfileCompletesWithoutNextStageArtifacts() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-terminal-delivery"));
+        var reportsDir = paths.workstreamDir().resolve("reports");
+        Files.createDirectories(reportsDir);
+        Files.writeString(reportsDir.resolve("latest-final-report.md"), """
+                ## User Request
+                done
+                ## Verification Evidence
+                verified
+                ## Acceptance Summary
+                accepted
+                ## Git Evidence
+                scoped
+                """);
+        var definition = new WorkflowDefinition(
+                "terminal-delivery-experiment",
+                1,
+                "before.acceptance",
+                List.of(
+                        new NodeDefinition("before.acceptance", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_acceptance", NodeKind.GATE, "human.review", Map.of(
+                                "terminal_gate", true,
+                                "allowed_actions", List.of("approve", "revise"),
+                                "gate_purpose", "acceptance"
+                        ))),
+                List.of(new EdgeDefinition("before.acceptance", "completed", "gate.human_acceptance"))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-terminal-delivery", definition);
+        var beforeGate = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, beforeGate, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+        ledger.resolveOpenGate(paths, definition, "approve", "accepted delivery");
+
+        var completed = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.COMPLETED, completed.status());
+        assertTrue(completed.activeNodeInstanceIds().isEmpty());
+        assertFalse(Files.exists(paths.workstreamDir().resolve("artifacts/next-stage/handoff.json")));
+        var audit = Files.readString(paths.completionAuditJson());
+        assertTrue(audit.contains("\"status\" : \"ready\""), audit);
+        assertTrue(audit.contains("\"gaps\" : [ ]"), audit);
+        assertFalse(audit.contains("handoff.json is missing"), audit);
+        assertFalse(audit.contains("next-stage prompt is missing"), audit);
+    }
+
+    @Test
+    void definitionThatDeclaresNextStageArtifactsStillAuditsThem() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-next-stage-required"));
+        var reportsDir = paths.workstreamDir().resolve("reports");
+        Files.createDirectories(reportsDir);
+        Files.writeString(reportsDir.resolve("latest-final-report.md"), """
+                ## User Request
+                done
+                ## Verification Evidence
+                verified
+                ## Acceptance Summary
+                accepted
+                ## Git Evidence
+                scoped
+                """);
+        var definition = new WorkflowDefinition(
+                "next-stage-required",
+                1,
+                "only",
+                List.of(
+                        new NodeDefinition("only", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("handoff", NodeKind.TASK, "acpx.agent_run", Map.of(
+                                "expected_artifact", "stage_handoff"
+                        )),
+                        new NodeDefinition("next-prompt", NodeKind.TASK, "prompt.generate_next_stage", Map.of())
+                ),
+                List.of()
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-next-stage-required", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED,
+                "completed", List.of(), Map.of());
+
+        var audit = Files.readString(paths.completionAuditJson());
+        assertTrue(audit.contains("\"status\" : \"needs_review\""), audit);
+        assertTrue(audit.contains("handoff.json is missing"), audit);
+        assertTrue(audit.contains("next-stage prompt is missing"), audit);
+    }
+
+    @Test
+    void allowedGateActionWithoutEdgeCompletesWorkflow() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-gate-complete"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "before.final_gate",
+                List.of(
+                        new NodeDefinition("before.final_gate", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("revise", "complete")
+                        ))),
+                List.of(new EdgeDefinition("before.final_gate", "completed", "gate.human_next_stage_approval"))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-gate-complete", definition);
+        var beforeGate = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, beforeGate, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+        var gateNodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+
+        ledger.resolveOpenGate(paths, definition, "complete", "all stages accepted");
+
+        var completed = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.COMPLETED, completed.status());
+        assertTrue(completed.activeNodeInstanceIds().isEmpty());
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("workflow_completed"));
+        assertTrue(Files.readString(paths.completionAuditJson()).contains("\"finalOutcome\" : \"complete\""));
+        var node = ledger.loadNode(paths, gateNodeId);
+        assertEquals("complete", node.result().get("human_action"));
+    }
+
+    @Test
+    void gateDocumentUsesConfiguredAllowedActions() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-gate-actions"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("gate.human_next_stage_approval", NodeKind.GATE, "human.review", Map.of(
+                                "allowed_actions", List.of("revise", "complete")
+                        ))
+                ),
+                List.of(new EdgeDefinition("first", "completed", "gate.human_next_stage_approval"))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-gate-actions", definition);
+        var current = ledger.loadCurrent(paths);
+        var first = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED, "completed", List.of(), Map.of());
+
+        var routed = ledger.loadCurrent(paths);
+        var gateJson = Files.readString(paths.gateJson(routed.openGateIds().get(0)));
+        assertTrue(gateJson.contains("\"complete\""));
+    }
+
+    @Test
+    void failedNodeStopsWorkflowWithoutRoutingNextNode() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-failed"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("second", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(new EdgeDefinition("first", "completed", "second"))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-failed", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "completed", List.of(), Map.of("exit_code", 4));
+
+        var stopped = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, stopped.status());
+        assertEquals(List.of(node.nodeInstanceId()), stopped.activeNodeInstanceIds());
+        assertEquals(List.of("recovery-" + node.nodeInstanceId()), stopped.openGateIds());
+        assertTrue(Files.exists(paths.gateJson("recovery-" + node.nodeInstanceId())));
+        assertFalse(Files.exists(paths.nodeJson("node-second-002")));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("node_failed"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("recovery_gate_id"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains(stopped.lastEventId()));
+        assertFalse(Files.exists(paths.goalSatisfactionJson()));
+    }
+
+    @Test
+    void failedNodeWritesCurrentFailureSummary() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-failure-summary"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "design.claude",
+                List.of(new NodeDefinition("design.claude", NodeKind.TASK, "agent.acpx", Map.of())),
+                List.of()
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-failure-summary", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
+                "RECOVERABLE_RATE_LIMIT",
+                List.of(".agent/workstreams/ws-failure-summary/runs/run-001/outputs/design.stderr.log"),
+                Map.of(
+                        "run_id", "run-001",
+                        "exit_code", 4,
+                        "agent", "claude",
+                        "session", "claude-main",
+                        "acpx_failure.reason", "RECOVERABLE_RATE_LIMIT",
+                        "acpx_failure.recoverable", true
+                ));
+
+        var summary = Files.readString(paths.currentFailureMarkdown());
+        assertTrue(summary.contains("# Current Failure"));
+        assertTrue(summary.contains("design.claude"));
+        assertTrue(summary.contains(node.nodeInstanceId()));
+        assertTrue(summary.contains("RECOVERABLE_RATE_LIMIT"));
+        assertTrue(summary.contains("design.stderr.log"));
+        assertTrue(summary.contains("dualctl retry --workdir " + tempDir.toAbsolutePath().normalize()));
+        assertFalse(summary.contains("--workstream-id"));
+    }
+
+    @Test
+    void modelMismatchFailureSummarySuggestsRebuildingAcpxSession() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-model-mismatch-summary"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "intake.claude",
+                List.of(new NodeDefinition("intake.claude", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of()
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-model-mismatch-summary", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
+                "RECOVERABLE_AGENT_MODEL_MISMATCH",
+                List.of(".agent/workstreams/ws-model-mismatch-summary/runs/run-001/outputs/intake.stderr.log"),
+                Map.of(
+                        "run_id", "run-001",
+                        "exit_code", 1,
+                        "agent", "claude",
+                        "session", "claude-main",
+                        "acpx_failure.reason", "RECOVERABLE_AGENT_MODEL_MISMATCH",
+                        "acpx_failure.recoverable", true
+                ));
+
+        var summary = Files.readString(paths.currentFailureMarkdown());
+        assertTrue(summary.contains("RECOVERABLE_AGENT_MODEL_MISMATCH"));
+        assertTrue(summary.contains("acpx claude sessions close claude-main"));
+        assertTrue(summary.contains("acpx claude sessions new --name claude-main"));
+        assertFalse(summary.contains("quota, reconnect, or session state"));
+    }
+
+    @Test
+    void reconnectFailureSummarySuggestsRebuildingAcpxSession() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reconnect-summary"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "intake.claude",
+                List.of(new NodeDefinition("intake.claude", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of()
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-reconnect-summary", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
+                "RECOVERABLE_AGENT_RECONNECT",
+                List.of(".agent/workstreams/ws-reconnect-summary/runs/run-001/outputs/intake.stderr.log"),
+                Map.of(
+                        "run_id", "run-001",
+                        "exit_code", 0,
+                        "agent", "claude",
+                        "session", "claude-main",
+                        "acpx_failure.reason", "RECOVERABLE_AGENT_RECONNECT",
+                        "acpx_failure.recoverable", true
+                ));
+
+        var summary = Files.readString(paths.currentFailureMarkdown());
+        assertTrue(summary.contains("RECOVERABLE_AGENT_RECONNECT"));
+        assertTrue(summary.contains("The acpx agent session needs reconnect"));
+        assertTrue(summary.contains("acpx claude sessions close claude-main"));
+        assertTrue(summary.contains("acpx claude sessions new --name claude-main"));
+        assertFalse(summary.contains("quota, reconnect, or session state"));
+    }
+
+    @Test
+    void failedNodeCurrentFailureSummaryHighlightsContractDiagnostic() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-contract-failure-summary"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "acceptance.codex",
+                List.of(new NodeDefinition("acceptance.codex", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of()
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-contract-failure-summary", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
+                "AGENT_OUTPUT_CONTRACT_VIOLATION",
+                List.of(
+                        ".agent/workstreams/ws-contract-failure-summary/artifacts/contract-failures/"
+                                + node.nodeInstanceId() + ".md"
+                ),
+                Map.of(
+                        "reason", "AGENT_OUTPUT_CONTRACT_VIOLATION",
+                        "contract_failure_diagnostic_ref",
+                        ".agent/workstreams/ws-contract-failure-summary/artifacts/contract-failures/"
+                                + node.nodeInstanceId() + ".json",
+                        "contract_failure_diagnostic_markdown_ref",
+                        ".agent/workstreams/ws-contract-failure-summary/artifacts/contract-failures/"
+                                + node.nodeInstanceId() + ".md",
+                        "parse_error", Map.of(
+                                "code", "STRUCTURED_ARTIFACT_MISSING",
+                                "message", "Required structured artifact missing: acceptance_review",
+                                "details", Map.of("required_artifact_type", "acceptance_review")
+                        )
+                ));
+
+        var summary = Files.readString(paths.currentFailureMarkdown());
+        assertTrue(summary.contains("## Contract Failure Diagnostic"));
+        assertTrue(summary.contains("STRUCTURED_ARTIFACT_MISSING"));
+        assertTrue(summary.contains("Required structured artifact missing: acceptance_review"));
+        assertTrue(summary.contains("required_artifact_type: acceptance_review"));
+        assertTrue(summary.contains(node.nodeInstanceId() + ".json"));
+        assertTrue(summary.contains(node.nodeInstanceId() + ".md"));
+    }
+
+    @Test
+    void invalidControlOutputOpensControlRepairGate() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-control-repair"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "design.decision",
+                List.of(new NodeDefinition("design.decision", NodeKind.DECISION, "review.decision", Map.of())),
+                List.of()
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-control-repair", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "INVALID_DUAL_CONTROL", List.of(), Map.of(
+                "reason", "INVALID_DUAL_CONTROL",
+                "message", "dual-control missing required key: decision",
+                "input_refs", List.of("runs/run-1/outputs/design-codex-review.md")
+        ));
+
+        var stopped = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, stopped.status());
+        assertEquals(List.of("recovery-" + node.nodeInstanceId()), stopped.openGateIds());
+        var gateJson = Files.readString(paths.gateJson(stopped.openGateIds().get(0)));
+        assertTrue(gateJson.contains("\"gateType\" : \"control.repair\""));
+        assertTrue(gateJson.contains("\"reason\" : \"INVALID_DUAL_CONTROL\""));
+        assertTrue(gateJson.contains("dual-control missing required key"));
+        var events = Files.readString(paths.eventsJsonl());
+        assertTrue(events.contains("control_repair_required"));
+        assertTrue(events.contains("runs/run-1/outputs/design-codex-review.md"));
+    }
+
+    @Test
+    void retryActiveFailedNodeSetsItReadyAgain() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-retry"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-retry", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "RECOVERABLE_AGENT_RECONNECT", List.of("stderr.log"), Map.of("recoverable", true));
+
+        ledger.retryActiveNode(paths, "session reconnected");
+
+        var retryCurrent = ledger.loadCurrent(paths);
+        var retryNode = ledger.loadNode(paths, retryCurrent.activeNodeInstanceIds().get(0));
+        assertEquals(WorkflowStatus.RUNNING, retryCurrent.status());
+        assertEquals(NodeStatus.READY, retryNode.status());
+        assertTrue(retryCurrent.openGateIds().isEmpty());
+        assertEquals("iter-001", retryNode.iterationId());
+        assertFalse(Files.exists(paths.iterationJson("iter-002")));
+        assertTrue(retryNode.outputRefs().isEmpty());
+        assertEquals("FAILED", retryNode.result().get("retry_of_status"));
+        assertFalse(retryNode.result().containsKey("permission_approval"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("node_retry_requested"));
+    }
+
+    @Test
+    void publicWebSearchApprovalRequiresExactEscalationAndCreatesOneRetryGrant() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-websearch-approval"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "design.claude_design",
+                List.of(new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of()
+        );
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-websearch-approval", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
+        var runPath = paths.runsDir().resolve("run-websearch").resolve("run.json");
+        Files.createDirectories(runPath.getParent());
+        writePermissionEscalationRun(runPath, "WebFetch");
+        var runRef = tempDir.relativize(runPath).toString();
+        ledger.completeAndRoute(
+                paths,
+                definition,
+                node.nodeInstanceId(),
+                NodeStatus.FAILED,
+                "failed",
+                List.of(runRef),
+                permissionBlockedResult(runRef)
+        );
+
+        assertThrows(IOException.class,
+                () -> ledger.approvePublicWebSearch(paths, "public dependency lookup", false));
+        assertThrows(IOException.class,
+                () -> ledger.approvePublicWebSearch(paths, "", true));
+        assertThrows(IOException.class,
+                () -> ledger.approvePublicWebSearch(paths, "public dependency lookup", true));
+
+        writePermissionEscalationRun(runPath, "WebSearch");
+        ledger.approvePublicWebSearch(paths, "public dependency lookup", true);
+
+        var approvedCurrent = ledger.loadCurrent(paths);
+        var approvedNode = ledger.loadNode(paths, approvedCurrent.activeNodeInstanceIds().getFirst());
+        assertEquals(WorkflowStatus.RUNNING, approvedCurrent.status());
+        assertEquals(NodeStatus.READY, approvedNode.status());
+        var approval = (Map<?, ?>) approvedNode.result().get("permission_approval");
+        assertEquals("PUBLIC_WEBSEARCH", approval.get("type"));
+        assertEquals("WebSearch", approval.get("tool_name"));
+        assertEquals("fetch", approval.get("tool_kind"));
+        assertEquals(Boolean.TRUE, approval.get("public_repository_attested"));
+        assertTrue(approval.get("source_query_sha256").toString().matches("[0-9a-f]{64}"));
+        var events = Files.readString(paths.eventsJsonl());
+        assertTrue(events.contains("public_websearch_approved"));
+        assertTrue(events.contains("permission_approval"));
+        assertTrue(events.contains("source_query_sha256"));
+
+        ledger.completeAndRoute(
+                paths,
+                definition,
+                approvedNode.nodeInstanceId(),
+                NodeStatus.FAILED,
+                "failed",
+                List.of(runRef),
+                permissionBlockedResult(runRef)
+        );
+        ledger.retryActiveNode(paths, "retry without a second human approval");
+        var nextRetry = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        assertFalse(nextRetry.result().containsKey("permission_approval"),
+                "the one-retry WebSearch grant must be consumed by the completed execution");
+    }
+
+    @Test
+    void publicWebSearchApprovalCannotBypassTheCurrentRecoveryAssessment() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-websearch-auth-failure"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle", 1, "design.claude_design",
+                List.of(new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of())),
+                List.of());
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-websearch-auth-failure", definition);
+        var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        var runPath = paths.runsDir().resolve("run-websearch").resolve("run.json");
+        Files.createDirectories(runPath.getParent());
+        writePermissionEscalationRun(runPath, "WebSearch");
+        var runRef = tempDir.relativize(runPath).toString();
+        ledger.completeAndRoute(
+                paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "failed", List.of(runRef),
+                Map.of(
+                        "run_metadata", runRef,
+                        "agent_execution_outcome", Map.of(
+                                "status", "AUTH_FAILED",
+                                "primaryReason", "authentication_failed",
+                                "recoveryCategory", "AUTH_FAILED",
+                                "retryPolicy", "MANUAL_ONLY",
+                                "operatorMessage", "Authentication failed."
+                        )));
+
+        assertThrows(IOException.class,
+                () -> ledger.approvePublicWebSearch(paths, "public dependency lookup", true));
+    }
+
+    private void writePermissionEscalationRun(Path runPath, String toolName) throws Exception {
+        Files.writeString(runPath, """
+                {
+                  "executionTimeline": [{
+                    "kind": "permission_decision",
+                    "details": {
+                      "authorityDisposition": "ESCALATION_REQUIRED",
+                      "disposition": "DENIED",
+                      "toolCallId": "call-websearch-1",
+                      "toolKind": "fetch",
+                      "toolName": "%s",
+                      "title": "Mailpit latest stable Docker tag",
+                      "resource": "Mailpit latest stable Docker tag"
+                    }
+                  }]
+                }
+                """.formatted(toolName));
+    }
+
+    private Map<String, Object> permissionBlockedResult(String runRef) {
+        return Map.of(
+                "run_metadata", runRef,
+                "agent_execution_outcome", Map.of(
+                        "status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "permission_blocked",
+                        "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
+                        "retryPolicy", "MANUAL_ONLY",
+                        "operatorMessage", "WebSearch requires approval."
+                )
+        );
+    }
+
+    @Test
+    void replayClassificationCompensatesOnlyTheLineageBoundMisroute() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-replay-classification"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "acceptance.classify_failure",
+                List.of(
+                        new NodeDefinition(
+                                "acceptance.classify_failure",
+                                NodeKind.DECISION,
+                                "acceptance.failure_classify",
+                                Map.of()
+                        ),
+                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())
+                ),
+                List.of(new EdgeDefinition(
+                        "acceptance.classify_failure",
+                        "REJECT_CONTRACT_GAP",
+                        "contract.compile",
+                        EdgeCondition.unconditional(),
+                        TransitionMetadata.loop("stale classification")
+                ))
+        );
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-replay-classification", definition);
+        var classifier = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        var classificationRef = ".agent/workstreams/ws-replay-classification/artifacts/failure-classification.json";
+        ledger.completeAndRoute(
+                paths,
+                definition,
+                classifier.nodeInstanceId(),
+                NodeStatus.COMPLETED,
+                "REJECT_CONTRACT_GAP",
+                List.of(classificationRef),
+                Map.of("category", "CONTRACT_GAP")
+        );
+        var compile = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        ledger.completeAndRoute(
+                paths,
+                definition,
+                compile.nodeInstanceId(),
+                NodeStatus.FAILED,
+                "TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING",
+                List.of(),
+                Map.of("reason", "TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING")
+        );
+
+        ledger.replayDeterministicClassification(paths, "verification_remediation owner corrected");
+
+        var replayCurrent = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.RUNNING, replayCurrent.status());
+        assertEquals(List.of(classifier.nodeInstanceId()), replayCurrent.activeNodeInstanceIds());
+        assertTrue(replayCurrent.openGateIds().isEmpty());
+        var replayClassifier = ledger.loadNode(paths, classifier.nodeInstanceId());
+        assertEquals(NodeStatus.READY, replayClassifier.status());
+        assertEquals(classifier.inputRefs(), replayClassifier.inputRefs());
+        assertTrue(replayClassifier.outputRefs().isEmpty());
+        assertEquals(compile.nodeInstanceId(), replayClassifier.result().get("superseded_node_instance_id"));
+        var skippedCompile = ledger.loadNode(paths, compile.nodeInstanceId());
+        assertEquals(NodeStatus.SKIPPED, skippedCompile.status());
+        assertEquals(true, skippedCompile.result().get("classification_replay_compensated"));
+        var recoveryGate = Files.readString(paths.gateJson("recovery-" + compile.nodeInstanceId()));
+        assertTrue(recoveryGate.contains("\"status\" : \"resolved\""));
+        assertTrue(recoveryGate.contains("replay_classification"));
+        assertTrue(Files.readString(paths.eventsJsonl())
+                .contains("deterministic_classification_replay_requested"));
+    }
+
+    @Test
+    void replayClassificationRejectsAnUnrelatedRecoveryFailure() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-replay-classification-reject"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "contract.compile",
+                List.of(new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())),
+                List.of()
+        );
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-replay-classification-reject", definition);
+        var compile = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        ledger.completeAndRoute(
+                paths,
+                definition,
+                compile.nodeInstanceId(),
+                NodeStatus.FAILED,
+                "IO_FAILURE",
+                List.of(),
+                Map.of("reason", "IO_FAILURE")
+        );
+
+        var error = assertThrows(IOException.class,
+                () -> ledger.replayDeterministicClassification(paths, "not a classifier misroute"));
+
+        assertTrue(error.getMessage().contains("not a replayable classification misroute"));
+        assertEquals(NodeStatus.FAILED, ledger.loadNode(paths, compile.nodeInstanceId()).status());
+    }
+
+    @Test
+    void staleRunningNodeMovesToRecoveryWhenPidIsGone() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-stale-running"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-stale-running", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        ledger.markRunning(paths, node.nodeInstanceId(), Long.MAX_VALUE);
+
+        ledger.recoverStaleRunningNode(paths, "agent process disappeared");
+
+        var recovered = ledger.loadCurrent(paths);
+        var failedNode = ledger.loadNode(paths, node.nodeInstanceId());
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, recovered.status());
+        assertEquals(List.of(node.nodeInstanceId()), recovered.activeNodeInstanceIds());
+        assertEquals(List.of("recovery-" + node.nodeInstanceId()), recovered.openGateIds());
+        assertEquals(NodeStatus.FAILED, failedNode.status());
+        assertEquals("STALE_RUNNING_PROCESS", failedNode.result().get("reason"));
+        assertEquals(true, failedNode.result().get("recoverable"));
+        assertTrue(Files.exists(paths.currentFailureMarkdown()));
+        assertTrue(Files.readString(paths.currentFailureMarkdown()).contains("STALE_RUNNING_PROCESS"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("node_stale_running_recovered"));
+    }
+
+    @Test
+    void staleRunningRecoveryRejectsLivePid() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-live-running"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-live-running", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        ledger.markRunning(paths, node.nodeInstanceId(), ProcessHandle.current().pid());
+
+        var error = assertThrows(IOException.class,
+                () -> ledger.recoverStaleRunningNode(paths, "should reject live process"));
+
+        assertTrue(error.getMessage().contains("still alive"));
+    }
+
+    @Test
+    void abortRecoveryMarksWorkflowFailedAndClearsActiveNodes() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-abort"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-abort", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "INVALID_DUAL_CONTROL", List.of(), Map.of());
+
+        ledger.abortRecovery(paths, "not worth continuing");
+
+        var aborted = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.FAILED, aborted.status());
+        assertTrue(aborted.activeNodeInstanceIds().isEmpty());
+        assertTrue(aborted.openGateIds().isEmpty());
+        var events = Files.readString(paths.eventsJsonl());
+        assertTrue(events.contains("workflow_aborted"));
+        assertTrue(events.contains("not worth continuing"));
+    }
+
+    @Test
+    void abortRecoveryRejectsNonRecoveryWorkflow() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-abort-ready"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-abort-ready", definition);
+
+        var error = assertThrows(java.io.IOException.class, () -> ledger.abortRecovery(paths, "not in recovery"));
+
+        assertTrue(error.getMessage().contains("not waiting for recovery"));
+    }
+
+    @Test
+    void retryRejectsNonRetryableActiveNode() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-retry-ready"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-retry-ready", definition);
+
+        var error = assertThrows(java.io.IOException.class, () -> ledger.retryActiveNode(paths, "not failed"));
+
+        assertTrue(error.getMessage().contains("not retryable"));
+    }
+
+    @Test
+    void blockedNodeStopsWorkflowWithoutRoutingNextNode() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-blocked"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(
+                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+                        new NodeDefinition("second", NodeKind.TASK, "noop.task", Map.of())
+                ),
+                List.of(new EdgeDefinition("first", "completed", "second"))
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-blocked", definition);
+        var current = ledger.loadCurrent(paths);
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.BLOCKED, "completed", List.of(), Map.of());
+
+        var stopped = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, stopped.status());
+        assertEquals(List.of(node.nodeInstanceId()), stopped.activeNodeInstanceIds());
+        assertEquals(List.of("recovery-" + node.nodeInstanceId()), stopped.openGateIds());
+        assertFalse(Files.exists(paths.nodeJson("node-second-002")));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains("node_blocked"));
+        assertTrue(Files.readString(paths.eventsJsonl()).contains(stopped.lastEventId()));
+    }
+
+    @Test
+    void rejectsDuplicateInitialization() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-duplicate"));
+        Files.createDirectories(paths.workstreamDir());
+        var definition = new WorkflowDefinition(
+                "agent-lifecycle",
+                1,
+                "first",
+                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
+                List.of()
+        );
+
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-duplicate", definition);
+
+        var error = assertThrows(java.io.IOException.class, () -> LedgerTestFixture.initialize(ledger, paths, "wf-duplicate", definition));
+        assertTrue(error.getMessage().contains("already initialized"));
+        var events = Files.readString(paths.eventsJsonl());
+        assertEquals(events.indexOf("evt-000001"), events.lastIndexOf("evt-000001"));
+    }
+
+    @Test
+    void documentRecordsRejectInvalidIdentityAndStatus() {
+        assertThrows(IllegalArgumentException.class, () -> new WorkflowCurrentDocument(
+                0,
+                "ws",
+                "wf",
+                "agent-lifecycle",
+                1,
+                WorkflowStatus.RUNNING,
+                List.of("node"),
+                List.of(),
+                "evt-000001",
+                java.time.Instant.now()
+        ));
+        assertThrows(IllegalArgumentException.class, () -> new WorkflowInstanceDocument(
+                1,
+                "wf",
+                "agent-lifecycle",
+                1,
+                null,
+                List.of("node"),
+                "evt-000001",
+                java.time.Instant.now(),
+                java.time.Instant.now()
+        ));
+        assertThrows(IllegalArgumentException.class, () -> new NodeInstanceDocument(
+                1,
+                "node",
+                "first",
+                NodeKind.TASK,
+                "noop.task",
+                NodeStatus.READY,
+                "",
+                "iter-001",
+                List.of(),
+                Map.of(),
+                List.of(),
+                Map.of(),
+                null,
+                "",
+                null,
+                null
+        ));
+        assertThrows(IllegalArgumentException.class, () -> new GateDocument(
+                1,
+                "gate",
+                "node",
+                "human.review",
+                "open",
+                List.of("approve"),
+                null,
+                null,
+                Map.of()
+        ));
+    }
+
+    private WorkstreamPaths initializedPaths(String workstreamId, WorkflowDefinition definition) throws Exception {
+        var paths = new WorkstreamPaths(tempDir.resolve(workstreamId), new DualId(workstreamId));
+        Files.createDirectories(paths.workstreamDir());
+        LedgerTestFixture.initialize(LedgerTestFixture.ledger(), paths, "wf-" + workstreamId, definition);
+        return paths;
+    }
+
+    private NodeInstanceDocument activeNode(WorkstreamPaths paths) throws Exception {
+        var ledger = LedgerTestFixture.ledger();
+        return ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+    }
+
+    private void writeCompletedTriggerNode(
+            WorkstreamPaths paths,
+            String nodeInstanceId,
+            String nodeDefinitionId,
+            String iterationId
+    ) throws Exception {
+        Files.createDirectories(paths.nodesDir());
+        new AtomicJsonWriter().write(paths.nodeJson(nodeInstanceId), new NodeInstanceDocument(
+                1,
+                nodeInstanceId,
+                nodeDefinitionId,
+                NodeKind.DECISION,
+                "review.decision",
+                NodeStatus.COMPLETED,
+                LedgerUtils.stageId(nodeDefinitionId),
+                iterationId,
+                List.of(),
+                Map.of(),
+                List.of(),
+                Map.of(),
+                "",
+                "",
+                Instant.now(),
+                Instant.now()
+        ));
+    }
+}

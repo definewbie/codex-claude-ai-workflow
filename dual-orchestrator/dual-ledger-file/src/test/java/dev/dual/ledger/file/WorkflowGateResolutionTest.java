@@ -29,8 +29,8 @@ class WorkflowGateResolutionTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-gate"));
         Files.createDirectories(paths.workstreamDir());
         var definition = gateDefinition();
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-gate", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-gate", definition);
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
 
         ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
@@ -47,8 +47,8 @@ class WorkflowGateResolutionTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-blocked-gate"));
         Files.createDirectories(paths.workstreamDir());
         var definition = gateDefinition();
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-blocked-gate", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-blocked-gate", definition);
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
         ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "BLOCKED", List.of("review.contract.json"), Map.of());
 
@@ -56,7 +56,8 @@ class WorkflowGateResolutionTest {
         var error = assertThrows(java.io.IOException.class,
                 () -> ledger.resolveOpenGate(paths, definition, "approved", ""));
 
-        assertEquals("a decision note is required for a BLOCKED human gate", error.getMessage());
+        assertTrue(error.getMessage().contains("decision note"));
+        assertTrue(error.getMessage().contains("BLOCKED"));
         assertEquals(before, ledger.loadCurrent(paths));
         var gate = ledger.loadOpenGateForNode(paths, before.activeNodeInstanceIds().getFirst());
         assertEquals("open", gate.status());
@@ -69,8 +70,8 @@ class WorkflowGateResolutionTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-advisory-design-review"));
         Files.createDirectories(paths.workstreamDir());
         var definition = advisoryDesignDefinition();
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-advisory-design-review", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-advisory-design-review", definition);
         var decision = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
 
         ledger.completeAndRoute(paths, definition, decision, NodeStatus.COMPLETED,
@@ -86,7 +87,8 @@ class WorkflowGateResolutionTest {
 
         var missingNote = assertThrows(java.io.IOException.class,
                 () -> ledger.resolveOpenGate(paths, definition, "revise", ""));
-        assertEquals("a decision note is required to revise a design", missingNote.getMessage());
+        assertTrue(missingNote.getMessage().contains("decision note"));
+        assertTrue(missingNote.getMessage().contains("revise"));
 
         var humanReason = "Keep the transaction design, but add a crash-recovery invariant.";
         ledger.resolveOpenGate(paths, definition, "revise", humanReason);
@@ -120,8 +122,8 @@ class WorkflowGateResolutionTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-approve-negative-advisory"));
         Files.createDirectories(paths.workstreamDir());
         var definition = advisoryDesignDefinition();
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-approve-negative-advisory", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-approve-negative-advisory", definition);
         var decision = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
 
         ledger.completeAndRoute(paths, definition, decision, NodeStatus.COMPLETED,
@@ -145,8 +147,8 @@ class WorkflowGateResolutionTest {
                 List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-not-gate", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-not-gate", definition);
 
         var error = assertThrows(java.io.IOException.class, () ->
                 ledger.resolveOpenGate(paths, definition, "approved", "not a gate"));

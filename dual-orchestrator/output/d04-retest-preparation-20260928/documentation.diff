@@ -1,0 +1,36 @@
+--- before/dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ after/dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -440,6 +440,12 @@
+ 
+ 本次[实际结果](../../output/d04-restricted-execution-20260928/result.md)：固定 Codex 原生命令沙箱 16 项切片通过（3 项合法读取/执行、13 项写入拒绝），样例前后指纹一致；原生模型任务因探针错误关闭必要 Code Mode 宿主而 INVALID，未发生任何文件工具命令。一次启动前配置错误另单独保存。模型消耗记录为 input 27,376（含 cached 13,440）、output 236，subscription_unpriced；不按进程成功或模型 JSON denied 宣称通过。已按预算停止，不自动补测。补测前须核对工具宿主与 sandbox 交界、修正初始化失败停止条件，并重新确认具体 Gate/增量调用预算；原生命令切片不外推到 Claude、acpx 传播或 D04 整体可行。
+ 
++### 8.10 补测准备与预算待确认（当前）
++
++用户要求“修正工具前提与停止条件，再确认增量实验预算，然后补测”。[准备材料](../../output/d04-retest-preparation-20260928/preparation-result.md)已显式恢复必要 Code Mode host/shell/unified execution，保持 read-only/never；加入初始化/工具错误停止、快速退出终检、进程组终止、停止后的 usage 保留及零工具证据拒绝，10 项离线检查通过。旧 INVALID 工件保留。默认只做准备检查；无预算确认不启动模型。
++
++[新 Gate](../../output/d04-retest-preparation-20260928/verification-gate.md)待用户确认：1 次启动/新 session/用户任务，gpt-6-astra low，90 秒与第 6 个可观察命令触发停止，零自动补跑；token 按实际 usage 记录，未验证 token/金额硬限。更正前次过度承诺：离线 help/feature 检查不等于整个工具链已初始化；watchdog 是观测后停止，不能保证第一笔模型请求之前阻断，也不是第 7 个请求前的原子准入。真实 Code Mode/模型工具与 sandbox 的共同约束仍待本次实验，不据离线检查冻结 D04。预算确认前本轮 provider 调用为 0；确认后也不进入产品实现。
++
+ ## 9. D09：交付外部窗口与处置
+ 
+ 复用 DeliveryMergePlan 四状态；新增操作意图与观察字段，不新建交付状态机。建议 `apply_intent` 包含 operation id、candidate/ref/SHA、批准引用、canonical target Git identity、base/index/worktree 基准、expected tree；`observation` 保存检查到的 HEAD/index/worktree/commit 引用与检查时点。恢复的“已知/不明”由这些事实派生，failureCode 可显示未知，不能仅凭 status=FAILED 再 apply。
+--- before/dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -279,3 +279,7 @@
+ 用户已同意以“经过证明的必要受限执行”替代绝对禁止 execute，并授权有界原生能力实验；结论确定前不承诺可行、不进入产品实现。业务不变量、Claude 作者／Codex 评审、身份/scope/批准/证据和恢复义务不变。当前候选及授权边界见详细设计 §8.9，[实验目录](../../output/d04-restricted-execution-20260928/)保存 Gate 与实际证据；§8.2 的无 execute 调查及先前未授权表述作为历史记录保留。D04/W03/W08 不因要求调整而关闭。
+ 
+ 实验结果：[报告](../../output/d04-restricted-execution-20260928/result.md)。Codex 原生命令沙箱 16 项切片通过；真实模型层因作者探针关闭必要工具宿主而 INVALID（零命令），输入 27,376 token、输出 236 token。初始化失败没有在模型调用前阻断，是本轮验证链缺口；已停止，不自动补测。D04/W03/W08 仍未完成；补测前修正工具前提/停止条件并确认增量预算，不进入产品实现。
++
++### 8.4 D04 补测准备（预算待确认）
++
++按用户要求完成[工具前提与停止条件修正](../../output/d04-retest-preparation-20260928/preparation-result.md)，10 项离线检查通过，未新增 provider 调用。Gate 建议 1 次启动/新 session/任务，gpt-6-astra low；90 秒及第 6 个可观察命令触发停止，零自动补跑，不承诺 token/金额硬限。等待用户确认增量预算后才补测，详见详细设计 §8.10。D04/W03/W08 均保持未完成，旧 INVALID 不覆盖；无产品/adapter 实现。
+--- before/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ after/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -1,6 +1,8 @@
+ # __ACTIVE__ Real-Case-Driven Orchestrator Simplification
+ 
+ ## 当前入口：2026-09-28 生命周期详细设计候选
++
++当前补测状态：用户要求先修正前提与停止条件、再确认增量预算。[准备与 Gate](../../output/d04-retest-preparation-20260928/preparation-result.md)已完成，10 项离线检查通过，新的模型调用为 0；预算待确认，未自动补测。当前候选仍允许经过证明的必要受限执行，D04 未冻结、产品未实施。细节以详细设计 §8.10/主清单 §8.4 为准。
+ 
+ 最新决定：用户已接受 D04“经过证明的必要受限执行”候选，并授权调整后进行有界原生能力实验。当前口径见详细设计 §8.9/主清单 §8.3；下文无 execute 及验证未授权记录均为此前状态。结论确定前不承诺可行，不开始产品实现；D04 仍待证。[本轮结果](../../output/d04-restricted-execution-20260928/result.md)：Codex 原生命令沙箱切片通过，模型切片因探针关闭必要工具宿主而 INVALID，已停止不自动补测。补测前修正前提检查/停止条件并确认增量预算，不改旧证据。
+ 

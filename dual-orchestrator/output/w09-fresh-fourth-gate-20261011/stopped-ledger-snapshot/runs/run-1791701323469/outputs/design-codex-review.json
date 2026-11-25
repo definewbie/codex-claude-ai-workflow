@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "workstream_id": "ws-20261011T044656Z-BMDJ",
+  "run_id": "run-1791701323469",
+  "node_id": "design.codex_arch_review",
+  "result": {
+    "artifact_type": "agent_output_contract",
+    "decision": "READY_FOR_ARCH_REVIEW",
+    "summary": "完整设计符合目标，实际输入输出证据已改为必选验证步骤，前轮阻塞项已在设计层解决。",
+    "lifecycle_status": "READY",
+    "blocking": false,
+    "checks": [
+      "先检查 Review Evidence Brief，再复核完整当前设计、候选文件职责及唯一活动修订义务。",
+      "算法按 CRLF、单独 CR 的顺序替换，保留其他字符及末尾有无换行，结果不含 CR，满足幂等性。",
+      "三个候选文件覆盖函数、测试和 README 职责，与设计说明一致；纯标准库方案符合已批准目标及排除范围。",
+      "测试设计覆盖所需输入类别与精确期望，并明确区分 11 个测试方法和 14 个输入案例。",
+      "实际调用、逐案例打印及 unittest 真实输出均为必选证据；README 一致性另有读取或执行核验步骤。",
+      "被测函数没有共享状态、持久化或外部副作用，并发、超时、崩溃恢复及回滚不引入额外生命周期要求，无需新增机制。"
+    ],
+    "evidence": [
+      "核心表达式 text.replace(\"\\r\\n\", \"\\n\").replace(\"\\r\", \"\\n\") 与要求的转换范围一致。",
+      "Declared Planned Files 明确列出 CREATE src/normalize_text.py、CREATE tests/test_normalize_text.py、CREATE README.md，验证命令不需要额外文件。",
+      "必选步骤二直接导入测试模块 CASES，执行全部 14 个案例，以 repr 展示 input、expected、actual，并断言实际结果等于期望，保留真实命令与完整输出。",
+      "必选步骤一保留 unittest 的真实命令、完整 stdout/stderr、测试数量及零 failure/error 结果。",
+      "README 计划包含导入、混合换行示例及测试命令，并要求实际核对源码与文档或执行示例。"
+    ],
+    "missing_evidence": [],
+    "must_fix": [],
+    "contract_obligations": [],
+    "acceptance_notes": [
+      "已根据当前设计内容核实 sha256:59b0a93b9f2d4639fe14b2ca304f0c905a4a0f0a1cae0f3f234806f89080b721#must_fix:0 得到解决，而非仅采信 ADDRESSED 声明。",
+      "测试发现与临时命令导入的环境注意事项已有处理路径，不构成当前设计阻塞。",
+      "本结论确认设计可继续进入计划阶段，不代表测试已经通过；实际执行证据仍须在 EXECUTION 阶段取得。",
+      "三个文件仍是候选清单，实施前必须单独批准精确路径及 CREATE/MODIFY 操作。"
+    ],
+    "open_risks": [],
+    "changed_files": [],
+    "verification_summary": "已依据所提供的完整设计完成静态复核，未发现未解决阻塞；未执行测试、读取额外文件或修改仓库。",
+    "failure": {
+      "category_hint": "",
+      "verification_remediation": "NONE",
+      "contract_gaps": [],
+      "out_of_scope_files": [],
+      "missing_tests": [],
+      "context_gaps": [],
+      "reason": ""
+    },
+    "reread_reasons": []
+  }
+}

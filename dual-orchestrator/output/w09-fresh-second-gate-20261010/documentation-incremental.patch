@@ -1,0 +1,29 @@
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -40,8 +40,8 @@
+ | W05 同冻结身份中断恢复；外部未知人工裁定；终态不重开 | I5/I1；D06/D07 ledger/runtime/worker/kernel | B02 holder、B03 本地协议/构造与身份、B04/B05/B06 写点/冷 JVM 独立 PASS，见 §23 | kernel 内部 I/O 专项与部署拓扑未全证，保留；首 Gate 限单 JVM 路由/ClassLoader，实际身份/停止核验不能以测试 JVM 代替 | 具名协议离线有据；I5 全故障/部署普适性未关闭 |
+ | W06 验收满足→候选批准→目标 Git 应用→实际提交→交付确认/中断处置 | I6，§4 交付行；candidate、DeliveryApplicationService、Git、query | T12；B06 四变体×inline/worker 受控完整批准链接临时真实 Git apply/人工实际 commit/finalize；写点、冷 JVM、拒绝/续作与同源投影证据见 §22.3；CC 批末独立 PASS 见 §22.4 | 本批实施/离线接线范围收口；LOW-1 查询锁序常驻化已登记，现有一次性反证仍有效；真实目标 Git、浏览器视觉与真实客户端未证，归组合准入/Gate；不自动 commit 或盲目重 apply | W04 验收/批准；W05 本地边界；B06/W06/D09 批次 CLOSED / PASS（离线范围）；真实交付证明未关闭，NO-GO 保持 |
+ | W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | 单一示例/typed 去重/受限 correction 已有；本轮逐字段案头表完成，见 §23 | G01 已在既有 prompt/template owner 修正并扫 intake/design/plan/reviewer/implement，共同保留严格身份；实际模型负担待真实 Gate，不承诺 token 节省 | 案头审计和 G01 离线修正已获 CC 合并独立 PASS；真实回应负担 NOT PROVEN |
+-| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 历史查询 LOW 常驻 6/0 与隔离反证；§23.1 本轮单轮 1755/206/0、654 输入同一性及新发行核验；CC PASS 接收见 §23.2；首例后1768/206/0及新发行候选见 §23.5，CC认可及身份重核见 §23.6 | 本轮 G01/G02–G04 见 §23.1；G05 本地批准/实际初始化前提见 §23.3；真实握手、业务 occurrence/工具证据在获准运行内核验；browser/真实 worker 未证，首个 CLI/INLINE 不关闭整体 W08 | 准备批次 CLOSED/PASS（离线）；CC 合并独立 PASS 见 §23.2；G05 本地准备见 §23.3；首次真实运行已授权并在接口核验处停止，见 §23.4；前向修复/新发行已获受影响CC认可，见 §23.6；fresh运行待授权 |
+-| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh Python 任务与 Gate 已受审；§23.3 G05 本地准备已批准并建立新实例，首例在prompt前停止，无真实业务交付 | 首次真实运行授权及停止证据见 §23.4；两处前向修复/离线证明/新发行与fresh候选见 §23.5，CC认可见 §23.6，当次fresh运行待授权；不自动retry/第二样本，未触发分支不冒填PASS | 本地准备 PASS；首次真实 Gate FAIL / WAITING_FOR_RECOVERY，见 §23.4；没有模型 prompt 或产品交付 |
++| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 历史查询 LOW 常驻 6/0 与隔离反证；§23.1 本轮单轮 1755/206/0、654 输入同一性及新发行核验；CC PASS 接收见 §23.2；首例后1768/206/0及新发行候选见 §23.5，CC认可及身份重核见 §23.6 | 本轮 G01/G02–G04 见 §23.1；G05 本地批准/实际初始化前提见 §23.3；真实握手、业务 occurrence/工具证据在获准运行内核验；browser/真实 worker 未证，首个 CLI/INLINE 不关闭整体 W08 | 准备批次 CLOSED/PASS（离线）；CC 合并独立 PASS 见 §23.2；G05 本地准备见 §23.3；首次真实运行已授权并在接口核验处停止，见 §23.4；前向修复/新发行已获受影响CC认可，见 §23.6；fresh第二次已获准并停止，见 §23.7 |
++| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh Python 任务与 Gate 已受审；§23.3 G05 本地准备已批准并建立新实例，首例在prompt前停止，无真实业务交付 | 首次真实运行授权及停止证据见 §23.4；两处前向修复/离线证明/新发行与fresh候选见 §23.5，CC认可见 §23.6，fresh第二次运行/停止见 §23.7；不自动retry/第二样本，未触发分支不冒填PASS | 本地准备 PASS；首次真实 Gate FAIL / WAITING_FOR_RECOVERY，见 §23.4；首例没有模型prompt；第二例已有真实响应但artifact拒绝，仍无产品交付（§23.7） |
+ 
+ ### 2.1 次序、依赖与独立评审触发
+ 
+@@ -798,3 +798,15 @@
+ 接收时只读复核 654 冻结输入及 CLI/server JAR、选定 wrapper/dist/config/Gate 环境字节一致；fresh候选目录尚不存在。未重跑回归或调用原生客户端，无新增实现/目标创建/提交。
+ 
+ **下一步动作**：将已审[fresh第二次Gate](../../output/w09-interface-forward-fix-20261010/fresh-second-gate.md)交用户批准新目标和新预算及真实执行。新18顶层调用提案不继承首例剩余17；600s/60min/120k预警/160k止损及两次有证据语义循环保持，关键与最终门仍实际到门批准、产品commit仍用户执行。取得当次授权后才创建新target/workstream并逐段核验运行；本CC PASS不自行解除真实运行NO-GO，无需另开接收评审轮次。
++
++### 23.7 W09 第二次 fresh Gate 已授权并停止（2026-10-10）
++
++用户“批准”覆盖新目标本地准备及新18次池真实运行；GOAL/EXECUTION/最终门仍须实际决定，产品commit不代做。新实例 `ws-20261010T085617Z-8SVF`、新target/worktree `/private/tmp/dual-w09-newlines-20261010-fresh-02`、terminal-delivery@5/INLINE/liteflow。**Gate FAIL / WAITING_FOR_RECOVERY / 主流程未闭合**；发行/配置/fresh有效，不将实际业务准入拒绝改INVALID。材料见[停止评估](../../output/w09-fresh-second-gate-20261010/assessment.md)、[原执行索引](../../output/w09-fresh-second-gate-20261010/execution-observation.json)、[CC受影响提示](../../output/w09-fresh-second-gate-20261010/cc-review-prompt.txt)。
++
++F01合法可选内部ID缺席真实通过；Claude Code真实响应并完成3个只读工具，首答带JSON前说明，既有一次deny-all格式修正后envelope/schema合法。后续proposal引用2份真实.agent程序材料，被产品canonical规则拒为TASK_CONTRACT_EVIDENCE_TRACEABILITY_INVALID，唯一主因required_artifact_contract_failed；摘要已同源，F02无旧因漂移。空inventory可空evidence_refs的合法表达与提示“additional durable references allowed”需受影响核对，不能造产品文件或删严格校验凑通过。
++
++另实证P0.5归因缺陷：原生request3/4分别36945/26548 token，合63493；Dual两个occurrence都记录26548、run合53096，少10397。初始prompt末尾换行被acpx trim，exact未匹配；acquisition含correction结束后reader以latest取到了第二请求。错误原事实不改；SDK数值成本不当订阅实际账单，usage_update上下文快照不计请求token。
++
++本次2顶层prompt（含correction）、累计runner441.492s；剩16不作重试/新例许可。具名session已close并show确认，主/修正进程及入口PID不存在，不外推任意子树全停。零Codex/关键门/产品修改/apply/commit；两工作目录clean/base不变。654输入/发行/native/config一致，首例77索引文件原样；第二例92文件停止快照归档不含非权威lock。没有代码改动/回归复跑/额外agent、没有旧样本恢复。
++
++**下一步动作**：合并CC只读核两边界与前向修复方向→原owner内必要修复及合法/拒绝/同族回归→重新冻结发行/Gate，再明确当次fresh运行授权。不自动retry/第三例，不借剩余预算继续掩盖观测或合同缺口。

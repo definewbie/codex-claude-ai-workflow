@@ -1,0 +1,14 @@
+1: ;;;;;; Base profile for Application Sandboxing
+2: ;;;;;;
+3: ;;;;;; Copyright (c) 2011-2019 Apple Inc.  All Rights reserved.
+4: ;;;;;;
+5: ;;;;;; WARNING: The sandbox rules in this file currently constitute
+6: ;;;;;; Apple System Private Interface and are subject to change at any time and
+7: ;;;;;; without notice. The contents of this file are also auto-generated and
+8: ;;;;;; not user editable; it may be overwritten at any time.
+9: (version 1)
+10: (deny default file-link)
+11: (define entitlement-legacy-names
+12:   '(("com.apple.security.device.microphone" "com.apple.security.microphone")
+13:     ("com.apple.security.device.camera" "com.apple.security.camera")
+14:     ("com.apple.security.personal-information.addressbook"

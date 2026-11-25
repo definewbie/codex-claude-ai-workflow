@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "claude_read_calls": 1,
+  "claude_nonce_match": true,
+  "claude_closed": true,
+  "codex_no_tool": true,
+  "codex_end_turn": true,
+  "codex_output": "{\"health\":\"ok\"}"
+}
+

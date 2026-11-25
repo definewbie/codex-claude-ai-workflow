@@ -1,0 +1,6 @@
+Step 1: design.claude_design -> RUNNING (resumed workflow)
+Stopped after --max-steps=1. Run again to continue.
+
+Next actions:
+  Continue running until the next gate, recovery, failure, or completion:
+     dualctl run --workdir /private/tmp/dual-w09-newlines-20261011-fresh-04/worktree ws-20261011T044656Z-BMDJ

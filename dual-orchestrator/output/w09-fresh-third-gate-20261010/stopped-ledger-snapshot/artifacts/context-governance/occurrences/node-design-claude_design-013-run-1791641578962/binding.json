@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261010T124812Z-XCZL",
+  "node_instance_id" : "node-design-claude_design-013",
+  "run_id" : "run-1791641578962",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/stage-scope-policy.json",
+      "sha256" : "244f6a38078724b7b4e5d8b8d4149e375563d4c2cd6e76e7fe57776d28056a40"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/file-summaries.json",
+      "sha256" : "e6828a0166d444cbee25405776f83e2140ab166f8ae541b8bde590fa51b53f92"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/repo-map.json",
+      "sha256" : "16978448fcad308fa06c2d86d902d2e68d28c8d854b28fe7ef388e7bb543988d"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/planned-report.json",
+      "sha256" : "f19df87cb7e69e34bf1d7d54829f2b530d79bd59a766b6619c3f0f3c19067274"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/agent-capability-catalog.json",
+      "sha256" : "68ff792ebf4b117f3dedcbf0cf35f1773faf66f7bde093c9168e7224b72e47f0"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/read-reuse-contract.json",
+      "sha256" : "2e53169eba2ff659540af2d0273c04f64c8f41a5f0211020a5cc9c9a202ce273"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/working-set.json",
+      "sha256" : "e741d394d3a4ed4eab6e0cc45a7228c43a93bb8837d12389beeb99d998be6e35"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/file-relevance-plan.json",
+      "sha256" : "f86db308d98c636a017004ed2eac028eeb9d675190cd02e0615fce0c9ca226a4"
+    }
+  }
+}

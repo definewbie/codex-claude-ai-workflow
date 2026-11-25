@@ -40,8 +40,8 @@ class WorkflowFileLedgerTest {
                 List.of()
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-test", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-test", definition);
 
         assertTrue(Files.exists(paths.workflowDefinitionJson()));
         assertTrue(Files.exists(paths.workflowInstanceJson()));
@@ -75,8 +75,8 @@ class WorkflowFileLedgerTest {
                         new NodeDefinition("next", NodeKind.TASK, "noop.task", Map.of())),
                 List.of(new EdgeDefinition("gate.review", "revise", "next"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-hidden-frozen-edge", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-hidden-frozen-edge", definition);
         var frozen = Files.readString(paths.workflowDefinitionJson())
                 .replace("\"allowed_actions\" : [ \"revise\" ]", "\"allowed_actions\" : [ \"approve\" ]");
         assertTrue(frozen.contains("\"allowed_actions\" : [ \"approve\" ]"));
@@ -103,8 +103,8 @@ class WorkflowFileLedgerTest {
                 List.of(new EdgeDefinition("first", "completed", "second"))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-route", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-route", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -158,8 +158,8 @@ class WorkflowFileLedgerTest {
                 )
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-gate-resolution", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-gate-resolution", definition);
         var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
                 "completed", List.of("first-output.md"), Map.of());
@@ -198,8 +198,8 @@ class WorkflowFileLedgerTest {
                 )
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-gate-approve-normalized", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-gate-approve-normalized", definition);
         var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
                 "completed", List.of("first-output.md"), Map.of());
@@ -232,8 +232,8 @@ class WorkflowFileLedgerTest {
                         new EdgeDefinition("first", "READY", "gate.review"),
                         new EdgeDefinition("gate.review", "approved", "next"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-unsupported-gate-action", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-unsupported-gate-action", definition);
         var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
                 "READY", List.of(), Map.of());
@@ -277,8 +277,8 @@ class WorkflowFileLedgerTest {
                                 new TransitionMetadata("loop", "", true, "", "",
                                         "Human requested a typed task-contract clarification"))));
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-contract-clarify", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-contract-clarify", definition);
         var compiler = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
         var compiledRefs = List.of(
                 ".agent/workstreams/ws-contract-clarify/artifacts/task-contract.json",
@@ -319,8 +319,8 @@ class WorkflowFileLedgerTest {
                 List.of(new EdgeDefinition("first", "completed", "second"))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-timeline", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-timeline", definition);
         writeRun(paths, "run-claude", "claude", "completed", 100, false);
         writeRun(paths, "run-codex", "codex", "failed", 300, true);
         var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
@@ -394,8 +394,8 @@ class WorkflowFileLedgerTest {
                 List.of(new EdgeDefinition("gate.review", "revise", "design.claude_design"))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-revision", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-revision", definition);
         var current = ledger.loadCurrent(paths);
         var gate = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -432,8 +432,8 @@ class WorkflowFileLedgerTest {
                         TransitionMetadata.loop("review requested design changes")))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-loop-metadata", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-loop-metadata", definition);
         var decision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
 
         ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED,
@@ -470,8 +470,8 @@ class WorkflowFileLedgerTest {
                 ))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-acceptance-repair-loop", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-acceptance-repair-loop", definition);
         var classify = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
 
         ledger.completeAndRoute(paths, definition, classify.nodeInstanceId(), NodeStatus.COMPLETED,
@@ -518,8 +518,8 @@ class WorkflowFileLedgerTest {
                         TransitionMetadata.loop("review requested design changes")))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-loop-limit", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-loop-limit", definition);
         var firstDecision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, firstDecision.nodeInstanceId(), NodeStatus.COMPLETED,
                 "BACK_TO_DESIGN", List.of("review-1.md"), Map.of());
@@ -558,7 +558,8 @@ class WorkflowFileLedgerTest {
                 List.of(secondDecision.nodeInstanceId()),
                 List.of(),
                 current.lastEventId(),
-                current.updatedAt()
+                current.updatedAt(),
+                current.commitSequence()
         );
         Files.write(paths.workflowCurrentJson(), new com.fasterxml.jackson.databind.ObjectMapper()
                 .findAndRegisterModules()
@@ -591,8 +592,8 @@ class WorkflowFileLedgerTest {
                 )
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-revision-limit", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-revision-limit", definition);
         var firstGate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, firstGate.nodeInstanceId(), NodeStatus.COMPLETED, "revise", List.of(), Map.of(
                 "note", "First revision."
@@ -661,19 +662,19 @@ class WorkflowFileLedgerTest {
 
         var completePaths = initializedPaths("ws-self-test-complete", definition);
         var completeDecision = activeNode(completePaths);
-        new WorkflowFileLedger().completeAndRoute(completePaths, definition, completeDecision.nodeInstanceId(),
+        LedgerTestFixture.ledger().completeAndRoute(completePaths, definition, completeDecision.nodeInstanceId(),
                 NodeStatus.COMPLETED, "SELF_TEST_COMPLETE", List.of("self-test.json"), Map.of());
         assertEquals("implement.artifact_validation", activeNode(completePaths).nodeDefinitionId());
 
         var incompletePaths = initializedPaths("ws-self-test-incomplete", definition);
         var incompleteDecision = activeNode(incompletePaths);
-        new WorkflowFileLedger().completeAndRoute(incompletePaths, definition, incompleteDecision.nodeInstanceId(),
+        LedgerTestFixture.ledger().completeAndRoute(incompletePaths, definition, incompleteDecision.nodeInstanceId(),
                 NodeStatus.COMPLETED, "SELF_TEST_INCOMPLETE", List.of("self-test.json"),
                 Map.of("continuation_kind", "IMPLEMENTATION_REPAIR"));
         var repair = activeNode(incompletePaths);
         assertEquals("context.implement_claude", repair.nodeDefinitionId());
         assertEquals("iter-002", repair.iterationId());
-        var incompleteLedger = new WorkflowFileLedger();
+        var incompleteLedger = LedgerTestFixture.ledger();
         incompleteLedger.completeAndRoute(incompletePaths, definition, repair.nodeInstanceId(),
                 NodeStatus.COMPLETED, "completed", List.of("implementation.json"), Map.of());
         var repeatedDecision = activeNode(incompletePaths);
@@ -709,7 +710,7 @@ class WorkflowFileLedgerTest {
 
         var blockedPaths = initializedPaths("ws-self-test-blocked", definition);
         var blockedDecision = activeNode(blockedPaths);
-        var blockedLedger = new WorkflowFileLedger();
+        var blockedLedger = LedgerTestFixture.ledger();
         blockedLedger.completeAndRoute(blockedPaths, definition, blockedDecision.nodeInstanceId(),
                 NodeStatus.COMPLETED, "BLOCKED", List.of("self-test.json"), Map.of());
         assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, blockedLedger.loadCurrent(blockedPaths).status());
@@ -741,7 +742,7 @@ class WorkflowFileLedgerTest {
                                         "loop", "", true, "", "", "Human authorized implementation repair"))));
         var paths = initializedPaths("ws-scope-repair", definition);
         var validation = activeNode(paths);
-        var ledger = new WorkflowFileLedger();
+        var ledger = LedgerTestFixture.ledger();
 
         ledger.completeAndRoute(paths, definition, validation.nodeInstanceId(), NodeStatus.COMPLETED,
                 "CHANGE_SCOPE_VIOLATION", List.of("scope-occurrence.json"),
@@ -773,7 +774,7 @@ class WorkflowFileLedgerTest {
                             Map.of("gate_purpose", "implementation_repair", "allowed_actions", List.of(action))),
                     new NodeDefinition("next", NodeKind.TASK, "noop.task", Map.of())), edges);
             var paths = initializedPaths("ws-request-" + scenario, definition);
-            var ledger = new WorkflowFileLedger();
+            var ledger = LedgerTestFixture.ledger();
             ledger.completeAndRoute(paths, definition, activeNode(paths).nodeInstanceId(), NodeStatus.COMPLETED,
                     source, List.of(), Map.of());
             var gate = new com.fasterxml.jackson.databind.ObjectMapper()
@@ -822,7 +823,7 @@ class WorkflowFileLedgerTest {
         var decision = activeNode(paths);
 
         var error = assertThrows(IOException.class,
-                () -> new WorkflowFileLedger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
+                () -> LedgerTestFixture.ledger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
                         NodeStatus.COMPLETED, "REVISE", List.of("evidence.json"), Map.of()));
 
         assertTrue(error.getMessage().contains("exactly one human gate"));
@@ -839,7 +840,7 @@ class WorkflowFileLedgerTest {
         var decision = activeNode(paths);
 
         var error = assertThrows(IOException.class,
-                () -> new WorkflowFileLedger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
+                () -> LedgerTestFixture.ledger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
                         NodeStatus.COMPLETED, "REVISE", List.of("evidence.json"), Map.of()));
 
         assertTrue(error.getMessage().contains("exactly one human gate"));
@@ -857,7 +858,7 @@ class WorkflowFileLedgerTest {
         var decision = activeNode(paths);
 
         var error = assertThrows(IOException.class,
-                () -> new WorkflowFileLedger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
+                () -> LedgerTestFixture.ledger().completeAndRoute(paths, definition, decision.nodeInstanceId(),
                         NodeStatus.COMPLETED, "REVISE", List.of("evidence.json"), Map.of()));
 
         assertTrue(error.getMessage().contains("must not start an iteration"));
@@ -954,8 +955,8 @@ class WorkflowFileLedgerTest {
                 )
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-acceptance-reject", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-acceptance-reject", definition);
         var decision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
 
         ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED, "REJECT", List.of("review.md"), Map.of(
@@ -1005,8 +1006,8 @@ class WorkflowFileLedgerTest {
                 )
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-acceptance-notes", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-acceptance-notes", definition);
         var decision = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
 
         ledger.completeAndRoute(paths, definition, decision.nodeInstanceId(), NodeStatus.COMPLETED,
@@ -1048,8 +1049,8 @@ class WorkflowFileLedgerTest {
                 )
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-next-stage", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-next-stage", definition);
         var current = ledger.loadCurrent(paths);
         var generator = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         var nextPrompt = ".agent/workstreams/ws-next-stage/artifacts/next-stage/next-stage-prompt.md";
@@ -1091,8 +1092,8 @@ class WorkflowFileLedgerTest {
                 )
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-close-mistaken", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-close-mistaken", definition);
         var beforeGate = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
         ledger.completeAndRoute(paths, definition, beforeGate, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
         var gate = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
@@ -1145,8 +1146,8 @@ class WorkflowFileLedgerTest {
                 List.of(new EdgeDefinition("acceptance.decision", "REJECT", "context.implement_claude"))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-reject", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-reject", definition);
         var current = ledger.loadCurrent(paths);
         var decision = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -1175,8 +1176,8 @@ class WorkflowFileLedgerTest {
                 List.of()
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-complete", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-complete", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -1226,8 +1227,8 @@ class WorkflowFileLedgerTest {
                 List.of(new EdgeDefinition("before.acceptance", "completed", "gate.human_acceptance"))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-terminal-delivery", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-terminal-delivery", definition);
         var beforeGate = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
         ledger.completeAndRoute(paths, definition, beforeGate, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
         ledger.resolveOpenGate(paths, definition, "approve", "accepted delivery");
@@ -1272,8 +1273,8 @@ class WorkflowFileLedgerTest {
                 List.of()
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-next-stage-required", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-next-stage-required", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED,
@@ -1301,8 +1302,8 @@ class WorkflowFileLedgerTest {
                 List.of(new EdgeDefinition("before.final_gate", "completed", "gate.human_next_stage_approval"))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-gate-complete", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-gate-complete", definition);
         var beforeGate = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
         ledger.completeAndRoute(paths, definition, beforeGate, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
         var gateNodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
@@ -1335,8 +1336,8 @@ class WorkflowFileLedgerTest {
                 List.of(new EdgeDefinition("first", "completed", "gate.human_next_stage_approval"))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-gate-actions", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-gate-actions", definition);
         var current = ledger.loadCurrent(paths);
         var first = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -1362,8 +1363,8 @@ class WorkflowFileLedgerTest {
                 List.of(new EdgeDefinition("first", "completed", "second"))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-failed", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-failed", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -1393,8 +1394,8 @@ class WorkflowFileLedgerTest {
                 List.of()
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-failure-summary", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-failure-summary", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -1432,8 +1433,8 @@ class WorkflowFileLedgerTest {
                 List.of()
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-model-mismatch-summary", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-model-mismatch-summary", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -1468,8 +1469,8 @@ class WorkflowFileLedgerTest {
                 List.of()
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-reconnect-summary", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-reconnect-summary", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -1505,8 +1506,8 @@ class WorkflowFileLedgerTest {
                 List.of()
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-contract-failure-summary", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-contract-failure-summary", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -1552,8 +1553,8 @@ class WorkflowFileLedgerTest {
                 List.of()
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-control-repair", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-control-repair", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -1586,8 +1587,8 @@ class WorkflowFileLedgerTest {
                 List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-retry", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-retry", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "RECOVERABLE_AGENT_RECONNECT", List.of("stderr.log"), Map.of("recoverable", true));
@@ -1618,8 +1619,8 @@ class WorkflowFileLedgerTest {
                 List.of(new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-websearch-approval", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-websearch-approval", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
         var runPath = paths.runsDir().resolve("run-websearch").resolve("run.json");
@@ -1684,8 +1685,8 @@ class WorkflowFileLedgerTest {
                 "agent-lifecycle", 1, "design.claude_design",
                 List.of(new NodeDefinition("design.claude_design", NodeKind.TASK, "acpx.agent_run", Map.of())),
                 List.of());
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-websearch-auth-failure", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-websearch-auth-failure", definition);
         var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
         var runPath = paths.runsDir().resolve("run-websearch").resolve("run.json");
         Files.createDirectories(runPath.getParent());
@@ -1764,8 +1765,8 @@ class WorkflowFileLedgerTest {
                         TransitionMetadata.loop("stale classification")
                 ))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-replay-classification", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-replay-classification", definition);
         var classifier = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
         var classificationRef = ".agent/workstreams/ws-replay-classification/artifacts/failure-classification.json";
         ledger.completeAndRoute(
@@ -1820,8 +1821,8 @@ class WorkflowFileLedgerTest {
                 List.of(new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-replay-classification-reject", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-replay-classification-reject", definition);
         var compile = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
         ledger.completeAndRoute(
                 paths,
@@ -1851,8 +1852,8 @@ class WorkflowFileLedgerTest {
                 List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-stale-running", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-stale-running", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         ledger.markRunning(paths, node.nodeInstanceId(), Long.MAX_VALUE);
@@ -1883,8 +1884,8 @@ class WorkflowFileLedgerTest {
                 List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-live-running", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-live-running", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         ledger.markRunning(paths, node.nodeInstanceId(), ProcessHandle.current().pid());
@@ -1906,8 +1907,8 @@ class WorkflowFileLedgerTest {
                 List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-abort", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-abort", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED, "INVALID_DUAL_CONTROL", List.of(), Map.of());
@@ -1934,8 +1935,8 @@ class WorkflowFileLedgerTest {
                 List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-abort-ready", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-abort-ready", definition);
 
         var error = assertThrows(java.io.IOException.class, () -> ledger.abortRecovery(paths, "not in recovery"));
 
@@ -1953,8 +1954,8 @@ class WorkflowFileLedgerTest {
                 List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-retry-ready", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-retry-ready", definition);
 
         var error = assertThrows(java.io.IOException.class, () -> ledger.retryActiveNode(paths, "not failed"));
 
@@ -1976,8 +1977,8 @@ class WorkflowFileLedgerTest {
                 List.of(new EdgeDefinition("first", "completed", "second"))
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-blocked", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-blocked", definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
 
@@ -2004,10 +2005,10 @@ class WorkflowFileLedgerTest {
                 List.of()
         );
 
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-duplicate", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-duplicate", definition);
 
-        var error = assertThrows(java.io.IOException.class, () -> ledger.initialize(paths, "wf-duplicate", definition));
+        var error = assertThrows(java.io.IOException.class, () -> LedgerTestFixture.initialize(ledger, paths, "wf-duplicate", definition));
         assertTrue(error.getMessage().contains("already initialized"));
         var events = Files.readString(paths.eventsJsonl());
         assertEquals(events.indexOf("evt-000001"), events.lastIndexOf("evt-000001"));
@@ -2072,12 +2073,12 @@ class WorkflowFileLedgerTest {
     private WorkstreamPaths initializedPaths(String workstreamId, WorkflowDefinition definition) throws Exception {
         var paths = new WorkstreamPaths(tempDir.resolve(workstreamId), new DualId(workstreamId));
         Files.createDirectories(paths.workstreamDir());
-        new WorkflowFileLedger().initialize(paths, "wf-" + workstreamId, definition);
+        LedgerTestFixture.initialize(LedgerTestFixture.ledger(), paths, "wf-" + workstreamId, definition);
         return paths;
     }
 
     private NodeInstanceDocument activeNode(WorkstreamPaths paths) throws Exception {
-        var ledger = new WorkflowFileLedger();
+        var ledger = LedgerTestFixture.ledger();
         return ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
     }
 

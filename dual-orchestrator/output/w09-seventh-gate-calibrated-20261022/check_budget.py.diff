@@ -1,0 +1,45 @@
+--- /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-seventh-gate-20261016/check_budget.py
++++ /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/check_budget.py
+@@ -69,6 +69,14 @@
+         ("active time cannot reserve next two-call block", state(200000, 5, 2500, nodes[3:]), "STOP"),
+         ("unknown path is not silently cheap", state(200000, 5, 500, ["new.unknown.stage"]), "STOP"),
+         ("observed total at stop is still a stop", state(1700000, 5, 500, nodes[3:]), "STOP"),
++        ("calibrated readiness plus design loop", state(0, 0, 0, nodes, nodes[4:6] + nodes[2:4]), "ALLOW_BUDGET_ONLY"),
++        ("calibrated readiness plus both semantic loops", state(0, 0, 0, nodes, nodes[4:6] + nodes[:4]), "ALLOW_BUDGET_ONLY"),
++        ("exact token reserve boundary allows", state(1450000, 10, 900, nodes[-1:]), "ALLOW_BUDGET_ONLY"),
++        ("one token below necessary tail reserve stops", state(1450001, 10, 900, nodes[-1:]), "STOP"),
++        ("exact call reserve boundary allows", state(1000000, 16, 900, nodes[-1:]), "ALLOW_BUDGET_ONLY"),
++        ("exact active time reserve boundary allows", state(1000000, 10, 2100, nodes[-1:]), "ALLOW_BUDGET_ONLY"),
++        ("one second below time reserve stops", state(1000000, 10, 2101, nodes[-1:]), "STOP"),
++        ("duplicate mandatory tail is rejected", state(0, 0, 0, [nodes[-1],nodes[-1]]), "STOP"),
+     ]
+     results = []
+     for label, s, expected in cases:
+@@ -76,14 +84,24 @@
+         assert r["result"] == expected, (label, r, expected)
+         results.append({"case": label, "expected": expected, "input": s, "output": r})
+     assert sum(RESERVES.values()) == P["illustrative_path"]["nominal_mainline_tokens"]
+-    assert 940000 + 175000 + 90000 + 150000 == 1355000
+-    assert P["total_stop"] - 1355000 == 345000
++    assert sum(RESERVES.values()) == 955000
++    assert 955000 + 175000 + 240000 + 150000 == 1520000
++    assert P["total_stop"] - 1520000 == 180000
++    assert 955000 + 175000 + 90000 + 240000 + 150000 == 1610000
++    for scenario in P['calibrated_scenarios'].values():
++        assert scenario['tokens'] <= P['total_stop'] and scenario['requests'] <= P['top_level_calls']
+     assert 9 + 2 + 2 + 1 == 14
++    indexed = {r['case']: r['output'] for r in results}
++    assert indexed['fresh nine-node mainline']['required_token_reserve'] == 1105000
++    assert indexed['calibrated readiness plus design loop']['required_token_reserve'] == 1520000
++    assert indexed['calibrated readiness plus design loop']['required_call_reserve'] == 14
++    assert indexed['calibrated readiness plus both semantic loops']['required_token_reserve'] == 1610000
++    assert indexed['calibrated readiness plus both semantic loops']['required_call_reserve'] == 16
+     (OUT / "budget-dry-run.json").write_text(json.dumps({
+         "status": "PASS_OFFLINE_ARITHMETIC_ONLY", "cases": results,
+         "not_proven": "native costs, runtime dispatch enforcement, seventh authorization or historical recovery",
+         "native_provider_calls": 0}, ensure_ascii=False, indent=2) + "\n")
+-    print("13 offline admission cases and budget arithmetic passed; no dispatch or native calls")
++    print(str(len(results)) + " offline admission cases and calibrated budget arithmetic passed; no dispatch or native calls")
+ 
+ 
+ if __name__ == "__main__":

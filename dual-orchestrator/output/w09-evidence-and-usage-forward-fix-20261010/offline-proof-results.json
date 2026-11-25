@@ -1,0 +1,58 @@
+{
+  "rows": [
+    {
+      "name": "proof-compile",
+      "exit": 0,
+      "expected": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "actual-stream-offline-proof",
+      "exit": 0,
+      "expected": 0,
+      "stdout_sha256": "9191aaaccb9733dc17e9bb230d49c15d28edcb808f3fb3a84b4fcbc09489b31b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "render-control-proof",
+      "exit": 0,
+      "expected": 0,
+      "stdout_sha256": "c389fccd77c5cd7174e6572b45f2913fd4fbb6294b9ed89ea2a6912fac25ced3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "request-id-removed-compile",
+      "exit": 0,
+      "expected": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "request-id-removed",
+      "exit": 1,
+      "expected": "nonzero",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "4112ff9c05192758d79a1583803284acdd5bb366894ddc8f265b828705aa8a6e"
+    },
+    {
+      "name": "shared-evidence-rule-removed-compile",
+      "exit": 0,
+      "expected": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "shared-evidence-rule-removed",
+      "exit": 1,
+      "expected": "nonzero",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "7f7977af50458fa24d32738ad4974bc5d89ed41f5c7f53bb557e79034d4dc657"
+    }
+  ],
+  "native_provider_calls": 0,
+  "maven_tests_not_added_by_this_proof": true,
+  "historical_stream_read_only": true,
+  "no_ledger_repair": true,
+  "frozen_production_classes_not_modified": true
+}

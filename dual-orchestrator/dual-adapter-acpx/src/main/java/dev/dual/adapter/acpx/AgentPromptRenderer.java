@@ -36,6 +36,12 @@ final class AgentPromptRenderer {
             "(?<![<\\p{Alnum}._-])(/[^\\s\"'`)]+)",
             Pattern.UNICODE_CHARACTER_CLASS);
 
+    private final dev.dual.ledger.file.WorkflowFileLedger ledger;
+
+    AgentPromptRenderer(dev.dual.ledger.file.WorkflowFileLedger ledger) {
+        this.ledger = java.util.Objects.requireNonNull(ledger);
+    }
+
     String render(Path workspaceRoot, String workstreamId, String nodeId, String promptTemplate, List<String> inputRefs) {
         return renderWithSections(workspaceRoot, workstreamId, "", nodeId, promptTemplate, inputRefs).content();
     }
@@ -259,7 +265,8 @@ final class AgentPromptRenderer {
 
                     - `must_fix` and `missing_evidence` mean unresolved blockers; keep them empty for a ready design.
                     - Put resolved review comments in `checks` or `evidence`, not `must_fix`.
-                    - `design.planned_files` declares intended changes only; exact paths and operations must be authorized by the approved TaskContract.
+                    - Under GOAL, `design.planned_files` contains proposals, not authorization; use canonical paths and operations respecting its exclusions. Exact implementation scope requires later EXECUTION approval.
+                    - Under EXECUTION, declared paths and operations must remain within its approved scope. Design or plan review does not grant additional write authority.
                     """.stripTrailing();
         }
         if (!contract.emitsArtifact("agent_output_contract")
@@ -401,7 +408,7 @@ final class AgentPromptRenderer {
                 var path = workspaceRoot.resolve(inputRef).normalize();
                 builder.append("- ").append(inputRef).append("\n");
                 var validatedDocument = AgentEvidenceIndex.validatedDocument(
-                        workspaceRoot, workstreamId, inputRef, OBJECT_MAPPER);
+                        ledger, workspaceRoot, workstreamId, inputRef, OBJECT_MAPPER);
                 if (validatedDocument.isPresent()) {
                     var document = validatedDocument.get();
                     var evidenceKey = document.runId() + "\n"
@@ -574,7 +581,7 @@ final class AgentPromptRenderer {
                 .ifPresent(trusted::add);
         if (trustedTaskContractPayload == null) {
             AgentRunGovernanceContext.trustedTaskContractPayload(
-                            workspaceRoot, workstreamId, nodeId, inputRefs)
+                            ledger, workspaceRoot, workstreamId, nodeId, inputRefs)
                     .ifPresent(trusted::add);
         } else {
             trusted.add(trustedTaskContractPayload);

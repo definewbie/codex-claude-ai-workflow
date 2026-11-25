@@ -1,0 +1,360 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+export DUAL_AGENT_RESULT_EMITTER="$PROJECT_ROOT/scripts/fixtures/emit-strict-agent-result.py"
+JAR_PATH="$PROJECT_ROOT/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar"
+CASE_NAME="${1:-all}"
+SKIP_BUILD="${SKIP_BUILD:-false}"
+KEEP="${KEEP:-false}"
+
+pass() { printf 'PASS %s\n' "$*"; }
+fail() { printf 'FAIL %s\n' "$*" >&2; exit 1; }
+log() { printf '[SEMANTIC] %s\n' "$*"; }
+
+usage() {
+  cat <<'EOF'
+Usage:
+  scripts/semantic-boundary-smoke.sh [all|plan-body|review-noise|reread-reason]
+
+This smoke uses a controlled fake acpx but drives the real dualctl/worktree/ledger
+path. It validates semantic boundaries:
+  plan-body     plan.claude_plan missing formal plan body is rejected
+  review-noise  prose "minor stylistic issue" does not classify as REVIEW_NOISE
+  reread-reason reusable file re-read remains observable without invalidating the artifact
+EOF
+}
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ "$SKIP_BUILD" != "true" ]]; then
+  log "Building dual-cli jar"
+  (cd "$PROJECT_ROOT" && mvn -q -pl dual-cli -am package -DskipTests)
+fi
+[[ -f "$JAR_PATH" ]] || fail "dual-cli jar missing: $JAR_PATH"
+
+dualctl() {
+  java -jar "$JAR_PATH" "$@"
+}
+
+make_fake_acpx() {
+  local bin_dir="$1"
+  mkdir -p "$bin_dir"
+  cat > "$bin_dir/claude" <<'FAKE_CLAUDE'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" == "--version" ]]; then
+  echo "semantic-boundary-fake-claude 1.0"
+  exit 0
+fi
+
+echo "semantic fake direct agent invocation requires acpx" >&2
+exit 1
+FAKE_CLAUDE
+  chmod +x "$bin_dir/claude"
+
+  cat > "$bin_dir/acpx" <<'FAKE'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" == "--version" ]]; then
+  echo "semantic-boundary-fake-acpx 1.0"
+  exit 0
+fi
+if [[ "${1:-}" == "build-info" ]]; then
+  python3 "${DUAL_AGENT_RESULT_EMITTER:?}" --build-info
+  exit 0
+fi
+
+agent=""
+prompt=""
+session_name=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    claude|codex)
+      agent="$1"
+      if [[ "${2:-}" == "sessions" ]]; then
+        session_action="${3:-}"
+        if [[ "$session_action" == "ensure" || "$session_action" == "new" ]]; then
+          shift 3
+          while [[ $# -gt 0 ]]; do
+            if [[ "$1" == "--name" ]]; then shift; session_name="${1:-}"; fi
+            shift
+          done
+          session_id="$(python3 - "$session_name" <<'PY'
+import sys, uuid
+print(uuid.uuid5(uuid.NAMESPACE_URL, "dual-semantic-smoke:" + sys.argv[1]))
+PY
+)"
+          python3 "${DUAL_AGENT_RESULT_EMITTER:?}" --register-session "$session_id" "$session_name" "$(pwd -P)"
+        fi
+        exit 0
+      fi
+      shift
+      ;;
+    -f) shift; prompt="${1:-}"; shift ;;
+    -s) shift; session_name="${1:-semantic-session}"; shift ;;
+    *) shift ;;
+  esac
+done
+
+template="$(basename "${prompt:-unknown.md}")"
+case_name="${DUAL_SEMANTIC_CASE:-}"
+session_id="$(python3 - "$session_name" <<'PY'
+import sys
+import uuid
+print(uuid.uuid5(uuid.NAMESPACE_URL, "dual-semantic-smoke:" + sys.argv[1]))
+PY
+)"
+echo "[acpx] session ${session_name} (${session_id}) · agent connected" >&2
+
+emit_result() {
+  python3 "${DUAL_AGENT_RESULT_EMITTER:?}" \
+    --prompt "$prompt" \
+    --template "$template" \
+    --profile semantic \
+    --scenario "$case_name" \
+    --session-id "$session_id"
+}
+
+tool_read_main() {
+  cat <<'EOF'
+[tool] Read main.py (completed)
+  input: {"file_path":"main.py"}
+EOF
+}
+
+agent_contract() {
+  local decision="$1"
+  local summary="$2"
+  local category_hint="${3:-}"
+  DUAL_FIXTURE_DECISION="$decision" \
+    DUAL_FIXTURE_SUMMARY="$summary" \
+    DUAL_FIXTURE_CATEGORY_HINT="$category_hint" \
+    emit_result
+}
+
+valid_plan() {
+  emit_result
+}
+
+case "$template" in
+  intake-claude-brainstorm.md)
+    if [[ "$case_name" == "reread-reason" ]]; then
+      tool_read_main
+    fi
+    emit_result
+    ;;
+  intake-codex-product-review.md)
+    agent_contract "READY_FOR_PRODUCT_REVIEW" "Product review passed."
+    ;;
+  design-claude.md)
+    if [[ "$case_name" == "reread-reason" ]]; then
+      tool_read_main
+    fi
+    agent_contract "READY_FOR_ARCH_REVIEW" "Design passed."
+    ;;
+  design-codex-review.md)
+    agent_contract "READY_FOR_ARCH_REVIEW" "Architecture review passed."
+    ;;
+  plan-claude.md)
+    valid_plan
+    ;;
+  plan-codex-review.md)
+    agent_contract "READY_TO_IMPLEMENT" "Plan review passed."
+    ;;
+  implement-claude.md)
+    if [[ "$case_name" == "reread-reason" ]]; then
+      tool_read_main
+    fi
+    if [[ -f main.py ]] && ! grep -q "def goodbye" main.py; then
+      cat >> main.py <<'PY'
+
+def goodbye():
+    return "goodbye"
+PY
+    fi
+    if [[ -f README.md ]] && ! grep -q "goodbye" README.md; then
+      cat >> README.md <<'README'
+
+## goodbye
+
+`goodbye()` returns `goodbye`.
+README
+    fi
+    agent_contract "IMPLEMENTED" "Implemented goodbye without declaring reread reasons."
+    ;;
+  implement-claude-self-test.md)
+    emit_result
+    ;;
+  acceptance-codex-review.md)
+    emit_result
+    ;;
+  stage-claude-handoff.md)
+    emit_result
+    ;;
+  *)
+    agent_contract "PASS" "Default controlled response."
+    ;;
+esac
+FAKE
+  chmod +x "$bin_dir/acpx"
+}
+
+setup_repo() {
+  local repo="$1"
+  rm -rf "$repo" "${repo}-agent-runs"
+  mkdir -p "$repo"
+  (
+    cd "$repo"
+    git init -q
+    git config user.email "semantic@test.local"
+    git config user.name "Semantic Smoke"
+    cat > README.md <<'EOF'
+# Semantic Fixture
+EOF
+    cat > NOTES.md <<'EOF'
+# Internal Notes
+
+This file is intentionally outside the implementation plan.
+EOF
+    cat > main.py <<'EOF'
+def hello():
+    return "world"
+
+if __name__ == "__main__":
+    print(hello())
+EOF
+    git add .
+    git commit -q -m "initial"
+  )
+}
+
+run_until_boundary() {
+  local repo="$1"
+  local case_name="$2"
+  local fake_bin="$3"
+  local task="$repo/task.md"
+  echo "Add goodbye() returning goodbye and document it." > "$task"
+  local output
+  output=$(PATH="$fake_bin:$PATH" DUAL_SEMANTIC_CASE="$case_name" dualctl start --run --max-steps 20 --workdir "$repo" --workflow-variant full --task-file "$task" 2>&1 || true)
+  local ws workdir
+  ws=$(printf '%s\n' "$output" | awk '/^Workstream:/ {print $2; exit}')
+  workdir=$(printf '%s\n' "$output" | awk '/^Workspace:/ {print $2; exit}')
+  [[ -n "$ws" && -n "$workdir" ]] || { printf '%s\n' "$output"; fail "$case_name: could not start workstream"; }
+
+  local round status approve
+  for round in 1 2 3 4 5 6 7 8; do
+    status=$(dualctl status --workdir "$workdir" "$ws" 2>&1 || true)
+    if printf '%s\n' "$status" | grep -q "WAITING_FOR_RECOVERY\|FAILED\|COMPLETED"; then
+      break
+    fi
+    if printf '%s\n' "$status" | grep -q "WAITING_FOR_HUMAN"; then
+      if printf '%s\n' "$status" | grep -q 'Active node definition: gate.human_next_stage_approval'; then
+        PATH="$fake_bin:$PATH" DUAL_SEMANTIC_CASE="$case_name" dualctl review complete \
+          --workdir "$workdir" "$ws" >/dev/null
+        break
+      fi
+      approve=$(PATH="$fake_bin:$PATH" DUAL_SEMANTIC_CASE="$case_name" dualctl review approve --run --max-steps 20 --workdir "$workdir" "$ws" 2>&1 || true)
+      if printf '%s\n' "$approve" | grep -q "WAITING_FOR_RECOVERY\|FAILED\|COMPLETED"; then
+        break
+      fi
+    else
+      approve=$(PATH="$fake_bin:$PATH" DUAL_SEMANTIC_CASE="$case_name" dualctl run --workdir "$workdir" "$ws" 2>&1 || true)
+    fi
+  done
+  printf '%s\t%s\n' "$workdir" "$ws"
+}
+
+assert_plan_body() {
+  local workdir="$1" ws="$2"
+  dualctl recovery show --workdir "$workdir" "$ws" > "$workdir/recovery-show.txt" 2>&1 || true
+  grep -R "AGENT_RESULT_CONTRACT_VIOLATION" "$workdir/.agent/workstreams/$ws" >/dev/null \
+    || fail "plan-body: expected AGENT_RESULT_CONTRACT_VIOLATION"
+  grep -R "result.plan is required" "$workdir/.agent/workstreams/$ws" >/dev/null \
+    || fail "plan-body: expected typed missing-plan diagnostic"
+  pass "plan-body: missing typed plan body is blocked"
+}
+
+assert_review_noise() {
+  local workdir="$1" ws="$2"
+  local class_json="$workdir/.agent/workstreams/$ws/artifacts/failure-classification.json"
+  [[ ! -f "$class_json" ]] || fail "review-noise: prose cannot supply a missing typed category"
+  python3 - "$workdir/.agent/workstreams/$ws" <<'PY' || fail "review-noise: missing category was not rejected at acceptance"
+import json, pathlib, sys
+nodes = [json.loads(p.read_text()) for p in (pathlib.Path(sys.argv[1]) / "nodes").glob("*.json")]
+reviews = [n for n in nodes if n["nodeDefinitionId"] == "acceptance.codex_verifier_review"]
+assert len(reviews) == 1 and reviews[0]["status"] == "FAILED"
+assert "failure.category_hint" in json.dumps(reviews[0]["result"]["parse_error"])
+PY
+  pass "review-noise: prose cannot replace a required typed acceptance category"
+}
+
+assert_reread_reason() {
+  local workdir="$1" ws="$2"
+  local ws_dir="$workdir/.agent/workstreams/$ws"
+  local metrics="$ws_dir/metrics/workstream-metrics.json"
+  dualctl status --workdir "$workdir" "$ws" | grep -q 'Status: COMPLETED' \
+    || fail "reread-reason: the complete valid workflow must still finish"
+  ! grep -R "REREAD_POLICY_DENIED" "$ws_dir" >/dev/null \
+    || fail "reread-reason: repeated read still invalidated the artifact"
+  [[ -f "$metrics" ]] || fail "reread-reason: expected workstream metrics"
+  python3 - "$metrics" <<'PY' || fail "reread-reason: repeated read missing from telemetry"
+import json
+import sys
+
+metrics = json.load(open(sys.argv[1]))
+repeated = metrics.get("toolMetrics", {}).get("repeatedReadFiles", [])
+assert any(item.get("path") == "main.py" and item.get("count", 0) >= 2 for item in repeated)
+PY
+  pass "reread-reason: repeated read is telemetry and does not invalidate the artifact"
+}
+
+run_case() (
+  local case_name="$1"
+  local root="/tmp/dual-semantic-${case_name}-$$"
+  local repo="$root/repo"
+  local fake_bin="$root/bin"
+  mkdir -p "$root/home"
+  export HOME="$root/home"
+  export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }-Duser.home=$HOME"
+  setup_repo "$repo"
+  make_fake_acpx "$fake_bin"
+  log "Running $case_name"
+  local result workdir ws
+  result=$(run_until_boundary "$repo" "$case_name" "$fake_bin")
+  workdir="${result%%$'\t'*}"
+  ws="${result##*$'\t'}"
+  case "$case_name" in
+    plan-body) assert_plan_body "$workdir" "$ws" ;;
+    review-noise) assert_review_noise "$workdir" "$ws" ;;
+    reread-reason) assert_reread_reason "$workdir" "$ws" ;;
+    *) fail "unknown semantic case: $case_name" ;;
+  esac
+  if [[ "$KEEP" != "true" ]]; then
+    rm -rf "$root" "${repo}-agent-runs"
+  else
+    log "Kept $root"
+  fi
+)
+
+case "$CASE_NAME" in
+  all)
+    run_case plan-body
+    run_case review-noise
+    run_case reread-reason
+    ;;
+  plan-body|review-noise|reread-reason)
+    run_case "$CASE_NAME"
+    ;;
+  *)
+    usage
+    fail "unknown case: $CASE_NAME"
+    ;;
+esac
+
+pass "semantic boundary smoke complete"

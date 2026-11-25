@@ -18,7 +18,7 @@ class TaskContractTest {
     private static TaskContract sampleContract(ContractStatus status,
                                                 List<String> acceptanceCriteria,
                                                 List<String> humanQuestions) {
-        return new TaskContract(
+        return executionContract(
                 "tc-001",
                 1,
                 Instant.parse("2026-05-30T12:00:00Z"),
@@ -38,7 +38,7 @@ class TaskContractTest {
                 humanQuestions,
                 status,
                 1,
-                new TaskContract.Source("req-42", "agent-1")
+                source("req-42", "agent-1")
         );
     }
 
@@ -126,7 +126,7 @@ class TaskContractTest {
     void validateNeedsClarificationAllowsEmptyScopeIncluded() {
         // Scope with null included/excluded gets normalized to empty lists — that's OK
         TaskContract.Scope scope = new TaskContract.Scope(null, null);
-        TaskContract contract = new TaskContract(
+        TaskContract contract = executionContract(
                 "tc-002",
                 1,
                 Instant.now(),
@@ -141,7 +141,7 @@ class TaskContractTest {
                 List.of("Some question?"),
                 ContractStatus.NEEDS_CLARIFICATION,
                 1,
-                new TaskContract.Source("req-1", "agent-1")
+                source("req-1", "agent-1")
         );
 
         List<String> errors = TaskContractValidator.validate(contract);
@@ -150,7 +150,7 @@ class TaskContractTest {
 
     @Test
     void validateReadyForReviewRequiresExecutableBoundariesAndTests() {
-        var contract = new TaskContract(
+        var contract = executionContract(
                 "tc-003",
                 1,
                 Instant.now(),
@@ -167,7 +167,7 @@ class TaskContractTest {
                 List.of(),
                 ContractStatus.READY_FOR_REVIEW,
                 1,
-                new TaskContract.Source("req-1", "agent-1")
+                source("req-1", "agent-1")
         );
 
         var errors = TaskContractValidator.validate(contract);
@@ -212,7 +212,7 @@ class TaskContractTest {
     void validateRequiresTypedScopeOperationAndRejectsLegacyNewPrefix() {
         var missingOperation = new TaskContract.ScopeEntry("src/NewFile.java", null);
         var legacyPrefix = entry("new:src/NewFile.java", TaskContract.ScopeOperation.CREATE);
-        var contract = new TaskContract(
+        var contract = executionContract(
                 "tc-004",
                 1,
                 Instant.now(),
@@ -227,7 +227,7 @@ class TaskContractTest {
                 List.of(),
                 ContractStatus.READY_FOR_REVIEW,
                 1,
-                new TaskContract.Source("req-1", "agent-1")
+                source("req-1", "agent-1")
         );
 
         var errors = TaskContractValidator.validate(contract);
@@ -242,7 +242,7 @@ class TaskContractTest {
 
     @Test
     void caseDifferentPathsAreNotDuplicates() {
-        var contract = new TaskContract(
+        var contract = executionContract(
                 "tc-1", 1, java.time.Instant.parse("2026-07-24T00:00:00Z"),
                 "Case sensitivity test",
                 new TaskContract.Scope(
@@ -257,7 +257,7 @@ class TaskContractTest {
                 List.of(), List.of(), List.of(),
                 ContractStatus.READY_FOR_REVIEW,
                 1,
-                new TaskContract.Source("req-1", "agent-1")
+                source("req-1", "agent-1")
         );
 
         var errors = TaskContractValidator.validate(contract);
@@ -296,4 +296,31 @@ class TaskContractTest {
         assertTrue(TaskContractValidator.isCanonicalPath("src/go.mod"),
                 "non-whitelisted extension accepted");
     }
+    // Schema fixtures only: these references are not filesystem/approval proof.
+    private static TaskContract.Reference reference(String name) {
+        return new TaskContract.Reference("fixtures/" + name + ".json", "a".repeat(64));
+    }
+
+    private static TaskContract.Source source(String request, String creator) {
+        return new TaskContract.Source(request, creator, reference("proposal"), reference("goal-approval"));
+    }
+
+    private static TaskContract executionContract(String id, int version, Instant created, String objective,
+            TaskContract.Scope scope, List<String> acceptance, List<String> tests, List<String> constraints,
+            List<String> nonGoals, List<String> risks, List<String> ambiguities, List<String> questions,
+            ContractStatus status, int pass, TaskContract.Source source) {
+        var criteria = java.util.stream.IntStream.range(0, acceptance.size())
+                .mapToObj(i -> new TaskContract.Clause("A" + (i + 1), acceptance.get(i))).toList();
+        var requirements = java.util.stream.IntStream.range(0, tests.size())
+                .mapToObj(i -> new TaskContract.Clause("T" + (i + 1), tests.get(i))).toList();
+        var exits = criteria.stream().map(c -> new TaskContract.VerificationBinding(c.id(), "compare actual output",
+                TaskContract.Executor.AGENT, List.of(reference("environment")), List.of(),
+                TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS,
+                List.of(reference("feasibility")), "self-test", false, null)).toList();
+        return new TaskContract(2, TaskContract.Phase.EXECUTION, 1,
+                id, version, created, objective, scope, criteria, requirements, constraints, nonGoals, risks,
+                List.of(), ambiguities, questions, status, pass, source, reference("goal"),
+                List.of(reference("design-decision"), reference("plan-decision")), exits, List.of());
+    }
+
 }

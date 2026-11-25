@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "rtk",
+    "proxy",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+    "--format",
+    "json",
+    "claude",
+    "sessions",
+    "close",
+    "claude-main-ws-20261011T141651Z-MBC2-run-1791728580831"
+  ],
+  "exit": 0
+}

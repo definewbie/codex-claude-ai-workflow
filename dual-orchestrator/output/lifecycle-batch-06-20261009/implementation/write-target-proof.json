@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "concrete_faults": 22,
+  "kind": "one-off per-target supplement, not Maven counts or separate cold-JVM proof",
+  "targets": [
+    "plan",
+    "current",
+    "merge.patch",
+    "changed-files.txt",
+    "excluded-files.txt"
+  ],
+  "before_after": true,
+  "reader_pending_rejection": true,
+  "repair_zero_reapply": true,
+  "prior_harness_fail": "write-target-1-fail1.log, Path.equals alias failed to select actual injection; not production counterproof"
+}

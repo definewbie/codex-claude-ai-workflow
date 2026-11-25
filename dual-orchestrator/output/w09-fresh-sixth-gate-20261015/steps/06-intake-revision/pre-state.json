@@ -1,0 +1,49 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261014T234009Z-RN9X",
+    "workflowInstanceId": "wf-ws-20261014T234009Z-RN9X",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-intake-claude_brainstorm-006"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000007",
+    "updatedAt": "2026-10-14T23:42:46.845652Z",
+    "commitSequence": 23
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-intake-claude_brainstorm-006",
+    "nodeDefinitionId": "intake.claude_brainstorm",
+    "kind": "TASK",
+    "handlerType": "acpx.agent_run",
+    "status": "READY",
+    "stageId": "stage-intake",
+    "iterationId": "iter-002",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.stderr.log",
+      ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.transcript.log",
+      ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.json",
+      ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/binding.json",
+      ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.contract.json"
+    ],
+    "inputTransition": {
+      "condition": "unconditional",
+      "transition_type": "normal",
+      "required": true,
+      "source_node_instance_id": "node-intake-decision-005",
+      "source_node_sha256": "6e8de30c35a2c395482ea0b1928105c9287d95d422a35a05afc06db811305766",
+      "purpose": "Seed the first Claude intake run with repo-scope context."
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 93.579
+}

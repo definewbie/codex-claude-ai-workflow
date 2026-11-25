@@ -1,0 +1,13 @@
+Human gate decided
+Workstream: ws-20260906T130900Z-SPM9
+Action: revise
+Running workflow until next gate...
+Step 1: gate.human_plan_approval -> WAITING_FOR_HUMAN (resumed workflow)
+
+Next actions:
+  1. Read the current review packet:
+     dualctl review show --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9 ws-20260906T130900Z-SPM9
+     packet: /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9/reviews/node-gate-human_plan_approval-040.md
+  2. Choose one action after review:
+     dualctl approve --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9 --run ws-20260906T130900Z-SPM9
+     dualctl revise --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9 --run --feedback-file feedback.md ws-20260906T130900Z-SPM9

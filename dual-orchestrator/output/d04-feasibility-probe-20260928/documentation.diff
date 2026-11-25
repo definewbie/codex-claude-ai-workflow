@@ -1,0 +1,35 @@
+--- before/dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ after/dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -420,6 +420,14 @@
+ 
+ 本轮没有认定成本收益已经发生不可接受偏差，也没有证明不存在偏差。已形成具体接口地图、候选契约、转移与失败切面；第一项的关键正向可用性仍未证明，故不提前扩展为工具服务或引擎开发。
+ 
++### 8.8 必要读取与禁止执行的离线探针（2026-09-28）
++
++用户要求先验证可行性。本轮[核验报告及原始证据](../../output/d04-feasibility-probe-20260928/feasibility-result.md)直接调用未修改的 acpx 宿主处理器，在临时样例完成 7 项断言：approve-reads/非交互 deny 下完整与分段读取可用，修改/创建/terminal 拒绝；deny-all 同时拒绝合法读取；terminal=false 配合 approve-all 仍能执行固定临时命令。最后一项证明能力声明不是请求时硬拒绝，不是候选配置已发生越权。只读上限须由请求消费者强制且不可运行时放宽，不能只设置 `--no-terminal`。
++
++固定 Codex 0.153.4 离线接受 `features.shell_tool=false`，但这只证明配置解析，不证明实际工具集合及读取可用。Codex adapter 业务代码未找到 ACP 读取调用，命中仅在内置 SDK；不能把宿主处理器通过当作模型工具链已接通，也不能据文本搜索断言引擎绝不支持读取。Claude 的 tools 集合接口有源码依据，原生 Read/Grep/Glob 与附加工具、配置合并、恢复的共同强制仍未实测。
++
++联合可行性仍未证明，D04 不冻结；本轮无模型调用、provider session、adapter/产品源码修改。下一证据须来自有界原生能力实验，而非再用文本 PASS 代替行为证明；依 §8.5 的授权和 Verification Gate 执行。若实验需要新工具服务、引擎修改或只能以允许受限 shell 换取读取，按 §8.6 停等用户选择。本次探针及结论为作者核验，未另经 CC 独立复审。
++
+ ## 9. D09：交付外部窗口与处置
+ 
+ 复用 DeliveryMergePlan 四状态；新增操作意图与观察字段，不新建交付状态机。建议 `apply_intent` 包含 operation id、candidate/ref/SHA、批准引用、canonical target Git identity、base/index/worktree 基准、expected tree；`observation` 保存检查到的 HEAD/index/worktree/commit 引用与检查时点。恢复的“已知/不明”由这些事实派生，failureCode 可显示未知，不能仅凭 status=FAILED 再 apply。
+--- before/dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -271,3 +271,5 @@
+ 随后用户带回该绑定候选的 CC PASS（2 LOW，无 WARN/FAIL），处置见详细设计 §14.3。§8.7 已补现有 ACP 读取比较及 readOnlyBinding 程序写点/归属盘点；同时纠正复审中 app-server FsReadFile/FsReadDirectory 与 ACP fs/read_text_file 的混同，不将现有客户端接口视为已接通模型工具。两项文字修订完成不等于可行性或写集已冻结；成本收益止损覆盖所有受影响边界，不仅 Codex 读取。
+ 
+ 用户明确要求：后续相关实施若发现成本与收益偏差，停止等其确认。此要求也约束设计阶段发现的扩围。按详细设计 §8.6 对照预期与实际证据，记录在当前 D04/W03 条目；需要引擎核心、额外工具服务/隔离平台，或损失读取/评审/合法续作收益等情况不得先做后报。停止受影响工作并提交成本、目标影响与选项，不能擅自切到同 provider、降低验收或覆写用户改动。其他独立且已授权的核验不受影响。
++
++2026-09-28 可行性探针：[离线报告](../../output/d04-feasibility-probe-20260928/feasibility-result.md)记录 7 项真实宿主 handler 断言及 pinned Codex 关闭 shell 开关的解析结果。宿主读可用、写/terminal 可拒绝，但 terminal=false 单独不强制；Codex 常规模型→ACP 读取未找到接通证据，原生无 execute 下读取仍未证明。D04/W03/W08 不据此关闭；下一证据是有界原生能力实验，授权和 Gate 沿详细设计 §8.5/§8.8，不自动进入产品实施或真实 provider 运行。
+--- before/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ after/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -6,6 +6,7 @@
+ 当前契约入口：[完整生命周期可靠性设计](20260923-dual-lifecycle-reliability-design.zh-CN.md)；[D01–D10 详细设计候选](20260928-dual-lifecycle-detailed-design.zh-CN.md)修订版与 D04 报告已获用户带回的 CC 复审 PASS（新增 1 LOW，无 WARN/FAIL）。READY 正向表示、BUSY/pending 设计义务经独立确认；D03 仅移除已完成的表示复核项。本次补“限制只读 provider 集合”选项及其跨 provider 评审分工代价，增量未经独立复审；D02 关联语义和 §13 其余枚举工作仍未完成，不是冻结版通过。
+ 用户已同意优先细化 D04 的现有 adapter 强制只读绑定，保留 Claude 作者／Codex 评审，并要求成本收益偏离时停等确认；具体止损见详细设计 §8.6/主清单 §8.2。[接口报告](../../output/d04-readonly-binding-design-20260928/binding-assessment.md)及详细设计 §8.2–§8.7 已获用户带回的 CC PASS（2 LOW，无 WARN/FAIL）；本次补 ACP 读取比较、readOnlyBinding 写点/归属盘点，并纠正 app-server 与 ACP 接口混同，增量未独立复审，见 §14.3。必要读取/无 execute 的共存、实际配置、session 传播和 writer 归属仍未证明；D04 未冻结，实施、提交、真实运行仍未授权。
+ 9·13 控制链设计保留为第一批参考；当前已有未提交实现及序列测试，尚未证明整体组合可靠交付。
++用户随后要求先验证可行性；[本轮离线探针](../../output/d04-feasibility-probe-20260928/feasibility-result.md)完成宿主处理器 7 项断言及 Codex shell 开关解析核验。ACP 宿主能力可用不等于模型入口已接通，原生必要读取与无写/execute 的联合条件仍未证明；D04 不冻结。本轮无模型调用或产品/adapter 源码改动；下一原生能力实验仍须满足详细设计 §8.5/§8.8 的授权和 Gate。
+ 2026-09-27 补记（R3）已获用户带回的第三轮 CC 设计层 PASS：前两轮问题均确认为设计层解决，无新增 WARN/FAIL，仅余 INFO-1。本次补记其前向记录/历史不回填边界，并澄清“无记录不等于未检查”，此澄清未经独立复审。整体设计评审收口；对账材料见下，I1 字段/写序及 I3/I4/I5/I6 等详细设计缺口仍在，不能据 PASS 开工。
+ 本轮交付[主工作清单、35 个相关文件对账与测试证据地图](20260927-dual-lifecycle-worklist.zh-CN.md)，保存工作区内容指纹和本轮 10 类 / 97 项离线测试通过证据；未修改 production、测试源码或历史 ledger，未运行产品 E2E。此前误启动的只读 CLI 调用已停止，未形成评审结论，与用户带回的有效评审区分。
+ 执行与纠偏办法（设计 §7.1）最新修订也已获 CC PASS，WARN-1、LOW-1/2 均解决，无新增必须修正项。规则评审收口，四项残余留待实际批次观察；实际主清单、相关 tracked/untracked 改动对账及覆盖地图已获用户带回的 CC 材料层 PASS（2 LOW，无 WARN/FAIL）；两项已按清单 §8 修订，W00 材料任务收口，增量由作者核验、未另经 CC 复审；读过 diff 与 97 项测试通过均不等于整个生命周期已验证。

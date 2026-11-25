@@ -1,0 +1,39 @@
+{
+  "exit": 0,
+  "elapsed_seconds": 0.048796750139445066,
+  "successful_complete_table": true,
+  "stderr": "",
+  "matching_rows": [],
+  "sessions": [
+    {
+      "name": "claude-main-ws-20261023T005431Z-9YYF-run-1792717427983",
+      "closed": true
+    },
+    {
+      "name": "codex-reviewer-ws-20261023T005431Z-9YYF",
+      "closed": true
+    },
+    {
+      "name": "claude-main-ws-20261023T005431Z-9YYF-run-1792718401135",
+      "closed": true
+    },
+    {
+      "name": "claude-main-ws-20261023T005431Z-9YYF-run-1792718732583",
+      "closed": true
+    },
+    {
+      "name": "claude-main-ws-20261023T005431Z-9YYF-run-1792719040009",
+      "closed": true
+    },
+    {
+      "name": "claude-main-ws-20261023T005431Z-9YYF-run-1792724160451",
+      "closed": true
+    },
+    {
+      "name": "claude-main-ws-20261023T005431Z-9YYF-run-1792967793610",
+      "closed": true
+    }
+  ],
+  "raw_table_sha256": "2cdbe3e4be182eda15f1c75586e6ce52f007630055947b149d1d1b5e6369afda",
+  "scope": "Current session/known workstream observation; not arbitrary subtree stop proof"
+}

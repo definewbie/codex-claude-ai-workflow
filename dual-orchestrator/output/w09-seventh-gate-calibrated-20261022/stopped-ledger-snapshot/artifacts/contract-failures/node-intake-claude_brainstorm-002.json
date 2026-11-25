@@ -1,0 +1,18 @@
+{
+  "schema_version" : 1,
+  "artifact_type" : "contract_failure_diagnostic",
+  "generated_at" : "2026-10-22T15:20:40.127258Z",
+  "workstream_id" : "ws-20261022T150557Z-Y2KB",
+  "node_instance_id" : "node-intake-claude_brainstorm-002",
+  "node_id" : "intake.claude_brainstorm",
+  "handler_type" : "acpx.agent_run",
+  "category" : "missing_agent_result",
+  "reason" : "AGENT_RESULT_MISSING",
+  "message" : "No readable agent output artifact found for contract validation.",
+  "source_output_ref" : "",
+  "required_keys" : [ "summary", "decision" ],
+  "allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW" ],
+  "details" : { },
+  "recovery_hint" : "Ask the agent step to emit one strict AgentResultEnvelope JSON object as its final assistant message for intake.claude_brainstorm.",
+  "recommended_owner" : "agent_or_prompt"
+}

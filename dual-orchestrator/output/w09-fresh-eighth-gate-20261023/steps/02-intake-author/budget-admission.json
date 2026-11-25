@@ -1,0 +1,37 @@
+{
+  "input": {
+    "actual_tokens": 0,
+    "completed_calls": 0,
+    "active_seconds": 1.65,
+    "remaining_mainline": [
+      "intake.claude_brainstorm",
+      "intake.codex_product_review",
+      "design.claude_design",
+      "design.codex_arch_review",
+      "plan.claude_plan",
+      "plan.codex_plan_review",
+      "implement.claude_implement",
+      "implement.claude_self_test_report",
+      "acceptance.codex_verifier_review"
+    ],
+    "new_extra_calls": [],
+    "measurement_complete": true,
+    "external_pending": false
+  },
+  "result": {
+    "result": "ALLOW_BUDGET_ONLY",
+    "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+    "required_token_reserve": 1105000,
+    "required_call_reserve": 10,
+    "remaining_tokens": 1700000,
+    "remaining_calls": 18,
+    "warning": false
+  },
+  "observation": {
+    "completed_runs": [],
+    "actual_tokens": 0,
+    "completed_calls": 0,
+    "measurement_complete": true,
+    "cost_note": "SDK amounts retained; not actual subscription payment. No invented mixed-provider price."
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "checked_at": "2026-10-10T13:56:25.711914+08:00",
+  "source_count": 654,
+  "source_mismatches": [],
+  "application_jars": {
+    "dual-cli": {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+      "sha256": "166d4dba02b117867178308f88f2f5dc43c17e2ca2eaee72d55af9d74cee03be"
+    },
+    "dual-server": {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/target/dual-server-0.1.0-SNAPSHOT.jar",
+      "sha256": "ceb8e91d0d4a3b2d98e57918b36bba7c194f9183aec0aa1701d527a820d124b3"
+    }
+  },
+  "target_parent_absent": true,
+  "plans_before": {
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "799f4bccfaa742e9cde9b0cf08e25dc9a844115ad5446939d6fb0e7d8a3a77ee",
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "3c37e1c462f394e4a7f1ab7bcd2c2355f52d076e0b77c0073407a3d6c55d1996"
+  }
+}

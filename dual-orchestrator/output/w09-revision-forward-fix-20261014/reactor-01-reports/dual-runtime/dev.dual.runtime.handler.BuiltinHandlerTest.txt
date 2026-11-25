@@ -1,0 +1,14 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.runtime.handler.BuiltinHandlerTest
+-------------------------------------------------------------------------------
+Tests run: 67, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 15.31 s <<< FAILURE! -- in dev.dual.runtime.handler.BuiltinHandlerTest
+dev.dual.runtime.handler.BuiltinHandlerTest.requirementGateProjectsExactTaskContractProposalSubject -- Time elapsed: 0.017 s <<< ERROR!
+java.lang.IllegalArgumentException: validated task-contract proposal lineage is required
+	at dev.dual.runtime.handler.TaskContractProposalReference.publishVerified(TaskContractProposalReference.java:100)
+	at dev.dual.runtime.handler.TaskContractProposalReference.publishInitial(TaskContractProposalReference.java:51)
+	at dev.dual.runtime.handler.ApprovedTaskContractProposalFixture.publish(ApprovedTaskContractProposalFixture.java:49)
+	at dev.dual.runtime.handler.BuiltinHandlerTest.requirementGateProjectsExactTaskContractProposalSubject(BuiltinHandlerTest.java:141)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+

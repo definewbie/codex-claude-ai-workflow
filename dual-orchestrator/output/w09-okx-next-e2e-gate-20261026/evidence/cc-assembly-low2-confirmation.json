@@ -1,0 +1,15 @@
+{
+  "finding": "CC LOW-2",
+  "status": "CONFIRMED",
+  "file": "run-one-step.py",
+  "file_sha256": "f8d7d07d436787461e04d170c61db9d51fdb6cd384732ccb57873bef8e9550b6",
+  "environment_assignment_line": 50,
+  "popen_line": 58,
+  "assignment": "env = launch['environment']",
+  "popen": "subprocess.Popen(args, cwd=workspace, env=env, stdout=so, stderr=se)",
+  "single_top_level_env_assignment": true,
+  "frozen_launch_sha256": "ed183a55113d8c86a56e92f4b058b24a2106f1a85be6331b41c5a111b8d3be29",
+  "all_frozen_observer_inputs_match": true,
+  "runtime_authorized": false,
+  "model_calls": 0
+}

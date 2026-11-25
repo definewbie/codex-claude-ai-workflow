@@ -1,0 +1,7 @@
+请只读评审 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator，遵守 AGENTS.md。
+
+入口：docs/testing/20260929-d04-three-boundary-verification-checklist.zh-CN.md；详设 §8.22、主清单及冻结条件已同步，修订说明/代码锚点/diff 在 output/d04-three-boundary-checklist-20260929/。
+
+请独立核对三类边界的 owner、事实消费者与拒绝时点：原生权限强制、业务 scope 校验、源码漂移与证据失效。检查两种角色、迟到写入、合法复用、完整失败/恢复及兄弟路径；判断是否误把事后拒绝写成事前防护、降低既有验收，或引入未经批准的新强制范围。
+
+按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给分级发现和未核验范围，不预设结论。只评审，不改文件，不运行 native/provider/探针，不启动 agent，不进入实现。

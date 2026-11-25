@@ -1,0 +1,38 @@
+{
+  "observed_at": "2026-10-11T14:51:15.198977+08:00",
+  "operations": [
+    {
+      "record_id": "01a1294c-d0dc-7711-b5ff-74b18d96e7d2",
+      "name": "codex-reviewer-ws-20261011T044656Z-BMDJ",
+      "closed_observed": true,
+      "proof": "stop-session-operations/01a1294c-d0dc-7711-b5ff-74b18d96e7d2"
+    },
+    {
+      "record_id": "bc943490-00c4-466e-ae58-8e9054ca69c7",
+      "name": "claude-main-ws-20261011T044656Z-BMDJ-run-1791694107574",
+      "closed_observed": true,
+      "proof": "stop-session-operations/bc943490-00c4-466e-ae58-8e9054ca69c7"
+    },
+    {
+      "record_id": "25354bf6-942a-464e-a046-4178013baebd",
+      "name": "claude-main-ws-20261011T044656Z-BMDJ-run-1791694532578",
+      "closed_observed": true,
+      "proof": "stop-session-operations/25354bf6-942a-464e-a046-4178013baebd"
+    },
+    {
+      "record_id": "2c72e475-4f58-42e5-8377-2fa53e182c46",
+      "name": "claude-main-ws-20261011T044656Z-BMDJ-run-1791699968740",
+      "closed_observed": true,
+      "proof": "stop-session-operations/2c72e475-4f58-42e5-8377-2fa53e182c46"
+    },
+    {
+      "record_id": "8b971cae-40eb-4a77-b91e-5f43981b9ef4",
+      "name": "claude-main-ws-20261011T044656Z-BMDJ-run-1791700286570",
+      "closed_observed": true,
+      "proof": "stop-session-operations/8b971cae-40eb-4a77-b91e-5f43981b9ef4"
+    }
+  ],
+  "scope": "these five named native sessions only; no assertion every descendant has stopped",
+  "all_prompt_results_completed": true,
+  "new_attempt_authority": false
+}

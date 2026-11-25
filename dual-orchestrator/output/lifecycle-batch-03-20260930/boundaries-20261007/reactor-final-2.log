@@ -1,0 +1,106 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+D08 topology: pid=14920, kernel=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, kernelLoader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, holderLoader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, holderSource=file:/Users/kriswang/.m2/repository/com/yomahub/liteflow-core/2.16.0/liteflow-core-2.16.0.jar
+Default workflow written.
+Path: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-8446709441949145444/workflow.json
+Workflow: agent-lifecycle-full@10
+Nodes: 34
+Edges: 61
+Active node marked ready for retry
+Workstream: ws-cli-retry-diagnostic
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-17299961253889113762 ws-cli-retry-diagnostic
+D08 CliLedgerFactory: property=null, environment=null, effective=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=44101
+D08 CliLedgerFactory: property=liteflow, environment=null, effective=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=44101
+D08 CliLedgerFactory: property=builtin, environment=null, effective=dev.dual.core.flow.BuiltInFlowOrchestrationKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=44101
+Calibration candidate decided
+Workstream: ws-cal
+Candidate: candidate-3
+Status: ACCEPTED
+Path: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-8456705863133986875/.agent/workstreams/ws-cal/calibration/candidates/candidate-3.json
+Delivery: BLOCKED
+Reason: final acceptance occurrence is missing
+{
+  "canApprove" : false,
+  "canCancel" : true,
+  "grant" : {
+    "schemaVersion" : 1,
+    "workstreamId" : "ws-cli-network",
+    "sourceNodeInstanceId" : "node-verify-tests-001",
+    "targetNodeDefinitionId" : "verify.tests",
+    "definitionSha256" : "e00dda3709007990cb5de7a3edbb6d822e60f2ca413a62393573bb8731e56ea4",
+    "domains" : [ "api.example.org", "packages.example.org" ],
+    "note" : "approved tests",
+    "approvedAt" : "2026-10-07T00:45:56.885241Z",
+    "state" : "PENDING",
+    "claimedNodeInstanceId" : "",
+    "claimedRunId" : ""
+  },
+  "targets" : [ "verify.tests" ],
+  "grantRef" : ".agent/workstreams/ws-cli-network/execution-authority/network-grants/grant-3b7e9f9f-1ea2-419a-8f0d-616aa37210ea.json",
+  "scope" : "one_execution"
+}
+{
+  "canApprove" : true,
+  "canCancel" : false,
+  "grant" : {
+    "schemaVersion" : 1,
+    "workstreamId" : "ws-cli-network",
+    "sourceNodeInstanceId" : "node-verify-tests-001",
+    "targetNodeDefinitionId" : "verify.tests",
+    "definitionSha256" : "e00dda3709007990cb5de7a3edbb6d822e60f2ca413a62393573bb8731e56ea4",
+    "domains" : [ "api.example.org", "packages.example.org" ],
+    "note" : "approved tests",
+    "approvedAt" : "2026-10-07T00:45:56.885241Z",
+    "state" : "CANCELLED",
+    "claimedNodeInstanceId" : "",
+    "claimedRunId" : ""
+  },
+  "targets" : [ "verify.tests" ],
+  "grantRef" : ".agent/workstreams/ws-cli-network/execution-authority/network-grants/grant-3b7e9f9f-1ea2-419a-8f0d-616aa37210ea.json",
+  "scope" : "one_execution"
+}
+Human gate decided
+Workstream: ws-review-decide-approve
+Action: approve
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-12310415275962831186 ws-review-decide-approve
+Human gate decided
+Workstream: ws-review-decide
+Action: reject
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-6427005757034500455 ws-review-decide
+Human gate approved
+Workstream: ws-review-approve-terminal
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-13394032383262903958 ws-review-approve-terminal
+Action need recorded. Gate remains waiting; no execution was authorized.
+Action need recorded. Gate remains waiting; no execution was authorized.
+Recovery state: WAITING_FOR_RECOVERY
+Workstream: ws-stale-command
+Next: inspect recovery; UNKNOWN requires a structured decision and does not permit ordinary retry.
+reap ws=ws-done status=COMPLETED distinct=0 closed=0 failed=0
+skip ws=ws-running status=RUNNING (not terminal)
+reaped=1 skipped=1 statusFailed=0 closeFailed=0
+reap ws=ws-close-failed status=WAITING_FOR_RECOVERY explicit=true distinct=1 closed=0 failed=1
+No workstreams found at /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-17112569955840122638/.agent/workstreams
+reap ws=ws-recoverable status=WAITING_FOR_RECOVERY explicit=true distinct=1 closed=1 failed=0
+skip ws=ws-running-selected status=RUNNING (not stopped or recoverable)
+Workstream ledger not found: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-1547756734605753536/.agent/workstreams/ws-missing/workflow/current.json
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.4)
+
+2026-10-07T08:46:02.127+08:00  INFO 44169 --- [           main] o.a.maven.surefire.booter.ForkedBooter   : Starting ForkedBooter v3.5.2 using Java 25.0.3 with PID 44169 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server)
+2026-10-07T08:46:02.128+08:00  INFO 44169 --- [           main] o.a.maven.surefire.booter.ForkedBooter   : No active profile set, falling back to 1 default profile: "default"
+2026-10-07T08:46:02.613+08:00  INFO 44169 --- [           main] o.a.maven.surefire.booter.ForkedBooter   : Started ForkedBooter in 0.601 seconds (process running for 0.869)
+D08 ServerLedgerFactory: property=null, environment=null, effective=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=44169
+D08 ServerLedgerFactory: property=liteflow, environment=null, effective=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=44169
+D08 ServerLedgerFactory: property=builtin, environment=null, effective=dev.dual.core.flow.BuiltInFlowOrchestrationKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=44169

@@ -1,0 +1,39 @@
+{
+  "suites": [
+    {
+      "name": "dev.dual.runtime.RunningStateGuardTest",
+      "tests": "27",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": null
+    },
+    {
+      "name": "dev.dual.runtime.handler.AgentRunCommitProtocolTest",
+      "tests": "11",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": null
+    },
+    {
+      "name": "dev.dual.runtime.handler.PhasedContractContinuationTest",
+      "tests": "10",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": null
+    },
+    {
+      "name": "dev.dual.runtime.handler.TaskContractProjectionVerifierTest",
+      "tests": "9",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": null
+    }
+  ],
+  "tests": 57,
+  "live_provider_runs": 0,
+  "source_log": "../protocol-consumers-15.log"
+}

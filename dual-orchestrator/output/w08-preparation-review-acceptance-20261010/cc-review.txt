@@ -1,0 +1,44 @@
+W08 准备批次（G01 修正 + G02–G04）· 独立复审
+
+结论：PASS。G01 合法阻塞已解除且严格拒绝全部保留；证据分层完整（先红→聚焦 108→单轮全模块 1,755/206/0→发行元数据核验→acpx 实际 build-info）；更新后的 Gate 具备可执行性与合理 ROI（9 节点修正+调用池算术显式化；G05 候选小型可验）。下一步唯一剩余：G05 交你批准。真实运行维持 NO-GO。
+
+1. G01 修正核验（评审重点一）
+
+合法阻塞解除：旧指令（“复制已批准实现范围”）经我全主源 grep 清零；先红证据（旧 GOAL 含复制指令、EXECUTION 缺精确约束两项预期失败）保留；修正后 GOAL 下 canonical 提案可到独立 reviewer（included 为空不阻塞设计）、EXECUTION 才授精确范围——分期语义与提示词一致。
+
+严格拒绝保留：同族表逐行核对——DesignScopeValidator 的 canonical/excluded/control 强制未动、GOAL 不授写、implement 只渲染已批 EXECUTION 文件、评审不等于执行批准、correction 用当前 typed contract 且格式修正不造批准/观察。我的上轮 LOW-1（GOAL 负向渲染断言）已入 Cannot-bypass（“GOAL 旧指令负向、EXECUTION 精确指令正向”）。链未动（L/R 协议零修改），四变体/inline-worker/失败写点/冷 JVM 由当轮全回归承接。
+
+2. G02–G04 与证据分层（评审重点二）
+
+- G02：以实际 build-info/config/help 取代静态声明歧义——build-info 与受审 1517f828 一致，静态记录不一致问题以运行时核验消解；装配边界明确（本仓 wrapper、timeout 600、liteflow；resolved config 默认 approve-all 不当许可；contract_discovery 无 C/X；correction deny-all；未发生 ask 的 lane 记 NOT_EXERCISED）。
+- G03：AC-1/2 真实 unittest、AC-3 真实 read/例核对，executor/ev径具名；readiness 登记在真实 GOAL 后的原等待门产生有效引用（拒绝 fresh 前假 ref）；宿主 Python 观察如实不证原生工具，缺工具停止、转 operator 须改合同重批。
+- G04：发行核验完整（内嵌模块字节一致、14 资源、6 次 CLI 操作 e Gate 终检含 config/launch/PATH/实际 R01。
+- 分层：先红→聚焦→单轮全模块→元数据→未证（真实模型/原生工具/浏览器）——各层不互冒；654 输入前后一致、不拼旧绿灯；三项自查纠偏（预算 6555→精简 67
+  字符不改守卫；发行脚本目录名 bug 以具名 dist 重核；8→9 节点修 确。
+
+3. Gate 可执行性与 ROI（评审重点三）
+
+链（§5）与 B01–B06 实现逐段对应：GOAL→复评→EXECUTION→资格/dispa 验收→最终门→L07/commit/finalize，每段有失败出口与已实现owner。调用池算术（18 次：9 节点+2 读取前缀=7 余量；readiness 重跑 2 则余 5）是预算可执行性的关键补充——上限可检测、路径可计数。G05 候选（换行规范化、临时
+target、60min/160k token）对首例是正确形状：足够小以止损、足够 iff 可验）。task-requirement 与 harness 材料分离正确。
+
+4. 六维
+
+Declared=用户准备授权+分期批准+CC G01/LOW-1 ✓；Proven=先红后绿+据/发行核验（真实模型如实未证）✓；Consumed=renderer/typedoutput→原 validator/compile/qualification/recovery ✓；Enforced before=原 validator 采纳前/qualification dispatch 前/人门交付前——prompt 纠正不冒称新硬机制
+✓；Failure route=原 D02/D06/D07/D09 + 前提不齐停止 + 无历史 res正向渲染+提案不写/未批零实现/非法路径无发布常驻 ✓。
+
+5. 分级发现
+
+无 WARN/FAIL。
+
+INFO-1 · G02 以实际输出消解静态歧义是正确方法——比修历史审计文件准）。
+
+INFO-2 · G05 的小任务选择恰当：首 Gate 的目的是验证链而非模型能“链故障”与“模型能力不足”的信号分离——这正是 FAIL/INVALID判别的基础。
+
+6. 尚未核验范围
+
+提示词测试内部断言（负向断言所在用例未逐行定位——先红 XML 与聚焦覆盖为据）；verification-exits.md/criterion-exit-candidates.json
+逐条；release-identity.json 明细；G05 任务全文与 target 隔离细  与授权一致）。
+
+7. 下一步
+
+准备批次收口。唯一剩余动作：你批准 G05（任务候选、临时 target、 额、关键/最终门与 commit 责任）→ Gate 材料独立评审 →真实运行授权。届时产生的真实观察（原生 ask、C/X、R02/R03、交付）将首次检验这条从 9·17 评估建起的全部机器。按约定：本 PASS 不授权真实运行。

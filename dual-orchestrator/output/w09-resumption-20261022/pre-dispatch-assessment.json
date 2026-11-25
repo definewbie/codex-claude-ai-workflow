@@ -1,0 +1,48 @@
+{
+  "checked_at": "2026-10-22T21:05:02.835202+08:00",
+  "status": "INVALID_PRECONDITION_BEFORE_PROVIDER_DISPATCH",
+  "user_authorization": "那可以继续之前没完成的工作了，我审批通过",
+  "approved_scope": "Resume pending W09 seventh case within existing 1700000-token / 18-request / 3600-active-second limits; no blanket business-gate approval",
+  "initial_ledger_expected_files": 21,
+  "missing_initial_ledger_files": [
+    "workstream.json",
+    "settings.json",
+    "timeline.jsonl",
+    "requirement.md",
+    "timeline.json",
+    "events.jsonl",
+    "projection-status.json",
+    "metrics/workstream-metrics.md",
+    "metrics/workstream-metrics.json",
+    "nodes/node-context-intake_claude_brainstorm-001.json",
+    "checkpoints/checkpoint-initial.json",
+    "workspaces/wsp-20261016T142045Z-MWCF.json",
+    "current/iteration.json",
+    "current/checkpoint.json",
+    "current/stage.json",
+    "workflow/instance.json",
+    "workflow/current.json",
+    "workflow/definition.json",
+    "iterations/iter-001.json",
+    "stages/01-design/stage.json",
+    "stages/01-design/iterations/001/iteration.json"
+  ],
+  "changed_present_initial_ledger_files": [],
+  "actual_ledger_files": [],
+  "git_metadata_present": {
+    "workspace": false,
+    "target": true
+  },
+  "live_paths": {
+    "parent": "/private/tmp/dual-w09-newlines-20261016-fresh-07",
+    "target": "/private/tmp/dual-w09-newlines-20261016-fresh-07/target",
+    "workspace": "/private/tmp/dual-w09-newlines-20261016-fresh-07/worktree",
+    "workstream": "ws-20261016T142045Z-UDHW",
+    "ledger": "/private/tmp/dual-w09-newlines-20261016-fresh-07/worktree/.agent/workstreams/ws-20261016T142045Z-UDHW"
+  },
+  "fresh_provider_dispatches_this_turn": 0,
+  "source_release_configuration_observer_check": "MATCH",
+  "safety": "No ledger reconstruction, retry, initialization or provider dispatch performed",
+  "next_action": "User decision on replacing missing never-run temporary instance with a newly initialized isolated instance under the same one-case budget; no new production fix or full regression indicated",
+  "cause": "Unknown; missing files confirmed, cleanup mechanism not established"
+}

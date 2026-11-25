@@ -1,0 +1,10 @@
+{
+  "classes": [
+    "AcpxAgentTaskHandler",
+    "AcpxUsageReader",
+    "AcpxStreamWireLine"
+  ],
+  "acpx_patch": "UNCHANGED",
+  "domain_schema": "UNCHANGED",
+  "definition_instance_execution": "Execution usage observation only"
+}

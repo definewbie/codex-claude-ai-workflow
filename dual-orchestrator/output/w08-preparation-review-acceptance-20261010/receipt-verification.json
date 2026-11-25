@@ -1,0 +1,26 @@
+{
+  "review_source": "User pasted CC independent review; raw text includes missing/garbled fragments, retained without reconstruction",
+  "received_status": "PASS",
+  "material_identity": {
+    "count": 439,
+    "mismatches": []
+  },
+  "source_identity": {
+    "count": 654,
+    "mismatches": []
+  },
+  "application_jars": {
+    "dual-cli": {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+      "matches": true
+    },
+    "dual-server": {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/target/dual-server-0.1.0-SNAPSHOT.jar",
+      "matches": true
+    }
+  },
+  "target_proposal_exists": false,
+  "tests_rerun": false,
+  "provider_runs": 0,
+  "new_execution_authority": false
+}

@@ -1,0 +1,11 @@
+{
+  "status": "PASS_RECEIPT_MATERIAL_CHECK_ONLY",
+  "new_planning_links_missing": [],
+  "code_or_test_changes": 0,
+  "tests_run": 0,
+  "native_provider_calls": 0,
+  "new_agent_count": 0,
+  "scope": "Receipt and two current planning documents only; old submitted bundles untouched",
+  "current_design_status": "DESIGN_FINALIZED_AWAITING_IMPLEMENTATION_AUTHORIZATION",
+  "sixth_started": false
+}

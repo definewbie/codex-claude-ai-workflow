@@ -1,0 +1,24 @@
+{
+  "id": "d04-native-child-boundary-20260930",
+  "status": "PREPARED_NOT_AUTHORIZED",
+  "binary": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+  "host": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex-code-mode-host",
+  "binarySha256": "b973d440acac501fd2594a43e7ca9ce41e0a65b9dfb28d0d7a7837c99e1261e3",
+  "hostSha256": "d8a2222e017342718d16a5dbe092921c628961f812f62f42036b8d960e1ffe56",
+  "cases": [
+    "read_only",
+    "implement",
+    "cancel"
+  ],
+  "limits": {
+    "sessions": 3,
+    "childrenPerSession": 1,
+    "requestsPerSession": 12,
+    "totalRequests": 36,
+    "secondsPerSession": 80,
+    "totalSeconds": 300,
+    "lateObservationSeconds": 25,
+    "realProviderCalls": 0,
+    "automaticRetries": 0
+  }
+}

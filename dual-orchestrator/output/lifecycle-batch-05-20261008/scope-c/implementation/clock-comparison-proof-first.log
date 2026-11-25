@@ -1,0 +1,20 @@
+Exception in thread "main" java.lang.RuntimeException: java.lang.IllegalStateException: an explicit ledger session is required
+	at dev.dual.runtime.handler.ClockComparisonProof.lambda$main$0(ClockComparisonProof.java:28)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.output(PhasedContractContinuationTest.java:328)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow$1.execute(PhasedContractContinuationTest.java:312)
+	at dev.dual.runtime.WorkflowRuntime.executeNode(WorkflowRuntime.java:365)
+	at dev.dual.runtime.WorkflowRuntime.lambda$executeAndRecordNode$0(WorkflowRuntime.java:327)
+	at dev.dual.runtime.handler.EvidenceCollection.execute(EvidenceCollection.java:94)
+	at dev.dual.runtime.WorkflowRuntime.executeAndRecordNode(WorkflowRuntime.java:326)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveNode(WorkflowRuntime.java:236)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveSnapshot(WorkflowRuntime.java:197)
+	at dev.dual.runtime.WorkflowRuntime.resumeWithinExecution(WorkflowRuntime.java:136)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:105)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.untilPause(PhasedContractContinuationTest.java:399)
+	at dev.dual.runtime.handler.ClockComparisonProof.main(ClockComparisonProof.java:30)
+Caused by: java.lang.IllegalStateException: an explicit ledger session is required
+	at dev.dual.ledger.file.WorkflowFileLedger.files(WorkflowFileLedger.java:89)
+	at dev.dual.runtime.handler.VerificationReadiness.activeRecords(VerificationReadiness.java:258)
+	at dev.dual.runtime.handler.VerificationReadiness.validateBindings(VerificationReadiness.java:128)
+	at dev.dual.runtime.handler.ClockComparisonProof.lambda$main$0(ClockComparisonProof.java:21)
+	... 12 more

@@ -1,0 +1,78 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-intake-claude_brainstorm-006",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "FAILED",
+  "stageId" : "stage-intake",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791728450947/binding.json", ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.contract.json" ],
+  "inputTransition" : {
+    "required" : true,
+    "source_node_instance_id" : "node-intake-decision-005",
+    "source_node_sha256" : "23360ef67472b3738e1082726a19f627d2f695cc4568a85983cc7dc520eeaa2a",
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "condition" : "unconditional",
+    "transition_type" : "normal"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728580831/outputs/intake-claude-brainstorm.stderr.log", ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728580831/outputs/intake-claude-brainstorm.transcript.log", ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728580831/outputs/intake-claude-brainstorm.json", ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791728580831/binding.json", ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/contract-failures/node-intake-claude_brainstorm-006.json", ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/contract-failures/node-intake-claude_brainstorm-006.md" ],
+  "result" : {
+    "adapter_signals" : [ ],
+    "agent" : "claude",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "task_contract_proposal",
+      "errorCode" : "TASK_CONTRACT_REVISION_PATCH_INVALID",
+      "errorMessage" : "task contract revision patch could not be merged",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : false
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : false,
+      "operatorMessage" : "The agent result was valid, but one or more required artifact projections failed validation.",
+      "primaryReason" : "required_artifact_contract_failed",
+      "recoveryCategory" : "ARTIFACT_CONTRACT_FAILURE",
+      "retryPolicy" : "MANUAL_ONLY",
+      "secondarySignals" : [ ],
+      "status" : "CONTRACT_FAILED"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "READY_FOR_PRODUCT_REVIEW",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW" ],
+    "contract_failure_diagnostic_markdown_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/contract-failures/node-intake-claude_brainstorm-006.md",
+    "contract_failure_diagnostic_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/contract-failures/node-intake-claude_brainstorm-006.json",
+    "contract_node_id" : "intake.claude_brainstorm",
+    "contract_required_keys" : [ "decision", "summary" ],
+    "exit_code" : 0,
+    "message" : "task contract revision patch could not be merged",
+    "output_complete" : true,
+    "parse_error" : {
+      "code" : "TASK_CONTRACT_REVISION_PATCH_INVALID",
+      "details" : {
+        "errors" : [ "REVISION_BASE_PROPOSAL_SHA256_MISMATCH" ]
+      },
+      "message" : "task contract revision patch could not be merged"
+    },
+    "process_usability" : "EXITED_ZERO",
+    "reason" : "AGENT_OUTPUT_CONTRACT_VIOLATION",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791728580831/binding.json",
+    "repository_fact_binding_sha256" : "dbfe1492d1af48febf89e357fe8d3a905988084c7aff6640b6f42a68a599a01f",
+    "run_id" : "run-1791728580831",
+    "run_metadata" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728580831/run.json",
+    "session" : "claude-main-ws-20261011T141651Z-MBC2-run-1791728580831",
+    "transcript_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728580831/outputs/intake-claude-brainstorm.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728580831/outputs/nxe-1791728580794-189e0763-completion.json",
+    "completion_sha256" : "f558de074a94fbc17a9fdbad1fd4ed0eba9de41a3109592b8119235e2e6a90bd"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1791728580794-189e0763",
+  "startedAt" : "2026-10-11T14:23:00.804172Z",
+  "finishedAt" : "2026-10-11T14:24:29.049628Z"
+}

@@ -35,12 +35,16 @@ record AcpxStreamWireLine(
     }
 
     record Request(
+            String sessionId,
             String promptText,
             String permissionToolCallId,
             String permissionToolKind,
             String permissionTitle,
             String permissionCommand,
-            List<String> permissionOptions
+            List<String> permissionOptions,
+            java.util.Map<String,String> permissionOptionKinds,
+            JsonNode permissionRawInput,
+            String permissionRequestJson
     ) {
         Request {
             promptText = promptText == null ? "" : promptText;
@@ -52,7 +56,7 @@ record AcpxStreamWireLine(
         }
     }
 
-    record Result(String sessionId, String stopReason, Usage usage, String permissionOutcome, String permissionOptionId) {
+    record Result(String sessionId, String stopReason, Usage usage, String permissionOutcome, String permissionOptionId, String responseJson) {
         Result {
             sessionId = sessionId == null ? "" : sessionId;
             stopReason = stopReason == null ? "" : stopReason;
@@ -69,7 +73,9 @@ record AcpxStreamWireLine(
             String text,
             String toolCallId,
             String toolName,
-            UsageUpdate usageUpdate
+            UsageUpdate usageUpdate,
+            JsonNode toolUpdate,
+            JsonNode nativePermission
     ) {
         Notification {
             sessionId = sessionId == null ? "" : sessionId;
@@ -123,6 +129,43 @@ record AcpxStreamWireLine(
             return malformed();
         }
 
+        return fromNode(node, trimmed);
+    }
+
+    /**
+     * Human-readable stdout mixes pretty-printed model text with complete RPC lines.
+     * Only successfully parsed RPC-shaped objects are frames here; the strict
+     * session NDJSON entry point above retains its existing MALFORMED semantics.
+     */
+    static java.util.Optional<AcpxStreamWireLine> transcriptFrame(String line) {
+        if (line == null || !line.stripLeading().startsWith("{")) return java.util.Optional.empty();
+        JsonNode node;
+        try {
+            node = MAPPER.reader().with(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+                    .readTree(line);
+        } catch (Exception readableFragment) {
+            return java.util.Optional.empty();
+        }
+        if (node == null || !node.isObject()
+                || !(node.has("jsonrpc") || node.has("method")
+                    || (node.has("id") && (node.has("result") || node.has("error")))
+                    || isTypedFailure(text(node.get("type")), "", node.get("error"))))
+            return java.util.Optional.empty();
+        // A recognized frame with invalid structure must not disappear into text
+        // or let a complete historical response wash it into success.
+        if ((node.has("jsonrpc") && (!node.get("jsonrpc").isTextual() || !"2.0".equals(node.get("jsonrpc").asText())))
+                || (node.has("id") && !(node.get("id").isIntegralNumber()
+                    || (node.get("id").isTextual() && !node.get("id").asText().isBlank())))
+                || (node.has("method") && (!node.get("method").isTextual() || node.get("method").asText().isBlank()))
+                || (node.has("params") && !node.get("params").isObject())
+                || (node.has("result") && (!node.get("result").isObject() || !node.has("id")
+                    || node.has("error") || node.has("method")))
+                || (node.has("error") && (!node.get("error").isObject() || !node.has("id"))))
+            return java.util.Optional.of(malformed());
+        return java.util.Optional.of(fromNode(node, line.strip()));
+    }
+
+    private static AcpxStreamWireLine fromNode(JsonNode node, String trimmed) {
         var requestId = id(node.get("id"));
         var method = text(node.get("method"));
         var errorNode = node.get("error");
@@ -164,7 +207,8 @@ record AcpxStreamWireLine(
                             text(resultNode.get("stopReason")),
                             usage(resultNode.get("usage")),
                             text(resultNode.at("/outcome/outcome")),
-                            text(resultNode.at("/outcome/optionId"))
+                            text(resultNode.at("/outcome/optionId")),
+                            trimmed
                     ),
                     null,
                     null
@@ -177,12 +221,15 @@ record AcpxStreamWireLine(
                     requestId,
                     method,
                     new Request(
+                            text(node.at("/params/sessionId")),
                             text(node.at("/params/prompt/0/text")),
                             text(node.at("/params/toolCall/toolCallId")),
                             text(node.at("/params/toolCall/kind")),
                             text(node.at("/params/toolCall/title")),
                             permissionResource(node.at("/params/toolCall/rawInput")),
-                            strings(node.at("/params/options"), "optionId")
+                            strings(node.at("/params/options"), "optionId"),
+                            optionKinds(node.at("/params/options")),
+                            node.at("/params/toolCall/rawInput").deepCopy(), trimmed
                     ),
                     null,
                     null,
@@ -207,12 +254,24 @@ record AcpxStreamWireLine(
                             text(update.at("/content/text")),
                             text(update.get("toolCallId")),
                             text(update.at("/_meta/claudeCode/toolName")),
-                            usageUpdate(updateKind, update)
+                            usageUpdate(updateKind, update),
+                            ("tool_call".equals(updateKind) || "tool_call_update".equals(updateKind))
+                                    ? update.deepCopy() : null,
+                            "dual/permission/request".equals(method) ? node.path("params").deepCopy() : null
                     ),
                     null
             );
         }
         return malformed();
+    }
+
+    private static java.util.Map<String,String> optionKinds(JsonNode options) {
+        var map = new java.util.LinkedHashMap<String,String>();
+        if (options != null && options.isArray()) for (var item : options) {
+            var id = text(item.get("optionId")); var kind = text(item.get("kind"));
+            if (!id.isBlank()) map.merge(id, kind, (old, next) -> "AMBIGUOUS");
+        }
+        return java.util.Map.copyOf(map);
     }
 
     private static Error error(JsonNode errorNode) {
@@ -238,13 +297,17 @@ record AcpxStreamWireLine(
         if (usage == null || !usage.isObject()) {
             return null;
         }
-        return new Usage(
-                number(usage.get("inputTokens")),
-                number(usage.get("outputTokens")),
-                number(usage.get("cachedReadTokens")),
-                number(usage.get("cachedWriteTokens")),
-                number(usage.get("totalTokens"))
-        );
+        if (!validToken(usage.get("inputTokens")) || !validToken(usage.get("outputTokens"))
+                || !validToken(usage.get("totalTokens"))
+                || (usage.has("cachedReadTokens") && !validToken(usage.get("cachedReadTokens")))
+                || (usage.has("cachedWriteTokens") && !validToken(usage.get("cachedWriteTokens")))) return null;
+        return new Usage(number(usage.get("inputTokens")), number(usage.get("outputTokens")),
+                number(usage.get("cachedReadTokens")), number(usage.get("cachedWriteTokens")),
+                number(usage.get("totalTokens")));
+    }
+
+    private static boolean validToken(JsonNode value) {
+        return value != null && value.isIntegralNumber() && value.canConvertToLong() && value.longValue() >= 0;
     }
 
     private static UsageUpdate usageUpdate(String updateKind, JsonNode update) {

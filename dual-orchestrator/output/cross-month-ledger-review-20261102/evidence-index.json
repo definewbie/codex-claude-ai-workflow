@@ -1,0 +1,634 @@
+[
+  {
+    "id": "E01",
+    "title": "KNJM：reconnect 与正文 end_turn 并存",
+    "finding": "失败原因与正文完成标记不一致，属于待核验的执行完成/信号优先级边界。",
+    "limitation": "正文标记不能证明属于本次原生请求的完成事实；不能判为已证实的假失败，更不能直接续传。",
+    "references": [
+      {
+        "label": "run 失败原因",
+        "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260602T110016Z-KNJM/.agent/workstreams/ws-20260602T110016Z-KNJM/runs/run-1780398017039/run.json",
+        "line": 22,
+        "matchingLines": [
+          22
+        ],
+        "needle": "RECOVERABLE_AGENT_RECONNECT",
+        "sha256": "e0e243d5b85c0054d71edd3c1daa77fa765f7861ad208509ce1fe585721c8f83"
+      },
+      {
+        "label": "正文末尾",
+        "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260602T110016Z-KNJM/.agent/workstreams/ws-20260602T110016Z-KNJM/runs/run-1780398017039/outputs/intake-claude-brainstorm.md",
+        "line": 582,
+        "matchingLines": [
+          582
+        ],
+        "needle": "[done] end_turn",
+        "sha256": "fc6e1dcabddbd1b8fc103a88bc73ef014235a8f20f5b8635b68b952e9623d016"
+      },
+      {
+        "label": "stderr",
+        "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260602T110016Z-KNJM/.agent/workstreams/ws-20260602T110016Z-KNJM/runs/run-1780398017039/outputs/intake-claude-brainstorm.stderr.log",
+        "line": 1,
+        "matchingLines": [
+          1
+        ],
+        "needle": "agent needs reconnect",
+        "sha256": "b6a6ba53375f4da4d79f498eb0620485c348f71372276884a41306c8f43fb852"
+      }
+    ]
+  },
+  {
+    "id": "E02",
+    "title": "PRF7：进程被中断，顶层却是结果协议失败",
+    "finding": "stderr 记录 harness 主动发出 interrupt_process=true；顶层 primaryReason 为 terminal_control_missing_or_invalid。",
+    "limitation": "证明历史分类压缩，不能证明已发生的文件/远程副作用可安全重做。",
+    "references": [
+      {
+        "label": "顶层原因",
+        "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260622T235255Z-PRF7/.agent/workstreams/ws-20260622T235255Z-PRF7/runs/run-1782180664429/run.json",
+        "line": 24,
+        "matchingLines": [
+          24,
+          77
+        ],
+        "needle": "terminal_control_missing_or_invalid",
+        "sha256": "4ac8ceaf248500ee54fb82cfd42f49189bfa2a357328979cade7ea569458a7f8"
+      },
+      {
+        "label": "主动停止证据",
+        "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260622T235255Z-PRF7/.agent/workstreams/ws-20260622T235255Z-PRF7/runs/run-1782180664429/outputs/plan-claude.stderr.log",
+        "line": 3,
+        "matchingLines": [
+          3
+        ],
+        "needle": "interrupt_process=true",
+        "sha256": "42e5729fed25feb1c752d06d377645d568d25aec7448f89d4c812f574f28dc31"
+      }
+    ]
+  },
+  {
+    "id": "E03",
+    "title": "AYU5 / FUMK：证据可见性准入失败",
+    "finding": "required review_evidence_packet 缺少 prompt visibility claim，进程 NOT_STARTED；同类七次分布在五个案例。",
+    "limitation": "这是正确的启动前拒绝；源工件存在不能证明内容已经进入最终提示。当前版本同类生产缺口是否仍可触发未证。",
+    "references": [
+      {
+        "label": "准入理由",
+        "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T030301Z-AYU5/.agent/workstreams/ws-20260708T030301Z-AYU5/runs/run-1783479932615/run.json",
+        "line": 74,
+        "matchingLines": [
+          74
+        ],
+        "needle": "REQUIRED_EVIDENCE_NOT_PROMPT_VISIBLE",
+        "sha256": "e3125391f347c9212b54d096893e1927619429e7bffd0f8d9bb90dc3630dc469"
+      },
+      {
+        "label": "未调用进程",
+        "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T030301Z-AYU5/.agent/workstreams/ws-20260708T030301Z-AYU5/runs/run-1783479932615/run.json",
+        "line": 82,
+        "matchingLines": [
+          82,
+          99
+        ],
+        "needle": "NOT_STARTED",
+        "sha256": "e3125391f347c9212b54d096893e1927619429e7bffd0f8d9bb90dc3630dc469"
+      },
+      {
+        "label": "FUMK 再次同类拒绝",
+        "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T043128Z-FUMK/.agent/workstreams/ws-20260708T043128Z-FUMK/runs/run-1783517570025/run.json",
+        "line": 75,
+        "matchingLines": [
+          75
+        ],
+        "needle": "REQUIRED_EVIDENCE_NOT_PROMPT_VISIBLE",
+        "sha256": "2150c9ca5464c489375320dce7bb3293560286ad97fa8cf1ba6864709afaa495"
+      }
+    ]
+  },
+  {
+    "id": "E04",
+    "title": "9S3P：机器路径字段混入自然语言",
+    "finding": "scope/evidence 字段未满足文件和证据契约；应审查生产者和发现入口，保留验证器。",
+    "limitation": "任务是否必须允许该文件，需要结合获批 scope，不能从拒绝本身推导扩大权限。",
+    "references": [
+      {
+        "label": "契约失败原文",
+        "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T152657Z-9S3P/.agent/workstreams/ws-20260629T152657Z-9S3P/runs/run-1782746818017/run.json",
+        "line": 114,
+        "matchingLines": [
+          114
+        ],
+        "needle": "scope.included is not a supported workspace path",
+        "sha256": "a763f1c426fe28f66683d58479c59f96bd85bcfb07e08a09c66d0f6ca4505f65"
+      }
+    ]
+  },
+  {
+    "id": "E05",
+    "title": "HHZL：必须按 occurrence 顺序解释纠正",
+    "finding": "先发生 INVALID_JSON，唯一纠正后仍有非法枚举；不能把最终枚举异常归因于先前提示丢失诊断。",
+    "limitation": "精确枚举诊断是局部改进；对原两次输出序列并未证明可以成功。",
+    "references": [
+      {
+        "label": "单次纠正预算",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/run.json",
+        "line": 61,
+        "matchingLines": [
+          61
+        ],
+        "needle": "maxCorrectionAttempts",
+        "sha256": "41acbf81b8fca25fc16c0a0353684e248ffe3802d41776602ecf3133b8a8f13c"
+      },
+      {
+        "label": "最终枚举异常",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/run.json",
+        "line": 218,
+        "matchingLines": [
+          218,
+          227
+        ],
+        "needle": "REVISE_PROPOSAL",
+        "sha256": "41acbf81b8fca25fc16c0a0353684e248ffe3802d41776602ecf3133b8a8f13c"
+      },
+      {
+        "label": "初次错误对应的纠正输入",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/prompts/intake-codex-product-review.contract-correction.md",
+        "line": 3,
+        "matchingLines": [
+          3
+        ],
+        "needle": "INVALID_JSON",
+        "sha256": "187e7c978f1516b44d1cff6414a4814940fbacc4977bb20f5d4de23e30667968"
+      }
+    ]
+  },
+  {
+    "id": "E06",
+    "title": "BXWV：缺外部证据仍回实现",
+    "finding": "验收 must_fix=[] 且 EVIDENCE_COLLECTION；自测说明缺外网/浏览器，随后仍路由回 implement。",
+    "limitation": "修复路由最多避免无依据改代码；外部证据依然必须真实取得，不能据此保证交付。",
+    "references": [
+      {
+        "label": "验收代码缺陷列表为空",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1789003988271/outputs/acceptance-codex-review.json",
+        "line": 27,
+        "matchingLines": [
+          27
+        ],
+        "needle": "\"must_fix\"",
+        "sha256": "bcd5f368351b260e1458f0761f54f2f00353e27c4251f897baaf8e3df032c75e"
+      },
+      {
+        "label": "修复动作类型",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1789003988271/outputs/acceptance-codex-review.json",
+        "line": 38,
+        "matchingLines": [
+          38
+        ],
+        "needle": "EVIDENCE_COLLECTION",
+        "sha256": "bcd5f368351b260e1458f0761f54f2f00353e27c4251f897baaf8e3df032c75e"
+      },
+      {
+        "label": "验收分类（具体序列见 ledger 316–331 行）",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl",
+        "line": 316,
+        "matchingLines": [
+          316
+        ],
+        "needle": "\"event_id\":\"domain-node-acceptance-classify_failure-092\"",
+        "sha256": "5b889c7776a9622b9cc5ace82946fa4bfb950d0ba0e2aa57901625ce8ad35e92"
+      },
+      {
+        "label": "自测仍回实现",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl",
+        "line": 326,
+        "matchingLines": [
+          326
+        ],
+        "needle": "\"event_id\":\"evt-000096\"",
+        "sha256": "5b889c7776a9622b9cc5ace82946fa4bfb950d0ba0e2aa57901625ce8ad35e92"
+      },
+      {
+        "label": "实际缺少外部证据的原因",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl",
+        "line": 327,
+        "matchingLines": [
+          327
+        ],
+        "needle": "\"event_id\":\"evt-000097\"",
+        "sha256": "5b889c7776a9622b9cc5ace82946fa4bfb950d0ba0e2aa57901625ce8ad35e92"
+      }
+    ]
+  },
+  {
+    "id": "E07",
+    "title": "MBC2：程序已知 SHA 被模型重新转写",
+    "finding": "revision 基线哈希转写错误，验证器正确拒绝；当前 ContractRevisionBinding 已改由程序绑定执行身份。",
+    "limitation": "保留拒绝错误基线的测试；不要用兼容旧错误哈希挽救单例。",
+    "references": [
+      {
+        "label": "节点拒绝",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/nodes/node-intake-claude_brainstorm-006.json",
+        "line": 59,
+        "matchingLines": [
+          59
+        ],
+        "needle": "REVISION_BASE_PROPOSAL_SHA256_MISMATCH",
+        "sha256": "8ec8f5a5518ef0ba01b35f90e75b0d736f38bde8c2c9ffbe0fe02031459c1e24"
+      },
+      {
+        "label": "输入基线 SHA",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728580831/prompts/intake-claude-brainstorm.md",
+        "line": 131,
+        "matchingLines": [
+          131,
+          147,
+          283,
+          295
+        ],
+        "needle": "f239f",
+        "sha256": "b2da7c760c33bdc0a34f47125721192da9f4ee7a675e8a7e273b336848b91cb4"
+      }
+    ]
+  },
+  {
+    "id": "E08",
+    "title": "V9W8：探索范围拒绝是必要保护",
+    "finding": "读取 backend/tests/test_safety.py 越过既有探索 scope，且无范围扩展申请。",
+    "limitation": "exit 0 不代表节点应该成功；允许范围是否过窄需要另证。",
+    "references": [
+      {
+        "label": "越界",
+        "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T175019Z-V9W8/.agent/workstreams/ws-20260704T175019Z-V9W8/runs/run-1783188244002/run.json",
+        "line": 91,
+        "matchingLines": [
+          91
+        ],
+        "needle": "READ_OUTSIDE_EXPLORATION_SCOPE",
+        "sha256": "8ffa3300cf90cb3e5b94f301c31f29762e97c3e9a3df057baf16cf4f07f69177"
+      },
+      {
+        "label": "缺少合法扩权动作",
+        "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T175019Z-V9W8/.agent/workstreams/ws-20260704T175019Z-V9W8/runs/run-1783188244002/run.json",
+        "line": 98,
+        "matchingLines": [
+          98
+        ],
+        "needle": "SCOPE_EXPANSION_REQUEST_MISSING",
+        "sha256": "8ffa3300cf90cb3e5b94f301c31f29762e97c3e9a3df057baf16cf4f07f69177"
+      }
+    ]
+  },
+  {
+    "id": "E09",
+    "title": "7SNA：固定 method 被模型加写细节",
+    "finding": "计划把已登记 method 与逐项细节混合；当前验证器要求 method 完全相等。",
+    "limitation": "该 run 已 completed，ledger 最新节点仍 READY。这里只能认定后续资格风险，不能宣称 ledger 已因此失败；新 validator 处理旧输入也是反事实验证。",
+    "references": [
+      {
+        "label": "计划 method",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.plan.json",
+        "line": 27,
+        "matchingLines": [
+          27,
+          50,
+          73,
+          96,
+          119
+        ],
+        "needle": "\"method\"",
+        "sha256": "e7bffc3bedbea71f685cc606341dbb07b0422a46094280d5c3c9917157822ced"
+      },
+      {
+        "label": "登记的固定 method",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/verification-readiness/okx-ac-availability-20261027-01.json",
+        "line": 1,
+        "matchingLines": [
+          1
+        ],
+        "needle": "\"method\"",
+        "sha256": "1212daf7ab19146a19336a41ac32668c60a31d76f48a6bf0292d361006129d08"
+      },
+      {
+        "label": "实际后续节点尚未执行",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/nodes/node-plan-codex_plan_review-025.json",
+        "line": 7,
+        "matchingLines": [
+          7
+        ],
+        "needle": "READY",
+        "sha256": "cfbab41634f7b812a7a658f512435081d3a6944ef2260197c4ad7c2cfb5760fc"
+      }
+    ]
+  },
+  {
+    "id": "E10",
+    "title": "9YYF：真实交付反例",
+    "finding": "ledger 存在 delivery_committed，目标仓库 HEAD 与交付 SHA 一致，本次只读复查已确认。",
+    "limitation": "证明至少一个新版本案例能走到提交，不等于异构任务总体成功率或外部 grader 质量通过。",
+    "references": [
+      {
+        "label": "交付事件",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+        "line": 149,
+        "matchingLines": [
+          149
+        ],
+        "needle": "delivery_committed",
+        "sha256": "477d8c0305988e19664e94c1250bbd9a40639a3d4e058eba308ba135806497fc"
+      }
+    ]
+  },
+  {
+    "id": "E11",
+    "title": "3B2P：revision 耗尽不必然是仪式过度",
+    "finding": "人工 revise 指向 SQLite 事务等实质缺陷；有真实产品原因，不能默认放宽上限。",
+    "limitation": "上限是否过紧，需要按阻塞类型、每轮增量与预算分别评价。",
+    "references": [
+      {
+        "label": "修订上限事件",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T040052Z-3B2P/.agent/workstreams/ws-20260904T040052Z-3B2P/events.jsonl",
+        "line": 121,
+        "matchingLines": [
+          121
+        ],
+        "needle": "revision_limit_reached",
+        "sha256": "31964751a4e540dac5730cffd3f96fc8e904095f0ed6ff3f311d231cb0f6b697"
+      },
+      {
+        "label": "实质事务问题的修订要求",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T040052Z-3B2P/.agent/workstreams/ws-20260904T040052Z-3B2P/gates/gate-node-gate-human_design_approval-038.json",
+        "line": 14,
+        "matchingLines": [
+          14
+        ],
+        "needle": "SQLite",
+        "sha256": "59e919803ce860979b466585e592c4dca4c9ee7ba82b6ee8cbcd679d41952102"
+      }
+    ]
+  },
+  {
+    "id": "E12",
+    "title": "9BZG：用量归属待核销",
+    "finding": "201ms run 与另一 run 均记录 totalTokens=404593 且 LATEST_PROMPT_IN_SESSION。",
+    "limitation": "相同用量本身不能证明重复收费；须 provider request/prompt ID 证明唯一归属。总账也存在缺失，不能宣称统一上界或下界。",
+    "references": [
+      {
+        "label": "短 run 归属",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/runs/run-1788347435520/run.json",
+        "line": 47,
+        "matchingLines": [
+          47,
+          96
+        ],
+        "needle": "LATEST_PROMPT_IN_SESSION",
+        "sha256": "77f57b4e901bc4069382461d25bc73f9d82d6a5d2c7aa31bbffef94f523bb287"
+      },
+      {
+        "label": "短 run 用量",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/runs/run-1788347435520/run.json",
+        "line": 42,
+        "matchingLines": [
+          42,
+          91
+        ],
+        "needle": "404593",
+        "sha256": "77f57b4e901bc4069382461d25bc73f9d82d6a5d2c7aa31bbffef94f523bb287"
+      },
+      {
+        "label": "另一 run 用量",
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/runs/run-1788347257826/run.json",
+        "line": 42,
+        "matchingLines": [
+          42,
+          91
+        ],
+        "needle": "404593",
+        "sha256": "4711b143c455a03b9325d63737e4f1d8869d8da8e5474afec4a83313164749f4"
+      }
+    ]
+  },
+  {
+    "id": "C01",
+    "title": "当前 typed retry 策略与消费入口",
+    "finding": "所查失败分支产出 MANUAL_ONLY，WorkflowRuntime 仅对 AUTO_ALLOWED 执行 typed 自动重试。",
+    "limitation": "不能据此把所有失败改成 AUTO_ALLOWED；必须先证明授权、停止、副作用与预算。",
+    "references": [
+      {
+        "label": "分类策略",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java",
+        "line": 33,
+        "matchingLines": [
+          33,
+          43,
+          54,
+          72,
+          83,
+          97
+        ],
+        "needle": "AgentExecutionRetryPolicy.MANUAL_ONLY",
+        "sha256": "500026b45a9e16706d0ad0fa0c5c831d9e38af8a4b2da1f34004941c737c4fc2"
+      },
+      {
+        "label": "唯一策略消费者",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+        "line": 460,
+        "matchingLines": [
+          460
+        ],
+        "needle": "if (!\"AUTO_ALLOWED\".equals(retryPolicy))",
+        "sha256": "bc89b78be8466c6b58b16635e6099a081bb6e94338b0794085ee7cf6ebf6b6ff"
+      }
+    ]
+  },
+  {
+    "id": "C02",
+    "title": "当前自测 continuation 分类",
+    "finding": "当前工作区源码，独立于历史执行身份。",
+    "limitation": "通过定向测试不能推广为历史 binary 行为或整体 E2E 通过。",
+    "references": [
+      {
+        "label": "当前自测 continuation 分类",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java",
+        "line": 72,
+        "matchingLines": [
+          72
+        ],
+        "needle": "SELF_TEST_INCOMPLETE",
+        "sha256": "bdd7cdb2525494246276f231f634d8434f46d4c3de7a3d100a375e1bf45050b9"
+      }
+    ]
+  },
+  {
+    "id": "C03",
+    "title": "当前证据收集副作用检查",
+    "finding": "当前工作区源码，独立于历史执行身份。",
+    "limitation": "通过定向测试不能推广为历史 binary 行为或整体 E2E 通过。",
+    "references": [
+      {
+        "label": "当前证据收集副作用检查",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+        "line": 98,
+        "matchingLines": [
+          98,
+          102,
+          184
+        ],
+        "needle": "guard.verify",
+        "sha256": "7d21d43972267957faf0f3a2bc04b966c6e7239405716368748102a70c418aa0"
+      }
+    ]
+  },
+  {
+    "id": "C04",
+    "title": "当前外部调用提交协议",
+    "finding": "当前工作区源码，独立于历史执行身份。",
+    "limitation": "通过定向测试不能推广为历史 binary 行为或整体 E2E 通过。",
+    "references": [
+      {
+        "label": "当前外部调用提交协议",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java",
+        "line": 112,
+        "matchingLines": [
+          112
+        ],
+        "needle": "beginExternalCall",
+        "sha256": "ffc5370455cd32b768833bf9606c44083f9fc0fce7a38bbf72ea6d4e5a6a8d85"
+      }
+    ]
+  },
+  {
+    "id": "C05",
+    "title": "当前 readiness 精确绑定",
+    "finding": "当前工作区源码，独立于历史执行身份。",
+    "limitation": "通过定向测试不能推广为历史 binary 行为或整体 E2E 通过。",
+    "references": [
+      {
+        "label": "当前 readiness 精确绑定",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java",
+        "line": 162,
+        "matchingLines": [
+          162
+        ],
+        "needle": "request.method().equals(binding.method())",
+        "sha256": "248cb1cb41bea137a1eb0c557df1904ddaa533e1702e5e2487cbdbf079b7702d"
+      }
+    ]
+  },
+  {
+    "id": "C06",
+    "title": "当前 revision 程序身份绑定",
+    "finding": "当前工作区源码，独立于历史执行身份。",
+    "limitation": "通过定向测试不能推广为历史 binary 行为或整体 E2E 通过。",
+    "references": [
+      {
+        "label": "当前 revision 程序身份绑定",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractRevisionBinding.java",
+        "line": 37,
+        "matchingLines": [
+          37
+        ],
+        "needle": "verifyDispatch",
+        "sha256": "893ee67c22919794f8a57e3e0e5f7cb36ed9e07a29fa48f33c466489b39d4f9b"
+      }
+    ]
+  },
+  {
+    "id": "C07",
+    "title": "当前取证：禁止污染发布，不等于阻止源码写入",
+    "finding": "三个内置 sibling 的 self_test_report 均使用 implement profile；handler 没有根据 collection 切换权限。E1 allow_write 含工作树；guard 在执行后拒绝，现有测试明确保留污染文件。",
+    "limitation": "证明当前源码和真实 runtime 消费序列中的权限/发布边界差异；未启动真实 provider，也不主张历史所有取证节点均发生过源码污染。",
+    "references": [
+      {
+        "label": "权限由定义解析",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+        "line": 209,
+        "matchingLines": [
+          209
+        ],
+        "needle": "var effectivePermissionProfile = permissionProfile(context);",
+        "sha256": "9804c76d0364b388cc763e9579ae1448001b946457bc07980816dabf3a949dda"
+      },
+      {
+        "label": "取证标记只添加提示",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+        "line": 259,
+        "matchingLines": [
+          259
+        ],
+        "needle": "var collectionInstruction =",
+        "sha256": "9804c76d0364b388cc763e9579ae1448001b946457bc07980816dabf3a949dda"
+      },
+      {
+        "label": "implement 自动允许编辑/执行",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxPermissionProfile.java",
+        "line": 99,
+        "matchingLines": [
+          99
+        ],
+        "needle": "static AcpxPermissionProfile implement()",
+        "sha256": "0e0ccc8e7c904d2cb698c84f7c9c8a28bcaa9da6d6106e8bcb2dee3de29586cc"
+      },
+      {
+        "label": "E1 工作树可写",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ClaudeExecutionPolicy.java",
+        "line": 106,
+        "matchingLines": [
+          106
+        ],
+        "needle": "filesystem.put(\"allow_write\"",
+        "sha256": "d1db8c5eaa853886248bc9cba8f8181774dbfed95048351ff56aa597888da439"
+      },
+      {
+        "label": "先执行再 verify",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+        "line": 96,
+        "matchingLines": [
+          96
+        ],
+        "needle": "result = execution.run();",
+        "sha256": "7d21d43972267957faf0f3a2bc04b966c6e7239405716368748102a70c418aa0"
+      },
+      {
+        "label": "测试证明污染仍留磁盘",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+        "line": 93,
+        "matchingLines": [
+          93
+        ],
+        "needle": "never silently revert source",
+        "sha256": "10ba8103f364c567755f1fd67880e8db235aedcbd433fe0dcdddcc58b9325f4e"
+      },
+      {
+        "label": "full 节点及随后 config",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json",
+        "line": 284,
+        "matchingLines": [
+          284
+        ],
+        "needle": "\"id\": \"implement.claude_self_test_report\"",
+        "sha256": "4375c8074896871bb00970b0ba8946bb4344d098800dbe060038c112a6897c0e"
+      },
+      {
+        "label": "contract 节点及随后 config",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json",
+        "line": 284,
+        "matchingLines": [
+          284
+        ],
+        "needle": "\"id\": \"implement.claude_self_test_report\"",
+        "sha256": "38979a69837754cc97af6c83df2aae6a750902b704e8b730eea3fbf64d4ff79c"
+      },
+      {
+        "label": "terminal-delivery 节点及随后 config",
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json",
+        "line": 284,
+        "matchingLines": [
+          284
+        ],
+        "needle": "\"id\": \"implement.claude_self_test_report\"",
+        "sha256": "d9cdcf71b8974d1ed023150dc1c2146d79769d6ac6aea994b0305d2d6b895fa2"
+      }
+    ]
+  }
+]

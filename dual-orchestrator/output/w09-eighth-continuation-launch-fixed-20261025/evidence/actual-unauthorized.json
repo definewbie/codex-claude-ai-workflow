@@ -1,0 +1,7 @@
+{
+  "status": "PASS_EXPECTED_REFUSAL",
+  "exit": 1,
+  "reason": "Missing new continuation run approval",
+  "steps_directory_created": false,
+  "java_native_provider_started": false
+}

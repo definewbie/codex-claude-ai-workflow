@@ -1,0 +1,679 @@
+{
+  "status": "SOURCE_BOUND_RULE_CANDIDATES_NOT_IMPLEMENTED",
+  "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+  "sha256": "1f6c53c39a5d645bcaeb8a5dfb328cfac452b4a8ad39136f8c7ef63ec7a4b0dc",
+  "count": 67,
+  "meaning": "Proposed per-rejection stable names and bounded input profiles. Includes Failure.of and explicit IOException/IllegalArgumentException throws; does not replace actual branch/operand mapping or runtime registration. Calls/delegated exceptions are separately traced; no runtime JSON loading. Rule version must be measured executable content, not this source SHA.",
+  "rows": [
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.requiresContract.legacy_contract_qualification_flag_is_not_supported",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.requiresContract",
+      "line": 40,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"legacy contract qualification flag is not supported: \" + definition.id()",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.requiredPhase.required_contract_phase_is_missing",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase",
+      "line": 48,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"required_contract_phase is missing: \" + definition.id()",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.requiredPhase.invalid_contract_phase",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase",
+      "line": 50,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"invalid contract phase: \" + definition.id()",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolve.dynamic_diagnostic_or_i_o_failure",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve",
+      "line": 63,
+      "kind": "Failure.of",
+      "original_reason": "CONTRACT_SNAPSHOT_UNAVAILABLE",
+      "original_arguments": "\"CONTRACT_SNAPSHOT_UNAVAILABLE\", failure.getMessage()",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_authorization_epoch_is_missing_or_duplicated",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 81,
+      "kind": "Failure.of",
+      "original_reason": "CONTRACT_EPOCH_INVALID",
+      "original_arguments": "\"CONTRACT_EPOCH_INVALID\", \"GOAL authorization epoch is missing or duplicated\"",
+      "input_profile": "GOAL_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_compile_does_not_publish_its_occurrence_artifacts",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 86,
+      "kind": "Failure.of",
+      "original_reason": "OUTPUT_REF_MISMATCH",
+      "original_arguments": "\"OUTPUT_REF_MISMATCH\", \"GOAL compile does not publish its occurrence artifacts\"",
+      "input_profile": "GOAL_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_identity_shape_or_immutable_bytes_do_not_match_its_compiler",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 97,
+      "kind": "Failure.of",
+      "original_reason": "GOAL_CONTRACT_INVALID",
+      "original_arguments": "\"GOAL_CONTRACT_INVALID\", \"GOAL identity, shape or immutable bytes do not match its compiler\"",
+      "input_profile": "GOAL_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_approval_reference_is_not_an_unchanged_workstream_gate",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 102,
+      "kind": "Failure.of",
+      "original_reason": "GOAL_APPROVAL_INVALID",
+      "original_arguments": "\"GOAL_APPROVAL_INVALID\", \"GOAL approval reference is not an unchanged workstream gate\"",
+      "input_profile": "GOAL_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_compiler_is_not_routed_from_the_matching_completed_human_decision",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 116,
+      "kind": "Failure.of",
+      "original_reason": "GOAL_APPROVAL_INVALID",
+      "original_arguments": "\"GOAL_APPROVAL_INVALID\", \"GOAL compiler is not routed from the matching completed human decision\"",
+      "input_profile": "GOAL_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.approved_review_subject_is_not_verifiable",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 120,
+      "kind": "Failure.of",
+      "original_reason": "GOAL_SUBJECT_INVALID",
+      "original_arguments": "\"GOAL_SUBJECT_INVALID\", \"approved review subject is not verifiable\"",
+      "input_profile": "GOAL_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_does_not_bind_the_approved_proposal_bytes",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 125,
+      "kind": "Failure.of",
+      "original_reason": "GOAL_SUBJECT_INVALID",
+      "original_arguments": "\"GOAL_SUBJECT_INVALID\", \"GOAL does not bind the approved proposal bytes\"",
+      "input_profile": "GOAL_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.invalid_route_event_identity",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 133,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"invalid route event identity\"",
+      "input_profile": "GOAL_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 137,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"unordered workflow events\"",
+      "input_profile": "GOAL_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.invalid_goal_approval_routing_occurrence",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 146,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"invalid GOAL approval routing occurrence\"",
+      "input_profile": "GOAL_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_approval_route_is_missing",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 149,
+      "kind": "Failure.of",
+      "original_reason": "GOAL_APPROVAL_INVALID",
+      "original_arguments": "\"GOAL_APPROVAL_INVALID\", \"GOAL approval route is missing\"",
+      "input_profile": "GOAL_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_approval_gate_node_is_missing",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 182,
+      "kind": "Failure.of",
+      "original_reason": "GATE_NODE_MISSING",
+      "original_arguments": "\"GATE_NODE_MISSING\", \"contract approval gate node is missing\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.latest_contract_approval_gate_is_not_completed",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 185,
+      "kind": "Failure.of",
+      "original_reason": "GATE_NOT_COMPLETED",
+      "original_arguments": "\"GATE_NOT_COMPLETED\", \"latest contract approval gate is not completed\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.latest_contract_gate_lineage_or_status_is_invalid",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 193,
+      "kind": "Failure.of",
+      "original_reason": "GATE_LINEAGE_INVALID",
+      "original_arguments": "\"GATE_LINEAGE_INVALID\", \"latest contract gate lineage or status is invalid\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.latest_contract_gate_action_is_not_approved",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 198,
+      "kind": "Failure.of",
+      "original_reason": "CONTRACT_NOT_APPROVED",
+      "original_arguments": "\n                    \"CONTRACT_NOT_APPROVED\", \"latest contract gate action is not approved: \" + gateAction",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_gate_note_does_not_match_node_result",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 202,
+      "kind": "Failure.of",
+      "original_reason": "GATE_RESULT_MISMATCH",
+      "original_arguments": "\"GATE_RESULT_MISMATCH\", \"contract gate note does not match node result\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_gate_subject_refs_do_not_match_node_input_refs",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 206,
+      "kind": "Failure.of",
+      "original_reason": "GATE_SUBJECT_MISMATCH",
+      "original_arguments": "\"GATE_SUBJECT_MISMATCH\", \"contract gate subject refs do not match node input refs\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_gate_source_occurrence_identity_is_missing_or_inconsistent",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 212,
+      "kind": "Failure.of",
+      "original_reason": "GATE_SOURCE_MISMATCH",
+      "original_arguments": "\"GATE_SOURCE_MISMATCH\", \"contract gate source occurrence identity is missing or inconsistent\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_source_is_not_a_completed_contract_compile_node",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 219,
+      "kind": "Failure.of",
+      "original_reason": "COMPILE_BINDING_MISSING",
+      "original_arguments": "\"COMPILE_BINDING_MISSING\", \"approved source is not a completed contract.compile node\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.routing_event_source_does_not_match_approved_compile_node",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 222,
+      "kind": "Failure.of",
+      "original_reason": "EVENT_SOURCE_MISMATCH",
+      "original_arguments": "\"EVENT_SOURCE_MISMATCH\", \"routing event source does not match approved compile node\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.completed_contract_compile_is_newer_than_the_approved_source",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 226,
+      "kind": "Failure.of",
+      "original_reason": "UNAPPROVED_RECOMPILE",
+      "original_arguments": "\n                    \"UNAPPROVED_RECOMPILE\", \"completed contract.compile is newer than the approved source: \"\n                            + newerCompile.nodeInstanceId()",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_or_requirement_resolution_artifact_is_missing",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 234,
+      "kind": "Failure.of",
+      "original_reason": "ARTIFACT_MISSING",
+      "original_arguments": "\"ARTIFACT_MISSING\", \"approved contract or requirement resolution artifact is missing\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_compile_gate_refs_do_not_bind_both_contract_artifacts",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 242,
+      "kind": "Failure.of",
+      "original_reason": "OUTPUT_REF_MISMATCH",
+      "original_arguments": "\"OUTPUT_REF_MISMATCH\", \"approved compile/gate refs do not bind both contract artifacts\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_artifacts_cannot_be_parsed",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 257,
+      "kind": "Failure.of",
+      "original_reason": "CONTRACT_INVALID",
+      "original_arguments": "\"CONTRACT_INVALID\", \"approved contract artifacts cannot be parsed\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.task_contract_json_is_invalid",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 261,
+      "kind": "Failure.of",
+      "original_reason": "CONTRACT_INVALID",
+      "original_arguments": "\n                    \"CONTRACT_INVALID\", \"task-contract.json is invalid: \" + String.join(\"; \", errors)",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_compile_has_incomplete_artifact_sha_binding",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 270,
+      "kind": "Failure.of",
+      "original_reason": "COMPILE_BINDING_MISSING",
+      "original_arguments": "\n                    \"COMPILE_BINDING_MISSING\", \"approved contract.compile has incomplete artifact SHA binding\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_artifact_sha_256_does_not_match_compile_result",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 274,
+      "kind": "Failure.of",
+      "original_reason": "HASH_MISMATCH",
+      "original_arguments": "\"HASH_MISMATCH\", \"approved contract artifact SHA-256 does not match compile result\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.task_contract_json_identity_does_not_match_compile_result",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 280,
+      "kind": "Failure.of",
+      "original_reason": "IDENTITY_MISMATCH",
+      "original_arguments": "\n                    \"IDENTITY_MISMATCH\", \"task-contract.json identity does not match compile result\"",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.dynamic_diagnostic_or_i_o_failure",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 289,
+      "kind": "Failure.of",
+      "original_reason": "VERIFICATION_READINESS_REQUIRED",
+      "original_arguments": "VerificationReadiness.REQUIRED, invalid.getMessage()",
+      "input_profile": "EXECUTION_APPROVAL",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.invalid_technical_continuation_approval_binding",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.currentVerificationBindings",
+      "line": 313,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"invalid technical continuation approval binding\"",
+      "input_profile": "TECHNICAL_BINDINGS",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_lost_its_independent_reviews",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.currentVerificationBindings",
+      "line": 320,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"technical continuation lost its independent reviews\"",
+      "input_profile": "TECHNICAL_BINDINGS",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_revision_changed_the_execution_authorization_boundary",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.currentVerificationBindings",
+      "line": 323,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"technical revision changed the execution authorization boundary\"",
+      "input_profile": "TECHNICAL_BINDINGS",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_route_source_changed",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.currentVerificationBindings",
+      "line": 330,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"technical continuation route source changed\"",
+      "input_profile": "TECHNICAL_BINDINGS",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_lineage_cycle",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.currentVerificationBindings",
+      "line": 333,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"technical continuation lineage cycle\"",
+      "input_profile": "TECHNICAL_BINDINGS",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.current_goal_is_required",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateExecutionInputs",
+      "line": 350,
+      "kind": "Failure.of",
+      "original_reason": "GOAL_CONTRACT_NOT_QUALIFIED",
+      "original_arguments": "\"GOAL_CONTRACT_NOT_QUALIFIED\", \"current GOAL is required\"",
+      "input_profile": "RULE_LOCAL_SHARED_INPUT",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.execution_contract_no_longer_binds_the_approved_goal",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateExecutionInputs",
+      "line": 361,
+      "kind": "Failure.of",
+      "original_reason": "EXECUTION_GOAL_MISMATCH",
+      "original_arguments": "\"EXECUTION_GOAL_MISMATCH\", \"execution contract no longer binds the approved goal\"",
+      "input_profile": "RULE_LOCAL_SHARED_INPUT",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.nonessential_declarations_must_bind_the_frozen_node_contracts",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateExecutionInputs",
+      "line": 363,
+      "kind": "Failure.of",
+      "original_reason": "EXECUTION_DECLARATION_MISMATCH",
+      "original_arguments": "\"EXECUTION_DECLARATION_MISMATCH\", \"nonessential declarations must bind the frozen node contracts\"",
+      "input_profile": "RULE_LOCAL_SHARED_INPUT",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.execution_contract_must_consume_its_routed_independent_reviews",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateExecutionInputs",
+      "line": 371,
+      "kind": "Failure.of",
+      "original_reason": "EXECUTION_REVIEW_MISMATCH",
+      "original_arguments": "\"EXECUTION_REVIEW_MISMATCH\", \"execution contract must consume its routed independent reviews\"",
+      "input_profile": "RULE_LOCAL_SHARED_INPUT",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.dynamic_diagnostic_or_i_o_failure",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateExecutionInputs",
+      "line": 374,
+      "kind": "Failure.of",
+      "original_reason": "VERIFICATION_READINESS_REQUIRED",
+      "original_arguments": "VerificationReadiness.REQUIRED, failure.getMessage()",
+      "input_profile": "RULE_LOCAL_SHARED_INPUT",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_candidate_requires_its_current_waiting_gate",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 387,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"contract candidate requires its current waiting gate\"",
+      "input_profile": "CANDIDATE_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_gate_subject_or_route_is_inconsistent",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 398,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"contract gate subject or route is inconsistent\"",
+      "input_profile": "CANDIDATE_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_gate_does_not_bind_its_completed_execution_compiler",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 406,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"contract gate does not bind its completed execution compiler\"",
+      "input_profile": "CANDIDATE_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_candidate_references_are_not_published_by_its_compiler",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 412,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"contract candidate references are not published by its compiler\"",
+      "input_profile": "CANDIDATE_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_candidate_bytes_or_identity_changed",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 423,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"contract candidate bytes or identity changed\"",
+      "input_profile": "CANDIDATE_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.executionCandidate.",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 425,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "failure.reason() + \": \" + failure.message()",
+      "input_profile": "CANDIDATE_BINDING",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.trustedWrappedPayload.qualified_task_contract_is_required",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.trustedWrappedPayload",
+      "line": 446,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "resolution.failure() == null\n                    ? \"qualified task contract is required\"\n                    : resolution.failure().reason() + \": \" + resolution.failure().message()",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.trustedWrappedPayload.",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.trustedWrappedPayload",
+      "line": 453,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "mismatch.get().reason() + \": \" + mismatch.get().message()",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveRoutedAcceptance.dynamic_diagnostic_or_i_o_failure",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveRoutedAcceptance",
+      "line": 470,
+      "kind": "Failure.of",
+      "original_reason": "CONTEXT_BINDING_INVALID",
+      "original_arguments": "\"CONTEXT_BINDING_INVALID\", failure.getMessage()",
+      "input_profile": "ROUTED_ACCEPTANCE",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveRoutedAcceptance.qualified_task_contract_is_required",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveRoutedAcceptance",
+      "line": 478,
+      "kind": "Failure.of",
+      "original_reason": "COMPILE_BINDING_MISSING",
+      "original_arguments": "\"COMPILE_BINDING_MISSING\", \"qualified task contract is required\"",
+      "input_profile": "ROUTED_ACCEPTANCE",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_contains_invalid_json",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.lastContractGateOccurrence",
+      "line": 500,
+      "kind": "Failure.of",
+      "original_reason": "EVENT_HISTORY_INVALID",
+      "original_arguments": "\n                            \"EVENT_HISTORY_INVALID\", \"workflow event history contains invalid JSON\"",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.routing_event_does_not_have_a_workflow_event_id",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.lastContractGateOccurrence",
+      "line": 507,
+      "kind": "Failure.of",
+      "original_reason": "EVENT_HISTORY_INVALID",
+      "original_arguments": "\n                                \"EVENT_HISTORY_INVALID\", \"routing event does not have a workflow event id\"",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.lastContractGateOccurrence",
+      "line": 514,
+      "kind": "Failure.of",
+      "original_reason": "EVENT_HISTORY_INVALID",
+      "original_arguments": "\n                            \"EVENT_HISTORY_INVALID\", \"workflow event history is not strictly ordered\"",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.contract_gate_routing_event_has_incomplete_source_lineage",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.lastContractGateOccurrence",
+      "line": 531,
+      "kind": "Failure.of",
+      "original_reason": "GATE_SOURCE_MISSING",
+      "original_arguments": "\n                            \"GATE_SOURCE_MISSING\", \"contract gate routing event has incomplete source lineage\"",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.cannot_read_workflow_event_history",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.lastContractGateOccurrence",
+      "line": 538,
+      "kind": "Failure.of",
+      "original_reason": "EVENT_HISTORY_UNREADABLE",
+      "original_arguments": "\n                    \"EVENT_HISTORY_UNREADABLE\", \"cannot read workflow event history\"",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.readGate.contract_approval_gate_document_is_missing",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.readGate",
+      "line": 545,
+      "kind": "Failure.of",
+      "original_reason": "GATE_DOCUMENT_MISSING",
+      "original_arguments": "\"GATE_DOCUMENT_MISSING\", \"contract approval gate document is missing\"",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.readGate.contract_approval_gate_document_cannot_be_parsed",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.readGate",
+      "line": 550,
+      "kind": "Failure.of",
+      "original_reason": "GATE_DOCUMENT_INVALID",
+      "original_arguments": "\"GATE_DOCUMENT_INVALID\", \"contract approval gate document cannot be parsed\"",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.readNodes.cannot_read_node_ledger_document",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.readNodes",
+      "line": 587,
+      "kind": "Failure.of",
+      "original_reason": "NODE_LEDGER_UNREADABLE",
+      "original_arguments": "\n                            \"NODE_LEDGER_UNREADABLE\", \"cannot read node ledger document \" + path.getFileName()",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.readNodes.cannot_list_node_ledger",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.readNodes",
+      "line": 593,
+      "kind": "Failure.of",
+      "original_reason": "NODE_LEDGER_UNREADABLE",
+      "original_arguments": "\"NODE_LEDGER_UNREADABLE\", \"cannot list node ledger\"",
+      "input_profile": "SNAPSHOT_READ",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.fromRefs.cannot_read_routed_acceptance_context_metadata",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.fromRefs",
+      "line": 716,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"cannot read routed acceptance context metadata\", failure",
+      "input_profile": "ROUTED_ACCEPTANCE",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.fromRefs.multiple_routed_acceptance_context_metadata_documents",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.fromRefs",
+      "line": 723,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"multiple routed acceptance context metadata documents\"",
+      "input_profile": "ROUTED_ACCEPTANCE",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.fromRefs.routed_acceptance_context_metadata_has_no_task_contract_binding",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.fromRefs",
+      "line": 729,
+      "kind": "throw",
+      "original_reason": "EXCEPTION",
+      "original_arguments": "\"routed acceptance context metadata has no task contract binding\"",
+      "input_profile": "ROUTED_ACCEPTANCE",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.AcceptanceContextBinding.validate.routed_context_sha_does_not_match_current_task_contract",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.AcceptanceContextBinding.validate",
+      "line": 736,
+      "kind": "Failure.of",
+      "original_reason": "CONTEXT_BINDING_HASH_MISMATCH",
+      "original_arguments": "\n                        \"CONTEXT_BINDING_HASH_MISMATCH\", \"routed context SHA does not match current task contract\"",
+      "input_profile": "ROUTED_ACCEPTANCE",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    },
+    {
+      "proposed_rule_id": "TaskContractProjectionVerifier.AcceptanceContextBinding.validate.routed_context_compile_ref_does_not_match_current_binding",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.AcceptanceContextBinding.validate",
+      "line": 740,
+      "kind": "Failure.of",
+      "original_reason": "CONTEXT_BINDING_LINEAGE_MISMATCH",
+      "original_arguments": "\n                        \"CONTEXT_BINDING_LINEAGE_MISMATCH\", \"routed context compile ref does not match current binding\"",
+      "input_profile": "ROUTED_ACCEPTANCE",
+      "decision_result": "PASSED only if the exact applicable condition actually ran with recorded inputs; otherwise explicit deferred or unavailable coverage. Never inferred from action allowed."
+    }
+  ]
+}

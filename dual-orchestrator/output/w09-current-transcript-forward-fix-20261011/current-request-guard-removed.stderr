@@ -1,0 +1,2 @@
+Exception in thread "main" java.lang.AssertionError: wrong request accepted AcpxUsage[inputTokens=20, outputTokens=1, cachedReadTokens=0, cachedWriteTokens=0, totalTokens=21, costAmount=null, costCurrency=, source=acpx_current_transcript, measurementType=PROVIDER_RUN_USAGE, attribution=EXACT_REQUEST_MATCH, cumulative=false, contextUsedTokens=0, sessionCostAmount=null, sessionCostCurrency=, providerId=, model=, billingMode=, providerMetadataSource=, unavailableReason=]
+	at dev.dual.adapter.acpx.RealCurrentUsageProof.main(RealCurrentUsageProof.java:26)

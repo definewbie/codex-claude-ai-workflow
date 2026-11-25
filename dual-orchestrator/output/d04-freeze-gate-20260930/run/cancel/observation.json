@@ -1,0 +1,17 @@
+{
+  "status": "CANCEL_OBSERVATION_TRIGGERED_ALL_STOPPED_UNKNOWN",
+  "resultSha256": "0f94945378c392ba7ef2d60d0fbe938f73eed1cfcfff8f29e373a61df0f94f2e",
+  "facts": {
+    "previousStatus": "running",
+    "subsequentStatus": "interrupted",
+    "lateWriteObserved": false,
+    "fixtureMatchingProcesses": []
+  },
+  "limits": [
+    "The root CLI completed shortly after interrupt; no-late-write cannot be attributed to interrupt alone.",
+    "No terminal child tool result was returned after interrupt; cannot infer all OS activity stopped.",
+    "Command-line matching is corroboration, not a universal descendant census."
+  ],
+  "gateDisposition": "No further runs; preserve interrupted/unknown distinction for D07 and independent freeze review",
+  "recordedAt": "2026-09-30T02:37:19.829628+00:00"
+}

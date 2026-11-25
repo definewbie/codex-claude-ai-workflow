@@ -1,0 +1,13 @@
+{
+  "type": "message",
+  "id": "diagnostic_end",
+  "role": "assistant",
+  "status": "completed",
+  "content": [
+    {
+      "type": "output_text",
+      "text": "DIAGNOSTIC_END_NOT_PROOF",
+      "annotations": []
+    }
+  ]
+}

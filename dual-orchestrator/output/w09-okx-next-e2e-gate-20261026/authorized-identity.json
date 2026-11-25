@@ -1,0 +1,13 @@
+{
+  "case": "OKX_JAVA_MODIFY_CANDIDATE",
+  "workstream": "ws-20261026T142203Z-7SNA",
+  "launch_identity_sha256": "ed183a55113d8c86a56e92f4b058b24a2106f1a85be6331b41c5a111b8d3be29",
+  "budget_sha256": "c0d97fbbb233865d8768b1ad9dfca97cb7b0e52a6714ae2d2dfab150f7e7fb29",
+  "initial_ledger_sha256": "d1b747b38d4ad8ec5cfbffb303162d8232e7568b0409ffc908bf7c3923df908b",
+  "run_authorization_sha256": "a9044fd6e5cbd52cb92404006f407b36f7510b3d1007cff4c592832ac4dfa50a",
+  "approval_evidence_sha256": "d5a4ce777642c8be80f500cd1105a0cdb69dcb0c0ef2c04e92be0fe11aa532c7",
+  "offline_manifest_is_historical": "offline-package-manifest-before-approval.json",
+  "mutable_authorization_change_is_user_approved": true,
+  "business_gates_delegated": false,
+  "commit_delegated": false
+}

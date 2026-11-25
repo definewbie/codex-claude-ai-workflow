@@ -1,0 +1,34 @@
+Usage: dualctl start [-hV] [--allow-unknown-handlers] [--run]
+                     [--branch=<branch>] [--max-steps=<maxSteps>]
+                     [--prompt-language=<promptLanguage>]
+                     [--task-file=<taskFile>] [--workdir=<workdir>]
+                     [--workflow=<workflowPath>]
+                     [--workflow-variant=<workflowVariant>]
+                     [--worktree-dir=<worktreeDir>] [<inlineRequirement>]
+Start an agent lifecycle workstream.
+      [<inlineRequirement>] Inline requirement text.
+      --allow-unknown-handlers
+                            Allow workflow handler types not built into this
+                              CLI.
+      --branch=<branch>     Worktree branch name.
+  -h, --help                Show this help message and exit.
+      --max-steps=<maxSteps>
+                            Maximum workflow nodes to execute when --run is
+                              used. Defaults to 20.
+      --prompt-language=<promptLanguage>
+                            Agent human-readable output language: auto, en,
+                              zh-CN. Defaults to auto.
+      --run                 Start and immediately run until the next gate,
+                              recovery, failure, or completion.
+      --task-file=<taskFile>
+                            Requirement file path.
+  -V, --version             Print version information and exit.
+      --workdir=<workdir>   Repository directory. Defaults to current directory.
+      --workflow=<workflowPath>
+                            Workflow definition JSON file. Defaults to built-in
+                              agent lifecycle.
+      --workflow-variant=<workflowVariant>
+                            Built-in workflow variant: full (default),
+                              contract, terminal-delivery.
+      --worktree-dir=<worktreeDir>
+                            Worktree directory.

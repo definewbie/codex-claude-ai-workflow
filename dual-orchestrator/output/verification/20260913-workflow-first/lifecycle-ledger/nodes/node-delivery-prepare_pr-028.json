@@ -1,0 +1,30 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-delivery-prepare_pr-028",
+  "nodeDefinitionId" : "delivery.prepare_pr",
+  "kind" : "TASK",
+  "handlerType" : "delivery.prepare_pr",
+  "status" : "COMPLETED",
+  "stageId" : "stage-delivery",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/reports/iter-001-final-report.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/reports/latest-final-report.md" ],
+  "inputTransition" : {
+    "required" : true,
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "transition_type" : "normal",
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/commit-message.txt", ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/pr-body.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/candidates/node-delivery-prepare_pr-028/candidate-4ae728ea818e155c8f3a0601c0375aa5d1c970f0266f54f262c7ef216b6c2e6f.json" ],
+  "result" : {
+    "commit_message_path" : ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/commit-message.txt",
+    "pr_body_path" : ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/pr-body.md",
+    "delivery_candidate_ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/candidates/node-delivery-prepare_pr-028/candidate-4ae728ea818e155c8f3a0601c0375aa5d1c970f0266f54f262c7ef216b6c2e6f.json",
+    "delivery_candidate_sha256" : "4ae728ea818e155c8f3a0601c0375aa5d1c970f0266f54f262c7ef216b6c2e6f",
+    "expected_result_tree" : "8f0721d88fe20e77c1dbcf8e9d5082d0fc04ac36",
+    "prepared_at" : "2026-09-13T16:05:26.601353Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315526591-01a9f534",
+  "startedAt" : "2026-09-13T16:05:26.601353Z",
+  "finishedAt" : "2026-09-13T16:05:26.667951Z"
+}

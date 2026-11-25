@@ -1,0 +1,17 @@
+{
+  "status": "STATIC_SOURCE_ONLY_NO_TEST_OR_NATIVE_RUN",
+  "files": {
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewGateActions.java": "9c53701dac8bcea85d5b03ed68a44becd992ce884a48be27336e5094e001180f",
+    "dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java": "8533fc0915a3043ad38cd4c63d5ce5b121f9339c9284ea9e4ea2dc803ebe6a6b",
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java": "1f6c53c39a5d645bcaeb8a5dfb328cfac452b4a8ad39136f8c7ef63ec7a4b0dc",
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java": "908226b7f135747c3fae1c8fa44f33a5a07988c461877b17eb3221639761e0de",
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java": "85ed81fbbbe669bc5a7fbe9262f5308b68a63450e0d5fc529876fd32b7732427",
+    "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java": "c0d3fcb98aa349d150ce17349739483b21e62ee2c30f92bfc2b1cbec39e90bc3",
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionResultFacts.java": "2a8723d95600143b64bc1867883f53ded679b8e56dccf09efaeb13b382ff949c",
+    "dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java": "699b4f57690985fc331124201db7f30aacddd3f209519075321e334ffc5a94ee",
+    "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java": "3b8a8cf0269a92c907b1ea463f64c6a8eeb9d346289829d7c607aab81ada4e72",
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "5b0bab469dc2f330443986064530a333baa9658b7a2b190b0906df66f024921d",
+    "output/freeze-review-20260928/freeze-details.md": "6c7f3fc5baddab3dfa20d3a7fe77cd9c8b4d545e4e4e330c3bbd6418fdf287a2",
+    "output/freeze-review-20260928/precondition-map.json": "3753cc4703a85039497d2469226c9cdb341f0e635d85393e52a2f982284a629a"
+  }
+}

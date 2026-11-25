@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "workstreamId": "ws-20261022T150557Z-Y2KB",
+  "workflowInstanceId": "wf-ws-20261022T150557Z-Y2KB",
+  "workflowId": "agent-lifecycle-terminal-delivery",
+  "definitionVersion": 5,
+  "status": "RUNNING",
+  "activeNodeInstanceIds": [
+    "node-intake-claude_brainstorm-002"
+  ],
+  "openGateIds": [],
+  "lastEventId": "evt-000002",
+  "updatedAt": "2026-10-22T15:19:47.472067Z",
+  "commitSequence": 5
+}

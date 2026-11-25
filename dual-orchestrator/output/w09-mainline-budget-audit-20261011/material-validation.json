@@ -1,0 +1,73 @@
+{
+  "identity_checks": "PASS",
+  "local_document_links": [
+    {
+      "file": "full-mainline-gate.md",
+      "target": "../w08-preparation-20261010/task-requirement.md",
+      "exists": true
+    },
+    {
+      "file": "full-mainline-gate.md",
+      "target": "check-budget-offline.py",
+      "exists": true
+    },
+    {
+      "file": "assessment.md",
+      "target": "full-mainline-gate.md",
+      "exists": true
+    },
+    {
+      "file": "assessment.md",
+      "target": "config-observation.json",
+      "exists": true
+    },
+    {
+      "file": "assessment.md",
+      "target": "native-config-and-tool-observation.json",
+      "exists": true
+    },
+    {
+      "file": "assessment.md",
+      "target": "source-index.json",
+      "exists": true
+    },
+    {
+      "file": "assessment.md",
+      "target": "source-excerpts.txt",
+      "exists": true
+    },
+    {
+      "file": "assessment.md",
+      "target": "input-observation.json",
+      "exists": true
+    },
+    {
+      "file": "assessment.md",
+      "target": "native-config-and-tool-observation.json",
+      "exists": true
+    },
+    {
+      "file": "assessment.md",
+      "target": "budget-proposal.json",
+      "exists": true
+    },
+    {
+      "file": "assessment.md",
+      "target": "check-budget-offline.py",
+      "exists": true
+    },
+    {
+      "file": "assessment.md",
+      "target": "budget-dry-run.json",
+      "exists": true
+    },
+    {
+      "file": "assessment.md",
+      "target": "full-mainline-gate.md",
+      "exists": true
+    }
+  ],
+  "budget_dry_run_sha256": "2328b0b4dee9c6a25a64e798e82cdaee8f8df2e88d0c56fa14a4338864ea16e2",
+  "budget_check_scope": "pure offline arithmetic only; no live observer or client execution",
+  "native_provider_calls": 0
+}

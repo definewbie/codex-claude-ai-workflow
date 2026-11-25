@@ -1,0 +1,38 @@
+You need to keep control of the edges, since they’re decision points: each
+one encodes the event, guard, and action that drives functionality. This is
+where hierarchy helps.
+
+Hierarchical State Machines
+
+Hierarchical state machines let states contain other states. Superstates
+capture shared entry/exit behavior and shared guards. Substates inherit
+those rules and add their own. History nodes remember which substate you
+were in when you left, so you can resume exactly there later. These new
+additions to the state machine are explained in the following list:
+
+Superstate
+
+  A state that groups a set of child states and their common policies.
+   Entering the superstate runs shared logic once; exiting it runs shared
+   cleanup once.
+
+Substate
+
+  A concrete mode that lives inside a superstate. It has its own edges but
+    inherits the superstate’s guards and actions.
+
+History
+
+  A “remember where I was” marker. Shallow history resumes at the last
+    active child; deep history resumes inside nested grandchildren. In agent
+    terms, this is a checkpoint for a portion of the graph.
+
+Parallel region
+
+   Two or more child regions of a superstate that advance independently.
+   Useful for fanning out tool calls or agent roles and then joining.
+
+Figure 1-3 shows a hierarchical state machine with a WORKING superstate.
+PLAN, ACT, and REFLECT are substates. H is a shallow history marker that
+records the last active substate so execution can resume there if the
+superstate is reentered.

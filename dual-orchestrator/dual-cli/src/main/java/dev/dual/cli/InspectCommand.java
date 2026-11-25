@@ -45,7 +45,8 @@ public final class InspectCommand implements Callable<Integer> {
     }
 
     private void inspectNode(WorkstreamPaths paths) throws Exception {
-        var ledger = CliLedgerFactory.create();
+        try (var snapshot = CliLedgerFactory.create().readSession(paths)) {
+        var ledger = snapshot.ledger();
         var id = nodeInstanceId;
         if (id == null || id.isBlank()) {
             var current = ledger.loadCurrent(paths);
@@ -75,6 +76,7 @@ public final class InspectCommand implements Callable<Integer> {
             showContext(paths, node.inputRefs(), node.outputRefs());
         } else if (show != null && !show.isBlank()) {
             throw new IllegalArgumentException("--show for node inspect must be context");
+        }
         }
     }
 

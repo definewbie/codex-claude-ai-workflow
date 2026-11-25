@@ -1,0 +1,36 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1792977548616-5edde94f",
+  "workflowExecutionId" : "wfe-1792977548517-fcc099fc",
+  "nodeInstanceId" : "node-implement-self_test_decision-032",
+  "nodeDefinitionId" : "implement.self_test_decision",
+  "nodeKind" : "DECISION",
+  "handlerType" : "review.decision",
+  "status" : "SUCCEEDED",
+  "agent" : "",
+  "session" : "",
+  "promptTemplate" : "",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "DECISION",
+    "handler_type" : "review.decision",
+    "agent" : "",
+    "session" : "",
+    "prompt_template" : "",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "max_revisions" : 1,
+      "required_contract_phase" : "EXECUTION"
+    },
+    "outcome" : "SELF_TEST_COMPLETE",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 6
+  },
+  "nodeExecutionId" : "nxe-1792977548622-c749982b",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-26T01:19:08.616522Z",
+  "claimedAt" : "2026-10-26T01:19:08.632273Z",
+  "completedAt" : "2026-10-26T01:19:08.879347Z"
+}

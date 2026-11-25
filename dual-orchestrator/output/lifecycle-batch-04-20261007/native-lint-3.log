@@ -1,0 +1,30 @@
+
+> acpx@0.13.2 lint /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source
+> oxlint --type-aware --deny-warnings src scripts examples test conformance && pnpm run lint:persisted-key-casing && pnpm run lint:flow-schema-terms
+
+
+> acpx@0.13.2 lint:persisted-key-casing /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source
+> tsx scripts/lint-persisted-key-casing.ts
+
+node:net:2145
+      const error = new UVExceptionWithHostPort(rval, 'listen', address, port);
+                    ^
+
+Error: listen EPERM: operation not permitted /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tsx-501/85824.pipe
+    at Server.setupListenHandle [as _listen2] (node:net:2145:21)
+    at listenInCluster (node:net:2224:12)
+    at Server.listen (node:net:2361:5)
+    at file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/node_modules/.pnpm/tsx@4.23.12/node_modules/tsx/dist/cli.mjs:53:31472
+    at new Promise (<anonymous>)
+    at createIpcServer (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/node_modules/.pnpm/tsx@4.23.12/node_modules/tsx/dist/cli.mjs:53:31450)
+    at async file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/node_modules/.pnpm/tsx@4.23.12/node_modules/tsx/dist/cli.mjs:55:542 {
+  code: 'EPERM',
+  errno: -1,
+  syscall: 'listen',
+  address: '/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tsx-501/85824.pipe',
+  port: -1
+}
+
+Node.js v24.19.0
+ ELIFECYCLE  Command failed with exit code 1.
+ ELIFECYCLE  Command failed with exit code 1.

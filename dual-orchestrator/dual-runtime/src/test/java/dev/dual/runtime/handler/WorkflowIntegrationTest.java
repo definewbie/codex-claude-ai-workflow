@@ -25,6 +25,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class WorkflowIntegrationTest {
     @TempDir
@@ -73,7 +74,7 @@ class WorkflowIntegrationTest {
         var packagePath = (String) contextResult.result().get("context_package");
         assertTrue(Files.exists(tempDir.resolve(packagePath)));
         var markdown = Files.readString(tempDir.resolve(packagePath), StandardCharsets.UTF_8);
-        assertTrue(markdown.contains("Build user auth module"));
+        assertFalse(markdown.contains("Build user auth module"), "active profile leaves the single requirement injection to the prompt renderer");
         assertTrue(markdown.contains("READY_FOR_PRODUCT_REVIEW"));
 
         var decisionHandler = new ReviewDecisionHandler();
@@ -105,8 +106,8 @@ class WorkflowIntegrationTest {
                         new EdgeDefinition("gate.review", "approved", "next"),
                         new EdgeDefinition("gate.review", "revise", "first"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-actions", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-actions", definition);
         var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
                 "READY", List.of(), Map.of());
@@ -129,8 +130,12 @@ class WorkflowIntegrationTest {
                 gateNode.finishedAt()
         );
 
-        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
-                tempDir, "ws-actions", gateDefinition, instance, "READY"));
+        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(tempDir,
+                "ws-actions",
+                gateDefinition,
+                instance,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
         @SuppressWarnings("unchecked")
         var packet = (Map<String, Object>) new ObjectMapper().readValue(
                 tempDir.resolve(String.valueOf(result.result().get("review_packet_json"))).toFile(), Map.class);
@@ -247,7 +252,7 @@ class WorkflowIntegrationTest {
 
     @Test
     void chain3_activeProfileBudgetExcludesDuplicateRequirement() throws Exception {
-        AuthoredInputFixture.before(tempDir, "ws-int", "implement.claude_implement", "run-implement");
+        var authorized = AuthoredInputFixture.before(tempDir, "ws-int", "implement.claude_implement", "run-implement");
         var largeRequirement = "A".repeat(8_000) + "\n";
         fixture.writeRequirement(largeRequirement);
         fixture.writeGitEvidence("M src/Foo.java\nM src/Bar.java", "2 files changed, 400 insertions(+)", null);
@@ -258,15 +263,10 @@ class WorkflowIntegrationTest {
         }
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws-int",
-                new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
-                        "target_node", "implement.claude_implement",
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-int", new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
+                        "required_contract_phase", "EXECUTION", "target_node", "implement.claude_implement",
                         "profile", "implementation"
-                )),
-                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
-        ));
+                )), authorized.instance(), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var packagePath = (String) result.result().get("context_package");
@@ -292,20 +292,15 @@ class WorkflowIntegrationTest {
 
     @Test
     void chain4_explicitFullProfileCompressesOversizedRequirement() throws Exception {
-        AuthoredInputFixture.before(tempDir, "ws-int", "implement.claude_implement", "run-implement");
+        var authorized = AuthoredInputFixture.before(tempDir, "ws-int", "implement.claude_implement", "run-implement");
         var oversizedRequirement = "R".repeat(25_000) + "\n";
         fixture.writeRequirement(oversizedRequirement);
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws-int",
-                new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
-                        "target_node", "implement.claude_implement",
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-int", new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
+                        "required_contract_phase", "EXECUTION", "target_node", "implement.claude_implement",
                         "profile", "full"
-                )),
-                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
-        ));
+                )), authorized.instance(), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         // ADAPTIVE policy now compresses oversized requirement instead of hard-failing
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -319,134 +314,19 @@ class WorkflowIntegrationTest {
 
     @Test
     void chain5_needsRevisionLoopWithContextCarryover() throws Exception {
-        fixture.writeRequirement("Design caching layer.\n");
-        fixture.writeAgentOutput("design-claude.md", """
-                # Design
-
-                Proposed Redis-based caching.
-
-                ```dual-control
-                decision: READY_FOR_ARCH_REVIEW
-                summary: Caching layer design complete
-                ```
-                """);
-
-        // Codex review rejects → NEEDS_REVISION
-        fixture.writeAgentOutput("codex-arch-review-reject.md", """
-                # Architecture Review
-
-                Missing cache invalidation strategy.
-
-                ```dual-control
-                decision: NEEDS_REVISION
-                summary: Must address cache invalidation
-                ```
-                """);
-        fixture.writeAgentOutput("codex-arch-review-reject.contract.json", """
-                {
-                  "artifact_type": "agent_output_contract",
-                  "node_id": "design.codex_arch_review",
-                  "decision": "NEEDS_REVISION",
-                  "summary": "Must address cache invalidation"
-                }
-                """);
-
-        var reviewRef = ".agent/workstreams/ws-int/runs/run-001/outputs/codex-arch-review-reject.contract.json";
-        var decisionHandler = new ReviewDecisionHandler();
-        var rejectResult = decisionHandler.evaluate(decisionContext(
-                "design.decision",
-                List.of(reviewRef)
-        ));
-        assertEquals(NodeStatus.COMPLETED, rejectResult.status());
-        assertEquals("NEEDS_REVISION", rejectResult.outcome());
-
-        // Write iteration history simulating the rejection
-        var iterationsDir = tempDir.resolve(".agent/workstreams/ws-int/iterations");
-        Files.createDirectories(iterationsDir);
-        Files.writeString(iterationsDir.resolve("iter-001.json"), """
-                {
-                  "iterationId": "iter-001",
-                  "parentIterationId": null,
-                  "number": 1,
-                  "stageId": "stage-design",
-                  "status": "active",
-                  "triggerNodeInstanceId": "node-design-decision-001",
-                  "triggerAction": "START",
-                  "targetNodeDefinitionId": "design.claude_design",
-                  "reason": "",
-                  "createdAt": "2026-05-28T08:00:00Z"
-                }
-                """);
-        Files.writeString(iterationsDir.resolve("iter-002.json"), """
-                {
-                  "iterationId": "iter-002",
-                  "parentIterationId": "iter-001",
-                  "number": 2,
-                  "stageId": "stage-design",
-                  "status": "active",
-                  "triggerNodeInstanceId": "node-design-decision-001",
-                  "triggerAction": "NEEDS_REVISION",
-                  "targetNodeDefinitionId": "design.claude_design",
-                  "reason": "Missing cache invalidation strategy",
-                  "createdAt": "2026-05-28T08:05:00Z"
-                }
-                """);
-
-        // Revised design output
-        fixture.writeAgentOutput("design-claude-v2.md", """
-                # Design v2
-
-                Added cache invalidation via TTL + event bus.
-
-                ```dual-control
-                decision: READY_FOR_ARCH_REVIEW
-                summary: Revised design with invalidation strategy
-                ```
-                """);
-
-        var revisedRef = ".agent/workstreams/ws-int/runs/run-001/outputs/design-claude-v2.md";
-
-        // Build context for the revised iteration — should include iteration history
-        var ctxHandler = new ContextBuildPackageHandler();
-        var ctxResult = ctxHandler.execute(taskContext(
-                "context.design_claude",
-                "context.build_package",
-                List.of(revisedRef)
-        ));
-        assertEquals(NodeStatus.COMPLETED, ctxResult.status());
-
-        var packagePath = (String) ctxResult.result().get("context_package");
-        var markdown = Files.readString(tempDir.resolve(packagePath), StandardCharsets.UTF_8);
-        assertTrue(markdown.contains("Design caching layer"), "Requirement must be present");
-        assertTrue(markdown.contains("iter-002"), "Iteration history must include the rejection loop");
-        assertTrue(markdown.contains("NEEDS_REVISION"), "Must show the trigger action");
-        assertTrue(markdown.contains("Missing cache invalidation"), "Must include rejection reason");
-
-        // Round 2: architecture review approves
-        fixture.writeAgentOutput("codex-arch-review-approve.md", """
-                # Architecture Review v2
-
-                LGTM.
-
-                ```dual-control
-                decision: READY_FOR_ARCH_REVIEW
-                summary: Invalidation strategy addresses concern
-                ```
-                """);
-        fixture.writeAgentOutput("codex-arch-review-approve.contract.json", """
-                {
-                  "artifact_type": "agent_output_contract",
-                  "node_id": "design.codex_arch_review",
-                  "decision": "READY_FOR_ARCH_REVIEW",
-                  "summary": "Invalidation strategy addresses concern"
-                }
-                """);
-        var approveReviewRef = ".agent/workstreams/ws-int/runs/run-001/outputs/codex-arch-review-approve.contract.json";
-        var approveResult = decisionHandler.evaluate(decisionContext(
-                "design.decision",
-                List.of(approveReviewRef)
-        ));
-        assertEquals("READY_FOR_ARCH_REVIEW", approveResult.outcome());
+        var f = new AuthoredStageSequenceTest.Fixture(tempDir, "src/cache.java", AuthoredStageSequenceTest.PlanTopology.REVIEWED_HUMAN, "ws-int");
+        f.advanceToGate(); f.approve();
+        assertEquals("gate.human_plan_approval", f.currentNode());
+        f.revise("Include cache invalidation in the plan");
+        assertEquals("gate.human_plan_approval", f.currentNode());
+        var revised = f.inputs.get("plan.claude_plan");
+        assertEquals(List.of("plan issue 1", "Include cache invalidation in the plan"),
+                revised.obligations().stream().map(AuthoredExecutionContext.Obligation::text).toList());
+        assertNotNull(revised.parent());
+        assertEquals(2, java.util.Collections.frequency(f.calls, "plan.codex_plan_review"));
+        f.approve();
+        assertEquals(dev.dual.core.workflow.WorkflowStatus.COMPLETED, f.ledger.loadCurrent(f.paths).status());
+        assertNotNull(f.inputs.get("implement.claude_implement").reviewedPlan());
     }
 
     @Test
@@ -630,15 +510,10 @@ class WorkflowIntegrationTest {
 
     private NodeResult buildContextPackage(String profile) throws Exception {
         var handler = new ContextBuildPackageHandler();
-        return handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws-int",
-                new NodeDefinition("context.test", NodeKind.TASK, "context.build_package", Map.of(
-                        "target_node", "next.agent",
+        return handler.execute(new TaskHandler.TaskContext(tempDir, "ws-int", new NodeDefinition("context.test", NodeKind.TASK, "context.build_package", Map.of(
+                        "required_contract_phase", "EXECUTION", "target_node", "next.agent",
                         "profile", profile
-                )),
-                node("context.test", NodeKind.TASK, "context.build_package", List.of())
-        ));
+                )), node("context.test", NodeKind.TASK, "context.build_package", List.of()), dev.dual.runtime.RuntimeTestLedger.ledger()));
     }
 
     private String readPackageMarkdown(NodeResult result) throws Exception {
@@ -647,21 +522,11 @@ class WorkflowIntegrationTest {
     }
 
     private TaskHandler.TaskContext taskContext(String nodeId, String handlerType, List<String> inputRefs) {
-        return new TaskHandler.TaskContext(
-                tempDir,
-                "ws-int",
-                new NodeDefinition(nodeId, NodeKind.TASK, handlerType, Map.of()),
-                node(nodeId, NodeKind.TASK, handlerType, inputRefs)
-        );
+        return new TaskHandler.TaskContext(tempDir, "ws-int", new NodeDefinition(nodeId, NodeKind.TASK, handlerType, Map.of()), node(nodeId, NodeKind.TASK, handlerType, inputRefs), dev.dual.runtime.RuntimeTestLedger.ledger());
     }
 
     private DecisionHandler.DecisionContext decisionContext(String nodeId, List<String> inputRefs) {
-        return new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws-int",
-                new NodeDefinition(nodeId, NodeKind.DECISION, "review.decision", Map.of()),
-                node(nodeId, NodeKind.DECISION, "review.decision", inputRefs)
-        );
+        return new DecisionHandler.DecisionContext(tempDir, "ws-int", new NodeDefinition(nodeId, NodeKind.DECISION, "review.decision", Map.of()), node(nodeId, NodeKind.DECISION, "review.decision", inputRefs), dev.dual.runtime.RuntimeTestLedger.ledger());
     }
 
     private String toWorkspaceRef(Path path) {

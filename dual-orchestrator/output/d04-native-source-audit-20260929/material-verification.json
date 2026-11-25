@@ -1,0 +1,19 @@
+{
+  "baselineFiles": 1319,
+  "unchangedBaselineFiles": 1316,
+  "changedBaselineFiles": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "missingBaselineFiles": [],
+  "verifiedSourceFiles": 14,
+  "priorManifestEntriesResolved": 13,
+  "nativeSessions": 0,
+  "providerCalls": 0,
+  "injectedCalls": 0,
+  "spawnedAgents": 0,
+  "productImplementation": false,
+  "upstreamRustModificationOrBuild": false,
+  "verification": "static material/self-review only; no runtime or independent review"
+}

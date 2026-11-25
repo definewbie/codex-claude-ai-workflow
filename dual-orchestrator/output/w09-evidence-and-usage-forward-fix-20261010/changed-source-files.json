@@ -1,0 +1,67 @@
+[
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java",
+    "before_sha256": "0d59ad15a877eb7492de209811357bb0d3fe07f393fd796e118587560f427fd3",
+    "after_sha256": "e3df7edb775ee9c9bd88b8fe48da8b384922684d3fcd55689e52bb6b83561020"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsage.java",
+    "before_sha256": "117eb94d32ba37798bf07f100db3b3baf689e584c03832a05c66887ae922c5f2",
+    "after_sha256": "9462ca1ab5882763808f759a588954f93e278f35b856b8ec51e02e431344c706"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+    "before_sha256": "03772f69b979d91af947f27be5daa5aa35a0c8bd4f159b869952240fdd9cc80b",
+    "after_sha256": "23dff46be25e81980b83abb3ed5abea450252157448fd8fe71f5ae55f7015840"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxPromptCompletion.java",
+    "before_sha256": "e0fa50535351317def44d68b8e3ac223b51fda5d9717ce4a1f858ce80fa681e8",
+    "after_sha256": "a92780c274d226a7fdb7377db3913965d361de433c581161d7410044df5bc463"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionStreamProjector.java",
+    "before_sha256": "d845fe47fa8c6247ee11c11ed7b023f79f48e26b8599244f8aa81175ca4aa7bb",
+    "after_sha256": "9aa41a602922530b6b1a7b8b6eadf377d25628c26bc2c333a5cad1ed02064ecf"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/intake-claude-brainstorm.md",
+    "before_sha256": "8f2894381d2fb1ece56852a625ee737fabe54d29cc3a03445c0f9d795bb4adf9",
+    "after_sha256": "c26b10a8cb892bb98c1d89fa4c1973d34740f550c5d364effe63b28a70a41215"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentPromptRendererTest.java",
+    "before_sha256": "6ddf239bc53cf1600f8a7df7d1514b8511b2de5d7482c27e1150f1b44dd51024",
+    "after_sha256": "73c483dbff87b5f1cf345b6b93ab8c90b0505970e65945810e01370a2c387c48"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java",
+    "before_sha256": "23ef2006206dd151f9329bd933a50f2b89d82056568410c67769cc2132e452d4",
+    "after_sha256": "26a69b46464947dbcd225616bc56621b0c051aa4eda17fb6c3a7439c7e0059a2"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageReaderTest.java",
+    "before_sha256": "8f4cd93d8add410673462a08726de80fd738fed9988e2a7bcaa55e128aa0790e",
+    "after_sha256": "380f78176ec7262ac40502d42cfa7c984e9f35a5111e51b2d4e9b8d4e4a274ab"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxSessionStreamProjectorTest.java",
+    "before_sha256": "9b8ea67bfee9447b12c0b6fdb5065f77a96b8324800f72bbfb92a0eea770ba26",
+    "after_sha256": "71d9ea0b06f6c70f50fcf44373616385cea05981a886d825e3a84742aec4e9bc"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+    "before_sha256": "42d93bbf1ab066eb7b820177c57228f01ca4cea32f4e239a90d2094133593a33",
+    "after_sha256": "486fc6e8a304e362e47054246d0400f3b68b462f6b1936294f6f823044024927"
+  },
+  {
+    "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/TaskContractProposalValidatorTest.java",
+    "before_sha256": "4ec9bc3c6be8518a46987b22a908282f276a61d316fe35ce998eabb26dbfbdbc",
+    "after_sha256": "8cf7ceb0523c77c37e555419b9caac0ea5a93d1a2d03519f497ada95a59fe8e2"
+  },
+  {
+    "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java",
+    "before_sha256": "d4335b8ae74bc015e5d5ba2d8c86ff756a428ef93caf446b214f4e2ccdd6553b",
+    "after_sha256": "dce48cdb2fa9387672986354d334833cafb03caef667f2c75fcbf63ca4e740bb"
+  }
+]

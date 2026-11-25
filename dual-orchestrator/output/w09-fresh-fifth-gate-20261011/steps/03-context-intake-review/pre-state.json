@@ -1,0 +1,50 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261011T141651Z-MBC2",
+    "workflowInstanceId": "wf-ws-20261011T141651Z-MBC2",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-context-intake_codex_product_review-003"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-10-11T14:19:40.666676Z",
+    "commitSequence": 10
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-context-intake_codex_product_review-003",
+    "nodeDefinitionId": "context.intake_codex_product_review",
+    "kind": "TASK",
+    "handlerType": "context.build_package",
+    "status": "READY",
+    "stageId": "stage-context",
+    "iterationId": "iter-001",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728289467/outputs/intake-claude-brainstorm.stderr.log",
+      ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728289467/outputs/intake-claude-brainstorm.transcript.log",
+      ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728289467/outputs/intake-claude-brainstorm.json",
+      ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791728289467/binding.json",
+      ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728289467/outputs/intake-claude-brainstorm.contract.json",
+      ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-517fc15b11bd1676.ref.json"
+    ],
+    "inputTransition": {
+      "condition": "unconditional",
+      "transition_type": "normal",
+      "required": true,
+      "source_node_instance_id": "node-intake-claude_brainstorm-002",
+      "source_node_sha256": "acbe5f63f54b3c538b398d8167a1604ba58f56f37b0bab12ea0c068c4daaa708",
+      "purpose": "Seed the first Claude intake run with repo-scope context."
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 94.194
+}

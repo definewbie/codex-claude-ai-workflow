@@ -1,8 +1,6 @@
 package dev.dual.cli;
 
-import dev.dual.ledger.file.LockOwner;
 import dev.dual.ledger.file.WorkflowFileLedger;
-import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -34,10 +32,8 @@ public class ReviewApproveCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "review approve"))) {
-            var ledger = CliLedgerFactory.create();
-            ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), "approve", note);
-        }
+        var ledger = CliLedgerFactory.create();
+        dev.dual.runtime.handler.ReviewGateActions.resolve(ledger, paths, "approve", note);
         System.out.println("Human gate approved");
         System.out.println("Workstream: " + workstreamId);
         if (!runImmediately) {
@@ -45,8 +41,6 @@ public class ReviewApproveCommand implements Callable<Integer> {
             return 0;
         }
         System.out.println("Running workflow until next gate...");
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "run"))) {
-            return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
-        }
+        return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
     }
 }

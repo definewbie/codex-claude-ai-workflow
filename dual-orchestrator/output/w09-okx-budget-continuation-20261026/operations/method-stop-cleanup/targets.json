@@ -1,0 +1,52 @@
+{
+  "open_records": [
+    {
+      "record_id": "01a178e7-262f-7420-b6f5-a88652750a69",
+      "name": "codex-reviewer-ws-20261026T142203Z-7SNA",
+      "agent": "codex",
+      "metadata_path": "/Users/kriswang/.acpx/sessions/01a178e7-262f-7420-b6f5-a88652750a69.json"
+    },
+    {
+      "record_id": "ab3986d9-d5da-4816-86e3-0bd22b614e3f",
+      "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793029979831",
+      "agent": "claude",
+      "metadata_path": "/Users/kriswang/.acpx/sessions/ab3986d9-d5da-4816-86e3-0bd22b614e3f.json"
+    },
+    {
+      "record_id": "7a1a6c84-99d9-438e-8cc9-418f106e97e8",
+      "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793030521008",
+      "agent": "claude",
+      "metadata_path": "/Users/kriswang/.acpx/sessions/7a1a6c84-99d9-438e-8cc9-418f106e97e8.json"
+    },
+    {
+      "record_id": "c25437b3-add8-43f4-b51a-7a2510108b64",
+      "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793048679201",
+      "agent": "claude",
+      "metadata_path": "/Users/kriswang/.acpx/sessions/c25437b3-add8-43f4-b51a-7a2510108b64.json"
+    }
+  ],
+  "already_closed_records": [
+    {
+      "record_id": "75fd08fd-0532-4728-8c47-1571b2008d04",
+      "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793026771764",
+      "metadata_path": "/Users/kriswang/.acpx/sessions/75fd08fd-0532-4728-8c47-1571b2008d04.json",
+      "metadata_sha256": "10fc10b16eddcd7e8d07b7c891d4b3bd8157565ffc197902a129acc054c349b7",
+      "meaning": "Locally recorded closed; no child-tree claim"
+    },
+    {
+      "record_id": "01a178bd-309e-7f13-b4f7-a9538baf1173",
+      "name": "codex-reviewer-ws-20261026T142203Z-7SNA",
+      "metadata_path": "/Users/kriswang/.acpx/sessions/01a178bd-309e-7f13-b4f7-a9538baf1173.json",
+      "metadata_sha256": "88943fec6c0f4051cf3baf33cb426f7e06fde621a72ccc1fa73a22611046d2f7",
+      "meaning": "Locally recorded closed; no child-tree claim"
+    },
+    {
+      "record_id": "8473c12f-45d4-4593-b904-65a370d0d6ab",
+      "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793027503466",
+      "metadata_path": "/Users/kriswang/.acpx/sessions/8473c12f-45d4-4593-b904-65a370d0d6ab.json",
+      "metadata_sha256": "24b9de9dadd80af4cf50b2571fdabd1e5c5e7b43571fc68a866e3e0b06f2717a",
+      "meaning": "Locally recorded closed; no child-tree claim"
+    }
+  ],
+  "model_calls": 0
+}

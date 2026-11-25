@@ -1,0 +1,43 @@
+{
+  "status": "PASS_LOCAL_PRECONDITIONS",
+  "authorization": "USER_GRANTED_FRESH_FIFTH_1700000",
+  "source_inputs_match": 656,
+  "observer_offline": "PASS",
+  "fresh_initialization": "PASS",
+  "runtime_identity": {
+    "behavior.env.DUAL_CONTEXT_GOVERNANCE_ENABLED": "",
+    "behavior.property.dual.context.memory.enabled": "",
+    "behavior.env.DUAL_ACPX_QUEUE_TTL_SECONDS": "",
+    "behavior.env.DUAL_SESSION_COMPACTION_EXPERIMENT": "",
+    "executable.server": "0f4ca616a4eeeccb4409aa7f5c4f3f508c9bcb394686c6d0b272a23df7f5be19",
+    "behavior.property.DUAL_SESSION_COMPACTION_STABILITY_CACHED_READ_TOKENS": "",
+    "behavior.env.DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS": "",
+    "behavior.property.dual.context.governance.enabled": "",
+    "kernel.effective": "liteflow",
+    "executable.cli": "06900ad8f7273e3d5410095f11cc956ed4a6b68eeccdfea17d53d8be9279d88e",
+    "kernel.configured": "liteflow",
+    "behavior.property.DUAL_SESSION_COMPACTION_EXPERIMENT": "",
+    "behavior.property.DUAL_SESSION_COMPACTION_IMPLEMENT_STABILITY_CACHED_READ_TOKENS": "",
+    "behavior.acpx.patch": "1517f828d303ea720a7a153e6dc8c33265ba1ea100d2b9260c98327b5604468c",
+    "behavior.env.DUAL_SESSION_COMPACTION_STABILITY_CACHED_READ_TOKENS": "",
+    "behavior.env.DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS": "",
+    "behavior.env.DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS": "",
+    "behavior.env.DUAL_ACPX_COMMAND_TIMEOUT_SECONDS": "600",
+    "behavior.policy.schema": "claude_execution_policy.v2",
+    "behavior.acpx.upstream": "fd173f04aa1b56f9e3f5ca5190c034ddcae28792",
+    "behavior.env.API_TIMEOUT_MS": "",
+    "behavior.env.DUAL_CONTEXT_MEMORY_ENABLED": "",
+    "java.runtime": "25.0.3+9-LTS-195",
+    "identity_schema": "dual-runtime-content.v1",
+    "behavior.env.DUAL_SESSION_COMPACTION_IMPLEMENT_STABILITY_CACHED_READ_TOKENS": ""
+  },
+  "native_model_calls": 0,
+  "business_approvals": 0,
+  "location": {
+    "parent": "/private/tmp/dual-w09-newlines-20261011-fresh-05",
+    "target": "/private/tmp/dual-w09-newlines-20261011-fresh-05/target",
+    "workspace": "/private/tmp/dual-w09-newlines-20261011-fresh-05/worktree",
+    "workstream": "ws-20261011T141651Z-MBC2",
+    "ledger": "/private/tmp/dual-w09-newlines-20261011-fresh-05/worktree/.agent/workstreams/ws-20261011T141651Z-MBC2"
+  }
+}

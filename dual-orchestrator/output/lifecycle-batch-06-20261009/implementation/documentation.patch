@@ -1,0 +1,62 @@
+--- a/docs/quickstart.md
++++ b/docs/quickstart.md
+@@ -379,3 +379,7 @@
+   under P1;
+ - delivery merge is explicit and conservative; the tool applies a reviewed
+   patch to the target index but does not commit or merge automatically.
++
++### Delivery interruption / 交付中断
++
++正常顺序是批准候选 → `delivery merge` → 人检查目标暂存内容并实际 commit → `delivery finalize`。UNKNOWN 时先查看 `status`/`summary` 的停止依据与下一步，不盲目再次应用；使用当前裁定模板经 `delivery resolve --decision <decision.json>` 显式关闭再次应用，或核实旧操作停止后授权一次新尝试。已知活动不得被人工声明覆盖；声明不等于测量退出码。详见 [reference](reference.md) 的交付裁定入口。
+--- a/docs/quickstart.zh-CN.md
++++ b/docs/quickstart.zh-CN.md
+@@ -336,3 +336,7 @@
+ - context/provider metrics 已能支持 MVP，但 token/cost 治理还会在 P1 继续强化；
+ - delivery merge 是显式保守动作：工具把已审查 patch apply 到目标 repo index，
+   不自动 commit，也不自动 merge。
++
++### Delivery interruption / 交付中断
++
++正常顺序是批准候选 → `delivery merge` → 人检查目标暂存内容并实际 commit → `delivery finalize`。UNKNOWN 时先查看 `status`/`summary` 的停止依据与下一步，不盲目再次应用；使用当前裁定模板经 `delivery resolve --decision <decision.json>` 显式关闭再次应用，或核实旧操作停止后授权一次新尝试。已知活动不得被人工声明覆盖；声明不等于测量退出码。详见 [reference](reference.md) 的交付裁定入口。
+--- a/docs/reference.md
++++ b/docs/reference.md
+@@ -1291,9 +1291,10 @@
+ .agent/workstreams/<workstream_id>/delivery/merge.patch
+ .agent/workstreams/<workstream_id>/delivery/changed-files.txt
+ .agent/workstreams/<workstream_id>/delivery/excluded-files.txt
+-.agent/workstreams/<workstream_id>/delivery/apply.stdout.log
+-.agent/workstreams/<workstream_id>/delivery/apply.stderr.log
+-```
++
++```
++
++stdout/stderr、真实退出码和进程身份保存在 `merge-plan.json` 的 operation 与对应 events 中，不承诺单独的日志文件。重复 merge 只重读/核对旧操作，不会重新应用。
+ 
+ 检查 target 中已暂存的精确候选后，由 operator 正常创建 Git commit。随后登记该 commit：
+ 
+@@ -1304,12 +1305,24 @@
+   <workstream_id>
+ ```
+ 
+-`delivery finalize` 要求 target clean、HEAD 等于给定 SHA、commit parent 等于 candidate base、commit tree 等于获批 `expectedResultTree`。通过后 `merge-plan.json` 进入 `COMMITTED`。旧的 `delivery commit` / `delivery create-pr` 旁路已删除；未来 push/PR 能力也必须消费同一 finalized commit，不能直接对当前 worktree 执行 `git add -A`。
++`delivery finalize` 先核旧应用停止依据（程序结束事实或显式人工确认），再要求 target clean、HEAD 等于给定 SHA、commit parent 等于 candidate base、commit tree 等于获批 `expectedResultTree`。通过后 `merge-plan.json` 进入 `COMMITTED`。旧的 `delivery commit` / `delivery create-pr` 旁路已删除；未来 push/PR 能力也必须消费同一 finalized commit，不能直接对当前 worktree 执行 `git add -A`。
+ 
+ `dualctl status`、`dualctl summary` 与 operator API/UI 只消费 `DeliveryApplicationService.View`，不会直接解释
+ `merge-plan.json`。该 view 先重验人工验收绑定的 candidate identity，再投影 delivery status、typed failure、target
+ repo、candidate identity、commit 与 `canMerge/canFinalize`。workflow 尚未完成或 completion audit 未 ready 时显式显示
+ `BLOCKED / WORKFLOW_NOT_DELIVERABLE`，但不把它解释为 workflow failure，也不开放 mutation command。
++
++出现 UNKNOWN 时先检查旧 Git 操作与目标现场，不能盲目重跑 merge。`status`/`summary`/两 UI 同源显示 `stopBasis`、`historicalStatus`、`currentActions`、`nextCommands` 与当前 `resolutionTemplate`。动作只在执行时重核后生效；过期/BUSY/pending 投影不能产生许可。
++
++人工裁定入口：
++
++```bash
++dualctl delivery resolve --workdir <effective_worktree> --decision <decision.json> <workstream_id>
++```
++
++从本次 status 输出的 `resolutionTemplate` 形成决定，保留 operation/candidate/批准/运行身份、plan SHA、代次与目标观察 SHA。填写唯一 `request_id`、`operator_note` 和 `disposition`：`CLOSE_APPLICATION` 单向关闭再次应用（`stop_basis:null` 仅关闭，不声称已停止）；`AUTHORIZE_NEW_APPLY` 仅在旧操作确认停止、目标仍为精确 base 时授权一次新尝试。人工停止声明要求实际核查方法、时间、`old_operation_stopped:true` 与明确接受 UNKNOWN/重复副作用风险，类型保持 `OPERATOR_CONFIRMED_STOPPED`，不会生成退出码；已知活动进程不能被声明覆盖。数据材料仅限本 workstream artifacts 的 UTF-8 JSON/Markdown（最多 1 MiB），引用须携 SHA，程序固定快照；请求 JSON 上限 64 KiB、未知或缺失字段拒绝。
++
++同 id 同完整决定幂等重读，即使原 plan SHA/代次已过期也不再发起应用；同 id 异决定拒绝。返回或送达不明时保留同一请求内容查验，不生成新 id 自动重试。关闭后仍可确认已存在的精确提交，但 commit 存在本身不证明旧 apply 结束。源码/目标漂移保留现场，不 reset/clean；no-change 候选不新增空交付能力。
+ 
+ 历史 `delivery.json` 不再由任何 current surface 读取；它只作为 frozen artifact 留在旧 workstream 中供人工审计。
+ 缺少 D1 candidate binding 的旧 workstream 显式投影 `BLOCKED / LEGACY_NOT_BOUND`，不会从旧 commit/PR 字段重建

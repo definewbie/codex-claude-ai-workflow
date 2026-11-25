@@ -1,0 +1,27 @@
+{
+  "schemaVersion" : 1,
+  "gateId" : "gate-node-gate-human_plan_approval-021",
+  "nodeInstanceId" : "node-gate-human_plan_approval-021",
+  "gateType" : "human.review",
+  "status" : "resolved",
+  "allowedActions" : [ "approve", "revise" ],
+  "openedAt" : "2026-10-23T01:36:15.131826Z",
+  "resolvedAt" : "2026-10-23T02:55:45.249704Z",
+  "result" : {
+    "subject_input_refs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json" ],
+    "source_outcome" : "VERIFICATION_READINESS_REQUIRED",
+    "source_node_instance_id" : "node-plan-decision-020",
+    "human_action" : "revise",
+    "note" : "用户已确认当前环境声明。请仅补齐当前已审计划各 verification_binding 的 environment_refs 和 feasibility_refs，逐条使用下列原 owner 已登记的 ref/SHA；method、criterion_id、executor、evidence_kind、detail_owner、退出码要求、三个 CREATE 文件以及其他已审计划语义保持不变。声明只证明 operator 认可前提可用，不证明原生工具执行或测试成功；实际证据仍在后续自测/验收采集。不要创造引用、不要把人工声明写为机器观察。补齐后经原独立计划复评和当前 EXECUTION 精确批准，不提前实施。\n\n[\n  {\n    \"criterion_id\": \"AC-1\",\n    \"ref\": \".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json\",\n    \"sha256\": \"afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd\",\n    \"method\": \"在仓库根执行 python -m unittest discover -s tests -v 2>&1 并采集实际输出；断言逐用例全部通过、结尾为 Ran 11 tests 与 OK（零 failure/零 error）；逐条核对 tests/test_normalize_text.py 中共享 CASES 表覆盖九类输入（空串、纯 LF、CRLF、单 CR、混合换行 \\\"a\\\\r\\\\nb\\\\rc\\\\nd\\\"→\\\"a\\\\nb\\\\nc\\\\nd\\\"、Unicode 含 U+2028 保留、末尾有换行、末尾无换行、连续空行 \\\"a\\\\r\\\\n\\\\r\\\\n\\\\rb\\\"→\\\"a\\\\n\\\\n\\\\nb\\\"），且 test_idempotent_across_all_cases 以 subTest 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。\"\n  },\n  {\n    \"criterion_id\": \"AC-2\",\n    \"ref\": \".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json\",\n    \"sha256\": \"81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99\",\n    \"method\": \"实际执行 python -m unittest discover -s tests -v 2>&1 并合并采集 stdout 与 stderr（unittest 默认将逐用例行、Ran 11 tests 与 OK/FAILED 写入 stderr）；实际输出须明确显示覆盖数（Ran 11 tests）与零 failure/error，并与测试源码中的 11 个方法名及 CASES 一一核对；不以完成状态或文字结论替代实际输入/输出与测试结果。\"\n  },\n  {\n    \"criterion_id\": \"AC-3\",\n    \"ref\": \".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json\",\n    \"sha256\": \"ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf\",\n    \"method\": \"实际读取 src/normalize_text.py 与 README.md，逐字符比对 README 中的导入语句（from normalize_text import normalize_newlines）与典型混合换行示例输入/输出（\\\"a\\\\r\\\\nb\\\\rc\\\\nd\\\" → 'a\\\\nb\\\\nc\\\\nd'，另含空串与末尾换行示例）与实现一致；或额外执行 PYTHONPATH=src python -m doctest README.md 作为支持证据（TR-3 允许任一途径）。\"\n  }\n]\n",
+    "decision_checks" : {
+      "schemaVersion" : 1,
+      "family" : "TaskContractProjectionVerifier",
+      "familyCoverage" : "NOT_INVOKED",
+      "gateNodeInstanceId" : "node-gate-human_plan_approval-021",
+      "sourceNodeInstanceId" : "node-plan-decision-020",
+      "subjectRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json" ],
+      "runtimeIdentitySha256" : "4b8226f4d961c4003741f72ea7b4f53da8b4677ad50b9ab140f7785eaea496d6",
+      "checks" : [ ]
+    }
+  }
+}

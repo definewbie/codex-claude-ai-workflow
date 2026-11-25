@@ -1,0 +1,230 @@
+dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
+126:     private static String contractRevisionInstruction(String nodeId, ProposalEmissionContext context) {
+127:         if ("intake.claude_brainstorm".equals(nodeId)) {
+128:             if (context.revision()) {
+129:                 return (context.goalReproposalAllowed()
+130:                         ? "Use task_contract_revision_patch for ordinary changes. Before first GOAL approval only, an actual objective or scope.excluded change may use task_contract_proposal with base_proposal_id. Preserve scope.included/evidence_refs (retain or ADD), open_questions, all clause IDs/sections (ADD/REPLACE only); revision_responses must cover each obligation using actual relevant clause IDs. Full proposal without a goal/exclusion change is rejected. Full result shape: " + json(exampleResult(nodeId,"READY_FOR_PRODUCT_REVIEW",ProposalEmissionContext.initial())) + " Replace this illustrative content with the full revised baseline, set base_proposal_id to the exact current ID and supply all revision_responses. "
+131:                         : "Return only `task_contract_revision_patch`; do not return or copy a full proposal. ")
+132:                         + "The patch is bound to base proposal id `" + context.baseProposalId()
+133:                         + "`. Full content identity is fixed by Dual; never emit base_proposal_sha256. "
+134:                         + "Cover each authoritative routed obligation exactly once. Preserve its id and implement its text: "
+135:                         + json(context.obligations())
+136:                         + (context.acceptanceEvidence().isEmpty() ? "" :
+137:                             ". Original verified rework evidence (retain non-contract defects as evidence; "
+138:                             + "do not reinterpret them as contract obligations or approval): "
+139:                             + context.acceptanceEvidence())
+140:                         + ". For task_contract_revision_patch only: clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
+141:                         + "No DELETE, section move, scope removal, objective/open-question change, JSON Pointer, "
+142:                         + "or arbitrary field patch is allowed. `scope_additions` uses exact repository-relative "
+143:                         + "paths. " + CANONICAL_SCOPE_PATH_REQUIREMENT
+144:                         + "Dual derives CREATE/MODIFY from the effective worktree. `section` is authoritative; clause IDs are opaque "
+145:                         + "and their prefixes do not determine section. "
+146:                         + "Across the entire `result.obligation_patches` array, each `clause_changes[].id`, "
+147:                         + "`scope_additions[].path`, and `evidence_ref_additions[]` target must appear at most once. "
+148:                         + "When one evidence ref supports multiple obligations, add it in one most relevant patch only; "
+149:                         + "use each obligation's `resolved_by_clause_ids` to express coverage instead of adding the ref again. "
+150:                         + closedItemFields("result.obligation_patches",
+151:                         new AgentResultEnvelope.ObligationPatch(
+152:                                 "CO-1", List.of("AC-1"),
+153:                                 List.of(new AgentResultEnvelope.ClauseChange(
+154:                                         AgentResultEnvelope.ClauseChangeOperation.REPLACE,
+155:                                         AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+156:                                         "AC-1", "replacement text")),
+157:                                 List.of(), List.of()));
+158:             }
+159:             return "Intake `result.scope.included` contains candidate paths, not write authorization. "
+160:                     + "GOAL approval fixes objective, acceptance and exclusions; exact implementation scope is approved in EXECUTION after design and plan review. "
+161:                     + "Only approved EXECUTION `scope.included` is the exhaustive authorization set for permitted repository changes; "
+162:                     + "each entry names one exact repository-relative path. " + CANONICAL_SCOPE_PATH_REQUIREMENT
+163:                     + "Dual derives CREATE/MODIFY from the effective worktree. "
+164:                     + "It does not require every declared path to be changed. Acceptance criteria, constraints, "
+165:                     + "risks, and other prose cannot authorize an undeclared path. Never describe the typed scope "
+166:                     + "as illustrative or non-exhaustive. When a revision obligation identifies a scope gap, "
+167:                     + "update the typed path entries directly and map the obligation to one or more "
+168:                     + "genuinely relevant clause IDs. "
+169:                     + "Each task-contract clause must contain stable string fields `id` and `text`. "
+170:                     + "On an initial intake, `result.revision_responses` must be `[]`. "
+171:                     + "On a revision, copy every routed Contract Obligation ID exactly once into "
+172:                     + "`review_obligation_id` and list one or more clause IDs in `resolved_by_clause_ids`. "
+173:                     + "Preserve every existing clause not named by the current `revision_responses` by copying "
+174:                     + "its `id` and `text` character-for-character from the verified previous proposal, including "
+175:                     + "whitespace, punctuation, capitalization, and Markdown backticks. Formatting normalization "
+176:                     + "is a modification and is prohibited unless that clause ID is declared in "
+177:                     + "`resolved_by_clause_ids`. "
+178:                     + "List every added or modified clause ID in at least one `resolved_by_clause_ids` entry, "
+179:                     + "and do not delete existing clause IDs. "
+180:                     + closedItemFields(
+181:                     "result.revision_responses",
+182:                     new AgentResultEnvelope.RevisionResponse("CO-1", List.of("AC-1")));
+
+dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java
+27:     public ParseResult parse(String candidate) {
+28:         if (candidate == null || candidate.isBlank()) {
+29:             return ParseResult.failed("AGENT_RESULT_MISSING", "Final ACP assistant message is empty.", null);
+30:         }
+31:         try {
+32:             return ParseResult.valid(objectMapper.readValue(candidate, AgentResultEnvelope.class));
+33:         } catch (JsonEOFException failure) {
+34:             return ParseResult.failed(
+35:                     "AGENT_RESULT_PARSE_FAILED",
+36:                     failure.getMessage(),
+37:                     ParseDiagnostic.at(ParseFailureKind.UNEXPECTED_END_OF_INPUT, failure.getLocation())
+38:             );
+39:         } catch (Exception failure) {
+40:             return ParseResult.failed(
+41:                     "AGENT_RESULT_PARSE_FAILED",
+42:                     failure.getMessage(),
+43:                     ParseDiagnostic.at(ParseFailureKind.INVALID_JSON, null)
+44:             );
+
+dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java
+234:     private static String renderCorrectionPrompt(
+235:             String contractPrompt,
+236:             CorrectionReason reason,
+237:             AgentResultEnvelopeParser.ParseResult parsed,
+238:             AgentResultEnvelopeValidator.ValidationResult validation
+239:     ) {
+240:         var correctionPolicy = """
+241:                 Your preceding final assistant message failed strict AgentResultEnvelope validation.
+242:                 Preserve its semantic decision, evidence, and conclusion using only fields declared by the contract.
+243:                 Remove every unsupported key. Do not preserve invalid object structure.
+244:                 Do not re-run the task, use tools, explain, or use Markdown.
+245:                 This is the only contract-correction attempt. Return exactly the JSON object required below.
+246:                 """.stripTrailing();
+247:         if (reason == CorrectionReason.PARSE_FAILURE) {
+248:             return """
+249:                     Typed correction reason: %s
+250:                     Syntax diagnostic:
+251:                     %s
+252: 
+253:                     %s
+254: 
+255:                     %s
+256: 
+257:                     %s
+258:                     """.formatted(
+259:                     reason,
+260:                     renderParseDiagnostic(parsed.diagnostic()),
+261:                     parseCorrectionInstruction(parsed.diagnostic()),
+262:                     correctionPolicy,
+263:                     contractPrompt
+264:             ).stripTrailing();
+265:         }
+266:         var evidence = reason == CorrectionReason.SCHEMA_FAILURE && validation != null
+267:                 ? validation.errors()
+268:                 : java.util.List.of(parsed.errorCode());
+269:         if (validation != null && validation.correctsAuthoredReferences()) {
+270:             correctionPolicy = """
+271:                     Only correct the malformed obligation_id slots listed below, using the canonical active obligations
+272:                     in Required Authored Context. Keep every already valid ID, array count/order, disposition,
+273:                     evidence string, design/plan content, and every other field unchanged.
+274:                     Return the complete JSON object. Do not re-run the task, use tools, explain, or use Markdown.
+275:                     This is the only contract-correction attempt; it does not grant an approval or close an obligation.
+276:                     Repairable slots: %s
+277:                     """.formatted(validation.correctionTargets()).stripTrailing();
+278:         }
+279:         return """
+280:                 Typed correction reason: %s
+281:                 Validation errors: %s
+282: 
+283:                 %s
+284: 
+285:                 %s
+286:                 """.formatted(reason, evidence, correctionPolicy, contractPrompt).stripTrailing();
+287:     }
+288: 
+289:     private static String renderParseDiagnostic(AgentResultEnvelopeParser.ParseDiagnostic diagnostic) {
+290:         if (diagnostic == null) {
+291:             return "- kind: INVALID_JSON";
+292:         }
+293:         var location = diagnostic.line() > 0 && diagnostic.column() > 0
+294:                 ? "\n- line: " + diagnostic.line() + "\n- column: " + diagnostic.column()
+295:                 : "";
+296:         return "- kind: " + diagnostic.kind() + location;
+297:     }
+298: 
+299:     private static String parseCorrectionInstruction(AgentResultEnvelopeParser.ParseDiagnostic diagnostic) {
+300:         if (diagnostic != null
+301:                 && diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.UNEXPECTED_END_OF_INPUT) {
+302:             return """
+303:                     The previous response ended before the root JSON object was closed.
+304:                     Re-emit the complete AgentResultEnvelope and verify that every object and array is closed before ending the response.
+305:                     """.stripTrailing();
+306:         }
+307:         return "Re-emit the complete AgentResultEnvelope as one strictly valid JSON object.";
+
+dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java
+115:             AcpxPromptCompletion completion,
+116:             AcpxProviderMetadata metadata
+117:     ) throws IOException {
+118:         for (var attempt = 0; attempt < retryAttempts; attempt++) {
+119:             var current = readCurrentUsage(transcriptPath, completion);
+120:             if (current != null) {
+121:                 // Shared history may enrich money only; it cannot revoke current tokens.
+122:                 if (AcpxUsage.PROVIDER_RUN_USAGE.equals(current.measurementType()) && Files.isRegularFile(streamPath)) {
+123:                     try {
+124:                         var history = readMatchingUsage(streamPath, completion);
+125:                         if (!history.ambiguous() && sameTokens(current, history.exact())) {
+126:                             var exact = history.exact();
+127:                             current = new AcpxUsage(current.inputTokens(), current.outputTokens(),
+128:                                     current.cachedReadTokens(), current.cachedWriteTokens(), current.totalTokens(),
+129:                                     exact.costAmount(), exact.costCurrency(), current.source(), current.measurementType(),
+130:                                     current.attribution(), false, 0, exact.sessionCostAmount(), exact.sessionCostCurrency(),
+131:                                     "", "", "", "", "");
+132:                         }
+133:                     } catch (IOException ignored) {
+134:                         // Optional monetary context is not the token source of truth.
+135:                     }
+136:                 }
+137:                 return Optional.of(current.withProviderMetadata(metadata));
+138:             }
+139:             var match = Files.isRegularFile(streamPath) ? readMatchingUsage(streamPath, completion)
+140:                     : new Match(null, null, false);
+141:             if (match.exact() != null || match.ambiguous() || attempt == retryAttempts - 1) {
+142:                 var best = match.best();
+143:                 return best == null ? Optional.empty() : Optional.of(best.withProviderMetadata(metadata));
+144:             }
+145:             sleepBeforeRetry();
+146:         }
+147:         return Optional.empty();
+148:     }
+149: 
+150:     /** Null means no prompt response yet; an invalid/partial response never falls back. */
+151:     private AcpxUsage readCurrentUsage(Path transcriptPath, AcpxPromptCompletion completion) throws IOException {
+152:         if (!Files.isRegularFile(transcriptPath)) return null;
+153:         AcpxStreamWireLine.Result result = null;
+154:         BigDecimal sessionCost = null;
+155:         String currency = "";
+156:         int responses = 0;
+157:         for (var line : Files.readAllLines(transcriptPath)) {
+158:             if (line.isBlank()) continue;
+159:             var wire = AcpxStreamWireLine.parse(line);
+160:             if (line.stripLeading().startsWith("{") && wire.kind() == AcpxStreamWireLine.Kind.MALFORMED)
+161:                 return AcpxUsage.unavailable("INVALID_CURRENT_TRANSCRIPT");
+162:             if (isPrompt(wire) && !matches(wire, completion))
+163:                 return AcpxUsage.unavailable("CURRENT_PROMPT_IDENTITY_MISMATCH");
+164:             if (isUsageUpdate(wire) && completion.sessionId().equals(wire.notification().sessionId())) {
+165:                 var update = wire.notification().usageUpdate();
+166:                 if (update.costAmount() != null) {
+167:                     sessionCost = update.costAmount();
+168:                     currency = update.costCurrency();
+169:                 }
+170:             }
+171:             if (wire.kind() == AcpxStreamWireLine.Kind.JSONRPC_ERROR
+172:                     && completion.requestId().equals(wire.requestId()))
+173:                 return AcpxUsage.unavailable("CURRENT_PROMPT_ERROR");
+174:             if (wire.kind() != AcpxStreamWireLine.Kind.JSONRPC_OK || wire.result() == null) continue;
+175:             var candidate = wire.result();
+176:             if (candidate.stopReason().isBlank() && candidate.usage() == null
+177:                     && !completion.requestId().equals(wire.requestId())) continue;
+178:             if (!completion.requestId().equals(wire.requestId())
+179:                     || !completion.stopReason().equals(candidate.stopReason())
+180:                     || (!candidate.sessionId().isBlank() && !completion.sessionId().equals(candidate.sessionId())))
+181:                 return AcpxUsage.unavailable("CURRENT_PROMPT_IDENTITY_MISMATCH");
+182:             if (++responses > 1) return AcpxUsage.unavailable("AMBIGUOUS_CURRENT_PROMPT_RESULT");
+183:             result = candidate;
+184:         }
+185:         if (result == null) return null;
+186:         if (result.usage() == null) return AcpxUsage.unavailable("CURRENT_PROMPT_USAGE_INCOMPLETE");
+187:         return usageFrom(result.usage(), null, sessionCost, currency,
+188:                 AcpxUsage.ATTR_EXACT_REQUEST_MATCH, "acpx_current_transcript");

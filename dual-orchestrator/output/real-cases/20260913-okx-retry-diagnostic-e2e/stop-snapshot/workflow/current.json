@@ -1,0 +1,12 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20260913T004742Z-6NX5",
+  "workflowInstanceId" : "wf-ws-20260913T004742Z-6NX5",
+  "workflowId" : "agent-lifecycle-small-plan-human-review-experiment",
+  "definitionVersion" : 1,
+  "status" : "WAITING_FOR_RECOVERY",
+  "activeNodeInstanceIds" : [ "node-intake-claude_brainstorm-012" ],
+  "openGateIds" : [ "recovery-node-intake-claude_brainstorm-012" ],
+  "lastEventId" : "evt-000014",
+  "updatedAt" : "2026-09-13T01:00:22.307504Z"
+}

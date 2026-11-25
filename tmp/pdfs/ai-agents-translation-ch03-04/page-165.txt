@@ -1,0 +1,21 @@
+Figure 4-4. Illustration of rotary positional embeddings (RoPE). Image adapted from Jianlin Su
+                                              et al. (2021).
+
+Extending RoPE-based models is straightforward. However, simple
+RoPE scaling can change model behavior and hurt quality on some
+tasks, so the expanded context window should still be evaluated for
+your workload. Modern libraries like vLLM or transformers let you
+rescale RoPE frequencies to expand the context window at load time:
+
+
+  from vllm import LLM, SamplingParams
+
+  llm = LLM(
+      model="answerdotai/ModernBERT-base",
+      trust_remote_code=True,
+      rope_scaling={"type": "linear", "factor": 4.0}
+  )
+
+  output = llm.generate("Summarize this 64k-token document...",
+                        SamplingParams(max_tokens=512))
+  print(output[0].outputs[0].text)

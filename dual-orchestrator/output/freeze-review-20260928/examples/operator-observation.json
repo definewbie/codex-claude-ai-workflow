@@ -1,0 +1,6 @@
+{
+  "fixture_kind": "SYNTHETIC_OPERATOR_MATERIAL",
+  "observation": "触控点击后页面进入约定状态",
+  "device": "example-device",
+  "machineExecuted": false
+}

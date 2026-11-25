@@ -1,0 +1,47 @@
+{
+  "exit": 0,
+  "suites": [
+    {
+      "module": "dual-ledger-file",
+      "suite": "WorkstreamAttentionEvaluatorTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "suite": "AcpxCompatibilitySequenceTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "suite": "AcpxNativeCommandSequenceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "suite": "NativePermissionTransportSequenceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "suite": "WorkflowFirstLifecycleSequenceTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "tests": 43,
+  "scope": "offline only; native permission uses local shell/Unix socket peers"
+}

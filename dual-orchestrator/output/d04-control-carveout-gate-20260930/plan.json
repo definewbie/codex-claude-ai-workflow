@@ -1,0 +1,30 @@
+{
+  "id": "d04-control-carveout-20260930",
+  "status": "PREPARED_NOT_AUTHORIZED_NOT_RUN",
+  "cases": [
+    "claude",
+    "codex"
+  ],
+  "limits": {
+    "topLevelSessions": 2,
+    "codexChildren": 1,
+    "claudeChildren": 0,
+    "requestsPerCase": 24,
+    "totalRequests": 48,
+    "secondsPerCase": 120,
+    "totalSeconds": 270,
+    "cleanupSecondsPerCase": 10,
+    "realProviderCalls": 0,
+    "automaticRetries": 0
+  },
+  "fixturePrefix": "dual-d04-carveout-",
+  "claudeTools": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash"
+  ],
+  "codexProfile": "d04_control_carveout",
+  "modelRoute": "local_stub_only",
+  "evidenceStatus": "REQUIRES_REVIEW_NOT_PASS"
+}

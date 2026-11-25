@@ -1,0 +1,28 @@
+{
+  "user_reply": "批准",
+  "recorded_at": "2026-10-11T14:25:41.996477+08:00",
+  "scope": "current GOAL only",
+  "subject": {
+    "workstream": "ws-20261011T044656Z-BMDJ",
+    "gate_id": "gate-node-gate-human_requirement_review-011",
+    "subject_node": "node-gate-human_requirement_review-011",
+    "gate_ref": ".agent/workstreams/ws-20261011T044656Z-BMDJ/gates/gate-node-gate-human_requirement_review-011.json",
+    "gate_sha256": "e08ccf671e5564f32103099d85ac7ba8988015916ef0dd44cc66d5a2879213b3",
+    "proposal_ref": ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694532578/outputs/intake-claude-brainstorm.contract.json",
+    "proposal_sha256": "4945d1a44ce37787501c93d662282c8d46ff5ddc6dab15179b673b891559fd8d",
+    "review_ref": ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.contract.json",
+    "review_sha256": "b689967eebdd3a78cab8d21a4e72c32338a2c4e37e244f9228b89265bde92b2f",
+    "source_outcome": "READY_FOR_PRODUCT_REVIEW",
+    "allowed_actions": [
+      "approve",
+      "revise"
+    ],
+    "not_approved": "precise EXECUTION scope or final delivery"
+  },
+  "excluded": [
+    "EXECUTION precise file/operation scope",
+    "final delivery",
+    "product commit"
+  ],
+  "note": "用户在当前 GOAL 材料展示后明确批准目标、验收和排除范围；不批准精确实施范围或最终交付。"
+}

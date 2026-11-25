@@ -11,13 +11,18 @@ public interface TaskHandler {
 
     NodeResult execute(TaskContext context) throws Exception;
 
+    /** Pure local planning only: no provider, process, Git mutation or lock acquisition. */
+    default boolean localLedgerMutation() { return false; }
+
     record TaskContext(
             Path workspaceRoot,
             String workstreamId,
             NodeDefinition definition,
-            NodeInstance instance
+            NodeInstance instance,
+            dev.dual.ledger.file.WorkflowFileLedger ledger
     ) {
         public TaskContext {
+            if (ledger == null) throw new IllegalArgumentException("assembled ledger is required");
             if (workspaceRoot == null) {
                 throw new IllegalArgumentException("workspaceRoot is required");
             }

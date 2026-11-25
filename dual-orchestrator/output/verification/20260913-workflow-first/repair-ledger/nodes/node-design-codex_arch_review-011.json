@@ -1,0 +1,65 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-design-codex_arch_review-011",
+  "nodeDefinitionId" : "design.codex_arch_review",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-design",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-design_codex_arch_review-010.md" ],
+  "inputTransition" : {
+    "required" : true,
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "transition_type" : "normal",
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-design-codex_arch_review-011-run-1789315517524/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.contract.json" ],
+  "result" : {
+    "run_id" : "run-1789315517524",
+    "run_metadata" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/run.json",
+    "agent" : "codex",
+    "session" : "codex-reviewer-ws-20260913T160441Z-H55W",
+    "exit_code" : 0,
+    "transcript_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.transcript.log",
+    "output_complete" : true,
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-design-codex_arch_review-011-run-1789315517524/binding.json",
+    "repository_fact_binding_sha256" : "ba192a410f349b7c6aba683465559d2e40a5d6f6488ebe0e924975838f1db8eb",
+    "process_usability" : "EXITED_ZERO",
+    "adapter_signals" : [ ],
+    "decision" : "READY_FOR_ARCH_REVIEW",
+    "summary" : "Architecture review passed for controlled smoke.",
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.contract.json",
+    "contract_sidecar_sha256" : "361bdb93b7be96a65c2be5778894784f7efc8ff340bcb18570a018af472dbfe6",
+    "agent_execution_result_contract" : {
+      "present" : true,
+      "valid" : true,
+      "decision" : "READY_FOR_ARCH_REVIEW",
+      "summary" : "",
+      "validationError" : ""
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "agent_output_contract",
+      "required" : true,
+      "present" : true,
+      "valid" : true,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "reread_reasons" : [ ],
+    "agent_execution_outcome" : {
+      "status" : "SUCCESS",
+      "primaryReason" : "completed",
+      "nodeMaySucceed" : true,
+      "retryPolicy" : "NONE",
+      "recoveryCategory" : "NONE",
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315517512-7583b591",
+  "startedAt" : "2026-09-13T16:05:17.519681Z",
+  "finishedAt" : "2026-09-13T16:05:27.904854Z"
+}

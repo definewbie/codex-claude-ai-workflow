@@ -1,0 +1,89 @@
+{
+  "source_sha256": "fff3f67271504119352af640cf372ce812ab5e026ab5c8882c0240a4cd7eeece",
+  "source_pdf_pages": [
+    22,
+    100
+  ],
+  "translation_language": "zh-CN",
+  "chapters": [
+    {
+      "chapter": 1,
+      "file": "第1章-从LLM到智能体.md",
+      "pdf_pages": [
+        22,
+        55
+      ],
+      "section_headings_including_chapter": 9,
+      "numbered_examples": 13,
+      "python_blocks_syntax_valid": 17,
+      "all_code_and_outputs_match_source_ignoring_whitespace": true,
+      "tables_rows_including_header_and_columns": [
+        [
+          8,
+          2
+        ],
+        [
+          6,
+          2
+        ]
+      ],
+      "original_images_byte_identical": 6,
+      "footnotes": 3,
+      "external_source_link_targets_preserved": 15,
+      "page_range_markers_cover_full_chapter": true,
+      "chinese_characters": 10547
+    },
+    {
+      "chapter": 2,
+      "file": "第2章-架构与模式.md",
+      "pdf_pages": [
+        56,
+        100
+      ],
+      "section_headings_including_chapter": 11,
+      "numbered_examples": 34,
+      "python_blocks_syntax_valid": 34,
+      "all_code_and_outputs_match_source_ignoring_whitespace": true,
+      "tables_rows_including_header_and_columns": [
+        [
+          7,
+          3
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          4,
+          4
+        ]
+      ],
+      "original_images_byte_identical": 8,
+      "footnotes": 3,
+      "external_source_link_targets_preserved": 9,
+      "page_range_markers_cover_full_chapter": true,
+      "chinese_characters": 11692
+    }
+  ],
+  "code_execution": "not_run",
+  "independent_translation_review": false,
+  "browser_preview": {
+    "images": 14,
+    "tables": 6,
+    "code_blocks": 57,
+    "all_images_loaded": true,
+    "horizontal_document_overflow": false,
+    "visual_inspection": "all_six_tables_opening_and_sample_code_blocks_pass",
+    "math_renderer": "not_enabled_in_preview; LaTeX markup checked against PDF"
+  },
+  "deliverable_sha256": {
+    "AI-Agents-第1-2章-中文译文.md": "e67d1623a76fd67e09506c2c8e6557e69c72bdac3436c8571ace907e1dc57cf8",
+    "README.md": "dd6e369be8a7fbeb7884ad1d561a78a89e6a60cac3e2e93a3bef8f624ceaf4d1",
+    "第1章-从LLM到智能体.md": "d34f0efb3e731d3ba610280d804ab6e84e2b68fe8b5eeaef7f78579cff8e3ef8",
+    "第2章-架构与模式.md": "ab60b443d2e989456a3fa3d590ff976ac8d0609b4b1206692be2bf0db3afc772"
+  }
+}

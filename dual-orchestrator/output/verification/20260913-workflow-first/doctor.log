@@ -1,0 +1,14 @@
+Doctor
+Workspace: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator
+
+[OK]   git command - git version 2.47.0
+[OK]   git repository - /Users/kriswang/work/projects/ai/codex-claude-ai-workflow
+[OK]   git branch - codex/recovery-origin-requirements
+[OK]   git commit - 3362eb42
+[OK]   acpx version - 0.13.2
+[OK]   E1 policy transport - upstream=fd173f04aa1b56f9e3f5ca5190c034ddcae28792, patch=4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e
+[OK]   acpx claude adapter - /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0
+[OK]   acpx codex adapter - npx -y @agentclientprotocol/codex-acp@1.10.0
+[OK]   Claude ACP environment bridge - Claude adapter command reads ~/.claude/settings.json env without writing secrets to acpx config
+
+Result: OK

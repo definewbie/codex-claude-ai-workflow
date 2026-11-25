@@ -20,7 +20,7 @@ class AgentResultEnvelopeValidatorTest {
     void capturedV14ShapeParsesStrictlyButRejectsDuplicateTargetWithoutCorrection() throws Exception {
         var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "revision",
-                "node-prev:0123456789abcdef", "a".repeat(64),
+                "node-prev:0123456789abcdef",
                 List.of(
                         obligation("CO-1", "AC-1", "src/main/resources/application.yml"),
                         obligation("CO-3", "C-12", "src/main/resources/application.yml")));
@@ -42,7 +42,7 @@ class AgentResultEnvelopeValidatorTest {
 
         var correctedPatch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
                 patch.artifactType(), patch.decision(), patch.summary(),
-                patch.baseProposalId(), patch.baseProposalSha256(),
+                patch.baseProposalId(),
                 List.of(
                         patch.obligationPatches().get(0),
                         obligation("CO-3", "C-12", null)));

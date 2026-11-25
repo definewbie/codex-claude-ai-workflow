@@ -1,0 +1,36 @@
+{
+  "runs": [
+    {
+      "mode": "control",
+      "phase": 0,
+      "exit": 0
+    },
+    {
+      "mode": "control",
+      "phase": 1,
+      "exit": 0
+    },
+    {
+      "mode": "mutant",
+      "phase": 0,
+      "exit": 0
+    },
+    {
+      "mode": "mutant",
+      "phase": 1,
+      "exit": 0
+    }
+  ],
+  "production_source_sha256": "699b4f57690985fc331124201db7f30aacddd3f209519075321e334ffc5a94ee",
+  "production_modified": false,
+  "mutation": "remove native_permission_interrupted reason mappings consumed from actual resolver outcome",
+  "expected": "EXPECTED_TYPED_RECOVERY_FAILURE",
+  "live_native_provider_runs": 0,
+  "assertion_evidence": {
+    "control_log": "final-control-1.log",
+    "mutant_log": "final-mutant-1.log",
+    "expected_failure_marker": "EXPECTED_TYPED_RECOVERY_FAILURE",
+    "marker_present": true,
+    "wrapper_exit_zero_means_expected_assertion_failure_captured": true
+  }
+}

@@ -1,0 +1,14 @@
+Decoder-Only Models
+
+Decoder-only models are what you usually think of when you hear “LLM.”
+They form the backbone of systems like GPT or Claude and follow a simple
+but powerful idea: generate one token at a time, using everything that came
+before as context.
+
+You already know the structure: no encoder, no cross-attention, just a stack
+of transformer blocks predicting the next token again and again. This
+autoregressive (auto = self, regressive = based on prior values) setup means
+the model learns to look only backward in the sequence. Each new token
+depends on its own previous outputs, creating a feedback loop where every
+generation step builds on what came before. Figure 4-1 gives you a high-
+level overview of the decoder-only architecture.

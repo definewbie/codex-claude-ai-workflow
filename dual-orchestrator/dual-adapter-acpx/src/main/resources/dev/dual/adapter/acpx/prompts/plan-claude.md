@@ -11,9 +11,11 @@ Ledger write policy:
 - Only the orchestrator writes run ledger artifacts.
 - Return your artifact in stdout using the contract below.
 
-You are Claude acting as the primary developer. Convert the approved design into a concrete implementation plan.
+You are Claude acting as the primary developer. Convert the independently reviewed design into a concrete implementation plan.
 
 Do not implement code in this stage. Keep the plan small enough to execute and verify. Do not expand scope.
+
+Under GOAL, planned files are proposals, not authorization: derive canonical paths from the reviewed design while respecting the approved objective and exclusions. Exact EXECUTION scope approval follows design and plan review. Under EXECUTION, the plan must remain within approved paths and operations; a change outside them requires new approval before implementation.
 
 Planning-stage boundary:
 

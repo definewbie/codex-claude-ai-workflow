@@ -1,0 +1,14 @@
+{
+  "head": "7dc8b3370b29688fe833a01a63490bb41f253b0f",
+  "tree": "5f42e2fd79ff6a145ef029a8d82cab065d76c197",
+  "target": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo",
+  "targetHead": "c84807946493a603c789ee40c6a4c615aa846c3b",
+  "targetTree": "81520ac179f17c35c7c358c2a02102007cbe7cba",
+  "hashes": {
+    "dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar": "8755281dc3919d3f54d6c50d552c3d82f4546af4ab31affdda89eb87aabe9a8a",
+    "dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json": "d56663c04dd954d349ac0423f107ab180239cff8d9322bb12fa9c50074c002a7",
+    "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo/REQUIREMENT.md": "9ac1544b1216eca575456e1b4c639b3d716d6eb9b89693991222192a5a2ac33a",
+    "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo/scripts/verify-workspace.sh": "c9401ad2933920406ff643fc39f8c4078a3624e537a09264ba0928d00aa28f23"
+  },
+  "checkedAt": "2026-09-09T11:39:16.509Z"
+}

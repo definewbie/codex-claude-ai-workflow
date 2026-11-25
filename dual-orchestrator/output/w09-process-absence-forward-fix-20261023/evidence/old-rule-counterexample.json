@@ -1,0 +1,34 @@
+{
+  "status": "EXPECTED_RED_3_CONSUMERS",
+  "results": [
+    {
+      "consumer": "prepare-offline.py",
+      "input_fact": "Successfully confirmed old PID absent, fixture type matches program-owned known_pids record",
+      "subsequent_table": "same numeric PID allocated to a synthetic unrelated process",
+      "old_status": "PRESENT",
+      "following_actions": [],
+      "expected_future_behavior": "Do not turn a confirmed old absence back into an unresolved old process",
+      "evidence_type": "OFFLINE_CONSTRUCTED_COUNTEREXAMPLE_NOT_TRIGGER_TIME_IDENTITY_PROOF"
+    },
+    {
+      "consumer": "pre-dispatch-recheck.py",
+      "input_fact": "Successfully confirmed old PID absent, fixture type matches program-owned known_pids record",
+      "subsequent_table": "same numeric PID allocated to a synthetic unrelated process",
+      "old_status": "PRESENT",
+      "following_actions": [],
+      "expected_future_behavior": "Do not turn a confirmed old absence back into an unresolved old process",
+      "evidence_type": "OFFLINE_CONSTRUCTED_COUNTEREXAMPLE_NOT_TRIGGER_TIME_IDENTITY_PROOF"
+    },
+    {
+      "consumer": "run-one-step.py",
+      "input_fact": "Successfully confirmed old PID absent, fixture type matches program-owned known_pids record",
+      "subsequent_table": "same numeric PID allocated to a synthetic unrelated process",
+      "old_status": "PRESENT",
+      "following_actions": [],
+      "expected_future_behavior": "Do not turn a confirmed old absence back into an unresolved old process",
+      "evidence_type": "OFFLINE_CONSTRUCTED_COUNTEREXAMPLE_NOT_TRIGGER_TIME_IDENTITY_PROOF"
+    }
+  ],
+  "native_calls": 0,
+  "java_calls": 0
+}

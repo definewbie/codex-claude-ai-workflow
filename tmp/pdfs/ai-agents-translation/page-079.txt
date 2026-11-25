@@ -1,0 +1,40 @@
+Example 2-16 runs the HTTP call only after approval and stores
+api_result. You can reject to prevent execution, and routing depends on
+human input.
+
+Example 2-16. Execute approved HTTP call
+def b_call(state: BState) -> BState:
+    import requests
+    r = requests.get(state["proposed_request"]["url"],
+    params=state["proposed_request"]["params"], timeout=10)
+    return {"api_result": {"status_code": r.status_code, "url":
+r.url}}
+
+   Run the external request only after approval.
+
+    Store result under api_result in state.
+
+You use review and edit to correct or improve model output by writing
+directly to the state. Here, Example 2-17 generates a short summary with
+the LLM and stores it in summary.
+
+Example 2-17. Generate summary text
+def c_write(state: CState) -> CState:
+    text = LLM.invoke("Write 2 sentences about why human
+                     in the loop matters for agents").content
+    return {"summary": text}
+
+   Ask the LLM to produce a candidate summary.
+
+    Store summary in state for later review.
+
+Example 2-18 pauses with interrupt(...) that includes a JSON
+schema asking for edited_text.
+
+Example 2-18. Interrupt for human edit
+def c_edit(state: CState) -> CState:
+    res = interrupt({
+        "task": "Edit the summary text",
+        "summary": state["summary"],
+        "schema": {
+            "type": "object",

@@ -1,0 +1,62 @@
+[
+  {
+    "path": "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/intake-claude-brainstorm.md",
+    "start": 10,
+    "end": 32,
+    "sha256": "8f2894381d2fb1ece56852a625ee737fabe54d29cc3a03445c0f9d795bb4adf9"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalValidator.java",
+    "start": 123,
+    "end": 191,
+    "sha256": "8fc052420901198dd12874755357d9f08aa007d4ac8b2d3606a9fdaa7cc65d71"
+  },
+  {
+    "path": "dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java",
+    "start": 236,
+    "end": 265,
+    "sha256": "61a4a30d463e4747c1a70c201ea85fd4ca76bb4a1104b880647c8936bd7c147d"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java",
+    "start": 298,
+    "end": 304,
+    "sha256": "a24db51b397eef2a02f8700572b6cd541b2e0fde431d48388afde78432317abd"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+    "start": 408,
+    "end": 431,
+    "sha256": "03772f69b979d91af947f27be5daa5aa35a0c8bd4f159b869952240fdd9cc80b"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java",
+    "start": 137,
+    "end": 164,
+    "sha256": "0d59ad15a877eb7492de209811357bb0d3fe07f393fd796e118587560f427fd3"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java",
+    "start": 185,
+    "end": 250,
+    "sha256": "0d59ad15a877eb7492de209811357bb0d3fe07f393fd796e118587560f427fd3"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java",
+    "start": 265,
+    "end": 268,
+    "sha256": "0d59ad15a877eb7492de209811357bb0d3fe07f393fd796e118587560f427fd3"
+  },
+  {
+    "path": ".tools/acpx-e1/source/src/prompt-content.ts",
+    "start": 282,
+    "end": 291,
+    "sha256": "3e92b3ac683f9ac75640965c222aef80d32aa3e8a7283a59d3c46f5e5df06999"
+  },
+  {
+    "path": ".tools/acpx-e1/source/src/cli/command-handlers.ts",
+    "start": 127,
+    "end": 140,
+    "sha256": "f5043c98f9f3b2312baed8d48ed0ffb4e2d40b14583e42a580abb3119b629ff4"
+  }
+]

@@ -1,0 +1,179 @@
+{
+  "status": "OFFLINE_SCOPE_AND_GATE_DRAFT_NOT_RUN_READY",
+  "authorized_activity": "read-only project inspection and offline proposal preparation only",
+  "target_phase": "P0: second distinct existing-Java-repository terminal-delivery E2E; no token-optimization work",
+  "project": {
+    "path": "/Users/kriswang/work/projects/ai/ai-crypto-arbitrage",
+    "head": "931db5db8fc468c61eb2c441d21a1da7facf69a1",
+    "dirty_entry_count": 92,
+    "product": "read-only OKX income assessment assistant; distinct from historical BTC candlestick demo",
+    "evidence": [
+      {
+        "path": "/Users/kriswang/work/projects/ai/ai-crypto-arbitrage/docs/05-Product-Baseline.md",
+        "sha256": "942e629ef41d4741cfef871e644198938c7a5157a6d47c2a01cfe68c5adb1752",
+        "equals_committed_head": true
+      },
+      {
+        "path": "/Users/kriswang/work/projects/ai/ai-crypto-arbitrage/docs/02-Portfolio.md",
+        "sha256": "a76ec891b83417cf93213dc8e37bdf2a19be72c85e77ae4ea2ba67d67663fae2",
+        "equals_committed_head": true
+      },
+      {
+        "path": "/Users/kriswang/work/projects/ai/ai-crypto-arbitrage/src/main/java/app/cryptoincome/assessment/application/PhaseOneAssessmentService.java",
+        "sha256": "855cd95aee6eff93afefb9c58e7ffeee6d3eef7271a5842004aa026eb750b59a",
+        "equals_committed_head": true
+      },
+      {
+        "path": "/Users/kriswang/work/projects/ai/ai-crypto-arbitrage/src/main/java/app/cryptoincome/assessment/domain/PhaseOneAssessment.java",
+        "sha256": "b91495ea19d412e6cc5ae3455b86bed5a784c4f65d3db227a024c7f2579b2cfe",
+        "equals_committed_head": true
+      },
+      {
+        "path": "/Users/kriswang/work/projects/ai/ai-crypto-arbitrage/src/main/java/app/cryptoincome/cli/AssessIncomeCliRunner.java",
+        "sha256": "f5c063bc9ac7260cebc18cd8c76949656332471854b12063c6b39927af4b56ed",
+        "equals_committed_head": true
+      },
+      {
+        "path": "/Users/kriswang/work/projects/ai/ai-crypto-arbitrage/src/test/java/app/cryptoincome/assessment/PhaseOneAssessmentServiceTest.java",
+        "sha256": "806870cca7e7f18f378567b308febe418d426f3b39100a07e7e48d9f65a7d0cc",
+        "equals_committed_head": true
+      },
+      {
+        "path": "/Users/kriswang/work/projects/ai/ai-crypto-arbitrage/src/test/java/app/cryptoincome/cli/AssessIncomeCliRunnerTest.java",
+        "sha256": "b0e3873614f6061146c50a976b435cfb3712f61c575efcf2eb4448af76fa27eb",
+        "equals_committed_head": true
+      },
+      {
+        "path": "/Users/kriswang/work/projects/ai/ai-crypto-arbitrage/pom.xml",
+        "sha256": "aadb95bf6513c210d0ad7f447e771a35798835080b72cceb54cc3a082b948627",
+        "equals_committed_head": true
+      }
+    ]
+  },
+  "scope_candidate": {
+    "user_approval_pending": true,
+    "goal": "Extend existing phase-one assessment and CLI to expose the cumulative 90-day funding rate needed to match the simple-earn benchmark after the same known costs.",
+    "meaning": "Derived historical-scenario comparison threshold, not a funding forecast or a trade recommendation.",
+    "formula": "(existing simpleEarnIncome + existing complete known costs) / hedgedShortNotional",
+    "eligibility": "Expose only when the existing assessment supports exact net comparison; unknown costs, unconfirmed terms, absent history or incomparable terminal policy must not produce an actionable numeric threshold.",
+    "owner": "existing PhaseOneAssessmentService -> PhaseOneAssessment -> CLI projection; CLI must not calculate an independent threshold",
+    "non_goals": [
+      "no changes to existing recommendation decisions",
+      "no strategy engine",
+      "no portfolio or Live mutation",
+      "no database migration",
+      "no exchange or private account calls",
+      "no AI financial advisor integration",
+      "no token optimization"
+    ],
+    "expected_surface": [
+      "existing assessment service and result",
+      "existing CLI projection",
+      "service and CLI tests",
+      "one focused usage document"
+    ],
+    "stop_on_scope_growth": "If this needs changes to market collection, portfolios, persistence, scheduling, external interfaces or Dual production code, stop and present the tradeoff."
+  },
+  "independent_formula_check": {
+    "arithmetic": "Python decimal independent check, not a product test or E2E result",
+    "capital": "20000",
+    "simple_apr": "0.0365",
+    "days": 90,
+    "known_costs": "20",
+    "hedged_notional": "10000",
+    "benchmark_income": "180.0000",
+    "threshold": "0.0200",
+    "cases": [
+      {
+        "cumulative_rate": "0.019",
+        "incremental_net_income": "-10.0000"
+      },
+      {
+        "cumulative_rate": "0.020",
+        "incremental_net_income": "0.0000"
+      },
+      {
+        "cumulative_rate": "0.021",
+        "incremental_net_income": "10.0000"
+      }
+    ]
+  },
+  "baseline_proposal": {
+    "selection_pending": true,
+    "recommended": "Isolated copy of a fixed repository baseline, with a separate isolated delivery target. Preserve the current dirty source repository unchanged.",
+    "simplest_candidate": "Committed HEAD, because the inspected assessment/CLI/test source files match it. Compare and explicitly approve the selected baseline before assembling the executable Gate.",
+    "exclusions": [
+      ".env",
+      "credentials",
+      "local database contents",
+      "generated target build outputs",
+      "browser session data"
+    ],
+    "reason_not_ready": "Current dirty tree cannot silently be treated as the agreed baseline; baseline compilation/regression and executable verification exits have not been run."
+  },
+  "verification_gate": {
+    "Target": "One useful small MODIFY change on the fixed existing Java project, through Dual intake/review/approval/implementation/self-test/independent acceptance/delivery/commit/finalize.",
+    "Source_of_truth": [
+      "typed task contract and approved exact paths",
+      "fixed run and occurrence records",
+      "actual test exit and reports",
+      "independent typed acceptance",
+      "delivery candidate SHA",
+      "target Git commit parent/tree",
+      "terminal workflow read model"
+    ],
+    "Trigger_precondition": [
+      "scope and baseline approved",
+      "baseline offline tests pass",
+      "current release/launch/config and required Java verification capability checked",
+      "separate budget and runtime authorization",
+      "all necessary business approval and acceptance/delivery exits mapped"
+    ],
+    "How_precondition_is_checked_before_run": "NOT YET ASSEMBLED: record source manifest, baseline tests, frozen release and launch comparison, actual verification exit checks and initial ledger; never claim this draft is an executable ready Gate.",
+    "PASS": [
+      "required threshold and CLI behavior satisfy independent examples and missing-evidence cases",
+      "existing required tests and behavior preserved",
+      "real separate-client acceptance valid",
+      "approved exact candidate delivered and target commit verified",
+      "workflow COMPLETED with no active nodes or open gates"
+    ],
+    "FAIL": [
+      "criterion failure or unintended regression",
+      "unsupported output accepted",
+      "boundary failure or unsafe external uncertainty",
+      "stop-loss reached"
+    ],
+    "INVALID": [
+      "wrong source/release/config",
+      "baseline or required execution environment not verified",
+      "observation cannot prove the target",
+      "unapproved scope or runtime composition"
+    ],
+    "Stop_loss": "New independent budget required; retain reserve-based pre-dispatch admission, request/time accounting and boundary stop rules. No old-case balance inheritance.",
+    "Run_artifact_freshness": "Freeze current Dual release plus selected target baseline; after product changes require new target build and tests with recorded source identity."
+  },
+  "budget_proposal": {
+    "approved": false,
+    "token_ceiling_candidate": 3000000,
+    "request_ceiling_candidate": 18,
+    "active_seconds_ceiling_candidate": 3600,
+    "basis": "The completed first E2E measured 2077707 tokens / 13 requests / 2057.088506041602 active seconds. This is one sample, not a mean, p95 or bound; the new Java/MySQL project has additional baseline risk.",
+    "not_expected_spend": true,
+    "reserve_table": "Must be mapped to actual verified exits and stages before a ready Gate; no claim that a numeric ceiling alone proves sufficient reserve.",
+    "old_balance_reused": false
+  },
+  "remaining_actions": [
+    "approve or revise this bounded useful feature and baseline selection",
+    "freeze isolated baseline and run baseline-only offline targeted/regression capability checks without network app startup",
+    "assemble stage reserve arithmetic and executable verification exits",
+    "submit complete Gate and independent-review prompt for approval; do not start a real case"
+  ],
+  "activity_summary": {
+    "product_source_modified": false,
+    "model_calls": 0,
+    "application_started": false,
+    "exchange_requests": 0,
+    "trading_actions": 0,
+    "tests_run": "independent arithmetic only; no Maven/application tests"
+  }
+}

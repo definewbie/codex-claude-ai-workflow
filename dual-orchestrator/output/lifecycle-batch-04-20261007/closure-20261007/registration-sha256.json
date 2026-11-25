@@ -1,0 +1,19 @@
+{
+  "closure_artifacts": {
+    "cc-review.txt": "ec28ca069ebd23fa4f255b57c348c60b2d3279c66c56a5c0638c690765883584",
+    "reception-check.json": "ad7f335bb230d6be5ae89822cb284e90cb2efbcc948bd6a7fb3f1e687ee31605",
+    "disposition.md": "54b1b6215f00ade00e55ff97aac87856ea287b8d8a733a0ec286cd0af5298d6e",
+    "closure.json": "0302ab99b0db4cd253919cf5deb63d87239ebb4ab982aec93ac1f34e04d69458",
+    "reviewed-batch.md": "1e5496ec0e16fe5d57114a0ca43bd655801eb98e76274da705ac057d80bae179",
+    "reviewed-verification.json": "6ca8ae9edc50f80ce8c5f8e885abadf50e802aca38d4ec5be3c3f7e5808381a8",
+    "reviewed-registration-sha256.json": "c072655409379bfce1b6c7eacbd4a5dd6f32e5f1816d40a6c47d53b95ed2db07",
+    "reviewed-worklist.md": "35a2592a945776f7ea50ab9c535be99f2429618f188649e43fe8fa21f7dfda4f",
+    "registration-only.patch": "01fd5e27623ddfe2121355960dcf0ee67ffbc3420e0d3eeefc430d32141cb6f6"
+  },
+  "current_document_hashes": {
+    "batch.md": "576e9b46c39659de1f509cf3124e1eea8d9200b0329b2aed41740a31a81469ae",
+    "worklist": "82f1b4a7ae806c4c5e92646f9c7bd8049fb24f79abf8145121f0d978b1cf1bec"
+  },
+  "reviewed_registration_preserved": true,
+  "original_test_evidence_unchanged": true
+}

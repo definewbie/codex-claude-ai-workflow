@@ -1,0 +1,102 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261010T124812Z-XCZL",
+  "runId" : "run-1791636690133",
+  "nodeId" : "intake.codex_product_review",
+  "agent" : "codex",
+  "promptTemplate" : "intake-codex-product-review",
+  "promptPath" : "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/prompts/intake-codex-product-review.md",
+  "totalBytes" : 22240,
+  "totalEstimatedTokens" : 5560,
+  "sections" : [ {
+    "name" : "workspace_guard",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "workspace-guard",
+    "bytes" : 402,
+    "estimatedTokens" : 101,
+    "sha256" : "7d7702bc5b69552535ffe824c365ddb6ff6a2a7b6f879db2462704ff5e24f1c7",
+    "includedReason" : "execution safety boundary",
+    "required" : true
+  }, {
+    "name" : "language_policy",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "language-policy",
+    "bytes" : 244,
+    "estimatedTokens" : 61,
+    "sha256" : "d20252d3644a0521308cb5b24f421c899463b6078aece0141858ed2ed32f50d5",
+    "includedReason" : "output language policy",
+    "required" : true
+  }, {
+    "name" : "structured_artifact_field_semantics",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "structured-artifact-field-semantics",
+    "bytes" : 479,
+    "estimatedTokens" : 120,
+    "sha256" : "b10bbd95cfd4baa41640817adc3618561f7e9e879d9527fd355fac978992158d",
+    "includedReason" : "structured artifact field semantics",
+    "required" : true
+  }, {
+    "name" : "template_static_frame",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "dev/dual/adapter/acpx/prompts/intake-codex-product-review.md",
+    "bytes" : 1792,
+    "estimatedTokens" : 448,
+    "sha256" : "c5fd0386ec2a27e73b1db9688f8629df3675f525fb560a11a03f58d50b35d77b",
+    "includedReason" : "prompt skeleton instructions",
+    "required" : true
+  }, {
+    "name" : "requirement",
+    "sourceType" : "requirement",
+    "sourceRef" : ".agent/workstreams/ws-20261010T124812Z-XCZL/requirement.md",
+    "bytes" : 1190,
+    "estimatedTokens" : 298,
+    "sha256" : "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+    "includedReason" : "task requirement",
+    "required" : true
+  }, {
+    "name" : "context_package",
+    "sourceType" : "context_package",
+    "sourceRef" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_codex_product_review-003.md,.agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-44bd6b6d7b341527.ref.json,.agent/workstreams/ws-20261010T124812Z-XCZL/context/agent-governance-node-intake-codex_product_review-004-run-1791636690133.md",
+    "bytes" : 13046,
+    "estimatedTokens" : 3262,
+    "sha256" : "5f6cccde11e36778aa1275cf889680f5e371cbd5b68cc994aae24faf2b2770b4",
+    "includedReason" : "prior artifacts / assembled context",
+    "required" : true
+  }, {
+    "name" : "read_reuse_contract",
+    "sourceType" : "read_reuse_contract",
+    "sourceRef" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_codex_product_review-003.md,.agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-44bd6b6d7b341527.ref.json,.agent/workstreams/ws-20261010T124812Z-XCZL/context/agent-governance-node-intake-codex_product_review-004-run-1791636690133.md",
+    "bytes" : 0,
+    "estimatedTokens" : 0,
+    "sha256" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "includedReason" : "typed memory read-reuse projection",
+    "required" : false
+  }, {
+    "name" : "contract_review_principles",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "contract-review-principles.md",
+    "bytes" : 1996,
+    "estimatedTokens" : 499,
+    "sha256" : "255a1af39f7d8cc79006c28508b0833b7f25c8a60ef50ec52fbd956a5947a5f8",
+    "includedReason" : "review principles",
+    "required" : true
+  }, {
+    "name" : "prompt_contract",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "ContractRegistry:intake.codex_product_review",
+    "bytes" : 2441,
+    "estimatedTokens" : 611,
+    "sha256" : "8d382773f32aeed927869c7c3c9e4abff906593ac271aee60ad8bc76b78755e0",
+    "includedReason" : "strict agent result envelope",
+    "required" : true
+  }, {
+    "name" : "external_research_discipline",
+    "sourceType" : "permission_policy_projection",
+    "sourceRef" : "review",
+    "bytes" : 521,
+    "estimatedTokens" : 131,
+    "sha256" : "518335f6aed4ae3d471ead53c2a92286330b234a02bc3fd4cbdd7a5b3cf27867",
+    "includedReason" : "guide provider behavior without replacing adapter enforcement",
+    "required" : true
+  } ]
+}

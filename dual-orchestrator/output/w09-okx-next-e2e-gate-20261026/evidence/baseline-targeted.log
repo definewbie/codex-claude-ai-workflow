@@ -1,0 +1,55 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< app.cryptoincome:ai-crypto-arbitrage >----------------
+[INFO] Building ai-crypto-arbitrage 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ ai-crypto-arbitrage ---
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ ai-crypto-arbitrage ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 20 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ ai-crypto-arbitrage ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 217 source files with javac [debug parameters release 25] to target/classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/main/java/app/cryptoincome/funding/infrastructure/okx/OkxPublicApiClient.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/main/java/app/cryptoincome/funding/infrastructure/okx/OkxPublicApiClient.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ ai-crypto-arbitrage ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ ai-crypto-arbitrage ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 44 source files with javac [debug parameters release 25] to target/test-classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/test/java/app/cryptoincome/assessment/MybatisFundingRateFactQueryTest.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/test/java/app/cryptoincome/assessment/MybatisFundingRateFactQueryTest.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ ai-crypto-arbitrage ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running app.cryptoincome.assessment.PhaseOneAssessmentServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.059 s -- in app.cryptoincome.assessment.PhaseOneAssessmentServiceTest
+[INFO] Running app.cryptoincome.assessment.SmartArbitrageAllocationCalculatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in app.cryptoincome.assessment.SmartArbitrageAllocationCalculatorTest
+[INFO] Running app.cryptoincome.cli.AssessIncomeCliRunnerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.048 s -- in app.cryptoincome.cli.AssessIncomeCliRunnerTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.049 s
+[INFO] Finished at: 2026-10-26T20:11:00+08:00
+[INFO] ------------------------------------------------------------------------

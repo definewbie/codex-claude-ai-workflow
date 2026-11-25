@@ -1,0 +1,11 @@
+{
+  "schemaVersion" : 1,
+  "workflowInstanceId" : "wf-ws-20261011T141651Z-MBC2",
+  "workflowId" : "agent-lifecycle-terminal-delivery",
+  "definitionVersion" : 5,
+  "status" : "WAITING_FOR_RECOVERY",
+  "activeNodeInstanceIds" : [ "node-intake-claude_brainstorm-006" ],
+  "lastEventId" : "evt-000008",
+  "createdAt" : "2026-10-11T14:16:51.230026Z",
+  "updatedAt" : "2026-10-11T14:24:29.051413Z"
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-context-plan_codex_plan_review-015",
+  "nodeDefinitionId" : "context.plan_codex_plan_review",
+  "kind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "COMPLETED",
+  "stageId" : "stage-context",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315471551/outputs/plan-claude.stderr.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315471551/outputs/plan-claude.transcript.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315471551/outputs/plan-claude.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-plan-claude_plan-014-run-1789315471551/binding.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315471551/outputs/plan-claude.contract.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315471551/outputs/plan-claude.plan.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/context/node-context-plan_codex_plan_review-015.md" ],
+  "result" : {
+    "context_package" : ".agent/workstreams/ws-20260913T160342Z-TVXE/context/node-context-plan_codex_plan_review-015.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20260913T160342Z-TVXE/context/node-context-plan_codex_plan_review-015.json",
+    "target_node" : "plan.codex_plan_review",
+    "profile" : "plan_review",
+    "sections" : [ "input_artifacts", "iteration_history", "review_evidence", "human_feedback", "recent_agent_outputs", "ledger_pointers" ],
+    "input_ref_count" : 6,
+    "generated_at" : "2026-09-13T16:04:42.142610Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315482105-668bbccc",
+  "startedAt" : "2026-09-13T16:04:42.116184Z",
+  "finishedAt" : "2026-09-13T16:04:42.152362Z"
+}

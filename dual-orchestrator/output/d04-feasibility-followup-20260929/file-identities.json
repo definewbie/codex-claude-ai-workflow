@@ -1,0 +1,19 @@
+{
+  "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "61ddcbb596fd6aacdb3e66356e7f888011f3ad6c6b6ba3a3a2931b3ed686b475",
+  "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "10ff560fbfb5d968501b071dddda62d066e3bb6559e551016336246f0f291684",
+  "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "998ac2f4e4bb912ce21138e8d1054b554f1571af5ef56ccc4c7ee7c1e2a9954d",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/auth-status.json": "bd845b7bb0be39c9ef51b2fb446ad7ec1a94e99764c4c102e9233eb72f8d54dc",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/baseline.json": "37ac0797c9d9dc9efca6b2d6542ba2a24633d3a522be934c5e370aa2b4f3e6fb",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/documentation.diff": "fa327e07deb80f7e6bc482c875a7f005df4e7339c921c1533f3eeb0aafad7bd3",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/event-guard.mjs": "9e2f8aa0acfa1c88c1ff02197b67943ee1e40b9120adc7e188b220dc57af3a44",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/identity.json": "dd93a73dcebc32fa5166b2810d583b13d114259e8ec7f459190f67b3bbc8e937",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/material-verification.json": "face0a672cda2096b8c8128dfced3be9331e835128b74338120e2be37e9f05b6",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/metadata-preflight.json": "e44fa501901f55a8f1c57afc89dc4a366562b5969628682e4d1239a861bde5d2",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/model-probe.mjs": "222f43a895f44f531729ebcdd405ec4dfcd5dbcf711e82865ffdfe9cea278b21",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/offline-validation.json": "b0c3cb36dca03848fe5b75b2a834854d354e118d5aa0a8f64c4b1fde2cee1e9f",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/preflight-checks.json": "3b4210befc19213f06f209939ab1c4b8af81b29df4b2091b7c8d17bb62de175b",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/result.md": "33cf5352f49a9a9852eed9a577c55bda0ff4ba81bdc1f33ad5638ccba6c5d535",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/run-probe.py": "b2d058f6ceca0827b8778f54285fb1b3ae0d54d06bf2b6721a49342ba6af39a9",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/test-event-guard.mjs": "0725e2e770b05abdf2a2bbeba1ccb536034c5c9adbed99752fbc3bb8edd62cee",
+  "dual-orchestrator/output/d04-feasibility-followup-20260929/verification-gate.md": "5bff67ba926f234a4cbbff8550f5145924dfdd879c6a7ebcc5d569e95b65e00c"
+}

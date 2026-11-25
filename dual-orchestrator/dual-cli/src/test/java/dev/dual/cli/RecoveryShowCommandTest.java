@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RecoveryShowCommandTest {
@@ -103,6 +104,37 @@ class RecoveryShowCommandTest {
                 + "/artifacts/contract-failures/node-design.md"));
     }
 
+    @Test
+    void preparationFailureExplainsHarnessInputsInsteadOfAskingForModelJson() throws Exception {
+        var ws = "ws-input-recovery";
+        var failure = dev.dual.runtime.handler.AgentExecutionResultFacts.inputPreparationFailed(
+                "TASK_CONTRACT_REVISION_CONTEXT_INVALID", "TASK_CONTRACT_REVISION_CONTEXT_INVALID", List.of("gate subject mismatch"));
+        writeFailure(ws, failure.status(), failure.outcome(), failure.result());
+        var printed = runShow(ws);
+        assertTrue(printed.contains("input_preparation_failure"));
+        assertTrue(printed.contains("TASK_CONTRACT_REVISION_CONTEXT_INVALID"));
+        assertTrue(printed.contains("gate subject mismatch"));
+        assertFalse(printed.contains("emit the typed artifact"));
+        assertFalse(printed.contains("AGENT_RESULT_MISSING"));
+    }
+
+    @Test
+    void incompleteProcessAndInvalidEnvelopeHaveDifferentRecoveryInstructions() throws Exception {
+        for (var reason : List.of("process_output_incomplete", "agent_result_missing_or_invalid")) {
+            var ws = "ws-" + reason;
+            writeFailure(ws, NodeStatus.FAILED, reason, Map.of("agent_execution_outcome", Map.of(
+                    "status", "OUTPUT_INCOMPLETE", "primaryReason", reason,
+                    "recoveryCategory", "OUTPUT_INCOMPLETE", "operatorMessage", "Recorded cause: " + reason,
+                    "nodeMaySucceed", false, "retryPolicy", "MANUAL_ONLY")));
+            var printed = runShow(ws);
+            assertTrue(printed.contains("- Classification: agent_output_incomplete"));
+            assertTrue(printed.contains("Recorded cause: " + reason));
+            assertTrue(printed.contains(reason.equals("process_output_incomplete")
+                    ? "- Retry Readiness: RETRY_AFTER_EXTERNAL_FIX"
+                    : "- Retry Readiness: RETRY_AFTER_OUTPUT_CONTRACT_FIX"));
+        }
+    }
+
     private void writeDiagnostic(String diagnosticRef) throws Exception {
         var path = tempDir.resolve(diagnosticRef);
         Files.createDirectories(path.getParent());
@@ -125,8 +157,8 @@ class RecoveryShowCommandTest {
                 List.of(new NodeDefinition("design.claude", NodeKind.TASK, "agent.acpx", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-recovery-show", definition);
+        var ledger = CliLedgerFactory.create();
+        CliTestLedger.initialize(ledger, paths, "wf-recovery-show", definition);
         var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), nodeStatus,
                 outcome,

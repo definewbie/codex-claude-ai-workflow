@@ -1,0 +1,21 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "stage_scope_policy",
+  "workstreamId" : "ws-20261014T234009Z-RN9X",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "builderNodeDefinitionId" : "intake.claude_brainstorm",
+  "targetNodeDefinitionId" : "intake.claude_brainstorm",
+  "iterationId" : "iter-001",
+  "writeScope" : [ ],
+  "previouslyReadFiles" : [ ],
+  "readReusePolicy" : {
+    "reasonField" : "",
+    "requireReasonWhenRereading" : false,
+    "avoidRepeatedReads" : [ ],
+    "preferExistingEvidence" : true
+  },
+  "forbiddenScope" : [ ".git/**", ".agent/workstreams/**/workflow/**", ".agent/workstreams/**/nodes/**", "business source writes" ],
+  "generatedAt" : "2026-10-14T23:40:47.575650Z"
+}

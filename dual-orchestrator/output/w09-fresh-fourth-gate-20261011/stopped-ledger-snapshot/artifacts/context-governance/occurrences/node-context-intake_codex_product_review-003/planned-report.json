@@ -1,0 +1,20 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "context_governance_report",
+  "workstreamId" : "ws-20261011T044656Z-BMDJ",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-context-intake_codex_product_review-003",
+  "nodeDefinitionId" : "context.intake_codex_product_review",
+  "builderNodeDefinitionId" : "context.intake_codex_product_review",
+  "targetNodeDefinitionId" : "intake.codex_product_review",
+  "iterationId" : "iter-001",
+  "reportPhase" : "planned",
+  "plannedReadFiles" : [ ],
+  "plannedWriteFiles" : [ ],
+  "plannedPreviouslyReadFiles" : [ ],
+  "plannedRepeatedReadAvoidance" : [ ],
+  "actualReadFiles" : [ ],
+  "actualWriteFiles" : [ ],
+  "telemetryPending" : true,
+  "generatedAt" : "2026-10-11T04:50:06.282898Z"
+}

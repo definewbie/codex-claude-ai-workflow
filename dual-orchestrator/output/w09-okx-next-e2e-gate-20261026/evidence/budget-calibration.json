@@ -1,0 +1,102 @@
+{
+  "kind": "historical_fixed_run_read_only",
+  "case_count": 1,
+  "observations": [
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/run.json",
+      "sha256": "fef81e1ac6017dec00601a4645275fc80106878bc376930c108cb5584fdbb917",
+      "node": "intake.claude_brainstorm",
+      "tokens": 24216,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/run.json",
+      "sha256": "36f10efa14e814cfc1422f8581d6bd6fdc8b67c9c637be0e13314bba8f7c2b0a",
+      "node": "intake.codex_product_review",
+      "tokens": 27546,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718401135/run.json",
+      "sha256": "9b13210209ed081cef541fc7f3b9109427f77a05532f4f9d039ebbbe7bbb7282",
+      "node": "design.claude_design",
+      "tokens": 82700,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/run.json",
+      "sha256": "b6459b0b3403321416445ff5881bd6b5fa1dc19efe20f8e2f3dd211ca8df2310",
+      "node": "design.codex_arch_review",
+      "tokens": 46586,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/run.json",
+      "sha256": "234e84bdc956eb03db23124bdaf0b61171f3d86dc13201030f912f154b12798c",
+      "node": "design.claude_design",
+      "tokens": 136458,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718961414/run.json",
+      "sha256": "bb53233c8fd8413411aebd020472c729323a9373bf796f31779e0fc54ae08f78",
+      "node": "design.codex_arch_review",
+      "tokens": 65565,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719040009/run.json",
+      "sha256": "73fd0f7bdf6720589d5bf6864b110e62a7dbf42010e0ac080b27159a245587c3",
+      "node": "plan.claude_plan",
+      "tokens": 91262,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/run.json",
+      "sha256": "abb90bda9c4739e9e62cc75bc7e9f7b2b009bc13edbfa98b416cd7a3c78dd423",
+      "node": "plan.codex_plan_review",
+      "tokens": 89583,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/run.json",
+      "sha256": "10f4d041ea8c84f8cd4c76d31db85168f9e16b52cd06568cda9b67134a15b3ac",
+      "node": "plan.claude_plan",
+      "tokens": 157659,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/run.json",
+      "sha256": "ad468ff823b5e2b2ddb9fa457fbd8aa824d93011c069334808f16d75c371e16d",
+      "node": "plan.codex_plan_review",
+      "tokens": 126667,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/run.json",
+      "sha256": "241d2eaec7d4a574826e10dd77bccef74b08652258933e6eb07ad9e3c550d745",
+      "node": "implement.claude_implement",
+      "tokens": 918786,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/run.json",
+      "sha256": "1e3ed5246929b0aa741e2cc2fd56f35d85852c1fa6e582108110ac4c5a59f0af",
+      "node": "implement.claude_self_test_report",
+      "tokens": 261472,
+      "occurrences": 1
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/run.json",
+      "sha256": "26484fd87deaacd4626f88607c62c2699125cc23f9c353b93d926897752622e8",
+      "node": "acceptance.codex_verifier_review",
+      "tokens": 49207,
+      "occurrences": 1
+    }
+  ],
+  "tokens": 2077707,
+  "requests": 13,
+  "active_seconds": 2057.088506041602,
+  "active_seconds_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/e2e-pass-20261026.json",
+  "limits": "one small Python CREATE case; not Java case cost prediction; provider/model anomaly on implement not repaired or hidden"
+}

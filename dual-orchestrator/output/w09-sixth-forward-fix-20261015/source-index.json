@@ -1,0 +1,103 @@
+{
+  "sources": [
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+      "sha256": "0ae8fda308de8eff0690d1eaaf60d5c26f51902f2ebeb9c81aaefd14007590fe",
+      "anchors": [
+        {
+          "line": 121,
+          "text": "+ closedItemFields(\"result.revision_responses\", new AgentResultEnvelope.AuthoredRevisionResponse("
+        },
+        {
+          "line": 159,
+          "text": "? closedItemFields(\"result.revision_responses\","
+        }
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java",
+      "sha256": "e3352a0689d07fa9911b958186b61a02560f95ecd9f478b579f8d75c6db02ea7",
+      "anchors": [
+        {
+          "line": 11,
+          "text": "import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;"
+        },
+        {
+          "line": 41,
+          "text": "} catch (UnrecognizedPropertyException failure) {"
+        },
+        {
+          "line": 57,
+          "text": "UNKNOWN_FIELD,"
+        },
+        {
+          "line": 61,
+          "text": "public record ParseDiagnostic(ParseFailureKind kind, long offset, int line, int column,"
+        },
+        {
+          "line": 68,
+          "text": "var at = at(ParseFailureKind.UNKNOWN_FIELD, location);"
+        }
+      ]
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java",
+      "sha256": "ff6f992a29525994f7733656c111bd7cf3bb159b5a2835d62e070090cdf89db7",
+      "anchors": [
+        {
+          "line": 260,
+          "text": "renderParseDiagnostic(parsed.diagnostic()),"
+        },
+        {
+          "line": 289,
+          "text": "private static String renderParseDiagnostic(AgentResultEnvelopeParser.ParseDiagnostic diagnostic) {"
+        },
+        {
+          "line": 296,
+          "text": "var field = diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.UNKNOWN_FIELD"
+        },
+        {
+          "line": 311,
+          "text": "if (diagnostic != null && diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.UNKNOWN_FIELD) {"
+        }
+      ]
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java",
+      "sha256": "f9087cb30af0fac0b0f930b3df69ce390ca8026c42289810eedd1b4480488e4e",
+      "anchors": [
+        {
+          "line": 132,
+          "text": "return fromNode(node, trimmed);"
+        },
+        {
+          "line": 140,
+          "text": "static java.util.Optional<AcpxStreamWireLine> transcriptFrame(String line) {"
+        },
+        {
+          "line": 165,
+          "text": "return java.util.Optional.of(fromNode(node, line.strip()));"
+        },
+        {
+          "line": 168,
+          "text": "private static AcpxStreamWireLine fromNode(JsonNode node, String trimmed) {"
+        }
+      ]
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java",
+      "sha256": "acd5242f826c23e1037a6634dc3c819b9d2673d330bee0e064a16b0a1b96c1c1",
+      "anchors": [
+        {
+          "line": 159,
+          "text": "var frame = AcpxStreamWireLine.transcriptFrame(line);"
+        },
+        {
+          "line": 163,
+          "text": "return AcpxUsage.unavailable(\"INVALID_CURRENT_TRANSCRIPT\");"
+        }
+      ]
+    }
+  ],
+  "note": "line anchors for independent verification, not claims of full review"
+}

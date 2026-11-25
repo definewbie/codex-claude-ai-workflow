@@ -1,0 +1,28 @@
+{
+  "details" : {
+    "cleanup" : false,
+    "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--format", "json", "claude", "sessions", "show", "claude-main-ws-20261023T005431Z-9YYF-run-1792717427983" ],
+    "command_id" : "5580f22c-4824-4e4c-8212-554b807f6708",
+    "invocation" : {
+      "agent" : "claude",
+      "cwd" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+      "executable" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "launch_environment" : {
+        "CLAUDE_CODE_EXECUTABLE" : "",
+        "PATH" : "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.codex/tmp/arg0-macos/codex-arg0o69tg0:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS"
+      },
+      "schema" : "dual.acpx.invocation.v1",
+      "session" : "claude-main-ws-20261023T005431Z-9YYF-run-1792717427983"
+    },
+    "purpose" : "session_compatibility",
+    "request_options" : [ "--prompt-retries", "1", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "--no-terminal", "--claude-execution-policy-ref", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "757a18d86d71df12cc3fe353c84e4675d378cf4f7a86e3625b014ba431a8f317" ],
+    "session" : "claude-main-ws-20261023T005431Z-9YYF-run-1792717427983"
+  },
+  "kind" : "command_intent",
+  "ordinal" : 3,
+  "prepared" : {
+    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/nxe-1792717427956-9d982f0f-prepared.json",
+    "sha256" : "2e78d31f5f6a84217a69e4df9f36b08b5bbec67cc4750f15f564d331e60ea2e4"
+  },
+  "schema" : "dual.run.command.v1"
+}

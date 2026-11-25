@@ -1,0 +1,9 @@
+{
+  "approved_at": "2026-10-22T23:19:00.883842+00:00",
+  "user_scope": "one initialization;45s wait+15s cleanup;necessary auth/network;no prompt,no90s,no seventh recovery,no eighth",
+  "native_initializations_limit": 1,
+  "prompt_limit": 0,
+  "wait_seconds": 45,
+  "cleanup_seconds": 15,
+  "state": "APPROVED_PENDING_PREFLIGHT"
+}

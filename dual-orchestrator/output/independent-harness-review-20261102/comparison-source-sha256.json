@@ -1,0 +1,81 @@
+{
+  "date": "2026-11-02",
+  "purpose": "Targeted comparison source identity; no new test or provider run",
+  "files": [
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/review.zh-CN.md",
+      "sha256": "ae11c3c8896ad1eed468445257f70c5f411a836d83a8b7e20ea6b006394e190e",
+      "bytes": 38455
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/independent-harness-review-20261102/review.zh-CN.md",
+      "sha256": "3f557d151d1295d966aa364b8dda11d758a8133de4011b474a6bccd4176d2ebe",
+      "bytes": 29647
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/docs/plans/20260910-evidence-collection-source-baseline.md",
+      "sha256": "053592f95c29e8f7efc19674d8d44ce863f4c507f9bb8418c1c3afdd78abc4ec",
+      "bytes": 4953
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "sha256": "979279bdc13bea4f313b382447b2593b2bb4f9fb57c04b674677cf91002d09f5",
+      "bytes": 210592
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "sha256": "76f8f175bc33753796073d4ad6a6e1000444eaea68e79aea661058165ece144a",
+      "bytes": 187646
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "sha256": "745737bc921c4a18147f4d023407729b9dde685503c6ab76b1a385364000f366",
+      "bytes": 298406
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/docs/design/dual-orchestrator-current-architecture.zh-CN.md",
+      "sha256": "1b6ad709cb70c22c4d645ecc9c58982020e04bca55e06f93ad8775b803822c3d",
+      "bytes": 33240
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+      "sha256": "9804c76d0364b388cc763e9579ae1448001b946457bc07980816dabf3a949dda",
+      "bytes": 45934
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxPermissionProfile.java",
+      "sha256": "0e0ccc8e7c904d2cb698c84f7c9c8a28bcaa9da6d6106e8bcb2dee3de29586cc",
+      "bytes": 6220
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ClaudeExecutionPolicy.java",
+      "sha256": "d1db8c5eaa853886248bc9cba8f8181774dbfed95048351ff56aa597888da439",
+      "bytes": 10382
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "sha256": "7d21d43972267957faf0f3a2bc04b966c6e7239405716368748102a70c418aa0",
+      "bytes": 16275
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java",
+      "sha256": "10ba8103f364c567755f1fd67880e8db235aedcbd433fe0dcdddcc58b9325f4e",
+      "bytes": 19135
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java",
+      "sha256": "248cb1cb41bea137a1eb0c557df1904ddaa533e1702e5e2487cbdbf079b7702d",
+      "bytes": 21609
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java",
+      "sha256": "500026b45a9e16706d0ad0fa0c5c831d9e38af8a4b2da1f34004941c737c4fc2",
+      "bytes": 7670
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "sha256": "bc89b78be8466c6b58b16635e6099a081bb6e94338b0794085ee7cf6ebf6b6ff",
+      "bytes": 28420
+    }
+  ]
+}

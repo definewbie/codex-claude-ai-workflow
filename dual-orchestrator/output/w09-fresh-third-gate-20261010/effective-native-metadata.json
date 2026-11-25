@@ -1,0 +1,42 @@
+{
+  "build_info": {
+    "upstream_commit": "fd173f04aa1b56f9e3f5ca5190c034ddcae28792",
+    "patch_sha256": "1517f828d303ea720a7a153e6dc8c33265ba1ea100d2b9260c98327b5604468c",
+    "policy_schema": "claude_execution_policy.v2"
+  },
+  "config_sanitized": {
+    "defaultAgent": "codex",
+    "defaultPermissions": "approve-all",
+    "nonInteractivePermissions": "deny",
+    "authPolicy": "skip",
+    "ttl": 300,
+    "timeout": null,
+    "queueMaxDepth": 16,
+    "format": "text",
+    "authMethods": [],
+    "disableExec": false,
+    "paths": {
+      "global": "/Users/kriswang/.acpx/config.json",
+      "project": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.acpxrc.json"
+    },
+    "loaded": {
+      "global": true,
+      "project": false
+    }
+  },
+  "agents": {
+    "codex": {
+      "keys": [
+        "command"
+      ],
+      "launch_spec_sha256": "248c1255e181be2fa7faccf0928cb163fcf3b0cbecc2b450f1d66b483aacc480"
+    },
+    "claude": {
+      "keys": [
+        "command"
+      ],
+      "launch_spec_sha256": "552577de7de6ad4bfb4ad0495c01cfda12f6c3c16d79b08fc07b735249e3c3f4"
+    }
+  },
+  "actual_client_model_calls": 0
+}

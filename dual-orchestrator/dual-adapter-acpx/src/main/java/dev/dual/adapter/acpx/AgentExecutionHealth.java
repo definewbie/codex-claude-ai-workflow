@@ -86,7 +86,7 @@ final class AgentExecutionHealth {
             }
             case SESSION_NEW_REQUESTED -> markProgress(event, elapsed);
             case PERMISSION_REQUESTED, PERMISSION_APPROVED -> markProgress(event, elapsed);
-            case PERMISSION_DENIED, PERMISSION_CANCELLED -> observePermissionDecision(event);
+            case PERMISSION_DENIED, PERMISSION_CANCELLED, PERMISSION_UNRESOLVED -> observePermissionDecision(event);
             case SESSION_RESUME_FAILED, RECONNECT_SIGNAL, PROVIDER_FAILURE -> observeFailure(event, elapsed);
             case OTHER -> {
                 // Other text is evidence, not lifecycle state.
@@ -94,7 +94,13 @@ final class AgentExecutionHealth {
         }
     }
 
-    Assessment assess(Duration elapsed) {
+    private boolean permissionWaiting;
+
+    Assessment assess(Duration elapsed) { return assess(elapsed, false); }
+
+    Assessment assess(Duration elapsed, boolean awaitingPersistedPermission) {
+        if (permissionWaiting && !awaitingPersistedPermission) lastProgressAt = elapsed;
+        permissionWaiting = awaitingPersistedPermission;
         if (currentSignal != null && currentSignal.recoverable()) {
             if (immediateFailure(currentSignal)
                     || elapsed.minus(currentFailureSince).compareTo(recoverableSignalGrace) >= 0) {
@@ -102,7 +108,7 @@ final class AgentExecutionHealth {
             }
             return new Assessment(Status.RECOVERING, currentAdapterSignal, signals());
         }
-        if (elapsed.minus(lastProgressAt).compareTo(progressStallTimeout) >= 0) {
+        if (!awaitingPersistedPermission && elapsed.minus(lastProgressAt).compareTo(progressStallTimeout) >= 0) {
             var stalled = new AdapterSignal(
                     AdapterSignalType.PROCESS_STALLED,
                     STALLED_AGENT_OUTPUT,
@@ -144,7 +150,11 @@ final class AgentExecutionHealth {
     private void observePermissionDecision(AgentLifecycleEvent event) {
         var evidence = event.permissionEvidence();
         var escalationRequired = evidence != null && escalatedPermissionKinds.contains(evidence.toolKind());
-        var disposition = event.kind() == AgentLifecycleEvent.Kind.PERMISSION_DENIED ? "denied" : "cancelled";
+        var disposition = switch (event.kind()) {
+            case PERMISSION_DENIED -> "denied";
+            case PERMISSION_CANCELLED -> "cancelled";
+            default -> "unresolved";
+        };
         var message = escalationRequired
                 ? "current ACP turn permission requires human approval: " + event.text()
                 : "current ACP turn permission " + disposition + ": " + event.text();
@@ -153,8 +163,9 @@ final class AgentExecutionHealth {
                 message,
                 event.sequence(),
                 "acpx_stream",
-                "",
-                false
+                evidence == null || evidence.operationRef() == null ? "" : evidence.operationRef().sessionId(),
+                false,
+                evidence == null ? null : evidence.operationRef()
         ));
     }
 
@@ -166,7 +177,7 @@ final class AgentExecutionHealth {
                     currentAdapterSignal.observedSequence(),
                     currentAdapterSignal.source(),
                     currentAdapterSignal.sessionId(),
-                    true
+                    true, currentAdapterSignal.operationRef()
             );
             for (int index = observedSignals.size() - 1; index >= 0; index--) {
                 if (observedSignals.get(index) == currentAdapterSignal) {

@@ -1,0 +1,49 @@
+{
+  "result": "PASS",
+  "scope": "Current continuation package, current complete ledger and all discovered src/main and src/test files; excludes ephemeral .mutation.lock",
+  "files_compared": 3545,
+  "changed_or_missing": [],
+  "new_files_in_preserved_scope": [],
+  "production_changes": 0,
+  "case_model_calls_this_analysis": 0,
+  "case_JVM_or_native_starts_this_analysis": 0,
+  "accounting_source": {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-budget-continuation-20261026/unexpected-method-stop-report.json",
+    "sha256": "21402e39e58d8e86a237db6a68085215b5e6d5abd507088dbd22185c02ab5d9e"
+  },
+  "preserved_accounting": {
+    "actual_tokens": 2034803,
+    "completed_requests": 9,
+    "active_seconds_including_cleanup": 1979.9747878720627,
+    "approved_limits": {
+      "tokens": 4000000,
+      "calls": 18,
+      "active_seconds": 3600
+    },
+    "remaining_tokens": 1965197
+  },
+  "original_stop": {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/stop-required.json",
+    "sha256": "b97d6d7de199d4b58e99badad804b7a15752e0b360141dca22e5fcf75dcdb5c3"
+  },
+  "current_stop": {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-budget-continuation-20261026/stop-required.json",
+    "sha256": "59fa17c01980bdde68b08b09aecadb21f97c0432c4b00568b02e3eb4f4dcce51"
+  },
+  "domain_current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261026T142203Z-7SNA",
+    "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-plan-codex_plan_review-025"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000025",
+    "updatedAt": "2026-10-26T21:09:17.939818Z",
+    "commitSequence": 93
+  },
+  "output_is_analysis_only": true
+}

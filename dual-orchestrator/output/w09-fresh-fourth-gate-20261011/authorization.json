@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-11T12:43:44.852071+08:00",
+  "user_statement": "批准，以跑完流程为目标，先做对再考虑做省",
+  "scope": "prepare/verify observer and fresh fourth full mainline real Gate",
+  "budget": {
+    "tokens": 1700000,
+    "warning": 1200000,
+    "top_level_calls": 18,
+    "active_seconds": 3600
+  },
+  "critical_and_final_gates": "must obtain current user decision",
+  "product_commit": "user",
+  "old_cases": "no recovery/no balance reuse",
+  "source_configuration_changes": false
+}

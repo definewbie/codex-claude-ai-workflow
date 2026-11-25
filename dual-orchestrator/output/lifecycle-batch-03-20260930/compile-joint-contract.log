@@ -1,0 +1,124 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] dual-cli                                                           [jar]
+[INFO] dual-server                                                        [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/9]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/9]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/9]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/9]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/9]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 98 source files with javac [debug parameters release 21] to target/classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java使用了未经检查或不安全的操作。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] 某些消息已经过简化; 请使用 -Xdiags:verbose 重新编译以获得完整输出
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java:[330,65] 不兼容的类型: dev.dual.core.workflow.NodeInstance无法转换为dev.dual.ledger.file.NodeInstanceDocument
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java:[78,95] 不兼容的类型: dev.dual.core.workflow.NodeInstance无法转换为dev.dual.ledger.file.NodeInstanceDocument
+[INFO] 2 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.151 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  0.018 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  0.043 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  0.010 s]
+[INFO] dual-runtime ....................................... FAILURE [  1.255 s]
+[INFO] dual-adapter-acpx .................................. SKIPPED
+[INFO] dual-cli ........................................... SKIPPED
+[INFO] dual-server ........................................ SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.612 s
+[INFO] Finished at: 2026-09-30T23:30:34+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project dual-runtime: Compilation failure: Compilation failure: 
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java:[330,65] 不兼容的类型: dev.dual.core.workflow.NodeInstance无法转换为dev.dual.ledger.file.NodeInstanceDocument
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java:[78,95] 不兼容的类型: dev.dual.core.workflow.NodeInstance无法转换为dev.dual.ledger.file.NodeInstanceDocument
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-runtime

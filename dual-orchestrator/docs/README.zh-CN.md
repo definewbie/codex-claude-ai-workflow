@@ -32,10 +32,10 @@ English version: [README.md](README.md)
 3. 运行：
 
 ```bash
-./scripts/smoke-test.sh --case lifecycle --cleanup
+rtk proxy mvn -q clean test
 ```
 
-4. 有真实 `acpx` Claude/Codex 可用时，运行：
+4. 真实 `acpx` case 必须另经 Verification Gate 批准，不能仅因客户端可用就运行：
 
 ```bash
 ./scripts/run-public-benchmark.sh

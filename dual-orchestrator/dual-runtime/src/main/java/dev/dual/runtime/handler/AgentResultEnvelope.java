@@ -88,8 +88,17 @@ public record AgentResultEnvelope(
             List<ContractClause> riskAreas,
             List<String> evidenceRefs,
             List<String> openQuestions,
-            List<RevisionResponse> revisionResponses
+            List<RevisionResponse> revisionResponses,
+            String baseProposalId
     ) implements AgentResult {
+        /** Initial proposal construction; wire revisions use the canonical constructor with an exact base ID. */
+        public TaskContractProposalResult(String artifactType, String decision, String summary, boolean needsHumanInput,
+                String objective, ProposalScope scope, List<ContractClause> acceptanceCriteria, List<ContractClause> testRequirements,
+                List<ContractClause> constraints, List<ContractClause> nonGoals, List<ContractClause> riskAreas,
+                List<String> evidenceRefs, List<String> openQuestions, List<RevisionResponse> revisionResponses) {
+            this(artifactType, decision, summary, needsHumanInput, objective, scope, acceptanceCriteria, testRequirements,
+                    constraints, nonGoals, riskAreas, evidenceRefs, openQuestions, revisionResponses, null);
+        }
     }
 
     public record ProposalScope(List<ProposalScopePath> included, List<String> excluded) {
@@ -112,7 +121,6 @@ public record AgentResultEnvelope(
             String decision,
             String summary,
             String baseProposalId,
-            String baseProposalSha256,
             List<ObligationPatch> obligationPatches
     ) implements AgentResult {
     }
@@ -216,7 +224,10 @@ public record AgentResultEnvelope(
             List<String> validationPlan,
             String rollbackNotes,
             List<String> knownRisks,
-            List<String> humanReviewChecklist
+            List<String> humanReviewChecklist,
+            List<TaskContract.ScopeEntry> files,
+            List<TaskContract.VerificationBinding> verificationBindings,
+            List<TaskContract.Reference> authorityRefs
     ) {
     }
 
@@ -231,7 +242,8 @@ public record AgentResultEnvelope(
             List<String> missingEvidence,
             List<String> mustFix,
             List<String> acceptanceNotes,
-            String verificationSummary
+            String verificationSummary,
+            List<VerificationCheck> verificationChecks
     ) implements AgentResult {
     }
 
@@ -249,9 +261,15 @@ public record AgentResultEnvelope(
             List<String> openRisks,
             List<String> changedFiles,
             String verificationSummary,
-            Failure failure
+            Failure failure,
+            List<VerificationCheck> verificationChecks
     ) implements AgentResult {
     }
+
+    /** Model-authored assertion and selectors; neither the selectors nor assertion create execution facts. */
+    @com.fasterxml.jackson.databind.annotation.JsonNaming(com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public record VerificationCheck(String criterionId, String assertion, String executionRef,
+                                    List<String> toolCallIds, List<TaskContract.Reference> materialRefs) {}
 
     public record StageHandoffResult(
             String artifactType,

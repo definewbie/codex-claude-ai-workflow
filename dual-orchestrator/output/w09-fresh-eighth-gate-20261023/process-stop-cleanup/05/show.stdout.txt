@@ -1,0 +1,18 @@
+id: 8ea1502b-cec8-400e-8e22-c800c3fe2f9c
+sessionId: d7b1023e-70b4-4f4d-89cb-85fb4ffd4f21
+agentSessionId: -
+agent: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0
+cwd: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree
+name: claude-main-ws-20261023T005431Z-9YYF-run-1792719040009
+created: 2026-10-23T01:30:42.300Z
+lastActivity: 2026-10-23T01:34:24.741Z
+lastPrompt: 2026-10-23T01:30:44.570Z
+closed: yes
+closedAt: 2026-10-23T03:05:20.554Z
+pid: -
+agentStartedAt: 2026-10-23T01:30:43.733Z
+lastExitCode: -
+lastExitSignal: -
+lastExitAt: 2026-10-23T02:04:24.716Z
+disconnectReason: connection_close
+historyEntries: 2

@@ -1,0 +1,360 @@
+{
+  "sessions": [
+    {
+      "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680",
+      "record_id": "d1587a2b-1836-4d4d-aee2-b39a5762d344",
+      "closed": true,
+      "metadata_sha256": "d9ed943a27b3fc35e10ad7ae1e3bade2453e38629aff81d99255a0350921c6dd",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791636803114",
+      "record_id": "5d7146fd-ea25-4ae9-b028-2ea4ba57bb18",
+      "closed": true,
+      "metadata_sha256": "6684ffd3e175b9856b3ff5ab1a1507f4c63a11ce41fa00a674c2ee84b6871ad0",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791641578962",
+      "record_id": "26a99c40-bdba-4c61-9037-c7d68880d0bd",
+      "closed": true,
+      "metadata_sha256": "55ddb6c3665acb307d0001a21f169c6797e7b0d446f95933cca74c8df7b0a249",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "codex-reviewer-ws-20261010T124812Z-XCZL",
+      "record_id": "01a125de-60c0-7453-a3eb-cc55042b4faa",
+      "closed": true,
+      "metadata_sha256": "5623448f58675528214a401e60e365ac5bffcfd9f4ac28b8ebc39c196dd0cd58",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261010T055644Z-6QCS-run-1791614610585",
+      "record_id": "1d507713-7c39-44bd-9010-2a15019a4f1e",
+      "closed": true,
+      "metadata_sha256": "745a72a9565199e4467624e9b7ff04ad5c8da2e35a5e55731a199f32702d20e2",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261010T085617Z-8SVF-run-1791622684632",
+      "record_id": "e67d5ff9-924f-403b-8fc4-98ccd7d42f62",
+      "closed": true,
+      "metadata_sha256": "12520fd154955ebdd4085158ff8615052513ada56f1b92510bf6aef681bab757",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "codex-reviewer-ws-20261011T044656Z-BMDJ",
+      "record_id": "01a1294c-d0dc-7711-b5ff-74b18d96e7d2",
+      "closed": true,
+      "metadata_sha256": "4ebede04d4fec36bdfe8754b28f16de4629c040b4c1a09d06a8ff2f7a451b82e",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261011T044656Z-BMDJ-run-1791694107574",
+      "record_id": "bc943490-00c4-466e-ae58-8e9054ca69c7",
+      "closed": true,
+      "metadata_sha256": "4c18c7f4e5d7aa5706d949da61c4d326e8459dd769f02c22ce0a4c67b323d179",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261011T044656Z-BMDJ-run-1791694532578",
+      "record_id": "25354bf6-942a-464e-a046-4178013baebd",
+      "closed": true,
+      "metadata_sha256": "3bc5bdc32e08336cfb3fdb944b5fece8198f38de5aeec81b495396a68bf148d4",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261011T044656Z-BMDJ-run-1791699968740",
+      "record_id": "2c72e475-4f58-42e5-8377-2fa53e182c46",
+      "closed": true,
+      "metadata_sha256": "e91ddbc5982a31bd7f63dd60665c2d26d7e0606ca6952b928f196e60576c2f7a",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261011T044656Z-BMDJ-run-1791700286570",
+      "record_id": "8b971cae-40eb-4a77-b91e-5f43981b9ef4",
+      "closed": true,
+      "metadata_sha256": "ae4b137493b2296aa0cc02e9ad2db41ebc4b184e98fa7d40056024a3b2094b13",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261011T141651Z-MBC2-run-1791728580831",
+      "record_id": "3eb67a2d-a9ea-4031-9bc1-00562d18407f",
+      "closed": true,
+      "metadata_sha256": "44f103bca5d7e1cd61df40739b5a01a32d1211445ef6e08c746cf52778f50a24",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "codex-reviewer-ws-20261011T141651Z-MBC2",
+      "record_id": "01a12b56-89d8-72b2-a797-56d1ed91e36f",
+      "closed": true,
+      "metadata_sha256": "54d1373586d0452f2ffa09528a8d97bb310f8f07c0350f4e1bca5dedff1a44fe",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261011T141651Z-MBC2-run-1791728289467",
+      "record_id": "dbbca816-3d32-498f-acee-d857e72cd612",
+      "closed": true,
+      "metadata_sha256": "2a15756a60c42e00d41f3fdee0970908e4861560197dcd98b8a8921ea157a209",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261014T234009Z-RN9X-run-1792021247531",
+      "record_id": "6f351661-60a7-47db-8059-0e743e0e6689",
+      "closed": true,
+      "metadata_sha256": "4d0776c669e8784ac7afca79ff0e3e0f2d7a3bb3337ec284a86e66633b7909b6",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "claude-main-ws-20261014T234009Z-RN9X-run-1792021385197",
+      "record_id": "fe3ee258-ed11-483c-9d00-70276dd5aee0",
+      "closed": true,
+      "metadata_sha256": "49642192dec47667cf7f073b22dc2d650b5bff276886ca55827ea84ef7c394c3",
+      "observation": "Existing local metadata read only; no session command"
+    },
+    {
+      "name": "codex-reviewer-ws-20261014T234009Z-RN9X",
+      "record_id": "01a13ccb-4cae-7d12-9174-9788eb3c00fe",
+      "closed": true,
+      "metadata_sha256": "bc1ce8571706e1a08ccde68e56e6c5da4da2cef12adba2e7616e5cd38dc1e4e5",
+      "observation": "Existing local metadata read only; no session command"
+    }
+  ],
+  "known_pids": [
+    {
+      "pid": 41973,
+      "absent": true
+    },
+    {
+      "pid": 42010,
+      "absent": true
+    },
+    {
+      "pid": 42057,
+      "absent": true
+    },
+    {
+      "pid": 42059,
+      "absent": true
+    },
+    {
+      "pid": 42454,
+      "absent": true
+    },
+    {
+      "pid": 42491,
+      "absent": true
+    },
+    {
+      "pid": 43211,
+      "absent": true
+    },
+    {
+      "pid": 43215,
+      "absent": true
+    },
+    {
+      "pid": 44904,
+      "absent": true
+    },
+    {
+      "pid": 44995,
+      "absent": true
+    },
+    {
+      "pid": 45036,
+      "absent": true
+    },
+    {
+      "pid": 45038,
+      "absent": true
+    },
+    {
+      "pid": 45722,
+      "absent": true
+    },
+    {
+      "pid": 45900,
+      "absent": true
+    },
+    {
+      "pid": 45942,
+      "absent": true
+    },
+    {
+      "pid": 46715,
+      "absent": true
+    },
+    {
+      "pid": 46753,
+      "absent": true
+    },
+    {
+      "pid": 47523,
+      "absent": true
+    },
+    {
+      "pid": 49255,
+      "absent": true
+    },
+    {
+      "pid": 49403,
+      "absent": true
+    },
+    {
+      "pid": 49443,
+      "absent": true
+    },
+    {
+      "pid": 50095,
+      "absent": true
+    },
+    {
+      "pid": 50119,
+      "absent": true
+    },
+    {
+      "pid": 50127,
+      "absent": true
+    },
+    {
+      "pid": 50391,
+      "absent": true
+    },
+    {
+      "pid": 53236,
+      "absent": true
+    },
+    {
+      "pid": 53420,
+      "absent": true
+    },
+    {
+      "pid": 53509,
+      "absent": true
+    },
+    {
+      "pid": 73133,
+      "absent": true
+    },
+    {
+      "pid": 73405,
+      "absent": true
+    },
+    {
+      "pid": 73611,
+      "absent": true
+    },
+    {
+      "pid": 73655,
+      "absent": true
+    },
+    {
+      "pid": 76216,
+      "absent": true
+    },
+    {
+      "pid": 76277,
+      "absent": true
+    },
+    {
+      "pid": 76464,
+      "absent": true
+    },
+    {
+      "pid": 76502,
+      "absent": true
+    },
+    {
+      "pid": 76608,
+      "absent": true
+    },
+    {
+      "pid": 78865,
+      "absent": true
+    },
+    {
+      "pid": 78991,
+      "absent": true
+    },
+    {
+      "pid": 79347,
+      "absent": true
+    },
+    {
+      "pid": 79387,
+      "absent": true
+    },
+    {
+      "pid": 80269,
+      "absent": true
+    },
+    {
+      "pid": 80462,
+      "absent": true
+    },
+    {
+      "pid": 80971,
+      "absent": true
+    },
+    {
+      "pid": 81017,
+      "absent": true
+    },
+    {
+      "pid": 83976,
+      "absent": true
+    },
+    {
+      "pid": 84188,
+      "absent": true
+    },
+    {
+      "pid": 84245,
+      "absent": true
+    },
+    {
+      "pid": 84247,
+      "absent": true
+    },
+    {
+      "pid": 84542,
+      "absent": true
+    },
+    {
+      "pid": 84667,
+      "absent": true
+    },
+    {
+      "pid": 85401,
+      "absent": true
+    },
+    {
+      "pid": 85411,
+      "absent": true
+    },
+    {
+      "pid": 87256,
+      "absent": true
+    },
+    {
+      "pid": 87378,
+      "absent": true
+    },
+    {
+      "pid": 87438,
+      "absent": true
+    },
+    {
+      "pid": 87440,
+      "absent": true
+    },
+    {
+      "pid": 87597,
+      "absent": true
+    }
+  ],
+  "scope": "Known prior named sessions and recorded PIDs only",
+  "arbitrary_children_stop": "NOT_PROVEN",
+  "no_earlier_case_continued": true
+}

@@ -32,12 +32,9 @@ public final class RecoveryReplayClassificationCommand implements Callable<Integ
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-        try (var ignored = WorkstreamLock.acquire(
-                paths.workstreamDir(),
-                LockOwner.currentProcess(workstreamId, "recovery replay classification")
-        )) {
-            CliLedgerFactory.create().replayDeterministicClassification(paths, note);
-        }
+
+        CliLedgerFactory.create().replayDeterministicClassification(paths, note);
+
         System.out.println("Deterministic classification marked ready for replay");
         System.out.println("Workstream: " + workstreamId);
         System.out.println("Resume: dualctl resume --workdir " + workspaceRoot + " " + workstreamId);

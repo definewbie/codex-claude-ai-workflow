@@ -1,0 +1,5 @@
+Local verification script failed: AssertionError: unexpected product files.
+Cause: verifier used absolute Path.parts[0] (/) instead of the entry name.
+Actual worktree top-level: .git and .agent only; no product file.
+This invalid checker result is not native capability evidence or product failure.
+Correction: compare f.name; no product/source/ledger changes, no reinitialization or provider.

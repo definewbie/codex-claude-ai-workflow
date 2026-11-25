@@ -1,0 +1,148 @@
+--- /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-seventh-gate-20261016/budget.json
++++ /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/budget.json
+@@ -1,5 +1,5 @@
+ {
+-  "status": "USER_APPROVED_OFFLINE_PLAN_SEVENTH_RUN_PENDING",
++  "status": "CALIBRATED_BUDGET_APPROVED_OFFLINE_RUN_PENDING",
+   "target": "one fresh terminal-delivery mainline through actual acceptance and COMMITTED",
+   "unit": "visible attributable request totalTokens, including cachedRead",
+   "total_stop": 1700000,
+@@ -19,59 +19,122 @@
+     {
+       "node": "intake.claude_brainstorm",
+       "tokens": 40000,
+-      "basis": "third author 20590/16911; second initial 36945; sampled intake only"
++      "basis": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN",
++      "observed_requests": 9,
++      "observed_cases": 5,
++      "observed_range": [
++        8659,
++        36945
++      ]
+     },
+     {
+       "node": "intake.codex_product_review",
+       "tokens": 50000,
+-      "basis": "third reviews 27560/39574; one shared session"
++      "basis": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN",
++      "observed_requests": 6,
++      "observed_cases": 4,
++      "observed_range": [
++        27428,
++        40194
++      ]
+     },
+     {
+       "node": "design.claude_design",
+       "tokens": 150000,
+-      "basis": "one actual 130731 sample plus provisional margin"
++      "basis": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN",
++      "observed_requests": 3,
++      "observed_cases": 2,
++      "observed_range": [
++        85538,
++        130731
++      ]
+     },
+     {
+       "node": "design.codex_arch_review",
+-      "tokens": 75000,
+-      "basis": "NO_REAL_STAGE_SAMPLE; reviewer allowance, not measured"
++      "tokens": 90000,
++      "basis": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN",
++      "observed_requests": 2,
++      "observed_cases": 1,
++      "observed_range": [
++        53075,
++        70687
++      ]
+     },
+     {
+       "node": "plan.claude_plan",
+       "tokens": 100000,
+-      "basis": "NO_REAL_STAGE_SAMPLE; planning allowance below design, unproven"
++      "basis": "UNMEASURED_PLANNING_ASSUMPTION",
++      "observed_requests": 0,
++      "observed_cases": 0,
++      "observed_range": null
+     },
+     {
+       "node": "plan.codex_plan_review",
+       "tokens": 75000,
+-      "basis": "NO_REAL_STAGE_SAMPLE; reviewer allowance, not measured"
++      "basis": "UNMEASURED_PLANNING_ASSUMPTION",
++      "observed_requests": 0,
++      "observed_cases": 0,
++      "observed_range": null
+     },
+     {
+       "node": "implement.claude_implement",
+       "tokens": 200000,
+-      "basis": "NO_REAL_STAGE_SAMPLE; provisional largest allowance for file writes and checks"
++      "basis": "UNMEASURED_PLANNING_ASSUMPTION",
++      "observed_requests": 0,
++      "observed_cases": 0,
++      "observed_range": null
+     },
+     {
+       "node": "implement.claude_self_test_report",
+       "tokens": 150000,
+-      "basis": "NO_REAL_STAGE_SAMPLE; execution and evidence allowance, not measured"
++      "basis": "UNMEASURED_PLANNING_ASSUMPTION",
++      "observed_requests": 0,
++      "observed_cases": 0,
++      "observed_range": null
+     },
+     {
+       "node": "acceptance.codex_verifier_review",
+       "tokens": 100000,
+-      "basis": "NO_REAL_STAGE_SAMPLE; independent acceptance allowance, not measured"
++      "basis": "UNMEASURED_PLANNING_ASSUMPTION",
++      "observed_requests": 0,
++      "observed_cases": 0,
++      "observed_range": null
+     }
+   ],
+   "illustrative_path": {
+-    "nominal_mainline_tokens": 940000,
++    "nominal_mainline_tokens": 955000,
+     "readiness_plan_rerun_tokens": 175000,
+-    "one_intake_semantic_loop_tokens": 90000,
++    "one_design_semantic_loop_tokens": 240000,
+     "one_format_correction_tokens": 150000,
+-    "planned_total": 1355000,
+-    "unallocated_margin": 345000,
++    "planned_total": 1520000,
++    "unallocated_margin": 180000,
+     "top_level_calls": 14,
+-    "not_guaranteed": "second semantic loop or further corrections fit only if actual remaining funds and calls pass admission"
++    "not_guaranteed": "Both intake/design loops use 1610000/16 requests; reserves are assumptions, not per-call caps; every actual dispatch rechecks funds/time/authority"
+   },
+   "real_run_authorized": false,
+-  "previous_balance_inherited": false
++  "previous_balance_inherited": false,
++  "calibration_source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-budget-calibration-20261022/budget-proposal.json",
++  "calibration_source_sha256": "b35b6a211e236cf4f2ea92bf94555cd810da5f1e7760ab7c40fd48ff8eb99d1f",
++  "calibrated_scenarios": {
++    "mainline_only": {
++      "tokens": 955000,
++      "requests": 9
++    },
++    "mainline_readiness_one_correction": {
++      "tokens": 1280000,
++      "requests": 12
++    },
++    "mainline_readiness_intake_loop_correction": {
++      "tokens": 1370000,
++      "requests": 14
++    },
++    "mainline_readiness_design_loop_correction": {
++      "tokens": 1520000,
++      "requests": 14
++    },
++    "mainline_readiness_both_loops_correction": {
++      "tokens": 1610000,
++      "requests": 16
++    }
++  }
+ }

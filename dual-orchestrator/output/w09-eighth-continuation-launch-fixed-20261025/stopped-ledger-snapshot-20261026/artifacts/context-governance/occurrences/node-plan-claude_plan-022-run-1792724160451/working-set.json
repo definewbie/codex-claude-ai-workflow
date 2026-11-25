@@ -1,0 +1,15 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "working_set",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "plan",
+  "nodeInstanceId" : "node-plan-claude_plan-022",
+  "nodeDefinitionId" : "plan.claude_plan",
+  "targetNodeDefinitionId" : "plan.claude_plan",
+  "iterationId" : "iter-003",
+  "coreFiles" : [ ],
+  "supportingFiles" : [ ],
+  "allowedWriteFiles" : [ ],
+  "forbiddenScope" : [ ".git/**", ".agent/workstreams/**/workflow/**", ".agent/workstreams/**/nodes/**", "business source writes" ],
+  "generatedAt" : "2026-10-23T02:56:00.600425Z"
+}

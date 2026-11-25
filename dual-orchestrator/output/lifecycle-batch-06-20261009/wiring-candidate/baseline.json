@@ -1,0 +1,9 @@
+{
+  "created_at": "2026-10-09T07:57:20.068802+08:00",
+  "scope": "D09 affected wiring design only; no coding/experiments",
+  "source_manifest": "../source-before-sha256.json",
+  "source_inputs_checked": 653,
+  "source_changes": [],
+  "document_preimages": "documents-before-text.json",
+  "status": "DESIGN_CANDIDATE / NOT_IMPLEMENTED / AWAITING_CC"
+}

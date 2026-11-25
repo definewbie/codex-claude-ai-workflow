@@ -1,0 +1,54 @@
+{
+  "gate_result": "FAIL",
+  "not_invalid_basis": "654 frozen sources, JARs and selected native/config match; valid fresh initialized instance; artifact refusal and attribution mismatch in effective combination",
+  "workstream": "ws-20261010T085617Z-8SVF",
+  "node_instance": "node-intake-claude_brainstorm-002",
+  "execution_id": "nxe-1791622684602-4a7db768",
+  "run_id": "run-1791622684632",
+  "workflow_status": "WAITING_FOR_RECOVERY",
+  "execution_outcome": {
+    "status": "CONTRACT_FAILED",
+    "primaryReason": "required_artifact_contract_failed",
+    "nodeMaySucceed": false,
+    "retryPolicy": "MANUAL_ONLY",
+    "recoveryCategory": "ARTIFACT_CONTRACT_FAILURE",
+    "operatorMessage": "The agent result was valid, but one or more required artifact projections failed validation.",
+    "secondarySignals": []
+  },
+  "contract_diagnostic": {
+    "code": "TASK_CONTRACT_EVIDENCE_TRACEABILITY_INVALID",
+    "details": {
+      "errors": [
+        "evidence_refs contains a non-canonical path: .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791622684632/repo-map.json",
+        "evidence_refs contains a non-canonical path: .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791622684632/binding.json"
+      ]
+    },
+    "message": "task_contract_proposal is not grounded in the tracked inventory"
+  },
+  "actual_prompt_calls": 2,
+  "remaining_top_level_calls": 16,
+  "remaining_not_authority_to_retry": true,
+  "runner_elapsed_seconds": 441.492,
+  "run_duration_ms": 434495,
+  "native_request_usage_tokens": 63493,
+  "run_reported_usage_tokens": 53096,
+  "run_usage_discrepancy_tokens": 10397,
+  "usage_total_scope": "two visible native prompt response usage values; not all internal/global billing",
+  "money": "not calculated; subscription_token_only, returned costAmount is not a paid bill",
+  "GOAL_EXECUTION_FINAL_decisions": 0,
+  "product_changes": 0,
+  "product_delivery": false,
+  "session_close_observed": true,
+  "prompt_process_pids_absent": [
+    89299,
+    90167
+  ],
+  "runner_pid_absent": 89259,
+  "entire_native_child_tree_stop": "NOT_PROVEN",
+  "provider_backend_identity": "native session metadata reports zhipu/glm-5.3; not independent upstream billing proof",
+  "permission_bridge": "NOT_EXERCISED",
+  "regression_tests_in_this_gate": "NOT_RUN; reviewed release evidence retained by content identity",
+  "production_source_changes": 0,
+  "automatic_retry": false,
+  "first_case_preserved": true
+}

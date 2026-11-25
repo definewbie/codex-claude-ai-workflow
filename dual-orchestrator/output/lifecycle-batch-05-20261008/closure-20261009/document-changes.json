@@ -1,0 +1,32 @@
+[
+  {
+    "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "before_sha256": "9038bdaa8fbb29fefbba731d39cdfd5c9d3eb836d1a75ac072bc7f50ccf96727",
+    "after_sha256": "4ce75e9c72c8403d1437629a95e9ed7e5bc7e65d9c8a31fed3861076bbcbe3e6"
+  },
+  {
+    "path": "docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "before_sha256": "ec5603958f2663d50bdc4e96da14cbcbda4a6742cec6112f4f3ada730a9c96fd",
+    "after_sha256": "8442eee290ac92ca3d81754454bedee06a2e93e6685c71e02d3ae0c6a1dff429"
+  },
+  {
+    "path": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "before_sha256": "3e20c74bb95d7834f0267a854d396b7312d82fae0c205b958be8b6ce87a91fad",
+    "after_sha256": "f0fb3f823c74061f4f44778b206bc14efd9f0907191f020a43efca76347ede79"
+  },
+  {
+    "path": "output/lifecycle-batch-05-20261008/scope-c/design.md",
+    "before_sha256": "5435e3ee0ba3c193f09e395b82ae5efe39c032c66a50b3a5d84a78f6536916ad",
+    "after_sha256": "7669ac39d63259768d3380cf9486905a3636a5bb33789afc9fd49396db22f130"
+  },
+  {
+    "path": "output/lifecycle-batch-05-20261008/scope-c/implementation/batch.md",
+    "before_sha256": "9c3cbb8f97c0fdccb34e2f1b3239b226514b75723ebd889b3e561ecb6b680dad",
+    "after_sha256": "b992bb98de464fc04f0d9d61d7d4d93a73a757c2357a4df6c090df15c5bd0736"
+  },
+  {
+    "path": "output/lifecycle-batch-05-20261008/scope-c/implementation/cc-review-received.md",
+    "before_sha256": "44e9d14c3054f298b9f8c01f98bae8946b3afb21392ce6170e83e983c15b1d48",
+    "after_sha256": "b810fde0a040d514fe60af860772850399d7d53c294ad97536dba8d556c1f1ac"
+  }
+]

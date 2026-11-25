@@ -1,0 +1,195 @@
+{
+  "checkedAt": "2026-09-12T08:43:26.476Z",
+  "gateResult": "FAIL",
+  "reason": "DESIGN_SCOPE_INVALID",
+  "currentStatus": "WAITING_FOR_RECOVERY",
+  "event": "evt-000015",
+  "node": "node-design-claude_design-014",
+  "run": "run-1789202097910",
+  "authorizedFiles": 34,
+  "plannedFiles": 8,
+  "unauthorized": [
+    {
+      "path": "src/main/java/com/example/okxkline/okx/okx 占位",
+      "operation": "CREATE",
+      "responsibility": "占位"
+    }
+  ],
+  "omittedCount": 27,
+  "omitted": [
+    {
+      "path": "src/main/java/com/example/okxkline/okx/OkxMarketClient.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/java/com/example/okxkline/persistence/entity/Candle.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/java/com/example/okxkline/persistence/entity/SyncState.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/java/com/example/okxkline/persistence/mapper/CandleMapper.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/java/com/example/okxkline/persistence/mapper/SyncStateMapper.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/java/com/example/okxkline/persistence/typehandler/DecimalTextTypeHandler.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/java/com/example/okxkline/sync/CandleSyncService.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/java/com/example/okxkline/sync/SyncScheduler.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/java/com/example/okxkline/sync/SyncStatusService.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/java/com/example/okxkline/web/ApiExceptionHandler.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/java/com/example/okxkline/web/CandleApiController.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/java/com/example/okxkline/web/SyncStatusApiController.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/resources/application.yml",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/resources/schema.sql",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/resources/static/app.js",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/resources/static/index.html",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/resources/static/styles.css",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/main/resources/static/vendor/echarts.min.js",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/test/java/com/example/okxkline/livesmoke/OkxLiveSmokeTest.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/test/java/com/example/okxkline/okx/OkxMarketClientTest.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/test/java/com/example/okxkline/persistence/CandlePersistenceTest.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/test/java/com/example/okxkline/sync/CandleSyncServiceTest.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/test/java/com/example/okxkline/sync/SyncSchedulerTest.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/test/java/com/example/okxkline/web/CandleApiTest.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/test/java/com/example/okxkline/web/ChartPageDomTest.java",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/test/resources/fixtures/candles-edge-cases.json",
+      "operation": "CREATE"
+    },
+    {
+      "path": "src/test/resources/fixtures/candles-normal.json",
+      "operation": "CREATE"
+    }
+  ],
+  "rawStreamMatchesCandidate": true,
+  "rawAssistantSha256": "c8d0f9dbed06b6028181d433e88b108903f65c2e253ab93bf265cbcb874a722e",
+  "stopReasons": [
+    "end_turn"
+  ],
+  "correctionAttempted": false,
+  "sidecarPublished": false,
+  "downstreamReviewerCreated": false,
+  "workspaceClean": true,
+  "originalTargetClean": true,
+  "sessions": [
+    {
+      "recordId": "1e0a4ced-9033-4c3b-9020-b3a808458d7f",
+      "name": "claude-main-ws-20260912T081920Z-KPPZ-run-1789202097910",
+      "closed": true,
+      "sha256": "359fffb251ef6ea0a442530e4e5b13a41127e8c5fde87a2e3eb6bfd111609b3a"
+    },
+    {
+      "recordId": "70130d16-5015-4189-a0cc-b6086dcd297b",
+      "name": "claude-main-ws-20260912T081920Z-KPPZ-run-1789201562077",
+      "closed": true,
+      "sha256": "fd543a8c9e850529ffd75a91f8cbe8ee0c219a4768471bfd4cbd3a3afb6d0a47"
+    },
+    {
+      "recordId": "dcae41fa-35be-4ad6-8734-beae13b69af2",
+      "name": "claude-main-ws-20260912T081920Z-KPPZ-run-1789201271061",
+      "closed": true,
+      "sha256": "acce8fb5701ff2e15d1ffdc2e86e3f1146f2cca84018ae0925823916e7ca3366"
+    },
+    {
+      "recordId": "01a094b8-0b92-7660-bb2e-277bf46d2138",
+      "name": "codex-reviewer-ws-20260912T081920Z-KPPZ",
+      "closed": true,
+      "sha256": "382d0b6a02c0164b64255233508c07f8c01c6909adb8617c3fc6ffaabe78a3d9"
+    }
+  ],
+  "evidenceRefs": [
+    {
+      "ref": ".agent/workstreams/ws-20260912T081920Z-KPPZ/workflow/current.json",
+      "sha256": "0b9f1e8ec292758b7e6e2c46bdfedc4a4accf62fe1add21f87703f179686888f"
+    },
+    {
+      "ref": ".agent/workstreams/ws-20260912T081920Z-KPPZ/nodes/node-design-claude_design-014.json",
+      "sha256": "85aa1624495332e4c67d72250d17c6ffb9bddab949207838e1ec4ff88aac519a"
+    },
+    {
+      "ref": ".agent/workstreams/ws-20260912T081920Z-KPPZ/artifacts/contract-failures/node-design-claude_design-014.json",
+      "sha256": "1c8a5f5679a9685258cded7834d6bd71971494f290d84607f7557812ad213d77"
+    },
+    {
+      "ref": ".agent/workstreams/ws-20260912T081920Z-KPPZ/recovery/current-failure.md",
+      "sha256": "a3a8ffd070b442dfc0049e8b8aaf9d41857910dd1acff9d2ee52b1711ca37f43"
+    },
+    {
+      "ref": ".agent/workstreams/ws-20260912T081920Z-KPPZ/runs/run-1789202097910/run.json",
+      "sha256": "f62901f3b334c92d674242f008812f0180086c6497d89e517bbf6c4c824e1826"
+    },
+    {
+      "ref": ".agent/workstreams/ws-20260912T081920Z-KPPZ/runs/run-1789202097910/outputs/design-claude.json",
+      "sha256": "c8d0f9dbed06b6028181d433e88b108903f65c2e253ab93bf265cbcb874a722e"
+    },
+    {
+      "ref": ".agent/workstreams/ws-20260912T081920Z-KPPZ/runs/run-1789202097910/prompts/design-claude.md",
+      "sha256": "65e80c1c83300ff7863e531fdfbe89367cfd7169f439b855325a418870c40c09"
+    }
+  ]
+}

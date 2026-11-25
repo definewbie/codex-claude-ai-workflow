@@ -1,0 +1,2832 @@
+{
+  "status": "SEARCH_CANDIDATES_NOT_MIGRATION_APPROVAL",
+  "pattern": "(?:loadCurrent|loadNode|loadDefinition|readValue|readTree|Files\\.(?:readString|readAllBytes|lines|list)|jsonWriter\\.write|planWriter\\.write|appendEvent|WorkstreamLock\\.acquire)\\(",
+  "files": 116,
+  "hits": [
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/StartCommand.java",
+      "line": 102,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId.value(), \"start\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/StartCommand.java",
+      "line": 138,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId.value(), \"run\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/StartCommand.java",
+      "line": 148,
+      "text": "return Files.readString(taskFile);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationBillingCsvCommand.java",
+      "line": 38,
+      "text": "var csvText = Files.readString(csvPath, StandardCharsets.UTF_8);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationBillingCsvCommand.java",
+      "line": 62,
+      "text": "Files.readString(costCsvPath, StandardCharsets.UTF_8),"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/StatusCommand.java",
+      "line": 42,
+      "text": "var current = workflowLedger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/StatusCommand.java",
+      "line": 50,
+      "text": "var node = workflowLedger.loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RecoveryShowCommand.java",
+      "line": 40,
+      "text": "System.out.print(Files.readString(summaryPath, StandardCharsets.UTF_8));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RecoveryShowCommand.java",
+      "line": 47,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RecoveryShowCommand.java",
+      "line": 51,
+      "text": "var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/SummaryCommand.java",
+      "line": 73,
+      "text": "? CliLedgerFactory.create().loadCurrent(paths)"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/SummaryCommand.java",
+      "line": 241,
+      "text": "return MAPPER.readValue(path.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/SummaryCommand.java",
+      "line": 283,
+      "text": "var json = MAPPER.readTree(path.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/SummaryCommand.java",
+      "line": 297,
+      "text": "try (var stream = Files.list(dir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewRequestActionCommand.java",
+      "line": 28,
+      "text": "if (!ledger.loadCurrent(paths).activeNodeInstanceIds().equals(java.util.List.of(gate))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewRequestActionCommand.java",
+      "line": 31,
+      "text": "var source = ledger.loadNode(paths, gate);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewCompleteCommand.java",
+      "line": 32,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"review complete\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewCompleteCommand.java",
+      "line": 34,
+      "text": "ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), \"complete\", note);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/InspectCommand.java",
+      "line": 51,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/InspectCommand.java",
+      "line": 58,
+      "text": "var node = ledger.loadNode(paths, id);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/InspectCommand.java",
+      "line": 119,
+      "text": "System.out.print(Files.readString(path));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/InspectCommand.java",
+      "line": 143,
+      "text": "var content = Files.readString(path);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewDecideCommand.java",
+      "line": 42,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"review decide\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewDecideCommand.java",
+      "line": 44,
+      "text": "var definition = ledger.loadDefinition(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewDecideCommand.java",
+      "line": 56,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"run\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewPacketCliHints.java",
+      "line": 31,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewPacketCliHints.java",
+      "line": 33,
+      "text": "var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewPacketCliHints.java",
+      "line": 37,
+      "text": "var definition = ledger.loadDefinition(paths).node(node.nodeDefinitionId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewPacketCliHints.java",
+      "line": 67,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewPacketCliHints.java",
+      "line": 71,
+      "text": "var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RecoveryStaleCommand.java",
+      "line": 39,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(),"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/TimelineCommand.java",
+      "line": 47,
+      "text": "System.out.println(Files.readString(paths.timelineJson()));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/TimelineCommand.java",
+      "line": 51,
+      "text": "var timeline = OBJECT_MAPPER.readValue(paths.timelineJson().toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RecoveryAbortCommand.java",
+      "line": 31,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"recovery abort\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RunUsageProjection.java",
+      "line": 65,
+      "text": "return longValue(objectMapper.readValue(metadataPath.toFile(), MAP_TYPE).get(\"estimatedTokens\"));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/TraceCommand.java",
+      "line": 288,
+      "text": "return MAPPER.readValue(path.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/TraceCommand.java",
+      "line": 349,
+      "text": "var event = MAPPER.readValue(line, MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/TraceCommand.java",
+      "line": 370,
+      "text": "try (var stream = Files.list(paths.agentTasksDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/TraceCommand.java",
+      "line": 550,
+      "text": "var node = MAPPER.readTree(manifestPath.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationShowCommand.java",
+      "line": 41,
+      "text": "System.out.print(Files.readString(jsonPath, StandardCharsets.UTF_8));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationShowCommand.java",
+      "line": 45,
+      "text": "var tree = mapper.readTree(jsonPath.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationShowCommand.java",
+      "line": 55,
+      "text": "System.out.print(Files.readString(mdPath, StandardCharsets.UTF_8));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationShowCommand.java",
+      "line": 57,
+      "text": "System.out.print(Files.readString(jsonPath, StandardCharsets.UTF_8));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RunMetadataReader.java",
+      "line": 35,
+      "text": "try (var stream = Files.list(paths.runsDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RunMetadataReader.java",
+      "line": 54,
+      "text": "return objectMapper.readValue(path.toFile(), RunMetadata.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RunMetadataReader.java",
+      "line": 65,
+      "text": "runs.add(objectMapper.readValue(path.toFile(), RunMetadata.class));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RunCommand.java",
+      "line": 35,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"run\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java",
+      "line": 146,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"autorun inspect\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java",
+      "line": 148,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java",
+      "line": 151,
+      "text": "node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java",
+      "line": 161,
+      "text": "gateConfig = ledger.loadDefinition(paths).node(node.nodeDefinitionId()).config();"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java",
+      "line": 173,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"autorun gate\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java",
+      "line": 175,
+      "text": "ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), action, \"auto-resolved from autorun\");"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java",
+      "line": 184,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"autorun run\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationDecideCommand.java",
+      "line": 53,
+      "text": "var tree = (ObjectNode) mapper.readTree(jsonPath.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RetryCommand.java",
+      "line": 31,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"retry\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RecoveryApproveWebSearchCommand.java",
+      "line": 41,
+      "text": "try (var ignored = WorkstreamLock.acquire("
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/DoctorCommand.java",
+      "line": 189,
+      "text": "Map<String, Object> root = MAPPER.readValue(configJson, new TypeReference<>() {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/DoctorCommand.java",
+      "line": 213,
+      "text": "Map<String, Object> root = MAPPER.readValue(configJson, new TypeReference<>() {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/DoctorCommand.java",
+      "line": 228,
+      "text": "Map<String, Object> root = MAPPER.readValue(claudeSettingsJson, new TypeReference<>() {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/DoctorCommand.java",
+      "line": 244,
+      "text": "return Files.exists(path) ? Files.readString(path, StandardCharsets.UTF_8) : \"\";"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RecoveryCloseMistakenIterationCommand.java",
+      "line": 36,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"recovery close mistaken iteration\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/WatchCommand.java",
+      "line": 60,
+      "text": "var timeline = OBJECT_MAPPER.readValue(paths.timelineJson().toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RecoveryReplayClassificationCommand.java",
+      "line": 35,
+      "text": "try (var ignored = WorkstreamLock.acquire("
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewReviseCommand.java",
+      "line": 38,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"review revise\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewReviseCommand.java",
+      "line": 40,
+      "text": "var feedback = Files.readString(feedbackFile.toAbsolutePath().normalize());"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewReviseCommand.java",
+      "line": 41,
+      "text": "ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), \"revise\", feedback);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewReviseCommand.java",
+      "line": 51,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"run\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationListCommand.java",
+      "line": 38,
+      "text": "var candidates = Files.list(candidatesDir)"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationListCommand.java",
+      "line": 68,
+      "text": "var json = mapper.readTree(path.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ProjectionsRefreshCommand.java",
+      "line": 53,
+      "text": "var metrics = OBJECT_MAPPER.readValue(paths.workstreamMetricsJson().toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/WorkerRunOnceCommand.java",
+      "line": 30,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"worker run-once\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RecoveryNetworkCommand.java",
+      "line": 32,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"network authority\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/SessionsReapCommand.java",
+      "line": 64,
+      "text": "try (Stream<Path> stream = Files.list(workstreamsDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/SessionsReapCommand.java",
+      "line": 72,
+      "text": "status = ledger.loadCurrent(new WorkstreamPaths(root, new DualId(workstreamId))).status();"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/SessionsReapCommand.java",
+      "line": 101,
+      "text": "status = ledger.loadCurrent(new WorkstreamPaths(root, new DualId(selectedWorkstreamId))).status();"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/EventsCommand.java",
+      "line": 76,
+      "text": "var event = objectMapper.readValue(line, Map.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/EventsCommand.java",
+      "line": 95,
+      "text": "var event = objectMapper.readValue(line, Map.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationPromoteCommand.java",
+      "line": 49,
+      "text": "var candidate = (ObjectNode) mapper.readTree(candidatePath.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationPromoteCommand.java",
+      "line": 50,
+      "text": "var plan = (ObjectNode) mapper.readTree(planPath.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationPromoteCommand.java",
+      "line": 62,
+      "text": "var existing = Files.isRegularFile(target) ? Files.readString(target, StandardCharsets.UTF_8) : \"\";"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/CalibrationPlanCommand.java",
+      "line": 44,
+      "text": "var candidate = mapper.readTree(candidatePath.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewShowCommand.java",
+      "line": 31,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewShowCommand.java",
+      "line": 37,
+      "text": "var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewShowCommand.java",
+      "line": 57,
+      "text": "System.out.println(Files.readString(packetPath, StandardCharsets.UTF_8));"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ResumeCommand.java",
+      "line": 36,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"resume\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewApproveCommand.java",
+      "line": 37,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"review approve\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewApproveCommand.java",
+      "line": 39,
+      "text": "ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), \"approve\", note);"
+    },
+    {
+      "path": "dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewApproveCommand.java",
+      "line": 48,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"run\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 65,
+      "text": "var current = workflowLedger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 116,
+      "text": "try (var stream = Files.list(workstreamsDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 136,
+      "text": "try (var stream = Files.list(agentRunsDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 171,
+      "text": "var current = Files.exists(paths.workflowCurrentJson()) ? workflowLedger.loadCurrent(paths) : null;"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 248,
+      "text": "var timeline = new LinkedHashMap<>(objectMapper.readValue(paths.timelineJson().toFile(), MAP_TYPE));"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 256,
+      "text": "var current = workflowLedger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 260,
+      "text": "var node = workflowLedger.loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 270,
+      "text": "var node = workflowLedger.loadNode(paths, nodeInstanceId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 297,
+      "text": "response.put(\"packetMarkdown\", Files.readString(packetPath, StandardCharsets.UTF_8));"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 298,
+      "text": "response.put(\"actionRequests\", workflowLedger.loadNode(paths, nodeInstanceId).result()"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 301,
+      "text": "response.put(\"packet\", objectMapper.readValue(packetJsonPath.toFile(), MAP_TYPE));"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 323,
+      "text": "response.put(\"markdown\", Files.readString(failurePath, StandardCharsets.UTF_8));"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 335,
+      "text": "var workstream = objectMapper.readValue(workstreamJson.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 349,
+      "text": "var current = objectMapper.readValue(currentJson.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 361,
+      "text": "var node = workflowLedger.loadNode(paths, nodeId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 467,
+      "text": "var event = objectMapper.readValue(line, MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 485,
+      "text": "var current = workflowLedger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 489,
+      "text": "var node = workflowLedger.loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 503,
+      "text": "var iteration = objectMapper.readValue(paths.iterationJson(iterationId).toFile(), WorkflowIterationDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 507,
+      "text": "var trigger = workflowLedger.loadNode(paths, iteration.triggerNodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 720,
+      "text": "try (var stream = Files.list(paths.runsDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 774,
+      "text": "try (var stream = Files.list(contextDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 787,
+      "text": "try (var stream = Files.list(dir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 825,
+      "text": "return Files.readString(path, StandardCharsets.UTF_8);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "line": 841,
+      "text": "return objectMapper.readValue(path.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 63,
+      "text": "var status = ledger.loadCurrent(paths(root, workstreamId)).status();"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 76,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"api resume\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 87,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"api retry\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 103,
+      "text": "try (var ignored = WorkstreamLock.acquire("
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 120,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"api network authority\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 134,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"api recovery stale\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 144,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"api recovery close mistaken iteration\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 157,
+      "text": "var current = ledger.loadCurrent(paths(root, workstreamId));"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 229,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, \"api review \" + action))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 231,
+      "text": "dev.dual.runtime.handler.EvidenceCollection.resolveGate(ledger, paths, ledger.loadDefinition(paths), action, note);"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 288,
+      "text": "var status = ledger.loadCurrent(paths).status();"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "line": 304,
+      "text": "var status = ledger.loadCurrent(paths).status();"
+    },
+    {
+      "path": "dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkspaceBrowseController.java",
+      "line": 30,
+      "text": "try (var stream = Files.list(current)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamAttentionEvaluator.java",
+      "line": 53,
+      "text": "var current = OBJECT_MAPPER.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamAttentionEvaluator.java",
+      "line": 425,
+      "text": "return OBJECT_MAPPER.readValue(paths.nodeJson(current.activeNodeInstanceIds().get(0)).toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamAttentionEvaluator.java",
+      "line": 436,
+      "text": "return OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/GoalSatisfactionWriter.java",
+      "line": 45,
+      "text": "jsonWriter.write(paths.goalSatisfactionJson(), document);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 29,
+      "text": "NodeInstanceDocument loadNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 30,
+      "text": "return objectMapper.readValue(paths.nodeJson(nodeInstanceId).toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 33,
+      "text": "WorkflowCurrentDocument loadCurrent(WorkstreamPaths paths) throws IOException {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 34,
+      "text": "return objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 38,
+      "text": "var node = loadNode(paths, nodeInstanceId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 58,
+      "text": "jsonWriter.write(paths.nodeJson(nodeInstanceId), updated);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 64,
+      "text": "var node = loadNode(paths, nodeInstanceId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 87,
+      "text": "jsonWriter.write(paths.nodeJson(nodeInstanceId), updated);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 96,
+      "text": "var node = loadNode(paths, nodeInstanceId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 125,
+      "text": "jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), retry);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 127,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 137,
+      "text": "eventLog.appendEvent(paths, eventId, \"node_auto_retry\", eventPayload);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 151,
+      "text": "jsonWriter.write(paths.workflowCurrentJson(), resumed);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 168,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 172,
+      "text": "var node = loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 211,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 215,
+      "text": "var node = loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 251,
+      "text": "jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), retry);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 263,
+      "text": "eventLog.appendEvent(paths, eventId, eventType, Map.copyOf(eventDetails));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 277,
+      "text": "jsonWriter.write(paths.workflowCurrentJson(), resumed);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 322,
+      "text": "var run = objectMapper.readTree(runPath.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 367,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 372,
+      "text": "var failed = loadNode(paths, current.activeNodeInstanceIds().getFirst());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 380,
+      "text": "var iteration = objectMapper.readValue("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 386,
+      "text": "var classifier = loadNode(paths, iteration.triggerNodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 400,
+      "text": "var candidate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 411,
+      "text": "jsonWriter.write(paths.nodeJson(failed.nodeInstanceId()), new NodeInstanceDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 433,
+      "text": "jsonWriter.write(paths.nodeJson(classifier.nodeInstanceId()), new NodeInstanceDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 455,
+      "text": "jsonWriter.write("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 461,
+      "text": "eventLog.appendEvent(paths, eventId, \"deterministic_classification_replay_requested\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 479,
+      "text": "jsonWriter.write(paths.workflowCurrentJson(), resumed);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 484,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 491,
+      "text": "var node = loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 525,
+      "text": "jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), failed);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 528,
+      "text": "jsonWriter.write(paths.gateJson(recoveryGateId), new GateDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 548,
+      "text": "eventLog.appendEvent(paths, eventId, \"node_stale_running_recovered\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 568,
+      "text": "jsonWriter.write(paths.workflowCurrentJson(), recovered);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 588,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 595,
+      "text": "var node = loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 597,
+      "text": "eventLog.appendEvent(paths, eventId, \"workflow_aborted\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 616,
+      "text": "jsonWriter.write(paths.workflowCurrentJson(), aborted);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 621,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 628,
+      "text": "var node = loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 629,
+      "text": "var iteration = objectMapper.readValue(paths.iterationJson(node.iterationId()).toFile(), WorkflowIterationDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 636,
+      "text": "var trigger = loadNode(paths, iteration.triggerNodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 663,
+      "text": "jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), skipped);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 670,
+      "text": "var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 671,
+      "text": "jsonWriter.write(gatePath, gate.resolved(\"close_mistaken_iteration\", note));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 675,
+      "text": "eventLog.appendEvent(paths, closeEventId, \"mistaken_iteration_closed\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 684,
+      "text": "eventLog.appendEvent(paths, completedEventId, \"workflow_completed\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 700,
+      "text": "jsonWriter.write(paths.workflowCurrentJson(), completed);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 705,
+      "text": "var node = loadNode(paths, nodeInstanceId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "line": 724,
+      "text": "jsonWriter.write(paths.nodeJson(nodeInstanceId), updated);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/CompletionAuditWriter.java",
+      "line": 34,
+      "text": "jsonWriter.write(paths.completionAuditJson(), audit);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/CompletionAuditWriter.java",
+      "line": 125,
+      "text": "return objectMapper.readValue(path.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/CompletionAuditWriter.java",
+      "line": 133,
+      "text": "return Files.readString(path, StandardCharsets.UTF_8);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryCandidateWriter.java",
+      "line": 61,
+      "text": "try (var stream = Files.list(dir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryCandidateWriter.java",
+      "line": 70,
+      "text": "var bytes = Files.readAllBytes(path);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryCandidateWriter.java",
+      "line": 75,
+      "text": "var document = jsonWriter.objectMapper().readValue(bytes, DeliveryCandidateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryCandidateWriter.java",
+      "line": 98,
+      "text": "if (!Files.isRegularFile(actual) || !reference.sha256().equals(sha256(Files.readAllBytes(actual)))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryMergePlanWriter.java",
+      "line": 9,
+      "text": "jsonWriter.write(paths.deliveryMergePlanJson(), plan);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 43,
+      "text": "var current = objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 78,
+      "text": "jsonWriter.write(paths.workstreamMetricsJson(), metrics);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 86,
+      "text": "try (var stream = Files.list(paths.nodesDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 92,
+      "text": "return objectMapper.readValue(path.toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 107,
+      "text": "try (var stream = Files.list(paths.iterationsDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 113,
+      "text": "return objectMapper.readValue(path.toFile(), WorkflowIterationDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 133,
+      "text": "try (var stream = Files.list(paths.runsDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 139,
+      "text": "var run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 217,
+      "text": "try (var stream = Files.list(paths.runsDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 224,
+      "text": "var run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 340,
+      "text": "try (var stream = Files.list(paths.runsDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 347,
+      "text": "var run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 726,
+      "text": "try (var stream = Files.list(paths.runsDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 734,
+      "text": "run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 965,
+      "text": "var document = objectMapper.readValue(contract.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 984,
+      "text": "var document = objectMapper.readValue(manifest.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 1003,
+      "text": "try (var stream = Files.list(contextDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 1009,
+      "text": "var metadata = objectMapper.readValue(path.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+      "line": 1163,
+      "text": "return longValue(objectMapper.readValue(metadataPath.toFile(), MAP_TYPE).get(\"estimatedTokens\"));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 81,
+      "text": "appendEvent(paths, eventId, \"workflow_started\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 85,
+      "text": "jsonWriter.write(paths.workflowDefinitionJson(), new WorkflowDefinitionDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 93,
+      "text": "jsonWriter.write(paths.iterationJson(\"iter-001\"), WorkflowIterationDocument.initial(entry.id(), now));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 94,
+      "text": "jsonWriter.write(paths.workflowInstanceJson(), new WorkflowInstanceDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 105,
+      "text": "jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 117,
+      "text": "jsonWriter.write(paths.nodeJson(nodeInstanceId), new NodeInstanceDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 138,
+      "text": "public WorkflowCurrentDocument loadCurrent(WorkstreamPaths paths) throws IOException {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 139,
+      "text": "return objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 142,
+      "text": "public WorkflowDefinition loadDefinition(WorkstreamPaths paths) throws IOException {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 144,
+      "text": "var json = Files.readString(jsonPath, StandardCharsets.UTF_8);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 145,
+      "text": "var doc = objectMapper.readValue(json, WorkflowDefinitionDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 152,
+      "text": "doc = objectMapper.readValue(json, WorkflowDefinitionDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 164,
+      "text": "public NodeInstanceDocument loadNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 165,
+      "text": "return objectMapper.readValue(paths.nodeJson(nodeInstanceId).toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 169,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 175,
+      "text": "var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 184,
+      "text": "var node = loadNode(paths, nodeInstanceId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 218,
+      "text": "public void appendEvent(WorkstreamPaths paths, String eventId, String eventType, Map<String, Object> payload)"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 220,
+      "text": "eventLog.appendEvent(paths, eventId, eventType, payload);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 248,
+      "text": "appendEvent(paths, \"agent-task-\" + task.agentTaskId(), \"agent_task_queued\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 267,
+      "text": "appendEvent(paths, \"agent-task-running-\" + updated.agentTaskId(), \"agent_task_started\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 284,
+      "text": "appendEvent(paths, (failed ? \"agent-task-failed-\" : \"agent-task-succeeded-\") + updated.agentTaskId(),"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 303,
+      "text": "appendEvent(paths, \"agent-task-failed-\" + updated.agentTaskId(), \"agent_task_failed\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 378,
+      "text": "try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(),"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 380,
+      "text": "return routingEngine.requestAction(paths, loadDefinition(paths), request);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 413,
+      "text": "appendEvent(paths, \"agent-task-queued-node-\" + agentTaskId, \"node_agent_task_queued\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "line": 455,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 48,
+      "text": "WorkflowCurrentDocument loadCurrent(WorkstreamPaths paths) throws IOException {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 49,
+      "text": "return objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 52,
+      "text": "NodeInstanceDocument loadNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 53,
+      "text": "return objectMapper.readValue(paths.nodeJson(nodeInstanceId).toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 78,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 83,
+      "text": "var node = loadNode(paths, nodeInstanceId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 106,
+      "text": "jsonWriter.write(paths.nodeJson(nodeInstanceId), finished);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 194,
+      "text": "jsonWriter.write(paths.nodeJson(nodeInstanceId), new NodeInstanceDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 213,
+      "text": "eventLog.appendEvent(paths, lastEventId, \"revision_limit_reached\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 235,
+      "text": "eventLog.appendEvent(paths, lastEventId, \"join_deferred\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 272,
+      "text": "jsonWriter.write(paths.iterationJson(nextIteration.iterationId()), nextIteration);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 304,
+      "text": "jsonWriter.write(paths.nodeJson(nextNodeInstanceId), nextNode);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 311,
+      "text": "jsonWriter.write(paths.gateJson(gateId), new GateDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 339,
+      "text": "eventLog.appendEvent(paths, lastEventId, \"node_routed\", Map.copyOf(routedPayload));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 342,
+      "text": "eventLog.appendEvent(paths, lastEventId, \"iteration_started\", iterationStartedPayload);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 370,
+      "text": "jsonWriter.write(paths.workflowCurrentJson(), next);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 398,
+      "text": "var activeNode = loadNode(paths, activeNodeId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 419,
+      "text": ".digest(Files.readAllBytes(paths.nodeJson(source.nodeInstanceId())))));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 471,
+      "text": "nodeDefinitionIds.add(loadNode(paths, activeNodeInstanceId).nodeDefinitionId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 496,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 500,
+      "text": "var node = loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 569,
+      "text": "var current = loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 574,
+      "text": "var node = loadNode(paths, request.gateNodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 603,
+      "text": "jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), new NodeInstanceDocument(node.schemaVersion(),"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 608,
+      "text": "eventLog.appendEvent(paths, \"human-action-\" + java.util.UUID.randomUUID(), \"human_action_requested\","
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 623,
+      "text": "var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 637,
+      "text": "jsonWriter.write(paths.gateJson(gate.gateId()), gate.resolved(action, note));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 648,
+      "text": "eventLog.appendEvent(paths, eventId, \"workflow_completed\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 666,
+      "text": "jsonWriter.write(paths.workflowCurrentJson(), completed);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 683,
+      "text": "jsonWriter.write(paths.gateJson(recoveryGateId), new GateDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 696,
+      "text": "eventLog.appendEvent(paths, eventId, controlRepair ? \"control_repair_required\" : \"node_\" + nodeStatus.name().toLowerCase(), eventPayload);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "line": 710,
+      "text": "jsonWriter.write(paths.workflowCurrentJson(), stopped);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/LedgerEventLog.java",
+      "line": 22,
+      "text": "void appendEvent(WorkstreamPaths paths, String eventId, String eventType, Map<String, Object> payload)"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/LedgerEventLog.java",
+      "line": 43,
+      "text": "var existing = objectMapper.readValue(paths.workflowInstanceJson().toFile(), WorkflowInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/LedgerEventLog.java",
+      "line": 44,
+      "text": "jsonWriter.write(paths.workflowInstanceJson(), new WorkflowInstanceDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/AgentTaskLedgerWriter.java",
+      "line": 68,
+      "text": "jsonWriter.write(paths.agentTaskJson(document.agentTaskId()), document);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/AgentTaskLedgerWriter.java",
+      "line": 95,
+      "text": "jsonWriter.write(paths.agentTaskJson(document.agentTaskId()), document);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/AgentTaskLedgerWriter.java",
+      "line": 115,
+      "text": "jsonWriter.write(paths.agentTaskJson(document.agentTaskId()), document);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/AgentTaskLedgerWriter.java",
+      "line": 126,
+      "text": "jsonWriter.write(paths.agentTaskJson(document.agentTaskId()), document);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/AgentTaskLedgerWriter.java",
+      "line": 135,
+      "text": "try (var stream = java.nio.file.Files.list(paths.agentTasksDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/AgentTaskLedgerWriter.java",
+      "line": 141,
+      "text": "documents.add(jsonWriter.objectMapper().readValue(file.toFile(), AgentTaskDocument.class));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/AgentTaskLedgerWriter.java",
+      "line": 155,
+      "text": "return Optional.of(jsonWriter.objectMapper().readValue(path.toFile(), AgentTaskDocument.class));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/LedgerMigrator.java",
+      "line": 39,
+      "text": "var node = mapper.readTree(json);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RevisionTracker.java",
+      "line": 69,
+      "text": "jsonWriter.write(paths.nodeJson(node.nodeInstanceId()), new NodeInstanceDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RevisionTracker.java",
+      "line": 89,
+      "text": "jsonWriter.write(paths.gateJson(recoveryGateId), new GateDocument("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RevisionTracker.java",
+      "line": 108,
+      "text": "eventLog.appendEvent(paths, eventId, \"revision_limit_reached\", Map.of("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RevisionTracker.java",
+      "line": 128,
+      "text": "jsonWriter.write(paths.workflowCurrentJson(), stopped);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RevisionTracker.java",
+      "line": 137,
+      "text": "try (var stream = Files.list(paths.iterationsDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RevisionTracker.java",
+      "line": 156,
+      "text": "try (var stream = Files.list(paths.iterationsDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RevisionTracker.java",
+      "line": 167,
+      "text": "var triggerNode = objectMapper.readValue("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RevisionTracker.java",
+      "line": 181,
+      "text": "return objectMapper.readValue(path.toFile(), WorkflowIterationDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/TimelineProjectionWriter.java",
+      "line": 27,
+      "text": "var current = objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/TimelineProjectionWriter.java",
+      "line": 45,
+      "text": "jsonWriter.write(paths.timelineJson(), projection);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/TimelineProjectionWriter.java",
+      "line": 52,
+      "text": "try (var stream = Files.list(paths.nodesDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/TimelineProjectionWriter.java",
+      "line": 58,
+      "text": "return objectMapper.readValue(path.toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FailureSummaryWriter.java",
+      "line": 19,
+      "text": "var node = objectMapper.readValue(paths.nodeJson(nodeInstanceId).toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FailureSummaryWriter.java",
+      "line": 20,
+      "text": "var current = objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 51,
+      "text": "jsonWriter.write(paths.workstreamJson(), WorkstreamDocument.from(workstream));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 52,
+      "text": "jsonWriter.write(paths.settingsJson(), settings);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 58,
+      "text": "jsonWriter.write(paths.workspaceJson(workspace.workspaceId()), workspaceDocument);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 59,
+      "text": "jsonWriter.write(paths.designStageJson(), stageDocument);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 60,
+      "text": "jsonWriter.write(paths.currentStageJson(), stageDocument);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 61,
+      "text": "jsonWriter.write(paths.designIterationJson(\"001\"), iterationDocument);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 62,
+      "text": "jsonWriter.write(paths.currentIterationJson(), iterationDocument);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 63,
+      "text": "jsonWriter.write(paths.workstreamDir().resolve(\"checkpoints\").resolve(\"checkpoint-initial.json\"), checkpointDocument);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 64,
+      "text": "jsonWriter.write(paths.currentCheckpointJson(), checkpointDocument);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 77,
+      "text": "var workstream = objectMapper.readValue(paths.workstreamJson().toFile(), WorkstreamDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 78,
+      "text": "var workspace = objectMapper.readValue("
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 82,
+      "text": "var stage = objectMapper.readValue(paths.currentStageJson().toFile(), StageDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 83,
+      "text": "var iteration = objectMapper.readValue(paths.currentIterationJson().toFile(), IterationDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+      "line": 84,
+      "text": "var checkpoint = objectMapper.readValue(paths.currentCheckpointJson().toFile(), CheckpointDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/OperatorWorkspaceRegistry.java",
+      "line": 47,
+      "text": "return objectMapper.readValue(registryPath.toFile(), OperatorWorkspaceRegistryDocument.class)"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/OperatorWorkspaceRegistry.java",
+      "line": 126,
+      "text": "jsonWriter.write(registryPath, document.normalized());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "line": 24,
+      "text": "var source = mapper.readValue(paths.nodeJson(sourceId).toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "line": 41,
+      "text": "var doc = mapper.readTree(verifiedPath(root, paths, ref, sha).toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "line": 66,
+      "text": "var compile = mapper.readValue(paths.nodeJson(compileId).toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "line": 73,
+      "text": "var workspace = mapper.readTree(paths.workstreamDir().resolve(\"workspaces/\" + workspaceId + \".json\").toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "line": 85,
+      "text": "require(sha.equals(HexFormat.of().formatHex(MessageDigest.getInstance(\"SHA-256\").digest(Files.readAllBytes(target)))),"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 47,
+      "text": "var definition = ledger.loadDefinition(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 63,
+      "text": "sha(Files.readAllBytes(paths.workflowDefinitionJson())), canonical, note.trim(),"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 94,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 96,
+      "text": "var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 100,
+      "text": "var candidates = waiting ? targets(ledger.loadDefinition(paths), node) : List.<String>of();"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 120,
+      "text": "if (!ledger.loadNode(paths, nodeId).inputTransition().containsKey(REF_KEY)) return null;"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 125,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 129,
+      "text": "var node = ledger.loadNode(paths, nodeId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 135,
+      "text": "if (!eligible(ledger.loadDefinition(paths).node(node.nodeDefinitionId()))) throw new IOException(\"network grant target capability mismatch\");"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 139,
+      "text": "var source = ledger.loadNode(paths, grant.sourceNodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 151,
+      "text": "return new Claim(ref, sha(Files.readAllBytes(path)), grant.domains());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 173,
+      "text": "|| !claim.sha256().equals(sha(Files.readAllBytes(resolve(paths, claim.ref()))))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 179,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 181,
+      "text": "var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 186,
+      "text": "var gate = writer.objectMapper().readValue(paths.gateJson(gateId).toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 225,
+      "text": "var source = ledger.loadNode(paths, grant.sourceNodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 234,
+      "text": "var grant = writer.objectMapper().readValue(resolve(paths, ref).toFile(), Grant.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+      "line": 236,
+      "text": "|| !sha(Files.readAllBytes(paths.workflowDefinitionJson())).equals(grant.definitionSha256())"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java",
+      "line": 50,
+      "text": "jsonWriter.write(paths.workflowExecutionJson(document.workflowExecutionId()), document);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java",
+      "line": 75,
+      "text": "jsonWriter.write(paths.workflowExecutionJson(document.workflowExecutionId()), document);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java",
+      "line": 111,
+      "text": "jsonWriter.write(paths.nodeExecutionJson(document.nodeExecutionId()), document);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java",
+      "line": 146,
+      "text": "jsonWriter.write(paths.nodeExecutionJson(document.nodeExecutionId()), document);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java",
+      "line": 183,
+      "text": "jsonWriter.write(paths.nodeExecutionJson(document.nodeExecutionId()), document);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java",
+      "line": 192,
+      "text": "try (var stream = java.nio.file.Files.list(paths.nodeExecutionsDir())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java",
+      "line": 198,
+      "text": "documents.add(jsonWriter.objectMapper().readValue(file.toFile(), NodeExecutionDocument.class));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java",
+      "line": 212,
+      "text": "return Optional.of(jsonWriter.objectMapper().readValue(path.toFile(), NodeExecutionDocument.class));"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java",
+      "line": 250,
+      "text": "jsonWriter.write(paths.nodeExecutionJson(document.nodeExecutionId()), document);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java",
+      "line": 462,
+      "text": "var run = OBJECT_MAPPER.readTree(path.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java",
+      "line": 499,
+      "text": "return OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/EdgeConditionModule.java",
+      "line": 56,
+      "text": "JsonNode node = p.getCodec().readTree(p);"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java",
+      "line": 108,
+      "text": "var stderr = Files.exists(stderrPath) ? Files.readString(stderrPath) : \"\";"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java",
+      "line": 121,
+      "text": "return readMatchingUsageWithRetry(streamPath, Files.readString(promptPath), metadata);"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ContextGovernanceActualReportWriter.java",
+      "line": 197,
+      "text": "return Optional.of(OBJECT_MAPPER.readTree(path.toFile()));"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ContextGovernanceActualReportWriter.java",
+      "line": 247,
+      "text": "digest.update(Files.readAllBytes(path));"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ContextGovernanceActualReportWriter.java",
+      "line": 328,
+      "text": "try (var stream = Files.list(runsDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ContextGovernanceActualReportWriter.java",
+      "line": 337,
+      "text": "var run = OBJECT_MAPPER.readTree(runJson.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ContextGovernanceActualReportWriter.java",
+      "line": 355,
+      "text": "var document = OBJECT_MAPPER.readTree(manifest.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ClaudeExecutionPolicy.java",
+      "line": 170,
+      "text": "var bytes = Files.readAllBytes(realPolicy);"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ClaudeExecutionPolicy.java",
+      "line": 174,
+      "text": "Map<String, Object> document = MAPPER.readValue(bytes, new TypeReference<>() {"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentPromptRenderer.java",
+      "line": 216,
+      "text": "return Files.readString(path, StandardCharsets.UTF_8);"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentPromptRenderer.java",
+      "line": 329,
+      "text": "var node = OBJECT_MAPPER.readTree(settingsPath.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentPromptRenderer.java",
+      "line": 593,
+      "text": "Files.readString(path, StandardCharsets.UTF_8),"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentPromptRenderer.java",
+      "line": 602,
+      "text": "var content = Files.readString(path, StandardCharsets.UTF_8);"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/WorkstreamMemoryUpdater.java",
+      "line": 433,
+      "text": "return new LinkedHashMap<>(objectMapper.readValue(memoryPath.toFile(), MAP_TYPE));"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/WorkstreamMemoryUpdater.java",
+      "line": 571,
+      "text": "var content = Files.readString(path);"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/WorkstreamMemoryUpdater.java",
+      "line": 610,
+      "text": "return HexFormat.of().formatHex(MessageDigest.getInstance(\"SHA-256\").digest(Files.readAllBytes(path)));"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentRunMetadataWriter.java",
+      "line": 379,
+      "text": "var root = objectMapper.readValue("
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentRunMetadataWriter.java",
+      "line": 707,
+      "text": "var bytes = Files.exists(artifactPath) ? Files.readAllBytes(artifactPath) : new byte[0];"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentRunMetadataWriter.java",
+      "line": 736,
+      "text": "var bytes = Files.exists(promptPath) ? Files.readAllBytes(promptPath) : new byte[0];"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+      "line": 93,
+      "text": "var current = new dev.dual.ledger.file.WorkflowFileLedger().loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+      "line": 522,
+      "text": "try (var files = Files.list(workspacesDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+      "line": 568,
+      "text": "digest.update(Files.readAllBytes(file));"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+      "line": 576,
+      "text": "return HexFormat.of().formatHex(MessageDigest.getInstance(\"SHA-256\").digest(Files.readAllBytes(path)));"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/PromptManifestWriter.java",
+      "line": 65,
+      "text": "var promptBytes = Files.exists(promptPath) ? Files.readAllBytes(promptPath) : new byte[0];"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/SessionCompactionSignal.java",
+      "line": 41,
+      "text": "return from(OBJECT_MAPPER.readValue(metricsPath.toFile(), MAP_TYPE));"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionLifecycle.java",
+      "line": 73,
+      "text": "try (var stream = Files.list(runsDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionLifecycle.java",
+      "line": 89,
+      "text": "JsonNode node = objectMapper.readTree(runJson.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxProviderMetadata.java",
+      "line": 57,
+      "text": "return fromJson(MAPPER.readTree(sessionJson.toFile()));"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxProviderMetadata.java",
+      "line": 80,
+      "text": "var envNode = MAPPER.readTree(settingsJson.toFile()).get(\"env\");"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java",
+      "line": 118,
+      "text": "node = MAPPER.readTree(trimmed);"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java",
+      "line": 812,
+      "text": "return Files.exists(path) ? Files.readString(path) : \"\";"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java",
+      "line": 855,
+      "text": "var entries = OBJECT_MAPPER.readTree(indexPath.toFile()).path(\"entries\");"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ReviewedAcpxBuildIdentity.java",
+      "line": 24,
+      "text": "var document = MAPPER.readValue(buildInfoJson, MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 82,
+      "text": "var definition = ledger.loadDefinition(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 83,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 136,
+      "text": "current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 152,
+      "text": "var node = ledger.loadNode(paths, activeNodeId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 175,
+      "text": "var next = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 192,
+      "text": "var nodeDoc = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 212,
+      "text": "current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 234,
+      "text": "var nodeDoc = ledger.loadNode(paths, activeNodeId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 248,
+      "text": "var refreshedCurrent = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 249,
+      "text": "var refreshedNode = ledger.loadNode(paths, activeNodeId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 261,
+      "text": "var next = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 294,
+      "text": "return ledger.loadNode(paths, current.activeNodeInstanceIds().get(0)).nodeDefinitionId();"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 384,
+      "text": "var nodeDoc = ledger.loadNode(paths, activeNodeId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 422,
+      "text": "ledger.appendEvent(paths, eventId,"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 429,
+      "text": "ledger.appendEvent(paths, eventId,"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 535,
+      "text": "ledger.appendEvent(paths, \"stale-running-\" + node.nodeInstanceId() + \"-\" + System.currentTimeMillis(),"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java",
+      "line": 55,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java",
+      "line": 66,
+      "text": "var definition = ledger.loadDefinition(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java",
+      "line": 67,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java",
+      "line": 68,
+      "text": "var nodeDoc = ledger.loadNode(paths, task.nodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java",
+      "line": 82,
+      "text": "var next = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java",
+      "line": 157,
+      "text": "var nodeDoc = ledger.loadNode(paths, activeNodeId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java",
+      "line": 183,
+      "text": "return ledger.loadNode(paths, current.activeNodeInstanceIds().get(0)).nodeDefinitionId();"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputLineageVerifier.java",
+      "line": 29,
+      "text": "var node = ledger.loadNode(paths, document.nodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java",
+      "line": 106,
+      "text": "var candidate = Files.readString(path, StandardCharsets.UTF_8);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java",
+      "line": 642,
+      "text": "return Optional.of(OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "line": 55,
+      "text": "this.definition = ledger.loadDefinition(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "line": 60,
+      "text": "var event = JSON.readValue(line, MAP);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "line": 220,
+      "text": "var gate = JSON.readValue(verifiedPath(root, ref).toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "line": 267,
+      "text": "var candidateDocument = JSON.readValue(verifiedPath(root, candidate.sidecar()).toFile(), MAP);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "line": 290,
+      "text": ".append(Files.readString(verifiedPath(root, subject.sidecar())));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "line": 297,
+      "text": "+ Files.readString(verifiedPath(root, approved.candidate().sidecar()));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "line": 327,
+      "text": "var iteration = JSON.readValue(canonicalPath(root, iterationRef).toFile(), WorkflowIterationDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "line": 413,
+      "text": "var node = JSON.readValue(canonicalPath(root, prefix + \"nodes/\" + id + \".json\").toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/StageHandoffDocument.java",
+      "line": 40,
+      "text": "return Optional.of(from(objectMapper.readValue(path.toFile(), MAP_TYPE)));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/WorkstreamMemoryProjection.java",
+      "line": 280,
+      "text": "return MAPPER.readValue(path.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/DeliveryPrepareHandler.java",
+      "line": 115,
+      "text": "var workstream = objectMapper.readValue(paths.workstreamJson().toFile(), WorkstreamDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/DeliveryPrepareHandler.java",
+      "line": 123,
+      "text": "var workspace = objectMapper.readValue(workspacePath.toFile(), WorkspaceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/DeliveryPrepareHandler.java",
+      "line": 195,
+      "text": "return Files.exists(path) ? Files.readString(path, StandardCharsets.UTF_8).stripTrailing() : fallback;"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 45,
+      "text": "var goal = OBJECT_MAPPER.readValue(paths.goalSatisfactionJson().toFile(), GoalSatisfactionDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 50,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 51,
+      "text": "var instance = OBJECT_MAPPER.readValue(paths.workflowInstanceJson().toFile(), WorkflowInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 52,
+      "text": "var definitionDocument = OBJECT_MAPPER.readValue("
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 74,
+      "text": "var decisionNode = ledger.loadNode(paths, goal.nodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 167,
+      "text": "var producer = new WorkflowFileLedger().loadNode(paths, entry.document().nodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 187,
+      "text": "var producer = ledger.loadNode(paths, acceptance.document().nodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 202,
+      "text": "var contextNode = ledger.loadNode(paths, contextNodeId);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+      "line": 257,
+      "text": "var producer = new WorkflowFileLedger().loadNode(paths, entry.document().nodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/RepositoryFactBinding.java",
+      "line": 81,
+      "text": "document = objectMapper.readValue(bindingPath.toFile(), Document.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/RepositoryFactBinding.java",
+      "line": 186,
+      "text": "var repoMap = objectMapper.readValue(root.resolve(repoMapRef.ref()).toFile(), Map.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 38,
+      "text": "var node = OBJECT_MAPPER.readValue(nodePath.toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 64,
+      "text": "var iteration = OBJECT_MAPPER.readValue(iterationPath.toFile(), WorkflowIterationDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 96,
+      "text": "var trigger = OBJECT_MAPPER.readValue(triggerPath.toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 136,
+      "text": "var trigger = OBJECT_MAPPER.readValue(triggerPath.toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 183,
+      "text": "var trigger = OBJECT_MAPPER.readValue(triggerPath.toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 219,
+      "text": "var node = OBJECT_MAPPER.readValue(nodePath.toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 277,
+      "text": "var gate = OBJECT_MAPPER.readValue(reader.path(reader.relative("
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 388,
+      "text": "item = OBJECT_MAPPER.readValue(path.toFile(), WorkflowIterationDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 408,
+      "text": "definition = OBJECT_MAPPER.readValue(path(relative(dir.resolve(\"workflow/definition.json\"))).toFile(),"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 414,
+      "text": "var tree = OBJECT_MAPPER.readTree(line);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 441,
+      "text": "var node = OBJECT_MAPPER.readValue(path(relative(dir.resolve(\"nodes/\" + id + \".json\"))).toFile(),"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 522,
+      "text": "var document = OBJECT_MAPPER.readValue(path(ref).toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 563,
+      "text": "try (var files = Files.list(dir.resolve(\"gates\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 565,
+      "text": "var doc = OBJECT_MAPPER.readValue(file.toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 601,
+      "text": "var iteration = OBJECT_MAPPER.readValue(path(relative(dir.resolve(\"iterations/\""
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 634,
+      "text": "var workstream = OBJECT_MAPPER.readTree(path(relative(dir.resolve(\"workstream.json\"))).toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "line": 637,
+      "text": "var workspace = OBJECT_MAPPER.readTree(path(relative(dir.resolve(\"workspaces/\" + id + \".json\"))).toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java",
+      "line": 74,
+      "text": "var json = (ObjectNode) OBJECT_MAPPER.readTree(runJson.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java",
+      "line": 113,
+      "text": "try (var stream = Files.list(runsDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java",
+      "line": 135,
+      "text": "try (var stream = Files.list(runsDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java",
+      "line": 141,
+      "text": "var json = (ObjectNode) OBJECT_MAPPER.readTree(runJson.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java",
+      "line": 163,
+      "text": "try (var stream = Files.list(runsDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java",
+      "line": 169,
+      "text": "var json = (ObjectNode) OBJECT_MAPPER.readTree(runJson.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java",
+      "line": 227,
+      "text": "var json = OBJECT_MAPPER.readTree(runJson.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TokenEstimator.java",
+      "line": 51,
+      "text": "var content = Files.readString(path, StandardCharsets.UTF_8);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputContractSidecar.java",
+      "line": 36,
+      "text": "MessageDigest.getInstance(\"SHA-256\").digest(Files.readAllBytes(sidecarPath)));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputContractDocument.java",
+      "line": 64,
+      "text": "return Optional.of(from(objectMapper.readValue(path.toFile(), MAP_TYPE)));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 31,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 34,
+      "text": "var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 56,
+      "text": "|| !MAPPER.readTree(file.toFile()).path(\"inputTransition\").has(\"evidence_collection_gate\")) return Optional.empty();"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 71,
+      "text": "var guard = open(root, workstreamId, MAPPER.readValue(paths.nodeJson(nodeId).toFile(), NodeInstanceDocument.class));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 108,
+      "text": "open(root, workstreamId, MAPPER.readValue(file.toFile(), NodeInstanceDocument.class));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 118,
+      "text": "try (var lines = Files.lines(paths.eventsJsonl())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 122,
+      "text": "var event = MAPPER.readTree(line);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 142,
+      "text": "var approval = MAPPER.readValue(file.toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 151,
+      "text": "var gate = MAPPER.readValue(gateFile.toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 179,
+      "text": "var node = MAPPER.readValue(paths.nodeJson(nodeId).toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 188,
+      "text": "var approval = MAPPER.readValue(approvalFile.toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "line": 31,
+      "text": "try (var lock = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(paths.workstreamId().value(), \"prepare evidence\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "line": 32,
+      "text": "var baseline = EvidenceCollection.captureBaseline(ledger, paths, ledger.loadDefinition(paths), \"submit_evidence\");"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "line": 67,
+      "text": "try (var lock = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(paths.workstreamId().value(), \"submit evidence\"))) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "line": 69,
+      "text": "var definition = ledger.loadDefinition(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "line": 70,
+      "text": "var gateNode = ledger.loadNode(paths, prepared.baseline().gateNodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "line": 76,
+      "text": "var gate = JSON.readValue(paths.gateJson(\"gate-\" + gateNode.nodeInstanceId()).toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "line": 82,
+      "text": "try (var lines = Files.lines(paths.eventsJsonl())) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "line": 86,
+      "text": "var event = JSON.readTree(line);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "line": 105,
+      "text": "var manifest = JSON.readValue(read(paths, new Reference(submission.manifestRef(), submission.manifestSha256())), Manifest.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "line": 132,
+      "text": "var preparation = JSON.readValue(read(paths, ref), Preparation.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceManifest.java",
+      "line": 217,
+      "text": "try (Stream<Path> paths = Files.list(nodesDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceManifest.java",
+      "line": 330,
+      "text": "return Optional.of(objectMapper.readValue(path.toFile(), MAP_TYPE));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceManifest.java",
+      "line": 335,
+      "text": "? Files.readString(path, StandardCharsets.UTF_8).length()"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java",
+      "line": 468,
+      "text": "var gate = OBJECT_MAPPER.readValue(gatePath.toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java",
+      "line": 477,
+      "text": "var node = OBJECT_MAPPER.readValue(nodePath.toFile(), NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/PlanArtifactDocument.java",
+      "line": 60,
+      "text": "return Optional.of(from(objectMapper.readValue(path.toFile(), MAP_TYPE)));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java",
+      "line": 32,
+      "text": "return ParseResult.valid(objectMapper.readValue(candidate, AgentResultEnvelope.class));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/RepoScopeGovernance.java",
+      "line": 552,
+      "text": "return new LinkedHashMap<>(objectMapper.readValue(workstreamMemoryPath.toFile(), MAP_TYPE));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/RepoScopeGovernance.java",
+      "line": 784,
+      "text": "var json = objectMapper.readValue(gitEvidence.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/RepoScopeGovernance.java",
+      "line": 817,
+      "text": "try (var stream = Files.list(runsDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/RepoScopeGovernance.java",
+      "line": 830,
+      "text": "run = objectMapper.readValue(runJson.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/RepoScopeGovernance.java",
+      "line": 886,
+      "text": "document = objectMapper.readValue(manifest.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 120,
+      "text": "contractBytes = Files.readAllBytes(contractPath);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 121,
+      "text": "resolutionBytes = Files.readAllBytes(resolutionPath);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 122,
+      "text": "contract = TaskContractArtifactWriter.mapper().readValue(contractBytes, TaskContract.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 123,
+      "text": "document = OBJECT_MAPPER.readValue(contractBytes, MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 124,
+      "text": "resolutionDocument = OBJECT_MAPPER.readValue(resolutionBytes, MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 170,
+      "text": "byte[] contractBytes = hasContract ? Files.readAllBytes(contractPath) : new byte[0];"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 172,
+      "text": "? TaskContractArtifactWriter.mapper().readValue(contractBytes, TaskContract.class)"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 175,
+      "text": "? OBJECT_MAPPER.readValue(contractBytes, MAP_TYPE)"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 180,
+      "text": "var resolutionBytes = Files.readAllBytes(resolutionPath);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 181,
+      "text": "resolutionDocument = OBJECT_MAPPER.readValue(resolutionBytes, MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 261,
+      "text": "event = OBJECT_MAPPER.readValue(line, MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 311,
+      "text": "return new GateRead(OBJECT_MAPPER.readValue(path.toFile(), GateDocument.class), null);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 343,
+      "text": "try (var paths = Files.list(nodesDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 348,
+      "text": "nodes.add(OBJECT_MAPPER.readValue(path.toFile(), NodeInstanceDocument.class));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "line": 488,
+      "text": "var document = objectMapper.readValue(path.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java",
+      "line": 44,
+      "text": "var document = JSON.readValue(path.toFile(), MAP);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java",
+      "line": 64,
+      "text": "var prompt = Files.readString(promptPath);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java",
+      "line": 92,
+      "text": "var run = JSON.readValue(runPath.toFile(), MAP);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java",
+      "line": 97,
+      "text": "var snapshot = snapshot(JSON.readValue(path.toFile(), MAP));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java",
+      "line": 131,
+      "text": "var doc = JSON.readValue(verifiedPath(root, candidate.sidecar()).toFile(), MAP);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java",
+      "line": 140,
+      "text": "var manifest = JSON.readValue(path.toFile(), MAP);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java",
+      "line": 199,
+      "text": ".append(Files.readString(path)).append(\"\\n\\n\");"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java",
+      "line": 205,
+      "text": "if (!TaskContractArtifactWriter.sha256(Files.readAllBytes(path)).equals(reference.sha256()))"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java",
+      "line": 222,
+      "text": "return new Reference(ref, TaskContractArtifactWriter.sha256(Files.readAllBytes(canonicalPath(root, ref))));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java",
+      "line": 32,
+      "text": "var contract = OBJECT_MAPPER.readValue(contractPath.toFile(), TaskContract.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java",
+      "line": 77,
+      "text": "var json = OBJECT_MAPPER.readValue(resolutionPath.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java",
+      "line": 166,
+      "text": "try (Stream<Path> paths = Files.list(iterationsDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java",
+      "line": 199,
+      "text": "try (Stream<Path> paths = Files.list(nodesDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java",
+      "line": 399,
+      "text": "try (Stream<Path> paths = Files.list(nodesDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java",
+      "line": 424,
+      "text": "try (Stream<Path> paths = Files.list(iterationsDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java",
+      "line": 630,
+      "text": "return OBJECT_MAPPER.readValue(path.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java",
+      "line": 687,
+      "text": "var content = Files.readString(path, StandardCharsets.UTF_8);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java",
+      "line": 696,
+      "text": "var content = Files.readString(path, StandardCharsets.UTF_8);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactValidateHandler.java",
+      "line": 406,
+      "text": "var workstream = OBJECT_MAPPER.readTree(paths.workstreamJson().toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactValidateHandler.java",
+      "line": 415,
+      "text": "var workspace = OBJECT_MAPPER.readTree(workspaceJson.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextBuildPackageHandler.java",
+      "line": 1111,
+      "text": "return Files.readString(path, StandardCharsets.UTF_8).stripTrailing();"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractArtifactWriter.java",
+      "line": 96,
+      "text": "return sha256(Files.readAllBytes(path));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalValidator.java",
+      "line": 142,
+      "text": "repoMap = OBJECT_MAPPER.readValue(repoMapPath.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunMetadataFinalizer.java",
+      "line": 126,
+      "text": "var json = (ObjectNode) OBJECT_MAPPER.readTree(path.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ChangeScopeEvaluationArtifact.java",
+      "line": 41,
+      "text": "if (!Files.isRegularFile(target) || !sha256(Files.readAllBytes(target)).equals(sha256)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ChangeScopeEvaluationArtifact.java",
+      "line": 81,
+      "text": "var bytes = Files.readAllBytes(path);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ChangeScopeEvaluationArtifact.java",
+      "line": 88,
+      "text": "document = OBJECT_MAPPER.readValue(bytes, Document.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ChangeScopeEvaluationArtifact.java",
+      "line": 115,
+      "text": "var source = OBJECT_MAPPER.readValue(sourcePath.toFile(), dev.dual.ledger.file.NodeInstanceDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextStateEvidenceBoundaryRenderer.java",
+      "line": 196,
+      "text": "try (Stream<Path> paths = Files.list(failureDir)) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextStateEvidenceBoundaryRenderer.java",
+      "line": 225,
+      "text": "return objectMapper.readValue(path.toFile(), MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalReference.java",
+      "line": 153,
+      "text": "var reference = objectMapper.readValue(referencePath.toFile(), TaskContractProposalReference.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalReference.java",
+      "line": 292,
+      "text": "return HexFormat.of().formatHex(MessageDigest.getInstance(\"SHA-256\").digest(Files.readAllBytes(path)));"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReportGenerateFinalHandler.java",
+      "line": 253,
+      "text": "var tree = mapper.readTree(classificationPath.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReportGenerateFinalHandler.java",
+      "line": 293,
+      "text": "var json = OBJECT_MAPPER.readTree(sidecar.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReportGenerateFinalHandler.java",
+      "line": 335,
+      "text": "var json = OBJECT_MAPPER.readTree(sidecar.toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReportGenerateFinalHandler.java",
+      "line": 373,
+      "text": "if (Files.exists(hygieneWarnings) && !Files.readString(hygieneWarnings, StandardCharsets.UTF_8).isBlank()) {"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReportGenerateFinalHandler.java",
+      "line": 402,
+      "text": "return Files.readString(path, StandardCharsets.UTF_8).stripTrailing();"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReportGenerateFinalHandler.java",
+      "line": 406,
+      "text": "var content = Files.readString(path, StandardCharsets.UTF_8).stripTrailing();"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/HumanReviewGateHandler.java",
+      "line": 840,
+      "text": "return Files.readString(path, StandardCharsets.UTF_8).trim();"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/lifecycle/WorkflowDefinitionLoader.java",
+      "line": 49,
+      "text": "var source = objectMapper.readValue(workflowPath.toFile(), WorkflowDefinitionSource.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/lifecycle/WorkflowDefinitionLoader.java",
+      "line": 153,
+      "text": "var source = objectMapper.readValue(input, WorkflowDefinitionSource.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 90,
+      "text": "try (var ignored = WorkstreamLock.acquire("
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 124,
+      "text": "planWriter.write(paths, ready);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 125,
+      "text": "var patch = Files.readString(resolveRef(paths, candidate.patch().ref()), StandardCharsets.UTF_8);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 132,
+      "text": "planWriter.write(paths, failed);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 139,
+      "text": "planWriter.write(paths, failed);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 143,
+      "text": "planWriter.write(paths, applied);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 150,
+      "text": "planWriter.write(paths, failed);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 160,
+      "text": "try (var ignored = WorkstreamLock.acquire("
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 180,
+      "text": "planWriter.write(paths, committed);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 184,
+      "text": "planWriter.write(paths, rejected);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 191,
+      "text": "var current = ledger.loadCurrent(paths);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 196,
+      "text": "var audit = objectMapper.readTree(paths.completionAuditJson().toFile());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 229,
+      "text": "var workstream = objectMapper.readValue(paths.workstreamJson().toFile(), WorkstreamDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "line": 280,
+      "text": "? objectMapper.readValue(paths.deliveryMergePlanJson().toFile(), DeliveryMergePlan.class)"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/AcceptedDeliveryCandidateResolver.java",
+      "line": 41,
+      "text": "var node = ledger.loadNode(paths, occurrence.nodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/AcceptedDeliveryCandidateResolver.java",
+      "line": 47,
+      "text": "var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/AcceptedDeliveryCandidateResolver.java",
+      "line": 79,
+      "text": "var producer = ledger.loadNode(paths, candidate.producerNodeInstanceId());"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/AcceptedDeliveryCandidateResolver.java",
+      "line": 97,
+      "text": "event = objectMapper.readValue(line, MAP_TYPE);"
+    },
+    {
+      "path": "dual-orchestrator/dual-core/src/main/java/dev/dual/core/provider/ProviderPricingCatalog.java",
+      "line": 48,
+      "text": "return fromDocument(objectMapper.readValue(path.toFile(), MAP_TYPE));"
+    },
+    {
+      "path": "dual-orchestrator/dual-core/src/main/java/dev/dual/core/provider/ProviderPricingCatalog.java",
+      "line": 59,
+      "text": "return fromDocument(objectMapper.readValue(stream, MAP_TYPE));"
+    }
+  ]
+}

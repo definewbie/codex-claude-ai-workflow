@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest
+-------------------------------------------------------------------------------
+Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 225.0 s -- in dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest

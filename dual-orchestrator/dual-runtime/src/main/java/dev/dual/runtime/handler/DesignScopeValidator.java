@@ -40,12 +40,12 @@ final class DesignScopeValidator {
         return List.copyOf(errors);
     }
 
-    static List<String> validate(Path root, String workstreamId, AgentResultEnvelope.Design design) {
+    static List<String> validate(dev.dual.ledger.file.WorkflowFileLedger ledger, Path root, String workstreamId, AgentResultEnvelope.Design design) {
         var errors = shapeErrors(design);
         if (!errors.isEmpty()) {
             return errors;
         }
-        var resolution = TaskContractProjectionVerifier.resolve(root, workstreamId);
+        var resolution = TaskContractProjectionVerifier.resolve(ledger, root, workstreamId, dev.dual.core.contract.TaskContract.Phase.GOAL);
         if (resolution.failure() != null || resolution.qualified().isEmpty()) {
             return List.of("DESIGN_CONTRACT_NOT_QUALIFIED: " + (resolution.failure() == null
                     ? "approved contract is absent" : resolution.failure().reason()));
@@ -53,15 +53,27 @@ final class DesignScopeValidator {
         return scopeErrors(design, resolution.qualified().orElseThrow().contract());
     }
 
-    private static List<String> scopeErrors(AgentResultEnvelope.Design design, TaskContract contract) {
+    static List<String> scopeErrors(AgentResultEnvelope.Design design, TaskContract contract) {
+        return proposedScopeErrors(design.plannedFiles().stream()
+                .map(file -> new TaskContract.ScopeEntry(file.path(), file.operation())).toList(), contract);
+    }
+
+    static List<String> proposedScopeErrors(List<TaskContract.ScopeEntry> files, TaskContract contract) {
         var errors = new ArrayList<String>();
-        for (var file : design.plannedFiles()) {
-            var authorized = contract.scope().included().stream()
-                    .filter(entry -> entry.path().equals(file.path())).findFirst();
-            if (authorized.isEmpty()) {
-                errors.add("DESIGN_SCOPE_NOT_AUTHORIZED: " + file.path());
-            } else if (authorized.get().operation() != file.operation()) {
-                errors.add("DESIGN_SCOPE_OPERATION_MISMATCH: " + file.path());
+        for (var file : files) {
+            if (file == null || !TaskContractValidator.isCanonicalPath(file.path()) || file.operation() == null) {
+                errors.add("PROPOSED_SCOPE_INVALID");
+                continue;
+            }
+            if (file.path().equals(".agent") || file.path().startsWith(".agent/")
+                    || file.path().equals(".git") || file.path().startsWith(".git/")
+                    || contract.scope().excluded().stream().anyMatch(excluded -> file.path().equals(excluded)
+                        || (TaskContractValidator.isCanonicalPath(excluded) && file.path().startsWith(excluded + "/")))) {
+                errors.add("PROPOSED_SCOPE_EXCLUDED: " + file.path());
+            }
+            if (contract.phase() == TaskContract.Phase.EXECUTION
+                    && !contract.scope().included().contains(file)) {
+                errors.add("PROPOSED_SCOPE_REQUIRES_NEW_APPROVAL: " + file.path());
             }
         }
         return List.copyOf(errors);

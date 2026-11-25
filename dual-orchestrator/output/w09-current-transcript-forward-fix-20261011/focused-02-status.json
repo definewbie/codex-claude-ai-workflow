@@ -1,0 +1,5 @@
+{
+  "status": "PASS_FOR_EARLIER_COMPILED_SLICE_ONLY",
+  "reason": "Production guard and extra test changes were made while this broader run was active; not current-source final credential",
+  "live_native_provider_calls": 0
+}

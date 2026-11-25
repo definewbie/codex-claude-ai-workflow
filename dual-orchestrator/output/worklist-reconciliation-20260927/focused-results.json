@@ -1,0 +1,104 @@
+{
+  "head": "3362eb421514e75fdc4332f570df5bf274b3725e",
+  "sourceBaseline": "baseline.json",
+  "commandLog": "focused-tests.log",
+  "exitCode": 0,
+  "totals": {
+    "tests": 97,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "class": "dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "dual-orchestrator/output/worklist-reconciliation-20260927/focused-reports/dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest.xml",
+      "sha256": "024521b4cce08db8ca0513f25f40505f8b48d25c86363a5a68cdd65d185acadc"
+    },
+    {
+      "class": "dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "dual-orchestrator/output/worklist-reconciliation-20260927/focused-reports/dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.xml",
+      "sha256": "b34bce7f2e87dc3827def7fa00ecbcd860924c9692685b0c2cd4293e5e1592a9"
+    },
+    {
+      "class": "dev.dual.adapter.acpx.AuthoredManifestDispatchTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "dual-orchestrator/output/worklist-reconciliation-20260927/focused-reports/dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AuthoredManifestDispatchTest.xml",
+      "sha256": "abd66263e01e097fcfb6459687ee126a7ceede1ee37ae8b3b77b4c4d03cead59"
+    },
+    {
+      "class": "dev.dual.adapter.acpx.RetryFailureContextSequenceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "dual-orchestrator/output/worklist-reconciliation-20260927/focused-reports/dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.RetryFailureContextSequenceTest.xml",
+      "sha256": "5a496c8b788e21a783513639d02abdcd4b47261a6074b0105aa60274eb9be3f9"
+    },
+    {
+      "class": "dev.dual.runtime.handler.ArtifactContractValidatorTest",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "dual-orchestrator/output/worklist-reconciliation-20260927/focused-reports/dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ArtifactContractValidatorTest.xml",
+      "sha256": "9f32fc5209675399ef9a6ac4eadc521f35fd4db5614f26b275f3195faaa2a0f2"
+    },
+    {
+      "class": "dev.dual.ledger.file.WorkflowGateResolutionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "dual-orchestrator/output/worklist-reconciliation-20260927/focused-reports/dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.WorkflowGateResolutionTest.xml",
+      "sha256": "d68a342eb18dd48f0d161c2719f91514d620523bc4a022b949812eaded528dfa"
+    },
+    {
+      "class": "dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "dual-orchestrator/output/worklist-reconciliation-20260927/focused-reports/dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest.xml",
+      "sha256": "fd35896c89a36905872a500e8865853beb45aa7bfd158cebf648b9b6b7645aca"
+    },
+    {
+      "class": "dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "dual-orchestrator/output/worklist-reconciliation-20260927/focused-reports/dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest.xml",
+      "sha256": "6252e578dd912463a1570cc44282691204ba00b16a9dc37fe9872c8a436e7517"
+    },
+    {
+      "class": "dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "dual-orchestrator/output/worklist-reconciliation-20260927/focused-reports/dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest.xml",
+      "sha256": "a5ab57a1adab24324a192db7c85db64a33b80a5a7de542cde99c1c7d01a581f8"
+    },
+    {
+      "class": "dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "dual-orchestrator/output/worklist-reconciliation-20260927/focused-reports/dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest.xml",
+      "sha256": "6d751a0c3b11ae2faf95f2f2ecdaff58c4b692d1735e04e406f5c01fb1a3cae9"
+    }
+  ]
+}

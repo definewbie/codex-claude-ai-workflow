@@ -1,0 +1,8 @@
+{
+  "type": "function_call",
+  "id": "spawn_once",
+  "call_id": "spawn_once",
+  "namespace": "collaboration",
+  "name": "spawn_agent",
+  "arguments": "{\"task_name\": \"probe\", \"fork_turns\": \"none\", \"message\": \"Bounded local diagnostic child. Use only supplied fixture operations.\"}"
+}

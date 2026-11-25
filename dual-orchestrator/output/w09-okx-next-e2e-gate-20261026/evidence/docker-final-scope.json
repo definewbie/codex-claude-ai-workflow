@@ -1,0 +1,19 @@
+{
+  "daemon": "NOT_CONNECTABLE",
+  "desktop_status": "Could not retrieve status. Is Docker Desktop running?",
+  "gui_lookup": "open -Ra Docker could not find application by name; this does not prove the bundle is uninstalled",
+  "contexts": [
+    "default unix:///var/run/docker.sock",
+    "desktop-linux unix:///Users/kriswang/.docker/run/docker.sock"
+  ],
+  "current_context": "desktop-linux",
+  "cli_link": "/Applications/Docker.app/Contents/Resources/bin/docker",
+  "actions_not_taken": [
+    "no Docker start",
+    "no installation",
+    "no image pull",
+    "no persistent context change",
+    "no product application start"
+  ],
+  "decision": "Stop environment investigation here; full MySQL baseline remains pending rather than expanding this small Gate into host repair"
+}

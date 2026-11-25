@@ -1,0 +1,63 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-plan-decision-026",
+  "nodeDefinitionId" : "plan.decision",
+  "kind" : "DECISION",
+  "handlerType" : "review.decision",
+  "status" : "COMPLETED",
+  "stageId" : "stage-plan",
+  "iterationId" : "iter-003",
+  "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.contract.json" ],
+  "inputTransition" : {
+    "transition_type" : "normal",
+    "condition" : "unconditional",
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256" : "d8109795168773e98ec73609ff6fc6373bf1ba2c77af679892aed78fdc0aecdf",
+    "source_node_instance_id" : "node-plan-codex_plan_review-025",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.contract.json" ],
+  "result" : {
+    "source" : "contract-sidecar",
+    "summary" : "环境与可行性引用已按人工要求补齐，原计划语义保持不变，复评通过，可进入当前 EXECUTION 精确审批。",
+    "decision" : "READY_TO_IMPLEMENT",
+    "reviewed_candidate" : {
+      "author_occurrence" : "node-plan-claude_plan-022",
+      "review_decision" : "READY_TO_IMPLEMENT",
+      "checks" : [ {
+        "result" : "PASSED",
+        "input_refs" : [ {
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.contract.json",
+          "sha256" : "7db15a9535462e8642d80db8eeb6857afa2865a040ff3210f8488e1b52118e06"
+        }, {
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.contract.json",
+          "sha256" : "b021f9fb966c656895f91729e4c9045e6780e1ad5b9c162af0458be68a59f559"
+        } ],
+        "rule_version" : "2",
+        "rule_id" : "review.subject.and.route"
+      } ],
+      "review_artifact" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.contract.json",
+        "sha256" : "b021f9fb966c656895f91729e4c9045e6780e1ad5b9c162af0458be68a59f559"
+      },
+      "stage" : "plan",
+      "decision_occurrence" : "node-plan-decision-026",
+      "reviewer_occurrence" : "node-plan-codex_plan_review-025",
+      "schema_version" : 1,
+      "author_artifact" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.contract.json",
+        "sha256" : "7db15a9535462e8642d80db8eeb6857afa2865a040ff3210f8488e1b52118e06"
+      },
+      "contract" : {
+        "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b",
+        "epoch" : 1,
+        "phase" : "GOAL",
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json"
+      }
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1792966953769-8c2d6670",
+  "startedAt" : "2026-10-25T22:22:33.778940Z",
+  "finishedAt" : "2026-10-25T22:22:33.903882Z"
+}

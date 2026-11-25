@@ -10,6 +10,10 @@ import dev.dual.runtime.handler.AuthoredExecutionContext;
 import dev.dual.runtime.handler.TaskHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import dev.dual.runtime.*;
+import dev.dual.runtime.handler.HandlerRegistry;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,32 +28,32 @@ class AuthoredManifestDispatchTest {
     private static final ObjectMapper JSON = new ObjectMapper().registerModule(new JavaTimeModule());
     @TempDir Path root;
 
-    @Test
-    void aSuccessfulWriterWithWrongIdentityCannotDispatchProvider() throws Exception {
-        assertRejected("identity");
+    @ParameterizedTest @ValueSource(booleans = {false, true})
+    void aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(boolean queued) throws Exception {
+        assertRejected("identity", queued);
     }
 
-    @Test
-    void retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider() throws Exception {
-        assertRejected("body");
+    @ParameterizedTest @ValueSource(booleans = {false, true})
+    void retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(boolean queued) throws Exception {
+        assertRejected("body", queued);
     }
 
-    @Test
-    void partialManifestCannotDispatchProvider() throws Exception {
-        assertRejected("partial");
+    @ParameterizedTest @ValueSource(booleans = {false, true})
+    void partialManifestCannotDispatchProvider(boolean queued) throws Exception {
+        assertRejected("partial", queued);
     }
 
-    @Test
-    void manifestWriteFailureRemainsAnIoFailureBeforeProvider() throws Exception {
-        assertWriteFailure("design.claude_design");
+    @ParameterizedTest @ValueSource(booleans = {false, true})
+    void manifestWriteFailureRemainsAnIoFailureBeforeProvider(boolean queued) throws Exception {
+        assertWriteFailure("design.claude_design", queued);
     }
 
-    @Test
-    void nonAuthoredSiblingPreservesTheSameIoFailureBeforeProvider() throws Exception {
-        assertWriteFailure("intake.codex_product_review");
+    @ParameterizedTest @ValueSource(booleans = {false, true})
+    void nonAuthoredSiblingPreservesTheSameIoFailureBeforeProvider(boolean queued) throws Exception {
+        assertWriteFailure("intake.codex_product_review", queued);
     }
 
-    private void assertWriteFailure(String nodeId) throws Exception {
+    private void assertWriteFailure(String nodeId, boolean queued) throws Exception {
         var context = context(nodeId);
         var calls = new AtomicInteger();
         var writes = new AtomicInteger();
@@ -65,7 +69,10 @@ class AuthoredManifestDispatchTest {
             }
         };
         var handler = new AcpxAgentTaskHandler(forbiddenTransport(calls), false, new AcpxUsageReader(), writer);
-        assertSame(diskFailure, assertThrows(IOException.class, () -> handler.execute(context)));
+        var result = execute(context, handler, queued);
+        assertEquals("INPUT_PREPARATION_FAILED", result.result().get("reason"));
+        assertEquals(IOException.class.getName(), result.result().get("failure_code"));
+        assertEquals(List.of(diskFailure.getMessage()), result.result().get("errors"));
         assertEquals(1, writes.get());
         assertEquals(0, calls.get());
     }
@@ -73,7 +80,7 @@ class AuthoredManifestDispatchTest {
     @Test
     void prepareOnlyWritesAndReadsTheSameManifestWithoutProvider() throws Exception {
         var context = context();
-        var result = new AcpxAgentTaskHandler(forbiddenTransport(new AtomicInteger()), true).execute(context);
+        var result = new AcpxAgentTaskHandler(forbiddenTransport(new AtomicInteger()), true).execute(AcpxTestLedger.claim(context));
         assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
         var run = JSON.readTree(root.resolve((String) result.result().get("run_metadata")).toFile());
         var manifestPath = root.resolve(run.path("promptManifestPath").asText());
@@ -84,7 +91,7 @@ class AuthoredManifestDispatchTest {
         assertFalse(run.has("authoredContext"), "run metadata locates the manifest; it must not copy its payload");
     }
 
-    private void assertRejected(String corruption) throws Exception {
+    private void assertRejected(String corruption, boolean queued) throws Exception {
         var context = context();
         var writes = new AtomicInteger();
         var calls = new AtomicInteger();
@@ -106,12 +113,28 @@ class AuthoredManifestDispatchTest {
                 writes.incrementAndGet();
             }
         };
-        var result = new AcpxAgentTaskHandler(forbiddenTransport(calls), false, new AcpxUsageReader(), writer).execute(context);
+        var result = execute(context, new AcpxAgentTaskHandler(forbiddenTransport(calls), false, new AcpxUsageReader(), writer), queued);
         assertEquals(1, writes.get(), "the writer returned; dispatch must independently verify its output");
         assertEquals(0, calls.get());
         assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", result.outcome());
+        assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", result.result().get("reason"));
         assertEquals("AUTHORED_CONTEXT_INVALID", result.result().get("failure_code"));
+    }
+
+    private NodeInstanceDocument execute(TaskHandler.TaskContext context, AcpxAgentTaskHandler handler, boolean queued) throws Exception {
+        var ledger = AcpxTestLedger.ledger();
+        var paths = new WorkstreamPaths(root, new DualId(context.workstreamId()));
+        var handlers = new HandlerRegistry(List.of(handler), List.of(), List.of());
+        var command = new WorkflowCommand(root, context.workstreamId());
+        new WorkflowRuntime(ledger, handlers, queued ? AgentTaskDispatchMode.WORKER : AgentTaskDispatchMode.INLINE).resume(command);
+        if (queued) new AgentWorker(ledger, handlers).runOne(command);
+        var current = ledger.loadCurrent(paths);
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, current.status());
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
+        assertTrue(node.outputRefs().isEmpty());
+        assertFalse(node.result().containsKey("parse_error"));
+        assertEquals("input_preparation_failure", RecoveryAssessment.from(node, root, context.workstreamId()).classification());
+        return node;
     }
 
     private TaskHandler.TaskContext context() throws Exception {
@@ -121,23 +144,28 @@ class AuthoredManifestDispatchTest {
     private TaskHandler.TaskContext context(String nodeId) throws Exception {
         var ws = "ws-manifest";
         var paths = new WorkstreamPaths(root, new DualId(ws));
-        var design = new NodeDefinition(nodeId, NodeKind.TASK, "acpx.agent_run", Map.of(
-                "agent", "claude", "session", "design", "prompt_template", "design-claude",
-                "permission_profile", "observe", "requires_approved_task_contract", true));
-        var ledger = new WorkflowFileLedger();
-        var definition = new WorkflowDefinition("manifest-fixture", 1, design.id(), List.of(design,
-                new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()),
-                new NodeDefinition("gate.contract_review", NodeKind.GATE, "human.review", Map.of("gate_purpose", "contract"))),
-                List.of(new EdgeDefinition("contract.compile", "completed", "gate.contract_review"),
-                        new EdgeDefinition("gate.contract_review", "approved", design.id())));
-        ledger.initialize(paths, "manifest-fixture", definition);
-        DesignContractFixture.approve(root, ws);
-        Files.writeString(paths.workstreamDir().resolve("requirement.md"), "Design a file conversion tool");
-        var instance = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
-        return new TaskHandler.TaskContext(root, ws, design, new NodeInstance(
-                instance.nodeInstanceId(), instance.nodeDefinitionId(), instance.kind(), instance.handlerType(),
-                instance.status(), instance.stageId(), instance.iterationId(), instance.inputRefs(),
-                instance.outputRefs(), instance.result(), instance.runRef(), instance.startedAt(), instance.finishedAt()));
+        var ledger = AcpxTestLedger.ledger();
+        if (nodeId.equals("intake.codex_product_review")) {
+            var intake = new NodeDefinition(nodeId, NodeKind.TASK, "acpx.agent_run", Map.of(
+                    "agent", "codex", "session", "intake", "prompt_template", "intake-codex-product-review", "permission_profile", "observe"));
+            AcpxTestLedger.initialize(ledger, paths, "manifest-fixture", new WorkflowDefinition("manifest-fixture", 1, nodeId, List.of(intake), List.of()));
+            return new TaskHandler.TaskContext(root, ws, intake, ledger.loadCoreNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst()), ledger);
+        }
+        new dev.dual.runtime.handler.AuthoredStageSequenceTest.Fixture(root, "repo/relative/new.ext",
+                dev.dual.runtime.handler.AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, ws, null, ledger)
+                .before(nodeId);
+        var definition = ledger.loadDefinition(paths).nodes().stream().filter(n -> n.id().equals(nodeId)).findFirst().orElseThrow();
+        var config = new java.util.LinkedHashMap<>(definition.config());
+        config.putAll(Map.of("agent", "claude", "session", "design", "prompt_template", "design-claude", "permission_profile", "observe"));
+        definition = new NodeDefinition(definition.id(), definition.kind(), definition.handlerType(), config);
+        // Runtime consumes the declared adapter binding too, not just this returned context.
+        var workflow = ledger.loadDefinition(paths);
+        var bound = definition;
+        var declaredDocument = (ObjectNode) JSON.readTree(paths.workflowDefinitionJson().toFile());
+        declaredDocument.set("nodes", JSON.valueToTree(workflow.nodes().stream().map(n -> n.id().equals(nodeId) ? bound : n).toList()));
+        JSON.writeValue(paths.workflowDefinitionJson().toFile(), declaredDocument);
+        var instance = ledger.loadCoreNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        return new TaskHandler.TaskContext(root, ws, definition, instance, ledger);
     }
 
     private AcpxAgentTransport forbiddenTransport(AtomicInteger calls) {

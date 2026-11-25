@@ -1,0 +1,75 @@
+{
+  "status": "USER_APPROVED_FRESH_FOURTH",
+  "target": "one fresh terminal-delivery mainline through actual acceptance and COMMITTED",
+  "unit": "visible attributable request totalTokens, including cachedRead",
+  "total_stop": 1700000,
+  "warning": 1200000,
+  "top_level_calls": 18,
+  "active_seconds": 3600,
+  "command_timeout_seconds": 600,
+  "next_agent_time_reserve_seconds": 1500,
+  "time_reserve_basis": "two possible 600s prompts plus provisional 300s preparation/cleanup allowance; not a hard runtime bound",
+  "possible_correction_tokens": 150000,
+  "possible_correction_calls": 1,
+  "semantic_loops_max": 2,
+  "extra_connection_prompts_default": 0,
+  "reserves_are": "temporary planning allowances; not p95, prediction intervals or native per-request hard caps",
+  "model_configuration_changes": "NONE_PROPOSED_FOR_THIS_GATE",
+  "stages": [
+    {
+      "node": "intake.claude_brainstorm",
+      "tokens": 40000,
+      "basis": "third author 20590/16911; second initial 36945; sampled intake only"
+    },
+    {
+      "node": "intake.codex_product_review",
+      "tokens": 50000,
+      "basis": "third reviews 27560/39574; one shared session"
+    },
+    {
+      "node": "design.claude_design",
+      "tokens": 150000,
+      "basis": "one actual 130731 sample plus provisional margin"
+    },
+    {
+      "node": "design.codex_arch_review",
+      "tokens": 75000,
+      "basis": "NO_REAL_STAGE_SAMPLE; reviewer allowance, not measured"
+    },
+    {
+      "node": "plan.claude_plan",
+      "tokens": 100000,
+      "basis": "NO_REAL_STAGE_SAMPLE; planning allowance below design, unproven"
+    },
+    {
+      "node": "plan.codex_plan_review",
+      "tokens": 75000,
+      "basis": "NO_REAL_STAGE_SAMPLE; reviewer allowance, not measured"
+    },
+    {
+      "node": "implement.claude_implement",
+      "tokens": 200000,
+      "basis": "NO_REAL_STAGE_SAMPLE; provisional largest allowance for file writes and checks"
+    },
+    {
+      "node": "implement.claude_self_test_report",
+      "tokens": 150000,
+      "basis": "NO_REAL_STAGE_SAMPLE; execution and evidence allowance, not measured"
+    },
+    {
+      "node": "acceptance.codex_verifier_review",
+      "tokens": 100000,
+      "basis": "NO_REAL_STAGE_SAMPLE; independent acceptance allowance, not measured"
+    }
+  ],
+  "illustrative_path": {
+    "nominal_mainline_tokens": 940000,
+    "readiness_plan_rerun_tokens": 175000,
+    "one_intake_semantic_loop_tokens": 90000,
+    "one_format_correction_tokens": 150000,
+    "planned_total": 1355000,
+    "unallocated_margin": 345000,
+    "top_level_calls": 14,
+    "not_guaranteed": "second semantic loop or further corrections fit only if actual remaining funds and calls pass admission"
+  }
+}

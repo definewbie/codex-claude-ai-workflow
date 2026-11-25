@@ -1,0 +1,78 @@
+{
+  "001": {
+    "process": {
+      "pid": 23868,
+      "started_at": "2026-10-10T14:43:06.259952+08:00",
+      "argv": [
+        "java",
+        "-Xlog:class+load=debug:file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-real-gate-20261010/steps/001/classloading.log:uptime,level,tags",
+        "-jar",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+        "run",
+        "--workdir=/private/tmp/dual-w09-newlines-20261010/worktree",
+        "--max-steps",
+        "1",
+        "--dispatch-mode",
+        "INLINE",
+        "ws-20261010T055644Z-6QCS"
+      ],
+      "expected_node": "context.intake_claude_brainstorm"
+    },
+    "result": {
+      "exit": 1,
+      "elapsed_seconds": 1.745,
+      "finished_at": "2026-10-10T14:43:08.003267+08:00"
+    },
+    "classes": {
+      "dev.dual.cli.DualCtlApplication": {
+        "source": "[0.099s][info ][class,load] dev.dual.cli.DualCtlApplication source: jar:nested:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar/!BOOT-INF/classes/!/",
+        "loader": "[0.099s][debug][class,load]  klass: 0x000001c001051c00 super: 0x000001c000176450 loader: [loader data: 0x000000011d41e550 for instance a 'org/springframework/boot/loader/launch/LaunchedClassLoader'{0x000000043fb33c08}] bytes: 2118 checksum: fe703d92"
+      },
+      "dev.dual.flow.liteflow.LiteFlowPrototypeKernel": {
+        "source": "[0.773s][info ][class,load] dev.dual.flow.liteflow.LiteFlowPrototypeKernel source: jar:nested:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar/!BOOT-INF/lib/dual-flow-liteflow-0.1.0-SNAPSHOT.jar!/",
+        "loader": "[0.773s][debug][class,load]  klass: 0x000001c0012754c0 super: 0x000001c000176450 interfaces: 0x000001c0012752b8 0x000001c00017d050 loader: [loader data: 0x000000011d41e550 for instance a 'org/springframework/boot/loader/launch/LaunchedClassLoader'{0x000000043c800010}] bytes: 6632 checksum: 188a1131"
+      },
+      "com.yomahub.liteflow.core.FlowExecutorHolder": {
+        "source": "[1.345s][info ][class,load] com.yomahub.liteflow.core.FlowExecutorHolder source: jar:nested:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar/!BOOT-INF/lib/liteflow-core-2.16.0.jar!/",
+        "loader": "[1.345s][debug][class,load]  klass: 0x000001c0013336a8 super: 0x000001c000176450 loader: [loader data: 0x000000011d41e550 for instance a 'org/springframework/boot/loader/launch/LaunchedClassLoader'{0x0000000405800010}] bytes: 1319 checksum: e4114fe3"
+      }
+    },
+    "concurrent_other_router_started": false
+  },
+  "002": {
+    "process": {
+      "pid": 24008,
+      "started_at": "2026-10-10T14:43:29.346071+08:00",
+      "argv": [
+        "java",
+        "-Xlog:class+load=debug:file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-real-gate-20261010/steps/002/classloading.log:uptime,level,tags",
+        "-jar",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+        "run",
+        "--workdir=/private/tmp/dual-w09-newlines-20261010/worktree",
+        "--max-steps",
+        "1",
+        "--dispatch-mode",
+        "INLINE",
+        "ws-20261010T055644Z-6QCS"
+      ],
+      "expected_node": "intake.claude_brainstorm"
+    },
+    "result": {
+      "exit": 1,
+      "elapsed_seconds": 4.965,
+      "finished_at": "2026-10-10T14:43:34.310194+08:00"
+    },
+    "classes": {
+      "dev.dual.cli.DualCtlApplication": {
+        "source": "[0.064s][info ][class,load] dev.dual.cli.DualCtlApplication source: jar:nested:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar/!BOOT-INF/classes/!/",
+        "loader": "[0.064s][debug][class,load]  klass: 0x0000060001051c00 super: 0x0000060000176450 loader: [loader data: 0x000000010d904860 for instance a 'org/springframework/boot/loader/launch/LaunchedClassLoader'{0x000000043fb33c08}] bytes: 2118 checksum: fe703d92"
+      },
+      "dev.dual.flow.liteflow.LiteFlowPrototypeKernel": {
+        "source": "[0.710s][info ][class,load] dev.dual.flow.liteflow.LiteFlowPrototypeKernel source: jar:nested:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar/!BOOT-INF/lib/dual-flow-liteflow-0.1.0-SNAPSHOT.jar!/",
+        "loader": "[0.710s][debug][class,load]  klass: 0x0000060001274418 super: 0x0000060000176450 interfaces: 0x0000060001274210 0x000006000017d050 loader: [loader data: 0x000000010d904860 for instance a 'org/springframework/boot/loader/launch/LaunchedClassLoader'{0x000000043c800000}] bytes: 6632 checksum: 188a1131"
+      }
+    },
+    "concurrent_other_router_started": false
+  }
+}

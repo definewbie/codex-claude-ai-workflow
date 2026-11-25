@@ -1,0 +1,7 @@
+{
+  "approved": true,
+  "approvedManifestSha256": "2f2698cf7fe743d463450feff007346368b15284296888989c7cf41fb64b560f",
+  "authorizationSource": "User explicitly replied 批准 to this Gate budget request",
+  "recordedAt": "2026-09-30T06:17:24.001324+00:00",
+  "scope": "Only this sealed Gate; no product implementation, external model calls, automatic retries or extra chat agents"
+}

@@ -1,0 +1,6 @@
+{
+  "source": "Current user message in this conversation",
+  "recorded_at": "2026-10-24T21:22:15.645327+08:00",
+  "user_instruction": "批准第八例续作，先完成只读重核，通过后按原170万token、18次请求、60分钟及储备式准入规则继续，累计原用量和耗时、不重置预算，保留原停止记录，以跑完主流程为目标。",
+  "business_gates_delegated": false
+}

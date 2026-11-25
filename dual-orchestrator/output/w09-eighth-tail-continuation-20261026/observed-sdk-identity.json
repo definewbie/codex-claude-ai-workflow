@@ -1,0 +1,20 @@
+{
+  "source_result": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-startup-offline-fix-20261023/native-initialization-observation-20261023/result.json",
+  "source_result_sha256": "06df1e25a1c381febc571426f89f4eec107c4b22b5d79264daceaf2606971190",
+  "source_process_observation": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-startup-offline-fix-20261023/native-initialization-observation-20261023/initialization-result.json",
+  "source_process_observation_sha256": "79cc3ad7492f01ca1445d7c428930ea23ba9ee6d5ea3c13c89532d95c088e989",
+  "observed_sdk_executable": {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk-darwin-arm64/claude",
+    "sha256": "7b39c1588df919d001dea3ffd5651adb682f2451b5a0e18d42d4233296b53cc7",
+    "provenance": "owned-group process observation; not inferred from PATH claude"
+  },
+  "package": {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk-darwin-arm64/package.json",
+    "name": "@anthropic-ai/claude-agent-sdk-darwin-arm64",
+    "version": "0.3.232",
+    "sha256": "602cab4d9911ecea925e7066a94d3742ce38f4a1bab392a40b99cb2e6b5ea791"
+  },
+  "interpretation": "Prior diagnostic actually observed this child; current byte baseline only, not proof of selection/GLM compatibility in a future execution",
+  "personal_claude_on_PATH_is_not_substitute": true,
+  "future_native_initialization_performed": false
+}

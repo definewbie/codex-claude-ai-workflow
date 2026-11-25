@@ -1,0 +1,44 @@
+[
+  {
+    "record_id": "01a1294c-d0dc-7711-b5ff-74b18d96e7d2",
+    "source": "/Users/kriswang/.acpx/sessions/01a1294c-d0dc-7711-b5ff-74b18d96e7d2.json",
+    "saved_ref": "native-evidence/01a1294c-d0dc-7711-b5ff-74b18d96e7d2.json",
+    "sha256": "905a3059c25b5c8c55fbbebfa1e444ef537fc02b0b130b51d4b29d1ed1011ae1",
+    "scope": "current observed prefix, session may remain open for legal continuation"
+  },
+  {
+    "record_id": "01a1294c-d0dc-7711-b5ff-74b18d96e7d2",
+    "source": "/Users/kriswang/.acpx/sessions/01a1294c-d0dc-7711-b5ff-74b18d96e7d2.stream.ndjson",
+    "saved_ref": "native-evidence/01a1294c-d0dc-7711-b5ff-74b18d96e7d2.stream.ndjson",
+    "sha256": "029ba1fe80ca259845ccd4211363b1ac0c0b6cc56bf7c11f7837785a65b6a2e8",
+    "scope": "current observed prefix, session may remain open for legal continuation"
+  },
+  {
+    "record_id": "25354bf6-942a-464e-a046-4178013baebd",
+    "source": "/Users/kriswang/.acpx/sessions/25354bf6-942a-464e-a046-4178013baebd.json",
+    "saved_ref": "native-evidence/25354bf6-942a-464e-a046-4178013baebd.json",
+    "sha256": "86686500caac8c55ca3501ee0d1f90ba64112f46fb199d7864bde7b7eb0c33d7",
+    "scope": "current observed prefix, session may remain open for legal continuation"
+  },
+  {
+    "record_id": "25354bf6-942a-464e-a046-4178013baebd",
+    "source": "/Users/kriswang/.acpx/sessions/25354bf6-942a-464e-a046-4178013baebd.stream.ndjson",
+    "saved_ref": "native-evidence/25354bf6-942a-464e-a046-4178013baebd.stream.ndjson",
+    "sha256": "cc6dc773b3432680cb73eee23b1061a2f2d20b0f473690e5a65c901cca8b33ec",
+    "scope": "current observed prefix, session may remain open for legal continuation"
+  },
+  {
+    "record_id": "bc943490-00c4-466e-ae58-8e9054ca69c7",
+    "source": "/Users/kriswang/.acpx/sessions/bc943490-00c4-466e-ae58-8e9054ca69c7.json",
+    "saved_ref": "native-evidence/bc943490-00c4-466e-ae58-8e9054ca69c7.json",
+    "sha256": "2d3f5eb7cc42910f5bd998b6a33032f2f51689b6417495b4dce96d8006ccf052",
+    "scope": "current observed prefix, session may remain open for legal continuation"
+  },
+  {
+    "record_id": "bc943490-00c4-466e-ae58-8e9054ca69c7",
+    "source": "/Users/kriswang/.acpx/sessions/bc943490-00c4-466e-ae58-8e9054ca69c7.stream.ndjson",
+    "saved_ref": "native-evidence/bc943490-00c4-466e-ae58-8e9054ca69c7.stream.ndjson",
+    "sha256": "b4fb4972c98c5678865f695664895b41ec404b119a8f56557ab34bfc0a22981a",
+    "scope": "current observed prefix, session may remain open for legal continuation"
+  }
+]

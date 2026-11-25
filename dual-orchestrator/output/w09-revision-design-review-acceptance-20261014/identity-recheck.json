@@ -1,0 +1,26 @@
+{
+  "historical_materials": [
+    {
+      "bundle": "w09-revision-wiring-design-20261014",
+      "entries": 15,
+      "changes": []
+    },
+    {
+      "bundle": "w09-fresh-fifth-gate-20261011",
+      "entries": 326,
+      "changes": []
+    },
+    {
+      "bundle": "w09-current-transcript-forward-fix-20261011",
+      "entries": 398,
+      "changes": []
+    }
+  ],
+  "frozen_source_inputs": 656,
+  "source_changes": [],
+  "tests_this_receipt": 0,
+  "native_provider_calls": 0,
+  "implementation_started": false,
+  "sixth_started": false,
+  "review_source": "Human supplied CC review in current conversation; no new independent reviewer invoked"
+}

@@ -1,0 +1,294 @@
+dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/intake-claude-brainstorm.md
+10: Use the orchestrator-provided seed, tracked-path inventory, memory, contract scope, and context recommendations to clarify the user request before implementation. This intake stage permits targeted Read/Grep/Glob discovery inside the effective workspace so the contract can be grounded in repository facts. Start from the projected repo map, inspect only the files needed to determine exact scope and acceptance semantics, and do not start an open-ended repository survey. Terminal, Bash, execute, write, edit, and file creation remain prohibited. When the tracked inventory is non-empty, `evidence_refs` must include at least one existing repository file that supports the proposed scope; additional durable evidence references remain allowed. Do not return `READY_FOR_PRODUCT_REVIEW` from filenames or requirement prose alone. If evidence remains insufficient, preserve the uncertainty in supported fields for reviewer/human judgment; do not end with a prose-only "I need to inspect the repo" message.
+11: 
+12: If the context package includes a previous Codex review, Must Fix list, or revision request, treat it as mandatory feedback for this intake revision. Explicitly address each Must Fix in the updated artifact instead of repeating the previous draft.
+13: 
+14: Revision convergence policy:
+15: 
+16: - Must Fix feedback is stronger than the previous draft. The revised proposal must change the contract enough that each Must Fix is satisfied by construction.
+17: - Do not move an already-specified user constraint into `open_questions`. If the user request or Codex Must Fix already states the rule, encode the rule directly into `acceptance_criteria`, `constraints`, and `test_requirements`.
+18: - Before returning `READY_FOR_PRODUCT_REVIEW`, account for every explicit user objective, allowed/excluded file, behavior constraint, acceptance criterion, and verification requirement in a binding proposal field: `objective`, `scope`, `acceptance_criteria`, `test_requirements`, `constraints`, or `non_goals`. A requirement mentioned only in `risk_areas`, `open_questions`, or `evidence_refs` is not preserved.
+19: - For an initial proposal over a non-empty tracked inventory, include at least one `evidence_refs` entry from the projected repo map. Evidence references support scope reasoning but never authorize edits by themselves.
+20: - Do not copy the current node's `AgentResultEnvelope`, JSON-only output, or workflow-routing protocol into the task proposal. Those are enforced independently by the orchestrator's Output Contract and are not product or implementation requirements.
+21: - Preserve the user's semantic boundary exactly. Do not broaden or narrow behavior based on language-specific edge cases, inferred product preferences, or a conservative implementation choice that the user did not request.
+22: - Treat intake file entries as proposals, not authorization. GOAL approval confirms the objective, acceptance and exclusions; exact implementation files and operations are approved in EXECUTION after design and plan review. Keep any proposed paths canonical and evidence-grounded. The approved EXECUTION `scope.included` is the exhaustive authorization set; it does not require every declared path to be changed. Do not use acceptance criteria, constraints, risks, or other prose to authorize undeclared paths. When a revision obligation identifies a scope gap, use only the exact typed scope-addition field rendered by the Output Contract and map the obligation to one or more genuinely relevant clause IDs.
+23: - Use `open_questions` only for real product ambiguity that cannot be resolved from the user request, repository evidence, or prior Codex feedback.
+24: - If an implementation tradeoff does not change user-visible semantics, choose the simplest compliant implementation and record material risk in `risk_areas`. If it would change the accepted input, output, scope, or observable behavior, preserve the literal user requirement and record the unresolved choice without turning it into a constraint or test.
+25: - When revising after a Codex Must Fix, include at least one acceptance criterion or test requirement for each Must Fix. Do not claim readiness while leaving a Must Fix as a future human decision.
+26: 
+27: Ledger write policy:
+28: 
+29: - Do not create, edit, or delete files under .agent/.
+30: - Only the orchestrator writes run ledger artifacts.
+31: - Return your artifact in stdout using the contract below.
+32: - Even when repository evidence is insufficient, the final assistant message must be the required strict JSON result. A prose-only response is a contract failure.
+
+dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalValidator.java
+123:     List<String> validateEvidenceTraceability(
+124:             TaskContractProposal proposal,
+125:             Path workspaceRoot,
+126:             RepositoryFactBinding.Verified repositoryFactBinding
+127:     ) {
+128:         var errors = new ArrayList<String>();
+129:         if (repositoryFactBinding == null) {
+130:             return List.of("tracked inventory occurrence binding is required before task contract proposal validation");
+131:         }
+132:         var repoMapArtifact = repositoryFactBinding.document().artifacts().get("repoMap");
+133:         if (repoMapArtifact == null) {
+134:             return List.of("tracked inventory occurrence binding has no repoMap artifact");
+135:         }
+136:         var repoMapPath = workspaceRoot.toAbsolutePath().normalize().resolve(repoMapArtifact.ref()).normalize();
+137:         if (!Files.isRegularFile(repoMapPath)) {
+138:             return List.of("tracked inventory is required before task contract proposal validation");
+139:         }
+140:         final Map<String, Object> repoMap;
+141:         try {
+142:             repoMap = OBJECT_MAPPER.readValue(repoMapPath.toFile(), MAP_TYPE);
+143:         } catch (IOException failure) {
+144:             return List.of("tracked inventory cannot be read: " + failure.getMessage());
+145:         }
+146:         if ("git_tracked_inventory".equals(String.valueOf(repoMap.get("source")))) {
+147:             try {
+148:                 var current = GitTrackedPathInventory.capture(workspaceRoot);
+149:                 var expectedHead = repositoryFactBinding.document().inventoryHead();
+150:                 var expectedSha = repositoryFactBinding.document().inventorySha256();
+151:                 var expectedCount = repositoryFactBinding.document().inventoryPathCount();
+152:                 if (!current.head().equals(expectedHead)
+153:                         || !current.sha256().equals(expectedSha)
+154:                         || current.paths().size() != expectedCount) {
+155:                     errors.add("tracked inventory identity changed after context projection");
+156:                 }
+157:             } catch (IOException failure) {
+158:                 errors.add("tracked inventory identity cannot be revalidated: " + failure.getMessage());
+159:             }
+160:         }
+161:         var inventoryPaths = new LinkedHashSet<String>();
+162:         if (repoMap.get("files") instanceof List<?> files) {
+163:             for (var item : files) {
+164:                 if (item instanceof Map<?, ?> file) {
+165:                     var value = file.get("path");
+166:                     var path = value == null ? "" : String.valueOf(value).trim();
+167:                     if (!path.isBlank()) {
+168:                         inventoryPaths.add(path);
+169:                     }
+170:                 }
+171:             }
+172:         }
+173:         var evidenceRefs = proposal.evidenceRefs() == null ? List.<String>of() : proposal.evidenceRefs();
+174:         var tracedRepositoryFact = false;
+175:         for (var evidenceRef : evidenceRefs) {
+176:             if (isBlank(evidenceRef)) {
+177:                 continue;
+178:             }
+179:             var ref = evidenceRef.trim();
+180:             if (!TaskContractValidator.isCanonicalPath(ref)) {
+181:                 errors.add("evidence_refs contains a non-canonical path: " + ref);
+182:             } else if (inventoryPaths.contains(ref) && !Files.isRegularFile(workspaceRoot.resolve(ref).normalize())) {
+183:                 errors.add("evidence_refs does not resolve to an existing file: " + ref);
+184:             } else if (inventoryPaths.contains(ref)) {
+185:                 tracedRepositoryFact = true;
+186:             }
+187:         }
+188:         if (!inventoryPaths.isEmpty() && !tracedRepositoryFact) {
+189:             errors.add("evidence_refs requires at least one fact from the tracked inventory");
+190:         }
+191:         return List.copyOf(errors);
+
+dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java
+236:     public static boolean isCanonicalPath(String value) {
+237:         if (value == null || value.isBlank()) {
+238:             return false;
+239:         }
+240:         if (value.indexOf('\0') >= 0 || value.contains("\\")) {
+241:             return false;
+242:         }
+243:         if (value.trim().length() != value.length()) {
+244:             return false;
+245:         }
+246:         if (value.endsWith("/") || value.matches("^[A-Za-z]:/.*")) {
+247:             return false;
+248:         }
+249:         try {
+250:             var path = Path.of(value);
+251:             if (path.isAbsolute()) {
+252:                 return false;
+253:             }
+254:             for (var segment : path) {
+255:                 var name = segment.toString();
+256:                 if ("..".equals(name) || ".".equals(name)
+257:                         || ".agent".equals(name) || ".git".equals(name)) {
+258:                     return false;
+259:                 }
+260:             }
+261:             var canonical = new StringJoiner("/");
+262:             for (var segment : path.normalize()) {
+263:                 canonical.add(segment.toString());
+264:             }
+265:             return path.getNameCount() > 0 && canonical.toString().equals(value);
+
+dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
+298:         var evidenceErrors = proposalValidator.validateEvidenceTraceability(
+299:                 proposal, root, repositoryFactBinding.verified());
+300:         if (!evidenceErrors.isEmpty()) {
+301:             return ProposalResolution.failure(ContractViolation.of(
+302:                     "TASK_CONTRACT_EVIDENCE_TRACEABILITY_INVALID",
+303:                     "task_contract_proposal is not grounded in the tracked inventory",
+304:                     Map.of("errors", evidenceErrors)));
+
+dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+408:                 var acquisition = resultAcquirer.acquire(
+409:                         agent,
+410:                         request,
+411:                         correctionRequest,
+412:                         agentResultContract,
+413:                         context.workstreamId(),
+414:                         runId,
+415:                         ContractRegistry.hasContract(context.definition().id())
+416:                                 ? ContractRegistry.forNode(context.definition().id())
+417:                                 : null,
+418:                         authored == null ? List.of() : authored.obligations().stream()
+419:                                 .map(dev.dual.runtime.handler.AuthoredExecutionContext.Obligation::id).toList()
+420:                 );
+421:                 var finalResult = acquisition.finalResult();
+422:                 var runTimeline = new ArrayList<>(acquisition.executionTimeline());
+423:                 runTimeline.addAll(commandEvents);
+424:                 runTimeline.sort(java.util.Comparator.comparing(AcpxExecutionEvent::observedAt));
+425:                 var initialUsage = usageFor(agent, acquisition.initialResult(), promptPath, stderrPath);
+426:                 var correctionUsage = acquisition.correctionAttempted()
+427:                         ? usageFor(agent, acquisition.correctionResult(), correctionPromptPath, correctionStderrPath)
+428:                         : null;
+429:                 var usage = acquisition.correctionAttempted()
+430:                         ? AcpxUsage.aggregatePromptOccurrences(initialUsage, correctionUsage)
+431:                         : initialUsage;
+
+dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java
+137:     private Optional<AcpxUsage> readMatchingUsageWithRetry(
+138:             Path streamPath,
+139:             String promptText,
+140:             AcpxProviderMetadata metadata
+141:     ) throws IOException {
+142:         for (var attempt = 0; attempt < retryAttempts; attempt++) {
+143:             var match = readMatchingUsage(streamPath, promptText);
+144:             if (match.hasProviderUsage() || attempt == retryAttempts - 1) {
+145:                 var best = match.best();
+146:                 return best == null ? Optional.empty() : Optional.of(best.withProviderMetadata(metadata));
+147:             }
+148:             sleepBeforeRetry();
+149:         }
+150:         return Optional.empty();
+151:     }
+152: 
+153:     /**
+154:      * 一次扫描 stream 的结果。三档按优先级取：精确 provider &gt; 最近 provider &gt; 会话快照。
+155:      * 包级可见以便单测直接验证归因/优先级，而不依赖重试时序。
+156:      */
+157:     record Match(AcpxUsage exact, AcpxUsage latest, AcpxUsage snapshot) {
+158:         boolean hasProviderUsage() {
+159:             return exact != null || latest != null;
+160:         }
+161: 
+162:         AcpxUsage best() {
+163:             return exact != null ? exact : latest != null ? latest : snapshot;
+164:         }
+
+dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java
+185:             if (isPrompt(wire)) {
+186:                 var firstPrompt = latestPromptRequestId == null;
+187:                 latestPromptRequestId = wire.requestId();
+188:                 latestPromptStartingCost = startingCostForPrompt(costAmount, firstPrompt);
+189:                 if (matchedRequestId == null && isMatchingPrompt(wire, promptText)) {
+190:                     matchedRequestId = latestPromptRequestId;
+191:                     matchedPromptStartingCost = latestPromptStartingCost;
+192:                 }
+193:                 continue;
+194:             }
+195:             if (isUsageUpdate(wire)) {
+196:                 var update = wire.notification().usageUpdate();
+197:                 if (update.costAmount() != null) {
+198:                     costAmount = update.costAmount();
+199:                     costCurrency = update.costCurrency();
+200:                 }
+201:                 var used = update.used();
+202:                 if (used > 0) {
+203:                     usageUpdateFallback = new AcpxUsage(
+204:                             0,
+205:                             0,
+206:                             0,
+207:                             0,
+208:                             0,
+209:                             null,
+210:                             "",
+211:                             "acpx_usage_update",
+212:                             AcpxUsage.SESSION_USED_SNAPSHOT,
+213:                             AcpxUsage.ATTR_SESSION_USAGE_UPDATE,
+214:                             true,
+215:                             used,
+216:                             costAmount,
+217:                             costCurrency,
+218:                             "",
+219:                             "",
+220:                             "",
+221:                             "",
+222:                             ""
+223:                     );
+224:                 }
+225:             }
+226:             if (wire.kind() == AcpxStreamWireLine.Kind.JSONRPC_OK
+227:                     && wire.result() != null
+228:                     && wire.result().usage() != null) {
+229:                 var requestId = wire.requestId();
+230:                 if (matchedRequestId != null && matchedRequestId.equals(requestId)) {
+231:                     exactUsage = usageFrom(
+232:                             wire.result().usage(),
+233:                             matchedPromptStartingCost,
+234:                             costAmount,
+235:                             costCurrency,
+236:                             AcpxUsage.ATTR_EXACT_PROMPT_MATCH
+237:                     );
+238:                 }
+239:                 if (latestPromptRequestId != null && latestPromptRequestId.equals(requestId)) {
+240:                     fallbackUsage = usageFrom(
+241:                             wire.result().usage(),
+242:                             latestPromptStartingCost,
+243:                             costAmount,
+244:                             costCurrency,
+245:                             AcpxUsage.ATTR_LATEST_PROMPT_IN_SESSION
+246:                     );
+247:                 }
+248:             }
+249:         }
+250:         return new Match(exactUsage, fallbackUsage, usageUpdateFallback);
+
+dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java
+265:     private boolean isMatchingPrompt(AcpxStreamWireLine wire, String promptText) {
+266:         return isPrompt(wire)
+267:                 && wire.request() != null
+268:                 && promptText.equals(wire.request().promptText());
+
+.tools/acpx-e1/source/src/prompt-content.ts
+282: export function parsePromptSource(source: string): PromptInput {
+283:   const trimmed = source.trim();
+284:   const structured = parseStructuredPrompt(trimmed);
+285:   if (structured) {
+286:     return structured;
+287:   }
+288:   if (!trimmed) {
+289:     return [];
+290:   }
+291:   return textPrompt(trimmed);
+
+.tools/acpx-e1/source/src/cli/command-handlers.ts
+127: async function readPromptFromFile(
+128:   filePath: string,
+129:   cwd: string,
+130:   promptParts: string[],
+131: ): Promise<import("../types.js").PromptInput> {
+132:   const source =
+133:     filePath === "-"
+134:       ? await readPromptInputFromStdin()
+135:       : await fs.readFile(path.resolve(cwd, filePath), "utf8");
+136:   const prompt = mergePromptSourceWithText(source, promptParts.join(" "));
+137:   if (prompt.length === 0) {
+138:     throw new InvalidArgumentError("Prompt from --file is empty");
+139:   }
+140:   return prompt;

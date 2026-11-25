@@ -1,0 +1,36 @@
+--- before/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -464,6 +464,12 @@
+ 
+ 必须澄清设计冻结与产品验收的次序：实现前需要原生可行性证据、明确的字段/owner/消费者/写序/拒绝出口及可执行测试设计；尚未存在的 adapter 回执、session 恢复传播和整链反证，需要在获准实现后以真实代码证明，未通过前不得关闭 W03/W05/W08 或开真实 E2E。不是把已有验收义务撤回，而是避免“禁止实现但要求实现链已通过”的循环前置。该澄清与主清单 §9 的批次组织属于作者本轮建议，须纳入既有冻结版独立复审；不据此自动解除 §13 任一缺口或用户开工授权。
+ 
++### 8.13 2026-09-29 补测前置进展
++
++用户已要求进入可行性验证下一步。本轮完成 [首错止损修正与离线核验](../../output/d04-feasibility-followup-20260929/result.md)：新诊断副本与实际 SDK 消费共用 guard，18 项序列通过，旧认证事件在首次 api_retry 即关闭消费；正常读取不误杀。原脚本/证据不改，未修改产品/adapter。
++
++本地 auth status 仍仅显示已登录，服务端有效性未证明；已询问用户是否恢复原认证，回复前不重复模型请求、不自行改凭据。新 [单次补测 Gate](../../output/d04-feasibility-followup-20260929/verification-gate.md)及无确认即拒绝的启动检查已准备；本轮模型调用为 0。D04 保持 DESIGN GAP，既有九项设计冻结不变；之后须以可行性证据交 CC 独立判断，不以这次离线 PASS 或“进入下一步”自动获得实施授权。
++
+ ## 9. D09：交付外部窗口与处置
+ 
+ 复用 DeliveryMergePlan 四状态；新增操作意图与观察字段，不新建交付状态机。建议 `apply_intent` 包含 operation id、candidate/ref/SHA、批准引用、canonical target Git identity、base/index/worktree 基准、expected tree；`observation` 保存检查到的 HEAD/index/worktree/commit 引用与检查时点。恢复的“已知/不明”由这些事实派生，failureCode 可显示未知，不能仅凭 status=FAILED 再 apply。
+--- before/20260927-dual-lifecycle-worklist.zh-CN.md
++++ dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -337,3 +337,7 @@
+ CC PASS，D01/D02/D03/D05–D10 依详细设计 §13/§15.1 和 [两项 LOW 补记](../../output/freeze-review-20260928-r2/review-disposition.md)记为 DESIGN_FROZEN。D08 明确删除隐式内核默认，包含内部便捷构造/读会话与测试兄弟路径；D02 的第二条非必需判定通道须使用执行批准可见、SHA 绑定的合同声明。补记由作者核验，未另经独立复审。
+ 
+ W01–W09 未因设计冻结而 Verified/Promoted，E02 等实施义务保持。D04 仍有原生可行性缺口，不只缺认证；全案未 Implementation Ready。接下来仍按既定路径处理 D04，之后完成整版实施范围及既有改动对账，并取得用户实施授权。此次不启动补测、不修改产品、不调用 CC；旧证据与受审包保持。
++
++### 9.6 D04 下一步已进入，认证前置待确认（2026-09-29）
++
++用户要求进入可行性补测；[本轮报告](../../output/d04-feasibility-followup-20260929/result.md)记录共享首错消费者 18 项离线序列通过、语法/dry-run/缺确认拒绝通过。本机 loggedIn=true 不代表服务端已接受，恢复认证的确认仍待用户回复，因此本轮未发模型请求。旧证据不改，产品工作项未完成，九项设计冻结与 D04 DESIGN GAP 状态维持；后续证据齐备才交 CC 冻结复审及实施范围对账，不自动实施。
+--- before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -1,6 +1,8 @@
+ # __ACTIVE__ Real-Case-Driven Orchestrator Simplification
+ 
+ ## 当前入口：2026-09-28 生命周期详细设计候选
++
++2026-09-29 进展：用户已要求进入 D04 可行性补测。新探针的首次错误停止已有 18 项离线序列证明，详见 [报告](../../output/d04-feasibility-followup-20260929/result.md)。Claude 本地仍显示已登录，但不能据此证明服务端认证恢复；已请求用户确认，尚未发模型任务，也未开始产品实现。后续仍需原生能力证据和 CC 冻结复审。
+ 
+ 当前状态：用户带回冻结候选 CC PASS；两项 LOW 已吸收，D01/D02/D03/D05–D10 九项设计冻结，D04 技术阻塞。详设 §13/§15.1、主清单 §9.5 与 [处置补记](../../output/freeze-review-20260928-r2/review-disposition.md)同步。修订固定了显式内核注入及执行合同中可审计的非必需声明；增量由作者核验，未另经 CC 复审。D04 仍缺 Claude 原生必要读取/限制、工具宿主、额外配置/读取与 scratch 上限证据，不是只差登录。全案未具备实施条件，未取得实施授权；本次无 provider/agent、产品改动或历史恢复。原冻结包与旧证据保留，以下为历史进展，不能覆盖本段当前状态。
+ 

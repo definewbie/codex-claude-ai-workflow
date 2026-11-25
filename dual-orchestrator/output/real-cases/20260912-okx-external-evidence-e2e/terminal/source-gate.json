@@ -1,0 +1,17 @@
+{
+  "schemaVersion" : 1,
+  "gateId" : "gate-node-gate-human_design_approval-035",
+  "nodeInstanceId" : "node-gate-human_design_approval-035",
+  "gateType" : "human.review",
+  "status" : "resolved",
+  "allowedActions" : [ "approve", "revise" ],
+  "openedAt" : "2026-09-12T00:00:41.338587Z",
+  "resolvedAt" : "2026-09-12T00:01:58.250881Z",
+  "result" : {
+    "subject_input_refs" : [ ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171190662/outputs/design-codex-review.stderr.log", ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171190662/outputs/design-codex-review.transcript.log", ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171190662/outputs/design-codex-review.json", ".agent/workstreams/ws-20260911T231749Z-GCTW/artifacts/context-governance/occurrences/node-design-codex_arch_review-033-run-1789171190662/binding.json", ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171190662/outputs/design-codex-review.contract.json" ],
+    "source_outcome" : "NEEDS_REVISION",
+    "source_node_instance_id" : "node-design-decision-034",
+    "human_action" : "revise",
+    "note" : "接受本轮仅两项Must Fix，其余已闭合项全部保持，不扩张合同或37项路径。AR-2直接采用非阻塞减法：删CountDownLatch/awaitStartupReady；所有syncOnce入口发现startupReady=false或enabled=false立即返回。启动转换成功提交后发布ready，再由启动入口显式执行首次回填；启动转换失败使启动失败且ready始终false，不保留等待线程。测试在转换尚未完成/最终失败时调用定时与手动入口，断言及时返回、零HTTP、无阻塞线程。AR-1a保留beforeCommit仅作为提交前异常测试，不再冒充底层COMMIT失败；另在现有测试文件内对实际连接commit调用注入可确定未提交的SQLException，核对当前Spring事务管理器回滚配置和真实清理顺序，确保先rollback/归还连接后才独立markFailure，单连接池仍可用、该轮行情/成功标记未写入、历史成功保留。只采用标准事务管理器与配置，不新增事务框架或文件；测试结论不得外推到已提交后丢失确认等未测故障。checks/evidence/planned_files/revision_responses全文同步，不重复设计其他事项。"
+  }
+}

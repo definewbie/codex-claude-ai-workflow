@@ -1,0 +1,15 @@
+{
+  "checkType": "documents_and_source_identity_only",
+  "result": "PASS",
+  "sourceEntriesChecked": 28,
+  "protectedSourceAndHistoricalEvidenceUnchanged": 735,
+  "sdRowsUnchanged": 7,
+  "localLinksValid": true,
+  "nativeRuns": 0,
+  "providerCalls": 0,
+  "productCodeChanges": 0,
+  "behaviorTestsRun": 0,
+  "extraAgents": 0,
+  "d04State": "DESIGN_GAP_AWAITING_AFFECTED_REVIEW",
+  "boundarySelfReview": "WARN: candidate wiring and cross-owner decision/send semantics not independently frozen"
+}

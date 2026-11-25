@@ -63,13 +63,22 @@ public final class AgentResultPromptContract {
                             verificationRemediationAllowedValues(exampleResult),
                             rereadReasonInstruction(nodeId),
                             verificationRemediationInstruction(nodeId, exampleResult) + acceptanceClassificationInstruction(exampleResult),
-                            contractRevisionInstruction(nodeId, proposalContext) + authoredRevisionInstruction(exampleResult)
-                                    + selfTestInstruction(exampleResult),
+                            evidenceReferenceInstruction(nodeId) + contractRevisionInstruction(nodeId, proposalContext) + authoredRevisionInstruction(exampleResult)
+                                    + selfTestInstruction(exampleResult) + verificationInstruction(exampleResult),
                             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
                     ).stripTrailing();
         } catch (Exception failure) {
             throw new IllegalStateException("failed to render AgentResultEnvelope prompt contract", failure);
         }
+    }
+
+    private static String evidenceReferenceInstruction(String nodeId) {
+        if (!nodeId.startsWith("intake.")) return "";
+        return "evidence_refs are canonical product-tree file paths, not program artifact references. "
+                + "An empty tracked-path inventory permits evidence_refs=[]; do not create files to populate it. "
+                + "For a non-empty inventory include at least one existing tracked product file supported by its repo-map fact. "
+                + "Never copy .agent/ or .git/ references into evidence_refs or evidence_ref_additions. "
+                + "Program repo-map/binding/context materials are carried by RepositoryFactBinding; reading them does not make them product evidence. ";
     }
 
     private static String selfTestInstruction(AgentResultEnvelope.AgentResult result) {
@@ -81,6 +90,23 @@ public final class AgentResultPromptContract {
                 + "Do not invent code changes to resolve an environment or evidence-only blocker.";
     }
 
+    private static String verificationInstruction(AgentResultEnvelope.AgentResult result) {
+        if (result instanceof AgentResultEnvelope.PlanResult)
+            return "\n" + VerificationReadiness.PLAN_BINDING_INSTRUCTION
+                    + "Each verification_binding must explicitly set actual_exit_required (boolean) and expected_exit_code (integer or null). "
+                    + "Derive these from the approved acceptance requirements before execution; never weaken a required exit check. "
+                    + "expected_exit_code requires actual_exit_required=true. Operator declarations cannot supply measured process exits.";
+        if (!(result instanceof AgentResultEnvelope.SelfTestResult) && !(result instanceof AgentResultEnvelope.AcceptanceReviewResult)) return "";
+        return "\nSuccessful self-test/acceptance must have one verification_checks entry for each approved criterion. "
+                + "Each entry contains exactly criterion_id, assertion, execution_ref, tool_call_ids, material_refs. "
+                + "assertion describes what the actual result demonstrates. execution_ref is CURRENT for this execution's program observations, "
+                + "or an exact prior verification-observations.json reference supplied in context; operator evidence uses the bound submission manifest. "
+                + "tool_call_ids may select known call IDs; [] selects the complete observed result set, not zero required evidence. "
+                + "material_refs contains actual material references with ref and sha256 fields when used, or []. Never invent IDs, paths, hashes, outputs or exits. "
+                + "Native completion is not measured exit 0. Missing required evidence must remain incomplete/rejected; verification_checks may be [] for an incomplete result. "
+                + "A declaration or a tool status alone does not establish the criterion; inspect its actual input/output and any required report.";
+    }
+
     private static String authoredRevisionInstruction(AgentResultEnvelope.AgentResult result) {
         if (!(result instanceof AgentResultEnvelope.DesignResult) && !(result instanceof AgentResultEnvelope.PlanResult)) return "";
         return "\n`result.revision_responses` is required: return [] when there are no active authored obligations. "
@@ -90,7 +116,7 @@ public final class AgentResultPromptContract {
                 + "Use NOT_ADDRESSED when unresolved; ADDRESSED is a claim for review, not an approval or closure. "
                 + "Preserve all previously required behavior and the approved contract while making this revision."
                 + (result instanceof AgentResultEnvelope.PlanResult
-                    ? "\nedit_files must contain unique canonical paths within the approved TaskContract scope. "
+                    ? "\nedit_files must contain unique canonical proposed paths respecting the approved GOAL exclusions. Exact file operations require later EXECUTION approval. "
                         + CANONICAL_SCOPE_PATH_REQUIREMENT + "A subset is allowed; reference_files do not authorize edits. "
                     : "")
                 + closedItemFields("result.revision_responses", new AgentResultEnvelope.AuthoredRevisionResponse(
@@ -101,16 +127,18 @@ public final class AgentResultPromptContract {
     private static String contractRevisionInstruction(String nodeId, ProposalEmissionContext context) {
         if ("intake.claude_brainstorm".equals(nodeId)) {
             if (context.revision()) {
-                return "Return only `task_contract_revision_patch`; do not return or copy a full proposal. "
+                return (context.goalReproposalAllowed()
+                        ? "Use task_contract_revision_patch for ordinary changes. Before first GOAL approval only, an actual objective or scope.excluded change may use task_contract_proposal with base_proposal_id. Preserve scope.included/evidence_refs (retain or ADD), open_questions, all clause IDs/sections (ADD/REPLACE only); revision_responses must cover each obligation using actual relevant clause IDs. Full proposal without a goal/exclusion change is rejected. Full result shape: " + json(exampleResult(nodeId,"READY_FOR_PRODUCT_REVIEW",ProposalEmissionContext.initial())) + " Replace this illustrative content with the full revised baseline, set base_proposal_id to the exact current ID and supply all revision_responses. "
+                        : "Return only `task_contract_revision_patch`; do not return or copy a full proposal. ")
                         + "The patch is bound to base proposal id `" + context.baseProposalId()
-                        + "` and sha256 `" + context.baseProposalSha256() + "`. "
+                        + "`. Full content identity is fixed by Dual; never emit base_proposal_sha256. "
                         + "Cover each authoritative routed obligation exactly once. Preserve its id and implement its text: "
                         + json(context.obligations())
                         + (context.acceptanceEvidence().isEmpty() ? "" :
                             ". Original verified rework evidence (retain non-contract defects as evidence; "
                             + "do not reinterpret them as contract obligations or approval): "
                             + context.acceptanceEvidence())
-                        + ". Only clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
+                        + ". For task_contract_revision_patch only: clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
                         + "No DELETE, section move, scope removal, objective/open-question change, JSON Pointer, "
                         + "or arbitrary field patch is allowed. `scope_additions` uses exact repository-relative "
                         + "paths. " + CANONICAL_SCOPE_PATH_REQUIREMENT
@@ -127,9 +155,15 @@ public final class AgentResultPromptContract {
                                         AgentResultEnvelope.ClauseChangeOperation.REPLACE,
                                         AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
                                         "AC-1", "replacement text")),
-                                List.of(), List.of()));
+                                List.of(), List.of()))
+                        + (context.goalReproposalAllowed()
+                            ? closedItemFields("result.revision_responses",
+                                new AgentResultEnvelope.RevisionResponse("CO-1", List.of("AC-1")))
+                            : "");
             }
-            return "`result.scope.included` is the exhaustive authorization set for permitted repository changes; "
+            return "Intake `result.scope.included` contains candidate paths, not write authorization. "
+                    + "GOAL approval fixes objective, acceptance and exclusions; exact implementation scope is approved in EXECUTION after design and plan review. "
+                    + "Only approved EXECUTION `scope.included` is the exhaustive authorization set for permitted repository changes; "
                     + "each entry names one exact repository-relative path. " + CANONICAL_SCOPE_PATH_REQUIREMENT
                     + "Dual derives CREATE/MODIFY from the effective worktree. "
                     + "It does not require every declared path to be changed. Acceptance criteria, constraints, "
@@ -269,7 +303,6 @@ public final class AgentResultPromptContract {
                     decision,
                     "one short sentence",
                     proposalContext.baseProposalId(),
-                    proposalContext.baseProposalSha256(),
                     List.of(new AgentResultEnvelope.ObligationPatch(
                             proposalContext.obligations().isEmpty()
                                     ? "CO-1" : proposalContext.obligations().getFirst().id(),
@@ -311,7 +344,7 @@ public final class AgentResultPromptContract {
                     List.of(), List.of(), List.of(), "Design only; no implementation performed.",
                     new AgentResultEnvelope.Design(List.of(new AgentResultEnvelope.PlannedFile(
                             "repo/relative/new.ext", dev.dual.core.contract.TaskContract.ScopeOperation.CREATE,
-                            "responsibility assigned within the approved scope"))), List.of());
+                            "proposed responsibility respecting the approved objective and exclusions"))), List.of());
             case "plan.claude_plan" -> new AgentResultEnvelope.PlanResult(
                     "plan_result",
                     decision,
@@ -335,7 +368,16 @@ public final class AgentResultPromptContract {
                             List.of("verification command or check"),
                             "rollback approach",
                             List.of("None identified."),
-                            List.of("review item")
+                            List.of("review item"),
+                            List.of(new dev.dual.core.contract.TaskContract.ScopeEntry("path/to/file.ext",
+                                    dev.dual.core.contract.TaskContract.ScopeOperation.MODIFY)),
+                            List.of(new dev.dual.core.contract.TaskContract.VerificationBinding(
+                                    "approved-criterion-id", "observable assertion and execution method",
+                                    dev.dual.core.contract.TaskContract.Executor.AGENT,
+                                    List.of(new dev.dual.core.contract.TaskContract.Reference("replace/with/actual-environment-ref", "0".repeat(64))),
+                                    List.of(), dev.dual.core.contract.TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS,
+                                    List.of(new dev.dual.core.contract.TaskContract.Reference("replace/with/actual-feasibility-ref", "0".repeat(64))),
+                                    "implement.claude_self_test_report", false, null)), List.of()
                     ), List.of()
             );
             case "implement.claude_self_test_report" -> new AgentResultEnvelope.SelfTestResult(
@@ -350,7 +392,7 @@ public final class AgentResultPromptContract {
                     List.of(),
                     List.of(),
                     "short verification adequacy summary"
-            );
+            , List.of());
             case "acceptance.codex_verifier_review" -> new AgentResultEnvelope.AcceptanceReviewResult(
                     "acceptance_review",
                     decision,
@@ -366,7 +408,7 @@ public final class AgentResultPromptContract {
                     List.of(),
                     "short verification adequacy summary",
                     emptyFailure()
-            );
+            , List.of());
             case "stage.claude_handoff" -> new AgentResultEnvelope.StageHandoffResult(
                     "stage_handoff",
                     decision,
@@ -434,7 +476,8 @@ public final class AgentResultPromptContract {
             String baseProposalId,
             String baseProposalSha256,
             List<AgentResultEnvelope.ReviewObligation> obligations,
-            String acceptanceEvidence
+            String acceptanceEvidence,
+            boolean goalReproposalAllowed
     ) {
         public ProposalEmissionContext {
             obligations = obligations == null ? List.of() : List.copyOf(obligations);
@@ -443,9 +486,15 @@ public final class AgentResultPromptContract {
 
         public ProposalEmissionContext(EmissionMode mode, String baseProposalId, String baseProposalSha256,
                                        List<AgentResultEnvelope.ReviewObligation> obligations) {
-            this(mode, baseProposalId, baseProposalSha256, obligations, "");
+            this(mode, baseProposalId, baseProposalSha256, obligations, "", false);
         }
 
+        public ProposalEmissionContext(EmissionMode mode,String id,String sha,List<AgentResultEnvelope.ReviewObligation> obligations,String evidence) {
+            this(mode,id,sha,obligations,evidence,false);
+        }
+        public ProposalEmissionContext withGoalReproposal(boolean allowed) {
+            return new ProposalEmissionContext(mode,baseProposalId,baseProposalSha256,obligations,acceptanceEvidence,allowed);
+        }
         public static ProposalEmissionContext initial() {
             return new ProposalEmissionContext(EmissionMode.INITIAL_FULL, "", "", List.of());
         }

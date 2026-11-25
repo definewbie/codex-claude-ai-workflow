@@ -1,0 +1,48 @@
+test_cold_consumers_reuse_fixed_fact_but_refuse_tampered_bytes (test_process_check.HistoricalAbsenceTest.test_cold_consumers_reuse_fixed_fact_but_refuse_tampered_bytes) ... ok
+test_confirmed_history_is_not_a_current_absence_claim (test_process_check.HistoricalAbsenceTest.test_confirmed_history_is_not_a_current_absence_claim) ... ok
+test_empty_watchlist_is_not_a_synthetic_successful_read (test_process_check.HistoricalAbsenceTest.test_empty_watchlist_is_not_a_synthetic_successful_read) ... ok
+test_first_preparation_never_trusts_input_absence_assertion (test_process_check.HistoricalAbsenceTest.test_first_preparation_never_trusts_input_absence_assertion) ... ok
+test_invalid_history_cannot_silently_remove_a_target (test_process_check.HistoricalAbsenceTest.test_invalid_history_cannot_silently_remove_a_target) ... ok
+test_mixed_records_only_check_unresolved_targets (test_process_check.HistoricalAbsenceTest.test_mixed_records_only_check_unresolved_targets) ... ok
+test_preparation_preserves_successfully_observed_records (test_process_check.HistoricalAbsenceTest.test_preparation_preserves_successfully_observed_records) ... ok
+test_preparation_receipt_write_failures_prevent_fixture_creation (test_process_check.HistoricalAbsenceTest.test_preparation_receipt_write_failures_prevent_fixture_creation) ... 
+  test_preparation_receipt_write_failures_prevent_fixture_creation (test_process_check.HistoricalAbsenceTest.test_preparation_receipt_write_failures_prevent_fixture_creation) (write_failure=2) ... ERROR
+  test_preparation_receipt_write_failures_prevent_fixture_creation (test_process_check.HistoricalAbsenceTest.test_preparation_receipt_write_failures_prevent_fixture_creation) (write_failure=None) ... ERROR
+test_three_entrypoints_share_guard_and_frozen_check_precedes_it (test_process_check.HistoricalAbsenceTest.test_three_entrypoints_share_guard_and_frozen_check_precedes_it) ... ok
+test_unresolved_present_or_failed_observation_still_stops (test_process_check.HistoricalAbsenceTest.test_unresolved_present_or_failed_observation_still_stops) ... ok
+test_cold_cli_permission_failure_and_success (test_process_check.ProcessCheckTest.test_cold_cli_permission_failure_and_success) ... ok
+test_failures_never_become_absent (test_process_check.ProcessCheckTest.test_failures_never_become_absent) ... ok
+test_invalid_pid_rejected_before_command (test_process_check.ProcessCheckTest.test_invalid_pid_rejected_before_command) ... ok
+test_present_pid_including_reused_pid_is_rejected (test_process_check.ProcessCheckTest.test_present_pid_including_reused_pid_is_rejected) ... ok
+test_successful_complete_snapshot_proves_absence_only (test_process_check.ProcessCheckTest.test_successful_complete_snapshot_proves_absence_only) ... ok
+test_three_assembled_consumers_stop_before_following_action (test_process_check.ProcessCheckTest.test_three_assembled_consumers_stop_before_following_action) ... ok
+test_timeout_and_spawn_failure_are_unknown (test_process_check.ProcessCheckTest.test_timeout_and_spawn_failure_are_unknown) ... ok
+
+======================================================================
+ERROR: test_preparation_receipt_write_failures_prevent_fixture_creation (test_process_check.HistoricalAbsenceTest.test_preparation_receipt_write_failures_prevent_fixture_creation) (write_failure=2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-process-absence-forward-fix-20261023/candidate/test_process_check.py", line 217, in test_preparation_receipt_write_failures_prevent_fixture_creation
+    exec(compile(body, "prepare-offline.py", "exec"), context)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "prepare-offline.py", line 83, in <module>
+    write(OUT/'old-execution-recheck.json', dict(sessions=session_checks, known_pids=pid_checks,
+                                                          ^^^^^^^^^^^^^^
+NameError: name 'session_checks' is not defined
+
+======================================================================
+ERROR: test_preparation_receipt_write_failures_prevent_fixture_creation (test_process_check.HistoricalAbsenceTest.test_preparation_receipt_write_failures_prevent_fixture_creation) (write_failure=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-process-absence-forward-fix-20261023/candidate/test_process_check.py", line 219, in test_preparation_receipt_write_failures_prevent_fixture_creation
+    exec(compile(body, "prepare-offline.py", "exec"), context)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "prepare-offline.py", line 83, in <module>
+    write(OUT/'old-execution-recheck.json', dict(sessions=session_checks, known_pids=pid_checks,
+                                                          ^^^^^^^^^^^^^^
+NameError: name 'session_checks' is not defined
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.213s
+
+FAILED (errors=2)

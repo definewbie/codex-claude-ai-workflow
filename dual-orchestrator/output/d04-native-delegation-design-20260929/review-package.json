@@ -1,0 +1,20 @@
+{
+  "status": "DESIGN_REVISION_D04_NOT_FROZEN",
+  "files": {
+    "dual-orchestrator/output/d04-native-delegation-design-20260929/assessment.md": "96e25f36a15996fede93933d4b63daa9363ca19d33f893d2bee9e8a22c041b9a",
+    "dual-orchestrator/output/d04-native-delegation-design-20260929/baseline.json": "006fb68b9d29b818b374836f5f1bea6fbbbc69157a345060e00521af6f77603b",
+    "dual-orchestrator/output/d04-native-delegation-design-20260929/before/20260923-dual-lifecycle-reliability-design.zh-CN.md": "fece1a746d641f6dc69474ecfeb07490adbf66c8c8d2c0c5a923da4ec0d292b3",
+    "dual-orchestrator/output/d04-native-delegation-design-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md": "2c2642c05b65e42571772581cbf8f0b8a89aba1a3a170ed02ea91df44ad2007b",
+    "dual-orchestrator/output/d04-native-delegation-design-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md": "48d497d17da84a2acead88922c7a360ccbaa732fc9f176bd0699f859212b450b",
+    "dual-orchestrator/output/d04-native-delegation-design-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "2c00c393943e180cc37358cf4b8f988b200003a98ec166b82b02cf6227a525a1",
+    "dual-orchestrator/output/d04-native-delegation-design-20260929/cc-hook-review.txt": "790beb7552982acf2c8616d1e9b92851f429698b67a26cb36a29b19bfa521b0c",
+    "dual-orchestrator/output/d04-native-delegation-design-20260929/cc-review.txt": "e2fb91c949f540af6c730b29506ad7c611a92fc40ed91c4535ed7513f34e6483",
+    "dual-orchestrator/output/d04-native-delegation-design-20260929/documentation.diff": "19bf5c2c53e303243910e20f04e02a5f8a466233442fbfc08a6193708a3d2e17",
+    "dual-orchestrator/output/d04-native-delegation-design-20260929/material-verification.json": "b185a0c709fa22ebb46931227a5c25afe72ca51c5f6a80748f95726dedf85be4",
+    "dual-orchestrator/output/d04-native-delegation-design-20260929/prior-manifest-resolution.json": "7a7a7e5dc863766e9436b0339f25406f2f76fe3ecb80ab6d1a9b31eb3068aa1c",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "e3e4ea1ee27020efac06a4e0a277cbb80146a2564aa6d4fe43103c3994823dee",
+    "dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md": "25dc1d04db72b18f4de4e46ddba82ab5e66ac587ed2b721b50e526378fa03390",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "56a219cb848665ae06cc4792bea5d43be53cd20ab8105dd75e9a3bc95c330ecb",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "1ba8858eac0ab9337a8de19eccfc30f05e371091719c4791b45cac10fa2f3f07"
+  }
+}

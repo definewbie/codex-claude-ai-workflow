@@ -1,0 +1,17 @@
+{
+  "status": "NINE_DESIGNS_FROZEN_D04_BLOCKED_AUTHOR_LOW_AMENDMENTS",
+  "files": {
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "27326045e087bc105264af5284fb78459ad014c0708f19ab92a2ac27591904d3",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "1823ee1fcbc8002dea35542bd0c3b9ed20ccfd7487b12c5965de55e4af3faf54",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "ae329ebc9a89844e3b981aae9b7b738471d607e48785eab61e9abd4b85101ae1",
+    "dual-orchestrator/output/freeze-review-20260928-r2/baseline.json": "503dfdbbea9be2a85a57f16be893f67c81c4dff85faca9c90e1111ef0c9ed67f",
+    "dual-orchestrator/output/freeze-review-20260928-r2/before/20260927-dual-lifecycle-worklist.zh-CN.md": "d35e2e6dc3a31193c18b4056963c4220fd2792da8ae2a0938e7032f9ab8546ed",
+    "dual-orchestrator/output/freeze-review-20260928-r2/before/20260928-dual-lifecycle-detailed-design.zh-CN.md": "a303c71d4826a49f9130dc7a13fd1538c5063d07e414715d78da5b6acb961558",
+    "dual-orchestrator/output/freeze-review-20260928-r2/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "122617a6460d544cf2c277e9bd7e564c8facb46620cc182e92368a4267fb3cdc",
+    "dual-orchestrator/output/freeze-review-20260928-r2/cc-review.txt": "188f593ea6b7fc90a4a54712e2af72e0dcba1661beb519b8c1259b709eea763d",
+    "dual-orchestrator/output/freeze-review-20260928-r2/constructor-sweep.json": "ad6767f160963582ebe387f6e5369302ac87794dcad02f15d2bf6204265e0c38",
+    "dual-orchestrator/output/freeze-review-20260928-r2/documentation.diff": "a21777ca65923f0c4e2adc2997716c25a0280bc6d0905e588944de9b32617172",
+    "dual-orchestrator/output/freeze-review-20260928-r2/material-verification.json": "d6a0fea0a709dcdbb2774f8925044746e3d84eaad36f6648e719ca756c8a4295",
+    "dual-orchestrator/output/freeze-review-20260928-r2/review-disposition.md": "afb4e8676d40cd23704ff5c62fc4ae84a211abb3a2d7e40bdf7b38a21fb83f57"
+  }
+}

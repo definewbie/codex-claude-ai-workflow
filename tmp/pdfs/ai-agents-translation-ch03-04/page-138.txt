@@ -1,0 +1,14 @@
+ Figure 3-10. AB-MCTS-A tree structure with CONT and GEN nodes. Image adapted from Yuichi Inoue et al.
+                                                  (2025).
+
+Both AB-MCTS variants rely on Bayesian updating to guide the search. The LLM
+generates, evaluates, and refines responses iteratively, distributing its
+computational effort where it brings the greatest gain. This allows the model to
+reason adaptively: exploring when uncertain, exploiting when confident.
+
+To illustrate, the next example uses the open source TreeQuest library to refine
+Python code for the Fibonacci sequence. It shows how tree search balances
+breadth and depth to improve an LLM agent’s answer step-by-step.
+
+Example 3-15 creates the first candidate and scores it. It drafts a solution from
+scratch, calls the judge, and returns a State that MCTS can treat as a root child.

@@ -1,0 +1,10 @@
+{
+  "native_initialization_attempts": 1,
+  "prompt_commands": 0,
+  "cleanup_within_15_seconds": true,
+  "session_records": 1,
+  "stop_status": "ABSENT",
+  "finished_at": "2026-10-22T23:20:56.238632+00:00",
+  "seventh_not_resumed": true,
+  "eighth_not_started": true
+}

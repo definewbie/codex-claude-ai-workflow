@@ -279,6 +279,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         appendList(builder, "Acceptance Criteria", contract.get("acceptanceCriteria"));
         appendList(builder, "Test Requirements", contract.get("testRequirements"));
         appendList(builder, "Constraints", contract.get("constraints"));
+        appendList(builder, "Nonessential Operation Declarations", contract.get("nonessentialOperationDeclarations"));
         builder.append("\n");
     }
 
@@ -374,6 +375,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         summary.put("acceptanceCriteria", document.acceptanceCriteria());
         summary.put("testRequirements", document.testRequirements());
         summary.put("constraints", document.constraints());
+        summary.put("nonessentialOperationDeclarations", TaskContractArtifactWriter.nonessentialOperationDescriptions(document));
         summary.put("path", contractView.contractRef());
         summary.put("authority", contractView.authority());
         if (contractView.qualified()) {
@@ -407,7 +409,7 @@ public final class HumanReviewGateHandler implements GateHandler {
 
     private GateContractView contractView(GateContext context) throws java.io.IOException {
         if ("contract".equals(gatePurpose(context))) {
-            var candidate = new TaskContractRevisionContextResolver().contractGateCandidate(
+            var candidate = new TaskContractRevisionContextResolver(context.ledger()).contractGateCandidate(
                     context.workspaceRoot(), context.workstreamId(), context.instance().nodeInstanceId());
             return new GateContractView(candidate.contract(), candidate.resolutionDocument(),
                     candidate.contractRef(), candidate.resolutionRef(),
@@ -416,9 +418,9 @@ public final class HumanReviewGateHandler implements GateHandler {
                     false, "unapproved_candidate");
         }
         if (!requiresApprovedTaskContract(context)) {
-            return stableContractView(context, "legacy_unqualified_projection");
+            return new GateContractView(null, Map.of(), "", "", "", "", false, "unavailable");
         }
-        var resolved = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
+        var resolved = TaskContractProjectionVerifier.resolve(context.ledger(), context.workspaceRoot(), context.workstreamId(), TaskContractProjectionVerifier.requiredPhase(context.definition()));
         if (resolved.failure() != null || resolved.qualified().isEmpty()) {
             var failure = resolved.failure() == null
                     ? TaskContractProjectionVerifier.Failure.of(
@@ -439,32 +441,10 @@ public final class HumanReviewGateHandler implements GateHandler {
                 "qualified_approval");
     }
 
-    private GateContractView stableContractView(GateContext context, String authority) {
-        var legacy = TaskContractProjectionVerifier.readLegacyProjection(
-                context.workspaceRoot(), context.workstreamId()).projection();
-        if (legacy.isEmpty()) {
-            return new GateContractView(null, Map.of(), "", "", "", "", false, authority);
-        }
-        return new GateContractView(
-                legacy.get().contract(),
-                legacy.get().resolutionDocument(),
-                legacy.get().contractRef(),
-                legacy.get().resolutionRef(),
-                "",
-                "",
-                false,
-                authority);
-    }
+
 
     private boolean requiresApprovedTaskContract(GateContext context) {
-        var configured = context.definition().config().get("requires_approved_task_contract");
-        if (configured == null) {
-            return false;
-        }
-        if (!(configured instanceof Boolean required)) {
-            throw new IllegalArgumentException("requires_approved_task_contract must be a boolean");
-        }
-        return required;
+        return TaskContractProjectionVerifier.requiresContract(context.definition());
     }
 
     private List<String> resolvedQuestionTexts(Object value) {
@@ -487,9 +467,20 @@ public final class HumanReviewGateHandler implements GateHandler {
     private Map<String, Object> contractRevision(GateContext context) throws java.io.IOException {
         var purpose = text(context.definition().config().get("gate_purpose"));
         if (!"requirement".equals(purpose) && !"contract".equals(purpose)) return Map.of();
-        var resolver = new TaskContractRevisionContextResolver();
+        var resolver = new TaskContractRevisionContextResolver(context.ledger());
+        var iterationId = context.instance().iterationId();
+        if ("contract".equals(purpose)) {
+            // EXECUTION may follow a plan revision. Requirement obligations still belong to
+            // its approved GOAL, never to that technical revision's iteration.
+            var goal = TaskContractProjectionVerifier.resolve(context.ledger(), context.workspaceRoot(),
+                    context.workstreamId(), dev.dual.core.contract.TaskContract.Phase.GOAL);
+            if (goal.qualified().isEmpty()) throw new java.io.IOException("GOAL_CONTRACT_NOT_QUALIFIED");
+            var paths = new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot(),
+                    new dev.dual.core.id.DualId(context.workstreamId()));
+            iterationId = context.ledger().loadNode(paths, goal.qualified().orElseThrow().compileNodeInstanceId()).iterationId();
+        }
         var resolved = resolver.resolveForDisplayIteration(
-                context.workspaceRoot(), context.workstreamId(), context.instance().iterationId());
+                context.workspaceRoot(), context.workstreamId(), iterationId);
         if (!resolved.valid()) {
             throw new java.io.IOException("CONTRACT_REVISION_CONTEXT_INVALID: " + resolved.errors());
         }
@@ -501,7 +492,7 @@ public final class HumanReviewGateHandler implements GateHandler {
         } else {
             var candidates = new java.util.LinkedHashSet<TaskContractProposalReference>();
             for (var ref : context.instance().inputRefs()) {
-                AgentEvidenceIndex.validatedDocument(context.workspaceRoot(), context.workstreamId(), ref, objectMapper)
+                AgentEvidenceIndex.validatedDocument(context.ledger(), context.workspaceRoot(), context.workstreamId(), ref, objectMapper)
                         .filter(document -> "intake.codex_product_review".equals(document.nodeId()))
                         .map(AgentOutputContractDocument::reviewSubject)
                         .ifPresent(candidates::add);
@@ -511,16 +502,18 @@ public final class HumanReviewGateHandler implements GateHandler {
             }
             candidate = candidates.iterator().next();
         }
-        return ContextBuildPackageHandler.contractRevisionProjection(context.workspaceRoot(), context.workstreamId(),
-                context.instance().iterationId(), candidate);
+        return ContextBuildPackageHandler.contractRevisionProjection(context.ledger(), context.workspaceRoot(), context.workstreamId(),
+                iterationId, candidate);
     }
 
     private AuthoredStageLineageResolver.GateView authoredGate(GateContext context) {
         var purpose = String.valueOf(context.definition().config().getOrDefault("gate_purpose", ""));
         if (!purpose.equals("design") && !purpose.equals("plan")) return null;
         try {
-            return new AuthoredStageLineageResolver(context.workspaceRoot(), context.workstreamId(), Long.MAX_VALUE)
-                    .gateView(context.instance().nodeInstanceId());
+            var paths = new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot(), new dev.dual.core.id.DualId(context.workstreamId()));
+            return context.ledger().inspect(paths, (scoped, files) ->
+                    new AuthoredStageLineageResolver(scoped, context.workspaceRoot(), context.workstreamId(), Long.MAX_VALUE)
+                            .gateView(context.instance().nodeInstanceId()));
         } catch (java.io.IOException | IllegalArgumentException failure) {
             throw new IllegalStateException("AUTHORED_GATE_LINEAGE_INVALID: " + failure.getMessage(), failure);
         }
@@ -529,7 +522,7 @@ public final class HumanReviewGateHandler implements GateHandler {
     private AgentDecisionSummary latestAgentDecision(GateContext context, AuthoredStageLineageResolver.GateView authored) {
         if (authored != null) return AgentDecisionSummary.from(authored.decision(), authored.sidecarRef());
         var fromRefs = AgentEvidenceIndex.latestFromRefs(
-                        context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper)
+                        context.ledger(), context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper)
                 .map(entry -> agentDecisionFromSidecar(context, entry));
         if (fromRefs.isPresent() && !fromRefs.get().isEmpty()) {
             return fromRefs.get();
@@ -540,7 +533,7 @@ public final class HumanReviewGateHandler implements GateHandler {
     private Map<String, Object> latestReviewSubject(GateContext context, AuthoredStageLineageResolver.GateView authored) {
         if (authored != null) return authored.projection();
         return AgentEvidenceIndex.latestFromRefs(
-                        context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper)
+                        context.ledger(), context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper)
                 .map(entry -> entry.document().reviewSubject())
                 .filter(java.util.Objects::nonNull)
                 .map(TaskContractProposalReference::toMap)
@@ -710,7 +703,7 @@ public final class HumanReviewGateHandler implements GateHandler {
             String inputRef
     ) {
         var document = AgentEvidenceIndex.validatedDocument(
-                        context.workspaceRoot(), context.workstreamId(), inputRef, objectMapper)
+                        context.ledger(), context.workspaceRoot(), context.workstreamId(), inputRef, objectMapper)
                 .orElseThrow(() -> new IllegalStateException(
                         "routed human review sidecar is unavailable: " + inputRef));
         summary.put("decision", document.decision());

@@ -15,9 +15,20 @@ public record WorkflowCurrentDocument(
         List<String> activeNodeInstanceIds,
         List<String> openGateIds,
         String lastEventId,
-        Instant updatedAt
+        Instant updatedAt,
+        long commitSequence
 ) {
+    /** Domain writers propose state; the local commit protocol assigns the durable sequence. */
+    public WorkflowCurrentDocument(int schemaVersion, String workstreamId, String workflowInstanceId,
+                                   String workflowId, int definitionVersion, WorkflowStatus status,
+                                   List<String> activeNodeInstanceIds, List<String> openGateIds,
+                                   String lastEventId, Instant updatedAt) {
+        this(schemaVersion, workstreamId, workflowInstanceId, workflowId, definitionVersion, status,
+                activeNodeInstanceIds, openGateIds, lastEventId, updatedAt, 0);
+    }
+
     public WorkflowCurrentDocument {
+        if (commitSequence < 0) throw new IllegalArgumentException("negative commit sequence");
         if (schemaVersion <= 0) {
             throw new IllegalArgumentException("schemaVersion must be positive");
         }

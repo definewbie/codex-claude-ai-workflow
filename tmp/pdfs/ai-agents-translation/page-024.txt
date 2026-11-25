@@ -1,0 +1,5 @@
+difference between a lone contributor and a coordinated team maps directly
+onto the difference between a single agent and a multi-agent system (MAS).
+Just as a tech lead coordinates multiple contributors, a supervisor agent can
+orchestrate multiple specialized agents to collaborate on solving a complex
+goal.

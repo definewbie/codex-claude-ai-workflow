@@ -1,0 +1,39 @@
+{
+  "run_id": "run-1791636537680",
+  "record_id": "d1587a2b-1836-4d4d-aee2-b39a5762d344",
+  "session_id": "3feafcc2-1d0e-417a-9b69-c140582c8b1c",
+  "request_id": "3",
+  "stream_ref": "/Users/kriswang/.acpx/sessions/d1587a2b-1836-4d4d-aee2-b39a5762d344.stream.ndjson",
+  "stream_prefix_sha256": "83477e084a2cc4e8afa87eb52faad4c6fb13aab926875f1b4128a68dc1d41c40",
+  "native_result_usage": {
+    "inputTokens": 9813,
+    "outputTokens": 5913,
+    "cachedReadTokens": 4864,
+    "cachedWriteTokens": 0,
+    "totalTokens": 20590
+  },
+  "fixed_run_usage": {
+    "inputTokens": 9813,
+    "outputTokens": 5913,
+    "cachedReadTokens": 4864,
+    "cachedWriteTokens": 0,
+    "totalTokens": 20590,
+    "costAmount": 0.199322,
+    "costCurrency": "USD",
+    "source": "acpx_stream",
+    "measurementType": "PROVIDER_RUN_USAGE",
+    "attribution": "EXACT_REQUEST_MATCH",
+    "cumulative": false,
+    "contextUsedTokens": 0,
+    "sessionCostAmount": 0.199322,
+    "sessionCostCurrency": "USD",
+    "providerId": "zhipu",
+    "model": "glm-5.3",
+    "billingMode": "subscription_token_only",
+    "providerMetadataSource": "acpx_session_json",
+    "unavailableReason": ""
+  },
+  "empty_inventory_evidence_refs": [],
+  "correction_attempted": false,
+  "scope": "first real author request only; no Codex/acceptance/delivery proof"
+}

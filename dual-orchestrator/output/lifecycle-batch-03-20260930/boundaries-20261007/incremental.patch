@@ -1,0 +1,1540 @@
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+@@ -794,6 +794,7 @@
+         fact.put("source", signal.source());
+         fact.put("sessionId", signal.sessionId());
+         fact.put("superseded", signal.superseded());
++            if (signal.operationRef() != null) fact.put("operationRef", signal.operationRef());
+         return Map.copyOf(fact);
+     }
+ 
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java
+@@ -556,7 +556,7 @@
+         var kind = switch (event.kind()) {
+             case PROMPT_ACCEPTED -> AgentExecutionTimelineEventKind.PROMPT_ACCEPTED;
+             case PROMPT_COMPLETED -> AgentExecutionTimelineEventKind.PROMPT_COMPLETED;
+-            case PERMISSION_APPROVED, PERMISSION_DENIED, PERMISSION_CANCELLED ->
++            case PERMISSION_APPROVED, PERMISSION_DENIED, PERMISSION_CANCELLED, PERMISSION_UNRESOLVED ->
+                     AgentExecutionTimelineEventKind.PERMISSION_DECISION;
+             default -> null;
+         };
+@@ -571,6 +571,7 @@
+                 event.kind() == AgentLifecycleEvent.Kind.PERMISSION_APPROVED
+                         || event.kind() == AgentLifecycleEvent.Kind.PERMISSION_DENIED
+                         || event.kind() == AgentLifecycleEvent.Kind.PERMISSION_CANCELLED
++                        || event.kind() == AgentLifecycleEvent.Kind.PERMISSION_UNRESOLVED
+                         ? permissionTimelineDetails(event, request)
+                         : Map.of("lifecycleSequence", event.sequence())
+         ));
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionStreamProjector.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionStreamProjector.java
+@@ -25,6 +25,12 @@
+     private AcpxPromptCompletion promptCompletion = AcpxPromptCompletion.EMPTY;
+     private final Map<String, AgentLifecycleEvent.PermissionEvidence> permissionDetails = new HashMap<>();
+     private final Map<String, String> toolNamesByCallId = new HashMap<>();
++    private String currentSession = "";
++    private boolean promptActive;
++    private final Map<String, dev.dual.core.execution.AdapterSignal.OperationRef> permissionOperations = new HashMap<>();
++    private final Map<String, Map<String,String>> permissionOptionKinds = new HashMap<>();
++    private final java.util.Set<String> seenPermissionIds = new java.util.HashSet<>();
++    private final java.util.Set<String> invalidPermissionIds = new java.util.HashSet<>();
+     private final AcpxToolObservations toolObservations = new AcpxToolObservations();
+ 
+     List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> toolObservations() {
+@@ -84,14 +90,27 @@
+         }
+         if ("session/prompt".equals(wire.method())) {
+             startPrompt(wire.requestId());
+-            toolObservations.start(wire.request().sessionId());
++            currentSession = wire.request().sessionId(); promptActive = currentSession != null && !currentSession.isBlank();
++            permissionDetails.clear(); permissionOperations.clear(); permissionOptionKinds.clear();
++            toolNamesByCallId.clear(); toolObservations.start(currentSession, currentPromptRequestId);
+         }
+         if ("session/new".equals(wire.method()) || "session/resume".equals(wire.method())) {
+             sessionReady = false;
+         }
+         if ("session/request_permission".equals(wire.method())) {
+-            var evidence = permissionEvidence(wire.request());
++            var request = wire.request();
++            if (!seenPermissionIds.add(wire.requestId())) invalidPermissionIds.add(wire.requestId());
++            var evidence = permissionEvidence(request);
+             permissionDetails.put(wire.requestId(), evidence);
++            // A current but uncorrelated request still produces a blocking permission fact.
++            // It cannot acquire an operation identity eligible for nonessential assessment.
++            if (!promptActive || !currentSession.equals(request.sessionId()))
++                return Optional.of(AgentLifecycleEvent.permissionRequested(sequence, evidence));
++            permissionOptionKinds.put(wire.requestId(), request.permissionOptionKinds());
++            permissionOperations.put(wire.requestId(), new dev.dual.core.execution.AdapterSignal.OperationRef(
++                    currentSession, currentPromptRequestId, wire.requestId(), request.permissionToolCallId(), sequence, -1,
++                    request.permissionToolKind(), dev.dual.core.execution.AdapterSignal.parametersHash(request.permissionRawInput()),
++                    request.permissionRequestJson(), dev.dual.core.execution.AdapterSignal.digest(request.permissionRequestJson()), "", ""));
+             return Optional.of(AgentLifecycleEvent.permissionRequested(sequence, evidence));
+         }
+         return switch (wire.method()) {
+@@ -125,7 +144,7 @@
+                     promptStopReason,
+                     finalAssistantMessage()
+             );
+-            toolObservations.finish();
++            toolObservations.finish(); promptActive = false;
+             return Optional.of(AgentLifecycleEvent.promptCompleted(sequence));
+         }
+         if (currentObservation && "session/request_permission".equals(method)) {
+@@ -133,15 +152,26 @@
+             if (evidence == null) {
+                 return Optional.empty();
+             }
++            var operation = permissionOperations.remove(wire.requestId());
++            var options = permissionOptionKinds.remove(wire.requestId());
+             var outcome = wire.result() == null ? "" : wire.result().permissionOutcome();
+             var optionId = wire.result() == null ? "" : wire.result().permissionOptionId();
+-            if ("selected".equals(outcome) && ("allow".equals(optionId) || "allow_always".equals(optionId))) {
++            var optionKind = options == null ? "" : options.getOrDefault(optionId, "");
++            boolean current = promptActive && operation != null && currentSession.equals(operation.sessionId())
++                    && !invalidPermissionIds.contains(wire.requestId());
++            if (current && "selected".equals(outcome) && ("reject_once".equals(optionKind) || "reject_always".equals(optionKind))) {
++                var response = wire.result().responseJson();
++                operation = new dev.dual.core.execution.AdapterSignal.OperationRef(operation.sessionId(), operation.promptId(),
++                        operation.requestId(), operation.toolCallId(), operation.requestSequence(), sequence, operation.kind(),
++                        operation.parametersSha256(), operation.requestJson(), operation.requestSha256(), response,
++                        dev.dual.core.execution.AdapterSignal.digest(response));
++                return Optional.of(AgentLifecycleEvent.permissionDenied(sequence, evidence.withDisposition("DENIED").withOperation(operation)));
++            }
++            if (current && "selected".equals(outcome) && ("allow_once".equals(optionKind) || "allow_always".equals(optionKind)))
+                 return Optional.of(AgentLifecycleEvent.permissionApproved(sequence, evidence.withDisposition("APPROVED")));
+-            }
+-            if ("selected".equals(outcome) && optionId.startsWith("reject")) {
+-                return Optional.of(AgentLifecycleEvent.permissionDenied(sequence, evidence.withDisposition("DENIED")));
+-            }
+-            return Optional.of(AgentLifecycleEvent.permissionCancelled(sequence, evidence.withDisposition("CANCELLED")));
++            if (current && "cancelled".equals(outcome))
++                return Optional.of(AgentLifecycleEvent.permissionCancelled(sequence, evidence.withDisposition("CANCELLED")));
++            return Optional.of(AgentLifecycleEvent.permissionUnresolved(sequence, evidence.withDisposition("UNKNOWN")));
+         }
+         if (wire.result() != null && wire.result().usage() != null) {
+             return Optional.of(AgentLifecycleEvent.usageUpdate(sequence));
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java
+@@ -41,7 +41,10 @@
+             String permissionToolKind,
+             String permissionTitle,
+             String permissionCommand,
+-            List<String> permissionOptions
++            List<String> permissionOptions,
++            java.util.Map<String,String> permissionOptionKinds,
++            JsonNode permissionRawInput,
++            String permissionRequestJson
+     ) {
+         Request {
+             promptText = promptText == null ? "" : promptText;
+@@ -53,7 +56,7 @@
+         }
+     }
+ 
+-    record Result(String sessionId, String stopReason, Usage usage, String permissionOutcome, String permissionOptionId) {
++    record Result(String sessionId, String stopReason, Usage usage, String permissionOutcome, String permissionOptionId, String responseJson) {
+         Result {
+             sessionId = sessionId == null ? "" : sessionId;
+             stopReason = stopReason == null ? "" : stopReason;
+@@ -166,7 +169,8 @@
+                             text(resultNode.get("stopReason")),
+                             usage(resultNode.get("usage")),
+                             text(resultNode.at("/outcome/outcome")),
+-                            text(resultNode.at("/outcome/optionId"))
++                            text(resultNode.at("/outcome/optionId")),
++                            trimmed
+                     ),
+                     null,
+                     null
+@@ -185,7 +189,9 @@
+                             text(node.at("/params/toolCall/kind")),
+                             text(node.at("/params/toolCall/title")),
+                             permissionResource(node.at("/params/toolCall/rawInput")),
+-                            strings(node.at("/params/options"), "optionId")
++                            strings(node.at("/params/options"), "optionId"),
++                            optionKinds(node.at("/params/options")),
++                            node.at("/params/toolCall/rawInput").deepCopy(), trimmed
+                     ),
+                     null,
+                     null,
+@@ -220,6 +226,15 @@
+         return malformed();
+     }
+ 
++    private static java.util.Map<String,String> optionKinds(JsonNode options) {
++        var map = new java.util.LinkedHashMap<String,String>();
++        if (options != null && options.isArray()) for (var item : options) {
++            var id = text(item.get("optionId")); var kind = text(item.get("kind"));
++            if (!id.isBlank()) map.merge(id, kind, (old, next) -> "AMBIGUOUS");
++        }
++        return java.util.Map.copyOf(map);
++    }
++
+     private static Error error(JsonNode errorNode) {
+         var data = errorNode.path("data");
+         var code = errorNode.get("code");
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxToolObservations.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxToolObservations.java
+@@ -9,9 +9,11 @@
+ final class AcpxToolObservations {
+     private String session = "";
+     private boolean active;
++    private String prompt = "";
+     private final Map<String, Call> calls = new LinkedHashMap<>();
+ 
+-    void start(String session) { this.session = session == null ? "" : session; active = !this.session.isBlank(); calls.clear(); }
++    void start(String session) { start(session, ""); }
++    void start(String session, String prompt) { this.prompt = prompt == null ? "" : prompt; this.session = session == null ? "" : session; active = !this.session.isBlank(); calls.clear(); }
+     void finish() { active = false; }
+     List<ToolObservation> values() { return calls.values().stream().map(Call::freeze).toList(); }
+ 
+@@ -23,10 +25,10 @@
+         var call = calls.get(id);
+         if ("tool_call".equals(notification.updateKind())) {
+             if (call != null) { call.invalid = true; return; }
+-            call = new Call(session, id); calls.put(id, call);
++            call = new Call(session, id, prompt); calls.put(id, call);
+         } else if (call == null) {
+             // A result without the call's creation/input is not evidence of this prompt's execution.
+-            call = new Call(session, id); call.invalid = true; calls.put(id, call);
++            call = new Call(session, id, prompt); call.invalid = true; calls.put(id, call);
+         }
+         if (call.terminal && !call.raw.contains(update)) call.invalid = true;
+         if (call.raw.contains(update)) return;
+@@ -61,15 +63,15 @@
+     }
+ 
+     private static final class Call {
+-        final String session, id;
++        final String session, id, prompt;
+         String name = "", kind = "", status = "", actualSource = "";
+         JsonNode input, output;
+         Integer reported, actual;
+         boolean invalid, terminal, hasRawOutput;
+         final com.fasterxml.jackson.databind.node.ArrayNode outputChunks = JsonNodeFactory.instance.arrayNode();
+         final List<JsonNode> raw = new ArrayList<>();
+-        Call(String session, String id) { this.session = session; this.id = id; }
++        Call(String session, String id, String prompt) { this.session = session; this.id = id; this.prompt = prompt; }
+         ToolObservation freeze() { return new ToolObservation(session, id, name, kind, input, output,
+-                status, reported, actual, actualSource, invalid, raw); }
++                status, reported, actual, actualSource, invalid, raw, prompt); }
+     }
+ }
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentExecutionHealth.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentExecutionHealth.java
+@@ -86,7 +86,7 @@
+             }
+             case SESSION_NEW_REQUESTED -> markProgress(event, elapsed);
+             case PERMISSION_REQUESTED, PERMISSION_APPROVED -> markProgress(event, elapsed);
+-            case PERMISSION_DENIED, PERMISSION_CANCELLED -> observePermissionDecision(event);
++            case PERMISSION_DENIED, PERMISSION_CANCELLED, PERMISSION_UNRESOLVED -> observePermissionDecision(event);
+             case SESSION_RESUME_FAILED, RECONNECT_SIGNAL, PROVIDER_FAILURE -> observeFailure(event, elapsed);
+             case OTHER -> {
+                 // Other text is evidence, not lifecycle state.
+@@ -144,7 +144,11 @@
+     private void observePermissionDecision(AgentLifecycleEvent event) {
+         var evidence = event.permissionEvidence();
+         var escalationRequired = evidence != null && escalatedPermissionKinds.contains(evidence.toolKind());
+-        var disposition = event.kind() == AgentLifecycleEvent.Kind.PERMISSION_DENIED ? "denied" : "cancelled";
++        var disposition = switch (event.kind()) {
++            case PERMISSION_DENIED -> "denied";
++            case PERMISSION_CANCELLED -> "cancelled";
++            default -> "unresolved";
++        };
+         var message = escalationRequired
+                 ? "current ACP turn permission requires human approval: " + event.text()
+                 : "current ACP turn permission " + disposition + ": " + event.text();
+@@ -153,8 +157,9 @@
+                 message,
+                 event.sequence(),
+                 "acpx_stream",
+-                "",
+-                false
++                evidence == null || evidence.operationRef() == null ? "" : evidence.operationRef().sessionId(),
++                false,
++                evidence == null ? null : evidence.operationRef()
+         ));
+     }
+ 
+@@ -166,7 +171,7 @@
+                     currentAdapterSignal.observedSequence(),
+                     currentAdapterSignal.source(),
+                     currentAdapterSignal.sessionId(),
+-                    true
++                    true, currentAdapterSignal.operationRef()
+             );
+             for (int index = observedSignals.size() - 1; index >= 0; index--) {
+                 if (observedSignals.get(index) == currentAdapterSignal) {
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentLifecycleEvent.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentLifecycleEvent.java
+@@ -72,6 +72,10 @@
+         return permissionEvent(sequence, Kind.PERMISSION_CANCELLED, evidence);
+     }
+ 
++    static AgentLifecycleEvent permissionUnresolved(long sequence, PermissionEvidence evidence) {
++        return permissionEvent(sequence, Kind.PERMISSION_UNRESOLVED, evidence);
++    }
++
+     private static AgentLifecycleEvent textLine(long sequence, Source source, String text) {
+         return new AgentLifecycleEvent(sequence, source, classifyText(source, text), text == null ? "" : text, null, null);
+     }
+@@ -147,11 +151,19 @@
+             String title,
+             String resource,
+             java.util.List<String> requestedOptions,
+-            String disposition
++            String disposition,
++            dev.dual.core.execution.AdapterSignal.OperationRef operationRef
+     ) {
+         static final PermissionEvidence EMPTY = new PermissionEvidence(
+                 "", "", "", "", "", java.util.List.of(), "UNAVAILABLE");
+ 
++        PermissionEvidence(String toolCallId, String kind, String name, String title, String resource,
++                           java.util.List<String> options, String disposition) {
++            this(toolCallId, kind, name, title, resource, options, disposition, null);
++        }
++        PermissionEvidence withOperation(dev.dual.core.execution.AdapterSignal.OperationRef operation) {
++            return new PermissionEvidence(toolCallId, toolKind, toolName, title, resource, requestedOptions, disposition, operation);
++        }
+         PermissionEvidence {
+             toolCallId = toolCallId == null ? "" : toolCallId;
+             toolKind = toolKind == null ? "" : toolKind;
+@@ -163,7 +175,7 @@
+         }
+ 
+         PermissionEvidence withDisposition(String value) {
+-            return new PermissionEvidence(toolCallId, toolKind, toolName, title, resource, requestedOptions, value);
++            return new PermissionEvidence(toolCallId, toolKind, toolName, title, resource, requestedOptions, value, operationRef);
+         }
+ 
+         String summary() {
+@@ -186,6 +198,7 @@
+         PERMISSION_APPROVED,
+         PERMISSION_DENIED,
+         PERMISSION_CANCELLED,
++        PERMISSION_UNRESOLVED,
+         TOOL_RESULT,
+         USAGE_UPDATE,
+         RECONNECT_SIGNAL,
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentRunMetadataWriter.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentRunMetadataWriter.java
+@@ -678,6 +678,7 @@
+             map.put("sessionId", signal.sessionId());
+             map.put("observedSequence", signal.observedSequence());
+             map.put("superseded", signal.superseded());
++            if (signal.operationRef() != null) map.put("operationRef", signal.operationRef());
+             return Map.copyOf(map);
+         }).toList();
+     }
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
+@@ -1433,7 +1433,7 @@
+     }
+ 
+     @Test
+-    void deniedOptionalToolWithProseWrappedFencedArtifactCompletesWithWarnings() throws Exception {
++    void completeFencedArtifactDoesNotProveUnassociatedDeniedToolNonessential() throws Exception {
+         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-non-zero-correction");
+         Files.createDirectories(workstreamDir);
+         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+@@ -1458,7 +1458,7 @@
+                 candidate
+         );
+ 
+-        assertEquals(NodeStatus.COMPLETED, result.status());
++        assertEquals(NodeStatus.FAILED, result.status());
+         assertEquals(1, transport.initialCalls);
+         assertEquals(0, transport.correctionCalls);
+         var runMetadata = OBJECT_MAPPER.readTree(
+@@ -1474,20 +1474,20 @@
+                 acquisition.path("occurrences").get(0).path("presentationDisposition").asText());
+ 
+         var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, result);
+-        assertEquals(NodeStatus.COMPLETED, finalized.status());
++        assertEquals(NodeStatus.FAILED, finalized.status());
+         var finalizedMetadata = OBJECT_MAPPER.readTree(
+                 tempDir.resolve((String) finalized.result().get("run_metadata")).toFile()
+         );
+-        assertEquals("SUCCESS_WITH_WARNINGS",
++        assertEquals("RECOVERABLE_ADAPTER_FAILURE",
+                 finalizedMetadata.path("executionOutcome").path("status").asText());
+-        assertEquals("completed_with_adapter_or_process_warnings",
++        assertEquals("permission_blocked",
+                 finalizedMetadata.path("executionOutcome").path("primaryReason").asText());
+         assertEquals("PERMISSION_BLOCKED",
+                 finalizedMetadata.path("executionOutcome").path("secondarySignals").get(0).path("type").asText());
+     }
+ 
+     @Test
+-    void deniedOptionalToolWithOnlyMissingRootClosureCompletesWithWarnings() throws Exception {
++    void recoveredRootClosureDoesNotProveUnassociatedDeniedToolNonessential() throws Exception {
+         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-root-closure-warning");
+         Files.createDirectories(workstreamDir);
+         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
+@@ -1512,7 +1512,7 @@
+                 candidate
+         );
+ 
+-        assertEquals(NodeStatus.COMPLETED, validated.status());
++        assertEquals(NodeStatus.FAILED, validated.status());
+         assertEquals(1, transport.initialCalls);
+         assertEquals(0, transport.correctionCalls);
+         var runMetadata = OBJECT_MAPPER.readTree(
+@@ -1525,11 +1525,11 @@
+         assertTrue(acquisition.path("occurrences").get(0).path("contractDecodable").asBoolean());
+ 
+         var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, validated);
+-        assertEquals(NodeStatus.COMPLETED, finalized.status());
++        assertEquals(NodeStatus.FAILED, finalized.status());
+         var finalizedMetadata = OBJECT_MAPPER.readTree(
+                 tempDir.resolve((String) finalized.result().get("run_metadata")).toFile()
+         );
+-        assertEquals("SUCCESS_WITH_WARNINGS",
++        assertEquals("RECOVERABLE_ADAPTER_FAILURE",
+                 finalizedMetadata.path("executionOutcome").path("status").asText());
+         assertEquals("PERMISSION_BLOCKED",
+                 finalizedMetadata.path("executionOutcome").path("secondarySignals").get(0).path("type").asText());
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTransportTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTransportTest.java
+@@ -1717,8 +1717,9 @@
+                 if printf '%%s ' "$@" | grep -qF ' cancel '; then exit 0; fi
+                 echo "connected (%s)" >&2
+                 cat >> '%s' <<'EOF'
++                {"jsonrpc":"2.0","id":91,"method":"session/prompt","params":{"sessionId":"session-current","prompt":[]}}
+                 {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"session-current","update":{"sessionUpdate":"tool_call_update","toolCallId":"call-current-1","_meta":{"claudeCode":{"toolName":"WebSearch"}}}}}
+-                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"options":[{"optionId":"allow"},{"optionId":"reject"}],"toolCall":{"toolCallId":"call-current-1","kind":"fetch","title":"Mailpit latest stable Docker tag","rawInput":{"query":"Mailpit latest stable Docker tag"}}}}
++                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"sessionId":"session-current","options":[{"optionId":"allow","kind":"allow_once"},{"optionId":"reject","kind":"reject_once"}],"toolCall":{"toolCallId":"call-current-1","kind":"fetch","title":"Mailpit latest stable Docker tag","rawInput":{"query":"Mailpit latest stable Docker tag"}}}}
+                 {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                 EOF
+                 exit 5
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxSessionStreamProjectorTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxSessionStreamProjectorTest.java
+@@ -5,6 +5,7 @@
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertFalse;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
++import static org.junit.jupiter.api.Assertions.assertNull;
+ 
+ class AcpxSessionStreamProjectorTest {
+     @Test
+@@ -158,16 +159,43 @@
+     @Test
+     void correlatesCurrentPermissionRequestAndDeniedDecision() {
+         var projector = new AcpxSessionStreamProjector();
++        projector.accept(0, AcpxStreamWireLine.parse("{\"jsonrpc\":\"2.0\",\"id\":99,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s\"}}"));
+         var requested = projector.accept(1, AcpxStreamWireLine.parse("""
+-                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"toolCall":{"title":"Run tests","rawInput":{"command":"mvn test"}}}}
++                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"sessionId":"s","toolCall":{"toolCallId":"t","kind":"execute","title":"Run tests","rawInput":{"command":"mvn test"}},"options":[{"optionId":"opaque","kind":"reject_once"}]}}
+                 """)).orElseThrow();
+         var denied = projector.accept(2, AcpxStreamWireLine.parse("""
+-                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
++                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"opaque"}}}
+                 """)).orElseThrow();
+ 
+         assertEquals(AgentLifecycleEvent.Kind.PERMISSION_REQUESTED, requested.kind());
+         assertEquals(AgentLifecycleEvent.Kind.PERMISSION_DENIED, denied.kind());
++        assertTrue(denied.permissionEvidence().operationRef().complete());
+         assertTrue(denied.text().contains("mvn test"));
++    }
++
++    @Test
++    void currentRequestWithoutSessionBindingStillBlocksButCannotSupplyOperationProof() {
++        var projector = new AcpxSessionStreamProjector();
++        projector.accept(1, AcpxStreamWireLine.parse("{\"id\":7,\"method\":\"session/request_permission\",\"params\":{\"toolCall\":{\"title\":\"unknown binding\"}}}"));
++        var response = projector.accept(2, AcpxStreamWireLine.parse("{\"id\":7,\"result\":{\"outcome\":{\"outcome\":\"selected\",\"optionId\":\"reject\"}}}" )).orElseThrow();
++        assertEquals("PERMISSION_UNRESOLVED", response.kind().name());
++        assertEquals("UNKNOWN", response.permissionEvidence().disposition());
++        assertNull(response.permissionEvidence().operationRef());
++        var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), java.time.Duration.ofSeconds(30));
++        health.observe(response);
++        assertTrue(health.assess(java.time.Duration.ZERO).signals().stream().anyMatch(signal ->
++                signal.type() == dev.dual.core.execution.AdapterSignalType.PERMISSION_BLOCKED
++                        && signal.message().contains("unresolved")));
++    }
++
++    @Test
++    void actualNativeCancellationRemainsDistinctFromUnresolvedReply() {
++        var projector = new AcpxSessionStreamProjector();
++        projector.accept(0, AcpxStreamWireLine.parse("{\"id\":99,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s\"}}"));
++        projector.accept(1, AcpxStreamWireLine.parse("{\"id\":7,\"method\":\"session/request_permission\",\"params\":{\"sessionId\":\"s\",\"toolCall\":{\"toolCallId\":\"read-1\",\"kind\":\"read\",\"rawInput\":{\"file_path\":\"README.md\"}}}}"));
++        var response = projector.accept(2, AcpxStreamWireLine.parse("{\"id\":7,\"result\":{\"outcome\":{\"outcome\":\"cancelled\"}}}" )).orElseThrow();
++        assertEquals(AgentLifecycleEvent.Kind.PERMISSION_CANCELLED, response.kind());
++        assertEquals("CANCELLED", response.permissionEvidence().disposition());
+     }
+ 
+     @Test
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentExecutionHealthTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentExecutionHealthTest.java
+@@ -209,11 +209,12 @@
+     void currentPermissionDenialIsRecordedWithoutStoppingTheTurnEarly() {
+         var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(1), Duration.ofSeconds(60));
+         var stream = new AcpxSessionStreamProjector();
+-        health.observe(stream.accept(0, AcpxStreamWireLine.parse("""
+-                {"jsonrpc":"2.0","id":9,"method":"session/request_permission","params":{"toolCall":{"title":"Run tests","rawInput":{"command":"mvn test"}}}}
+-                """)).orElseThrow());
++        health.observe(stream.accept(0, AcpxStreamWireLine.parse("{\"jsonrpc\":\"2.0\",\"id\":99,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s\"}}" )).orElseThrow());
+         health.observe(stream.accept(1, AcpxStreamWireLine.parse("""
+-                {"jsonrpc":"2.0","id":9,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
++                {"jsonrpc":"2.0","id":9,"method":"session/request_permission","params":{"sessionId":"s","toolCall":{"toolCallId":"t","kind":"execute","title":"Run tests","rawInput":{"command":"mvn test"}},"options":[{"optionId":"opaque","kind":"reject_once"}]}}
++                """)).orElseThrow());
++        health.observe(stream.accept(2, AcpxStreamWireLine.parse("""
++                {"jsonrpc":"2.0","id":9,"result":{"outcome":{"outcome":"selected","optionId":"opaque"}}}
+                 """)).orElseThrow());
+ 
+         var assessment = health.assess(Duration.ofSeconds(2));
+--- before/dual-core/src/main/java/dev/dual/core/contract/TaskContract.java
++++ after/dual-core/src/main/java/dev/dual/core/contract/TaskContract.java
+@@ -28,8 +28,38 @@
+         @JsonProperty("goal_contract") Reference goalContract,
+         @JsonProperty("reviewed_candidates") List<Reference> reviewedCandidates,
+         @JsonProperty("verification_bindings") List<VerificationBinding> verificationBindings,
++        @JsonProperty("authority_refs") List<Reference> authorityRefs,
++        @JsonProperty("nonessential_operation_declarations") List<NonessentialOperationDeclaration> nonessentialOperationDeclarations
++) {
++
++    /** An absent declaration grants no permission-failure downgrade. */
++    public TaskContract(
++        @JsonProperty("schema_version") int schemaVersion,
++        Phase phase,
++        long epoch,
++        String id,
++        int version,
++        @JsonProperty("created_at") Instant createdAt,
++        String objective,
++        Scope scope,
++        @JsonProperty("acceptance_criteria") List<Clause> acceptanceCriteria,
++        @JsonProperty("test_requirements") List<Clause> testRequirements,
++        List<String> constraints,
++        @JsonProperty("non_goals") List<String> nonGoals,
++        @JsonProperty("risk_areas") List<String> riskAreas,
++        @JsonProperty("evidence_refs") List<String> evidenceRefs,
++        @JsonProperty("ambiguity_notes") List<String> ambiguityNotes,
++        @JsonProperty("human_questions") List<String> humanQuestions,
++        ContractStatus status,
++        @JsonProperty("compilation_pass") int compilationPass,
++        Source source,
++        @JsonProperty("goal_contract") Reference goalContract,
++        @JsonProperty("reviewed_candidates") List<Reference> reviewedCandidates,
++        @JsonProperty("verification_bindings") List<VerificationBinding> verificationBindings,
+         @JsonProperty("authority_refs") List<Reference> authorityRefs
+-) {
++    ) {
++        this(schemaVersion, phase, epoch, id, version, createdAt, objective, scope, acceptanceCriteria, testRequirements, constraints, nonGoals, riskAreas, evidenceRefs, ambiguityNotes, humanQuestions, status, compilationPass, source, goalContract, reviewedCandidates, verificationBindings, authorityRefs, List.of());
++    }
+ 
+     public TaskContract {
+         if (schemaVersion != 2) throw new IllegalArgumentException("unsupported task contract schema: " + schemaVersion);
+@@ -38,6 +68,7 @@
+         reviewedCandidates = List.copyOf(reviewedCandidates == null ? List.of() : reviewedCandidates);
+         verificationBindings = List.copyOf(verificationBindings == null ? List.of() : verificationBindings);
+         authorityRefs = List.copyOf(authorityRefs == null ? List.of() : authorityRefs);
++        nonessentialOperationDeclarations = List.copyOf(nonessentialOperationDeclarations == null ? List.of() : nonessentialOperationDeclarations);
+         if (id == null || id.isBlank()) {
+             throw new IllegalArgumentException("id is required");
+         }
+@@ -124,6 +155,20 @@
+         }
+     }
+ 
++    public record NonessentialOperationDeclaration(
++            String id,
++            @JsonProperty("node_definition_id") String nodeDefinitionId,
++            @JsonProperty("node_contract_ref") Reference nodeContractRef,
++            @JsonProperty("operation_kind") String operationKind,
++            @JsonProperty("operation_parameters_sha256") String operationParametersSha256,
++            @JsonProperty("criterion_ids") List<String> criterionIds,
++            String rationale,
++            @JsonProperty("rule_identity") String ruleIdentity) {
++        public NonessentialOperationDeclaration {
++            criterionIds = List.copyOf(criterionIds == null ? List.of() : criterionIds);
++        }
++    }
++
+     public record Source(
+             @JsonProperty("raw_request_ref") String rawRequestRef,
+             @JsonProperty("created_by") String createdBy,
+--- before/dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java
++++ after/dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java
+@@ -76,7 +76,7 @@
+             if (contract.scope() != null && !contract.scope().included().isEmpty())
+                 errors.add("GOAL cannot grant product writes through scope.included");
+             if (contract.goalContract() != null || !contract.reviewedCandidates().isEmpty()
+-                    || !contract.verificationBindings().isEmpty())
++                    || !contract.verificationBindings().isEmpty() || !contract.nonessentialOperationDeclarations().isEmpty())
+                 errors.add("GOAL cannot masquerade as an EXECUTION contract");
+             return;
+         }
+@@ -105,6 +105,22 @@
+                 errors.add("verification executor and evidence kind must agree");
+         }
+         if (!covered.equals(required)) errors.add("every approved acceptance criterion requires a verification exit");
++        var declarationIds = new HashSet<String>();
++        for (var declaration : contract.nonessentialOperationDeclarations()) {
++            if (declaration.id() == null || declaration.id().isBlank() || !declarationIds.add(declaration.id())
++                    || declaration.nodeDefinitionId() == null || declaration.nodeDefinitionId().isBlank()
++                    || declaration.nodeContractRef() == null
++                    || !List.of("read", "search").contains(declaration.operationKind())
++                    || declaration.operationParametersSha256() == null
++                    || !declaration.operationParametersSha256().matches("[0-9a-f]{64}")
++                    || declaration.rationale() == null || declaration.rationale().isBlank()
++                    || !"permission_nonessential.v1".equals(declaration.ruleIdentity())
++                    || declaration.criterionIds().isEmpty()
++                    || !required.containsAll(declaration.criterionIds())
++                    || new HashSet<>(declaration.criterionIds()).size() != declaration.criterionIds().size())
++                errors.add("invalid nonessential operation declaration: " + declaration.id());
++        }
++
+     }
+ 
+     /** Evidence requirements are approved with the plan, never inferred from observed results. */
+--- before/dual-core/src/main/java/dev/dual/core/execution/AdapterSignal.java
++++ after/dual-core/src/main/java/dev/dual/core/execution/AdapterSignal.java
+@@ -6,7 +6,8 @@
+         long observedSequence,
+         String source,
+         String sessionId,
+-        boolean superseded
++        boolean superseded,
++        OperationRef operationRef
+ ) {
+     public AdapterSignal {
+         if (type == null) {
+@@ -20,6 +21,49 @@
+         }
+     }
+ 
++    public AdapterSignal(AdapterSignalType type, String message, long sequence, String source, String session, boolean superseded) {
++        this(type, message, sequence, source, session, superseded, null);
++    }
++
++    /** Raw request/response preserved by the adapter; the enclosing fixed observation binds run/execution. */
++    public record OperationRef(String sessionId, String promptId, String requestId, String toolCallId,
++                               long requestSequence, long decisionSequence, String kind,
++                               String parametersSha256, String requestJson, String requestSha256,
++                               String decisionJson, String decisionSha256) {
++        public boolean complete() {
++            return nonblank(sessionId) && nonblank(promptId) && nonblank(requestId) && nonblank(toolCallId)
++                    && nonblank(kind) && requestSequence >= 0 && decisionSequence > requestSequence
++                    && hash(parametersSha256) && hash(requestSha256) && hash(decisionSha256)
++                    && nonblank(requestJson) && nonblank(decisionJson)
++                    && requestSha256.equals(digest(requestJson)) && decisionSha256.equals(digest(decisionJson));
++        }
++        private static boolean nonblank(String s) { return s != null && !s.isBlank(); }
++        private static boolean hash(String s) { return s != null && s.matches("[0-9a-f]{64}"); }
++    }
++
++    /** Canonical JSON parameter identity, preserving array order and every unknown parameter. */
++    public static String parametersHash(com.fasterxml.jackson.databind.JsonNode value) {
++        if (value == null || value.isNull()) return "";
++        return digest(canonical(value).toString());
++    }
++    private static com.fasterxml.jackson.databind.JsonNode canonical(com.fasterxml.jackson.databind.JsonNode value) {
++        if (value.isObject()) {
++            var node = com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode();
++            var names = new java.util.TreeSet<String>(); value.fieldNames().forEachRemaining(names::add);
++            names.forEach(name -> node.set(name, canonical(value.get(name)))); return node;
++        }
++        if (value.isArray()) {
++            var node = com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.arrayNode();
++            value.forEach(item -> node.add(canonical(item))); return node;
++        }
++        return value.deepCopy();
++    }
++    public static String digest(String text) {
++        try { return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
++                .digest(text.getBytes(java.nio.charset.StandardCharsets.UTF_8))); }
++        catch (java.security.NoSuchAlgorithmException e) { throw new IllegalStateException(e); }
++    }
++
+     public AdapterSignal(AdapterSignalType type, String message, long observedSequence) {
+         this(type, message, observedSequence, "", "", false);
+     }
+--- before/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionEvidence.java
++++ after/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionEvidence.java
+@@ -9,16 +9,50 @@
+         ProcessResult processResult,
+         AgentResultContractResult agentResultContract,
+         List<ArtifactContractResult> artifactContracts,
+-        List<AdapterSignal> adapterSignals
++        List<AdapterSignal> adapterSignals,
++        List<PermissionAssessment> permissionAssessments
+ ) {
++    public enum PermissionDisposition { REQUIRED, PROVEN_NONESSENTIAL, UNKNOWN }
++    public record PermissionAssessment(AdapterSignal signal, dev.dual.core.contract.TaskContract.Reference contract,
++                                       List<String> criterionIds, List<dev.dual.core.contract.TaskContract.Reference> evidenceRefs,
++                                       String ruleIdentity, PermissionDisposition disposition, String declarationId,
++                                       String runId, String executionId) {
++        public PermissionAssessment {
++            criterionIds = criterionIds == null ? List.of() : List.copyOf(criterionIds);
++            evidenceRefs = evidenceRefs == null ? List.of() : List.copyOf(evidenceRefs);
++        }
++        public boolean proves(AdapterSignal denied) {
++            return denied.equals(signal) && denied.operationRef() != null && denied.operationRef().complete()
++                    && denied.sessionId().equals(denied.operationRef().sessionId())
++                    && denied.observedSequence() == denied.operationRef().decisionSequence()
++                    && disposition == PermissionDisposition.PROVEN_NONESSENTIAL && contract != null
++                    && "permission_nonessential.v1".equals(ruleIdentity)
++                    && !criterionIds.isEmpty() && criterionIds.stream().allMatch(id -> id != null && !id.isBlank())
++                    && new java.util.HashSet<>(criterionIds).size() == criterionIds.size()
++                    && !evidenceRefs.isEmpty() && runId != null && !runId.isBlank()
++                    && executionId != null && !executionId.isBlank();
++        }
++    }
++    public AgentExecutionEvidence(ProcessResult process, AgentResultContractResult result,
++                                  List<ArtifactContractResult> artifacts, List<AdapterSignal> signals) {
++        this(process, result, artifacts, signals, List.of());
++    }
+     /** One adapter-observed call. Reported status/exit are not a measured process exit. */
+     public record ToolObservation(String sessionId, String toolCallId, String toolName, String kind,
+                                   com.fasterxml.jackson.databind.JsonNode input,
+                                   com.fasterxml.jackson.databind.JsonNode output,
+                                   String nativeStatus, Integer reportedExitCode, Integer actualExitCode,
+                                   String actualExitSource, boolean invalid,
+-                                  List<com.fasterxml.jackson.databind.JsonNode> rawUpdates) {
++                                  List<com.fasterxml.jackson.databind.JsonNode> rawUpdates, String promptId) {
++        public ToolObservation(String sessionId, String toolCallId, String toolName, String kind,
++                               com.fasterxml.jackson.databind.JsonNode input, com.fasterxml.jackson.databind.JsonNode output,
++                               String nativeStatus, Integer reportedExitCode, Integer actualExitCode, String actualExitSource,
++                               boolean invalid, List<com.fasterxml.jackson.databind.JsonNode> rawUpdates) {
++            this(sessionId, toolCallId, toolName, kind, input, output, nativeStatus, reportedExitCode, actualExitCode,
++                    actualExitSource, invalid, rawUpdates, "");
++        }
+         public ToolObservation {
++            promptId = promptId == null ? "" : promptId;
+             input = input == null ? null : input.deepCopy();
+             output = output == null ? null : output.deepCopy();
+             rawUpdates = rawUpdates == null ? List.of() : rawUpdates.stream()
+@@ -39,5 +73,6 @@
+         }
+         artifactContracts = artifactContracts == null ? List.of() : List.copyOf(artifactContracts);
+         adapterSignals = adapterSignals == null ? List.of() : List.copyOf(adapterSignals);
++        permissionAssessments = permissionAssessments == null ? List.of() : List.copyOf(permissionAssessments);
+     }
+ }
+--- before/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java
++++ after/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java
+@@ -100,7 +100,7 @@
+             );
+         }
+         if (process.usability() == ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
+-                || hasRecoverableWarning(signals)) {
++                || hasRecoverableWarning(signals) || signals.stream().anyMatch(signal -> isContainedPermissionDenial(signal, evidence))) {
+             return new AgentExecutionOutcome(
+                     AgentExecutionOutcomeStatus.SUCCESS_WITH_WARNINGS,
+                     "completed_with_adapter_or_process_warnings",
+@@ -133,7 +133,9 @@
+         if (signal.type() != AdapterSignalType.PERMISSION_BLOCKED) {
+             return false;
+         }
+-        return evidence.processResult().usability() == ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
++        return (evidence.processResult().usability() == ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
++                || evidence.processResult().usability() == ProcessUsability.EXITED_ZERO)
++                && evidence.permissionAssessments().stream().filter(a -> a.proves(signal)).count() == 1
+                 && evidence.agentResultContract().present()
+                 && evidence.agentResultContract().valid()
+                 && evidence.artifactContracts().stream().allMatch(ArtifactContractResult::satisfied);
+--- before/dual-core/src/test/java/dev/dual/core/execution/AgentExecutionOutcomeResolverTest.java
++++ after/dual-core/src/test/java/dev/dual/core/execution/AgentExecutionOutcomeResolverTest.java
+@@ -12,6 +12,15 @@
+ 
+ class AgentExecutionOutcomeResolverTest {
+     private final AgentExecutionOutcomeResolver resolver = new AgentExecutionOutcomeResolver();
++
++    @Test
++    void completeArtifactsCannotInventProofThatAnUnidentifiedDeniedOperationWasOptional() {
++        var outcome = resolve(ProcessResult.nonZeroComplete(5), AgentResultContractResult.valid("SELF_TEST_COMPLETE"),
++                List.of(ArtifactContractResult.requiredValid("self_test_report")),
++                List.of(AdapterSignal.of(AdapterSignalType.PERMISSION_BLOCKED)));
++        assertEquals("permission_blocked", outcome.primaryReason());
++        assertFalse(outcome.nodeMaySucceed());
++    }
+ 
+     @Test
+     void incompleteProcessIsPrimaryAcrossMissingEnvelopeAndInvalidArtifactCombinations() {
+@@ -175,14 +184,16 @@
+ 
+     @Test
+     void deniedOptionalToolCannotOverrideCompleteValidatedEvidence() {
+-        var signal = AdapterSignal.of(AdapterSignalType.PERMISSION_BLOCKED);
+-
+-        var outcome = resolve(
+-                ProcessResult.nonZeroComplete(5),
++        var op = new AdapterSignal.OperationRef("s", "p", "r", "t", 1, 2, "read",
++                AdapterSignal.digest("params"), "request", AdapterSignal.digest("request"), "decision", AdapterSignal.digest("decision"));
++        var signal = new AdapterSignal(AdapterSignalType.PERMISSION_BLOCKED, "denied", 2, "acpx_stream", "s", false, op);
++        var ref = new dev.dual.core.contract.TaskContract.Reference("contract.json", AdapterSignal.digest("contract"));
++        var assessment = new AgentExecutionEvidence.PermissionAssessment(signal, ref, List.of("ac-1"), List.of(ref),
++                "permission_nonessential.v1", AgentExecutionEvidence.PermissionDisposition.PROVEN_NONESSENTIAL, "", "run", "execution");
++        var evidence = new AgentExecutionEvidence(ProcessResult.nonZeroComplete(5),
+                 AgentResultContractResult.valid("READY_FOR_ARCH_REVIEW"),
+-                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+-                List.of(signal)
+-        );
++                List.of(ArtifactContractResult.requiredValid("agent_output_contract")), List.of(signal), List.of(assessment));
++        var outcome = resolver.resolve(evidence);
+ 
+         assertEquals(AgentExecutionOutcomeStatus.SUCCESS_WITH_WARNINGS, outcome.status());
+         assertEquals("completed_with_adapter_or_process_warnings", outcome.primaryReason());
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunMetadataFinalizer.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunMetadataFinalizer.java
+@@ -120,7 +120,7 @@
+                     process,
+                     agentResultContract,
+                     artifactContractResults,
+-                    signals
++                    signals, permissionAssessments(result)
+             );
+             var processResult = mergedProcessResult(json, process);
+             var finalized = executionFinalizer.finalize(baseAttempt(json, result), evidence);
+@@ -133,6 +133,7 @@
+             json.set("adapterSignals", OBJECT_MAPPER.valueToTree(signals.stream()
+                     .map(AgentRunMetadataFinalizer::adapterSignalToMap)
+                     .toList()));
++            json.set("permissionAssessments", OBJECT_MAPPER.valueToTree(evidence.permissionAssessments()));
+             json.set("agentResultContract", OBJECT_MAPPER.valueToTree(
+                     AgentExecutionResultFacts.agentResultContractToMap(agentResultContract)));
+             json.set("artifactContractResults", OBJECT_MAPPER.valueToTree(artifactContractResults.stream()
+@@ -152,11 +153,18 @@
+         }
+     }
+ 
+-    private static List<AdapterSignal> resultAdapterSignals(NodeResult result) {
++    static List<AdapterSignal> resultAdapterSignals(NodeResult result) {
+         if (result.result().containsKey("adapter_signals")) {
+             return adapterSignalsFromValue(result.result().get("adapter_signals"));
+         }
+         return legacyAdapterSignals(result);
++    }
++
++    private static List<AgentExecutionEvidence.PermissionAssessment> permissionAssessments(NodeResult result) {
++        var raw = result.result().get(PermissionEvidence.FACT);
++        if (raw == null) return List.of();
++        if (!(raw instanceof List<?> items)) throw new IllegalArgumentException("permission assessments must be an array");
++        return items.stream().map(item -> OBJECT_MAPPER.convertValue(item, AgentExecutionEvidence.PermissionAssessment.class)).toList();
+     }
+ 
+     private static List<AdapterSignal> legacyAdapterSignals(NodeResult result) {
+@@ -201,7 +209,8 @@
+                     item.path("observedSequence").isNumber() ? Math.max(0L, item.path("observedSequence").asLong()) : 0L,
+                     item.path("source").asText(""),
+                     item.path("sessionId").asText(""),
+-                    item.path("superseded").isBoolean() && item.path("superseded").asBoolean()
++                    item.path("superseded").isBoolean() && item.path("superseded").asBoolean(),
++                    item.hasNonNull("operationRef") ? OBJECT_MAPPER.convertValue(item.get("operationRef"), AdapterSignal.OperationRef.class) : null
+             ));
+         }
+         return List.copyOf(signals);
+@@ -229,7 +238,8 @@
+                     sequence,
+                     text(map.get("source")),
+                     text(map.get("sessionId")),
+-                    Boolean.TRUE.equals(map.get("superseded"))
++                    Boolean.TRUE.equals(map.get("superseded")),
++                    map.get("operationRef") == null ? null : OBJECT_MAPPER.convertValue(map.get("operationRef"), AdapterSignal.OperationRef.class)
+             ));
+         }
+         return List.copyOf(signals);
+@@ -258,6 +268,7 @@
+         map.put("source", signal.source());
+         map.put("sessionId", signal.sessionId());
+         map.put("superseded", signal.superseded());
++            if (signal.operationRef() != null) map.put("operationRef", signal.operationRef());
+         return map;
+     }
+ 
+@@ -376,6 +387,7 @@
+         map.put("sessionId", signal.sessionId());
+         map.put("observedSequence", signal.observedSequence());
+         map.put("superseded", signal.superseded());
++            if (signal.operationRef() != null) map.put("operationRef", signal.operationRef());
+         return map;
+     }
+ 
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
+@@ -394,6 +394,8 @@
+                 AgentResultContractResult.valid(envelope.result().decision()),
+                 List.of(ArtifactContractResult.requiredValid(envelope.result().artifactType())),
+                 document.get("reread_reasons"));
++        validated = PermissionEvidence.assess(ledger, root, workstreamId, nodeInstanceId, nodeDefinition.id(),
++                validated, envelope.result());
+         var bytes = (OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n").getBytes(StandardCharsets.UTF_8);
+         var sidecarRef = root.relativize(sidecarPath).toString();
+         var writes = new LinkedHashMap<String, String>();
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java
+@@ -188,7 +188,8 @@
+                 1, source.source(), new TaskContract.Reference(goal.contractRef(), goal.sha256()),
+                 List.of(new TaskContract.Reference(design.decision().ref(), design.decision().sha256()),
+                         new TaskContract.Reference(reviewedPlan.decision().ref(), reviewedPlan.decision().sha256())),
+-                plan.verificationBindings(), plan.authorityRefs());
++                plan.verificationBindings(), plan.authorityRefs(),
++                nonessentialDeclarations(context.ledger(), paths));
+         var validation = TaskContractValidator.validate(contract);
+         if (!validation.isEmpty()) return proposalFailure("EXECUTION_CONTRACT_INVALID", "execution contract cannot be published", validation);
+         var dir = paths.workstreamDir().resolve("artifacts/contracts/" + context.instance().nodeInstanceId());
+@@ -204,6 +205,29 @@
+                         "contract_phase", contract.phase().name(), "contract_epoch", contract.epoch(), "generated_at", contract.createdAt().toString(),
+                         "task_contract_sha256", TaskContractArtifactWriter.sha256(bytes),
+                         "contract_resolution_sha256", TaskContractArtifactWriter.sha256(resolutionBytes), "compilation_pass", 1));
++    }
++
++    /** The frozen definition is the immutable container of each node's authored contract. */
++    static List<TaskContract.NonessentialOperationDeclaration> nonessentialDeclarations(
++            dev.dual.ledger.file.WorkflowFileLedger ledger, dev.dual.ledger.file.WorkstreamPaths paths) throws IOException {
++        var definition = ledger.loadDefinition(paths);
++        var ref = new TaskContract.Reference(paths.workspaceRoot().relativize(paths.workflowDefinitionJson()).toString(),
++                TaskContractArtifactWriter.sha256(ledger.files().readBytes(paths.workflowDefinitionJson())));
++        var declarations = new ArrayList<TaskContract.NonessentialOperationDeclaration>();
++        for (var node : definition.nodes()) {
++            var configured = node.config().get("nonessential_operation_declarations");
++            if (configured == null) continue;
++            if (!(configured instanceof List<?> items)) throw new IOException("nonessential declarations must be an array");
++            for (var item : items) {
++                var json = OBJECT_MAPPER.valueToTree(item);
++                if (!json.isObject() || json.has("node_contract_ref") || json.has("node_definition_id"))
++                    throw new IOException("declaration node/source identity is assigned only by the compiler");
++                ((com.fasterxml.jackson.databind.node.ObjectNode) json).put("node_definition_id", node.id());
++                ((com.fasterxml.jackson.databind.node.ObjectNode) json).set("node_contract_ref", OBJECT_MAPPER.valueToTree(ref));
++                declarations.add(OBJECT_MAPPER.treeToValue(json, TaskContract.NonessentialOperationDeclaration.class));
++            }
++        }
++        return List.copyOf(declarations);
+     }
+ 
+     private ProposalCompileResult compileFromProposal(
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/HumanReviewGateHandler.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/HumanReviewGateHandler.java
+@@ -279,6 +279,7 @@
+         appendList(builder, "Acceptance Criteria", contract.get("acceptanceCriteria"));
+         appendList(builder, "Test Requirements", contract.get("testRequirements"));
+         appendList(builder, "Constraints", contract.get("constraints"));
++        appendList(builder, "Nonessential Operation Declarations", contract.get("nonessentialOperationDeclarations"));
+         builder.append("\n");
+     }
+ 
+@@ -374,6 +375,7 @@
+         summary.put("acceptanceCriteria", document.acceptanceCriteria());
+         summary.put("testRequirements", document.testRequirements());
+         summary.put("constraints", document.constraints());
++        summary.put("nonessentialOperationDeclarations", TaskContractArtifactWriter.nonessentialOperationDescriptions(document));
+         summary.put("path", contractView.contractRef());
+         summary.put("authority", contractView.authority());
+         if (contractView.qualified()) {
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/PermissionEvidence.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/PermissionEvidence.java
+@@ -0,0 +1,137 @@
++package dev.dual.runtime.handler;
++
++import com.fasterxml.jackson.databind.ObjectMapper;
++import dev.dual.core.contract.TaskContract;
++import dev.dual.core.execution.AdapterSignal;
++import dev.dual.core.execution.AdapterSignalType;
++import dev.dual.core.execution.AgentExecutionEvidence.*;
++import dev.dual.core.workflow.NodeResult;
++import dev.dual.ledger.file.WorkflowFileLedger;
++import java.io.IOException;
++import java.nio.file.*;
++import java.util.*;
++
++/** Program-owned association of a denied request with approved obligations; never judges a shell command. */
++final class PermissionEvidence {
++    static final String FACT = "permission_assessments";
++    private static final ObjectMapper JSON = new ObjectMapper().findAndRegisterModules();
++    private static final String RULE = "permission_nonessential.v1";
++    private PermissionEvidence() {}
++
++    static NodeResult assess(WorkflowFileLedger ledger, Path root, String ws, String node, String definition,
++                             NodeResult result, AgentResultEnvelope.AgentResult artifact) {
++        var signals = AgentRunMetadataFinalizer.resultAdapterSignals(result).stream()
++                .filter(s -> s.type() == AdapterSignalType.PERMISSION_BLOCKED && !s.superseded()).toList();
++        // Even an empty program assessment replaces any externally supplied candidate fact.
++        var assessments = new ArrayList<PermissionAssessment>();
++        for (var signal : signals) assessments.add(assessOne(ledger, root, ws, node, definition, result, artifact, signal));
++        var facts = new LinkedHashMap<String,Object>(result.result()); facts.put(FACT, List.copyOf(assessments));
++        return new NodeResult(result.outcome(), result.status(), result.outputRefs(), facts, result.errorMessage());
++    }
++
++    private static PermissionAssessment assessOne(WorkflowFileLedger ledger, Path root, String ws, String node,
++                                                  String definition, NodeResult result,
++                                                  AgentResultEnvelope.AgentResult artifact, AdapterSignal signal) {
++        TaskContract.Reference contractRef = null;
++        var criteria = new ArrayList<String>();
++        var refs = new LinkedHashSet<TaskContract.Reference>();
++        String run = String.valueOf(result.result().getOrDefault("run_id", "")), execution = "", declaration = "";
++        var disposition = PermissionDisposition.UNKNOWN;
++        try {
++            var qualified = TaskContractProjectionVerifier.resolve(ledger, root, ws, TaskContract.Phase.EXECUTION)
++                    .qualified().orElseThrow(() -> new IOException("no approved EXECUTION"));
++            contractRef = new TaskContract.Reference(qualified.contractRef(), qualified.sha256());
++            criteria.addAll(qualified.contract().verificationBindings().stream().map(TaskContract.VerificationBinding::criterionId).toList());
++            var current = VerificationEvidence.load(ledger, root, ws, node, result, "CURRENT");
++            execution = current.execution(); run = current.run();
++            if (current.permissionSignals() == null || Collections.frequency(current.permissionSignals(), signal) != 1
++                    || !current.baseline().contract().equals(contractRef) || !validOperation(root, current, signal))
++                throw new IOException("denied operation is not uniquely bound to this execution");
++            refs.add(JSON.convertValue(result.result().get(VerificationEvidence.FACT), TaskContract.Reference.class));
++            var op = signal.operationRef();
++            var declared = qualified.contract().nonessentialOperationDeclarations().stream()
++                    .filter(d -> definition.equals(d.nodeDefinitionId()) && op.kind().equals(d.operationKind())
++                            && op.parametersSha256().equals(d.operationParametersSha256())
++                            && new HashSet<>(criteria).equals(new HashSet<>(d.criterionIds()))).toList();
++            var checks = VerificationEvidence.checks(artifact);
++            if (checks != null && checks.stream().anyMatch(c -> c != null && "CURRENT".equals(c.executionRef())
++                    && c.toolCallIds() != null && c.toolCallIds().contains(op.toolCallId()))) {
++                disposition = PermissionDisposition.REQUIRED;
++                throw new IOException("denied tool is explicitly selected by a criterion");
++            }
++            boolean verified = "SELF_TEST_COMPLETE".equals(artifact.decision()) || "ACCEPT".equals(artifact.decision())
++                    || "ACCEPT_WITH_NOTES".equals(artifact.decision());
++            if (verified && checks != null && checks.size() == criteria.size()) {
++                // verify() has already checked the approved requirements and immutable source identities.
++                // A denied call selected by any criterion cannot be declared nonessential afterwards.
++                for (var check : checks) {
++                    var binding = qualified.contract().verificationBindings().stream()
++                            .filter(b -> b.criterionId().equals(check.criterionId())).findFirst().orElseThrow();
++                    if (binding.evidenceKind() == TaskContract.EvidenceKind.OPERATOR_DECLARATION_WITH_MATERIAL) {
++                        refs.addAll(check.materialRefs()); continue;
++                    }
++                    var observed = VerificationEvidence.load(ledger, root, ws, node, result, check.executionRef());
++                    var selected = check.toolCallIds().isEmpty() ? observed.tools().stream().filter(ToolObservation::hasExecutionResult)
++                            .map(ToolObservation::toolCallId).toList() : check.toolCallIds();
++                    for (var tool : observed.tools().stream().filter(t -> selected.contains(t.toolCallId())).toList()) {
++                        if (op.sessionId().equals(tool.sessionId()) && op.promptId().equals(tool.promptId()) && op.toolCallId().equals(tool.toolCallId())) {
++                            disposition = PermissionDisposition.REQUIRED;
++                            throw new IOException("denied tool is an evidence producer for an approved criterion");
++                        }
++                        if (!"completed".equals(tool.nativeStatus())) throw new IOException("required tool did not complete");
++                    }
++                    refs.add("CURRENT".equals(check.executionRef())
++                            ? JSON.convertValue(result.result().get(VerificationEvidence.FACT), TaskContract.Reference.class)
++                            : new TaskContract.Reference(check.executionRef(), TaskContractArtifactWriter.sha256(root.resolve(check.executionRef()))));
++                }
++                disposition = PermissionDisposition.PROVEN_NONESSENTIAL;
++            } else if (declared.size() == 1) {
++                var d = declared.getFirst();
++                // The contract verifier rechecks the exact frozen node inputs, not today's mutable config.
++                VerificationEvidence.read(root, d.nodeContractRef());
++                declaration = d.id(); refs.add(d.nodeContractRef()); disposition = PermissionDisposition.PROVEN_NONESSENTIAL;
++            }
++        } catch (IOException | IllegalArgumentException invalid) {
++            // Missing or ambiguous association remains the original permission block, never a JSON failure.
++        }
++        return new PermissionAssessment(signal, contractRef, criteria, List.copyOf(refs), RULE, disposition, declaration, run, execution);
++    }
++
++    private static boolean validOperation(Path root, VerificationEvidence.Observation observed, AdapterSignal signal) throws IOException {
++        var op = signal.operationRef();
++        if (op == null || !op.complete() || !signal.sessionId().equals(op.sessionId())
++                || signal.observedSequence() != op.decisionSequence() || !List.of("read", "search").contains(op.kind())) return false;
++        var request = JSON.readTree(op.requestJson()); var response = JSON.readTree(op.decisionJson());
++        var params = request.path("params"); var tool = params.path("toolCall");
++        if (!"session/request_permission".equals(request.path("method").asText())
++                || !op.requestId().equals(request.path("id").asText()) || !op.requestId().equals(response.path("id").asText())
++                || !op.sessionId().equals(params.path("sessionId").asText())
++                || !op.toolCallId().equals(tool.path("toolCallId").asText()) || !op.kind().equals(tool.path("kind").asText())
++                || !op.parametersSha256().equals(AdapterSignal.parametersHash(tool.get("rawInput")))) return false;
++        var outcome = response.path("result").path("outcome");
++        var option = outcome.path("optionId").asText();
++        if (!"selected".equals(outcome.path("outcome").asText())) return false;
++        var matches = new ArrayList<com.fasterxml.jackson.databind.JsonNode>();
++        for (var entry : params.path("options")) if (option.equals(entry.path("optionId").asText())) matches.add(entry);
++        if (matches.size() != 1 || !List.of("reject_once", "reject_always").contains(matches.getFirst().path("kind").asText())) return false;
++        var calls = observed.tools().stream().filter(t -> op.sessionId().equals(t.sessionId()) && op.toolCallId().equals(t.toolCallId())).toList();
++        if (calls.size() != 1 || !op.promptId().equals(calls.getFirst().promptId()) || calls.getFirst().invalid() || !op.kind().equals(calls.getFirst().kind())
++                || !op.parametersSha256().equals(AdapterSignal.parametersHash(calls.getFirst().input()))) return false;
++        // Only structured, canonical product-file reads are in this bounded rule. No command classification.
++        var raw = tool.path("rawInput");
++        var target = raw.hasNonNull("path") ? raw.path("path").asText() : raw.path("file_path").asText();
++        var realRoot = root.toRealPath();
++        var supplied = Path.of(target);
++        var relative = target;
++        if (supplied.isAbsolute()) {
++            if (!supplied.normalize().equals(supplied)) return false;
++            var workspace = root.toAbsolutePath().normalize();
++            var base = supplied.startsWith(workspace) ? workspace : realRoot;
++            if (!supplied.startsWith(base)) return false;
++            relative = base.relativize(supplied).toString();
++        }
++        if (!dev.dual.core.contract.TaskContractValidator.isCanonicalPath(relative)) return false;
++        var path = realRoot.resolve(relative);
++        return Files.isRegularFile(path) && path.toRealPath().equals(path);
++    }
++}
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/ReportGenerateFinalHandler.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/ReportGenerateFinalHandler.java
+@@ -141,6 +141,8 @@
+                         .map(item -> item.operation() + ": " + item.path())
+                         .collect(java.util.stream.Collectors.joining(", "))).append("\n");
+         builder.append("- **Scope Excluded:** ").append(contract.scope().excluded().isEmpty() ? "(none)" : String.join(", ", contract.scope().excluded())).append("\n");
++        builder.append("- **Nonessential Operation Declarations:**\n");
++        TaskContractArtifactWriter.nonessentialOperationDescriptions(contract).forEach(d -> builder.append("  - ").append(d).append("\n"));
+         builder.append("- **Acceptance Criteria:** ").append(contract.acceptanceCriteria().size()).append(" items").append("\n");
+         builder.append("- **Non-Goals:** ").append(contract.nonGoals().isEmpty() ? "(none)" : String.join(", ", contract.nonGoals())).append("\n");
+         builder.append("- **Contract Gaps Found:** 0\n");
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractArtifactWriter.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractArtifactWriter.java
+@@ -71,6 +71,8 @@
+         appendListSection(md, "Ambiguity Notes", contract.ambiguityNotes());
+         appendListSection(md, "Human Questions", contract.humanQuestions());
+ 
++        appendListSection(md, "Nonessential Operation Declarations", nonessentialOperationDescriptions(contract));
++
+         if (contract.source() != null) {
+             md.append("## Source\n\n");
+             md.append("- **Created by:** ").append(contract.source().createdBy()).append("\n");
+@@ -81,6 +83,14 @@
+         }
+ 
+         return md.toString();
++    }
++
++    static java.util.List<String> nonessentialOperationDescriptions(TaskContract contract) {
++        return contract.nonessentialOperationDeclarations().isEmpty() ? java.util.List.of("None")
++                : contract.nonessentialOperationDeclarations().stream().map(d -> d.id() + ": " + d.rationale()
++                    + "; node=" + d.nodeDefinitionId() + "; kind=" + d.operationKind()
++                    + "; criteria=" + d.criterionIds() + "; parameters_sha256=" + d.operationParametersSha256()
++                    + "; source=" + d.nodeContractRef() + "; rule=" + d.ruleIdentity()).toList();
+     }
+ 
+     static ObjectMapper mapper() {
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java
+@@ -335,7 +335,8 @@
+ 
+     static boolean sameExecutionBoundary(WorkflowFileLedger ledger, WorkstreamPaths paths, TaskContract approved,
+                                          PlanArtifactDocument plan) throws IOException {
+-        return plan != null && new java.util.HashSet<>(approved.scope().included()).equals(new java.util.HashSet<>(plan.files()))
++        return approved.nonessentialOperationDeclarations().equals(ContractCompileHandler.nonessentialDeclarations(ledger, paths))
++                && plan != null && new java.util.HashSet<>(approved.scope().included()).equals(new java.util.HashSet<>(plan.files()))
+                 && approved.authorityRefs().equals(plan.authorityRefs())
+                 && VerificationReadiness.sameVerificationBoundary(ledger, paths, approved.verificationBindings(), plan.verificationBindings());
+     }
+@@ -358,6 +359,8 @@
+                 || !contract.scope().excluded().equals(goal.contract().scope().excluded())
+                 || !contract.source().equals(goal.contract().source()))
+             return Failure.of("EXECUTION_GOAL_MISMATCH", "execution contract no longer binds the approved goal");
++        if (!contract.nonessentialOperationDeclarations().equals(ContractCompileHandler.nonessentialDeclarations(ledger, files.paths())))
++            return Failure.of("EXECUTION_DECLARATION_MISMATCH", "nonessential declarations must bind the frozen node contracts");
+         var lineage = new AuthoredStageLineageResolver(ledger, workspaceRoot, workstreamId, Long.MAX_VALUE);
+         var reviewed = new ArrayList<TaskContract.Reference>();
+         for (var stage : AuthoredStageLineageResolver.Stage.values()) {
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationEvidence.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationEvidence.java
+@@ -18,7 +18,7 @@
+     public record Baseline(TaskContract.Reference contract, EvidenceCollectionSource source) {}
+     public record Observation(String schema, String workstream, String node, String execution, String run,
+                               String agent, Map<String, String> prepared, Baseline baseline,
+-                              EvidenceCollectionSource afterSource, List<ToolObservation> tools) {}
++                              EvidenceCollectionSource afterSource, List<ToolObservation> tools, List<dev.dual.core.execution.AdapterSignal> permissionSignals) {}
+     private VerificationEvidence() {}
+ 
+     public static Baseline prepare(TaskHandler.TaskContext context) throws IOException {
+@@ -36,7 +36,7 @@
+         var record = new Observation("dual.verification.observations.v1", context.workstreamId(),
+                 context.instance().nodeInstanceId(), prepared.execution().nodeExecutionId(), runDir.getFileName().toString(),
+                 agent, prepared.reference(), baseline,
+-                EvidenceCollectionSource.capture(context.workspaceRoot(), baseline.source().paths()), List.copyOf(observations));
++                EvidenceCollectionSource.capture(context.workspaceRoot(), baseline.source().paths()), List.copyOf(observations), AgentRunMetadataFinalizer.resultAdapterSignals(result));
+         var ref = AgentRunCommitProtocol.recordObservation(context.workspaceRoot(), context.workstreamId(), prepared, record);
+         var facts = new LinkedHashMap<String, Object>(result.result()); facts.put(FACT, ref);
+         var outputs = new ArrayList<>(result.outputRefs()); outputs.add(ref.ref());
+@@ -182,7 +182,7 @@
+         for (var execution : executions) verifyExit(binding, execution);
+     }
+ 
+-    private static Observation load(WorkflowFileLedger ledger, Path root, String ws, String node, NodeResult result, String selector) throws IOException {
++    static Observation load(WorkflowFileLedger ledger, Path root, String ws, String node, NodeResult result, String selector) throws IOException {
+         require(selector != null && !selector.isBlank(), "execution_ref must be CURRENT or a fixed observation reference");
+         TaskContract.Reference ref;
+         boolean own = "CURRENT".equals(selector);
+@@ -223,7 +223,7 @@
+         return observed;
+     }
+ 
+-    private static byte[] read(Path root, TaskContract.Reference ref) throws IOException {
++    static byte[] read(Path root, TaskContract.Reference ref) throws IOException {
+         require(ref != null && ref.ref() != null && ref.sha256() != null && ref.sha256().matches("[0-9a-f]{64}")
+                 && !Path.of(ref.ref()).isAbsolute() && !ref.ref().isBlank(), "invalid evidence reference");
+         var file = root.toAbsolutePath().normalize().resolve(ref.ref());
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java
+@@ -186,7 +186,9 @@
+         final String business;
+         final WorkstreamPaths paths;
+         final WorkflowFileLedger ledger;
+-        final WorkflowRuntime runtime;
++        WorkflowRuntime runtime;
++        final HandlerRegistry handlers;
++        dev.dual.runtime.AgentWorker worker;
+         final List<String> calls = new ArrayList<>();
+         final List<String> patchObligations = new ArrayList<>();
+         final List<TaskHandler.TaskContext> implementContexts = new ArrayList<>();
+@@ -208,6 +210,11 @@
+         }
+ 
+         Fixture(Path root, String category, String business, String ws, String variant, WorkflowFileLedger ledger) throws Exception {
++            this(root, category, business, ws, variant, ledger, java.util.function.UnaryOperator.identity());
++        }
++
++        Fixture(Path root, String category, String business, String ws, String variant, WorkflowFileLedger ledger,
++                java.util.function.UnaryOperator<WorkflowDefinition> definitionMutation) throws Exception {
+             this.ledger = ledger;
+             this.ws = ws;
+             Files.createDirectories(root);
+@@ -217,7 +224,9 @@
+             Files.writeString(this.root.resolve(".gitignore"), ".agent/\n");
+             git("add", "."); git("commit", "-m", "baseline");
+             paths = new WorkstreamPaths(this.root, new DualId(ws));
+-            var definition = new WorkflowDefinitionLoader().loadOrDefault(null, variant);
++            var definition = definitionMutation.apply(variant.equals("small")
++                    ? new WorkflowDefinitionLoader().loadOrDefault(Path.of("src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json"), null)
++                    : new WorkflowDefinitionLoader().loadOrDefault(null, variant));
+             if (category.equals("SCOPE_ADDITION") && definition.edgesFrom("gate.human_implementation_repair").stream()
+                     .noneMatch(edge -> edge.on().equals("request_scope_revision"))) {
+                 var nodes = definition.nodes().stream().map(node -> {
+@@ -242,14 +251,17 @@
+                 public String type() { return "acpx.agent_run"; }
+                 public NodeResult execute(TaskContext context) throws Exception { return output(context); }
+             };
+-            runtime = new WorkflowRuntime(ledger, new HandlerRegistry(
++            handlers = new HandlerRegistry(
+                     List.of(provider, new ContextBuildPackageHandler(), new ContractCompileHandler(),
+                             new ArtifactValidateHandler(), new FailureClassifyHandler(),
+                             new ReportGenerateFinalHandler(), new DeliveryPrepareHandler(), new PromptGenerateNextStageHandler()),
+-                    List.of(new ReviewDecisionHandler()), List.of(new HumanReviewGateHandler())));
++                    List.of(new ReviewDecisionHandler()), List.of(new HumanReviewGateHandler()));
++            runtime = new WorkflowRuntime(ledger, handlers);
+         }
+ 
+         java.util.function.Consumer<TaskHandler.TaskContext> beforeDispatch = context -> {};
++        java.util.function.BiFunction<TaskHandler.TaskContext, List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation>,
++                List<dev.dual.core.execution.AdapterSignal>> permissionSignals = (context, tools) -> List.of();
+ 
+         NodeResult output(TaskHandler.TaskContext context) throws Exception {
+             var id = context.definition().id();
+@@ -383,19 +395,23 @@
+                 var content = Files.readString(root.resolve(business));
+                 observations.add(new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("fixture-session", "read-product",
+                         "fixture.read", "read", JSON.valueToTree(Map.of("path", business)), JSON.valueToTree(Map.of("content", content)),
+-                        "completed", null, null, "", false, List.of()));
++                        "completed", null, null, "", false, List.of(), "fixture-prompt"));
+                 result.set("verification_checks", JSON.valueToTree(prepared.qualifiedTaskContract().orElseThrow().verificationBindings().stream()
+                         .map(b -> new AgentResultEnvelope.VerificationCheck(b.criterionId(), "The fixture contains the expected output", "CURRENT", List.of("read-product"), List.of())).toList()));
+             }
+             outputMutation.accept(result);
+             metadata.put("status", "process_exited");
+             metadata.set("processResult", JSON.valueToTree(Map.of("exitCode", 0, "usability", "EXITED_ZERO", "durationMs", 1)));
+-            metadata.putArray("adapterSignals"); JSON.writeValue(dir.resolve("run.json").toFile(), metadata);
++            var signals = permissionSignals.apply(context, observations);
++            metadata.set("adapterSignals", JSON.valueToTree(signals)); JSON.writeValue(dir.resolve("run.json").toFile(), metadata);
+             var output = dir.resolve("outputs/result.json"); JSON.writeValue(output.toFile(), envelope);
+             var binding = prepared.repositoryFactBinding();
+             var candidate = NodeResult.completed("completed", List.of(root.relativize(output).toString(), binding.ref()), Map.of(
+                     "run_id", runId, "exit_code", 0, "run_metadata", root.relativize(dir.resolve("run.json")).toString(), "repository_fact_binding_ref", binding.ref(),
+                     "repository_fact_binding_sha256", binding.sha256()));
++            var facts = new LinkedHashMap<String,Object>(candidate.result());
++            facts.put("adapter_signals", JSON.convertValue(JSON.valueToTree(signals), List.class));
++            candidate = new NodeResult(candidate.outcome(), candidate.status(), candidate.outputRefs(), facts, candidate.errorMessage());
+             return VerificationEvidence.record(context, runPrepared, verificationBaseline, "fixture", observations, candidate);
+         }
+ 
+@@ -404,8 +420,13 @@
+             assertFalse(current.activeNodeInstanceIds().isEmpty(), current.toString());
+             return ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst()).nodeDefinitionId();
+         }
++        void enableWorker() {
++            runtime = new WorkflowRuntime(ledger, handlers, dev.dual.runtime.AgentTaskDispatchMode.WORKER);
++            worker = new dev.dual.runtime.AgentWorker(ledger, handlers);
++        }
+         void step() throws Exception {
+             runtime.resume(new WorkflowCommand(root, ws));
++            if (worker != null) worker.runOne(new WorkflowCommand(root, ws));
+             var current = ledger.loadCurrent(paths);
+             assertNotEquals(WorkflowStatus.WAITING_FOR_RECOVERY, current.status(), () -> {
+                 try { return ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst()).toString(); }
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/PermissionEvidenceSequenceTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/PermissionEvidenceSequenceTest.java
+@@ -0,0 +1,198 @@
++package dev.dual.runtime.handler;
++
++import com.fasterxml.jackson.databind.ObjectMapper;
++import dev.dual.core.execution.*;
++import dev.dual.core.execution.AgentExecutionEvidence.*;
++import dev.dual.core.workflow.*;
++import dev.dual.runtime.WorkflowCommand;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.io.TempDir;
++import java.nio.file.*;
++import java.util.*;
++import static org.junit.jupiter.api.Assertions.*;
++
++/** Real offline workflow/approval/program file observations; ACP messages here are synthetic protocol fixtures. */
++class PermissionEvidenceSequenceTest {
++    @TempDir Path root;
++    static final ObjectMapper JSON = new ObjectMapper().findAndRegisterModules();
++    static final String SELF = "implement.claude_self_test_report";
++    static final String IMPLEMENT = "implement.claude_implement";
++
++    @Test void independentRequiredEvidenceAllowsDeniedNonessentialReadAndFixedCompletionReload() throws Exception {
++        for (var variant : List.of("contract", "small", "full", "terminal-delivery", "worker")) {
++        var f = fixture(variant.equals("worker") ? "contract" : variant, null);
++        if (variant.equals("worker")) f.enableWorker();
++        f.permissionSignals = (context, tools) -> context.definition().id().equals(SELF)
++                ? List.of(denial(tools, "optional-read", "README.md")) : List.of();
++        f.until(SELF);
++        var id = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst();
++        f.step();
++        var completed = f.ledger.loadNode(f.paths, id);
++        assertEquals(NodeStatus.COMPLETED, completed.status());
++        var execution = f.ledger.latestNodeExecution(f.paths, completed).orElseThrow();
++        var fixed = AgentRunCommitProtocol.readCompletion(f.paths, execution);
++        var assessments = JSON.valueToTree(fixed.result().get(PermissionEvidence.FACT));
++        assertEquals("PROVEN_NONESSENTIAL", assessments.get(0).path("disposition").asText());
++        assertEquals("SUCCESS_WITH_WARNINGS", JSON.valueToTree(fixed.result().get("agent_execution_outcome")).path("status").asText());
++        assertNotEquals(SELF, f.currentNode());
++        if (variant.equals("contract")) {
++            var log = f.root.resolve("cold-permission.log");
++            var process = new ProcessBuilder(Path.of(System.getProperty("java.home"), "bin", "java").toString(),
++                    "-cp", System.getProperty("java.class.path"), ColdPermissionReader.class.getName(), f.root.toString(), f.ws, id)
++                    .redirectErrorStream(true).redirectOutput(log.toFile()).start();
++            assertTrue(process.waitFor(30, java.util.concurrent.TimeUnit.SECONDS));
++            assertEquals(0, process.exitValue(), Files.readString(log));
++        }
++
++        // A newly constructed reader consumes the fixed bytes, without rerunning the fixture provider.
++        var reader = dev.dual.runtime.RuntimeTestLedger.ledger();
++        assertEquals(fixed, AgentRunCommitProtocol.readCompletion(f.paths,
++                reader.latestNodeExecution(f.paths, reader.loadNode(f.paths, id)).orElseThrow()));
++        }
++    }
++
++    @Test void requiredToolCannotBeDowngradedEvenWithCompleteArtifact() throws Exception {
++        var f = fixture("contract", null);
++        f.permissionSignals = (context, tools) -> context.definition().id().equals(SELF)
++                ? List.of(denial(tools, "read-product", "tool.py")) : List.of();
++        assertBlocked(f, SELF, "REQUIRED");
++    }
++
++    @Test void absoluteNativeFilePathsPreserveLegalReadsAndRejectOutsideOrControlTargets() throws Exception {
++        for (var mode : List.of("inline", "worker")) {
++            var f = fixture("contract", null);
++            if (mode.equals("worker")) f.enableWorker();
++            f.permissionSignals = (context, tools) -> context.definition().id().equals(SELF)
++                    ? List.of(denial(tools, "optional-read", JSON.valueToTree(Map.of("file_path",
++                            f.root.resolve("README.md").toAbsolutePath().toString())))) : List.of();
++            f.until(SELF); var id = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst(); f.step();
++            var node = f.ledger.loadNode(f.paths, id);
++            assertEquals(NodeStatus.COMPLETED, node.status());
++            assertEquals("SUCCESS_WITH_WARNINGS", JSON.valueToTree(node.result().get("agent_execution_outcome")).path("status").asText());
++        }
++        var outside = root.resolve("outside-readable.md"); Files.writeString(outside, "readable outside this workstream workspace");
++        for (var targetKind : List.of("outside", "control")) {
++            var f = fixture("contract", null);
++            var target = targetKind.equals("outside") ? outside
++                    : f.root.resolve(".agent/workstreams/" + f.ws + "/current.json");
++            f.permissionSignals = (context, tools) -> context.definition().id().equals(SELF)
++                    ? List.of(denial(tools, "optional-read", JSON.valueToTree(Map.of("file_path", target.toAbsolutePath().toString()))))
++                    : List.of();
++            assertBlocked(f, SELF, "UNKNOWN");
++        }
++    }
++
++    @Test void workerAlsoRefusesRequiredDeniedTool() throws Exception {
++        var f = fixture("contract", null); f.enableWorker();
++        f.permissionSignals = (context, tools) -> context.definition().id().equals(SELF)
++                ? List.of(denial(tools, "read-product", "tool.py")) : List.of();
++        assertBlocked(f, SELF, "REQUIRED");
++    }
++
++    @Test void crossSessionMissingRawAssociationAndProtectedTargetsRemainBlocked() throws Exception {
++        for (var variant : List.of("contract", "small", "full", "terminal-delivery")) {
++            var f = fixture(variant, null);
++            f.permissionSignals = (context, tools) -> {
++                if (!context.definition().id().equals(SELF)) return List.of();
++                var good = denial(tools, "optional-read", "README.md");
++                return List.of(new AdapterSignal(good.type(), good.message(), good.observedSequence(), good.source(),
++                        "foreign-session", false, good.operationRef()));
++            };
++            assertBlocked(f, SELF, "UNKNOWN");
++        }
++        var f = fixture("contract", null);
++        f.permissionSignals = (context, tools) -> context.definition().id().equals(SELF)
++                ? List.of(denial(tools, "control-read", ".agent/workstreams/x/current.json")) : List.of();
++        assertBlocked(f, SELF, "UNKNOWN");
++    }
++
++    @Test void explicitNonessentialDeclarationRequiresExactExecutionApprovalAndRequestParameters() throws Exception {
++        var f = fixture("contract", IMPLEMENT);
++        f.until("gate.contract_review");
++        var candidate = TaskContractProjectionVerifier.executionCandidate(f.ledger, f.root, f.ws,
++                f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst(), true);
++        // The declaration is visible in the candidate's canonical JSON and human-readable material.
++        assertEquals(1, candidate.contract().nonessentialOperationDeclarations().size());
++        f.step(); // Open the real human packet; no approval yet.
++        var gate = f.ledger.loadNode(f.paths, f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst());
++        var packetRef = ".agent/workstreams/" + f.ws + "/reviews/" + gate.nodeInstanceId() + ".json";
++        var packet = JSON.readTree(f.root.resolve(packetRef).toFile());
++        assertTrue(packet.path("taskContract").path("nonessentialOperationDeclarations").toString().contains("optional-read"));
++        assertFalse(f.calls.contains(IMPLEMENT));
++        f.approve();
++        f.permissionSignals = (context, tools) -> context.definition().id().equals(IMPLEMENT)
++                ? List.of(denial(tools, "optional-read", "README.md")) : List.of();
++        f.until(IMPLEMENT); var id = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst(); f.step();
++        var node = f.ledger.loadNode(f.paths, id);
++        assertEquals(NodeStatus.COMPLETED, node.status());
++        assertEquals("optional-read", JSON.valueToTree(node.result().get(PermissionEvidence.FACT)).get(0).path("declarationId").asText());
++        f.until("acceptance.generate_final_report");
++        var reportId = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst(); f.step();
++        var report = f.ledger.loadNode(f.paths, reportId);
++        assertTrue(report.outputRefs().stream().filter(r -> r.endsWith(".md")).anyMatch(r -> {
++            try { return Files.readString(f.root.resolve(r)).contains("optional-read"); }
++            catch (java.io.IOException e) { throw new java.io.UncheckedIOException(e); }
++        }));
++        var wrong = fixture("contract", IMPLEMENT);
++        wrong.permissionSignals = (context, tools) -> context.definition().id().equals(IMPLEMENT)
++                ? List.of(denial(tools, "optional-read", "tool.py")) : List.of();
++        assertBlocked(wrong, IMPLEMENT, "UNKNOWN");
++    }
++
++    public static class ColdPermissionReader {
++        public static void main(String[] args) throws Exception {
++            var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
++            var paths = new dev.dual.ledger.file.WorkstreamPaths(Path.of(args[0]), new dev.dual.core.id.DualId(args[1]));
++            var execution = ledger.latestNodeExecution(paths, ledger.loadNode(paths, args[2])).orElseThrow();
++            var fixed = AgentRunCommitProtocol.readCompletion(paths, execution);
++            if (!"PROVEN_NONESSENTIAL".equals(JSON.valueToTree(fixed.result().get(PermissionEvidence.FACT)).get(0).path("disposition").asText())
++                    || !"SUCCESS_WITH_WARNINGS".equals(JSON.valueToTree(fixed.result().get("agent_execution_outcome")).path("status").asText()))
++                throw new IllegalStateException("permission evidence did not survive cold read");
++        }
++    }
++
++    private AcceptanceRepairSequenceTest.Fixture fixture(String variant, String declaredNode) throws Exception {
++        return new AcceptanceRepairSequenceTest.Fixture(root.resolve(UUID.randomUUID().toString()),
++                "VERIFICATION_INSUFFICIENT", "tool.py", "ws-permission", variant, dev.dual.runtime.RuntimeTestLedger.ledger(), definition -> {
++            if (declaredNode == null) return definition;
++            var nodes = definition.nodes().stream().map(node -> {
++                if (!declaredNode.equals(node.id())) return node;
++                var config = new LinkedHashMap<String,Object>(node.config());
++                config.put("nonessential_operation_declarations", List.of(Map.of("id", "optional-read", "operation_kind", "read",
++                        "operation_parameters_sha256", AdapterSignal.parametersHash(JSON.valueToTree(Map.of("path", "README.md"))),
++                        "criterion_ids", List.of("AC-1", "AC-2"), "rationale", "Optional background read, no required obligation depends on it",
++                        "rule_identity", "permission_nonessential.v1")));
++                return new NodeDefinition(node.id(), node.kind(), node.handlerType(), config);
++            }).toList();
++            return new WorkflowDefinition(definition.workflowId(), definition.version(), definition.entryNodeId(), nodes, definition.edges());
++        });
++    }
++
++    private void assertBlocked(AcceptanceRepairSequenceTest.Fixture f, String target, String disposition) throws Exception {
++        f.until(target); var id = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst();
++        f.runtime.resume(new WorkflowCommand(f.root, f.ws));
++        if (f.worker != null) f.worker.runOne(new WorkflowCommand(f.root, f.ws));
++        var node = f.ledger.loadNode(f.paths, id);
++        assertEquals(NodeStatus.FAILED, node.status());
++        assertEquals("permission_blocked", JSON.valueToTree(node.result().get("agent_execution_outcome")).path("primaryReason").asText(), node.toString());
++        assertEquals(disposition, JSON.valueToTree(node.result().get(PermissionEvidence.FACT)).get(0).path("disposition").asText());
++        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.ledger.loadCurrent(f.paths).status());
++        assertTrue(node.outputRefs().stream().noneMatch(ref -> ref.endsWith(".contract.json")));
++    }
++
++    private static AdapterSignal denial(List<ToolObservation> tools, String call, String path) {
++        return denial(tools, call, JSON.valueToTree(Map.of("path", path)));
++    }
++
++    private static AdapterSignal denial(List<ToolObservation> tools, String call, com.fasterxml.jackson.databind.JsonNode input) {
++        if (tools.stream().noneMatch(t -> call.equals(t.toolCallId())))
++            tools.add(new ToolObservation("fixture-session", call, "Read", "read", input, null, "pending", null, null, "", false, List.of(), "fixture-prompt"));
++        var request = JSON.valueToTree(Map.of("id", 7, "method", "session/request_permission", "params", Map.of("sessionId", "fixture-session",
++                "toolCall", Map.of("toolCallId", call, "kind", "read", "rawInput", input),
++                "options", List.of(Map.of("optionId", "opaque-option", "kind", "reject_once"))))).toString();
++        var response = JSON.valueToTree(Map.of("id", 7, "result", Map.of("outcome", Map.of("outcome", "selected", "optionId", "opaque-option")))).toString();
++        var op = new AdapterSignal.OperationRef("fixture-session", "fixture-prompt", "7", call, 2, 3, "read",
++                AdapterSignal.parametersHash(input), request, AdapterSignal.digest(request), response, AdapterSignal.digest(response));
++        return new AdapterSignal(AdapterSignalType.PERMISSION_BLOCKED, "read denied", 3, "acpx_stream", "fixture-session", false, op);
++    }
++}
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java
+@@ -83,6 +83,42 @@
+         f.untilPause();
+         assertEquals(WorkflowStatus.COMPLETED, f.base.ledger.loadCurrent(f.base.paths).status());
+         assertEquals(1, Collections.frequency(f.calls, "implement.claude_implement"));
++    }
++
++    @Test void weakeningApprovedExitRequirementReturnsToAuthorReviewAndNewExecutionApproval() throws Exception {
++        var f = new Flow(root); f.actualExitRequired = true;
++        f.untilPause(); f.recordReadiness();
++        ReviewGateActions.resolve(f.base.ledger, f.base.paths, "revise", "Bind prerequisites");
++        f.untilPause();
++        var originalCandidate = TaskContractProjectionVerifier.executionCandidate(f.base.ledger, root, f.base.ws,
++                f.base.ledger.loadCurrent(f.base.paths).activeNodeInstanceIds().getFirst(), true);
++        assertTrue(originalCandidate.contract().verificationBindings().stream().allMatch(b -> Boolean.TRUE.equals(b.actualExitRequired())));
++        ReviewGateActions.resolve(f.base.ledger, f.base.paths, "approve", "Approve real exit evidence requirement");
++        var original = Files.readAllBytes(root.resolve("test-tool.lock"));
++        Files.writeString(root.resolve("test-tool.lock"), "temporary environment drift"); f.untilPause();
++        var failedId = f.base.ledger.loadCurrent(f.base.paths).activeNodeInstanceIds().getFirst();
++        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.base.ledger.loadCurrent(f.base.paths).status());
++        Files.write(root.resolve("test-tool.lock"), original);
++        var t = f.base.request("renewed-exit-plan", VerificationReadiness.Action.RECORD, f.readiness);
++        f.readiness = VerificationReadiness.record(f.base.ledger, root, f.base.ws, new VerificationReadiness.Request(
++                t.schema(), t.requestId(), failedId, t.goal(), t.epoch(), t.criterionIds(), t.method(), t.executor(), t.evidenceKind(),
++                t.environment(), t.statement(), t.detailOwner(), t.lifetime(), t.expiresAt(), t.action(), t.supersedes()));
++        f.actualExitRequired = false;
++        ReviewGateActions.revise(f.base.ledger, f.base.paths, failedId, "Propose native execution status instead of a real exit requirement");
++        f.untilPause();
++        assertEquals("gate.contract_review", f.node());
++        assertEquals(3, Collections.frequency(f.calls, "plan.claude_plan"));
++        assertEquals(3, Collections.frequency(f.calls, "plan.codex_plan_review"));
++        assertFalse(f.calls.contains("implement.claude_implement"));
++        var replacement = TaskContractProjectionVerifier.executionCandidate(f.base.ledger, root, f.base.ws,
++                f.base.ledger.loadCurrent(f.base.paths).activeNodeInstanceIds().getFirst(), true);
++        assertNotEquals(originalCandidate.rawJson(), replacement.rawJson());
++        assertTrue(replacement.contract().verificationBindings().stream().noneMatch(b -> Boolean.TRUE.equals(b.actualExitRequired())));
++        ReviewGateActions.resolve(f.base.ledger, f.base.paths, "approve", "Approve this explicitly changed evidence requirement");
++        f.untilPause();
++        assertEquals(WorkflowStatus.COMPLETED, f.base.ledger.loadCurrent(f.base.paths).status());
++        assertEquals(1, Collections.frequency(f.calls, "implement.claude_implement"));
++        assertEquals(replacement.contractRef(), f.inputs.get("implement.claude_implement").contract().contract().ref());
+     }
+ 
+     @Test void changedPersistedReviewFactsCannotBecomeQualifiedByNumericNormalization() throws Exception {
+@@ -241,6 +277,7 @@
+     }
+ 
+     static final class Flow {
++        boolean actualExitRequired;
+         final VerificationReadinessTest.Fixture base;
+         final WorkflowRuntime runtime;
+         final List<String> calls = new ArrayList<>();
+@@ -334,6 +371,9 @@
+                 var bindings = readiness == null ? List.of("AC-1", "AC-2").stream().map(id -> new TaskContract.VerificationBinding(
+                         id, "run project tests", TaskContract.Executor.AGENT, List.of(), List.of(),
+                         TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(), "verification-owner", false, null)).toList() : base.bindings(readiness);
++                bindings = bindings.stream().map(b -> new TaskContract.VerificationBinding(b.criterionId(), b.method(), b.executor(),
++                        b.environmentRefs(), b.authorityRefs(), b.evidenceKind(), b.feasibilityRefs(), b.detailOwner(),
++                        actualExitRequired, actualExitRequired ? 0 : null)).toList();
+                 plan.set("verification_bindings", JSON.valueToTree(bindings)); plan.putArray("authority_refs");
+             }
+             var output = dir.resolve("outputs/result.json"); JSON.writeValue(output.toFile(), envelope);
+--- before/dual-server/src/main/resources/static/console.js
++++ after/dual-server/src/main/resources/static/console.js
+@@ -470,6 +470,7 @@
+       ["原因", guidance.reason || decision.summary || "-"],
+     ], [
+       ...authoredStageEvidence(packet.authoredStage),
++      ...asList(contract.nonessentialOperationDeclarations).map(item => `非必需操作声明：${item}`),
+       ...(packet.externalEvidenceInstructions ? [packet.externalEvidenceInstructions] : []),
+       ...(asList(decision.mustFix).map((item) => `Must Fix：${item}`)),
+       ...(asList(state.review?.actionRequests).map((item) => `待处理动作需求：${item.content?.expected_result || ""}`)),
+--- before/dual-server/src/main/resources/static/mgt/app.js
++++ after/dual-server/src/main/resources/static/mgt/app.js
+@@ -885,6 +885,7 @@
+     reviewList("Acceptance Criteria", contract.acceptanceCriteria),
+     reviewList("Test Requirements", contract.testRequirements),
+     reviewList("Constraints", contract.constraints),
++    reviewList("Nonessential Operation Declarations", contract.nonessentialOperationDeclarations),
+   ]);
+ 
+   appendGateEvidenceSection("Agent Review Evidence", [

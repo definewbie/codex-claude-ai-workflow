@@ -1,0 +1,13 @@
+Dual workstream started
+Workstream: ws-20261026T142203Z-7SNA
+Stage: design
+Mode: worktree
+Original repo: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/target
+Workspace: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree
+Branch: codex/w09-okx-break-even-20261026
+
+Ledger: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA
+Workflow: agent-lifecycle-terminal-delivery@5
+Prompt language: zh-CN
+Variant: terminal-delivery
+Next: dualctl run --workdir /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree ws-20261026T142203Z-7SNA

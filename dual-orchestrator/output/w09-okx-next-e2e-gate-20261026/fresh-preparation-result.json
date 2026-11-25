@@ -1,0 +1,91 @@
+{
+  "status": "OFFLINE_INITIALIZED_AWAITING_REVIEW_AND_APPROVAL",
+  "location": {
+    "parent": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case",
+    "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/target",
+    "workspace": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree",
+    "workstream": "ws-20261026T142203Z-7SNA",
+    "ledger": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA"
+  },
+  "baseline_git_tree": "3b10c1f77f3b140d3a8ef8d8e73f7ca2dc3b7547",
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261026T142203Z-7SNA",
+    "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-context-intake_claude_brainstorm-001"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000001",
+    "updatedAt": "2026-10-26T14:22:03.577440Z",
+    "commitSequence": 1
+  },
+  "runtime_identity": {
+    "behavior.acpx.patch": "1517f828d303ea720a7a153e6dc8c33265ba1ea100d2b9260c98327b5604468c",
+    "behavior.property.DUAL_SESSION_COMPACTION_IMPLEMENT_STABILITY_CACHED_READ_TOKENS": "",
+    "behavior.property.DUAL_SESSION_COMPACTION_EXPERIMENT": "",
+    "kernel.configured": "liteflow",
+    "executable.cli": "6e928a89a364fa24271972bfae3b71fe4b9c909782bfa14ca2d4ef7a36aba3a8",
+    "kernel.effective": "liteflow",
+    "behavior.property.dual.context.governance.enabled": "",
+    "behavior.env.DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS": "",
+    "behavior.property.DUAL_SESSION_COMPACTION_STABILITY_CACHED_READ_TOKENS": "",
+    "executable.server": "34197f5f746821f87ff8e363b61995aaf57e8615c6bd57903bc32da6cda05c4e",
+    "behavior.env.DUAL_SESSION_COMPACTION_EXPERIMENT": "",
+    "behavior.env.DUAL_ACPX_QUEUE_TTL_SECONDS": "",
+    "behavior.property.dual.context.memory.enabled": "",
+    "behavior.env.DUAL_CONTEXT_GOVERNANCE_ENABLED": "",
+    "behavior.env.DUAL_SESSION_COMPACTION_IMPLEMENT_STABILITY_CACHED_READ_TOKENS": "",
+    "identity_schema": "dual-runtime-content.v1",
+    "java.runtime": "25.0.3+9-LTS-195",
+    "behavior.env.DUAL_CONTEXT_MEMORY_ENABLED": "",
+    "behavior.env.API_TIMEOUT_MS": "",
+    "behavior.acpx.upstream": "fd173f04aa1b56f9e3f5ca5190c034ddcae28792",
+    "behavior.policy.schema": "claude_execution_policy.v2",
+    "behavior.env.DUAL_ACPX_COMMAND_TIMEOUT_SECONDS": "600",
+    "behavior.env.DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS": "",
+    "behavior.env.DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS": "",
+    "behavior.env.DUAL_SESSION_COMPACTION_STABILITY_CACHED_READ_TOKENS": ""
+  },
+  "budget_input": {
+    "actual_tokens": 0,
+    "completed_calls": 0,
+    "active_seconds": 1.8570212919730693,
+    "remaining_mainline": [
+      "intake.claude_brainstorm",
+      "intake.codex_product_review",
+      "design.claude_design",
+      "design.codex_arch_review",
+      "plan.claude_plan",
+      "plan.codex_plan_review",
+      "implement.claude_implement",
+      "implement.claude_self_test_report",
+      "acceptance.codex_verifier_review"
+    ],
+    "new_extra_calls": [],
+    "measurement_complete": true,
+    "external_pending": false
+  },
+  "budget_result": {
+    "result": "ALLOW_BUDGET_ONLY",
+    "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+    "required_token_reserve": 2365000,
+    "required_call_reserve": 10,
+    "remaining_tokens": 3000000,
+    "remaining_calls": 18,
+    "warning": false
+  },
+  "process_observation": {
+    "status": "NO_UNRESOLVED_PIDS",
+    "checked_pids": [],
+    "scope": "Prior confirmed absence only; no current process-table or child-tree claim",
+    "previously_confirmed_absent": []
+  },
+  "model_calls": 0,
+  "native_sessions_created": 0,
+  "business_approvals": 0,
+  "real_run_authorized": false
+}

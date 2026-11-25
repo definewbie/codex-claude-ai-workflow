@@ -1,0 +1,28 @@
+{
+  "details" : {
+    "cleanup" : false,
+    "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "codex", "sessions", "ensure", "--name", "codex-reviewer-ws-20261023T005431Z-9YYF" ],
+    "command_id" : "ef656a2f-ff8f-4211-853c-7440c21653cc",
+    "invocation" : {
+      "agent" : "codex",
+      "cwd" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+      "executable" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "launch_environment" : {
+        "CODEX_PATH" : "",
+        "PATH" : "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.codex/tmp/arg0-macos/codex-arg0o69tg0:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS"
+      },
+      "schema" : "dual.acpx.invocation.v1",
+      "session" : "codex-reviewer-ws-20261023T005431Z-9YYF"
+    },
+    "purpose" : "session_ensure",
+    "request_options" : [ "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob" ],
+    "session" : "codex-reviewer-ws-20261023T005431Z-9YYF"
+  },
+  "kind" : "command_intent",
+  "ordinal" : 1,
+  "prepared" : {
+    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/nxe-1792717558509-31d36f10-prepared.json",
+    "sha256" : "6c21ab83b20f3f482050b99ea7a98cdc372169a35c351f61374020986f6f65e7"
+  },
+  "schema" : "dual.run.command.v1"
+}

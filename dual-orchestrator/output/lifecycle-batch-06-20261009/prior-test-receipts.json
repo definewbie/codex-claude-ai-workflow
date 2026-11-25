@@ -1,0 +1,117 @@
+{
+  "scope": "existing B05 receipts; not B06 validation or proof of untested windows",
+  "rows": [
+    {
+      "module": "dual-adapter-acpx",
+      "suite": "dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest",
+      "counts": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "report": "output/lifecycle-batch-05-20261008/scope-c/implementation/final-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.xml",
+      "sha256": "2ae21b3056c97f8aeea31de9e6952e787d1ad923864bbf75189a0dc5632256f1",
+      "historical_batch": "B05",
+      "new_execution": false
+    },
+    {
+      "module": "dual-adapter-git",
+      "suite": "dev.dual.adapter.git.GitPatchMergeServiceTest",
+      "counts": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "report": "output/lifecycle-batch-05-20261008/scope-c/implementation/final-reports/dual-adapter-git/TEST-dev.dual.adapter.git.GitPatchMergeServiceTest.xml",
+      "sha256": "64d5dd38fb9ff1bc7eb6c7df3ce16c8cb63dd284ff733df82556dfb9253b2c81",
+      "historical_batch": "B05",
+      "new_execution": false
+    },
+    {
+      "module": "dual-cli",
+      "suite": "dev.dual.cli.DeliveryMergeCommandTest",
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "report": "output/lifecycle-batch-05-20261008/scope-c/implementation/final-reports/dual-cli/TEST-dev.dual.cli.DeliveryMergeCommandTest.xml",
+      "sha256": "1bb4332f3f23ee7d2d0ac1353662042195578b68a212cee69434c1f9caac5418",
+      "historical_batch": "B05",
+      "new_execution": false
+    },
+    {
+      "module": "dual-ledger-file",
+      "suite": "dev.dual.ledger.file.DeliveryCandidateWriterTest",
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "report": "output/lifecycle-batch-05-20261008/scope-c/implementation/final-reports/dual-ledger-file/TEST-dev.dual.ledger.file.DeliveryCandidateWriterTest.xml",
+      "sha256": "c527b0d2062bb3f428693054d291662f1af7c53f3164b92694ec89933dc138f3",
+      "historical_batch": "B05",
+      "new_execution": false
+    },
+    {
+      "module": "dual-ledger-file",
+      "suite": "dev.dual.ledger.file.DeliveryMergePlanTest",
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "report": "output/lifecycle-batch-05-20261008/scope-c/implementation/final-reports/dual-ledger-file/TEST-dev.dual.ledger.file.DeliveryMergePlanTest.xml",
+      "sha256": "6993ece08f7e2c2ccb8d0209e1bdcea6d5792f359d77553d6f14d7258108fcb1",
+      "historical_batch": "B05",
+      "new_execution": false
+    },
+    {
+      "module": "dual-runtime",
+      "suite": "dev.dual.runtime.delivery.DeliveryApplicationServiceTest",
+      "counts": {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "report": "output/lifecycle-batch-05-20261008/scope-c/implementation/final-reports/dual-runtime/TEST-dev.dual.runtime.delivery.DeliveryApplicationServiceTest.xml",
+      "sha256": "806a3aaaaa4550ed4f58f74e097fbd0da27b9618f66a1d026932b60082fb42a8",
+      "historical_batch": "B05",
+      "new_execution": false
+    },
+    {
+      "module": "dual-runtime",
+      "suite": "dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest",
+      "counts": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "report": "output/lifecycle-batch-05-20261008/scope-c/implementation/final-reports/dual-runtime/TEST-dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest.xml",
+      "sha256": "e1c466c32737812ba531ad2767f548d8ba4c291ef9c1caf594c1b8b994a30006",
+      "historical_batch": "B05",
+      "new_execution": false
+    },
+    {
+      "module": "dual-server",
+      "suite": "dev.dual.server.DeliveryViewServiceTest",
+      "counts": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "report": "output/lifecycle-batch-05-20261008/scope-c/implementation/final-reports/dual-server/TEST-dev.dual.server.DeliveryViewServiceTest.xml",
+      "sha256": "394a87942cb148d6723470f3fa743e51c0d5cf63f8414f1934ec694a279bdd1d",
+      "historical_batch": "B05",
+      "new_execution": false
+    }
+  ]
+}

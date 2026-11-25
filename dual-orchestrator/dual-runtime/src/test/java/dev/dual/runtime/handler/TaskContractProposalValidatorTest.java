@@ -20,6 +20,31 @@ class TaskContractProposalValidatorTest {
     private final TaskContractProposalValidator validator = new TaskContractProposalValidator();
 
     @Test
+    void emptyRepositoryNeedsNoInventedEvidenceButRejectsControlReferences() throws Exception {
+        runGit("init");
+        runGit("config", "user.email", "dual-test@example.invalid");
+        runGit("config", "user.name", "Dual Test");
+        runGit("commit", "--allow-empty", "-m", "empty baseline");
+        var inventory = GitTrackedPathInventory.capture(workspace);
+        assertTrue(inventory.paths().isEmpty());
+        var repoMap = workspace.resolve(".agent/workstreams/ws-test/artifacts/context-governance/occurrences/node-run/repo-map.json");
+        Files.createDirectories(repoMap.getParent());
+        new com.fasterxml.jackson.databind.ObjectMapper().writeValue(repoMap.toFile(), Map.of(
+                "artifactType", "repo_map", "source", "git_tracked_inventory", "inventoryHead", inventory.head(),
+                "inventorySha256", inventory.sha256(), "inventoryPathCount", 0, "files", List.of()));
+        var binding = binding(repoMap, inventory.head(), inventory.sha256(), 0);
+        var clean = proposal(List.of(entry("src/product.py", TaskContract.ScopeOperation.CREATE)), List.of(), List.of());
+        assertTrue(validator.validate(clean, workspace).isEmpty());
+        assertTrue(validator.validateEvidenceTraceability(clean, workspace, binding).isEmpty());
+        for (var controlRef : List.of(".agent/workstreams/ws-test/artifacts/context-governance/occurrences/node-run/repo-map.json", ".git/config")) {
+            var polluted = proposal(clean.scope().included(), List.of(), List.of(controlRef));
+            assertTrue(validator.validateEvidenceTraceability(polluted, workspace, binding).stream()
+                    .anyMatch(error -> error.contains("canonical")), controlRef);
+        }
+        assertFalse(Files.exists(workspace.resolve("src/product.py")), "accepting a proposal does not create product evidence");
+    }
+
+    @Test
     void initialEvidenceMustReferenceTrackedInventory() throws Exception {
         Files.writeString(workspace.resolve("README.md"), "# fixture\n");
         var repoMap = workspace.resolve(".agent/workstreams/ws-test/artifacts/context-governance/occurrences/node-run/repo-map.json");

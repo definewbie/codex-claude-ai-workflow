@@ -1,0 +1,216 @@
+{
+  "status": "IN_PROGRESS",
+  "batch": "B03",
+  "whole_batch_pass": false,
+  "live_provider_runs": 0,
+  "native_experiments": 0,
+  "extra_agents": 0,
+  "git_commit": false,
+  "production_compile": {
+    "status": "PASS",
+    "log": "compile-all-final.log",
+    "sha256": "74404332f369d2e03742eedcc1d5e29037b6f11c2ed95ea7979edb92aa524293"
+  },
+  "maven_tests": {
+    "scope": "core and ledger only; not all modules",
+    "log": "ledger-regression-final.log",
+    "modules": [
+      {
+        "module": "dual-core",
+        "tests": 123,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suites": 16,
+        "reports": [
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.arbitration.FailureClassificationTest.xml",
+            "sha256": "f96b6190f3c3a9b27c42d6b2567b60648c17623a0a8c4c23514e865c4eeebe5c"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.contract.PhasedContractTest.xml",
+            "sha256": "79e0ae20a7bf9a40c1a5e8ab3aee976c957095c38a314626cf6c4758a83d2909"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.contract.TaskContractTest.xml",
+            "sha256": "c26556e67836d11cd1866bfa316b1c096f14b550735ecc4363713daa1ebcc63f"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.domain.PromptLanguageTest.xml",
+            "sha256": "5c21310f5d38ac9f4ef2ad75d731b8c22c04125309ac8a01dd27d1055f074bfc"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionAttemptTest.xml",
+            "sha256": "a8b694250701e56dfb2e36aa014c048b9a34a979b46ae603f0aef706416e09fa"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionFinalizerTest.xml",
+            "sha256": "de3be822ed20e45c134239d13a9ff0b34f8be61c18723e2d9f357b1a3837eb1f"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionOutcomeResolverTest.xml",
+            "sha256": "8819be002cd370aec980f6a0e3c5dd141bc3e0a16cd56820bf3079ba9f556f2f"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.id.DualIdGeneratorTest.xml",
+            "sha256": "bd6066e013f58b1c45cf87f81d578bcda888092e4435cbe6b903e4856f26a508"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.provider.ProviderBillingCsvCalibrationTest.xml",
+            "sha256": "ed188a08532a3de12a8bff3e513b6e66bd9f85b37b894715c561bb97a44dbcbc"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.provider.ProviderCachePolicyTest.xml",
+            "sha256": "93734a63cefe3e001e78fbe95ba7a02081e4e7e54885c37f93419694549d9bdc"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.provider.ProviderPricingCatalogTest.xml",
+            "sha256": "d60e7bad21a79d132dc74008f717d670589badc438581d6b2e5b7ec4267a5d60"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest.xml",
+            "sha256": "35a5f6b911f6ffa516601d2f0b7c495d6e14ba8afeccb6590239ddbedcd44499"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.workflow.EdgeConditionTest.xml",
+            "sha256": "2c17f084aa320b1e4f400ebc32081bf9506901fb955d96b208062db79808ac64"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.workflow.EdgeDefinitionTest.xml",
+            "sha256": "70d20355f685de9f3fdfbd60255d7fc25b364feb69f41b94cffa6a239387fbe1"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.workflow.HumanGateActionSemanticsTest.xml",
+            "sha256": "029e904280baa1d742ebe00dc4ecb87cbe82287803b6ec8d30818856cb6f46b6"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-core/TEST-dev.dual.core.workflow.WorkflowDefinitionTest.xml",
+            "sha256": "b4dc097eaf0a48cefde61e8da98c0e4f5e193bdbb55978155731895bce8ec763"
+          }
+        ]
+      },
+      {
+        "module": "dual-ledger-file",
+        "tests": 151,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "suites": 22,
+        "reports": [
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.CheckpointDocumentTest.xml",
+            "sha256": "55a2a32ae3159882547dc1b7f919b6e49f8dbae3b3b0ba07dc0960e00a83a290"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.ConditionalEdgeRoutingTest.xml",
+            "sha256": "85239265d2b18aabab5602f17e7671d882641ca5aaa7a09bee3d234c8a0d09dc"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.DeliveryCandidateWriterTest.xml",
+            "sha256": "719a57e69325e8b8ba08e4ef182c1111e66b7e1518645b4bf06e08f0db6c0756"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.DeliveryMergePlanTest.xml",
+            "sha256": "27786e3359c2326bd124cc2151d3b6e4463e5893b547a0c32a10da4cd9a90ade"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.ExecutionConsistencyClassifierTest.xml",
+            "sha256": "e4bb724a5f05b3f02212ec0da1e8a651492961b875350c4a08b569b9cc7e036e"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.xml",
+            "sha256": "0fec20a83029d0eeb244f5969078e2f89f1af2e4cce915a4dcf3a5f96a041a04"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.FileLedgerStoreTest.xml",
+            "sha256": "4db080d7994627b31c58b676f004bd9fa7401eaf085e3b1a22df5a6267afbce8"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.HumanActionRequestTest.xml",
+            "sha256": "c2709271c7de8e8393167a0ae89e300272859719f7fb38e77881889f1f90087d"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.IterationRefTest.xml",
+            "sha256": "ad0a97af19ccee9dd0e7158b42fc0b749363b7800a19ce1c7d287b866f149cf5"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.LedgerMigratorTest.xml",
+            "sha256": "39fc1e2cd2ccacc433ddd5549a63f8e44b489f2ecfedc6ecb4ca7891f25a326e"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.LedgerSessionTest.xml",
+            "sha256": "8f73dd680caa51228ed54825ba7c17fe5f2aca561e685dc081f549f4d91c627a"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.MetricsProjectionWriterTest.xml",
+            "sha256": "6f0c8720de6a831c9e51b643fb01372ef555137db33980d0350dcd4e449cdc11"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.xml",
+            "sha256": "441c3b9f71ccae849c240195064f27750d786cb16246bcc37b01103737766512"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.OperatorWorkspaceRegistryTest.xml",
+            "sha256": "5ce9511fece4d542196b2d19962a63a5bb194537932ef61d5e62c7e8550143e2"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.ParallelFanOutTest.xml",
+            "sha256": "24edcd6a50354df55d500c32070c81197ea2cc4b7f8a4ea0591447f67121d2dd"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.RecoveryAssessmentTest.xml",
+            "sha256": "f67d89033a7ae2e65a9b1ae58d26af23735a9bf23f48601cf8ceae7698d5611c"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.RetryFailureContextTest.xml",
+            "sha256": "e6fd218837a9d958e5e1f7efb01131a969dac05997e9fd74754c11515bf32487"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkflowCommitSequenceTest.xml",
+            "sha256": "dd910a1e35f0b1a5e2a579df431c1533ec82383271284b425148dd21e1596eea"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkflowFileLedgerTest.xml",
+            "sha256": "a6b7d27db2fc94966cbc7a1d28f106b678565b54ac642c7566b520f9bb1e2855"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkflowGateResolutionTest.xml",
+            "sha256": "788ffda1535d621714c44a2313e2f8cd4ade7d1877e4d3ea908b69600112442c"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.xml",
+            "sha256": "55f91c5d54c39d498f8075f71392ed3f052f0d5bed0ae93a5eaabee653cf52e3"
+          },
+          {
+            "path": "output/lifecycle-batch-03-20260930/implementation-20261006/reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkstreamLockTest.xml",
+            "sha256": "a68b5668f492e5d9b6c5e6711783dc2da017cabc6ab049863110b00f40c342f5"
+          }
+        ]
+      }
+    ]
+  },
+  "focused_runtime_tests": {
+    "status": "PASS",
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "log": "phased-continuation.log",
+    "runner": "run-focused-tests.py",
+    "limitations": [
+      "selected test compilation/JUnit execution while old unrelated runtime fixtures fail Maven test compilation",
+      "GOAL approval/compile supplied by explicit fixture; deterministic provider stub; no provider/native",
+      "readiness/authored/EXECUTION/approve/preparation subset; no full four-variant inline/worker delivery/recovery proof"
+    ]
+  },
+  "whole_reactor_tests": {
+    "status": "NOT_PASSED",
+    "test_compile_status": "FAIL",
+    "evidence": "current-test-compile.log",
+    "reason": "old runtime test signatures and schema/fixture migration incomplete; no skipped-test waiver"
+  },
+  "status_notes": [
+    "B01/B02 counts are not reused as this batch evidence",
+    "No W item or invariant is closed by these partial results"
+  ]
+}

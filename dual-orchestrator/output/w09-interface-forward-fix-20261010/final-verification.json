@@ -1,0 +1,31 @@
+{
+  "frozen_sources": 654,
+  "jars_match": true,
+  "original_indexed_ledger_files": 77,
+  "original_indexed_ledger_unchanged": true,
+  "all_material_json_valid": true,
+  "source_scope": {
+    "files": [
+      "dual-ledger-file/src/main/java/dev/dual/ledger/file/FailureSummaryWriter.java",
+      "dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkstreamAttentionEvaluatorTest.java",
+      "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java",
+      "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java",
+      "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java",
+      "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/SessionMetadataFixture.java",
+      "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionTransportSequenceTest.java",
+      "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java"
+    ],
+    "production_files": [
+      "dual-ledger-file/src/main/java/dev/dual/ledger/file/FailureSummaryWriter.java",
+      "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java"
+    ],
+    "baseline": "pre-repair dirty workspace, not HEAD"
+  },
+  "docs_changed": [
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md"
+  ],
+  "new_native_provider_runs": 0,
+  "new_target_created": false,
+  "committed": false,
+  "independent_review": "PENDING_CC"
+}

@@ -1,0 +1,153 @@
+[
+  {
+    "id": "read_product",
+    "name": "Read",
+    "input": {
+      "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/input.txt"
+    },
+    "allowed": true
+  },
+  {
+    "id": "write_product",
+    "name": "Write",
+    "input": {
+      "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/write-legal.txt",
+      "content": "WRITE_LEGAL"
+    },
+    "allowed": true
+  },
+  {
+    "id": "edit_product",
+    "name": "Edit",
+    "input": {
+      "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/input.txt",
+      "old_string": "INPUT_",
+      "new_string": "EDITED_"
+    },
+    "allowed": true
+  },
+  {
+    "id": "read_control",
+    "name": "Read",
+    "input": {
+      "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/.agent/record.txt"
+    },
+    "allowed": true
+  },
+  {
+    "id": "write_control",
+    "name": "Write",
+    "input": {
+      "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/.agent/record.txt",
+      "content": "BAD"
+    },
+    "allowed": false
+  },
+  {
+    "id": "edit_control",
+    "name": "Edit",
+    "input": {
+      "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/.agent/record.txt",
+      "old_string": "CONTROL_",
+      "new_string": "BAD_"
+    },
+    "allowed": false
+  },
+  {
+    "id": "write_alias",
+    "name": "Write",
+    "input": {
+      "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/alias-control",
+      "content": "BAD"
+    },
+    "allowed": false
+  },
+  {
+    "id": "bash_legal_write",
+    "name": "Bash",
+    "input": {
+      "command": "/usr/bin/printf LEGAL > /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/legal-parent.txt",
+      "timeout": 5000,
+      "description": "Bounded fixture legal_write",
+      "run_in_background": false
+    },
+    "allowed": true
+  },
+  {
+    "id": "bash_control_write",
+    "name": "Bash",
+    "input": {
+      "command": "/usr/bin/printf BAD > /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/.agent/record.txt",
+      "timeout": 5000,
+      "description": "Bounded fixture control_write",
+      "run_in_background": false
+    },
+    "allowed": false
+  },
+  {
+    "id": "bash_control_new",
+    "name": "Bash",
+    "input": {
+      "command": "/usr/bin/printf BAD > /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/.agent/new.txt",
+      "timeout": 5000,
+      "description": "Bounded fixture control_new",
+      "run_in_background": false
+    },
+    "allowed": false
+  },
+  {
+    "id": "bash_symlink_write",
+    "name": "Bash",
+    "input": {
+      "command": "/usr/bin/printf BAD > /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/alias-control",
+      "timeout": 5000,
+      "description": "Bounded fixture symlink_write",
+      "run_in_background": false
+    },
+    "allowed": false
+  },
+  {
+    "id": "bash_hardlink_write",
+    "name": "Bash",
+    "input": {
+      "command": "/usr/bin/printf BAD > /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/hardlink-control",
+      "timeout": 5000,
+      "description": "Bounded fixture hardlink_write",
+      "run_in_background": false
+    },
+    "allowed": false
+  },
+  {
+    "id": "bash_rename_control",
+    "name": "Bash",
+    "input": {
+      "command": "/bin/mv /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/.agent /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/moved-control",
+      "timeout": 5000,
+      "description": "Bounded fixture rename_control",
+      "run_in_background": false
+    },
+    "allowed": false
+  },
+  {
+    "id": "bash_delete_record",
+    "name": "Bash",
+    "input": {
+      "command": "/bin/rm /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/.agent/record.txt",
+      "timeout": 5000,
+      "description": "Bounded fixture delete_record",
+      "run_in_background": false
+    },
+    "allowed": false
+  },
+  {
+    "id": "bash_write_restore_first",
+    "name": "Bash",
+    "input": {
+      "command": "/usr/bin/printf TRANSIENT > /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/.agent/record.txt",
+      "timeout": 5000,
+      "description": "Bounded fixture write_restore_first",
+      "run_in_background": false
+    },
+    "allowed": false
+  }
+]

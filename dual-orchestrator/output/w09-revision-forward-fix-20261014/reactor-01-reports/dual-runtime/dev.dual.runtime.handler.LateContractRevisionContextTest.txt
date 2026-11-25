@@ -1,0 +1,112 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.runtime.handler.LateContractRevisionContextTest
+-------------------------------------------------------------------------------
+Tests run: 8, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 19.86 s <<< FAILURE! -- in dev.dual.runtime.handler.LateContractRevisionContextTest
+dev.dual.runtime.handler.LateContractRevisionContextTest.intermediateCompileInputsAndParentCycleFailClosed(Path) -- Time elapsed: 3.707 s <<< ERROR!
+java.io.IOException: invalid program revision binding
+	at dev.dual.runtime.handler.ContractRevisionBinding.from(ContractRevisionBinding.java:35)
+	at dev.dual.runtime.handler.ContractRevisionBinding.verifyDispatch(ContractRevisionBinding.java:41)
+	at dev.dual.runtime.handler.AgentRunCommitProtocol.lambda$qualifyDispatch$0(AgentRunCommitProtocol.java:93)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:83)
+	at dev.dual.runtime.handler.AgentRunCommitProtocol.qualifyDispatch(AgentRunCommitProtocol.java:87)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.output(AcceptanceRepairSequenceTest.java:304)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture$1.execute(AcceptanceRepairSequenceTest.java:252)
+	at dev.dual.runtime.WorkflowRuntime.executeNode(WorkflowRuntime.java:365)
+	at dev.dual.runtime.WorkflowRuntime.lambda$executeAndRecordNode$0(WorkflowRuntime.java:327)
+	at dev.dual.runtime.handler.EvidenceCollection.execute(EvidenceCollection.java:94)
+	at dev.dual.runtime.WorkflowRuntime.executeAndRecordNode(WorkflowRuntime.java:326)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveNode(WorkflowRuntime.java:236)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveSnapshot(WorkflowRuntime.java:197)
+	at dev.dual.runtime.WorkflowRuntime.resumeWithinExecution(WorkflowRuntime.java:136)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:105)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.step(AcceptanceRepairSequenceTest.java:428)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.until(AcceptanceRepairSequenceTest.java:459)
+	at dev.dual.runtime.handler.LateContractRevisionContextTest.intermediateCompileInputsAndParentCycleFailClosed(LateContractRevisionContextTest.java:155)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: invalid revision binding fields
+	at dev.dual.runtime.handler.ContractRevisionBinding.from(ContractRevisionBinding.java:29)
+	... 20 more
+
+dev.dual.runtime.handler.LateContractRevisionContextTest.historicalClarifyRejectsAmbiguousApproval(Path) -- Time elapsed: 2.603 s <<< ERROR!
+java.io.IOException: invalid program revision binding
+	at dev.dual.runtime.handler.ContractRevisionBinding.from(ContractRevisionBinding.java:35)
+	at dev.dual.runtime.handler.ContractRevisionBinding.verifyDispatch(ContractRevisionBinding.java:41)
+	at dev.dual.runtime.handler.AgentRunCommitProtocol.lambda$qualifyDispatch$0(AgentRunCommitProtocol.java:93)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:83)
+	at dev.dual.runtime.handler.AgentRunCommitProtocol.qualifyDispatch(AgentRunCommitProtocol.java:87)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.output(AcceptanceRepairSequenceTest.java:304)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture$1.execute(AcceptanceRepairSequenceTest.java:252)
+	at dev.dual.runtime.WorkflowRuntime.executeNode(WorkflowRuntime.java:365)
+	at dev.dual.runtime.WorkflowRuntime.lambda$executeAndRecordNode$0(WorkflowRuntime.java:327)
+	at dev.dual.runtime.handler.EvidenceCollection.execute(EvidenceCollection.java:94)
+	at dev.dual.runtime.WorkflowRuntime.executeAndRecordNode(WorkflowRuntime.java:326)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveNode(WorkflowRuntime.java:236)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveSnapshot(WorkflowRuntime.java:197)
+	at dev.dual.runtime.WorkflowRuntime.resumeWithinExecution(WorkflowRuntime.java:136)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:105)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.step(AcceptanceRepairSequenceTest.java:428)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.until(AcceptanceRepairSequenceTest.java:459)
+	at dev.dual.runtime.handler.LateContractRevisionContextTest.historicalClarifyRejectsAmbiguousApproval(LateContractRevisionContextTest.java:140)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: invalid revision binding fields
+	at dev.dual.runtime.handler.ContractRevisionBinding.from(ContractRevisionBinding.java:29)
+	... 20 more
+
+dev.dual.runtime.handler.LateContractRevisionContextTest.frozenRootIsMandatoryEvenAfterACompleteDraft(Path) -- Time elapsed: 2.692 s <<< ERROR!
+java.io.IOException: invalid program revision binding
+	at dev.dual.runtime.handler.ContractRevisionBinding.from(ContractRevisionBinding.java:35)
+	at dev.dual.runtime.handler.ContractRevisionBinding.verifyDispatch(ContractRevisionBinding.java:41)
+	at dev.dual.runtime.handler.AgentRunCommitProtocol.lambda$qualifyDispatch$0(AgentRunCommitProtocol.java:93)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:83)
+	at dev.dual.runtime.handler.AgentRunCommitProtocol.qualifyDispatch(AgentRunCommitProtocol.java:87)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.output(AcceptanceRepairSequenceTest.java:304)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture$1.execute(AcceptanceRepairSequenceTest.java:252)
+	at dev.dual.runtime.WorkflowRuntime.executeNode(WorkflowRuntime.java:365)
+	at dev.dual.runtime.WorkflowRuntime.lambda$executeAndRecordNode$0(WorkflowRuntime.java:327)
+	at dev.dual.runtime.handler.EvidenceCollection.execute(EvidenceCollection.java:94)
+	at dev.dual.runtime.WorkflowRuntime.executeAndRecordNode(WorkflowRuntime.java:326)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveNode(WorkflowRuntime.java:236)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveSnapshot(WorkflowRuntime.java:197)
+	at dev.dual.runtime.WorkflowRuntime.resumeWithinExecution(WorkflowRuntime.java:136)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:105)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.step(AcceptanceRepairSequenceTest.java:428)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.until(AcceptanceRepairSequenceTest.java:459)
+	at dev.dual.runtime.handler.LateContractRevisionContextTest.frozenRootIsMandatoryEvenAfterACompleteDraft(LateContractRevisionContextTest.java:108)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: invalid revision binding fields
+	at dev.dual.runtime.handler.ContractRevisionBinding.from(ContractRevisionBinding.java:29)
+	... 20 more
+
+dev.dual.runtime.handler.LateContractRevisionContextTest.reviewHumanRevisionAndHistoricalClarifyKeepDistinctParents(Path) -- Time elapsed: 2.523 s <<< ERROR!
+java.io.IOException: invalid program revision binding
+	at dev.dual.runtime.handler.ContractRevisionBinding.from(ContractRevisionBinding.java:35)
+	at dev.dual.runtime.handler.ContractRevisionBinding.verifyDispatch(ContractRevisionBinding.java:41)
+	at dev.dual.runtime.handler.AgentRunCommitProtocol.lambda$qualifyDispatch$0(AgentRunCommitProtocol.java:93)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:83)
+	at dev.dual.runtime.handler.AgentRunCommitProtocol.qualifyDispatch(AgentRunCommitProtocol.java:87)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.output(AcceptanceRepairSequenceTest.java:304)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture$1.execute(AcceptanceRepairSequenceTest.java:252)
+	at dev.dual.runtime.WorkflowRuntime.executeNode(WorkflowRuntime.java:365)
+	at dev.dual.runtime.WorkflowRuntime.lambda$executeAndRecordNode$0(WorkflowRuntime.java:327)
+	at dev.dual.runtime.handler.EvidenceCollection.execute(EvidenceCollection.java:94)
+	at dev.dual.runtime.WorkflowRuntime.executeAndRecordNode(WorkflowRuntime.java:326)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveNode(WorkflowRuntime.java:236)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveSnapshot(WorkflowRuntime.java:197)
+	at dev.dual.runtime.WorkflowRuntime.resumeWithinExecution(WorkflowRuntime.java:136)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:105)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.step(AcceptanceRepairSequenceTest.java:428)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.until(AcceptanceRepairSequenceTest.java:459)
+	at dev.dual.runtime.handler.LateContractRevisionContextTest.reviewHumanRevisionAndHistoricalClarifyKeepDistinctParents(LateContractRevisionContextTest.java:30)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: invalid revision binding fields
+	at dev.dual.runtime.handler.ContractRevisionBinding.from(ContractRevisionBinding.java:29)
+	... 20 more
+

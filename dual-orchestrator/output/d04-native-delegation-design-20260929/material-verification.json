@@ -1,0 +1,16 @@
+{
+  "baselineFiles": 1319,
+  "unchangedBaselineFiles": 1315,
+  "changedBaselineFiles": [
+    "dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "priorManifestEntriesResolved": 28,
+  "newLinksResolve": true,
+  "freezeTableAndWorkIndexUpdated": true,
+  "nativeProviderOrAgentCalls": 0,
+  "productImplementation": false,
+  "review": "author document review only; independent CC review pending"
+}

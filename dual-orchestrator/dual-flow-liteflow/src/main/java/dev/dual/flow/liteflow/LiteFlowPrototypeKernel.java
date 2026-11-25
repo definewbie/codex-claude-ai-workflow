@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 public final class LiteFlowPrototypeKernel implements FlowOrchestrationKernel, AutoCloseable {
     private final LiteFlowElCompiler compiler;
@@ -45,6 +44,15 @@ public final class LiteFlowPrototypeKernel implements FlowOrchestrationKernel, A
             FlowExecutionSnapshot snapshot,
             FlowSignal signal
     ) {
+        // LiteFlow's holder is JVM-global: per-kernel and per-workstream locks cannot protect it.
+        synchronized (FlowExecutorHolder.class) {
+            return advanceExclusive(definition, snapshot, signal);
+        }
+    }
+
+    private FlowAdvanceResult advanceExclusive(
+            WorkflowDefinition definition, FlowExecutionSnapshot snapshot, FlowSignal signal
+    ) {
         var compiled = compiler.compile(definition);
         var chainName = compiled.chainName(signal.nodeDefinitionId(), signal.outcome());
         if (chainName == null) {
@@ -73,8 +81,10 @@ public final class LiteFlowPrototypeKernel implements FlowOrchestrationKernel, A
 
     @Override
     public void close() {
-        FlowExecutorHolder.clean();
-        deleteLastRuleFile();
+        synchronized (FlowExecutorHolder.class) {
+            FlowExecutorHolder.clean();
+            deleteLastRuleFile();
+        }
     }
 
     private FlowExecutor loadExecutor(String xml) {

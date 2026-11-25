@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261011T044656Z-BMDJ",
+  "node_instance_id" : "node-design-codex_arch_review-020",
+  "run_id" : "run-1791701323469",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/planned-report.json",
+      "sha256" : "19c4ff2ae32a7a6f6d5abbc5ef328c439fa1965e288a3bd064612401e493a229"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/agent-capability-catalog.json",
+      "sha256" : "fbe3c9d553a28b566f23bf1057d466c2290e9ae0ad97d40930bbbec85af14521"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/read-reuse-contract.json",
+      "sha256" : "4a892b03c88766f8829818fd672675f97c5d847824d866141bc166c533c4d0da"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/working-set.json",
+      "sha256" : "7a4061c656317f025a62065ed128d8fc316d1f4e913a7a6c32d90995aecff6f0"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/file-relevance-plan.json",
+      "sha256" : "e7fe5fac686d7c184d482044bcb62cc9f11e57292bbf1e5ae043b34d32ff66de"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/stage-scope-policy.json",
+      "sha256" : "b4255606271cb76b204d6f01ab45b733bc94f17e4b99ed28f74e5bfa2c2f544e"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/file-summaries.json",
+      "sha256" : "18e16454749f30078dcc8e228f4e8948b53420231b9a410a3b94c8c278574191"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/repo-map.json",
+      "sha256" : "7ace32a50f16f75115e4f2180fc5f0f8c02969c9fd6eb1a1549fe0d7d78ac011"
+    }
+  }
+}

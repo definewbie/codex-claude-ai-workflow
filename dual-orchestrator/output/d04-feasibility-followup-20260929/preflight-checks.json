@@ -1,0 +1,34 @@
+{
+  "status": "PASS_OFFLINE",
+  "checks": [
+    {
+      "file": "event-guard.mjs",
+      "syntax": "PASS"
+    },
+    {
+      "file": "test-event-guard.mjs",
+      "syntax": "PASS"
+    },
+    {
+      "file": "model-probe.mjs",
+      "syntax": "PASS"
+    },
+    {
+      "file": "run-probe.py",
+      "syntax": "PASS"
+    },
+    {
+      "dryRun": {
+        "status": "PREPARED_NOT_RUN",
+        "model": "claude-sonnet-5",
+        "userMessages": 0
+      }
+    },
+    {
+      "missingRecoveryConfirmation": "REFUSED_BEFORE_START"
+    }
+  ],
+  "providerTasks": 0,
+  "serverAuthentication": "UNVERIFIED",
+  "liveStopTiming": "UNPROVEN"
+}

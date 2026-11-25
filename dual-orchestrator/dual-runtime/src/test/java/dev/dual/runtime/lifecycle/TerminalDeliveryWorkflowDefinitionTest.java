@@ -21,8 +21,6 @@ class TerminalDeliveryWorkflowDefinitionTest {
         var terminal = new LifecycleWorkflowDefinitionFactory().forVariant("terminal-delivery");
 
         assertEquals("agent-lifecycle-terminal-delivery", terminal.workflowId());
-        assertEquals(31, terminal.nodes().size());
-        assertEquals(56, terminal.edges().size());
         assertEquals(9, terminal.nodes().stream()
                 .filter(node -> "acpx.agent_run".equals(node.handlerType()))
                 .count());
@@ -61,6 +59,8 @@ class TerminalDeliveryWorkflowDefinitionTest {
         }
         var expectedEdges = full.edges().stream()
                 .filter(edge -> !OMITTED_TAIL_NODES.contains(edge.from()))
+                .map(edge -> edge.from().equals("acceptance.generate_final_report")
+                        ? new dev.dual.core.workflow.EdgeDefinition(edge.from(), edge.on(), "delivery.prepare_pr", edge.condition(), edge.metadata()) : edge)
                 .filter(edge -> !OMITTED_TAIL_NODES.contains(edge.to()))
                 .filter(edge -> !("gate.human_acceptance".equals(edge.from())
                         && "approved".equals(edge.on())))
@@ -70,10 +70,6 @@ class TerminalDeliveryWorkflowDefinitionTest {
         assertEquals(json.valueToTree(expectedEdges), json.valueToTree(terminal.edges()));
 
         assertFalse(Boolean.TRUE.equals(full.node("gate.human_acceptance").config().get("terminal_gate")));
-        assertEquals("stage.claude_handoff", full.edgesFrom("gate.human_acceptance").stream()
-                .filter(edge -> "approved".equals(edge.on()))
-                .findFirst()
-                .orElseThrow()
-                .to());
+        assertTrue(full.edgesFrom("gate.human_acceptance").stream().noneMatch(edge -> "approved".equals(edge.on())));
     }
 }

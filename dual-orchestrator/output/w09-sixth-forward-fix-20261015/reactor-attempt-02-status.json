@@ -1,0 +1,6 @@
+{
+  "status": "INTERRUPTED_NOT_ACCEPTANCE",
+  "exit": 130,
+  "reason": "Self-review found numeric jsonrpc 2.0 coerced to text by existing helper; align new frame guard with observer string type before final full run",
+  "sources_modified_while_running": false
+}

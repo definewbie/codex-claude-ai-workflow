@@ -1,0 +1,37 @@
+Table 3-2. RL concepts
+
+ Concept      What it means        Why it matters for agents
+
+ Reward      A signal that tells the agent  Rewards close the loop
+                  whether an outcome was     between action and
+                good or bad.                consequence. Without them,
+                                                  the agent has no sense of
+                                                  progress.
+
+ Trajectory       The full sequence of     A trajectory captures how the
+                   reasoning steps, actions,      agent reached a decision, not
+                 and tool calls that lead to      just what it decided.
+                 an outcome.
+
+ Rollout      A complete run of one or     Rollouts record the agent’s
+                more trajectories for a task.   experiences so they can be
+                                           compared, scored, and used for
+                                                    learning.
+
+ Policy          The model’s internal      RL updates the policy so the
+                   decision rule that maps       agent makes better choices
+                   context to the next action.    over time.
+
+ Reward or     A model that evaluates      Turns raw outcomes into
+ judge model       trajectories and assigns       learning signals that drive
+                  rewards based on quality or  improvement.
+                    correctness.
+
+ Relative         Comparing multiple        Removes the need for
+ evaluation         rollouts to decide which      handcrafted rewards and
+                  performed best.             allows self-improvement from
+                                             comparison.
+
+
+The agent doesn’t need a teacher to label every step. It only needs a way to
+compare its own trajectories and decide which ones lead to better reasoning. In

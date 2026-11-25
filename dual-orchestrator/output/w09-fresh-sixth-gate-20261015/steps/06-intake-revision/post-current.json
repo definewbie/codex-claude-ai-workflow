@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "workstreamId": "ws-20261014T234009Z-RN9X",
+  "workflowInstanceId": "wf-ws-20261014T234009Z-RN9X",
+  "workflowId": "agent-lifecycle-terminal-delivery",
+  "definitionVersion": 5,
+  "status": "WAITING_FOR_RECOVERY",
+  "activeNodeInstanceIds": [
+    "node-intake-claude_brainstorm-006"
+  ],
+  "openGateIds": [
+    "recovery-node-intake-claude_brainstorm-006"
+  ],
+  "lastEventId": "evt-000008",
+  "updatedAt": "2026-10-14T23:45:06.478858Z",
+  "commitSequence": 28
+}

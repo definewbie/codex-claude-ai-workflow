@@ -1,0 +1,25 @@
+{
+  "kind": "ANALYSIS_ONLY_NOT_RUN_AUTHORITY",
+  "files": {
+    "preservation-before.json": {
+      "sha256": "1e5e689d7c767aed93a4983765ca47a3afb10359f7e8843b1ad92130d40d4167",
+      "bytes": 973743
+    },
+    "preservation-result.json": {
+      "sha256": "80ab34bd850db35623efa0f89065edfce214ae03f2101ec32d1f3e4a51e6e472",
+      "bytes": 1970
+    },
+    "readonly-comparison.json": {
+      "sha256": "85bd2c4e9f1902cdf218d78b62c471c1d2764b6b230a178dbc03bc2c0805a77f",
+      "bytes": 9272
+    },
+    "assessment.md": {
+      "sha256": "8c2613446d85280ba39f19995904db431f1c4e80fe903a05d71929f0ea62251b",
+      "bytes": 16968
+    },
+    "source-index.json": {
+      "sha256": "b27e4309ae62503aee10d3c5a07a249fbd57af9365682edb3ddea3637375919b",
+      "bytes": 12208
+    }
+  }
+}

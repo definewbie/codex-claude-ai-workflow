@@ -176,11 +176,11 @@ Token source meanings:
 Run:
 
 ```bash
-./scripts/smoke-test.sh --case lifecycle --cleanup
+rtk proxy mvn -q clean test
 dualctl doctor --workdir /path/to/repo
 ```
 
-If the controlled smoke passes but the public benchmark fails, inspect the
+If offline regression passes but a separately approved public benchmark fails, inspect the
 benchmark report under:
 
 ```text

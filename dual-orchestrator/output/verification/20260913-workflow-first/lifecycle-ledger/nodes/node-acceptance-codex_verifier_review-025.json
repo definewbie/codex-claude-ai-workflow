@@ -1,0 +1,64 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-acceptance-codex_verifier_review-025",
+  "nodeDefinitionId" : "acceptance.codex_verifier_review",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-acceptance",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/context/node-context-acceptance_codex_verifier_review-024.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/context/node-context-acceptance_codex_verifier_review-024.json" ],
+  "inputTransition" : {
+    "required" : true,
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "transition_type" : "normal",
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315516067/outputs/acceptance-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315516067/outputs/acceptance-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315516067/outputs/acceptance-codex-review.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-025-run-1789315516067/binding.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315516067/outputs/acceptance-codex-review.contract.json" ],
+  "result" : {
+    "run_id" : "run-1789315516067",
+    "run_metadata" : ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315516067/run.json",
+    "agent" : "codex",
+    "session" : "codex-reviewer-ws-20260913T160342Z-TVXE",
+    "exit_code" : 0,
+    "transcript_ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315516067/outputs/acceptance-codex-review.transcript.log",
+    "output_complete" : true,
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-025-run-1789315516067/binding.json",
+    "repository_fact_binding_sha256" : "50797684d51c94161c6b04308baf6ba230879b02da07f1e54572f201086a6b67",
+    "process_usability" : "EXITED_ZERO",
+    "adapter_signals" : [ ],
+    "decision" : "ACCEPT",
+    "summary" : "Controlled verifier accepted the implementation evidence.",
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315516067/outputs/acceptance-codex-review.contract.json",
+    "contract_sidecar_sha256" : "aa2492cb591ebb8a2068d81144d6509d197a93228c84dfef220013e0f8229939",
+    "agent_execution_result_contract" : {
+      "present" : true,
+      "valid" : true,
+      "decision" : "ACCEPT",
+      "summary" : "",
+      "validationError" : ""
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "acceptance_review",
+      "required" : true,
+      "present" : true,
+      "valid" : true,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "agent_execution_outcome" : {
+      "status" : "SUCCESS",
+      "primaryReason" : "completed",
+      "nodeMaySucceed" : true,
+      "retryPolicy" : "NONE",
+      "recoveryCategory" : "NONE",
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315516048-b71d9f56",
+  "startedAt" : "2026-09-13T16:05:16.061932Z",
+  "finishedAt" : "2026-09-13T16:05:26.461071Z"
+}

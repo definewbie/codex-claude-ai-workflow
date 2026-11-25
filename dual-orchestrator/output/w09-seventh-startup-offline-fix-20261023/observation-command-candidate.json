@@ -1,0 +1,41 @@
+{
+  "status": "NOT_AUTHORIZED_NOT_RUN",
+  "source_intent": "output/w09-seventh-gate-calibrated-20261022/stopped-ledger-snapshot/runs/run-1792682394836/outputs/nxe-1792682394810-11c05b13-command-5bb7ee91-607f-4620-9a2e-891b9ee5bc68-intent.json",
+  "source_sha256": "6722a667c591fd6905657ba37fee9f82a16a1b4eb43b7565db57ad143a711e26",
+  "argv": [
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+    "--verbose",
+    "--prompt-retries",
+    "1",
+    "--approve-reads",
+    "--non-interactive-permissions",
+    "fail",
+    "--permission-policy",
+    "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}",
+    "--allowed-tools",
+    "Read,Grep,Glob",
+    "--no-terminal",
+    "--claude-execution-policy-ref",
+    ".agent/workstreams/ws-20261022T150557Z-Y2KB/runs/run-1792682394836/execution-authority/claude-execution-policy.json",
+    "--claude-execution-policy-sha256",
+    "ca7ed0e1f716667cdbc3f0890171c49b4f349dca38dffd458e29dc0eba31d2c2",
+    "claude",
+    "sessions",
+    "new",
+    "--name",
+    "claude-bootstrap-observe-20261023-pending-approval"
+  ],
+  "cwd": "/private/tmp/dual-w09-newlines-20261022-offline-07/worktree",
+  "changes": [
+    "insert --verbose",
+    "replace session name with independent diagnostic name"
+  ],
+  "new_session_limit": 1,
+  "prompt_request_limit": 0,
+  "outer_wait_seconds": 45,
+  "cleanup_budget_seconds": 15,
+  "automatic_90_second_attempt": false,
+  "existing_permission_policy_role": "unchanged restriction input for separately authorized diagnostic; not renewed run/workstream authority",
+  "environment_note": "recheck actual PATH/client/config and policy bytes before run; no secret values copied here",
+  "execution_method": "NOT_ASSEMBLED; authorization and offline no-prompt/timeout/cleanup verification required before native execution"
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792717621229-41527a96",
+  "agentTaskId" : "agt-1792717621224-15a0b1e1",
+  "workflowExecutionId" : "wfe-1792717621154-92521017",
+  "nodeInstanceId" : "node-intake-decision-005",
+  "nodeDefinitionId" : "intake.decision",
+  "handlerType" : "review.decision",
+  "status" : "SUCCEEDED",
+  "pid" : 74106,
+  "outcome" : "READY_FOR_PRODUCT_REVIEW",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "input_identity" : "8358d0a7824bd85dbe78e4a15f9aa7e465d0419a21b9259a1224a1e055151bf1",
+      "executor_pid" : 74106,
+      "executor_started_at" : "2026-10-23T01:07:00.039Z"
+    },
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "source" : "contract-sidecar",
+    "summary" : "提案完整保留用户需求、验收证据要求和实施授权边界，可以进入后续目标审批与设计计划。",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-23T01:07:01.228939Z",
+  "finishedAt" : "2026-10-23T01:07:01.273646Z",
+  "durationMs" : 44
+}

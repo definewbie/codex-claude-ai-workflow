@@ -1,0 +1,5 @@
+{
+  "status": "ABSENT",
+  "matching_processes": [],
+  "scope": "owned group and named local workspace/session only; not arbitrary or remote descendants"
+}

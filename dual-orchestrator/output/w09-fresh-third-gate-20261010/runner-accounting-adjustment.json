@@ -1,0 +1,12 @@
+{
+  "old_sha256": "56952bbf536c2db0dae2b3f729304e09580f8ebdadfd38a0c35563481eab313c",
+  "new_sha256": "a315633b952e4f62201e1dfc796e9eaf86695d47aaf237e8f81f56b1096b9271",
+  "reason": "Replace prior conservative two-per-run reserve with actual fixed occurrence count so a legal revision does not consume fictional calls; still reserve two for next dispatch",
+  "production_changes": 0,
+  "authorized_limits_changed": false,
+  "currently_loaded_runner_unaffected": true,
+  "status": "WITHDRAWN_BEFORE_ANY_EXECUTION",
+  "reason_for_withdrawal": "Retain the starting observer byte identity; if its conservative reservation becomes restrictive, report actual evidence rather than altering a running Gate harness",
+  "restored_sha256": "56952bbf536c2db0dae2b3f729304e09580f8ebdadfd38a0c35563481eab313c",
+  "new_observer_executions": 0
+}

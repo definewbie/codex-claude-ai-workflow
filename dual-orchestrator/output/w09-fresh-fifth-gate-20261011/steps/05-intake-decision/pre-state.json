@@ -1,0 +1,49 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261011T141651Z-MBC2",
+    "workflowInstanceId": "wf-ws-20261011T141651Z-MBC2",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-intake-decision-005"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000005",
+    "updatedAt": "2026-10-11T14:21:50.596466Z",
+    "commitSequence": 19
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-intake-decision-005",
+    "nodeDefinitionId": "intake.decision",
+    "kind": "DECISION",
+    "handlerType": "review.decision",
+    "status": "READY",
+    "stageId": "stage-intake",
+    "iterationId": "iter-001",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.stderr.log",
+      ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.transcript.log",
+      ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.json",
+      ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791728450947/binding.json",
+      ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.contract.json"
+    ],
+    "inputTransition": {
+      "source_node_instance_id": "node-intake-codex_product_review-004",
+      "source_node_sha256": "e6558650289127bbda8db2f165352b1725495311cabd8456f452099e923d2fb5",
+      "purpose": "Seed the first Claude intake run with repo-scope context.",
+      "condition": "unconditional",
+      "transition_type": "normal",
+      "required": true
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 157.004
+}

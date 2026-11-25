@@ -1,0 +1,81 @@
+{
+  "status": "PASS_SINGLE_CLEAN_REACTOR",
+  "exit": 0,
+  "totals": {
+    "tests": 1790,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": 208
+  },
+  "modules": [
+    {
+      "module": "dual-adapter-acpx",
+      "tests": 492,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 39
+    },
+    {
+      "module": "dual-adapter-git",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 2
+    },
+    {
+      "module": "dual-cli",
+      "tests": 96,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 27
+    },
+    {
+      "module": "dual-core",
+      "tests": 126,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 16
+    },
+    {
+      "module": "dual-flow-liteflow",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 4
+    },
+    {
+      "module": "dual-ledger-file",
+      "tests": 161,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 23
+    },
+    {
+      "module": "dual-runtime",
+      "tests": 807,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 83
+    },
+    {
+      "module": "dual-server",
+      "tests": 82,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 14
+    }
+  ],
+  "source_before_after_equal": true,
+  "source_input_count": 656,
+  "native_provider_calls": 0,
+  "not_aggregated_with_focused_or_offline_proofs": true
+}

@@ -1,0 +1,11 @@
+
+> acpx@0.13.2 lint /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source
+> oxlint --type-aware --deny-warnings src scripts examples test conformance && pnpm run lint:persisted-key-casing && pnpm run lint:flow-schema-terms
+
+src/cli/queue/permission-replies.ts:130:8: error eslint(complexity): method `reply` has a complexity of 10. Maximum allowed is 8.
+test/permission-replies.test.ts:231:22: error eslint(curly): Expected { after 'if' condition. help: Replace `socket.destroy();` with `{socket.destroy();}`.
+src/acp/client.ts:2035:45: error eslint(complexity): private async method `handleExactPermissionRequest` has a complexity of 10. Maximum allowed is 8.
+src/cli/queue/messages.ts:545:1: error eslint(complexity): function `parseSubmitRequest` has a complexity of 9. Maximum allowed is 8.
+test/claude-execution-policy.test.ts:25:21: error typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+test/claude-execution-policy.test.ts:113:21: error typescript(no-unnecessary-type-assertion): This assertion is unnecessary since it does not change the type of the expression.
+ ELIFECYCLE  Command failed with exit code 1.

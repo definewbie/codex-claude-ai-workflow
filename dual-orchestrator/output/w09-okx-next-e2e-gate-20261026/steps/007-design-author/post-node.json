@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-design-claude_design-008",
+  "nodeDefinitionId": "design.claude_design",
+  "kind": "TASK",
+  "handlerType": "acpx.agent_run",
+  "status": "COMPLETED",
+  "stageId": "stage-design",
+  "iterationId": "iter-001",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/task-contract.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/task-contract.md",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/contract-resolution.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/contract-resolution.md"
+  ],
+  "inputTransition": {
+    "required": true,
+    "transition_type": "normal",
+    "condition": "unconditional",
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256": "afb979cee6fceda9b5f7c91d91fbb471505951c2d9e6fce7e11883919986b76e",
+    "source_node_instance_id": "node-contract-compile-007"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-design-claude_design-008-run-1793027503466/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.contract.json"
+  ],
+  "result": {
+    "adapter_signals": [],
+    "agent": "claude",
+    "agent_execution_artifact_contract_results": [
+      {
+        "contractType": "design_result",
+        "errorCode": "",
+        "errorMessage": "",
+        "path": "",
+        "present": true,
+        "required": true,
+        "valid": true
+      }
+    ],
+    "agent_execution_outcome": {
+      "nodeMaySucceed": true,
+      "operatorMessage": "The agent produced valid result and artifact evidence.",
+      "primaryReason": "completed",
+      "recoveryCategory": "NONE",
+      "retryPolicy": "NONE",
+      "secondarySignals": [],
+      "status": "SUCCESS"
+    },
+    "agent_execution_result_contract": {
+      "decision": "READY_FOR_ARCH_REVIEW",
+      "present": true,
+      "summary": "",
+      "valid": true,
+      "validationError": ""
+    },
+    "contract_sidecar_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.contract.json",
+    "contract_sidecar_sha256": "bb4d8fa682a7c26b7070ce7d5e8421492e98338fc36996f93c4c03d084c02a95",
+    "decision": "READY_FOR_ARCH_REVIEW",
+    "exit_code": 0,
+    "output_complete": true,
+    "permission_assessments": [],
+    "process_usability": "EXITED_ZERO",
+    "repository_fact_binding_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-design-claude_design-008-run-1793027503466/binding.json",
+    "repository_fact_binding_sha256": "a2754073edd7c65d7439e1968da9a716bd693b6483deddc80cd4549662ed8e58",
+    "run_id": "run-1793027503466",
+    "run_metadata": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/run.json",
+    "session": "claude-main-ws-20261026T142203Z-7SNA-run-1793027503466",
+    "summary": "在 PhaseOneAssessmentService 既有充分证据分支内新增与增量比较同可用条件的“90 天累计资金费率追平阈值”typed 字段，CLI 只读展示并附中文使用说明与配套测试。",
+    "transcript_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.transcript.log",
+    "completion_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/nxe-1793027503427-1b98a159-completion.json",
+    "completion_sha256": "9ce1bd0cfe8a9f12d1ca6cd4c43945aca4d3bb8582ea23be16b899c3514cfed2"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1793027503427-1b98a159",
+  "startedAt": "2026-10-26T15:11:43.438070Z",
+  "finishedAt": "2026-10-26T15:18:00.516501Z"
+}

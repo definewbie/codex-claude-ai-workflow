@@ -1,0 +1,30 @@
+{
+  "captured_at": "2026-10-22T23:15:45.989144+08:00",
+  "status": "PASS_FULL_BYTES_SNAPSHOTTED_AND_VERIFIED",
+  "files": [
+    {
+      "source": "/Users/kriswang/.codex/config.toml",
+      "snapshot": "private-baseline/config.toml",
+      "bytes": 6891,
+      "sha256": "61caf49514401ce6ffb089620de56ecdc9f1a22db4d6a0900cc276f234752452",
+      "matches_reviewed_launch_identity": true,
+      "source_before_after_unchanged": true,
+      "snapshot_mode": "0o600"
+    },
+    {
+      "source": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "snapshot": "private-baseline/codex.bin",
+      "bytes": 249449504,
+      "sha256": "9394a943e3fce54f998ecc150eb0b7d6e22ce0da48e5063c59b4883e80aeaecd",
+      "matches_reviewed_launch_identity": true,
+      "source_before_after_unchanged": true,
+      "snapshot_mode": "0o600"
+    }
+  ],
+  "snapshot_directory_mode": "0o700",
+  "configuration_contents_printed": false,
+  "native_executed": false,
+  "historical_whole_config_equivalence": "NOT_PROVEN",
+  "live_client_compatibility": "NOT_RUN",
+  "future_use": "Byte comparison baseline only; not a rollback, version lock or execution permission"
+}

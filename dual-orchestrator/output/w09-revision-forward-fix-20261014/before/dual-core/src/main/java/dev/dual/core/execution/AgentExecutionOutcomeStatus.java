@@ -1,0 +1,12 @@
+package dev.dual.core.execution;
+
+public enum AgentExecutionOutcomeStatus {
+    SUCCESS,
+    SUCCESS_WITH_WARNINGS,
+    CONTRACT_FAILED,
+    OUTPUT_INCOMPLETE,
+    RECOVERABLE_ADAPTER_FAILURE,
+    NON_RECOVERABLE_ADAPTER_FAILURE,
+    TIMEOUT,
+    INTERRUPTED
+}

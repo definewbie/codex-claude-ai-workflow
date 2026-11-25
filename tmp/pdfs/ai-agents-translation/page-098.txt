@@ -1,0 +1,16 @@
+   Defines a user prompt asking for fintech licensing details in Switzerland
+
+   Streams the results from the swarm, showing the handoff-driven
+   workflow in action
+
+The run produces three clean bullet points with references, citing official
+Swiss regulator pages and trusted financial sources. However, if the writer
+finds the evidence too thin, it can trigger a return handoff to research. The
+full cycle takes just about 30 seconds to gather the information and generate
+the final structured output.
+
+The supervisor, hierarchical, and swarm architectures from this section
+show how different coordination strategies affect MASs. Supervisors
+provide centralized control, hierarchies allow scalable organization into
+teams of teams, and swarms emphasize flexible peer-to-peer collaboration.
+Table 2-4 compares these patterns and highlights when to use each one.

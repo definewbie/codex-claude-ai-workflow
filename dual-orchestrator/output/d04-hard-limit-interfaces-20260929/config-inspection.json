@@ -1,0 +1,67 @@
+{
+  "binary": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+  "binarySha256": "b973d440acac501fd2594a43e7ca9ce41e0a65b9dfb28d0d7a7837c99e1261e3",
+  "scope": "config parser/features list only; no turn or tool dispatch",
+  "results": [
+    {
+      "name": "boolean",
+      "command": [
+        "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+        "--strict-config",
+        "-c",
+        "features.multi_agent=false",
+        "-c",
+        "features.multi_agent_v2=false",
+        "features",
+        "list"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Error: `--strict-config` is not supported for `codex features`\n"
+    },
+    {
+      "name": "structured",
+      "command": [
+        "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+        "--strict-config",
+        "-c",
+        "features.multi_agent=false",
+        "-c",
+        "features.multi_agent_v2.enabled=false",
+        "features",
+        "list"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Error: `--strict-config` is not supported for `codex features`\n"
+    },
+    {
+      "name": "zero_limit",
+      "command": [
+        "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+        "--strict-config",
+        "-c",
+        "agents.max_concurrent_threads_per_session=0",
+        "features",
+        "list"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Error: `--strict-config` is not supported for `codex features`\n"
+    },
+    {
+      "name": "global_tools",
+      "command": [
+        "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+        "--strict-config",
+        "-c",
+        "enabled_tools=[]",
+        "features",
+        "list"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Error: `--strict-config` is not supported for `codex features`\n"
+    }
+  ]
+}

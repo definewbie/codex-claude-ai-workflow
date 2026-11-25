@@ -1,0 +1,15 @@
+{
+  "schemaVersion" : 1,
+  "gateId" : "recovery-node-intake-claude_brainstorm-006",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-006",
+  "gateType" : "recovery.review",
+  "status" : "open",
+  "allowedActions" : [ "retry", "abort" ],
+  "openedAt" : "2026-10-11T14:24:29.050426Z",
+  "resolvedAt" : null,
+  "result" : {
+    "node" : "intake.claude_brainstorm",
+    "node_status" : "FAILED",
+    "outcome" : "required_artifact_contract_failed"
+  }
+}

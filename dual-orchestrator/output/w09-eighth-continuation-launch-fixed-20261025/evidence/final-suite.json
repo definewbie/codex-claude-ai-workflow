@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "single_run": true,
+  "exit": 0,
+  "tests": 38,
+  "failures": 0,
+  "elapsed_seconds": 2.255813291994855,
+  "python": "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13",
+  "python_sha256": "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+  "before_inputs": {
+    "check_budget.py": "ec44b480ce3fad03aad83a808a717f41461a465e778ad6cc9054738e5d6c72d0",
+    "pre-dispatch-recheck.py": "5a65641cfa07e3b12613dfb1c16d3ac6da40de6d68e998da026a539542c9ba7f",
+    "process_check.py": "4e3fdc7e9aad73124fe5050929d94a3cace3852afd78e9ac7e5f694e2cedad33",
+    "test_gate_observer.py": "5d6a067af41aa8944b4dbd482dac43e9c017920376223d1fe662f2d03e580232",
+    "continuation.py": "00a9676dc147a1442b3801944d07e8e1997c57ab7e40c0c512d1d2cbf7823082",
+    "run-one-step.py": "fb337087a18c6755ea8ca1787234bfc59b76ea650a36dfd097c475be5b2407b0",
+    "gate_support.py": "22b709c9e5fa22abd7fdc9059ad9a988a8b8923d1600aa477f91f3f191ec09d5",
+    "test_continuation.py": "2609973b100ad6501f4ffd69405b54297e72a78d773c6af31630e860c8aa10e8",
+    "budget.json": "9c326c7191d9f7a60ef768e16cb712507de653183a7b4dd7cb72f06e87873ea5",
+    "budget-dry-run.json": "5d18bccfa54b10c662675b787b28b5bba469d40addaccc09507e24d1b833b1bf"
+  },
+  "after_inputs": {
+    "check_budget.py": "ec44b480ce3fad03aad83a808a717f41461a465e778ad6cc9054738e5d6c72d0",
+    "pre-dispatch-recheck.py": "5a65641cfa07e3b12613dfb1c16d3ac6da40de6d68e998da026a539542c9ba7f",
+    "process_check.py": "4e3fdc7e9aad73124fe5050929d94a3cace3852afd78e9ac7e5f694e2cedad33",
+    "test_gate_observer.py": "5d6a067af41aa8944b4dbd482dac43e9c017920376223d1fe662f2d03e580232",
+    "continuation.py": "00a9676dc147a1442b3801944d07e8e1997c57ab7e40c0c512d1d2cbf7823082",
+    "run-one-step.py": "fb337087a18c6755ea8ca1787234bfc59b76ea650a36dfd097c475be5b2407b0",
+    "gate_support.py": "22b709c9e5fa22abd7fdc9059ad9a988a8b8923d1600aa477f91f3f191ec09d5",
+    "test_continuation.py": "2609973b100ad6501f4ffd69405b54297e72a78d773c6af31630e860c8aa10e8",
+    "budget.json": "9c326c7191d9f7a60ef768e16cb712507de653183a7b4dd7cb72f06e87873ea5",
+    "budget-dry-run.json": "5d18bccfa54b10c662675b787b28b5bba469d40addaccc09507e24d1b833b1bf"
+  },
+  "native_provider_calls": 0,
+  "real_java_steps": 0,
+  "scope": "26 full operator assembly tests with synthetic usage seam and disposable local process chain; 12 observer protocol tests. Not real Java/native/provider E2E.",
+  "not_added_to_count": [
+    "21 budget arithmetic",
+    "4 expected mutant failures",
+    "historical product 1813/210",
+    "prior 17-process candidate suite"
+  ]
+}

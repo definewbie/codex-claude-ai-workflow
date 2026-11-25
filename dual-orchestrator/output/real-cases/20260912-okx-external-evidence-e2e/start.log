@@ -1,0 +1,13 @@
+Dual workstream started
+Workstream: ws-20260911T231749Z-GCTW
+Stage: design
+Mode: worktree
+Original repo: /Users/kriswang/work/projects/ai/okx-btc-k-line-demo
+Workspace: /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260911T231749Z-GCTW
+Branch: codex/okx-external-evidence-20260912
+
+Ledger: /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260911T231749Z-GCTW/.agent/workstreams/ws-20260911T231749Z-GCTW
+Workflow: agent-lifecycle-small-plan-human-review-experiment@1
+Prompt language: zh-CN
+Workflow source: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json
+Next: dualctl run --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260911T231749Z-GCTW ws-20260911T231749Z-GCTW

@@ -1,0 +1,10 @@
+{
+  "suite": "test_process_check",
+  "tests": 7,
+  "exit": 0,
+  "includes": "Simulated failure pairs, cold CLI, actual candidate consumer fragments; actual ps pairs separately recorded",
+  "native_calls": 0,
+  "provider_calls": 0,
+  "new_case_created": false,
+  "maven_rerun": false
+}

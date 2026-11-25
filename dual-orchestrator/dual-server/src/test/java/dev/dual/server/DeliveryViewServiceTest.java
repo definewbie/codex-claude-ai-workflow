@@ -28,11 +28,10 @@ class DeliveryViewServiceTest {
 
         var view = service.view(fixture.sourceWorktree(), fixture.workstreamId());
 
-        assertEquals("BLOCKED", view.get("status"));
+        assertEquals("INVALID", view.get("status"));
         assertEquals(false, view.get("canMerge"));
-        assertEquals("LEGACY_NOT_BOUND", view.get("reasonCode"));
-        assertTrue(String.valueOf(view.get("targetRepo")).endsWith("target-repo"));
-        assertTrue(String.valueOf(view.get("operatorNextAction")).contains("边界错误"));
+        assertEquals("LEDGER_INVALID", view.get("reasonCode"));
+        assertFalse(Files.exists(fixture.paths().deliveryMergePlanJson()));
     }
 
     @Test
@@ -42,9 +41,9 @@ class DeliveryViewServiceTest {
 
         var view = service.view(fixture.sourceWorktree(), fixture.workstreamId());
 
-        assertEquals("BLOCKED", view.get("status"));
+        assertEquals("INVALID", view.get("status"));
         assertEquals(false, view.get("canMerge"));
-        assertEquals("LEGACY_NOT_BOUND", view.get("reasonCode"));
+        assertEquals("LEDGER_INVALID", view.get("reasonCode"));
     }
 
     @Test
@@ -52,40 +51,91 @@ class DeliveryViewServiceTest {
         var fixture = createDeliveryFixture("ws-delivery-merge", "ACCEPT");
         var service = new DeliveryViewService(objectMapper);
 
-        var view = service.merge(fixture.sourceWorktree(), fixture.workstreamId());
-
-        assertEquals("FAILED", view.get("status"));
-        assertEquals(false, view.get("canMerge"));
-        assertTrue(Files.isRegularFile(fixture.paths().deliveryMergePlanJson()));
+        org.junit.jupiter.api.Assertions.assertThrows(java.io.IOException.class,
+                () -> service.merge(fixture.sourceWorktree(), fixture.workstreamId()));
+        assertFalse(Files.exists(fixture.paths().deliveryMergePlanJson()), "invalid ledger must fail before a delivery intent or Git effect");
         assertTrue(git(fixture.targetRepo(), "diff", "--cached", "--", "README.md").isBlank());
     }
 
     @Test
     void runningWorkflowIsVisibleAsNotYetDeliverableWithoutMutationCommands() throws Exception {
-        var fixture = createDeliveryFixture("ws-delivery-running", "ACCEPT");
-        Files.writeString(fixture.paths().workflowCurrentJson(), """
-                {
-                  "schemaVersion": 1,
-                  "workstreamId": "ws-delivery-running",
-                  "workflowInstanceId": "wf-test",
-                  "workflowId": "delivery-test",
-                  "definitionVersion": 1,
-                  "status": "RUNNING",
-                  "activeNodeInstanceIds": [],
-                  "openGateIds": [],
-                  "lastEventId": "evt-000001",
-                  "updatedAt": "2026-06-01T00:00:00Z"
-                }
-                """, StandardCharsets.UTF_8);
-
-        var view = new DeliveryViewService(objectMapper).view(fixture.sourceWorktree(), fixture.workstreamId());
-
+        var ws = "ws-delivery-running";
+        var paths = new WorkstreamPaths(tempDir, new DualId(ws));
+        var node = new dev.dual.core.workflow.NodeDefinition("work", dev.dual.core.workflow.NodeKind.TASK, "noop.task", java.util.Map.of());
+        ServerTestLedger.initialize(ServerLedgerFactory.create(), paths, "wf-test",
+                new dev.dual.core.workflow.WorkflowDefinition("delivery-test", 1, "work", List.of(node), List.of()));
+        var view = new DeliveryViewService(objectMapper).view(tempDir, ws);
         assertEquals("BLOCKED", view.get("status"));
         assertEquals("WORKFLOW_NOT_DELIVERABLE", view.get("reasonCode"));
         assertEquals(false, view.get("canMerge"));
         assertEquals(false, view.get("canFinalize"));
-        assertTrue(String.valueOf(view.get("operatorNextAction")).contains("当前尚不可交付"));
         assertTrue(strings(view.get("nextCommands")).isEmpty());
+        assertFalse(Files.exists(paths.deliveryMergePlanJson()));
+    }
+
+    @Test
+    void ownerActionsAreProjectedForStagingCommitAndHistoryWithoutBeingRecomputed() throws Exception {
+        var f=dev.dual.runtime.delivery.DeliveryApplicationServiceTest.deliveryFixture(tempDir,"ws-owner-projection");
+        var core=new dev.dual.runtime.delivery.DeliveryApplicationService(dev.dual.runtime.RuntimeTestLedger.ledger());
+        var facade=new DeliveryViewService(core);
+        assertEquals(List.of("MERGE"),facade.view(f.source(),f.workstreamId()).get("currentActions"));
+        var applied=facade.merge(f.source(),f.workstreamId());
+        assertEquals(core.view(f.source(),f.workstreamId(),null).currentActions(),applied.get("currentActions"));
+        assertEquals(false,applied.get("canFinalize"));
+        assertTrue(strings(applied.get("nextCommands")).stream().anyMatch(x->x.contains("commit -m")));
+        git(f.target(),"commit","-m","actual projection target commit");
+        String commit=git(f.target(),"rev-parse","HEAD").trim();
+        assertEquals(true,facade.view(f.source(),f.workstreamId()).get("canFinalize"));
+        var committed=facade.finalizeCommit(f.source(),f.workstreamId(),commit);
+        assertEquals("COMMITTED",committed.get("historicalStatus"));
+        assertEquals(core.view(f.source(),f.workstreamId(),null).nextCommands(),committed.get("nextCommands"));
+        var commandBytes="{\"schema\":1,\"schema\":2}".getBytes(StandardCharsets.UTF_8);
+        assertEquals("DELIVERY_INVALID",facade.resolve(f.source(),f.workstreamId(),commandBytes).get("reasonCode"));
+    }
+
+    @Test
+    void statusAndOverviewObserveBeforeLedgerLockAndComposeWithinTheSameSnapshot() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-query-lock-order"));
+        var ledger = ServerLedgerFactory.create();
+        var node = new dev.dual.core.workflow.NodeDefinition(
+                "work", dev.dual.core.workflow.NodeKind.TASK, "noop.task", java.util.Map.of());
+        ServerTestLedger.initialize(ledger, paths, "wf-query-lock-order",
+                new dev.dual.core.workflow.WorkflowDefinition("query", 1, "work", List.of(node), List.of()));
+        var observed = new java.util.concurrent.atomic.AtomicInteger();
+        var composed = new java.util.concurrent.atomic.AtomicInteger();
+        var facade = new DeliveryViewService(objectMapper) {
+            @Override
+            public dev.dual.runtime.delivery.DeliveryApplicationService.View observe(Path root, String id) {
+                try (var outside = ledger.readSession(paths)) {
+                    observed.incrementAndGet();
+                } catch (Exception held) {
+                    throw new AssertionError("target observation must precede the ledger read lock", held);
+                }
+                return super.observe(root, id);
+            }
+
+            @Override
+            public java.util.Map<String, Object> inSnapshot(
+                    Path root, String id, dev.dual.runtime.delivery.DeliveryApplicationService.View sample,
+                    dev.dual.ledger.file.WorkflowFileLedger scoped) throws java.io.IOException {
+                org.junit.jupiter.api.Assertions.assertThrows(dev.dual.ledger.file.WorkstreamLockedException.class,
+                        () -> {
+                            try (var unexpected = ledger.readSession(paths)) {
+                                throw new AssertionError("composition must use the already-held ledger snapshot");
+                            }
+                        });
+                composed.incrementAndGet();
+                return super.inSnapshot(root, id, sample, scoped);
+            }
+        };
+        var query = new WorkstreamQueryService(objectMapper, facade);
+
+        assertEquals("RUNNING", query.status(tempDir, paths.workstreamId().value()).get("status"));
+        var overview = query.overview(tempDir, paths.workstreamId().value());
+        assertFalse(overview.isEmpty());
+        assertEquals(2, observed.get(), "both current query entrances must observe outside L");
+        assertEquals(2, composed.get(), "both projections must compose within L");
+        assertFalse(Files.exists(paths.deliveryMergePlanJson()), "observation must not create a delivery intent");
     }
 
     private Fixture createDeliveryFixture(String workstreamId, String decision) throws Exception {

@@ -1,0 +1,2678 @@
+[
+  {
+    "id": "ws-20260602T081345Z-SHXP",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260602T081345Z-SHXP/.agent/workstreams/ws-20260602T081345Z-SHXP",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-p6",
+    "active": [
+      "node-implement-claude_self_test_report-042"
+    ],
+    "lastEventId": "evt-000042",
+    "updatedAt": "2026-06-02T09:53:51.387428Z",
+    "runs": 15,
+    "nodes": 40,
+    "events": 45,
+    "logFiles": 16,
+    "logBytes": 2790
+  },
+  {
+    "id": "ws-20260602T110016Z-KNJM",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260602T110016Z-KNJM/.agent/workstreams/ws-20260602T110016Z-KNJM",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-p6",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-02T11:02:10.663404Z",
+    "runs": 1,
+    "nodes": 1,
+    "events": 2,
+    "logFiles": 1,
+    "logBytes": 177
+  },
+  {
+    "id": "ws-20260602T211852Z-WCBQ",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260602T211852Z-WCBQ/.agent/workstreams/ws-20260602T211852Z-WCBQ",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-p6",
+    "active": [
+      "node-design-decision-016"
+    ],
+    "lastEventId": "evt-000017",
+    "updatedAt": "2026-06-02T21:27:58.258669Z",
+    "runs": 6,
+    "nodes": 15,
+    "events": 18,
+    "logFiles": 6,
+    "logBytes": 1047
+  },
+  {
+    "id": "ws-20260602T214314Z-48LF",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260602T214314Z-48LF/.agent/workstreams/ws-20260602T214314Z-48LF",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_HUMAN",
+    "workflow": "agent-lifecycle-p6",
+    "active": [
+      "node-gate-contract_review-033"
+    ],
+    "lastEventId": "evt-000033",
+    "updatedAt": "2026-06-02T21:56:49.969091Z",
+    "runs": 11,
+    "nodes": 31,
+    "events": 36,
+    "logFiles": 11,
+    "logBytes": 1908
+  },
+  {
+    "id": "ws-20260602T220128Z-WAPE",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260602T220128Z-WAPE/.agent/workstreams/ws-20260602T220128Z-WAPE",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-p6",
+    "active": [
+      "node-design-decision-016"
+    ],
+    "lastEventId": "evt-000017",
+    "updatedAt": "2026-06-02T22:10:11.612175Z",
+    "runs": 6,
+    "nodes": 15,
+    "events": 18,
+    "logFiles": 6,
+    "logBytes": 1047
+  },
+  {
+    "id": "ws-20260604T062822Z-5CTF",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260604T062822Z-5CTF/.agent/workstreams/ws-20260604T062822Z-5CTF",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-p5",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-04T06:29:46.321611Z",
+    "runs": 1,
+    "nodes": 1,
+    "events": 2,
+    "logFiles": 1,
+    "logBytes": 177
+  },
+  {
+    "id": "ws-20260604T063104Z-H878",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260604T063104Z-H878/.agent/workstreams/ws-20260604T063104Z-H878",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-p5",
+    "active": [
+      "node-intake-decision-011"
+    ],
+    "lastEventId": "evt-000012",
+    "updatedAt": "2026-06-04T07:11:13.511601Z",
+    "runs": 5,
+    "nodes": 8,
+    "events": 12,
+    "logFiles": 5,
+    "logBytes": 879
+  },
+  {
+    "id": "ws-20260610T073636Z-TNDV",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260610T073636Z-TNDV/.agent/workstreams/ws-20260610T073636Z-TNDV",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "FAILED",
+    "workflow": "agent-lifecycle-p6",
+    "active": [],
+    "lastEventId": "evt-000023",
+    "updatedAt": "2026-06-10T08:34:37.815893Z",
+    "runs": 8,
+    "nodes": 19,
+    "events": 24,
+    "logFiles": 8,
+    "logBytes": 1404
+  },
+  {
+    "id": "ws-20260611T081444Z-FJVR",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260611T081444Z-FJVR/.agent/workstreams/ws-20260611T081444Z-FJVR",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-008"
+    ],
+    "lastEventId": "evt-000009",
+    "updatedAt": "2026-06-11T08:26:35.414598Z",
+    "runs": 3,
+    "nodes": 8,
+    "events": 10,
+    "logFiles": 3,
+    "logBytes": 528
+  },
+  {
+    "id": "ws-20260615T045151Z-5DAP",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260615T045151Z-5DAP/.agent/workstreams/ws-20260615T045151Z-5DAP",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-15T05:43:00.736640Z",
+    "runs": 0,
+    "nodes": 1,
+    "events": 3,
+    "logFiles": 1,
+    "logBytes": 177
+  },
+  {
+    "id": "ws-20260615T130638Z-MLD6",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260615T130638Z-MLD6/.agent/workstreams/ws-20260615T130638Z-MLD6",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-codex_product_review-003"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-15T13:13:38.806348Z",
+    "runs": 1,
+    "nodes": 3,
+    "events": 3,
+    "logFiles": 2,
+    "logBytes": 357
+  },
+  {
+    "id": "ws-20260615T131757Z-TCG2",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260615T131757Z-TCG2/.agent/workstreams/ws-20260615T131757Z-TCG2",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-decision-021"
+    ],
+    "lastEventId": "evt-000022",
+    "updatedAt": "2026-06-15T13:46:59.941009Z",
+    "runs": 8,
+    "nodes": 19,
+    "events": 74,
+    "logFiles": 8,
+    "logBytes": 1398
+  },
+  {
+    "id": "ws-20260615T220549Z-B3LH",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260615T220549Z-B3LH/.agent/workstreams/ws-20260615T220549Z-B3LH",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-decision-009"
+    ],
+    "lastEventId": "evt-000010",
+    "updatedAt": "2026-06-15T22:14:17.976365Z",
+    "runs": 4,
+    "nodes": 8,
+    "events": 34,
+    "logFiles": 4,
+    "logBytes": 714
+  },
+  {
+    "id": "ws-20260616T015200Z-73J9",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260616T015200Z-73J9/.agent/workstreams/ws-20260616T015200Z-73J9",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-010"
+    ],
+    "lastEventId": "evt-000013",
+    "updatedAt": "2026-06-16T02:10:42.561635Z",
+    "runs": 5,
+    "nodes": 8,
+    "events": 38,
+    "logFiles": 5,
+    "logBytes": 888
+  },
+  {
+    "id": "ws-20260616T023157Z-ERHM",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260616T023157Z-ERHM/.agent/workstreams/ws-20260616T023157Z-ERHM",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000008",
+    "updatedAt": "2026-06-16T03:19:12.798221Z",
+    "runs": 4,
+    "nodes": 1,
+    "events": 20,
+    "logFiles": 4,
+    "logBytes": 708
+  },
+  {
+    "id": "ws-20260616T065917Z-FETC",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260616T065917Z-FETC/.agent/workstreams/ws-20260616T065917Z-FETC",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000006",
+    "updatedAt": "2026-06-16T11:39:11.747346Z",
+    "runs": 3,
+    "nodes": 1,
+    "events": 15,
+    "logFiles": 3,
+    "logBytes": 531
+  },
+  {
+    "id": "ws-20260617T011857Z-5QV3",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T011857Z-5QV3/.agent/workstreams/ws-20260617T011857Z-5QV3",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-contract",
+    "active": [
+      "node-intake-claude_brainstorm-005"
+    ],
+    "lastEventId": "evt-000009",
+    "updatedAt": "2026-06-17T01:39:34.593943Z",
+    "runs": 4,
+    "nodes": 5,
+    "events": 27,
+    "logFiles": 4,
+    "logBytes": 711
+  },
+  {
+    "id": "ws-20260617T052857Z-E9L8",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T052857Z-E9L8/.agent/workstreams/ws-20260617T052857Z-E9L8",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000001",
+    "updatedAt": "2026-06-17T05:28:57.628608Z",
+    "runs": 0,
+    "nodes": 1,
+    "events": 3,
+    "logFiles": 1,
+    "logBytes": 177
+  },
+  {
+    "id": "ws-20260617T053546Z-R6SL",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T053546Z-R6SL/.agent/workstreams/ws-20260617T053546Z-R6SL",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000004",
+    "updatedAt": "2026-06-17T05:37:05.241888Z",
+    "runs": 2,
+    "nodes": 1,
+    "events": 10,
+    "logFiles": 2,
+    "logBytes": 354
+  },
+  {
+    "id": "ws-20260617T062107Z-P492",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T062107Z-P492/.agent/workstreams/ws-20260617T062107Z-P492",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_HUMAN",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-gate-human_design_approval-033"
+    ],
+    "lastEventId": "evt-000033",
+    "updatedAt": "2026-06-17T11:43:22.358296Z",
+    "runs": 13,
+    "nodes": 16,
+    "events": 97,
+    "logFiles": 14,
+    "logBytes": 2492
+  },
+  {
+    "id": "ws-20260617T135917Z-BFL5",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T135917Z-BFL5/.agent/workstreams/ws-20260617T135917Z-BFL5",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000001",
+    "updatedAt": "2026-06-17T13:59:17.325261Z",
+    "runs": 0,
+    "nodes": 1,
+    "events": 3,
+    "logFiles": 1,
+    "logBytes": 177
+  },
+  {
+    "id": "ws-20260617T140547Z-2Z9E",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T140547Z-2Z9E/.agent/workstreams/ws-20260617T140547Z-2Z9E",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000001",
+    "updatedAt": "2026-06-17T14:05:47.657536Z",
+    "runs": 0,
+    "nodes": 1,
+    "events": 3,
+    "logFiles": 1,
+    "logBytes": 177
+  },
+  {
+    "id": "ws-20260617T142005Z-9GQY",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T142005Z-9GQY/.agent/workstreams/ws-20260617T142005Z-9GQY",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_HUMAN",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-gate-human_requirement_review-011"
+    ],
+    "lastEventId": "evt-000011",
+    "updatedAt": "2026-06-17T14:46:05.946156Z",
+    "runs": 5,
+    "nodes": 5,
+    "events": 32,
+    "logFiles": 5,
+    "logBytes": 888
+  },
+  {
+    "id": "ws-20260618T004045Z-6VPL",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T004045Z-6VPL/.agent/workstreams/ws-20260618T004045Z-6VPL",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-acceptance-codex_verifier_review-025"
+    ],
+    "lastEventId": "evt-000026",
+    "updatedAt": "2026-06-18T01:26:20.945011Z",
+    "runs": 10,
+    "nodes": 23,
+    "events": 87,
+    "logFiles": 10,
+    "logBytes": 1782
+  },
+  {
+    "id": "ws-20260618T013540Z-AT6N",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T013540Z-AT6N/.agent/workstreams/ws-20260618T013540Z-AT6N",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000004",
+    "updatedAt": "2026-06-18T01:57:02.140798Z",
+    "runs": 2,
+    "nodes": 1,
+    "events": 10,
+    "logFiles": 2,
+    "logBytes": 354
+  },
+  {
+    "id": "ws-20260618T020149Z-M6Y9",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T020149Z-M6Y9/.agent/workstreams/ws-20260618T020149Z-M6Y9",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-acceptance-codex_verifier_review-034"
+    ],
+    "lastEventId": "evt-000035",
+    "updatedAt": "2026-06-18T02:37:08.533898Z",
+    "runs": 11,
+    "nodes": 27,
+    "events": 112,
+    "logFiles": 13,
+    "logBytes": 2319
+  },
+  {
+    "id": "ws-20260618T043104Z-U9R7",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T043104Z-U9R7/.agent/workstreams/ws-20260618T043104Z-U9R7",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-decision-011"
+    ],
+    "lastEventId": "evt-000012",
+    "updatedAt": "2026-06-18T04:42:36.324795Z",
+    "runs": 5,
+    "nodes": 8,
+    "events": 39,
+    "logFiles": 5,
+    "logBytes": 891
+  },
+  {
+    "id": "ws-20260618T044540Z-7HHS",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T044540Z-7HHS/.agent/workstreams/ws-20260618T044540Z-7HHS",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-decision-106"
+    ],
+    "lastEventId": "evt-000107",
+    "updatedAt": "2026-06-18T06:37:39.904995Z",
+    "runs": 41,
+    "nodes": 80,
+    "events": 352,
+    "logFiles": 41,
+    "logBytes": 7320
+  },
+  {
+    "id": "ws-20260618T063836Z-FX4L",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T063836Z-FX4L/.agent/workstreams/ws-20260618T063836Z-FX4L",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-codex_product_review-012"
+    ],
+    "lastEventId": "evt-000015",
+    "updatedAt": "2026-06-18T06:56:30.436051Z",
+    "runs": 7,
+    "nodes": 7,
+    "events": 45,
+    "logFiles": 7,
+    "logBytes": 1254
+  },
+  {
+    "id": "ws-20260618T092922Z-2UWS",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T092922Z-2UWS/.agent/workstreams/ws-20260618T092922Z-2UWS",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-067"
+    ],
+    "lastEventId": "evt-000068",
+    "updatedAt": "2026-06-18T10:20:18.209638Z",
+    "runs": 24,
+    "nodes": 52,
+    "events": 222,
+    "logFiles": 50,
+    "logBytes": 357601
+  },
+  {
+    "id": "ws-20260618T140011Z-P3FS",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T140011Z-P3FS/.agent/workstreams/ws-20260618T140011Z-P3FS",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000001",
+    "updatedAt": "2026-06-18T14:00:11.991122Z",
+    "runs": 0,
+    "nodes": 1,
+    "events": 3,
+    "logFiles": 2,
+    "logBytes": 183
+  },
+  {
+    "id": "ws-20260618T140712Z-FNSC",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T140712Z-FNSC/.agent/workstreams/ws-20260618T140712Z-FNSC",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-18T14:07:13.967246Z",
+    "runs": 1,
+    "nodes": 1,
+    "events": 5,
+    "logFiles": 2,
+    "logBytes": 389
+  },
+  {
+    "id": "ws-20260618T141334Z-BGH3",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T141334Z-BGH3/.agent/workstreams/ws-20260618T141334Z-BGH3",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-18T14:14:22.183968Z",
+    "runs": 1,
+    "nodes": 1,
+    "events": 5,
+    "logFiles": 2,
+    "logBytes": 279
+  },
+  {
+    "id": "ws-20260618T142523Z-7UEQ",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T142523Z-7UEQ/.agent/workstreams/ws-20260618T142523Z-7UEQ",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-18T14:25:35.353128Z",
+    "runs": 1,
+    "nodes": 1,
+    "events": 5,
+    "logFiles": 2,
+    "logBytes": 495
+  },
+  {
+    "id": "ws-20260618T143416Z-KXSR",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T143416Z-KXSR/.agent/workstreams/ws-20260618T143416Z-KXSR",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-18T14:34:29.946664Z",
+    "runs": 1,
+    "nodes": 1,
+    "events": 5,
+    "logFiles": 2,
+    "logBytes": 495
+  },
+  {
+    "id": "ws-20260618T143817Z-59MN",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T143817Z-59MN/.agent/workstreams/ws-20260618T143817Z-59MN",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-001"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-18T14:38:31.795778Z",
+    "runs": 1,
+    "nodes": 1,
+    "events": 5,
+    "logFiles": 2,
+    "logBytes": 495
+  },
+  {
+    "id": "ws-20260619T020553Z-6KA4",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260619T020553Z-6KA4/.agent/workstreams/ws-20260619T020553Z-6KA4",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_implement-023"
+    ],
+    "lastEventId": "evt-000030",
+    "updatedAt": "2026-06-19T03:13:28.035885Z",
+    "runs": 12,
+    "nodes": 19,
+    "events": 91,
+    "logFiles": 24,
+    "logBytes": 369924
+  },
+  {
+    "id": "ws-20260619T051122Z-P837",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260619T051122Z-P837/.agent/workstreams/ws-20260619T051122Z-P837",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "COMPLETED",
+    "workflow": "agent-lifecycle-full",
+    "active": [],
+    "lastEventId": "evt-000072",
+    "updatedAt": "2026-06-19T06:19:11.987111Z",
+    "runs": 24,
+    "nodes": 67,
+    "events": 251,
+    "logFiles": 48,
+    "logBytes": 617748
+  },
+  {
+    "id": "ws-20260619T122430Z-Y7ZD",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260619T122430Z-Y7ZD/.agent/workstreams/ws-20260619T122430Z-Y7ZD",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "COMPLETED",
+    "workflow": "agent-lifecycle-full",
+    "active": [],
+    "lastEventId": "evt-000041",
+    "updatedAt": "2026-06-19T12:58:40.098345Z",
+    "runs": 13,
+    "nodes": 39,
+    "events": 143,
+    "logFiles": 26,
+    "logBytes": 314987
+  },
+  {
+    "id": "ws-20260620T032243Z-KBJM",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260620T032243Z-KBJM/.agent/workstreams/ws-20260620T032243Z-KBJM",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "COMPLETED",
+    "workflow": "agent-lifecycle-full",
+    "active": [],
+    "lastEventId": "evt-000068",
+    "updatedAt": "2026-06-20T04:03:22.392781Z",
+    "runs": 23,
+    "nodes": 63,
+    "events": 234,
+    "logFiles": 48,
+    "logBytes": 518196
+  },
+  {
+    "id": "ws-20260621T070700Z-NJ8B",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260621T070700Z-NJ8B/.agent/workstreams/ws-20260621T070700Z-NJ8B",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "COMPLETED",
+    "workflow": "agent-lifecycle-full",
+    "active": [],
+    "lastEventId": "evt-000037",
+    "updatedAt": "2026-06-21T07:24:03.611851Z",
+    "runs": 12,
+    "nodes": 35,
+    "events": 126,
+    "logFiles": 24,
+    "logBytes": 151932
+  },
+  {
+    "id": "ws-20260621T073237Z-4YH3",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260621T073237Z-4YH3/.agent/workstreams/ws-20260621T073237Z-4YH3",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-decision-009"
+    ],
+    "lastEventId": "evt-000010",
+    "updatedAt": "2026-06-21T07:41:23.851355Z",
+    "runs": 4,
+    "nodes": 8,
+    "events": 34,
+    "logFiles": 8,
+    "logBytes": 78058
+  },
+  {
+    "id": "ws-20260621T074935Z-99B6",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260621T074935Z-99B6/.agent/workstreams/ws-20260621T074935Z-99B6",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-008"
+    ],
+    "lastEventId": "evt-000008",
+    "updatedAt": "2026-06-21T07:57:37.422659Z",
+    "runs": 2,
+    "nodes": 8,
+    "events": 26,
+    "logFiles": 6,
+    "logBytes": 91402
+  },
+  {
+    "id": "ws-20260621T081600Z-QHUZ",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260621T081600Z-QHUZ/.agent/workstreams/ws-20260621T081600Z-QHUZ",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-008"
+    ],
+    "lastEventId": "evt-000009",
+    "updatedAt": "2026-06-21T08:22:34.559131Z",
+    "runs": 3,
+    "nodes": 8,
+    "events": 28,
+    "logFiles": 6,
+    "logBytes": 62557
+  },
+  {
+    "id": "ws-20260621T083037Z-UEEX",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260621T083037Z-UEEX/.agent/workstreams/ws-20260621T083037Z-UEEX",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-codex_product_review-003"
+    ],
+    "lastEventId": "evt-000004",
+    "updatedAt": "2026-06-21T08:34:29.781270Z",
+    "runs": 2,
+    "nodes": 3,
+    "events": 13,
+    "logFiles": 4,
+    "logBytes": 34994
+  },
+  {
+    "id": "ws-20260621T090133Z-RTHH",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260621T090133Z-RTHH/.agent/workstreams/ws-20260621T090133Z-RTHH",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-codex_plan_review-025"
+    ],
+    "lastEventId": "evt-000025",
+    "updatedAt": "2026-06-21T09:18:19.907337Z",
+    "runs": 9,
+    "nodes": 23,
+    "events": 85,
+    "logFiles": 20,
+    "logBytes": 181869
+  },
+  {
+    "id": "ws-20260621T093105Z-4KZ3",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260621T093105Z-4KZ3/.agent/workstreams/ws-20260621T093105Z-4KZ3",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-codex_arch_review-010"
+    ],
+    "lastEventId": "evt-000011",
+    "updatedAt": "2026-06-21T09:44:26.938486Z",
+    "runs": 4,
+    "nodes": 10,
+    "events": 36,
+    "logFiles": 8,
+    "logBytes": 46048
+  },
+  {
+    "id": "ws-20260621T093539Z-TK6S",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260621T093539Z-TK6S/.agent/workstreams/ws-20260621T093539Z-TK6S",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_HUMAN",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-gate-human_design_approval-012"
+    ],
+    "lastEventId": "evt-000012",
+    "updatedAt": "2026-06-21T09:54:11.072966Z",
+    "runs": 4,
+    "nodes": 12,
+    "events": 40,
+    "logFiles": 8,
+    "logBytes": 210870
+  },
+  {
+    "id": "ws-20260622T214720Z-MKPK",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260622T214720Z-MKPK/.agent/workstreams/ws-20260622T214720Z-MKPK",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "COMPLETED",
+    "workflow": "agent-lifecycle-full",
+    "active": [],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-22T21:51:29.028072Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 43013
+  },
+  {
+    "id": "ws-20260622T215436Z-K3EH",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260622T215436Z-K3EH/.agent/workstreams/ws-20260622T215436Z-K3EH",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "COMPLETED",
+    "workflow": "agent-lifecycle-full",
+    "active": [],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-22T22:00:57.357837Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 46194
+  },
+  {
+    "id": "ws-20260622T220305Z-CJB3",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260622T220305Z-CJB3/.agent/workstreams/ws-20260622T220305Z-CJB3",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_HUMAN",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-gate-human_plan_approval-018"
+    ],
+    "lastEventId": "evt-000018",
+    "updatedAt": "2026-06-22T22:20:42.368985Z",
+    "runs": 6,
+    "nodes": 18,
+    "events": 61,
+    "logFiles": 12,
+    "logBytes": 254915
+  },
+  {
+    "id": "ws-20260622T235255Z-PRF7",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260622T235255Z-PRF7/.agent/workstreams/ws-20260622T235255Z-PRF7",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-claude_plan-024"
+    ],
+    "lastEventId": "evt-000029",
+    "updatedAt": "2026-06-23T02:20:28.089107Z",
+    "runs": 10,
+    "nodes": 22,
+    "events": 93,
+    "logFiles": 22,
+    "logBytes": 379740
+  },
+  {
+    "id": "ws-20260623T122538Z-SLPD",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260623T122538Z-SLPD/.agent/workstreams/ws-20260623T122538Z-SLPD",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-034"
+    ],
+    "lastEventId": "evt-000035",
+    "updatedAt": "2026-06-23T12:54:33.733286Z",
+    "runs": 11,
+    "nodes": 33,
+    "events": 121,
+    "logFiles": 24,
+    "logBytes": 311555
+  },
+  {
+    "id": "ws-20260626T133943Z-BDGM",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260626T133943Z-BDGM/.agent/workstreams/ws-20260626T133943Z-BDGM",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "COMPLETED",
+    "workflow": "agent-lifecycle-full",
+    "active": [],
+    "lastEventId": "evt-000051",
+    "updatedAt": "2026-06-26T15:32:16.508751Z",
+    "runs": 17,
+    "nodes": 44,
+    "events": 174,
+    "logFiles": 34,
+    "logBytes": 506643
+  },
+  {
+    "id": "ws-20260627T020130Z-HLG4",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260627T020130Z-HLG4/.agent/workstreams/ws-20260627T020130Z-HLG4",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-claude_plan-028"
+    ],
+    "lastEventId": "evt-000029",
+    "updatedAt": "2026-06-27T02:24:54.247268Z",
+    "runs": 10,
+    "nodes": 26,
+    "events": 98,
+    "logFiles": 22,
+    "logBytes": 255707
+  },
+  {
+    "id": "ws-20260627T151110Z-Q52R",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260627T151110Z-Q52R/.agent/workstreams/ws-20260627T151110Z-Q52R",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_self_test_report-026"
+    ],
+    "lastEventId": "evt-000026",
+    "updatedAt": "2026-06-27T15:39:19.315118Z",
+    "runs": 9,
+    "nodes": 25,
+    "events": 89,
+    "logFiles": 20,
+    "logBytes": 249305
+  },
+  {
+    "id": "ws-20260627T211611Z-7PV9",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260627T211611Z-7PV9/.agent/workstreams/ws-20260627T211611Z-7PV9",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-codex_arch_review-032"
+    ],
+    "lastEventId": "evt-000033",
+    "updatedAt": "2026-06-27T21:41:09.376920Z",
+    "runs": 11,
+    "nodes": 31,
+    "events": 114,
+    "logFiles": 22,
+    "logBytes": 285247
+  },
+  {
+    "id": "ws-20260628T004503Z-9XR2",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260628T004503Z-9XR2/.agent/workstreams/ws-20260628T004503Z-9XR2",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_self_test_report-026"
+    ],
+    "lastEventId": "evt-000026",
+    "updatedAt": "2026-06-28T01:04:24.361431Z",
+    "runs": 9,
+    "nodes": 25,
+    "events": 89,
+    "logFiles": 20,
+    "logBytes": 249019
+  },
+  {
+    "id": "ws-20260628T013326Z-EVZC",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260628T013326Z-EVZC/.agent/workstreams/ws-20260628T013326Z-EVZC",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_self_test_report-021"
+    ],
+    "lastEventId": "evt-000021",
+    "updatedAt": "2026-06-28T01:49:20.808672Z",
+    "runs": 7,
+    "nodes": 21,
+    "events": 72,
+    "logFiles": 16,
+    "logBytes": 199518
+  },
+  {
+    "id": "ws-20260628T023625Z-BW4C",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260628T023625Z-BW4C/.agent/workstreams/ws-20260628T023625Z-BW4C",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_implement-025"
+    ],
+    "lastEventId": "evt-000026",
+    "updatedAt": "2026-06-28T03:00:00.528930Z",
+    "runs": 9,
+    "nodes": 24,
+    "events": 87,
+    "logFiles": 18,
+    "logBytes": 253903
+  },
+  {
+    "id": "ws-20260628T033237Z-HCUM",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260628T033237Z-HCUM/.agent/workstreams/ws-20260628T033237Z-HCUM",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "COMPLETED",
+    "workflow": "agent-lifecycle-full",
+    "active": [],
+    "lastEventId": "evt-000040",
+    "updatedAt": "2026-06-28T04:08:31.890132Z",
+    "runs": 12,
+    "nodes": 38,
+    "events": 139,
+    "logFiles": 24,
+    "logBytes": 370436
+  },
+  {
+    "id": "ws-20260628T053814Z-26S7",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260628T053814Z-26S7/.agent/workstreams/ws-20260628T053814Z-26S7",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-codex_product_review-004"
+    ],
+    "lastEventId": "evt-000005",
+    "updatedAt": "2026-06-28T05:44:14.223303Z",
+    "runs": 2,
+    "nodes": 4,
+    "events": 17,
+    "logFiles": 4,
+    "logBytes": 60100
+  },
+  {
+    "id": "ws-20260628T061508Z-ACUF",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260628T061508Z-ACUF/.agent/workstreams/ws-20260628T061508Z-ACUF",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-28T06:15:09.452153Z",
+    "runs": 0,
+    "nodes": 2,
+    "events": 7,
+    "logFiles": 2,
+    "logBytes": 43298
+  },
+  {
+    "id": "ws-20260628T130510Z-WTBV",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260628T130510Z-WTBV/.agent/workstreams/ws-20260628T130510Z-WTBV",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-codex_product_review-009"
+    ],
+    "lastEventId": "evt-000009",
+    "updatedAt": "2026-06-28T13:19:04.739697Z",
+    "runs": 3,
+    "nodes": 8,
+    "events": 32,
+    "logFiles": 8,
+    "logBytes": 125612
+  },
+  {
+    "id": "ws-20260629T112130Z-MKZV",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T112130Z-MKZV/.agent/workstreams/ws-20260629T112130Z-MKZV",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-29T11:21:30.644723Z",
+    "runs": 0,
+    "nodes": 2,
+    "events": 7,
+    "logFiles": 2,
+    "logBytes": 41721
+  },
+  {
+    "id": "ws-20260629T115907Z-3CN8",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T115907Z-3CN8/.agent/workstreams/ws-20260629T115907Z-3CN8",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-29T12:04:37.463858Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 51269
+  },
+  {
+    "id": "ws-20260629T121903Z-4BAZ",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T121903Z-4BAZ/.agent/workstreams/ws-20260629T121903Z-4BAZ",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-29T12:19:03.536617Z",
+    "runs": 0,
+    "nodes": 2,
+    "events": 7,
+    "logFiles": 2,
+    "logBytes": 36173
+  },
+  {
+    "id": "ws-20260629T125338Z-DA9N",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T125338Z-DA9N/.agent/workstreams/ws-20260629T125338Z-DA9N",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-29T12:53:39.018573Z",
+    "runs": 0,
+    "nodes": 2,
+    "events": 7,
+    "logFiles": 2,
+    "logBytes": 6562
+  },
+  {
+    "id": "ws-20260629T132242Z-K4T3",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T132242Z-K4T3/.agent/workstreams/ws-20260629T132242Z-K4T3",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-29T13:27:31.168292Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 43420
+  },
+  {
+    "id": "ws-20260629T135252Z-NWXT",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T135252Z-NWXT/.agent/workstreams/ws-20260629T135252Z-NWXT",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-06-29T13:52:53.087128Z",
+    "runs": 0,
+    "nodes": 2,
+    "events": 7,
+    "logFiles": 2,
+    "logBytes": 15322
+  },
+  {
+    "id": "ws-20260629T145415Z-2G43",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T145415Z-2G43/.agent/workstreams/ws-20260629T145415Z-2G43",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-29T14:55:33.716558Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 343
+  },
+  {
+    "id": "ws-20260629T151128Z-RQQC",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T151128Z-RQQC/.agent/workstreams/ws-20260629T151128Z-RQQC",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-29T15:12:20.450629Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 341
+  },
+  {
+    "id": "ws-20260629T152657Z-9S3P",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T152657Z-9S3P/.agent/workstreams/ws-20260629T152657Z-9S3P",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-29T15:29:06.827728Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 14864
+  },
+  {
+    "id": "ws-20260629T162513Z-J7GL",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T162513Z-J7GL/.agent/workstreams/ws-20260629T162513Z-J7GL",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-context-intake_codex_product_review-003"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-29T16:27:42.026882Z",
+    "runs": 1,
+    "nodes": 3,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 13105
+  },
+  {
+    "id": "ws-20260629T212347Z-86TZ",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T212347Z-86TZ/.agent/workstreams/ws-20260629T212347Z-86TZ",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-29T21:24:21.673833Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 490
+  },
+  {
+    "id": "ws-20260629T213533Z-RGMV",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T213533Z-RGMV/.agent/workstreams/ws-20260629T213533Z-RGMV",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-29T21:37:17.341101Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 10340
+  },
+  {
+    "id": "ws-20260629T214255Z-W3E6",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260629T214255Z-W3E6/.agent/workstreams/ws-20260629T214255Z-W3E6",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-context-intake_codex_product_review-003"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-06-29T21:46:00.148787Z",
+    "runs": 1,
+    "nodes": 3,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 12203
+  },
+  {
+    "id": "ws-20260630T112054Z-N4YR",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260630T112054Z-N4YR/.agent/workstreams/ws-20260630T112054Z-N4YR",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-009"
+    ],
+    "lastEventId": "evt-000010",
+    "updatedAt": "2026-06-30T11:26:08.218467Z",
+    "runs": 2,
+    "nodes": 9,
+    "events": 32,
+    "logFiles": 6,
+    "logBytes": 31929
+  },
+  {
+    "id": "ws-20260630T115038Z-HUUC",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260630T115038Z-HUUC/.agent/workstreams/ws-20260630T115038Z-HUUC",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-codex_product_review-004"
+    ],
+    "lastEventId": "evt-000005",
+    "updatedAt": "2026-06-30T11:53:18.325096Z",
+    "runs": 2,
+    "nodes": 4,
+    "events": 17,
+    "logFiles": 4,
+    "logBytes": 10546
+  },
+  {
+    "id": "ws-20260630T120421Z-7Y5D",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260630T120421Z-7Y5D/.agent/workstreams/ws-20260630T120421Z-7Y5D",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-codex_product_review-004"
+    ],
+    "lastEventId": "evt-000005",
+    "updatedAt": "2026-06-30T12:06:56.866728Z",
+    "runs": 2,
+    "nodes": 4,
+    "events": 17,
+    "logFiles": 4,
+    "logBytes": 9633
+  },
+  {
+    "id": "ws-20260701T001207Z-WALF",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260701T001207Z-WALF/.agent/workstreams/ws-20260701T001207Z-WALF",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-07-01T00:13:08.279415Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 11214
+  },
+  {
+    "id": "ws-20260701T023418Z-M377",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260701T023418Z-M377/.agent/workstreams/ws-20260701T023418Z-M377",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-009"
+    ],
+    "lastEventId": "evt-000010",
+    "updatedAt": "2026-07-01T02:42:07.705143Z",
+    "runs": 3,
+    "nodes": 9,
+    "events": 32,
+    "logFiles": 6,
+    "logBytes": 127246
+  },
+  {
+    "id": "ws-20260701T085130Z-TFF4",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260701T085130Z-TFF4/.agent/workstreams/ws-20260701T085130Z-TFF4",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-014"
+    ],
+    "lastEventId": "evt-000016",
+    "updatedAt": "2026-07-01T13:05:29.727009Z",
+    "runs": 6,
+    "nodes": 13,
+    "events": 52,
+    "logFiles": 12,
+    "logBytes": 201773
+  },
+  {
+    "id": "ws-20260701T212108Z-59MA",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260701T212108Z-59MA/.agent/workstreams/ws-20260701T212108Z-59MA",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-07-01T21:21:24.717824Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 9979
+  },
+  {
+    "id": "ws-20260701T215006Z-UNRA",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260701T215006Z-UNRA/.agent/workstreams/ws-20260701T215006Z-UNRA",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-07-01T21:50:28.839258Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 8841
+  },
+  {
+    "id": "ws-20260701T215335Z-NWX8",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260701T215335Z-NWX8/.agent/workstreams/ws-20260701T215335Z-NWX8",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-07-01T21:53:37.423132Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 0
+  },
+  {
+    "id": "ws-20260701T220012Z-S5HX",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260701T220012Z-S5HX/.agent/workstreams/ws-20260701T220012Z-S5HX",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-07-01T22:00:54.964666Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 1,
+    "logBytes": 0
+  },
+  {
+    "id": "ws-20260703T003916Z-8ZXQ",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260703T003916Z-8ZXQ/.agent/workstreams/ws-20260703T003916Z-8ZXQ",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-009"
+    ],
+    "lastEventId": "evt-000010",
+    "updatedAt": "2026-07-03T00:45:04.644137Z",
+    "runs": 3,
+    "nodes": 9,
+    "events": 32,
+    "logFiles": 6,
+    "logBytes": 74283
+  },
+  {
+    "id": "ws-20260703T140541Z-H8J5",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260703T140541Z-H8J5/.agent/workstreams/ws-20260703T140541Z-H8J5",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-decision-005"
+    ],
+    "lastEventId": "evt-000006",
+    "updatedAt": "2026-07-03T14:11:05.130129Z",
+    "runs": 2,
+    "nodes": 5,
+    "events": 21,
+    "logFiles": 4,
+    "logBytes": 30661
+  },
+  {
+    "id": "ws-20260703T150412Z-D476",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260703T150412Z-D476/.agent/workstreams/ws-20260703T150412Z-D476",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-006"
+    ],
+    "lastEventId": "evt-000008",
+    "updatedAt": "2026-07-03T15:12:06.000319Z",
+    "runs": 3,
+    "nodes": 6,
+    "events": 26,
+    "logFiles": 6,
+    "logBytes": 59650
+  },
+  {
+    "id": "ws-20260703T151903Z-SJNL",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260703T151903Z-SJNL/.agent/workstreams/ws-20260703T151903Z-SJNL",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_implement-030"
+    ],
+    "lastEventId": "evt-000031",
+    "updatedAt": "2026-07-03T15:55:08.026601Z",
+    "runs": 11,
+    "nodes": 28,
+    "events": 104,
+    "logFiles": 22,
+    "logBytes": 254004
+  },
+  {
+    "id": "ws-20260704T003958Z-TZRQ",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T003958Z-TZRQ/.agent/workstreams/ws-20260704T003958Z-TZRQ",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-codex_product_review-004"
+    ],
+    "lastEventId": "evt-000005",
+    "updatedAt": "2026-07-04T00:44:04.632184Z",
+    "runs": 2,
+    "nodes": 4,
+    "events": 17,
+    "logFiles": 4,
+    "logBytes": 26739
+  },
+  {
+    "id": "ws-20260704T014430Z-5HVK",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T014430Z-5HVK/.agent/workstreams/ws-20260704T014430Z-5HVK",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-07-04T01:46:29.047761Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 25158
+  },
+  {
+    "id": "ws-20260704T021909Z-6CBS",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T021909Z-6CBS/.agent/workstreams/ws-20260704T021909Z-6CBS",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-claude_plan-019"
+    ],
+    "lastEventId": "evt-000020",
+    "updatedAt": "2026-07-04T02:32:13.697557Z",
+    "runs": 7,
+    "nodes": 18,
+    "events": 66,
+    "logFiles": 14,
+    "logBytes": 158988
+  },
+  {
+    "id": "ws-20260704T031233Z-ABVX",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T031233Z-ABVX/.agent/workstreams/ws-20260704T031233Z-ABVX",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-claude_plan-014"
+    ],
+    "lastEventId": "evt-000015",
+    "updatedAt": "2026-07-04T03:22:22.979571Z",
+    "runs": 5,
+    "nodes": 14,
+    "events": 49,
+    "logFiles": 10,
+    "logBytes": 88935
+  },
+  {
+    "id": "ws-20260704T033841Z-G6AX",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T033841Z-G6AX/.agent/workstreams/ws-20260704T033841Z-G6AX",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-claude_plan-014"
+    ],
+    "lastEventId": "evt-000015",
+    "updatedAt": "2026-07-04T03:51:26.276859Z",
+    "runs": 5,
+    "nodes": 14,
+    "events": 49,
+    "logFiles": 10,
+    "logBytes": 99187
+  },
+  {
+    "id": "ws-20260704T045242Z-B88Z",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T045242Z-B88Z/.agent/workstreams/ws-20260704T045242Z-B88Z",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-006"
+    ],
+    "lastEventId": "evt-000008",
+    "updatedAt": "2026-07-04T04:58:51.948094Z",
+    "runs": 3,
+    "nodes": 6,
+    "events": 26,
+    "logFiles": 6,
+    "logBytes": 58489
+  },
+  {
+    "id": "ws-20260704T054933Z-QC7S",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T054933Z-QC7S/.agent/workstreams/ws-20260704T054933Z-QC7S",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-006"
+    ],
+    "lastEventId": "evt-000008",
+    "updatedAt": "2026-07-04T05:58:02.756179Z",
+    "runs": 3,
+    "nodes": 6,
+    "events": 26,
+    "logFiles": 6,
+    "logBytes": 73720
+  },
+  {
+    "id": "ws-20260704T062224Z-EVMG",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T062224Z-EVMG/.agent/workstreams/ws-20260704T062224Z-EVMG",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-011"
+    ],
+    "lastEventId": "evt-000013",
+    "updatedAt": "2026-07-04T06:33:04.704361Z",
+    "runs": 5,
+    "nodes": 10,
+    "events": 43,
+    "logFiles": 10,
+    "logBytes": 93674
+  },
+  {
+    "id": "ws-20260704T064656Z-QFH2",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T064656Z-QFH2/.agent/workstreams/ws-20260704T064656Z-QFH2",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-claude_plan-019"
+    ],
+    "lastEventId": "evt-000020",
+    "updatedAt": "2026-07-04T07:03:09.283949Z",
+    "runs": 7,
+    "nodes": 18,
+    "events": 66,
+    "logFiles": 14,
+    "logBytes": 144230
+  },
+  {
+    "id": "ws-20260704T072031Z-X8KS",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T072031Z-X8KS/.agent/workstreams/ws-20260704T072031Z-X8KS",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-claude_plan-019"
+    ],
+    "lastEventId": "evt-000020",
+    "updatedAt": "2026-07-04T07:37:05.513552Z",
+    "runs": 7,
+    "nodes": 18,
+    "events": 66,
+    "logFiles": 14,
+    "logBytes": 129087
+  },
+  {
+    "id": "ws-20260704T112349Z-DRG2",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T112349Z-DRG2/.agent/workstreams/ws-20260704T112349Z-DRG2",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-018"
+    ],
+    "lastEventId": "evt-000020",
+    "updatedAt": "2026-07-04T11:39:29.906987Z",
+    "runs": 7,
+    "nodes": 17,
+    "events": 66,
+    "logFiles": 14,
+    "logBytes": 145616
+  },
+  {
+    "id": "ws-20260704T115816Z-EKFJ",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T115816Z-EKFJ/.agent/workstreams/ws-20260704T115816Z-EKFJ",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_implement-025"
+    ],
+    "lastEventId": "evt-000026",
+    "updatedAt": "2026-07-04T12:22:44.687461Z",
+    "runs": 9,
+    "nodes": 24,
+    "events": 87,
+    "logFiles": 18,
+    "logBytes": 183727
+  },
+  {
+    "id": "ws-20260704T123942Z-8BJR",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T123942Z-8BJR/.agent/workstreams/ws-20260704T123942Z-8BJR",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-claude_plan-023"
+    ],
+    "lastEventId": "evt-000025",
+    "updatedAt": "2026-07-04T13:02:38.087894Z",
+    "runs": 9,
+    "nodes": 22,
+    "events": 83,
+    "logFiles": 18,
+    "logBytes": 169628
+  },
+  {
+    "id": "ws-20260704T131734Z-PBRD",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T131734Z-PBRD/.agent/workstreams/ws-20260704T131734Z-PBRD",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-codex_product_review-004"
+    ],
+    "lastEventId": "evt-000005",
+    "updatedAt": "2026-07-04T13:28:36.001253Z",
+    "runs": 2,
+    "nodes": 4,
+    "events": 17,
+    "logFiles": 4,
+    "logBytes": 22962
+  },
+  {
+    "id": "ws-20260704T172337Z-G73K",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T172337Z-G73K/.agent/workstreams/ws-20260704T172337Z-G73K",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_implement-020"
+    ],
+    "lastEventId": "evt-000021",
+    "updatedAt": "2026-07-04T17:39:31.695753Z",
+    "runs": 7,
+    "nodes": 20,
+    "events": 70,
+    "logFiles": 14,
+    "logBytes": 201981
+  },
+  {
+    "id": "ws-20260704T175019Z-V9W8",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T175019Z-V9W8/.agent/workstreams/ws-20260704T175019Z-V9W8",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-claude_plan-019"
+    ],
+    "lastEventId": "evt-000020",
+    "updatedAt": "2026-07-04T18:07:36.232101Z",
+    "runs": 7,
+    "nodes": 18,
+    "events": 66,
+    "logFiles": 14,
+    "logBytes": 135757
+  },
+  {
+    "id": "ws-20260704T233225Z-KX8D",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260704T233225Z-KX8D/.agent/workstreams/ws-20260704T233225Z-KX8D",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_implement-020"
+    ],
+    "lastEventId": "evt-000021",
+    "updatedAt": "2026-07-04T23:47:30.534154Z",
+    "runs": 7,
+    "nodes": 20,
+    "events": 70,
+    "logFiles": 14,
+    "logBytes": 186914
+  },
+  {
+    "id": "ws-20260705T000524Z-DDZZ",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T000524Z-DDZZ/.agent/workstreams/ws-20260705T000524Z-DDZZ",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-014"
+    ],
+    "lastEventId": "evt-000015",
+    "updatedAt": "2026-07-05T00:14:59.978910Z",
+    "runs": 5,
+    "nodes": 13,
+    "events": 49,
+    "logFiles": 10,
+    "logBytes": 96605
+  },
+  {
+    "id": "ws-20260705T002110Z-KEZH",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T002110Z-KEZH/.agent/workstreams/ws-20260705T002110Z-KEZH",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-07-05T00:21:10.608589Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 7,
+    "logFiles": 2,
+    "logBytes": 264
+  },
+  {
+    "id": "ws-20260705T004010Z-MZ9H",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T004010Z-MZ9H/.agent/workstreams/ws-20260705T004010Z-MZ9H",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_implement-025"
+    ],
+    "lastEventId": "evt-000026",
+    "updatedAt": "2026-07-05T01:04:35.574272Z",
+    "runs": 9,
+    "nodes": 24,
+    "events": 87,
+    "logFiles": 18,
+    "logBytes": 193183
+  },
+  {
+    "id": "ws-20260705T065054Z-LRRG",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T065054Z-LRRG/.agent/workstreams/ws-20260705T065054Z-LRRG",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-07-05T06:52:45.527713Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 30821
+  },
+  {
+    "id": "ws-20260705T070544Z-WVVH",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T070544Z-WVVH/.agent/workstreams/ws-20260705T070544Z-WVVH",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-contract-compile-012"
+    ],
+    "lastEventId": "evt-000013",
+    "updatedAt": "2026-07-05T07:13:11.408149Z",
+    "runs": 4,
+    "nodes": 11,
+    "events": 43,
+    "logFiles": 8,
+    "logBytes": 58870
+  },
+  {
+    "id": "ws-20260705T071811Z-ZNFF",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T071811Z-ZNFF/.agent/workstreams/ws-20260705T071811Z-ZNFF",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-plan-claude_plan-014"
+    ],
+    "lastEventId": "evt-000015",
+    "updatedAt": "2026-07-05T07:28:36.991468Z",
+    "runs": 5,
+    "nodes": 14,
+    "events": 49,
+    "logFiles": 10,
+    "logBytes": 79384
+  },
+  {
+    "id": "ws-20260705T073609Z-4X2D",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T073609Z-4X2D/.agent/workstreams/ws-20260705T073609Z-4X2D",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-decision-017"
+    ],
+    "lastEventId": "evt-000018",
+    "updatedAt": "2026-07-05T07:48:27.210725Z",
+    "runs": 6,
+    "nodes": 16,
+    "events": 61,
+    "logFiles": 12,
+    "logBytes": 110674
+  },
+  {
+    "id": "ws-20260705T131339Z-LVP8",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T131339Z-LVP8/.agent/workstreams/ws-20260705T131339Z-LVP8",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-016"
+    ],
+    "lastEventId": "evt-000017",
+    "updatedAt": "2026-07-05T13:24:22.021277Z",
+    "runs": 7,
+    "nodes": 14,
+    "events": 58,
+    "logFiles": 14,
+    "logBytes": 97335
+  },
+  {
+    "id": "ws-20260705T210447Z-U5VW",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T210447Z-U5VW/.agent/workstreams/ws-20260705T210447Z-U5VW",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-decision-022"
+    ],
+    "lastEventId": "evt-000023",
+    "updatedAt": "2026-07-05T21:19:55.895025Z",
+    "runs": 9,
+    "nodes": 17,
+    "events": 77,
+    "logFiles": 18,
+    "logBytes": 122778
+  },
+  {
+    "id": "ws-20260705T213114Z-Q4WF",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T213114Z-Q4WF/.agent/workstreams/ws-20260705T213114Z-Q4WF",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-006"
+    ],
+    "lastEventId": "evt-000008",
+    "updatedAt": "2026-07-05T21:35:41.481166Z",
+    "runs": 3,
+    "nodes": 6,
+    "events": 26,
+    "logFiles": 6,
+    "logBytes": 56088
+  },
+  {
+    "id": "ws-20260705T214217Z-NPPE",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T214217Z-NPPE/.agent/workstreams/ws-20260705T214217Z-NPPE",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_HUMAN",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-gate-human_plan_approval-018"
+    ],
+    "lastEventId": "evt-000018",
+    "updatedAt": "2026-07-05T21:52:18.647284Z",
+    "runs": 6,
+    "nodes": 18,
+    "events": 61,
+    "logFiles": 12,
+    "logBytes": 110329
+  },
+  {
+    "id": "ws-20260706T090534Z-3UJN",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260706T090534Z-3UJN/.agent/workstreams/ws-20260706T090534Z-3UJN",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-decision-020"
+    ],
+    "lastEventId": "evt-000021",
+    "updatedAt": "2026-07-06T09:23:39.332593Z",
+    "runs": 8,
+    "nodes": 17,
+    "events": 72,
+    "logFiles": 16,
+    "logBytes": 145466
+  },
+  {
+    "id": "ws-20260708T030301Z-AYU5",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T030301Z-AYU5/.agent/workstreams/ws-20260708T030301Z-AYU5",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-codex_product_review-004"
+    ],
+    "lastEventId": "evt-000005",
+    "updatedAt": "2026-07-08T03:05:32.647113Z",
+    "runs": 2,
+    "nodes": 4,
+    "events": 19,
+    "logFiles": 2,
+    "logBytes": 17692
+  },
+  {
+    "id": "ws-20260708T034713Z-MUSW",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T034713Z-MUSW/.agent/workstreams/ws-20260708T034713Z-MUSW",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-codex_product_review-004"
+    ],
+    "lastEventId": "evt-000005",
+    "updatedAt": "2026-07-08T03:49:41.562632Z",
+    "runs": 2,
+    "nodes": 4,
+    "events": 19,
+    "logFiles": 2,
+    "logBytes": 19887
+  },
+  {
+    "id": "ws-20260708T035735Z-B8VZ",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T035735Z-B8VZ/.agent/workstreams/ws-20260708T035735Z-B8VZ",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-claude_design-014"
+    ],
+    "lastEventId": "evt-000015",
+    "updatedAt": "2026-07-08T04:07:27.413205Z",
+    "runs": 5,
+    "nodes": 13,
+    "events": 54,
+    "logFiles": 8,
+    "logBytes": 57812
+  },
+  {
+    "id": "ws-20260708T041552Z-8PGZ",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T041552Z-8PGZ/.agent/workstreams/ws-20260708T041552Z-8PGZ",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-design-codex_arch_review-011"
+    ],
+    "lastEventId": "evt-000012",
+    "updatedAt": "2026-07-08T04:24:51.194456Z",
+    "runs": 4,
+    "nodes": 11,
+    "events": 44,
+    "logFiles": 6,
+    "logBytes": 66071
+  },
+  {
+    "id": "ws-20260708T043128Z-FUMK",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T043128Z-FUMK/.agent/workstreams/ws-20260708T043128Z-FUMK",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-acceptance-codex_verifier_review-057"
+    ],
+    "lastEventId": "evt-000057",
+    "updatedAt": "2026-07-08T14:25:42.154681Z",
+    "runs": 20,
+    "nodes": 44,
+    "events": 213,
+    "logFiles": 34,
+    "logBytes": 260786
+  },
+  {
+    "id": "ws-20260709T074640Z-CR4Z",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260709T074640Z-CR4Z/.agent/workstreams/ws-20260709T074640Z-CR4Z",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_implement-025"
+    ],
+    "lastEventId": "evt-000025",
+    "updatedAt": "2026-07-09T08:08:14.368028Z",
+    "runs": 9,
+    "nodes": 24,
+    "events": 95,
+    "logFiles": 18,
+    "logBytes": 180200
+  },
+  {
+    "id": "ws-20260709T085911Z-HANA",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260709T085911Z-HANA/.agent/workstreams/ws-20260709T085911Z-HANA",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_implement-020"
+    ],
+    "lastEventId": "evt-000021",
+    "updatedAt": "2026-07-09T09:22:14.751058Z",
+    "runs": 7,
+    "nodes": 20,
+    "events": 77,
+    "logFiles": 14,
+    "logBytes": 136554
+  },
+  {
+    "id": "ws-20260709T093512Z-6FER",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260709T093512Z-6FER/.agent/workstreams/ws-20260709T093512Z-6FER",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-implement-claude_implement-020"
+    ],
+    "lastEventId": "evt-000021",
+    "updatedAt": "2026-07-09T09:59:27.130624Z",
+    "runs": 7,
+    "nodes": 20,
+    "events": 77,
+    "logFiles": 14,
+    "logBytes": 114679
+  },
+  {
+    "id": "ws-20260709T100534Z-2TCS",
+    "root": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260709T100534Z-2TCS/.agent/workstreams/ws-20260709T100534Z-2TCS",
+    "group": "cancer-clinic-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-verification-collect_evidence-031"
+    ],
+    "lastEventId": "evt-000033",
+    "updatedAt": "2026-07-09T12:01:15.905218Z",
+    "runs": 11,
+    "nodes": 27,
+    "events": 121,
+    "logFiles": 22,
+    "logBytes": 198882
+  },
+  {
+    "id": "ws-20260815T033043Z-Z95C",
+    "root": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/archive/captcha-auth-v14-ws-20260815T033043Z-Z95C",
+    "group": "captcha-auth-app-agent-runs",
+    "archived": true,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-terminal-delivery",
+    "active": [
+      "node-intake-claude_brainstorm-006"
+    ],
+    "lastEventId": "evt-000008",
+    "updatedAt": "2026-08-15T03:34:39.443937Z",
+    "runs": 3,
+    "nodes": 6,
+    "events": 26,
+    "logFiles": 6,
+    "logBytes": 50376
+  },
+  {
+    "id": "ws-20260817T141747Z-HUAX",
+    "root": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/archive/captcha-auth-v15-ws-20260817T141747Z-HUAX/ledger",
+    "group": "captcha-auth-app-agent-runs",
+    "archived": true,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-terminal-delivery",
+    "active": [
+      "node-intake-claude_brainstorm-006"
+    ],
+    "lastEventId": "evt-000008",
+    "updatedAt": "2026-08-17T14:27:53.027556Z",
+    "runs": 3,
+    "nodes": 6,
+    "events": 26,
+    "logFiles": 9,
+    "logBytes": 65173
+  },
+  {
+    "id": "ws-20260818T011340Z-WA53",
+    "root": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53",
+    "group": "captcha-auth-app-agent-runs",
+    "archived": false,
+    "status": "COMPLETED",
+    "workflow": "agent-lifecycle-terminal-delivery",
+    "active": [],
+    "lastEventId": "evt-000116",
+    "updatedAt": "2026-08-18T10:32:30.793123Z",
+    "runs": 39,
+    "nodes": 75,
+    "events": 362,
+    "logFiles": 85,
+    "logBytes": 1070715
+  },
+  {
+    "id": "ws-20260827T142330Z-FX2Y",
+    "root": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260827T142330Z-FX2Y/.agent/workstreams/ws-20260827T142330Z-FX2Y",
+    "group": "captcha-auth-app-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-intake-claude_brainstorm-006"
+    ],
+    "lastEventId": "evt-000008",
+    "updatedAt": "2026-08-27T14:50:44.998962Z",
+    "runs": 3,
+    "nodes": 6,
+    "events": 25,
+    "logFiles": 4,
+    "logBytes": 20464
+  },
+  {
+    "id": "ws-20260827T232026Z-EFCB",
+    "root": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260827T232026Z-EFCB/.agent/workstreams/ws-20260827T232026Z-EFCB",
+    "group": "captcha-auth-app-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_HUMAN",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-gate-human_requirement_review-006"
+    ],
+    "lastEventId": "evt-000006",
+    "updatedAt": "2026-08-27T23:25:30.542123Z",
+    "runs": 2,
+    "nodes": 6,
+    "events": 21,
+    "logFiles": 4,
+    "logBytes": 44031
+  },
+  {
+    "id": "ws-20260828T054556Z-AHBV",
+    "root": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260828T054556Z-AHBV/.agent/workstreams/ws-20260828T054556Z-AHBV",
+    "group": "captcha-auth-app-agent-runs",
+    "archived": false,
+    "status": "COMPLETED",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [],
+    "lastEventId": "evt-000048",
+    "updatedAt": "2026-08-28T11:03:59.271364Z",
+    "runs": 16,
+    "nodes": 39,
+    "events": 160,
+    "logFiles": 36,
+    "logBytes": 385258
+  },
+  {
+    "id": "ws-20260525T050507Z-TQK3",
+    "root": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow-agent-runs/ws-20260525T050507Z-TQK3/.agent/workstreams/ws-20260525T050507Z-TQK3",
+    "group": "codex-claude-ai-workflow-agent-runs",
+    "archived": false,
+    "status": "COMPLETED",
+    "workflow": "implement-only-smoke",
+    "active": [],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-05-25T05:07:01.380191Z",
+    "runs": 1,
+    "nodes": 1,
+    "events": 2,
+    "logFiles": 1,
+    "logBytes": 188
+  },
+  {
+    "id": "ws-20260827T051220Z-2U4R",
+    "root": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.agent/workstreams/ws-20260827T051220Z-2U4R",
+    "group": "darwin-skill-optimizer-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-implement-claude_implement-027"
+    ],
+    "lastEventId": "evt-000028",
+    "updatedAt": "2026-08-27T11:06:47.854242Z",
+    "runs": 9,
+    "nodes": 26,
+    "events": 95,
+    "logFiles": 18,
+    "logBytes": 129622
+  },
+  {
+    "id": "ws-20260829T122452Z-9BZG",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-implement-artifact_validation-058"
+    ],
+    "lastEventId": "evt-000059",
+    "updatedAt": "2026-09-03T12:55:28.545099Z",
+    "runs": 22,
+    "nodes": 34,
+    "events": 173,
+    "logFiles": 48,
+    "logBytes": 896613
+  },
+  {
+    "id": "ws-20260903T225544Z-HHZL",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-intake-codex_product_review-004"
+    ],
+    "lastEventId": "evt-000005",
+    "updatedAt": "2026-09-03T23:05:31.849630Z",
+    "runs": 2,
+    "nodes": 4,
+    "events": 17,
+    "logFiles": 7,
+    "logBytes": 24653
+  },
+  {
+    "id": "ws-20260904T040052Z-3B2P",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T040052Z-3B2P/.agent/workstreams/ws-20260904T040052Z-3B2P",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-gate-human_design_approval-038"
+    ],
+    "lastEventId": "evt-000039",
+    "updatedAt": "2026-09-04T08:07:07.606919Z",
+    "runs": 13,
+    "nodes": 32,
+    "events": 121,
+    "logFiles": 28,
+    "logBytes": 296760
+  },
+  {
+    "id": "ws-20260904T131724Z-PNBV",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T131724Z-PNBV/.agent/workstreams/ws-20260904T131724Z-PNBV",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_HUMAN",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-gate-human_design_approval-038"
+    ],
+    "lastEventId": "evt-000038",
+    "updatedAt": "2026-09-04T15:05:45.252630Z",
+    "runs": 13,
+    "nodes": 32,
+    "events": 120,
+    "logFiles": 26,
+    "logBytes": 174179
+  },
+  {
+    "id": "ws-20260906T130900Z-SPM9",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "RUNNING",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-contract-compile-070"
+    ],
+    "lastEventId": "evt-000071",
+    "updatedAt": "2026-09-07T13:28:15.544840Z",
+    "runs": 24,
+    "nodes": 59,
+    "events": 223,
+    "logFiles": 62,
+    "logBytes": 1177486
+  },
+  {
+    "id": "ws-20260908T170320Z-6KVE",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260908T170320Z-6KVE/.agent/workstreams/ws-20260908T170320Z-6KVE",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_HUMAN",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-gate-human_requirement_review-011"
+    ],
+    "lastEventId": "evt-000011",
+    "updatedAt": "2026-09-08T17:12:57.467646Z",
+    "runs": 4,
+    "nodes": 10,
+    "events": 38,
+    "logFiles": 8,
+    "logBytes": 49640
+  },
+  {
+    "id": "ws-20260909T113923Z-FZ8K",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K/.agent/workstreams/ws-20260909T113923Z-FZ8K",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-implement-claude_implement-026"
+    ],
+    "lastEventId": "evt-000027",
+    "updatedAt": "2026-09-09T12:51:32.306518Z",
+    "runs": 9,
+    "nodes": 24,
+    "events": 82,
+    "logFiles": 18,
+    "logBytes": 275879
+  },
+  {
+    "id": "ws-20260909T151234Z-BXWV",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-implement-claude_implement-098"
+    ],
+    "lastEventId": "evt-000099",
+    "updatedAt": "2026-09-10T01:45:33.437712Z",
+    "runs": 32,
+    "nodes": 85,
+    "events": 335,
+    "logFiles": 82,
+    "logBytes": 1796747
+  },
+  {
+    "id": "ws-20260910T145051Z-245D",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260910T145051Z-245D/.agent/workstreams/ws-20260910T145051Z-245D",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_HUMAN",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-gate-human_implementation_repair-050"
+    ],
+    "lastEventId": "evt-000050",
+    "updatedAt": "2026-09-10T17:41:46.501292Z",
+    "runs": 17,
+    "nodes": 43,
+    "events": 157,
+    "logFiles": 44,
+    "logBytes": 1043176
+  },
+  {
+    "id": "ws-20260911T231749Z-GCTW",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260911T231749Z-GCTW/.agent/workstreams/ws-20260911T231749Z-GCTW",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-design-claude_design-036"
+    ],
+    "lastEventId": "evt-000038",
+    "updatedAt": "2026-09-12T00:07:59.875288Z",
+    "runs": 13,
+    "nodes": 32,
+    "events": 120,
+    "logFiles": 26,
+    "logBytes": 275719
+  },
+  {
+    "id": "ws-20260912T081920Z-KPPZ",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260912T081920Z-KPPZ/.agent/workstreams/ws-20260912T081920Z-KPPZ",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-design-claude_design-014"
+    ],
+    "lastEventId": "evt-000015",
+    "updatedAt": "2026-09-12T08:40:09.696538Z",
+    "runs": 5,
+    "nodes": 13,
+    "events": 49,
+    "logFiles": 10,
+    "logBytes": 76157
+  },
+  {
+    "id": "ws-20260913T004742Z-6NX5",
+    "root": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260913T004742Z-6NX5/.agent/workstreams/ws-20260913T004742Z-6NX5",
+    "group": "okx-btc-k-line-demo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-small-plan-human-review-experiment",
+    "active": [
+      "node-intake-claude_brainstorm-012"
+    ],
+    "lastEventId": "evt-000014",
+    "updatedAt": "2026-09-13T01:00:22.307504Z",
+    "runs": 4,
+    "nodes": 11,
+    "events": 44,
+    "logFiles": 8,
+    "logBytes": 43600
+  },
+  {
+    "id": "ws-20260913T160115Z-QS9Z",
+    "root": "/private/tmp/dual-semantic-plan-body-74178/repo-agent-runs/ws-20260913T160115Z-QS9Z/.agent/workstreams/ws-20260913T160115Z-QS9Z",
+    "group": "repo-agent-runs",
+    "archived": false,
+    "status": "WAITING_FOR_RECOVERY",
+    "workflow": "agent-lifecycle-full",
+    "active": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "lastEventId": "evt-000003",
+    "updatedAt": "2026-09-13T16:01:26.287774Z",
+    "runs": 1,
+    "nodes": 2,
+    "events": 9,
+    "logFiles": 2,
+    "logBytes": 128
+  }
+]

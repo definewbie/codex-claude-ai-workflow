@@ -37,7 +37,7 @@ class RetryFailureContextSequenceTest {
             var f = new Fixture(root.resolve(agent), queued, agent);
             for (var stage : List.of("design", "plan")) {
                 f.transport.failNode = stage + ".claude_" + stage;
-                f.transport.badPath = "unapproved/first.txt";
+                f.transport.badPath = "secrets.txt/first.txt";
                 f.advance();
                 var failed = f.active();
                 assertEquals(NodeStatus.FAILED, failed.status());
@@ -59,12 +59,12 @@ class RetryFailureContextSequenceTest {
                 assertEquals(inputRefs, ready.inputRefs());
                 assertTrue(ready.outputRefs().isEmpty());
                 assertFalse(ready.result().containsKey("permission_approval"));
-                assertTrue(snapshot.get("diagnostic_text").toString().contains("unapproved/first.txt"));
+                assertTrue(snapshot.get("diagnostic_text").toString().contains("secrets.txt/first.txt"));
 
                 // Historical files are not inputs to the retry snapshot, including after a cold start.
                 Files.delete(f.paths.nodeExecutionJson(oldExecution));
                 Files.delete(f.root.resolve(failed.result().get("contract_failure_diagnostic_ref").toString()));
-                f.ledger = new WorkflowFileLedger();
+                f.ledger = AcpxTestLedger.ledger();
                 f.transport.badPath = "";
                 f.advance();
                 assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, f.current().status());
@@ -72,7 +72,7 @@ class RetryFailureContextSequenceTest {
                 assertEquals(calls + 2, f.transport.prompts.size(), "one author then one real reviewer node");
                 var retryPrompt = f.transport.prompts.get(calls);
                 assertTrue(retryPrompt.contains(SECTION));
-                assertTrue(retryPrompt.contains("unapproved/first.txt"));
+                assertTrue(retryPrompt.contains("secrets.txt/first.txt"));
                 assertTrue(retryPrompt.contains(oldExecution));
                 assertFalse(f.transport.prompts.get(calls + 1).contains(SECTION), "no retry section in reviewer");
                 var published = f.ledger.loadNode(f.paths, failed.nodeInstanceId());
@@ -87,6 +87,9 @@ class RetryFailureContextSequenceTest {
                 f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths), "approve", "Accept reviewed result");
             }
             f.advance();
+            assertEquals("gate.contract_review", f.active().nodeDefinitionId());
+            f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths), "approve", "Approve exact execution scope");
+            f.advance();
             assertEquals(WorkflowStatus.COMPLETED, f.current().status());
             assertFalse(f.transport.prompts.getLast().contains(SECTION), "implementation inherits no diagnostic");
         }
@@ -95,10 +98,10 @@ class RetryFailureContextSequenceTest {
     @ParameterizedTest @ValueSource(booleans = {false, true})
     void anotherInvalidCandidateIsRejectedAndNextRetryUsesOnlyItsDiagnostic(boolean queued) throws Exception {
         var f = new Fixture(root, queued, "claude");
-        f.transport.badPath = "unapproved/first.txt";
+        f.transport.badPath = "secrets.txt/first.txt";
         f.advance();
         f.ledger.retryActiveNode(f.paths, "Retry");
-        f.transport.badPath = "unapproved/second.txt";
+        f.transport.badPath = "secrets.txt/second.txt";
         f.advance();
         assertEquals(2, f.transport.prompts.size(), "no reviewer or automatic retry");
         var second = f.active();
@@ -106,37 +109,39 @@ class RetryFailureContextSequenceTest {
         assertTrue(second.outputRefs().stream().noneMatch(ref -> ref.endsWith(".contract.json")));
         f.ledger.retryActiveNode(f.paths, "Retry after inspection again");
         var text = ((Map<?, ?>) f.active().result().get(KEY)).get("diagnostic_text").toString();
-        assertTrue(text.contains("unapproved/second.txt"));
-        assertFalse(text.contains("unapproved/first.txt"));
+        assertTrue(text.contains("secrets.txt/second.txt"));
+        assertFalse(text.contains("secrets.txt/first.txt"));
         f.transport.badPath = "";
         f.advance();
         assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, f.current().status());
     }
 
     @ParameterizedTest @ValueSource(booleans = {false, true})
-    void incompleteRetryWritesCannotLaunchAfterRestart(boolean queued) throws Exception {
-        for (var cut : List.of("event", "current")) {
-            var f = new Fixture(root.resolve(cut), queued, "claude");
-            f.transport.badPath = "unapproved/first.txt";
+    void interruptedRetryCompletesItsFixedDecisionBeforeLegitimateContinuation(boolean queued) throws Exception {
+        for (var point : List.of("before_manifest", "after_manifest", "after_replace", "before_append", "before_pending_delete")) {
+            var f = new Fixture(root.resolve(point), queued, "claude");
+            f.transport.badPath = "secrets.txt/first.txt";
             f.advance();
-            var failurePath = cut.equals("event") ? f.paths.eventsJsonl()
-                    : f.paths.workflowCurrentJson().resolveSibling("current.json.tmp");
-            var backup = failurePath.resolveSibling("retry-fault-backup");
-            if (cut.equals("event")) Files.move(failurePath, backup);
-            Files.createDirectory(failurePath);
-            try {
-                assertThrows(Exception.class, () -> f.ledger.retryActiveNode(f.paths, "Retry"));
-            } finally {
-                Files.delete(failurePath);
-                if (cut.equals("event")) Files.move(backup, failurePath);
+            var failed = f.active();
+            var current = f.current();
+            var interrupted = dev.dual.ledger.file.InterruptedTestLedger.at(point, Map.of("test_binary", "acpx-tests-v3"));
+            assertThrows(java.io.IOException.class, () -> interrupted.retryActiveNode(f.paths, "Retry after inspection"));
+            assertEquals(1, f.transport.prompts.size());
+            f.ledger = AcpxTestLedger.ledger();
+            if (point.equals("before_manifest")) {
+                assertEquals(current, f.current());
+                assertEquals(NodeStatus.FAILED, f.active().status());
+                f.ledger.retryActiveNode(f.paths, "Retry after inspection");
+            } else {
+                assertThrows(dev.dual.ledger.file.LedgerSession.PendingCommitException.class, f::current);
+                try (var write = f.ledger.writeSession(f.paths, "finish fixed retry", "recover")) { write.commit(); }
             }
             assertEquals(NodeStatus.READY, f.active().status());
             assertNotNull(f.active().result().get(KEY));
-            assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.current().status());
-            f.ledger = new WorkflowFileLedger();
-            f.runtime().resume(new WorkflowCommand(f.root, f.ws));
-            if (queued) new AgentWorker(f.ledger, f.handlers()).runOne(new WorkflowCommand(f.root, f.ws));
-            assertEquals(1, f.transport.prompts.size(), "partial retry must not spend another provider turn");
+            assertEquals(failed.inputRefs(), f.active().inputRefs());
+            f.transport.badPath = ""; f.advance();
+            assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, f.current().status());
+            assertEquals(3, f.transport.prompts.size(), "one deliberate author retry followed by its independent reviewer");
         }
     }
 
@@ -144,7 +149,7 @@ class RetryFailureContextSequenceTest {
     void malformedSnapshotStopsTheWholePipelineBeforeProvider(boolean queued) throws Exception {
         for (var corrupt : List.of("version", "text", "limit", "truncated", "identity", "extra")) {
             var f = new Fixture(root.resolve(corrupt), queued, "claude");
-            f.transport.badPath = "unapproved/first.txt";
+            f.transport.badPath = "secrets.txt/first.txt";
             f.advance();
             f.ledger.retryActiveNode(f.paths, "Retry");
             var node = f.active();
@@ -164,6 +169,10 @@ class RetryFailureContextSequenceTest {
             assertEquals(1, f.transport.prompts.size());
             assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.current().status());
             assertEquals(NodeStatus.FAILED, f.active().status());
+            assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", f.active().result().get("reason"));
+            assertEquals("RETRY_FAILURE_CONTEXT_INVALID", f.active().result().get("failure_code"));
+            assertEquals("input_preparation_failure", RecoveryAssessment.from(f.active(), f.root, f.ws).classification());
+            assertFalse(f.active().result().containsKey("parse_error"));
             assertTrue(f.active().outputRefs().stream().noneMatch(ref -> ref.endsWith(".contract.json")));
             f.runtime().resume(new WorkflowCommand(f.root, f.ws));
             assertEquals(1, f.transport.prompts.size(), "invalid context must not trigger automatic retry");
@@ -176,7 +185,7 @@ class RetryFailureContextSequenceTest {
         final String ws = "ws-retry-diagnostic";
         final WorkstreamPaths paths;
         final Transport transport = new Transport();
-        WorkflowFileLedger ledger = new WorkflowFileLedger();
+        WorkflowFileLedger ledger = AcpxTestLedger.ledger();
 
         Fixture(Path root, boolean queued, String authorAgent) throws Exception {
             this.root = root.toAbsolutePath();
@@ -187,48 +196,25 @@ class RetryFailureContextSequenceTest {
             git("add", "README.md");
             git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-qm", "baseline");
             paths = new WorkstreamPaths(this.root, new DualId(ws));
-            var nodes = new ArrayList<NodeDefinition>();
-            var edges = new ArrayList<EdgeDefinition>();
-            for (var stage : List.of("design", "plan")) {
-                var author = stage + ".claude_" + stage;
-                var reviewer = stage + ".codex_" + (stage.equals("design") ? "arch" : "plan") + "_review";
-                nodes.add(agent(author, authorAgent, stage + "-claude", stage + "_result"));
-                nodes.add(new NodeDefinition("ctx." + stage, NodeKind.TASK, "context.build_package", Map.of(
-                        "target_node", reviewer, "profile", stage.equals("design") ? "architecture_review" : "plan_review",
-                        "requires_approved_task_contract", true)));
-                nodes.add(agent(reviewer, "codex", stage + "-codex-review", "agent_output_contract"));
-                nodes.add(new NodeDefinition(stage + ".decision", NodeKind.DECISION, "review.decision", Map.of()));
-                nodes.add(gate("gate.human_" + stage + "_approval", stage));
-                edges.add(new EdgeDefinition(author, "completed", "ctx." + stage));
-                edges.add(new EdgeDefinition("ctx." + stage, "completed", reviewer));
-                edges.add(new EdgeDefinition(reviewer, "completed", stage + ".decision"));
-                edges.add(new EdgeDefinition(stage + ".decision", stage.equals("design") ? "READY_FOR_ARCH_REVIEW" : "READY_TO_IMPLEMENT",
-                        "gate.human_" + stage + "_approval"));
-                edges.add(new EdgeDefinition("gate.human_" + stage + "_approval", "revise", author));
+            var authored = new AuthoredStageSequenceTest.Fixture(this.root, "repo/relative/new.ext",
+                    AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, ws, null, ledger);
+            transport.bindings = authored.verificationBindings();
+            var document = (ObjectNode) JSON.readTree(paths.workflowDefinitionJson().toFile());
+            for (var node : document.withArray("nodes")) {
+                if (!node.path("handlerType").asText().equals("acpx.agent_run")) continue;
+                var id = node.path("id").asText();
+                var config = (ObjectNode) node.get("config");
+                config.put("agent", id.contains("codex") ? "codex" : authorAgent);
+                config.put("session", "retry-fixture"); config.put("permission_profile", "observe");
+                config.put("prompt_template", id.startsWith("design") ? (id.contains("codex") ? "design-codex-review" : "design-claude")
+                        : id.startsWith("plan") ? (id.contains("codex") ? "plan-codex-review" : "plan-claude")
+                        : id.contains("self_test") ? "implement-claude-self-test" : "implement-claude");
             }
-            nodes.add(new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()));
-            nodes.add(gate("gate.contract_review", "contract"));
-            nodes.add(agent("implement.claude_implement", "claude", "implement-claude", "agent_output_contract"));
-            edges.add(new EdgeDefinition("contract.compile", "completed", "gate.contract_review"));
-            edges.add(new EdgeDefinition("gate.contract_review", "approved", "design.claude_design"));
-            edges.add(new EdgeDefinition("gate.human_design_approval", "approved", "plan.claude_plan"));
-            edges.add(new EdgeDefinition("gate.human_plan_approval", "approved", "implement.claude_implement"));
-            ledger.initialize(paths, ws, new WorkflowDefinition("retry-diagnostic-fixture", 1, "design.claude_design", nodes, edges));
-            DesignContractFixture.approve(this.root, ws);
-            Files.writeString(paths.workstreamDir().resolve("requirement.md"), "Design a document conversion tool");
+            JSON.writeValue(paths.workflowDefinitionJson().toFile(), document);
         }
 
-        NodeDefinition agent(String id, String agent, String template, String artifact) {
-            return new NodeDefinition(id, NodeKind.TASK, "acpx.agent_run", Map.of("agent", agent, "session", "retry-fixture",
-                    "prompt_template", template, "permission_profile", "observe", "expected_artifact", artifact,
-                    "requires_approved_task_contract", true));
-        }
-        NodeDefinition gate(String id, String purpose) {
-            return new NodeDefinition(id, NodeKind.GATE, "human.review", Map.of("gate_purpose", purpose,
-                    "allowed_actions", List.of("approved", "revise")));
-        }
         HandlerRegistry handlers() {
-            return new HandlerRegistry(List.of(new AcpxAgentTaskHandler(transport, false), new ContextBuildPackageHandler()),
+            return new HandlerRegistry(List.of(new AcpxAgentTaskHandler(transport, false), new ContextBuildPackageHandler(), new ContractCompileHandler()),
                     List.of(new ReviewDecisionHandler()), List.of(new HumanReviewGateHandler()));
         }
         WorkflowRuntime runtime() {
@@ -259,6 +245,7 @@ class RetryFailureContextSequenceTest {
         String failNode = "design.claude_design";
         String badPath = "";
         int corrections;
+        com.fasterxml.jackson.databind.JsonNode bindings;
         @Override public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException { return run(request); }
         @Override public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws java.io.IOException { return run(request); }
         @Override AcpxRunResult runAgentResultCorrection(String agent, AcpxRunRequest request) {
@@ -274,22 +261,44 @@ class RetryFailureContextSequenceTest {
                 case "plan.claude_plan" -> "READY_FOR_PLAN_REVIEW";
                 case "plan.codex_plan_review" -> "READY_TO_IMPLEMENT";
                 case "implement.claude_implement" -> "IMPLEMENTED";
+                case "implement.claude_self_test_report" -> "SELF_TEST_COMPLETE";
                 default -> "READY_FOR_ARCH_REVIEW";
             };
             var example = AgentResultPromptContract.render(snapshot.workstreamId(), snapshot.runId(), snapshot.nodeId(), decision, Set.of(decision));
             var envelope = (ObjectNode) JSON.readTree(example.substring(example.indexOf('{')));
             var result = (ObjectNode) envelope.get("result");
             if (result.has("must_fix")) result.putArray("must_fix");
-            if (result.has("plan")) ((ObjectNode) result.get("plan")).putArray("edit_files").add("repo/relative/new.ext");
+            if (result.has("plan")) {
+                var plan = (ObjectNode) result.get("plan");
+                plan.putArray("edit_files").add("repo/relative/new.ext");
+                plan.putArray("files").addObject().put("path", "repo/relative/new.ext").put("operation", "CREATE");
+                plan.set("verification_bindings", bindings.deepCopy()); plan.putArray("authority_refs");
+            }
             if (!badPath.isBlank() && snapshot.nodeId().equals(failNode)) {
                 if (result.has("design")) ((ObjectNode) result.at("/design/planned_files/0")).put("path", badPath);
-                else ((ObjectNode) result.get("plan")).putArray("edit_files").add(badPath);
+                else {
+                    ((ObjectNode) result.get("plan")).putArray("edit_files").add(badPath);
+                    ((ObjectNode) result.get("plan")).putArray("files").addObject().put("path", badPath).put("operation", "CREATE");
+                }
+            }
+            var observations = new ArrayList<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation>();
+            if (result.has("verification_checks")) {
+                var content = Files.readString(request.workdir().resolve("README.md"));
+                observations.add(new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("fixture-session", "read-readme", "fixture.read", "read",
+                        JSON.valueToTree(Map.of("path", "README.md")), JSON.valueToTree(Map.of("content", content)),
+                        "completed", null, null, "", false, List.of()));
+                var checks = result.putArray("verification_checks");
+                for (var binding : bindings) {
+                    var check = checks.addObject().put("criterion_id", binding.path("criterion_id").asText())
+                            .put("assertion", "Inspected fixture README").put("execution_ref", "CURRENT");
+                    check.putArray("tool_call_ids").add("read-readme"); check.putArray("material_refs");
+                }
             }
             Files.writeString(request.stdoutPath(), "fixture transcript"); Files.writeString(request.stderrPath(), "");
             var now = Instant.now();
             return new AcpxRunResult(now, now.plusMillis(1), List.of("fixture"), List.of(), null,
                     new AcpxPromptCompletion("fixture-request", "end_turn", envelope.toString()),
-                    new ProcessResult("fixture", null, 0, ProcessUsability.EXITED_ZERO, 1, "", "", false, false), List.of());
+                    new ProcessResult("fixture", null, 0, ProcessUsability.EXITED_ZERO, 1, "", "", false, false), List.of(), observations);
         }
     }
 }

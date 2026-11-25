@@ -1,0 +1,150 @@
+{
+  "artifact_type" : "agent_output_contract",
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261010T124812Z-XCZL",
+  "run_id" : "run-1791636803114",
+  "node_id" : "intake.claude_brainstorm",
+  "node_instance_id" : "node-intake-claude_brainstorm-006",
+  "handler_type" : "acpx.agent_run",
+  "decision" : "READY_FOR_PRODUCT_REVIEW",
+  "summary" : "已按 CO-1 修订 C-4 并新增 AC-5，将三个建议文件明确为候选范围，绑定实现前单独批准精确路径与 CREATE/MODIFY、仅以获批 EXECUTION scope.included 为穷尽授权。",
+  "required_keys" : [ "summary", "decision" ],
+  "allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW" ],
+  "source_output_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/intake-claude-brainstorm.json",
+  "source_artifact_type" : "task_contract_revision_patch",
+  "generated_at" : "2026-10-10T12:56:21.737458Z",
+  "control" : {
+    "summary" : "已按 CO-1 修订 C-4 并新增 AC-5，将三个建议文件明确为候选范围，绑定实现前单独批准精确路径与 CREATE/MODIFY、仅以获批 EXECUTION scope.included 为穷尽授权。",
+    "decision" : "READY_FOR_PRODUCT_REVIEW"
+  },
+  "control_source" : {
+    "kind" : "strict_agent_result_envelope"
+  },
+  "blocking" : false,
+  "checks_run" : [ "task_contract_proposal mechanical validation" ],
+  "checks_skipped" : [ ],
+  "evidence" : [ "canonical task_contract_proposal result" ],
+  "missing_evidence" : [ ],
+  "must_fix" : [ ],
+  "acceptance_notes" : [ ],
+  "open_risks" : [ ],
+  "changed_files" : [ ],
+  "verification_summary" : "task contract proposal validated",
+  "failure" : { },
+  "task_contract_proposal" : {
+    "artifact_type" : "task_contract_proposal",
+    "schema_version" : 3,
+    "objective" : "在本地 Python 仓库中实现 normalize_newlines(text: str) -> str:将 CRLF 与单独 CR 统一转换为 LF,完整保留其他字符、空字符串、已有 LF 以及末尾有无换行的状态,并配套 unittest 测试与 README 用法说明。",
+    "scope" : {
+      "excluded" : [ "第三方依赖及任何依赖声明文件(如 requirements.txt、pyproject.toml 的依赖项)", "网络、数据库、浏览器、后台服务相关的任何集成", "系统或机器配置的读取与修改", ".git/ 与 .agent/ 目录下的任何文件" ],
+      "included" : [ {
+        "path" : "src/normalize_text.py",
+        "operation" : "CREATE"
+      }, {
+        "path" : "tests/test_normalize_text.py",
+        "operation" : "CREATE"
+      }, {
+        "path" : "README.md",
+        "operation" : "CREATE"
+      } ]
+    },
+    "acceptance_criteria" : [ {
+      "text" : "tests/test_normalize_text.py 以 unittest 覆盖至少八类输入:空字符串、纯 LF 文本、含 CRLF 文本、含单独 CR 文本、混合换行文本、Unicode 内容、末尾有换行、末尾无换行、连续空行;每类用例断言与函数语义对应的明确期望输出,并断言对已规范化结果再次调用 normalize_newlines 输出不变(幂等)。",
+      "id" : "AC-1"
+    }, {
+      "text" : "在仓库中实际执行 unittest(如 python -m unittest 或等价标准库方式),保留的真实输出明确显示运行的用例数且 failures=0、errors=0,输出所列用例与 tests/test_normalize_text.py 源码中的案例一一对应;本任务不要求工具独立测量的真实退出码,但仅凭“测试完成”之类的文字结论不满足本条。",
+      "id" : "AC-2"
+    }, {
+      "text" : "README.md 提供与 src/normalize_text.py 实现一致的用法示例,至少包含导入语句和一段典型混合换行输入及其逐字符可核对的输出表示,并通过实际读取源码/文档或实际执行示例验证该一致性。",
+      "id" : "AC-3"
+    }, {
+      "text" : "normalize_newlines 对任意字符串仅执行换行规范化:每个 CRLF(\\r\\n)与每个单独 CR(\\r)都恰好转换为一个 LF(\\n),其余所有字符(含空串、已有 \\n、末尾换行的有无)逐字符保持不变。",
+      "id" : "AC-4"
+    }, {
+      "text" : "最终交付的实现改动严格限于获批 EXECUTION scope.included 列出的精确仓库相对路径，各路径的 CREATE/MODIFY 操作与获批内容一致；不出现授权集之外任何路径的改动，也不要求每个获批路径都必须发生改动。",
+      "id" : "AC-5"
+    } ],
+    "test_requirements" : [ {
+      "text" : "使用 Python 标准库 unittest 编写 tests/test_normalize_text.py,不引入 pytest 等第三方测试框架或依赖。",
+      "id" : "TR-1"
+    }, {
+      "text" : "实际运行测试并在交付材料中记录真实命令与完整输出(含运行用例数、failures、errors),不得以结论文字替代实际输入/输出。",
+      "id" : "TR-2"
+    }, {
+      "text" : "测试中显式包含幂等用例:对 AC-1 所列各类输入 x,断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。",
+      "id" : "TR-3"
+    }, {
+      "text" : "实际核对 README 示例与源码行为一致(读取比对或执行示例),确保示例的导入方式与输入/输出表示可复现。",
+      "id" : "TR-4"
+    } ],
+    "constraints" : [ {
+      "text" : "仅使用 Python 标准库;不引入第三方依赖,也不创建依赖声明文件。",
+      "id" : "C-1"
+    }, {
+      "text" : "不使用网络、数据库、浏览器或后台服务;不修改系统或机器配置。",
+      "id" : "C-2"
+    }, {
+      "text" : "公开函数签名固定为 normalize_newlines(text: str) -> str,输入输出均为 str,不读写文件系统、不修改调用方传入的字符串。",
+      "id" : "C-3"
+    }, {
+      "text" : "当前 scope.included 中的 src/normalize_text.py、tests/test_normalize_text.py、README.md 三个条目仅是候选建议，不构成已固定的实施文件集：GOAL 批准只确认目标、验收标准与排除范围，不锁定具体实施文件；须经设计与计划评审形成最终候选，并在实现开始前单独批准每个精确仓库相对路径及其 CREATE/MODIFY 操作；仅获批的 EXECUTION scope.included 构成穷尽的变更授权，本提案任何其他文字（含约束、验收、风险）均不得扩展该授权，且不要求每个获批路径都必须发生改动；在此授权边界内不改动 .git/ 与 .agent/ 下的任何内容。",
+      "id" : "C-4"
+    } ],
+    "non_goals" : [ {
+      "text" : "不做换行规范化以外的文本处理:不去除首尾空白、不转换编码、不做 Unicode NFC/NFD 规范化、不改写制表符等其他控制字符。",
+      "id" : "NG-1"
+    }, {
+      "text" : "不提供命令行入口、打包发布、CI 配置或其他工程化设施。",
+      "id" : "NG-2"
+    }, {
+      "text" : "不支持 str 以外的输入类型,不新增换行转换相关的其他公开 API。",
+      "id" : "NG-3"
+    } ],
+    "risk_areas" : [ {
+      "text" : "实现必须先处理 \\r\\n 再处理单独 \\r(或使用等价的一次性逻辑),否则 CRLF 会被替换成两个 LF;需由 CRLF 与混合换行测试用例防回归。",
+      "id" : "R-1"
+    }, {
+      "text" : "README 示例中的回车/换行字符在 Markdown 渲染后不可见,应使用显式转义或 repr 风格表示输入/输出,确保示例可与实际执行逐字符核对。",
+      "id" : "R-2"
+    }, {
+      "text" : "当前仓库产品树为空(repo-map 显示 tracked 文件数为 0),三个文件均为新建;测试导入 src 下的模块需以标准库方式处理 sys.path(如基于 __file__ 推导),避免引入安装步骤,具体方式在设计与计划阶段确定。",
+      "id" : "R-3"
+    } ],
+    "evidence_refs" : [ ],
+    "open_questions" : [ ],
+    "revision_responses" : [ {
+      "review_obligation_id" : "CO-1",
+      "resolved_by_clause_ids" : [ "C-4", "AC-5" ]
+    } ]
+  },
+  "proposal_derivation" : {
+    "kind" : "revision_patch_merge",
+    "base_proposal_reference" : {
+      "proposal_id" : "node-intake-claude_brainstorm-002:44bd6b6d7b341527",
+      "workstream_id" : "ws-20261010T124812Z-XCZL",
+      "schema_version" : 1,
+      "artifact_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/outputs/intake-claude-brainstorm.contract.json",
+      "producer_node_id" : "intake.claude_brainstorm",
+      "producer_node_instance_id" : "node-intake-claude_brainstorm-002",
+      "sha256" : "44bd6b6d7b34152796f68e8b35358a55f20aa90e97e1bea46bc935e031f38722"
+    },
+    "patch_source_output_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/intake-claude-brainstorm.json",
+    "base_proposal_sha256" : "44bd6b6d7b34152796f68e8b35358a55f20aa90e97e1bea46bc935e031f38722",
+    "base_proposal_id" : "node-intake-claude_brainstorm-002:44bd6b6d7b341527"
+  },
+  "repository_fact_binding" : {
+    "artifact_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791636803114/binding.json",
+    "sha256" : "d3a219c17371d7658f71b5998c786b75bd6231e27e189598bbf0180a2d11b44d"
+  },
+  "stage_outcome" : "READY",
+  "stage_outcome_source" : "decision",
+  "lifecycle_status" : "READY",
+  "evidence_state" : {
+    "blocking" : false,
+    "evidence_count" : 1,
+    "missing_evidence_count" : 0,
+    "must_fix_count" : 0,
+    "acceptance_note_count" : 0,
+    "open_risk_count" : 0
+  }
+}

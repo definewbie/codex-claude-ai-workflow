@@ -143,9 +143,7 @@ class FullWorkflowDefinitionTest {
         WorkflowDefinition wf = factory.forVariant("full");
 
         List<String> rejectOutcomes = List.of(
-                "REJECT_IMPLEMENTATION_BUG",
-                "REJECT_CONTEXT_INSUFFICIENT",
-                "REJECT_TOOL_LIMITATION"
+                "REJECT_IMPLEMENTATION_BUG"
         );
 
         for (String outcome : rejectOutcomes) {

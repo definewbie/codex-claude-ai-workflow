@@ -1,0 +1,42 @@
+# Current Failure
+
+## Summary
+
+- Workflow Status: WAITING_FOR_RECOVERY
+- Node: intake.claude_brainstorm
+- Node Instance: node-intake-claude_brainstorm-002
+- Node Status: FAILED
+- Handler: acpx.agent_run
+- Reason: required_artifact_contract_failed
+- Recovery Category: ARTIFACT_CONTRACT_FAILURE
+- Retry Policy: MANUAL_ONLY
+- Exit Code: 0
+- Run ID: run-1791622684632
+- Agent: claude
+- Session: claude-main-ws-20261010T085617Z-8SVF-run-1791622684632
+- Attention Category: ARTIFACT_CONTRACT_FAILURE
+- Retry Safe: false
+
+## Contract Failure Diagnostic
+
+- Diagnostic JSON: .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/contract-failures/node-intake-claude_brainstorm-002.json
+- Diagnostic Markdown: .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/contract-failures/node-intake-claude_brainstorm-002.md
+- Error Code: TASK_CONTRACT_EVIDENCE_TRACEABILITY_INVALID
+- Error Message: task_contract_proposal is not grounded in the tracked inventory
+- Details:
+  - errors: [evidence_refs contains a non-canonical path: .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791622684632/repo-map.json, evidence_refs contains a non-canonical path: .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791622684632/binding.json]
+
+## Evidence
+
+- .agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/outputs/intake-claude-brainstorm.stderr.log
+- .agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/outputs/intake-claude-brainstorm.transcript.log
+- .agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/outputs/intake-claude-brainstorm.json
+- .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791622684632/binding.json
+- .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/contract-failures/node-intake-claude_brainstorm-002.json
+- .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/contract-failures/node-intake-claude_brainstorm-002.md
+
+## Suggested Action
+
+- Inspect the diagnostic details, prompt contract, and source output before retrying the node.
+- Inspect the contract diagnostic and fix the output contract before retrying.
+- Command: `dualctl retry --workdir /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree ws-20261010T085617Z-8SVF`.

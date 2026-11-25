@@ -1,0 +1,12 @@
+{
+  "status": "PASS_OFFLINE_PREPARATION_ONLY",
+  "pythonSyntax": "PASS",
+  "workerSyntax": "PASS",
+  "tests": 12,
+  "mockJsScenariosWithinTests": 5,
+  "nativeSessions": 0,
+  "realModelCalls": 0,
+  "serversStarted": 0,
+  "sdkResolverInvoked": false,
+  "authorizationCreated": false
+}

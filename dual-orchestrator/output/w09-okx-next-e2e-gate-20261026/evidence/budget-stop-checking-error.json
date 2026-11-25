@@ -1,0 +1,6 @@
+{
+  "classification": "OPERATOR_CHECK_ERROR_NOT_GATE_FAILURE",
+  "error": "Compared default collapsed-untracked git status with baseline all-untracked status",
+  "resolution": "Repeated exact baseline --porcelain=v1 --untracked-files=all; 92 entries and SHA match",
+  "raw_initial_assertion_preserved_in_tool_history": true
+}

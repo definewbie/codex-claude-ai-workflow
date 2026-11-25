@@ -1,0 +1,40 @@
+            return tool_obj.invoke(tool_input)
+        if response["type"] == "edit":
+            new_args = response["args"]["args"]
+            return tool_obj.invoke(new_args)
+        if response["type"] == "response":
+            return response["args"]
+        raise ValueError("Unsupported interrupt response type")
+    return wrapped
+
+   Wrap original tool call in a review request.
+
+   Pass tool name and arguments for inspection.
+
+   Allow human to accept, edit, or respond.
+
+   Pause until decision is received.
+
+   Execute original tool call if accepted.
+
+   Execute tool with revised arguments.
+
+   Replace tool output with human response.
+
+You can resume with one of these commands:
+
+
+  {"type": "accept"}
+  {"type": "edit", "args": {"args": {"query": "weather in NY"}}}
+  {"type": "response", "args": "Skip the tool right now"}
+
+The wrapper executes the original tool call, executes with edited args, or
+returns a human message instead of calling the tool. With that, you inspect
+and approve tool calls before they hit the outside world.
+
+
+         INTERRUPTS AND SIDE EFFECTS
+
+     Never put side-effecting code (API calls, DB writes) in the same node as
+     interrupt(...). Always pause first, then execute effects only after explicit
+      approval to avoid repeats when resuming.

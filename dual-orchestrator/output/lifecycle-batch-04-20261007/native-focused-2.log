@@ -1,0 +1,30 @@
+TAP version 13
+# Subtest: exact permission ask returns the offered option and exposes the original RPC signal
+ok 1 - exact permission ask returns the offered option and exposes the original RPC signal
+  ---
+  duration_ms: 1.258916
+  ...
+# Subtest: exact permission ask never falls back after callback failure or invalid choice
+ok 2 - exact permission ask never falls back after callback failure or invalid choice
+  ---
+  duration_ms: 0.512125
+  ...
+# Subtest: exact lane retains auto reads and explicit denial without asking a human
+ok 3 - exact lane retains auto reads and explicit denial without asking a human
+  ---
+  duration_ms: 0.13225
+  ...
+# Subtest: exact lane refuses stale RPCs, unowned sessions and replies after cancellation
+ok 4 - exact lane refuses stale RPCs, unowned sessions and replies after cancellation
+  ---
+  duration_ms: 0.278542
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 96.314042

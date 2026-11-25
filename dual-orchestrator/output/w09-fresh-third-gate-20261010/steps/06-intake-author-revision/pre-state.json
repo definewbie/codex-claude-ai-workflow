@@ -1,0 +1,50 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261010T124812Z-XCZL",
+    "workflowInstanceId": "wf-ws-20261010T124812Z-XCZL",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-intake-claude_brainstorm-006"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000007",
+    "updatedAt": "2026-10-10T12:52:46.438576Z",
+    "commitSequence": 23
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-intake-claude_brainstorm-006",
+    "nodeDefinitionId": "intake.claude_brainstorm",
+    "kind": "TASK",
+    "handlerType": "acpx.agent_run",
+    "status": "READY",
+    "stageId": "stage-intake",
+    "iterationId": "iter-002",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.stderr.log",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.transcript.log",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.json",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791636690133/binding.json",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.contract.json"
+    ],
+    "inputTransition": {
+      "purpose": "Seed the first Claude intake run with repo-scope context.",
+      "source_node_sha256": "5a32a9ad0bae233649cabdccec1da03443bdf5db26bb3ed975a409fb94eb81dd",
+      "source_node_instance_id": "node-intake-decision-005",
+      "required": true,
+      "transition_type": "normal",
+      "condition": "unconditional"
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 151.307,
+  "prior_run_count": 2
+}

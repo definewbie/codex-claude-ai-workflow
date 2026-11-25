@@ -1,0 +1,65 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-plan-codex_plan_review-016",
+  "nodeDefinitionId" : "plan.codex_plan_review",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-plan",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-plan_codex_plan_review-015.md" ],
+  "inputTransition" : {
+    "required" : true,
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "transition_type" : "normal",
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-plan-codex_plan_review-016-run-1789315540711/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.contract.json" ],
+  "result" : {
+    "run_id" : "run-1789315540711",
+    "run_metadata" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/run.json",
+    "agent" : "codex",
+    "session" : "codex-reviewer-ws-20260913T160441Z-H55W",
+    "exit_code" : 0,
+    "transcript_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.transcript.log",
+    "output_complete" : true,
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-plan-codex_plan_review-016-run-1789315540711/binding.json",
+    "repository_fact_binding_sha256" : "172dbad67775e576257f881d717bfc182ecee750d93420928cfab6942df30873",
+    "process_usability" : "EXITED_ZERO",
+    "adapter_signals" : [ ],
+    "decision" : "READY_TO_IMPLEMENT",
+    "summary" : "Plan is ready to implement.",
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.contract.json",
+    "contract_sidecar_sha256" : "700b0d84645d77fbd81dc76e4d3f5965ccbe71269ca8ba325af39a11a08cbc25",
+    "agent_execution_result_contract" : {
+      "present" : true,
+      "valid" : true,
+      "decision" : "READY_TO_IMPLEMENT",
+      "summary" : "",
+      "validationError" : ""
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "agent_output_contract",
+      "required" : true,
+      "present" : true,
+      "valid" : true,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "reread_reasons" : [ ],
+    "agent_execution_outcome" : {
+      "status" : "SUCCESS",
+      "primaryReason" : "completed",
+      "nodeMaySucceed" : true,
+      "retryPolicy" : "NONE",
+      "recoveryCategory" : "NONE",
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315540696-74e4fef3",
+  "startedAt" : "2026-09-13T16:05:40.706350Z",
+  "finishedAt" : "2026-09-13T16:05:51.109701Z"
+}

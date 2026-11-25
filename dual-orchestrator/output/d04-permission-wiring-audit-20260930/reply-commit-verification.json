@@ -1,0 +1,31 @@
+{
+  "kind": "documentation_consistency_only",
+  "checks": {
+    "protected_source_and_evidence_unchanged": 735,
+    "inspected_source_unchanged": 4,
+    "original_audit_files_unchanged": 6,
+    "scope_and_drift_rows_unchanged": 7
+  },
+  "source_sha256": {
+    "dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeExecutionDocument.java": "3417ebca9ca62f7062babb3e984dce22b7c1517eb7349c64b15fbdf956ebd144",
+    "dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java": "65df5e36060588b1b158811432487110b31d533e4d27177ec70a24bbec6c4d96",
+    "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamLock.java": "3f54f1e447e57bab0aa66920f26e213288f5b30aaac2e421d83be346bd050a5c",
+    "dual-runtime/src/main/java/dev/dual/runtime/StaleRunningRecovery.java": "bd5ecfc900334d264fdf08cab822862fc4636d9e848497a7859fa3617c6c65f8"
+  },
+  "new_protocol_sha256": "b30b148a7292b69664784a5ead98e0f09816a4d604ae409be9908fe3f73e5ba0",
+  "updated_document_sha256": {
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "a57e52f621167d0fc8bf5ca1a1186c9987350caca5822fe991340b355d84d4f4",
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "7b9f9c15fcb05503dfd2659ee6b12bd8626713516d12d6afe28d9f5a9bde5cd1",
+    "docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "286ad4008ba4f42fa59df7bccb9965d9109d758e8ec56efc501a5de16b751c78",
+    "docs/testing/20260929-d04-three-boundary-verification-checklist.zh-CN.md": "995b4fdc561b9878c9b260714fc9e91ebcc29333ef88a2ae06514861889d8542"
+  },
+  "runtime_tests": "NOT RUN",
+  "native_provider_runs": 0,
+  "extra_agents": 0,
+  "implementation_authorized": false,
+  "design_status": "CANDIDATE_PENDING_INDEPENDENT_REVIEW",
+  "limits": [
+    "Hashes verify material identity only; they do not prove runtime behavior or design freeze.",
+    "C-before-X in-flight semantics require explicit affected design review."
+  ]
+}

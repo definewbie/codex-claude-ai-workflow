@@ -2,6 +2,7 @@ package dev.dual.ledger.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.dual.core.contract.TaskContractValidator;
+import dev.dual.core.contract.TaskContract;
 import dev.dual.core.workflow.NodeStatus;
 
 import java.io.IOException;
@@ -58,16 +59,28 @@ final class ScopeRevisionRequestGuard {
         }
         var proposal = binding.path("proposal_reference");
         verifiedPath(root, paths, proposal.path("artifact_ref").asText(), proposal.path("sha256").asText());
-        var artifactPrefix = root.relativize(paths.workstreamDir().toAbsolutePath().normalize()).toString() + "/artifacts/";
-        verifiedPath(root, paths, artifactPrefix + "task-contract.json", binding.path("task_contract_sha256").asText());
-        verifiedPath(root, paths, artifactPrefix + "contract-resolution.json", binding.path("contract_resolution_sha256").asText());
+        var contractRef = binding.path("task_contract_ref").asText();
+        var resolutionRef = binding.path("contract_resolution_ref").asText();
+        var contract = mapper.readValue(verifiedPath(root, paths, contractRef, binding.path("task_contract_sha256").asText()).toFile(), TaskContract.class);
+        verifiedPath(root, paths, resolutionRef, binding.path("contract_resolution_sha256").asText());
+        require(contract.phase() == TaskContract.Phase.EXECUTION && contract.goalContract() != null,
+                "scope baseline must be an execution contract");
         var compileId = binding.path("compile_node_instance_id").asText();
         require(compileId.matches("[A-Za-z0-9._-]+"), "scope compile identity is invalid");
         var compile = mapper.readValue(paths.nodeJson(compileId).toFile(), NodeInstanceDocument.class);
-        require(compile.status() == NodeStatus.COMPLETED && compile.nodeDefinitionId().equals("contract.compile")
+        require(compile.status() == NodeStatus.COMPLETED && compile.nodeDefinitionId().equals("contract.compile_execution")
+                && compile.outputRefs().contains(contractRef) && compile.outputRefs().contains(resolutionRef)
                 && binding.path("task_contract_sha256").asText().equals(compile.result().get("task_contract_sha256"))
                 && binding.path("contract_resolution_sha256").asText().equals(compile.result().get("contract_resolution_sha256")),
                 "scope compile baseline changed");
+        var goalId = binding.path("goal_compile_node_instance_id").asText();
+        require(goalId.matches("[A-Za-z0-9._-]+"), "scope GOAL compile identity is invalid");
+        var goal = mapper.readValue(paths.nodeJson(goalId).toFile(), NodeInstanceDocument.class);
+        require(goal.status() == NodeStatus.COMPLETED && goal.nodeDefinitionId().equals("contract.compile")
+                && goal.outputRefs().contains(contract.goalContract().ref())
+                && contract.goalContract().sha256().equals(goal.result().get("task_contract_sha256")),
+                "scope GOAL compile binding changed");
+        verifiedPath(root, paths, contract.goalContract().ref(), contract.goalContract().sha256());
         var workspaceId = binding.path("workspace_id").asText();
         require(workspaceId.matches("[A-Za-z0-9._-]+"), "scope workspace is missing");
         var workspace = mapper.readTree(paths.workstreamDir().resolve("workspaces/" + workspaceId + ".json").toFile());

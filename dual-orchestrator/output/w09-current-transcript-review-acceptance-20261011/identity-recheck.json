@@ -1,0 +1,22 @@
+{
+  "status": "CC_FIX_ACCEPTED_RELEASE_ACCEPTED_FIFTH_AWAITING_USER_AUTHORIZATION",
+  "checked_at": "2026-10-11T14:05:14.138653+00:00",
+  "checks": {
+    "source_inputs_656_unchanged": true,
+    "review_material_398_unchanged": true,
+    "application_jars_unchanged": true,
+    "selected_native_bytes_unchanged": true,
+    "configuration_files_unchanged": true,
+    "launch_env_unchanged": true,
+    "fifth_target_absent": true,
+    "fifth_authorization_absent": true
+  },
+  "review_source": "User supplied independent CC review in current conversation",
+  "source_count": 656,
+  "material_count": 398,
+  "native_provider_calls_this_receipt": 0,
+  "tests_rerun_this_receipt": false,
+  "actual_fifth_environment_and_topology": "NOT_CREATED_NOT_CHECKED",
+  "release_identity_sha256": "ef4ee6662b6f8e484a621688284d8dcaa527b5957c236c9399408e4853aa2cf9",
+  "material_manifest_sha256": "4f4ba8732ffa71dc041252c7d4fe1037a28e4465bc9566a8b6fe2c9a24498128"
+}

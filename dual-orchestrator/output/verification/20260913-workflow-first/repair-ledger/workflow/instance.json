@@ -1,0 +1,11 @@
+{
+  "schemaVersion" : 1,
+  "workflowInstanceId" : "wf-ws-20260913T160441Z-H55W",
+  "workflowId" : "agent-lifecycle-full",
+  "definitionVersion" : 10,
+  "status" : "COMPLETED",
+  "activeNodeInstanceIds" : [ ],
+  "lastEventId" : "evt-000043",
+  "createdAt" : "2026-09-13T16:04:41.513770Z",
+  "updatedAt" : "2026-09-13T16:07:11.557601Z"
+}

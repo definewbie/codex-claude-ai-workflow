@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/pre-dispatch-recheck.py", line 32, in <module>
+    process_observation = require_known_pids_absent([row['pid'] for row in old['known_pids']])
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process_check.py", line 25, in require_known_pids_absent
+    raise ProcessInspectionError("UNKNOWN", "Process table unavailable or incomplete")
+process_check.ProcessInspectionError: Process table unavailable or incomplete

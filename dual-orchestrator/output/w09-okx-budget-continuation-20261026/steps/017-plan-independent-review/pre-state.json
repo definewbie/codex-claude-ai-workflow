@@ -1,0 +1,45 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261026T142203Z-7SNA",
+    "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-plan-codex_plan_review-019"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000019",
+    "updatedAt": "2026-10-26T16:07:56.701499Z",
+    "commitSequence": 73
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-plan-codex_plan_review-019",
+    "nodeDefinitionId": "plan.codex_plan_review",
+    "kind": "TASK",
+    "handlerType": "acpx.agent_run",
+    "status": "READY",
+    "stageId": "stage-plan",
+    "iterationId": "iter-002",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/context/node-context-plan_codex_plan_review-018.md"
+    ],
+    "inputTransition": {
+      "purpose": "Seed the first Claude intake run with repo-scope context.",
+      "source_node_sha256": "6abc26a2083b8bb601ff443f1cc00b990409345dc57f515b140cb5557848ba67",
+      "source_node_instance_id": "node-context-plan_codex_plan_review-018",
+      "required": true,
+      "transition_type": "normal",
+      "condition": "unconditional"
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 1635.9205064138005
+}

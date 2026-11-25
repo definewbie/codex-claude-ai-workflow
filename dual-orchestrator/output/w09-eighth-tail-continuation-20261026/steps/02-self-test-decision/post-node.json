@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-implement-self_test_decision-032",
+  "nodeDefinitionId": "implement.self_test_decision",
+  "kind": "DECISION",
+  "handlerType": "review.decision",
+  "status": "COMPLETED",
+  "stageId": "stage-implement",
+  "iterationId": "iter-003",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.stderr.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.transcript.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/binding.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/verification-observations.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.contract.json"
+  ],
+  "inputTransition": {
+    "condition": "unconditional",
+    "transition_type": "normal",
+    "required": true,
+    "source_node_instance_id": "node-implement-claude_self_test_report-031",
+    "source_node_sha256": "0c08cd2ee99c14f5b15fcf9be47f655ff4bd71831f32d580776e30ed1407bfef",
+    "purpose": "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.stderr.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.transcript.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/binding.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/verification-observations.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.contract.json"
+  ],
+  "result": {
+    "decision": "SELF_TEST_COMPLETE",
+    "source": "contract-sidecar",
+    "summary": "在仓库根实际执行 python -m unittest discover -s tests -v 2>&1 得 Ran 11 tests 与 OK（零 failure/error），11 个用例名与 tests/test_normalize_text.py 九项 CASES 逐条核对一致，README 示例经逐字符比对与 doctest 实际执行确认与实现一致，AC-1/AC-2/AC-3 全部通过。",
+    "continuation_kind": "COMPLETE"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1792977548622-c749982b",
+  "startedAt": "2026-10-26T01:19:08.633872Z",
+  "finishedAt": "2026-10-26T01:19:08.883003Z"
+}

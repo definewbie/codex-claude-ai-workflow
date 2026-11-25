@@ -1,0 +1,18 @@
+{
+  "status": "OFFLINE_DESIGN_NOT_RUN_AUTHORIZATION",
+  "files": {
+    "dual-orchestrator/output/d04-dispatch-probe-design-20260929/material-verification.json": "1f03335cb6577c64f8582ea4984eb65fb320c3e54e94ac0fc72955ea513ab4db",
+    "dual-orchestrator/output/d04-dispatch-probe-design-20260929/documentation.diff": "632fcbf55d39b76df414065aa72f06699fcfa87cd98ba6326a91582169c899de",
+    "dual-orchestrator/output/d04-dispatch-probe-design-20260929/prior-manifest-resolution.json": "a3cd0775398d1524f0cbff0f1844faacdf0e8fa32a2099cc419bd2dbfb50ccec",
+    "dual-orchestrator/output/d04-dispatch-probe-design-20260929/baseline.json": "818ee374092a7c03c4867889908bcaf155cd3a5e2e042eec1fee9c0f08f2bc55",
+    "dual-orchestrator/output/d04-dispatch-probe-design-20260929/probe-design.md": "8f21a6ea97ace591c35194810001a1cef4dbc0a1836849b6371b688268439143",
+    "dual-orchestrator/output/d04-dispatch-probe-design-20260929/cc-review.txt": "727e86c0ac87720f905778df8cd8ef745f17e867661ec006dc467e88c2517d94",
+    "dual-orchestrator/output/d04-dispatch-probe-design-20260929/tool-contract-evidence.json": "49e7721f1513119f22adac16ce5f7e07a5175021fb8d6ee511c6204baf79c56c",
+    "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "e7aad8e25cbef31dccc7756be741018f03f417c0db39c2ed00ed597c36c4f691",
+    "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md": "d5895a6018fa358cde919f659e4fe1d3a3b2e14502bb28b9daec3080b3d19e19",
+    "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md": "8ba19285b004a41707c543cd1e7b55bfc3822f5f13bddfbd48fd73982687f2cf",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "ce1ee2dee5707ee96e0fe913c37b5cd3907258b48fe7273fa70a2bb994eff03d",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "1308aa35d8bb5293186a331c4f0ed488d1c5e91749adebb5161d88052dda687f",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "82397b4c1e926044ee9b033107a3ecb881c73f2d63b77b6574ac1507bd395b7e"
+  }
+}

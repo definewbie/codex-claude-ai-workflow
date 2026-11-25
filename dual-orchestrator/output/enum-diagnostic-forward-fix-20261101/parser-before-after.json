@@ -1,0 +1,35 @@
+{
+  "before": {
+    "envelope": null,
+    "errorCode": "AGENT_RESULT_PARSE_FAILED",
+    "message": "Cannot deserialize value of type `dev.dual.runtime.handler.AgentResultEnvelope$VerificationRemediation` from String \"REVISE_PROPOSAL\": not one of the values accepted for Enum class: [NONE, TEST_CODE_CHANGE, EVIDENCE_COLLECTION]\n at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1098] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope[\"result\"]->dev.dual.runtime.handler.AgentResultEnvelope$AgentOutputResult[\"failure\"]->dev.dual.runtime.handler.AgentResultEnvelope$Failure[\"verification_remediation\"])",
+    "diagnostic": {
+      "kind": "INVALID_JSON",
+      "offset": -1,
+      "line": -1,
+      "column": -1,
+      "fieldName": "",
+      "allowedFields": []
+    }
+  },
+  "after": {
+    "envelope": null,
+    "errorCode": "AGENT_RESULT_PARSE_FAILED",
+    "message": "Cannot deserialize value of type `dev.dual.runtime.handler.AgentResultEnvelope$VerificationRemediation` from String \"REVISE_PROPOSAL\": not one of the values accepted for Enum class: [NONE, TEST_CODE_CHANGE, EVIDENCE_COLLECTION]\n at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1098] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope[\"result\"]->dev.dual.runtime.handler.AgentResultEnvelope$AgentOutputResult[\"failure\"]->dev.dual.runtime.handler.AgentResultEnvelope$Failure[\"verification_remediation\"])",
+    "diagnostic": {
+      "kind": "INVALID_ENUM_VALUE",
+      "offset": 1097,
+      "line": 1,
+      "column": 1098,
+      "fieldName": "",
+      "allowedFields": [],
+      "fieldPath": "/result/failure/verification_remediation",
+      "actualValue": "REVISE_PROPOSAL",
+      "allowedValues": [
+        "NONE",
+        "EVIDENCE_COLLECTION",
+        "TEST_CODE_CHANGE"
+      ]
+    }
+  }
+}

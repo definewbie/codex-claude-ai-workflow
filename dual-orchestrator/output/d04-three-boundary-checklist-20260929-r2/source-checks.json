@@ -1,0 +1,19 @@
+{
+  "scope": "static source only, no tests executed",
+  "files": [
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "sha256": "6adcf5239e41149ef37634826bbe3da22bab911e2ebfbb886b526238f95e296b",
+      "start": 29,
+      "end": 47,
+      "text": "29:     static EvidenceCollectionBaseline captureBaseline(WorkflowFileLedger ledger, WorkstreamPaths paths,\n30:                                                        WorkflowDefinition definition, String action) throws IOException {\n31:         var current = ledger.loadCurrent(paths);\n32:         if (current.status() != WorkflowStatus.WAITING_FOR_HUMAN || current.activeNodeInstanceIds().size() != 1\n33:                 ) throw new IOException(\"collection requires a waiting human gate\");\n34:         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());\n35:         var gate = ledger.loadOpenGateForNode(paths, node.nodeInstanceId());\n36:         if (gate == null || !HumanGateActionSemantics.allowedActions(definition.node(node.nodeDefinitionId()),\n37:                 String.valueOf(gate.result().get(\"source_outcome\"))).contains(action))\n38:             throw new IOException(\"collection is not available at this gate\");\n39:         var resolution = TaskContractProjectionVerifier.resolve(paths.workspaceRoot(), paths.workstreamId().value());\n40:         var qualified = resolution.qualified().orElseThrow(() -> new IOException(\n41:                 \"collection requires a qualified approved task contract: \" + resolution.failure()));\n42:         var included = qualified.contract().scope().included().stream().map(entry -> entry.path()).toList();\n43:         var source = EvidenceCollectionSource.capture(paths.workspaceRoot(), included);\n44:         var baseline = new EvidenceCollectionBaseline(node.nodeInstanceId(), qualified.contractRef(), qualified.sha256(),\n45:                 source.head(), source.indexSha256(), source.sha256(), source.paths());\n46:         verifySource(paths.workspaceRoot(), baseline);\n47:         return baseline;"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "sha256": "6442114b49b0b4a7edae7f1535f8d43b2c372d5695ca7b865a8fa16853c82ee8",
+      "start": 30,
+      "end": 45,
+      "text": "30:     public static Reference prepare(WorkflowFileLedger ledger, WorkstreamPaths paths) throws IOException {\n31:         try (var lock = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(paths.workstreamId().value(), \"prepare evidence\"))) {\n32:             var baseline = EvidenceCollection.captureBaseline(ledger, paths, ledger.loadDefinition(paths), \"submit_evidence\");\n33:             return save(paths, \"preparations\", JSON.writeValueAsBytes(new Preparation(baseline, Instant.now())), \".json\");\n34:         }\n35:     }\n36: \n37:     public static EvidenceSubmission submit(WorkflowFileLedger ledger, WorkstreamPaths paths, Reference preparation,\n38:                                              String requestId, List<Path> files, Declaration execution, String note) throws IOException {\n39:         if (blank(note) || requestId == null || !requestId.matches(\"[A-Za-z0-9._-]{1,80}\")\n40:                 || files == null || files.isEmpty() || files.size() > 32 || execution == null)\n41:             throw new IOException(\"submission requires request id, note, declaration, and 1-32 explicit files\");\n42:         var prepared = readPreparation(paths, preparation);\n43:         if (execution.startedAt().isBefore(prepared.recordedAt()))\n44:             throw new IOException(\"declared execution precedes preparation; timestamps are operator declarations, not machine proof\");\n45:         EvidenceCollection.verifySource(paths.workspaceRoot(), prepared.baseline());"
+    }
+  ]
+}

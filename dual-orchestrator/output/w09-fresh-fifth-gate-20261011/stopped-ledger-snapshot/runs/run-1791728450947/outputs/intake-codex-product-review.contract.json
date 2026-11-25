@@ -1,0 +1,71 @@
+{
+  "artifact_type" : "agent_output_contract",
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261011T141651Z-MBC2",
+  "run_id" : "run-1791728450947",
+  "node_id" : "intake.codex_product_review",
+  "node_instance_id" : "node-intake-codex_product_review-004",
+  "handler_type" : "acpx.agent_run",
+  "decision" : "NEEDS_REVISION",
+  "summary" : "功能语义与主要验收要求完整，但文件范围约束与提案性质冲突，且缺少退出码验证豁免。",
+  "required_keys" : [ "summary", "decision" ],
+  "allowed_decisions" : [ "BLOCKED", "READY_FOR_PRODUCT_REVIEW", "NEEDS_REVISION" ],
+  "source_output_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.json",
+  "source_artifact_type" : "agent_output_contract",
+  "generated_at" : "2026-10-11T14:21:50.340719Z",
+  "control" : {
+    "decision" : "NEEDS_REVISION",
+    "summary" : "功能语义与主要验收要求完整，但文件范围约束与提案性质冲突，且缺少退出码验证豁免。"
+  },
+  "control_source" : {
+    "kind" : "strict_agent_result_envelope"
+  },
+  "lifecycle_status" : "NEEDS_REVISION",
+  "blocking" : true,
+  "checks" : [ "产品经理视角：核对目标、显式需求、非目标与验收条件。", "架构师视角：核对标准库约束、实现范围提案与后续 EXECUTION 授权的边界。", "最终用户视角：核对字符保留、末尾换行、幂等性、测试证据与 README 可复现性。", "先检查 Review Evidence Brief，再审阅上下文提供的完整 task_contract_proposal；未修改文件。" ],
+  "evidence" : [ "objective、AC-1、TR-1 与 C-3 已覆盖换行转换、其他字符保留、至少八类输入的明确期望与幂等性。", "AC-2 与 TR-2 要求实际测试输出、数量及零失败和零错误，并要求与测试源码相符。", "AC-3 与 TR-3 要求通过实际读取源码和文档或执行示例核验导入及混合换行输入输出。", "C-4 将三个路径声明为待设计与计划确认的提案，但 objective、scope.excluded 与 NG-2 又将这三个路径固定为交付与排他范围。", "用户明确说明不要求工具提供独立测量的真实退出码；提案的绑定字段未保留这一验证边界。" ],
+  "missing_evidence" : [ ],
+  "must_fix" : [ "消除文件范围的内部冲突：三个路径可保留为候选 scope.included，但目标和排除项不能提前锁定实现文件集合；最终精确路径及 CREATE/MODIFY 由后续 EXECUTION 单独批准。", "在 AC-2 或测试约束中明确不要求工具提供独立测量的真实退出码，同时保留实际输入输出、测试数量及零失败和零错误的证据要求。" ],
+  "acceptance_notes" : [ "无需将 AgentResultEnvelope、JSON 输出或工作流路由协议重复写入产品任务提案。", "当前已跟踪产品路径清单为空，允许产品证据引用为空；无需创建文件补充引用。", "本次为实现前契约评审，尚无实际测试结果不构成当前阶段的证据缺口。" ],
+  "open_risks" : [ ],
+  "changed_files" : [ ],
+  "verification_summary" : "已完成基于所提供上下文的需求映射与契约一致性审查；两项绑定约束需修订，无需用户另作产品决策。",
+  "failure" : {
+    "category_hint" : "契约约束缺口",
+    "verification_remediation" : "NONE",
+    "contract_gaps" : [ "候选路径在目标及排除项中被提前固化，与 C-4 及用户的分阶段范围批准要求冲突。", "未在绑定字段中保留不要求独立测量真实退出码的明确验证边界。" ],
+    "out_of_scope_files" : [ ],
+    "missing_tests" : [ ],
+    "context_gaps" : [ ],
+    "reason" : "需先统一文件范围授权语义并补全验证边界，才能接受该共享任务契约。"
+  },
+  "checks_run" : [ ],
+  "checks_skipped" : [ ],
+  "contract_obligations" : [ {
+    "text" : "建议文件仅为设计与计划阶段的候选路径。GOAL 固定目标、验收与非目标，不固定实现文件集合；仅获批 EXECUTION scope.included 中逐项列明的精确仓库相对路径及 CREATE/MODIFY 构成完整写授权，范围缺口须以具体路径和操作修订。同步消除 objective、scope.excluded 与 NG-2 对三个候选路径的提前锁定。",
+    "id" : "CO-1"
+  }, {
+    "text" : "在绑定验收或测试字段中保留用户的验证边界：不要求工具提供独立测量的真实退出码，但测试完成状态或文字结论不能替代实际输入输出与测试结果。",
+    "id" : "CO-2"
+  } ],
+  "reread_reasons" : [ ],
+  "review_subject" : {
+    "producer_node_instance_id" : "node-intake-claude_brainstorm-002",
+    "sha256" : "517fc15b11bd16761e1c694d0625156981e8e515f239f6243186735ff00de94c",
+    "proposal_id" : "node-intake-claude_brainstorm-002:517fc15b11bd1676",
+    "workstream_id" : "ws-20261011T141651Z-MBC2",
+    "schema_version" : 1,
+    "artifact_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728289467/outputs/intake-claude-brainstorm.contract.json",
+    "producer_node_id" : "intake.claude_brainstorm"
+  },
+  "stage_outcome" : "NEEDS_REVISION",
+  "stage_outcome_source" : "invalid",
+  "evidence_state" : {
+    "blocking" : true,
+    "evidence_count" : 5,
+    "missing_evidence_count" : 0,
+    "must_fix_count" : 2,
+    "acceptance_note_count" : 3,
+    "open_risk_count" : 0
+  }
+}

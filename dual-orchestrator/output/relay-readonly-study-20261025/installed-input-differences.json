@@ -1,0 +1,26 @@
+{
+  "recorded_at": "2026-10-25T22:11:25.881382+08:00",
+  "fixed_entries": 31,
+  "differences": [
+    {
+      "path": "/Users/kriswang/.codex/config.toml",
+      "fixed_sha256": "61caf49514401ce6ffb089620de56ecdc9f1a22db4d6a0900cc276f234752452",
+      "current_sha256": "d6e48e362ced42a8a61e3615be4c9fefc6bc3979132fd33b735a6aa0eb9faab6",
+      "status": "BYTE_DIFFERENCE_NOT_COMPATIBILITY_VERDICT"
+    },
+    {
+      "path": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "fixed_sha256": "9394a943e3fce54f998ecc150eb0b7d6e22ce0da48e5063c59b4883e80aeaecd",
+      "current_sha256": "a04752e4d46a4d89e53e6f61c59c5349a638c8ce172ffbf391fd482b4d902a4e",
+      "status": "BYTE_DIFFERENCE_NOT_COMPATIBILITY_VERDICT"
+    }
+  ],
+  "codex_bundle": {
+    "CFBundleIdentifier": "com.openai.codex.cli",
+    "CFBundleVersion": "1"
+  },
+  "codex_info_plist_sha256": "c40b0e6b87b94ef5a232ab8312678c5db2156428f57c3f3d6c32525373be7f59",
+  "config_contents_not_exported": true,
+  "no_native_cli_or_model_launched": true,
+  "historical_startup_result_not_reclassified": true
+}

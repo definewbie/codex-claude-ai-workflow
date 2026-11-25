@@ -1,0 +1,138 @@
+{
+  "discoveredEventFiles": 185,
+  "workflowEventCopies": 176,
+  "nonWorkflowStreams": 9,
+  "uniqueWorkstreams": 169,
+  "uniqueRuns": 990,
+  "eventRowsInSelectedCopies": 9349,
+  "start": "2026-05-25T05:05:07.249710Z",
+  "last": "2026-10-28T14:19:45.838975Z",
+  "states": {
+    "RUNNING": 36,
+    "COMPLETED": 14,
+    "WAITING_FOR_RECOVERY": 105,
+    "WAITING_FOR_HUMAN": 13,
+    "FAILED": 1
+  },
+  "runSurfaces": {
+    "EXECUTION_ACCEPTED": 821,
+    "LEGACY_OR_UNCLASSIFIED": 62,
+    "RESULT_PROTOCOL": 40,
+    "EXECUTION_COMPLETION": 22,
+    "ARTIFACT_CONTRACT": 15,
+    "PREPARED_ONLY": 4,
+    "PROVIDER_SESSION": 5,
+    "BOOTSTRAP_COMPATIBILITY": 8,
+    "CAPABILITY_SCOPE": 6,
+    "INPUT_READINESS": 7
+  },
+  "runReasons": {
+    "LEGACY_NO_TYPED_REASON": 327,
+    "completed_with_adapter_or_process_warnings": 55,
+    "terminal_control_missing_or_invalid": 18,
+    "completed": 505,
+    "process_interrupted": 11,
+    "required_artifact_contract_failed": 15,
+    "rate_limited": 2,
+    "process_stalled": 3,
+    "process_output_incomplete": 1,
+    "session_bootstrap_failed": 7,
+    "process_timed_out": 7,
+    "exploration_policy_violation": 4,
+    "node_input_incomplete": 7,
+    "agent_reconnect_required": 3,
+    "agent_result_missing_or_invalid": 22,
+    "permission_blocked": 2,
+    "adapter_incompatible": 1
+  },
+  "cohorts": {
+    "cancer-clinic": {
+      "cases": 129,
+      "runs": 712,
+      "states": {
+        "RUNNING": 26,
+        "WAITING_FOR_RECOVERY": 88,
+        "WAITING_FOR_HUMAN": 6,
+        "FAILED": 1,
+        "COMPLETED": 8
+      },
+      "definitionVersions": {
+        "3": 15,
+        "2": 2,
+        "4": 10,
+        "5": 38,
+        "6": 64
+      }
+    },
+    "captcha-auth-app": {
+      "cases": 6,
+      "runs": 66,
+      "states": {
+        "WAITING_FOR_RECOVERY": 3,
+        "COMPLETED": 2,
+        "WAITING_FOR_HUMAN": 1
+      },
+      "definitionVersions": {
+        "5": 3,
+        "1": 3
+      }
+    },
+    "darwin-skill-optimizer": {
+      "cases": 1,
+      "runs": 9,
+      "states": {
+        "WAITING_FOR_RECOVERY": 1
+      },
+      "definitionVersions": {
+        "1": 1
+      }
+    },
+    "okx-btc-k-line-demo": {
+      "cases": 12,
+      "runs": 158,
+      "states": {
+        "WAITING_FOR_RECOVERY": 8,
+        "WAITING_FOR_HUMAN": 3,
+        "RUNNING": 1
+      },
+      "definitionVersions": {
+        "1": 12
+      }
+    },
+    "retained-project-output": {
+      "cases": 21,
+      "runs": 45,
+      "states": {
+        "RUNNING": 9,
+        "COMPLETED": 4,
+        "WAITING_FOR_RECOVERY": 5,
+        "WAITING_FOR_HUMAN": 3
+      },
+      "definitionVersions": {
+        "1": 10,
+        "10": 2,
+        "5": 9
+      }
+    }
+  },
+  "missingRegisteredProjects": 83,
+  "parseErrors": 0,
+  "anomalies": {
+    "REPEATED_EVENT_ID": 1
+  },
+  "executionPopulation": {
+    "cases": 158,
+    "runs": 990,
+    "states": {
+      "COMPLETED": 12,
+      "RUNNING": 30,
+      "WAITING_FOR_RECOVERY": 105,
+      "WAITING_FOR_HUMAN": 10,
+      "FAILED": 1
+    },
+    "withoutRunMetadata": 10,
+    "eventRows": 9055,
+    "start": "2026-05-25T05:05:07.249710Z",
+    "last": "2026-10-26T21:09:17.939278Z"
+  }
+}

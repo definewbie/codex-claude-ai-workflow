@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="16.095" tests="52" errors="0" skipped="0" failures="1">
+  <properties>
+    <property name="java.specification.version" value="25"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-booter/3.5.2/surefire-booter-3.5.2.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-api/3.5.2/surefire-api-3.5.2.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-extensions-spi/3.5.2/surefire-extensions-spi-3.5.2.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-shared-utils/3.5.2/surefire-shared-utils-3.5.2.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-logger-api/3.5.2/surefire-logger-api-3.5.2.jar:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target/test-classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/dual-runtime-0.1.0-SNAPSHOT-tests.jar:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/target/classes:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter/3.4.4/spring-boot-starter-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot/3.4.4/spring-boot-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/spring-context/6.2.5/spring-context-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-aop/6.2.5/spring-aop-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-beans/6.2.5/spring-beans-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-expression/6.2.5/spring-expression-6.2.5.jar:/Users/kriswang/.m2/repository/io/micrometer/micrometer-observation/1.14.5/micrometer-observation-1.14.5.jar:/Users/kriswang/.m2/repository/io/micrometer/micrometer-commons/1.14.5/micrometer-commons-1.14.5.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.4.4/spring-boot-autoconfigure-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.4.4/spring-boot-starter-logging-3.4.4.jar:/Users/kriswang/.m2/repository/ch/qos/logback/logback-classic/1.5.18/logback-classic-1.5.18.jar:/Users/kriswang/.m2/repository/ch/qos/logback/logback-core/1.5.18/logback-core-1.5.18.jar:/Users/kriswang/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.24.3/log4j-to-slf4j-2.24.3.jar:/Users/kriswang/.m2/repository/org/apache/logging/log4j/log4j-api/2.24.3/log4j-api-2.24.3.jar:/Users/kriswang/.m2/repository/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.jar:/Users/kriswang/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/Users/kriswang/.m2/repository/org/yaml/snakeyaml/2.3/snakeyaml-2.3.jar:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/target/classes:/Users/kriswang/.m2/repository/com/yomahub/liteflow-core/2.16.0/liteflow-core-2.16.0.jar:/Users/kriswang/.m2/repository/cn/hutool/hutool-core/5.8.39/hutool-core-5.8.39.jar:/Users/kriswang/.m2/repository/cn/hutool/hutool-crypto/5.8.39/hutool-crypto-5.8.39.jar:/Users/kriswang/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar:/Users/kriswang/.m2/repository/org/dom4j/dom4j/2.1.4/dom4j-2.1.4.jar:/Users/kriswang/.m2/repository/com/alibaba/transmittable-thread-local/2.14.5/transmittable-thread-local-2.14.5.jar:/Users/kriswang/.m2/repository/net/bytebuddy/byte-buddy/1.15.11/byte-buddy-1.15.11.jar:/Users/kriswang/.m2/repository/com/alibaba/qlexpress4/4.1.0/qlexpress4-4.1.0.jar:/Users/kriswang/.m2/repository/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar:/Users/kriswang/.m2/repository/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar:/Users/kriswang/.m2/repository/commons-io/commons-io/2.14.0/commons-io-2.14.0.jar:/Users/kriswang/.m2/repository/org/apache/commons/commons-text/1.14.0/commons-text-1.14.0.jar:/Users/kriswang/.m2/repository/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar:/Users/kriswang/.m2/repository/com/github/ben-manes/caffeine/caffeine/3.1.8/caffeine-3.1.8.jar:/Users/kriswang/.m2/repository/org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.jar:/Users/kriswang/.m2/repository/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/classes:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.18.3/jackson-databind-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.18.3/jackson-annotations-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.3/jackson-core-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.3/jackson-datatype-jsr310-2.18.3.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.4.4/spring-boot-starter-test-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-test/3.4.4/spring-boot-test-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.4.4/spring-boot-test-autoconfigure-3.4.4.jar:/Users/kriswang/.m2/repository/com/jayway/jsonpath/json-path/2.9.0/json-path-2.9.0.jar:/Users/kriswang/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.2/jakarta.xml.bind-api-4.0.2.jar:/Users/kriswang/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/Users/kriswang/.m2/repository/net/minidev/json-smart/2.5.2/json-smart-2.5.2.jar:/Users/kriswang/.m2/repository/net/minidev/accessors-smart/2.5.2/accessors-smart-2.5.2.jar:/Users/kriswang/.m2/repository/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar:/Users/kriswang/.m2/repository/org/assertj/assertj-core/3.26.3/assertj-core-3.26.3.jar:/Users/kriswang/.m2/repository/org/awaitility/awaitility/4.2.2/awaitility-4.2.2.jar:/Users/kriswang/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter/5.11.4/junit-jupiter-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.11.4/junit-jupiter-api-5.11.4.jar:/Users/kriswang/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-commons/1.11.4/junit-platform-commons-1.11.4.jar:/Users/kriswang/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.11.4/junit-jupiter-params-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.11.4/junit-jupiter-engine-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-engine/1.11.4/junit-platform-engine-1.11.4.jar:/Users/kriswang/.m2/repository/org/mockito/mockito-core/5.14.2/mockito-core-5.14.2.jar:/Users/kriswang/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar:/Users/kriswang/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/Users/kriswang/.m2/repository/org/mockito/mockito-junit-jupiter/5.14.2/mockito-junit-jupiter-5.14.2.jar:/Users/kriswang/.m2/repository/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.jar:/Users/kriswang/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/Users/kriswang/.m2/repository/org/springframework/spring-core/6.2.5/spring-core-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-jcl/6.2.5/spring-jcl-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-test/6.2.5/spring-test-6.2.5.jar:/Users/kriswang/.m2/repository/org/xmlunit/xmlunit-core/2.10.0/xmlunit-core-2.10.0.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-junit-platform/3.5.2/surefire-junit-platform-3.5.2.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/common-java5/3.5.2/common-java5-3.5.2.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-launcher/1.11.4/junit-platform-launcher-1.11.4.jar"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="Asia/Shanghai"/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="java.vm.specification.version" value="25"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="CN"/>
+    <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/lib"/>
+    <property name="sun.java.command" value="org.apache.maven.surefire.booter.ForkedBooter /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target/surefire 2026-10-10T19-05-59_693-jvmRun1 surefire-20261010190604047_3tmp surefire_1-20261010190604047_4tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="test" value="AcpxUsageReaderTest,AgentPromptRendererTest,AcpxSessionStreamProjectorTest,AcpxAgentTaskHandlerTest,TaskContractProposalValidatorTest,AgentResultPromptContractTest"/>
+    <property name="surefire.test.class.path" value="/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target/test-classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/dual-runtime-0.1.0-SNAPSHOT-tests.jar:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/target/classes:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter/3.4.4/spring-boot-starter-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot/3.4.4/spring-boot-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/spring-context/6.2.5/spring-context-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-aop/6.2.5/spring-aop-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-beans/6.2.5/spring-beans-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-expression/6.2.5/spring-expression-6.2.5.jar:/Users/kriswang/.m2/repository/io/micrometer/micrometer-observation/1.14.5/micrometer-observation-1.14.5.jar:/Users/kriswang/.m2/repository/io/micrometer/micrometer-commons/1.14.5/micrometer-commons-1.14.5.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.4.4/spring-boot-autoconfigure-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.4.4/spring-boot-starter-logging-3.4.4.jar:/Users/kriswang/.m2/repository/ch/qos/logback/logback-classic/1.5.18/logback-classic-1.5.18.jar:/Users/kriswang/.m2/repository/ch/qos/logback/logback-core/1.5.18/logback-core-1.5.18.jar:/Users/kriswang/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.24.3/log4j-to-slf4j-2.24.3.jar:/Users/kriswang/.m2/repository/org/apache/logging/log4j/log4j-api/2.24.3/log4j-api-2.24.3.jar:/Users/kriswang/.m2/repository/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.jar:/Users/kriswang/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/Users/kriswang/.m2/repository/org/yaml/snakeyaml/2.3/snakeyaml-2.3.jar:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/target/classes:/Users/kriswang/.m2/repository/com/yomahub/liteflow-core/2.16.0/liteflow-core-2.16.0.jar:/Users/kriswang/.m2/repository/cn/hutool/hutool-core/5.8.39/hutool-core-5.8.39.jar:/Users/kriswang/.m2/repository/cn/hutool/hutool-crypto/5.8.39/hutool-crypto-5.8.39.jar:/Users/kriswang/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar:/Users/kriswang/.m2/repository/org/dom4j/dom4j/2.1.4/dom4j-2.1.4.jar:/Users/kriswang/.m2/repository/com/alibaba/transmittable-thread-local/2.14.5/transmittable-thread-local-2.14.5.jar:/Users/kriswang/.m2/repository/net/bytebuddy/byte-buddy/1.15.11/byte-buddy-1.15.11.jar:/Users/kriswang/.m2/repository/com/alibaba/qlexpress4/4.1.0/qlexpress4-4.1.0.jar:/Users/kriswang/.m2/repository/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar:/Users/kriswang/.m2/repository/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar:/Users/kriswang/.m2/repository/commons-io/commons-io/2.14.0/commons-io-2.14.0.jar:/Users/kriswang/.m2/repository/org/apache/commons/commons-text/1.14.0/commons-text-1.14.0.jar:/Users/kriswang/.m2/repository/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar:/Users/kriswang/.m2/repository/com/github/ben-manes/caffeine/caffeine/3.1.8/caffeine-3.1.8.jar:/Users/kriswang/.m2/repository/org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.jar:/Users/kriswang/.m2/repository/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/classes:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.18.3/jackson-databind-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.18.3/jackson-annotations-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.3/jackson-core-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.3/jackson-datatype-jsr310-2.18.3.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.4.4/spring-boot-starter-test-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-test/3.4.4/spring-boot-test-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.4.4/spring-boot-test-autoconfigure-3.4.4.jar:/Users/kriswang/.m2/repository/com/jayway/jsonpath/json-path/2.9.0/json-path-2.9.0.jar:/Users/kriswang/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.2/jakarta.xml.bind-api-4.0.2.jar:/Users/kriswang/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/Users/kriswang/.m2/repository/net/minidev/json-smart/2.5.2/json-smart-2.5.2.jar:/Users/kriswang/.m2/repository/net/minidev/accessors-smart/2.5.2/accessors-smart-2.5.2.jar:/Users/kriswang/.m2/repository/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar:/Users/kriswang/.m2/repository/org/assertj/assertj-core/3.26.3/assertj-core-3.26.3.jar:/Users/kriswang/.m2/repository/org/awaitility/awaitility/4.2.2/awaitility-4.2.2.jar:/Users/kriswang/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter/5.11.4/junit-jupiter-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.11.4/junit-jupiter-api-5.11.4.jar:/Users/kriswang/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-commons/1.11.4/junit-platform-commons-1.11.4.jar:/Users/kriswang/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.11.4/junit-jupiter-params-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.11.4/junit-jupiter-engine-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-engine/1.11.4/junit-platform-engine-1.11.4.jar:/Users/kriswang/.m2/repository/org/mockito/mockito-core/5.14.2/mockito-core-5.14.2.jar:/Users/kriswang/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar:/Users/kriswang/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/Users/kriswang/.m2/repository/org/mockito/mockito-junit-jupiter/5.14.2/mockito-junit-jupiter-5.14.2.jar:/Users/kriswang/.m2/repository/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.jar:/Users/kriswang/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/Users/kriswang/.m2/repository/org/springframework/spring-core/6.2.5/spring-core-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-jcl/6.2.5/spring-jcl-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-test/6.2.5/spring-test-6.2.5.jar:/Users/kriswang/.m2/repository/org/xmlunit/xmlunit-core/2.10.0/xmlunit-core-2.10.0.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/Users/kriswang"/>
+    <property name="user.language" value="zh"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2026-04-21"/>
+    <property name="java.home" value="/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="apple.awt.application.name" value="ForkedBooter"/>
+    <property name="user.script" value="Hans"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="25.0.3+9-LTS-195"/>
+    <property name="user.name" value="kriswang"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="15.6.1"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="surefire.failIfNoSpecifiedTests" value="false"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="localRepository" value="/Users/kriswang/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/"/>
+    <property name="java.version" value="25.0.3"/>
+    <property name="user.dir" value="/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx"/>
+    <property name="os.arch" value="aarch64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/Users/kriswang/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="25.0.3+9-LTS-195"/>
+    <property name="stdin.encoding" value="UTF-8"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property name="java.class.version" value="69.0"/>
+  </properties>
+  <testcase name="contractDiscoveryProfileAllowsReadAndSearchWithoutExecute" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.377"/>
+  <testcase name="acceptanceBindingMismatchFailsBeforeTransportInvocation" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.071"/>
+  <testcase name="preparedRunHasNonTerminalExecutionAttemptAndTimelineAppendDoesNotFinalizeIt" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.007"/>
+  <testcase name="unresolvedSessionRequestCannotUseEarlierCompletionToSuppressReconnect" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.083"/>
+  <testcase name="completedRunSplitsRawTranscriptFromFinalArtifactOutput" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.082"/>
+  <testcase name="completedRunPreservesFencedRawTranscriptButPersistsStrictCandidate" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.077"/>
+  <testcase name="rejectsUnsupportedAgent" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.037"/>
+  <testcase name="prepareOnlyProviderCacheAwareWritesCompactionSeedWhenStabilitySignalTriggers" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="1.072"/>
+  <testcase name="runScopedSessionRemainsOptIn" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.128"/>
+  <testcase name="recoveredRootClosureDoesNotProveUnassociatedDeniedToolNonessential" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.162"/>
+  <testcase name="typedPublicWebSearchApprovalAddsOnlyExactToolForOneRetry" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.263"/>
+  <testcase name="runMetadataRecordsSessionScopeStageAndIteration" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.049"/>
+  <testcase name="recordsProviderConnectionFailureAsAdapterBoundaryFailure" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.048"/>
+  <testcase name="unvalidatedCompletionDoesNotEnterSemanticMemory" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.05"/>
+  <testcase name="treatsNonZeroExitAsCompletedWhenStdoutHasCompleteTerminalArtifact" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.155"/>
+  <testcase name="nonImplementationAgentNodeRunsWithoutApproveAll" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.049"/>
+  <testcase name="prepareOnlyRunWritesSessionCompactionSeedWhenExperimentEnabled" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.766"/>
+  <testcase name="nodePermissionProfileIsPassedToAcpxTransport" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.242"/>
+  <testcase name="adjacentE1ExecutionsDoNotReuseAConflictingPolicySession" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="1.063"/>
+  <testcase name="completesWhenExitCodeIsZeroAndOutputIsCompleteDespiteReconnectStderr" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.047"/>
+  <testcase name="completedAgentRunRecordsAcpxUsageFromSessionStream" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.048"/>
+  <testcase name="configuredPostContractNodeWithoutQualificationFailsBeforeTransportInvocation" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.003"/>
+  <testcase name="invalidRevisionContextStopsBeforeProviderDispatch" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.002"/>
+  <testcase name="schemaCorrectionStillInvalidCannotRouteAndDoesNotStartThirdPrompt" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.994"/>
+  <testcase name="writesPromptAndReturnsPreparedWhenConfiguredForPrepareOnly" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.114"/>
+  <testcase name="preparedRunWritesNonTerminalExecutionAttemptWithoutOutcome" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.003"/>
+  <testcase name="schemaMissingFieldUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="1.1"/>
+  <testcase name="capturedLargeStreamKeepsOccurrenceFactsConsistentThroughFinalization" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.647"/>
+  <testcase name="completedRunRecordsActualReadTelemetryWithoutReadPolicyFields" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.048"/>
+  <testcase name="qualifiedAuthoredReviewStillExcludesUnvalidatedOutputFromMemory" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.226"/>
+  <testcase name="normalRunWritesPreparedMetadataBeforeLaunchingAgentProcess" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.73"/>
+  <testcase name="startedRunWithoutFinalResultRemainsUnknownAndCannotAutoRetry" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.062"/>
+  <testcase name="implementationAgentCannotRewriteWorkspaceBaseAuthority" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.72"/>
+  <testcase name="namedImplementProfileOverridesLegacyApproveAllFlag" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.713"/>
+  <testcase name="completedRunWritesArtifactMetadataSidecars" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.006"/>
+  <testcase name="implementationAgentCannotCreateAdditionalWorkspaceAuthority" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.718"/>
+  <testcase name="runWritesExecutionTimeline" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.041"/>
+  <testcase name="prosePrefixedFinalMessageUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.131"/>
+  <testcase name="recordsTypedTimeoutForZeroExitWithoutPromptCompletionAtDeadline" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.704"/>
+  <testcase name="completesReconnectExitWhenStdoutHasCompleteTerminalArtifact" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.04"/>
+  <testcase name="operatorGrantFlowsThroughRealHandlerPolicyAndDoesNotSurviveRetry" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.141"/>
+  <testcase name="recordsSessionBootstrapFailureAsAdapterBoundaryFailure" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.041"/>
+  <testcase name="implementationAgentNodeRunsWithApproveAllWhenConfigured" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.746"/>
+  <testcase name="completedAgentRunPrefersTransportUsageWhenNoAcpxSessionStreamExists" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.049">
+    <failure message="{&#10;  &quot;schemaVersion&quot; : 2,&#10;  &quot;runId&quot; : &quot;run-1791630377197&quot;,&#10;  &quot;workstreamId&quot; : &quot;ws-test&quot;,&#10;  &quot;nodeId&quot; : &quot;intake.claude_brainstorm&quot;,&#10;  &quot;agent&quot; : &quot;claude&quot;,&#10;  &quot;session&quot; : &quot;claude-main-ws-test&quot;,&#10;  &quot;sessionScope&quot; : &quot;workstream&quot;,&#10;  &quot;sessionSegmentKey&quot; : &quot;ws:ws-test&quot;,&#10;  &quot;sessionScopeReason&quot; : &quot;default:workstream&quot;,&#10;  &quot;stage&quot; : &quot;stage-intake&quot;,&#10;  &quot;semanticIteration&quot; : &quot;iter-001&quot;,&#10;  &quot;sessionCompactionMode&quot; : &quot;off&quot;,&#10;  &quot;sessionCompactionEnabled&quot; : false,&#10;  &quot;sessionCompactionReason&quot; : &quot;default:off&quot;,&#10;  &quot;sessionCompactionSeedKind&quot; : &quot;&quot;,&#10;  &quot;sessionCompactionSeedPath&quot; : &quot;&quot;,&#10;  &quot;promptTemplate&quot; : &quot;intake-claude-brainstorm&quot;,&#10;  &quot;workdir&quot; : &quot;/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-8775714553715065441&quot;,&#10;  &quot;promptPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md&quot;,&#10;  &quot;promptManifestPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md.manifest.json&quot;,&#10;  &quot;outputPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.json&quot;,&#10;  &quot;transcriptPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log&quot;,&#10;  &quot;stderrPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log&quot;,&#10;  &quot;promptMetadataPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md.meta.json&quot;,&#10;  &quot;outputMetadataPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.json.meta.json&quot;,&#10;  &quot;transcriptMetadataPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log.meta.json&quot;,&#10;  &quot;stderrMetadataPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log.meta.json&quot;,&#10;  &quot;command&quot; : [ &quot;claude&quot;, &quot;--print&quot; ],&#10;  &quot;startedAt&quot; : &quot;2026-06-01T00:00:00Z&quot;,&#10;  &quot;finishedAt&quot; : &quot;2026-06-01T00:00:01Z&quot;,&#10;  &quot;durationMs&quot; : 1000,&#10;  &quot;exitCode&quot; : 0,&#10;  &quot;status&quot; : &quot;process_exited&quot;,&#10;  &quot;failureReason&quot; : null,&#10;  &quot;recoverable&quot; : null,&#10;  &quot;usage&quot; : {&#10;    &quot;inputTokens&quot; : 12,&#10;    &quot;outputTokens&quot; : 6,&#10;    &quot;cachedReadTokens&quot; : 34,&#10;    &quot;cachedWriteTokens&quot; : 5,&#10;    &quot;totalTokens&quot; : 57,&#10;    &quot;costAmount&quot; : null,&#10;    &quot;costCurrency&quot; : &quot;&quot;,&#10;    &quot;source&quot; : &quot;acpx_stream&quot;,&#10;    &quot;measurementType&quot; : &quot;PROVIDER_RUN_USAGE&quot;,&#10;    &quot;attribution&quot; : &quot;EXACT_PROMPT_MATCH&quot;,&#10;    &quot;cumulative&quot; : false,&#10;    &quot;contextUsedTokens&quot; : 0,&#10;    &quot;sessionCostAmount&quot; : null,&#10;    &quot;sessionCostCurrency&quot; : &quot;&quot;,&#10;    &quot;providerId&quot; : &quot;zhipu&quot;,&#10;    &quot;model&quot; : &quot;glm-5.2&quot;,&#10;    &quot;billingMode&quot; : &quot;subscription_token_only&quot;,&#10;    &quot;providerMetadataSource&quot; : &quot;claude_settings_env&quot;,&#10;    &quot;unavailableReason&quot; : &quot;&quot;&#10;  },&#10;  &quot;agentResultAcquisition&quot; : {&#10;    &quot;schemaVersion&quot; : 2,&#10;    &quot;correctionAttempted&quot; : false,&#10;    &quot;maxCorrectionAttempts&quot; : 1,&#10;    &quot;selectedCandidateOccurrence&quot; : 1,&#10;    &quot;correctionReason&quot; : &quot;NONE&quot;,&#10;    &quot;correctionDisposition&quot; : &quot;NOT_NEEDED&quot;,&#10;    &quot;occurrences&quot; : [ {&#10;      &quot;occurrence&quot; : 1,&#10;      &quot;sessionName&quot; : &quot;claude-main-ws-test&quot;,&#10;      &quot;requestId&quot; : &quot;fixture-prompt&quot;,&#10;      &quot;promptPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md&quot;,&#10;      &quot;outputPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.json&quot;,&#10;      &quot;transcriptPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log&quot;,&#10;      &quot;stderrPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log&quot;,&#10;      &quot;startedAt&quot; : &quot;2026-06-01T00:00:00Z&quot;,&#10;      &quot;finishedAt&quot; : &quot;2026-06-01T00:00:01Z&quot;,&#10;      &quot;durationMs&quot; : 1000,&#10;      &quot;exitCode&quot; : 0,&#10;      &quot;stopReason&quot; : &quot;end_turn&quot;,&#10;      &quot;presentationDisposition&quot; : &quot;NOT_NEEDED&quot;,&#10;      &quot;rawAssistantSha256&quot; : &quot;2d0796bb865aa68fc5506939c019df7f85282d87d51eb97db6e3bae6430a3ba0&quot;,&#10;      &quot;candidateSha256&quot; : &quot;2d0796bb865aa68fc5506939c019df7f85282d87d51eb97db6e3bae6430a3ba0&quot;,&#10;      &quot;contractDecodable&quot; : true,&#10;      &quot;parseErrorCode&quot; : &quot;&quot;,&#10;      &quot;contractSchemaValid&quot; : true,&#10;      &quot;contractCorrectionDisposition&quot; : &quot;NONE&quot;,&#10;      &quot;contractValidationErrors&quot; : [ ],&#10;      &quot;usage&quot; : {&#10;        &quot;inputTokens&quot; : 12,&#10;        &quot;outputTokens&quot; : 6,&#10;        &quot;cachedReadTokens&quot; : 34,&#10;        &quot;cachedWriteTokens&quot; : 5,&#10;        &quot;totalTokens&quot; : 57,&#10;        &quot;costAmount&quot; : null,&#10;        &quot;costCurrency&quot; : &quot;&quot;,&#10;        &quot;source&quot; : &quot;acpx_stream&quot;,&#10;        &quot;measurementType&quot; : &quot;PROVIDER_RUN_USAGE&quot;,&#10;        &quot;attribution&quot; : &quot;EXACT_PROMPT_MATCH&quot;,&#10;        &quot;cumulative&quot; : false,&#10;        &quot;contextUsedTokens&quot; : 0,&#10;        &quot;sessionCostAmount&quot; : null,&#10;        &quot;sessionCostCurrency&quot; : &quot;&quot;,&#10;        &quot;providerId&quot; : &quot;zhipu&quot;,&#10;        &quot;model&quot; : &quot;glm-5.2&quot;,&#10;        &quot;billingMode&quot; : &quot;subscription_token_only&quot;,&#10;        &quot;providerMetadataSource&quot; : &quot;claude_settings_env&quot;,&#10;        &quot;unavailableReason&quot; : &quot;&quot;&#10;      },&#10;      &quot;processResult&quot; : {&#10;        &quot;command&quot; : &quot;claude --print&quot;,&#10;        &quot;pid&quot; : null,&#10;        &quot;exitCode&quot; : 0,&#10;        &quot;usability&quot; : &quot;EXITED_ZERO&quot;,&#10;        &quot;durationMs&quot; : 1000,&#10;        &quot;stdoutPath&quot; : &quot;&quot;,&#10;        &quot;stderrPath&quot; : &quot;&quot;,&#10;        &quot;interrupted&quot; : false,&#10;        &quot;timedOut&quot; : false&#10;      },&#10;      &quot;adapterSignals&quot; : [ ]&#10;    } ]&#10;  },&#10;  &quot;providerModelIdentity&quot; : {&#10;    &quot;billingMode&quot; : &quot;subscription_token_only&quot;,&#10;    &quot;model&quot; : &quot;glm-5.2&quot;,&#10;    &quot;confidence&quot; : &quot;high&quot;,&#10;    &quot;source&quot; : &quot;claude_settings_env&quot;,&#10;    &quot;provider&quot; : &quot;zhipu&quot;&#10;  },&#10;  &quot;toolUsage&quot; : {&#10;    &quot;schemaVersion&quot; : 1,&#10;    &quot;toolCallCount&quot; : 0,&#10;    &quot;readCount&quot; : 0,&#10;    &quot;writeCount&quot; : 0,&#10;    &quot;bashCount&quot; : 0,&#10;    &quot;otherCount&quot; : 0,&#10;    &quot;byTool&quot; : { },&#10;    &quot;toolIds&quot; : [ ],&#10;    &quot;readFiles&quot; : [ ],&#10;    &quot;directReadFiles&quot; : [ ],&#10;    &quot;writeFiles&quot; : [ ],&#10;    &quot;bashCommands&quot; : [ ],&#10;    &quot;commandExecutables&quot; : [ ]&#10;  },&#10;  &quot;contextGovernanceActualReportPath&quot; : &quot;.agent/workstreams/ws-test/artifacts/context-governance/intake.claude_brainstorm-actual-run-1791630377197.json&quot;,&#10;  &quot;executionAuthority&quot; : {&#10;    &quot;transportDisposition&quot; : &quot;NETWORK_AUTHORITY_NOT_CONFIGURED&quot;&#10;  },&#10;  &quot;processResult&quot; : {&#10;    &quot;command&quot; : &quot;claude --print&quot;,&#10;    &quot;pid&quot; : null,&#10;    &quot;exitCode&quot; : 0,&#10;    &quot;usability&quot; : &quot;EXITED_ZERO&quot;,&#10;    &quot;durationMs&quot; : 1000,&#10;    &quot;stdoutPath&quot; : &quot;&quot;,&#10;    &quot;stderrPath&quot; : &quot;&quot;,&#10;    &quot;interrupted&quot; : false,&#10;    &quot;timedOut&quot; : false&#10;  },&#10;  &quot;adapterSignals&quot; : [ ],&#10;  &quot;agentResultContract&quot; : null,&#10;  &quot;artifactContractResults&quot; : [ ],&#10;  &quot;executionAttempt&quot; : {&#10;    &quot;attemptId&quot; : &quot;att-run-1791630377197&quot;,&#10;    &quot;runId&quot; : &quot;run-1791630377197&quot;,&#10;    &quot;workstreamId&quot; : &quot;ws-test&quot;,&#10;    &quot;nodeId&quot; : &quot;intake.claude_brainstorm&quot;,&#10;    &quot;agent&quot; : &quot;claude&quot;,&#10;    &quot;status&quot; : &quot;PROCESS_EXITED&quot;,&#10;    &quot;processStatus&quot; : &quot;EXITED&quot;,&#10;    &quot;failureSignal&quot; : null,&#10;    &quot;recoverable&quot; : false,&#10;    &quot;retrySafe&quot; : false,&#10;    &quot;message&quot; : &quot;process exited&quot;,&#10;    &quot;stderrPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log&quot;,&#10;    &quot;transcriptPath&quot; : &quot;.agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log&quot;,&#10;    &quot;sessionName&quot; : &quot;claude-main-ws-test&quot;,&#10;    &quot;sessionId&quot; : &quot;&quot;,&#10;    &quot;sessionScope&quot; : &quot;workstream&quot;,&#10;    &quot;sessionSegmentKey&quot; : &quot;ws:ws-test&quot;,&#10;    &quot;startedAt&quot; : &quot;2026-06-01T00:00:00Z&quot;,&#10;    &quot;finishedAt&quot; : &quot;2026-06-01T00:00:01Z&quot;&#10;  },&#10;  &quot;executionOutcome&quot; : null,&#10;  &quot;executionTimeline&quot; : [ {&#10;    &quot;sequence&quot; : 1,&#10;    &quot;observedAt&quot; : &quot;2026-10-10T11:06:17.213073Z&quot;,&#10;    &quot;source&quot; : &quot;adapter&quot;,&#10;    &quot;kind&quot; : &quot;artifact_extracted&quot;,&#10;    &quot;elapsedMs&quot; : 11358377213&#10;  } ]&#10;} ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: 
+{
+  "schemaVersion" : 2,
+  "runId" : "run-1791630377197",
+  "workstreamId" : "ws-test",
+  "nodeId" : "intake.claude_brainstorm",
+  "agent" : "claude",
+  "session" : "claude-main-ws-test",
+  "sessionScope" : "workstream",
+  "sessionSegmentKey" : "ws:ws-test",
+  "sessionScopeReason" : "default:workstream",
+  "stage" : "stage-intake",
+  "semanticIteration" : "iter-001",
+  "sessionCompactionMode" : "off",
+  "sessionCompactionEnabled" : false,
+  "sessionCompactionReason" : "default:off",
+  "sessionCompactionSeedKind" : "",
+  "sessionCompactionSeedPath" : "",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "workdir" : "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-8775714553715065441",
+  "promptPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md",
+  "promptManifestPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md.manifest.json",
+  "outputPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.json",
+  "transcriptPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log",
+  "stderrPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log",
+  "promptMetadataPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md.meta.json",
+  "outputMetadataPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.json.meta.json",
+  "transcriptMetadataPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log.meta.json",
+  "stderrMetadataPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log.meta.json",
+  "command" : [ "claude", "--print" ],
+  "startedAt" : "2026-06-01T00:00:00Z",
+  "finishedAt" : "2026-06-01T00:00:01Z",
+  "durationMs" : 1000,
+  "exitCode" : 0,
+  "status" : "process_exited",
+  "failureReason" : null,
+  "recoverable" : null,
+  "usage" : {
+    "inputTokens" : 12,
+    "outputTokens" : 6,
+    "cachedReadTokens" : 34,
+    "cachedWriteTokens" : 5,
+    "totalTokens" : 57,
+    "costAmount" : null,
+    "costCurrency" : "",
+    "source" : "acpx_stream",
+    "measurementType" : "PROVIDER_RUN_USAGE",
+    "attribution" : "EXACT_PROMPT_MATCH",
+    "cumulative" : false,
+    "contextUsedTokens" : 0,
+    "sessionCostAmount" : null,
+    "sessionCostCurrency" : "",
+    "providerId" : "zhipu",
+    "model" : "glm-5.2",
+    "billingMode" : "subscription_token_only",
+    "providerMetadataSource" : "claude_settings_env",
+    "unavailableReason" : ""
+  },
+  "agentResultAcquisition" : {
+    "schemaVersion" : 2,
+    "correctionAttempted" : false,
+    "maxCorrectionAttempts" : 1,
+    "selectedCandidateOccurrence" : 1,
+    "correctionReason" : "NONE",
+    "correctionDisposition" : "NOT_NEEDED",
+    "occurrences" : [ {
+      "occurrence" : 1,
+      "sessionName" : "claude-main-ws-test",
+      "requestId" : "fixture-prompt",
+      "promptPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/prompts/intake-claude-brainstorm.md",
+      "outputPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.json",
+      "transcriptPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log",
+      "stderrPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log",
+      "startedAt" : "2026-06-01T00:00:00Z",
+      "finishedAt" : "2026-06-01T00:00:01Z",
+      "durationMs" : 1000,
+      "exitCode" : 0,
+      "stopReason" : "end_turn",
+      "presentationDisposition" : "NOT_NEEDED",
+      "rawAssistantSha256" : "2d0796bb865aa68fc5506939c019df7f85282d87d51eb97db6e3bae6430a3ba0",
+      "candidateSha256" : "2d0796bb865aa68fc5506939c019df7f85282d87d51eb97db6e3bae6430a3ba0",
+      "contractDecodable" : true,
+      "parseErrorCode" : "",
+      "contractSchemaValid" : true,
+      "contractCorrectionDisposition" : "NONE",
+      "contractValidationErrors" : [ ],
+      "usage" : {
+        "inputTokens" : 12,
+        "outputTokens" : 6,
+        "cachedReadTokens" : 34,
+        "cachedWriteTokens" : 5,
+        "totalTokens" : 57,
+        "costAmount" : null,
+        "costCurrency" : "",
+        "source" : "acpx_stream",
+        "measurementType" : "PROVIDER_RUN_USAGE",
+        "attribution" : "EXACT_PROMPT_MATCH",
+        "cumulative" : false,
+        "contextUsedTokens" : 0,
+        "sessionCostAmount" : null,
+        "sessionCostCurrency" : "",
+        "providerId" : "zhipu",
+        "model" : "glm-5.2",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "claude_settings_env",
+        "unavailableReason" : ""
+      },
+      "processResult" : {
+        "command" : "claude --print",
+        "pid" : null,
+        "exitCode" : 0,
+        "usability" : "EXITED_ZERO",
+        "durationMs" : 1000,
+        "stdoutPath" : "",
+        "stderrPath" : "",
+        "interrupted" : false,
+        "timedOut" : false
+      },
+      "adapterSignals" : [ ]
+    } ]
+  },
+  "providerModelIdentity" : {
+    "billingMode" : "subscription_token_only",
+    "model" : "glm-5.2",
+    "confidence" : "high",
+    "source" : "claude_settings_env",
+    "provider" : "zhipu"
+  },
+  "toolUsage" : {
+    "schemaVersion" : 1,
+    "toolCallCount" : 0,
+    "readCount" : 0,
+    "writeCount" : 0,
+    "bashCount" : 0,
+    "otherCount" : 0,
+    "byTool" : { },
+    "toolIds" : [ ],
+    "readFiles" : [ ],
+    "directReadFiles" : [ ],
+    "writeFiles" : [ ],
+    "bashCommands" : [ ],
+    "commandExecutables" : [ ]
+  },
+  "contextGovernanceActualReportPath" : ".agent/workstreams/ws-test/artifacts/context-governance/intake.claude_brainstorm-actual-run-1791630377197.json",
+  "executionAuthority" : {
+    "transportDisposition" : "NETWORK_AUTHORITY_NOT_CONFIGURED"
+  },
+  "processResult" : {
+    "command" : "claude --print",
+    "pid" : null,
+    "exitCode" : 0,
+    "usability" : "EXITED_ZERO",
+    "durationMs" : 1000,
+    "stdoutPath" : "",
+    "stderrPath" : "",
+    "interrupted" : false,
+    "timedOut" : false
+  },
+  "adapterSignals" : [ ],
+  "agentResultContract" : null,
+  "artifactContractResults" : [ ],
+  "executionAttempt" : {
+    "attemptId" : "att-run-1791630377197",
+    "runId" : "run-1791630377197",
+    "workstreamId" : "ws-test",
+    "nodeId" : "intake.claude_brainstorm",
+    "agent" : "claude",
+    "status" : "PROCESS_EXITED",
+    "processStatus" : "EXITED",
+    "failureSignal" : null,
+    "recoverable" : false,
+    "retrySafe" : false,
+    "message" : "process exited",
+    "stderrPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.stderr.log",
+    "transcriptPath" : ".agent/workstreams/ws-test/runs/run-1791630377197/outputs/intake-claude-brainstorm.transcript.log",
+    "sessionName" : "claude-main-ws-test",
+    "sessionId" : "",
+    "sessionScope" : "workstream",
+    "sessionSegmentKey" : "ws:ws-test",
+    "startedAt" : "2026-06-01T00:00:00Z",
+    "finishedAt" : "2026-06-01T00:00:01Z"
+  },
+  "executionOutcome" : null,
+  "executionTimeline" : [ {
+    "sequence" : 1,
+    "observedAt" : "2026-10-10T11:06:17.213073Z",
+    "source" : "adapter",
+    "kind" : "artifact_extracted",
+    "elapsedMs" : 11358377213
+  } ]
+} ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedAgentRunPrefersTransportUsageWhenNoAcpxSessionStreamExists(AcpxAgentTaskHandlerTest.java:1077)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></failure>
+  </testcase>
+  <testcase name="handlerCannotFabricateExecutionFactsWhenTransportContractThrows" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.045"/>
+  <testcase name="incompatibleNativeInterfacePersistsItsFactsAndRecoversWithoutSendingAProviderPrompt(String)[1]" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.771"/>
+  <testcase name="incompatibleNativeInterfacePersistsItsFactsAndRecoversWithoutSendingAProviderPrompt(String)[2]" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.694"/>
+  <testcase name="incompatibleNativeInterfacePersistsItsFactsAndRecoversWithoutSendingAProviderPrompt(String)[3]" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.705"/>
+  <testcase name="runWritesPromptManifestByDefault" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.042"/>
+  <testcase name="implementationAgentCannotRewriteTaskContractAuthority" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.713"/>
+  <testcase name="completeFencedArtifactDoesNotProveUnassociatedDeniedToolNonessential" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.129"/>
+  <testcase name="treatsReconnectStderrAsRecoverableFailureEvenWhenExitCodeIsZero" classname="dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest" time="0.04"/>
+</testsuite>

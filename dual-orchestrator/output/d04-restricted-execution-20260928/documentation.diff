@@ -1,0 +1,119 @@
+--- before/dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ after/dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -299,11 +299,11 @@
+ 
+ 此项是本轮最明确的可行性阻塞，不能借用 R4/Phase B 的网络结果证明文件隔离。
+ 
+-推荐路径：复用 AcpxPermissionProfile、provider 的既有只读限制与 transport 启动校验；design/plan/review 使用无 terminal、无 edit/execute、禁止 approveAll 的 profile，逐次绑定实际 policy identity，fresh session 起步，correction 同样受限。`--allowed-tools` 只是免确认清单，不能当工具可见性白名单。新 profile 不能自动叠加 implement 的特许配置，也不修改用户全局 home/config。
++推荐路径（按用户 2026-09-28 新决定修订）：复用 AcpxPermissionProfile、provider 的既有隔离限制与 transport 启动校验；design/plan/review 允许必要的受限执行，禁止未授权的产品/Git/control/policy 写入及其他未授权副作用，禁止绕过沙箱与静默提权。禁止 approveAll，不以工具名称白名单代替实际隔离；逐次绑定实际 policy identity，fresh session 起步，correction 同样受限。`--allowed-tools` 只是免确认清单，不能当工具可见性白名单。新 profile 不能自动叠加 implement 的特许配置，也不修改用户全局 home/config。
+ 
+ | 面 | 已确认代码现状 | 实施前必须证明的具体点 |
+ |---|---|---|
+-| Claude | policy write 允许 workspace 写入；transport 绑定 ref/SHA；profile 有 contract_discovery 无 terminal 范例 | frozen adapter 对 filesystem deny/allow、原生编辑工具、terminal 的实际强制；worktree/Git/control 无写权限；模型不能改 policy 自我提权 |
++| Claude | policy write 允许 workspace 写入；transport 绑定 ref/SHA；profile 有 contract_discovery 无 terminal 范例 | frozen adapter 对 filesystem deny/allow、原生编辑和受限 terminal 的实际强制；必要读取/搜索可完成，worktree/Git/control 无写权限，模型不能改 policy 或绕过限制 |
+ | Codex | 走同一 ACP permission 参数，Claude binding 明确不适用；本机 1.10.0 adapter 的常规 read-only mode 实际传 workspaceWrite（见 §8.1） | 现有 mode 不足以冻结；须决定是否调整 adapter 绑定，并证明每 session/turn 的有效只读限制及高权限 session 不可继承 |
+ | correction/session | correction 可复用既有 session；fresh 当前仅 simpleClaudeCode 控制 | 高权限旧 session 不可复用到只读阶段；降权限必须有实际有效配置证明，否则 fresh 或拒绝 |
+ | ledger/program artifacts | 运行目录在工作区内，程序要写控制文件 | adapter 与程序 writer 的实际可写面分离；只按路径豁免会容许模型冒充程序，必须证明模型不可写受保护路径 |
+@@ -337,7 +337,7 @@
+ 
+ [绑定接口核验与成本边界](../../output/d04-readonly-binding-design-20260928/binding-assessment.md)记录本轮 13 个源码/声明文件的定点读取与 SHA，以及 pinned Codex CLI 0.153.4 的离线协议导出；没有启动 session/provider。以下为候选设计，不把静态接口存在算作运行时强制通过。
+ 
+-本轮有三个直接影响方案的发现：Claude SDK/adapter 支持 `tools` 可用工具集合，但当前 acpx 只转 `allowedTools` 免确认列表；acpx 新建 session 带 policy 元数据，load/resume 未同样传入；Codex 原生协议支持真正 `readOnly`，但尚未证明常规评审如何在无 execute 工具时保留必要读取。它们分别要求补足参数绑定、恢复一致性和正向可用性证明，不能合并为一个 profile 改名。
++本轮有三个直接影响方案的发现：Claude SDK/adapter 支持 `tools` 可用工具集合，但当前 acpx 只转 `allowedTools` 免确认列表；acpx 新建 session 带 policy 元数据，load/resume 未同样传入；Codex 原生协议支持真正 `readOnly`；此前候选要求无 execute，现按用户决定改为必要受限执行，仍须证明合法读取与未授权副作用被拒绝共同成立。它们分别要求补足参数绑定、恢复一致性和正向可用性证明，不能合并为一个 profile 改名。
+ 
+ 边界保持：definition 选择角色要求；已批准 GOAL/EXECUTION 决定目的与可用权限；AcpxPermissionProfile/TaskHandler 生成角色限制；transport/acpx/provider adapter 负责强制和执行事实；程序 writer 保存产物；read model 只显示事实。只读限制不能产生新写授权，也不能替代 scope/批准校验。设计、计划及其复评均适用；实现阶段仍按已批精确范围执行，不把本节变成全阶段工具禁用。
+ 
+@@ -350,7 +350,7 @@
+ | schema、role purpose、agent=claude/codex、workstream/node/run/attempt identity | Role 由已冻结 definition 决定；TaskHandler/transport 核对实际调用。不能让模型或 session 名称决定角色 |
+ | 已批准合同 ref/SHA/phase/epoch 与当前输入身份 | 来自 qualification/D07；binding 不能给 GOAL 增加写权限，不能借旧 epoch 续作 |
+ | canonical workspace、Git/common-dir、control roots、程序 scratch 引用 | 从真实路径推导并验证；scratch 不给模型任意写权限，不能包含或经链接指向产品/control。root/control deny 与程序自身 writer 分别核验 |
+-| 固定能力语义：必要读取/搜索；无产品/Git/control 写、无 terminal/edit/execute；不允许运行中放宽 | 由受审 profile 翻译成两 adapter 的固定参数；不开放用户自编规则语言。ACP 工具和 provider 原生工具都须覆盖 |
++| 固定能力语义：必要读取/搜索及受限执行；无未授权产品/Git/control/policy 写或其他副作用；不允许运行中放宽 | 由受审 profile 翻译成两 adapter 的固定参数；不开放用户自编规则语言。ACP 工具和 provider 原生工具都须覆盖 |
+ | acpx/provider adapter/依赖与限制配置身份 | D07 冻结组合；记录请求值与实际生效值，缺任一不可用缓存 mode 名推定 |
+ | 更窄的 correction 限制、session 复用身份 | 不能大于原上限；相同名、相同 cwd 或仅相同模型都不足以复用。需要工具全禁时须有实际接口/证据，不把 --deny-all 当原生全禁证明 |
+ 
+@@ -371,7 +371,7 @@
+ | acpx 公共 ACP 工具 | 分开声明 fs/read 与 fs/write 能力，write/terminal 在实际 handler 再拒绝，policy 更新不得提权 | 当前 fs capability 共用布尔，文件写有许可检查；仅不展示能力不等于恶意请求无法执行；不得用 deny-all 同时破坏合法读 |
+ | acpx session/queue | session options 持久化完整绑定；新建、加载、恢复、queue owner 和 mode 控制均核对同一绑定并传给 adapter | 当前仅有 Claude ref/SHA 冲突检查，load/resume 元数据及两 provider 复用判断仍需补全 |
+ 
+-不把全部工具禁掉来替代可行性：设计作者须能读取必要代码并输出结构化方案，评审者须能独立核对必要材料；工具读取能力不足时不能只增大固定 prompt 就声称保持同等审查能力。若 Codex 必须使用受限 shell 才可读，须明确这与当前“无 execute”要求的差别，并按 §8.6 提交取舍，不自行改写约束含义。
++不把全部工具禁掉来替代可行性：设计作者须能读取必要代码并输出结构化方案，评审者须能独立核对必要材料；工具读取能力不足时不能只增大固定 prompt 就声称保持同等审查能力。用户已明确接受经过证明的必要受限执行，取代此前“无 execute”候选；这不授权任意命令副作用、未约束的原生编辑/MCP/外部工具或沙箱外重试。写入权限由实际限制守住，不能由 prompt 自述“只读命令”授予。必要临时写入若存在，须冻结与产品/Git/control/policy 分离的 scratch、生命周期及链接边界，不以整个 /tmp 或 .agent 为隐含豁免。
+ 
+ | pre-state / trigger | 必经检查、写序与成功消费 | 失败/重启/兄弟路径 |
+ |---|---|---|
+@@ -413,20 +413,32 @@
+ 
+ ### 8.7 具体待核验顺序及停止边界
+ 
+-1. 首先证明两 provider 的“必要读取可用＋写/执行面受限”能同时成立，尤其是 Codex 无 execute 条件下的读取。允许比较已有 ACP `fs/read_text_file` 宿主介导读取，调查和核验现有协议面本身不视为新增工具服务；但须追到常规 turn 的模型工具调用及 adapter→acpx 实际消费，不能把协议方法存在当成可用。此前导出的 Codex app-server `FsReadFile/FsReadDirectory`（`fs/readFile`、`fs/readDirectory`）是另一套客户端接口，不能直接作为 ACP 回调或模型工具已接通的证据。原生路径不成立时，先比较这些已有候选；若必须新增工具服务、修改引擎或改变约束，立即按 §8.6 停止，而不是先细化大量迁移字段。
++1. 首先证明两 provider 的“必要读取可用＋写/执行面受限”能同时成立，尤其是 Codex 受限执行下的自主读取/搜索、禁止写入和禁止沙箱外升级。允许比较已有 ACP `fs/read_text_file` 宿主介导读取，调查和核验现有协议面本身不视为新增工具服务；但须追到常规 turn 的模型工具调用及 adapter→acpx 实际消费，不能把协议方法存在当成可用。此前导出的 Codex app-server `FsReadFile/FsReadDirectory`（`fs/readFile`、`fs/readDirectory`）是另一套客户端接口，不能直接作为 ACP 回调或模型工具已接通的证据。原生路径不成立时，先比较这些已有候选；若必须新增工具服务、修改引擎或改变约束，立即按 §8.6 停止，而不是先细化大量迁移字段。
+ 2. 该前提成立后，冻结 binding 版本与 Java/acpx/provider 每个消费者、session/correction 传播及实际回执来源；不把新字段存在当完成。
+ 3. 将 baseline/可信 writer 归属、正常/异常收尾与 D06/D07 写集/恢复入口对齐，冻结反证和正向样例、维护及验证成本。**显式登记 readOnlyBinding 不可变文档这个程序写入物**：按 §8.3 由 TaskHandler 的程序准备路径负责，冻结 canonical ref、内容 SHA、实际 writer/时点、原子写入方式、失败残留及下一消费者。D06/D07 对账须分别列出 run 准备 owner 的绑定文档写入，以及 ledger 写集中 node/task 对该文档的固定引用；不得为了纳入清单伪造跨 owner 原子事务或让两个 writer 同时拥有文档。准备中断留下的孤立文档不授予 dispatch 资格；引用提交失败、文件缺失或 SHA 漂移均阻止后续调用。程序工件盘点中显式列出该文档的归属和预期字节核验，不按路径命中自动豁免；准备、收尾、恢复与测试共同消费同一归属记录。具体写点/引用写集未冻结前，此项不能关闭。
+ 4. 交 CC 独立复审该具体方案；满足全部条件后才能建议 D04 冻结。实施仍需用户显式授权，真实 E2E 仍在全链回归和 Gate 之后。
+ 
+ 本轮没有认定成本收益已经发生不可接受偏差，也没有证明不存在偏差。已形成具体接口地图、候选契约、转移与失败切面；第一项的关键正向可用性仍未证明，故不提前扩展为工具服务或引擎开发。
+ 
+-### 8.8 必要读取与禁止执行的离线探针（2026-09-28）
++### 8.8 此前“无执行”候选的离线探针（历史核验，2026-09-28）
+ 
+ 用户要求先验证可行性。本轮[核验报告及原始证据](../../output/d04-feasibility-probe-20260928/feasibility-result.md)直接调用未修改的 acpx 宿主处理器，在临时样例完成 7 项断言：approve-reads/非交互 deny 下完整与分段读取可用，修改/创建/terminal 拒绝；deny-all 同时拒绝合法读取；terminal=false 配合 approve-all 仍能执行固定临时命令。最后一项证明能力声明不是请求时硬拒绝，不是候选配置已发生越权。只读上限须由请求消费者强制且不可运行时放宽，不能只设置 `--no-terminal`。
+ 
+ 固定 Codex 0.153.4 离线接受 `features.shell_tool=false`，但这只证明配置解析，不证明实际工具集合及读取可用。Codex adapter 业务代码未找到 ACP 读取调用，命中仅在内置 SDK；不能把宿主处理器通过当作模型工具链已接通，也不能据文本搜索断言引擎绝不支持读取。Claude 的 tools 集合接口有源码依据，原生 Read/Grep/Glob 与附加工具、配置合并、恢复的共同强制仍未实测。
+ 
+ 联合可行性仍未证明，D04 不冻结；本轮无模型调用、provider session、adapter/产品源码修改。下一证据须来自有界原生能力实验，而非再用文本 PASS 代替行为证明；依 §8.5 的授权和 Verification Gate 执行。若实验需要新工具服务、引擎修改或只能以允许受限 shell 换取读取，按 §8.6 停等用户选择。本次探针及结论为作者核验，未另经 CC 独立复审。
++
++### 8.9 用户确认的受限执行候选与本次实验授权
++
++用户已明确同意：调整 D04 候选要求为“允许经过证明的必要受限执行”，调整后进行有界原生能力实验；结论确定前不承诺可行、不开始产品实现。此决定覆盖临时验证程序与固定 native 能力实验，不授权修改产品/adapter 源码、安装替换版本、变更用户全局配置、实现 W03、合入或真实全流程 E2E。§8.1/§8.5/§8.8 中此前“真实验证未授权”的时间性记录，以本次有界实验授权为准；Verification Gate 仍须先通过。此前报告和 CC 结论保留原文，均不外推为新候选已获评审。
++
++目标不变量仍为 R3 I3：未批准实现前，产品工作区、Git、控制账本与权限事实不得被模型改写；合法设计、计划、独立复评和结构化产出必须可完成。执行工具存在不再本身判 FAIL；越权写入、隐藏提权、未授权外部副作用或破坏合法续作仍判 FAIL。不能把“允许受限执行”扩为运行任意测试/安装依赖等隐含写授权。网络 authority 不扩张，不重开 R4/Phase B。 ACP 宿主 terminal、原生 shell、原生编辑、Code Mode 宿主及 MCP/额外工具是不同执行入口，不因某个原生 shell 通过而全部放行；不能证明消费同一上限的入口须保持关闭或在请求前明确拒绝。允许必要工具宿主不等于允许它绕过文件限制，其实际执行/委派边界仍须核验。
++
++本轮先在固定 native 引擎已有入口，以新临时样例验证读取/搜索/子进程合法执行，与产品样例、Git、control、链接及写后还原拒绝；先执行不消耗模型的层级。运行 Gate、精确命令、binary SHA、输入/结果和失败分类保存在 [实验目录](../../output/d04-restricted-execution-20260928/)。若需要模型层验证，则须另满足实际 provider/model/工具与限制回执、预算及触发前提，不能把缺项解释为普通探测。不同层级分开报告：原生沙箱探针不能证明模型工具链、acpx 传播或 Dual 发布恢复已闭合。
++
++成本上限与止损见本轮 Gate；出现 native 隔离不可用、受保护写入成功、需要修改引擎/新工具服务/新平台或改变严格身份/scope/批准时，停止受影响实验并提交事实；不能先实现补丁让候选过关。本文和清单的当前 D04 口径均使用新要求，历史“无 execute”证据只说明此前调查过程。
++
++本次[实际结果](../../output/d04-restricted-execution-20260928/result.md)：固定 Codex 原生命令沙箱 16 项切片通过（3 项合法读取/执行、13 项写入拒绝），样例前后指纹一致；原生模型任务因探针错误关闭必要 Code Mode 宿主而 INVALID，未发生任何文件工具命令。一次启动前配置错误另单独保存。模型消耗记录为 input 27,376（含 cached 13,440）、output 236，subscription_unpriced；不按进程成功或模型 JSON denied 宣称通过。已按预算停止，不自动补测。补测前须核对工具宿主与 sandbox 交界、修正初始化失败停止条件，并重新确认具体 Gate/增量调用预算；原生命令切片不外推到 Claude、acpx 传播或 D04 整体可行。
+ 
+ ## 9. D09：交付外部窗口与处置
+ 
+@@ -521,7 +533,7 @@
+ | D01 | gate checks/continuation_failure 字段及三类诊断、缺证据规则 | 逐个现有前置 code/rule 与消费者的枚举映射；和 D06 exact write set 绑定；独立评审 |
+ | D02 | 阶段顺序、原因冲突、领域校验与发布分离、常驻回归位置 | contained permission “非必需”证据如何从现有 signal 与义务精确关联；若无关联需明确不能容纳的范围；独立评审 |
+ | D03 | 两阶段同模型、四变体逐门迁移与批准失效；§2.3 READY 无人门、decision 固化及独立资格投影已获 CC 独立复核（§14.1） | 完整 JSON（含 reviewed_candidate）、与 D06 逐写点绑定、compiler/qualification/authored/各投影 consumer 迁移对照及新旧格式/伪批准拒绝测试设计 |
+-| D04 | 用户已选优先细化 adapter 强制只读绑定、保留跨 provider 分工；§8.2–§8.7 给出字段/消费者、恢复路径、反证及成本收益止损 | 首先证明必要读取与无写/execute 约束可共存（Codex 读取接口与执行限制尚待证）；随后冻结逐消费者/session 回执、writer 归属和验证成本并独立复审；强制能力仍未证明，成本收益偏差须停等用户 |
++| D04 | 用户已选优先细化 adapter 强制只读绑定、保留跨 provider 分工；§8.2–§8.7 给出字段/消费者、恢复路径、反证及成本收益止损 | 原生命令切片已获局部证据，原生模型实验 INVALID；先修正验证前提与止损并确认补测预算，再证明必要读取/受限执行与未授权副作用拒绝在真实工具链共存；随后冻结逐消费者/session 回执、writer 归属和验证成本并独立复审；强制能力仍未证明，成本收益偏差须停等用户 |
+ | D05 | 必需项/出口字段、可信边界、四检查点 | 对代表性合法任务填完整样本（含 operator 路径），逐项验证已有 evidence 是否足够，避免 schema 有字段但无可用生产者 |
+ | D06 | 推荐 prepared、字段/写序/reader/event 规则 | 全部写集/读会话入口清单、M6 函数级桥接；核实 atomic move 与锁装配；方案独立评审 |
+ | D07 | 两层身份、dispatch intent、未知外部结果边界 | 现有 recovery action 与人工裁定 payload/执行者停止核验的逐入口对照；不能先宣称有合法 retry 出口 |
+--- before/dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -52,7 +52,7 @@
+ | D01 续作诊断配对 | gate/decision、NodeResult 与现有失败 writer；不另建诊断 authority | 明确字段、原始证据、消费/分类条件、写入失败与冷读，不靠旧决定回填；真实合法续作与错误拒绝成对 |
+ | D02 执行失败保真 | AgentExecutionOutcomeResolver/AgentExecutionResultFacts/validator/finalizer | 定义未调用、过程不可信、输出不合法、产物不合法的适用条件及冲突矩阵；前后处理不会把衍生缺产物盖过决定性执行失败；同一语义由唯一规则消费。详细设计须明确 E02 常驻回归的源码落点、两执行入口及成功/contained-warning 对照的场景和断言；对应 W02 关闭须以这些常驻测试已在源码存在且实际通过为证据，不能只以矩阵或 resolver 改动关闭 |
+ | D03 分期批准与自动推进 | proposal/TaskContract、qualified input、四份 definition 的 gate/required refs | 目标批准与执行批准的 subject/schema、四变体逐门保留/迁移表、重大取舍和批准失效、预算耗尽出口；READY 的 decision 固化、无人工门路由、D06 写集及 reviewed/人工授权投影须冻结；不得先拆掉资格校验再补批准 |
+-| D04 只读执行面 | AcpxPermissionProfile、ClaudeExecutionPolicy、transport、既有准备/发布入口 | 用户已同意优先细化 adapter 强制只读绑定，保留 Claude 作者／Codex 评审；先证明必要读取与无写/execute 共同可行，再冻结 Claude/Codex、inline/worker、correction/session 绑定及 baseline/writer 归属。成本收益偏离须停止等用户确认，具体见详细设计 §8.6；不重开 R4/Phase B，不等于实施授权 |
++| D04 只读执行面 | AcpxPermissionProfile、ClaudeExecutionPolicy、transport、既有准备/发布入口 | 用户已同意优先细化 adapter 强制只读绑定，保留 Claude 作者／Codex 评审；按用户新决定，先证明必要读取/受限执行与未授权副作用拒绝共同可行，再冻结 Claude/Codex、inline/worker、correction/session 绑定及 baseline/writer 归属。成本收益偏离须停止等用户确认，具体见详细设计 §8.6；不重开 R4/Phase B，不等于实施授权 |
+ | D05 验收出口 | 现有 contract/plan/execution policy 与外部材料流程 | 必需项标识、可信方法/环境证明、检查者/时点、细化责任、失败续作；新增能力必须证明无既有替代，存在重大取舍则交用户决定 |
+ | D06 本地一致性 | R1 的 reconciliation / prepared mutation / generation pointer 比较与现有 writers | 选择方案并列出所有受影响写点、reader 可见性、event 幂等、冷启动与 queue/execution 桥接；不默认 journal，不以安全停止满足可续作 |
+ | D07 运行身份/未知执行 | 既有 workstream/run/attempt/输入批准引用 | 固定版本与合法修订输入分开、唯一 owner/写序/恢复核验点；spawn/产物写入是否发生未知时禁止盲重放；未知历史版本 INVALID |
+@@ -273,3 +273,9 @@
+ 用户明确要求：后续相关实施若发现成本与收益偏差，停止等其确认。此要求也约束设计阶段发现的扩围。按详细设计 §8.6 对照预期与实际证据，记录在当前 D04/W03 条目；需要引擎核心、额外工具服务/隔离平台，或损失读取/评审/合法续作收益等情况不得先做后报。停止受影响工作并提交成本、目标影响与选项，不能擅自切到同 provider、降低验收或覆写用户改动。其他独立且已授权的核验不受影响。
+ 
+ 2026-09-28 可行性探针：[离线报告](../../output/d04-feasibility-probe-20260928/feasibility-result.md)记录 7 项真实宿主 handler 断言及 pinned Codex 关闭 shell 开关的解析结果。宿主读可用、写/terminal 可拒绝，但 terminal=false 单独不强制；Codex 常规模型→ACP 读取未找到接通证据，原生无 execute 下读取仍未证明。D04/W03/W08 不据此关闭；下一证据是有界原生能力实验，授权和 Gate 沿详细设计 §8.5/§8.8，不自动进入产品实施或真实 provider 运行。
++
++### 8.3 D04 受限执行候选与有界实验（当前）
++
++用户已同意以“经过证明的必要受限执行”替代绝对禁止 execute，并授权有界原生能力实验；结论确定前不承诺可行、不进入产品实现。业务不变量、Claude 作者／Codex 评审、身份/scope/批准/证据和恢复义务不变。当前候选及授权边界见详细设计 §8.9，[实验目录](../../output/d04-restricted-execution-20260928/)保存 Gate 与实际证据；§8.2 的无 execute 调查及先前未授权表述作为历史记录保留。D04/W03/W08 不因要求调整而关闭。
++
++实验结果：[报告](../../output/d04-restricted-execution-20260928/result.md)。Codex 原生命令沙箱 16 项切片通过；真实模型层因作者探针关闭必要工具宿主而 INVALID（零命令），输入 27,376 token、输出 236 token。初始化失败没有在模型调用前阻断，是本轮验证链缺口；已停止，不自动补测。D04/W03/W08 仍未完成；补测前修正工具前提/停止条件并确认增量预算，不进入产品实现。
+--- before/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ after/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -1,6 +1,8 @@
+ # __ACTIVE__ Real-Case-Driven Orchestrator Simplification
+ 
+ ## 当前入口：2026-09-28 生命周期详细设计候选
++
++最新决定：用户已接受 D04“经过证明的必要受限执行”候选，并授权调整后进行有界原生能力实验。当前口径见详细设计 §8.9/主清单 §8.3；下文无 execute 及验证未授权记录均为此前状态。结论确定前不承诺可行，不开始产品实现；D04 仍待证。[本轮结果](../../output/d04-restricted-execution-20260928/result.md)：Codex 原生命令沙箱切片通过，模型切片因探针关闭必要工具宿主而 INVALID，已停止不自动补测。补测前修正前提检查/停止条件并确认增量预算，不改旧证据。
+ 
+ 用户已要求进入下一步：形成必要详细设计及普通核验；CC 仍由用户自行发起，不直接调用，不自动进入实现。
+ 当前契约入口：[完整生命周期可靠性设计](20260923-dual-lifecycle-reliability-design.zh-CN.md)；[D01–D10 详细设计候选](20260928-dual-lifecycle-detailed-design.zh-CN.md)修订版与 D04 报告已获用户带回的 CC 复审 PASS（新增 1 LOW，无 WARN/FAIL）。READY 正向表示、BUSY/pending 设计义务经独立确认；D03 仅移除已完成的表示复核项。本次补“限制只读 provider 集合”选项及其跨 provider 评审分工代价，增量未经独立复审；D02 关联语义和 §13 其余枚举工作仍未完成，不是冻结版通过。

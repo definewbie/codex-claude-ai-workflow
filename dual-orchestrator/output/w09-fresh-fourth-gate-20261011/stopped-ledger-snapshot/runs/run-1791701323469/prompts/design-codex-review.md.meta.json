@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "prompt",
+  "runId" : "run-1791701323469",
+  "workstreamId" : "ws-20261011T044656Z-BMDJ",
+  "nodeId" : "design.codex_arch_review",
+  "agent" : "codex",
+  "session" : "codex-reviewer-ws-20261011T044656Z-BMDJ",
+  "promptTemplate" : "design-codex-review",
+  "workdir" : "/private/tmp/dual-w09-newlines-20261011-fresh-04/worktree",
+  "artifactPath" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791701323469/prompts/design-codex-review.md",
+  "contentType" : "text/markdown",
+  "byteSize" : 60082,
+  "estimatedTokens" : 15021,
+  "lineCount" : 595,
+  "sha256" : "dd9b9c2473df6d92d4d6447678c07b08577a730f127fd8c3cf44a8e4a2a2ab86",
+  "generatedAt" : "2026-10-11T06:49:09.555266Z"
+}

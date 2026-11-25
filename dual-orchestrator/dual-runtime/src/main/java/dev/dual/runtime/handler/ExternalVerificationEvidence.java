@@ -28,10 +28,10 @@ public final class ExternalVerificationEvidence {
     private ExternalVerificationEvidence() {}
 
     public static Reference prepare(WorkflowFileLedger ledger, WorkstreamPaths paths) throws IOException {
-        try (var lock = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(paths.workstreamId().value(), "prepare evidence"))) {
-            var baseline = EvidenceCollection.captureBaseline(ledger, paths, ledger.loadDefinition(paths), "submit_evidence");
-            return save(paths, "preparations", JSON.writeValueAsBytes(new Preparation(baseline, Instant.now())), ".json");
-        }
+        var preparation = ledger.inspect(paths, (scoped, files) -> new Preparation(
+                EvidenceCollection.captureBaseline(scoped, paths, scoped.loadDefinition(paths), "submit_evidence"), Instant.now()));
+        // Material production grants no authority. Submission rechecks the fixed baseline under L05.
+        return save(paths, "preparations", JSON.writeValueAsBytes(preparation), ".json");
     }
 
     public static EvidenceSubmission submit(WorkflowFileLedger ledger, WorkstreamPaths paths, Reference preparation,
@@ -64,10 +64,11 @@ public final class ExternalVerificationEvidence {
         var reference = save(paths, "submissions", JSON.writeValueAsBytes(manifest), ".json");
         var submission = new EvidenceSubmission(requestId, preparation.ref(), preparation.sha256(),
                 reference.ref(), reference.sha256(), prepared.baseline());
-        try (var lock = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(paths.workstreamId().value(), "submit evidence"))) {
+        try (var write = ledger.writeSession(paths, "submit evidence", requestId)) {
+            var scoped = write.ledger();
             verify(paths, submission);
-            var definition = ledger.loadDefinition(paths);
-            var gateNode = ledger.loadNode(paths, prepared.baseline().gateNodeInstanceId());
+            var definition = scoped.loadDefinition(paths);
+            var gateNode = scoped.loadNode(paths, prepared.baseline().gateNodeInstanceId());
             // Only a fully routed prior decision is idempotent. Partial gate writes never authorize another route.
             if (gateNode.status() == NodeStatus.COMPLETED) {
                 var prior = JSON.convertValue(gateNode.result().get("external_evidence"), EvidenceSubmission.class);
@@ -92,9 +93,10 @@ public final class ExternalVerificationEvidence {
                 if (!routed) throw new IOException("partial evidence decision; no automatic recovery");
                 return prior;
             }
-            var currentBaseline = EvidenceCollection.captureBaseline(ledger, paths, definition, "submit_evidence");
+            var currentBaseline = EvidenceCollection.captureBaseline(scoped, paths, definition, "submit_evidence");
             if (!prepared.baseline().equals(currentBaseline)) throw new IOException("preparation no longer belongs to current source/gate");
-            ledger.submitEvidence(paths, definition, note, submission);
+            scoped.submitEvidence(paths, definition, note, submission);
+            write.commit();
             return submission;
         }
     }

@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="1.381" tests="61" errors="11" skipped="0" failures="4">
+  <properties>
+    <property name="java.specification.version" value="25"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-booter/3.5.2/surefire-booter-3.5.2.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-api/3.5.2/surefire-api-3.5.2.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-extensions-spi/3.5.2/surefire-extensions-spi-3.5.2.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-shared-utils/3.5.2/surefire-shared-utils-3.5.2.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-logger-api/3.5.2/surefire-logger-api-3.5.2.jar:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/test-classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/target/classes:/Users/kriswang/.m2/repository/com/yomahub/liteflow-core/2.16.0/liteflow-core-2.16.0.jar:/Users/kriswang/.m2/repository/cn/hutool/hutool-core/5.8.39/hutool-core-5.8.39.jar:/Users/kriswang/.m2/repository/cn/hutool/hutool-crypto/5.8.39/hutool-crypto-5.8.39.jar:/Users/kriswang/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar:/Users/kriswang/.m2/repository/org/dom4j/dom4j/2.1.4/dom4j-2.1.4.jar:/Users/kriswang/.m2/repository/com/alibaba/transmittable-thread-local/2.14.5/transmittable-thread-local-2.14.5.jar:/Users/kriswang/.m2/repository/net/bytebuddy/byte-buddy/1.15.11/byte-buddy-1.15.11.jar:/Users/kriswang/.m2/repository/com/alibaba/qlexpress4/4.1.0/qlexpress4-4.1.0.jar:/Users/kriswang/.m2/repository/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar:/Users/kriswang/.m2/repository/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar:/Users/kriswang/.m2/repository/commons-io/commons-io/2.14.0/commons-io-2.14.0.jar:/Users/kriswang/.m2/repository/org/apache/commons/commons-text/1.14.0/commons-text-1.14.0.jar:/Users/kriswang/.m2/repository/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar:/Users/kriswang/.m2/repository/com/github/ben-manes/caffeine/caffeine/3.1.8/caffeine-3.1.8.jar:/Users/kriswang/.m2/repository/org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.jar:/Users/kriswang/.m2/repository/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/target/classes:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter/3.4.4/spring-boot-starter-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot/3.4.4/spring-boot-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/spring-context/6.2.5/spring-context-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-aop/6.2.5/spring-aop-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-beans/6.2.5/spring-beans-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-expression/6.2.5/spring-expression-6.2.5.jar:/Users/kriswang/.m2/repository/io/micrometer/micrometer-observation/1.14.5/micrometer-observation-1.14.5.jar:/Users/kriswang/.m2/repository/io/micrometer/micrometer-commons/1.14.5/micrometer-commons-1.14.5.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.4.4/spring-boot-autoconfigure-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.4.4/spring-boot-starter-logging-3.4.4.jar:/Users/kriswang/.m2/repository/ch/qos/logback/logback-classic/1.5.18/logback-classic-1.5.18.jar:/Users/kriswang/.m2/repository/ch/qos/logback/logback-core/1.5.18/logback-core-1.5.18.jar:/Users/kriswang/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.24.3/log4j-to-slf4j-2.24.3.jar:/Users/kriswang/.m2/repository/org/apache/logging/log4j/log4j-api/2.24.3/log4j-api-2.24.3.jar:/Users/kriswang/.m2/repository/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.jar:/Users/kriswang/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/Users/kriswang/.m2/repository/org/springframework/spring-core/6.2.5/spring-core-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-jcl/6.2.5/spring-jcl-6.2.5.jar:/Users/kriswang/.m2/repository/org/yaml/snakeyaml/2.3/snakeyaml-2.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.18.3/jackson-databind-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.18.3/jackson-annotations-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.3/jackson-core-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.3/jackson-datatype-jsr310-2.18.3.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.4.4/spring-boot-starter-test-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-test/3.4.4/spring-boot-test-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.4.4/spring-boot-test-autoconfigure-3.4.4.jar:/Users/kriswang/.m2/repository/com/jayway/jsonpath/json-path/2.9.0/json-path-2.9.0.jar:/Users/kriswang/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.2/jakarta.xml.bind-api-4.0.2.jar:/Users/kriswang/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/Users/kriswang/.m2/repository/net/minidev/json-smart/2.5.2/json-smart-2.5.2.jar:/Users/kriswang/.m2/repository/net/minidev/accessors-smart/2.5.2/accessors-smart-2.5.2.jar:/Users/kriswang/.m2/repository/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar:/Users/kriswang/.m2/repository/org/assertj/assertj-core/3.26.3/assertj-core-3.26.3.jar:/Users/kriswang/.m2/repository/org/awaitility/awaitility/4.2.2/awaitility-4.2.2.jar:/Users/kriswang/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter/5.11.4/junit-jupiter-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.11.4/junit-jupiter-api-5.11.4.jar:/Users/kriswang/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-commons/1.11.4/junit-platform-commons-1.11.4.jar:/Users/kriswang/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.11.4/junit-jupiter-params-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.11.4/junit-jupiter-engine-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-engine/1.11.4/junit-platform-engine-1.11.4.jar:/Users/kriswang/.m2/repository/org/mockito/mockito-core/5.14.2/mockito-core-5.14.2.jar:/Users/kriswang/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar:/Users/kriswang/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/Users/kriswang/.m2/repository/org/mockito/mockito-junit-jupiter/5.14.2/mockito-junit-jupiter-5.14.2.jar:/Users/kriswang/.m2/repository/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.jar:/Users/kriswang/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/Users/kriswang/.m2/repository/org/springframework/spring-test/6.2.5/spring-test-6.2.5.jar:/Users/kriswang/.m2/repository/org/xmlunit/xmlunit-core/2.10.0/xmlunit-core-2.10.0.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/surefire-junit-platform/3.5.2/surefire-junit-platform-3.5.2.jar:/Users/kriswang/.m2/repository/org/apache/maven/surefire/common-java5/3.5.2/common-java5-3.5.2.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-launcher/1.11.4/junit-platform-launcher-1.11.4.jar"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="Asia/Shanghai"/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="java.vm.specification.version" value="25"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="CN"/>
+    <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/lib"/>
+    <property name="sun.java.command" value="org.apache.maven.surefire.booter.ForkedBooter /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/surefire 2026-10-06T19-31-00_186-jvmRun1 surefire-20261006193114378_11tmp surefire_4-20261006193114378_12tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/test-classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/target/classes:/Users/kriswang/.m2/repository/com/yomahub/liteflow-core/2.16.0/liteflow-core-2.16.0.jar:/Users/kriswang/.m2/repository/cn/hutool/hutool-core/5.8.39/hutool-core-5.8.39.jar:/Users/kriswang/.m2/repository/cn/hutool/hutool-crypto/5.8.39/hutool-crypto-5.8.39.jar:/Users/kriswang/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar:/Users/kriswang/.m2/repository/org/dom4j/dom4j/2.1.4/dom4j-2.1.4.jar:/Users/kriswang/.m2/repository/com/alibaba/transmittable-thread-local/2.14.5/transmittable-thread-local-2.14.5.jar:/Users/kriswang/.m2/repository/net/bytebuddy/byte-buddy/1.15.11/byte-buddy-1.15.11.jar:/Users/kriswang/.m2/repository/com/alibaba/qlexpress4/4.1.0/qlexpress4-4.1.0.jar:/Users/kriswang/.m2/repository/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar:/Users/kriswang/.m2/repository/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar:/Users/kriswang/.m2/repository/commons-io/commons-io/2.14.0/commons-io-2.14.0.jar:/Users/kriswang/.m2/repository/org/apache/commons/commons-text/1.14.0/commons-text-1.14.0.jar:/Users/kriswang/.m2/repository/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar:/Users/kriswang/.m2/repository/com/github/ben-manes/caffeine/caffeine/3.1.8/caffeine-3.1.8.jar:/Users/kriswang/.m2/repository/org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.jar:/Users/kriswang/.m2/repository/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/target/classes:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter/3.4.4/spring-boot-starter-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot/3.4.4/spring-boot-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/spring-context/6.2.5/spring-context-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-aop/6.2.5/spring-aop-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-beans/6.2.5/spring-beans-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-expression/6.2.5/spring-expression-6.2.5.jar:/Users/kriswang/.m2/repository/io/micrometer/micrometer-observation/1.14.5/micrometer-observation-1.14.5.jar:/Users/kriswang/.m2/repository/io/micrometer/micrometer-commons/1.14.5/micrometer-commons-1.14.5.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.4.4/spring-boot-autoconfigure-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.4.4/spring-boot-starter-logging-3.4.4.jar:/Users/kriswang/.m2/repository/ch/qos/logback/logback-classic/1.5.18/logback-classic-1.5.18.jar:/Users/kriswang/.m2/repository/ch/qos/logback/logback-core/1.5.18/logback-core-1.5.18.jar:/Users/kriswang/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.24.3/log4j-to-slf4j-2.24.3.jar:/Users/kriswang/.m2/repository/org/apache/logging/log4j/log4j-api/2.24.3/log4j-api-2.24.3.jar:/Users/kriswang/.m2/repository/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.jar:/Users/kriswang/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/Users/kriswang/.m2/repository/org/springframework/spring-core/6.2.5/spring-core-6.2.5.jar:/Users/kriswang/.m2/repository/org/springframework/spring-jcl/6.2.5/spring-jcl-6.2.5.jar:/Users/kriswang/.m2/repository/org/yaml/snakeyaml/2.3/snakeyaml-2.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.18.3/jackson-databind-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.18.3/jackson-annotations-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.3/jackson-core-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.3/jackson-datatype-jsr310-2.18.3.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-starter-test/3.4.4/spring-boot-starter-test-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-test/3.4.4/spring-boot-test-3.4.4.jar:/Users/kriswang/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/3.4.4/spring-boot-test-autoconfigure-3.4.4.jar:/Users/kriswang/.m2/repository/com/jayway/jsonpath/json-path/2.9.0/json-path-2.9.0.jar:/Users/kriswang/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/4.0.2/jakarta.xml.bind-api-4.0.2.jar:/Users/kriswang/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/Users/kriswang/.m2/repository/net/minidev/json-smart/2.5.2/json-smart-2.5.2.jar:/Users/kriswang/.m2/repository/net/minidev/accessors-smart/2.5.2/accessors-smart-2.5.2.jar:/Users/kriswang/.m2/repository/org/ow2/asm/asm/9.7.1/asm-9.7.1.jar:/Users/kriswang/.m2/repository/org/assertj/assertj-core/3.26.3/assertj-core-3.26.3.jar:/Users/kriswang/.m2/repository/org/awaitility/awaitility/4.2.2/awaitility-4.2.2.jar:/Users/kriswang/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter/5.11.4/junit-jupiter-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.11.4/junit-jupiter-api-5.11.4.jar:/Users/kriswang/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-commons/1.11.4/junit-platform-commons-1.11.4.jar:/Users/kriswang/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.11.4/junit-jupiter-params-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.11.4/junit-jupiter-engine-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-engine/1.11.4/junit-platform-engine-1.11.4.jar:/Users/kriswang/.m2/repository/org/mockito/mockito-core/5.14.2/mockito-core-5.14.2.jar:/Users/kriswang/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar:/Users/kriswang/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/Users/kriswang/.m2/repository/org/mockito/mockito-junit-jupiter/5.14.2/mockito-junit-jupiter-5.14.2.jar:/Users/kriswang/.m2/repository/org/skyscreamer/jsonassert/1.5.3/jsonassert-1.5.3.jar:/Users/kriswang/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar:/Users/kriswang/.m2/repository/org/springframework/spring-test/6.2.5/spring-test-6.2.5.jar:/Users/kriswang/.m2/repository/org/xmlunit/xmlunit-core/2.10.0/xmlunit-core-2.10.0.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/Users/kriswang"/>
+    <property name="user.language" value="zh"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2026-04-21"/>
+    <property name="java.home" value="/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="apple.awt.application.name" value="ForkedBooter"/>
+    <property name="user.script" value="Hans"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="25.0.3+9-LTS-195"/>
+    <property name="user.name" value="kriswang"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="15.6.1"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="localRepository" value="/Users/kriswang/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/"/>
+    <property name="java.version" value="25.0.3"/>
+    <property name="user.dir" value="/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime"/>
+    <property name="os.arch" value="aarch64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/Users/kriswang/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="25.0.3+9-LTS-195"/>
+    <property name="stdin.encoding" value="UTF-8"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property name="java.class.version" value="69.0"/>
+    <property name="maven.test.failure.ignore" value="true"/>
+  </properties>
+  <testcase name="acceptanceProfileRendersReviewEvidenceBriefWithChangedFiles" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.002">
+    <error message="Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/factory method to deserialize from String value (&apos;tokens refreshed&apos;)&#10; at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 8, column: 27] (through reference chain: dev.dual.core.contract.TaskContract[&quot;acceptance_criteria&quot;]-&gt;java.util.ArrayList[0])" type="com.fasterxml.jackson.databind.exc.MismatchedInputException"><![CDATA[com.fasterxml.jackson.databind.exc.MismatchedInputException: 
+Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/factory method to deserialize from String value ('tokens refreshed')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 8, column: 27] (through reference chain: dev.dual.core.contract.TaskContract["acceptance_criteria"]->java.util.ArrayList[0])
+	at com.fasterxml.jackson.databind.exc.MismatchedInputException.from(MismatchedInputException.java:63)
+	at com.fasterxml.jackson.databind.DeserializationContext.reportInputMismatch(DeserializationContext.java:1754)
+	at com.fasterxml.jackson.databind.DeserializationContext.handleMissingInstantiator(DeserializationContext.java:1379)
+	at com.fasterxml.jackson.databind.deser.std.StdDeserializer._deserializeFromString(StdDeserializer.java:311)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromString(BeanDeserializerBase.java:1592)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeOther(BeanDeserializer.java:197)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:187)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer._deserializeFromArray(CollectionDeserializer.java:361)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer.deserialize(CollectionDeserializer.java:246)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer.deserialize(CollectionDeserializer.java:30)
+	at com.fasterxml.jackson.databind.deser.SettableBeanProperty.deserialize(SettableBeanProperty.java:543)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeWithErrorWrapping(BeanDeserializer.java:585)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:447)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3733)
+	at dev.dual.runtime.handler.TaskContractProjectionFixture.seedCompileBinding(TaskContractProjectionFixture.java:26)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceProfileRendersReviewEvidenceBriefWithChangedFiles(ContextBuildPackageHandlerTest.java:535)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+  </testcase>
+  <testcase name="governedPackageWritesRepoScopeGovernanceArtifacts" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.006">
+    <failure message="expected: &lt;true&gt; but was: &lt;false&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.governedPackageWritesRepoScopeGovernanceArtifacts(ContextBuildPackageHandlerTest.java:1908)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></failure>
+  </testcase>
+  <testcase name="summaryRenderingRejectsAgentSidecarWithoutLedgerOccurrence" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.003"/>
+  <testcase name="acceptanceAlsoPreservesFeedbackAfterEnoughTrimming" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.002">
+    <error message="required_contract_phase is missing: ctx.test" type="java.lang.IllegalArgumentException"><![CDATA[java.lang.IllegalArgumentException: required_contract_phase is missing: ctx.test
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:66)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.assertMinimalBudgetTrimming(ContextBuildPackageHandlerTest.java:1317)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceAlsoPreservesFeedbackAfterEnoughTrimming(ContextBuildPackageHandlerTest.java:1302)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+  </testcase>
+  <testcase name="governedProfileWithoutGitEvidenceSkipsGitSection" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.003"/>
+  <testcase name="governedMissingOptionalSectionSkipsGracefully" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.004"/>
+  <testcase name="planReviewRendersTypedPlanFromValidatedAgentEvidence" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.234">
+    <error message="routed agent evidence sidecar is unreadable: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-7858677029297492076/.agent/workstreams/ws-ctx/runs/run-plan/outputs/plan-claude.contract.json" type="java.lang.IllegalStateException"><![CDATA[java.lang.IllegalStateException: routed agent evidence sidecar is unreadable: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-7858677029297492076/.agent/workstreams/ws-ctx/runs/run-plan/outputs/plan-claude.contract.json
+	at dev.dual.runtime.handler.AgentEvidenceIndex.readEntry(AgentEvidenceIndex.java:186)
+	at dev.dual.runtime.handler.AgentEvidenceIndex.lambda$fromRefs$1(AgentEvidenceIndex.java:40)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.DistinctOps$1$2.accept(DistinctOps.java:174)
+	at java.base/java.util.stream.Streams$StreamBuilderImpl.forEachRemaining(Streams.java:411)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:803)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.AbstractList$RandomAccessSpliterator.forEachRemaining(AbstractList.java:722)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:635)
+	at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:291)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:652)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:658)
+	at java.base/java.util.stream.ReferencePipeline.toList(ReferencePipeline.java:663)
+	at dev.dual.runtime.handler.AgentEvidenceIndex.fromRefs(AgentEvidenceIndex.java:43)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.missingRequiredAgentEvidence(ContextBuildPackageHandler.java:1038)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:105)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.planReviewRendersTypedPlanFromValidatedAgentEvidence(ContextBuildPackageHandlerTest.java:275)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+  </testcase>
+  <testcase name="acceptanceDoesNotAcceptMatchingDecisionFromWrongProducer" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.016">
+    <error message="required_contract_phase is missing: ctx.acceptance" type="java.lang.IllegalArgumentException"><![CDATA[java.lang.IllegalArgumentException: required_contract_phase is missing: ctx.acceptance
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:66)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceDoesNotAcceptMatchingDecisionFromWrongProducer(ContextBuildPackageHandlerTest.java:227)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+  </testcase>
+  <testcase name="inputArtifactAgentOutputUsesSidecarSummaryInsteadOfRawBody" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.015">
+    <error message="Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/factory method to deserialize from String value (&apos;validated evidence is projected&apos;)&#10; at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 8, column: 27] (through reference chain: dev.dual.core.contract.TaskContract[&quot;acceptance_criteria&quot;]-&gt;java.util.ArrayList[0])" type="com.fasterxml.jackson.databind.exc.MismatchedInputException"><![CDATA[com.fasterxml.jackson.databind.exc.MismatchedInputException: 
+Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/factory method to deserialize from String value ('validated evidence is projected')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 8, column: 27] (through reference chain: dev.dual.core.contract.TaskContract["acceptance_criteria"]->java.util.ArrayList[0])
+	at com.fasterxml.jackson.databind.exc.MismatchedInputException.from(MismatchedInputException.java:63)
+	at com.fasterxml.jackson.databind.DeserializationContext.reportInputMismatch(DeserializationContext.java:1754)
+	at com.fasterxml.jackson.databind.DeserializationContext.handleMissingInstantiator(DeserializationContext.java:1379)
+	at com.fasterxml.jackson.databind.deser.std.StdDeserializer._deserializeFromString(StdDeserializer.java:311)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromString(BeanDeserializerBase.java:1592)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeOther(BeanDeserializer.java:197)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:187)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer._deserializeFromArray(CollectionDeserializer.java:361)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer.deserialize(CollectionDeserializer.java:246)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer.deserialize(CollectionDeserializer.java:30)
+	at com.fasterxml.jackson.databind.deser.SettableBeanProperty.deserialize(SettableBeanProperty.java:543)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeWithErrorWrapping(BeanDeserializer.java:585)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:447)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3733)
+	at dev.dual.runtime.handler.TaskContractProjectionFixture.seedCompileBinding(TaskContractProjectionFixture.java:26)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.inputArtifactAgentOutputUsesSidecarSummaryInsteadOfRawBody(ContextBuildPackageHandlerTest.java:943)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+  </testcase>
+  <testcase name="contextIncludesStateEvidenceBoundaryAndContractFailures" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.022"/>
+  <testcase name="gitEvidenceSectionRendersWhenPresent" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.006"/>
+  <testcase name="planReviewRequiresTypedPlanPayloadBeforeReviewerStarts" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.016"/>
+  <testcase name="contextHighlightsCurrentRepairObjectiveFromRejectedAcceptance" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.021"/>
+  <testcase name="governanceDisabledOmitsRepoScopeArtifacts" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.002"/>
+  <testcase name="implementationProfileRendersAgentHandoffFromWorkstreamMemory" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.004"/>
+  <testcase name="transcriptInputRefIsNeverExpandedIntoContextPackage" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.005"/>
+  <testcase name="memoryDisabledOmitsWorkingMemoryFromImplementationPackage" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.005"/>
+  <testcase name="phase5StopsAfterEnoughTrimmingAndPreservesHumanFeedback" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.007"/>
+  <testcase name="explicitFullProfileRequirementStillSupportsAdaptiveCompression" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.005"/>
+  <testcase name="inputArtifactAgentOutputOnlySurfacesValidatedProjection" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.021"/>
+  <testcase name="adaptiveDegradation_compressesLargeRequirement" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.005"/>
+  <testcase name="memoryDisabledOmitsReviewEvidenceBriefFromReviewPackage" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.024"/>
+  <testcase name="reviewPackageIncludesEvidenceBriefFromManifest" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.022"/>
+  <testcase name="nonDroppableBoundaryOverflowFailsWithoutPublishingPackage" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.004"/>
+  <testcase name="architectureReviewDecisionOnlyHistoryKeepsLatestReasonsWhenDegraded" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.006"/>
+  <testcase name="implementTargetDoesNotReceiveTypedSourceRereadAllowance" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.524">
+    <failure message="expected: &lt;COMPLETED&gt; but was: &lt;FAILED&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.implementTargetDoesNotReceiveTypedSourceRereadAllowance(ContextBuildPackageHandlerTest.java:2276)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></failure>
+  </testcase>
+  <testcase name="acceptanceRendersCompletedSelfTestEvidenceFromRoutedSidecar" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.015">
+    <error message="required_contract_phase is missing: ctx.acceptance" type="java.lang.IllegalArgumentException"><![CDATA[java.lang.IllegalArgumentException: required_contract_phase is missing: ctx.acceptance
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:66)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceRendersCompletedSelfTestEvidenceFromRoutedSidecar(ContextBuildPackageHandlerTest.java:190)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+  </testcase>
+  <testcase name="observedAndHeuristicFilesCannotExpandCanonicalChangeBoundary" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.006">
+    <failure message="expected: &lt;[src/allowed.java, docs/API contract.md]&gt; but was: &lt;[]&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: expected: <[src/allowed.java, docs/API contract.md]> but was: <[]>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.observedAndHeuristicFilesCannotExpandCanonicalChangeBoundary(ContextBuildPackageHandlerTest.java:2145)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></failure>
+  </testcase>
+  <testcase name="implementationPackageWritesEvidenceManifestAndWorkingMemory" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.005"/>
+  <testcase name="unroutedHistoricalAgentEvidenceCannotExpandExplorationScope" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.023"/>
+  <testcase name="governedProductReviewCapsRenderedPackageToTotalBudget" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.005"/>
+  <testcase name="unroutedWorkspaceFilesCannotEnterContextThroughRepoHeuristics" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.006"/>
+  <testcase name="malformedHandoffJsonDoesNotBreakContextBuild" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.005"/>
+  <testcase name="legacyPathCanRenderExplicitWorkingMemorySection" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.003"/>
+  <testcase name="governedStageGuidanceContainsNoReadAuthority" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.008">
+    <error message="required_contract_phase is missing: ctx.test" type="java.lang.IllegalArgumentException"><![CDATA[java.lang.IllegalArgumentException: required_contract_phase is missing: ctx.test
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:66)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.governedStageGuidanceContainsNoReadAuthority(ContextBuildPackageHandlerTest.java:2023)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+  </testcase>
+  <testcase name="taskContractSectionIncludesContractResolution" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.001">
+    <error message="Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/factory method to deserialize from String value (&apos;Criterion one&apos;)&#10; at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 10, column: 27] (through reference chain: dev.dual.core.contract.TaskContract[&quot;acceptance_criteria&quot;]-&gt;java.util.ArrayList[0])" type="com.fasterxml.jackson.databind.exc.MismatchedInputException"><![CDATA[com.fasterxml.jackson.databind.exc.MismatchedInputException: 
+Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/factory method to deserialize from String value ('Criterion one')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 10, column: 27] (through reference chain: dev.dual.core.contract.TaskContract["acceptance_criteria"]->java.util.ArrayList[0])
+	at com.fasterxml.jackson.databind.exc.MismatchedInputException.from(MismatchedInputException.java:63)
+	at com.fasterxml.jackson.databind.DeserializationContext.reportInputMismatch(DeserializationContext.java:1754)
+	at com.fasterxml.jackson.databind.DeserializationContext.handleMissingInstantiator(DeserializationContext.java:1379)
+	at com.fasterxml.jackson.databind.deser.std.StdDeserializer._deserializeFromString(StdDeserializer.java:311)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromString(BeanDeserializerBase.java:1592)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeOther(BeanDeserializer.java:197)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:187)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer._deserializeFromArray(CollectionDeserializer.java:361)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer.deserialize(CollectionDeserializer.java:246)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer.deserialize(CollectionDeserializer.java:30)
+	at com.fasterxml.jackson.databind.deser.SettableBeanProperty.deserialize(SettableBeanProperty.java:543)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeWithErrorWrapping(BeanDeserializer.java:585)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:447)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3733)
+	at dev.dual.runtime.handler.TaskContractProjectionFixture.seedCompileBinding(TaskContractProjectionFixture.java:26)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.taskContractSectionIncludesContractResolution(ContextBuildPackageHandlerTest.java:1479)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+  </testcase>
+  <testcase name="budgetOverflowDropsOptionalSectionsInPhase5" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.006"/>
+  <testcase name="acceptanceSectionOverrideFailsBeforePublishingContextArtifacts" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.001"/>
+  <testcase name="productReviewContextProjectsCompleteProposalFromValidatedReference" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.022"/>
+  <testcase name="unchangedReadFilesAreMarkedReusableInHandoff" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.004"/>
+  <testcase name="summaryRenderingShowsArtifactNames" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.022"/>
+  <testcase name="legacyPathWithIncludeSectionsOverride" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.003"/>
+  <testcase name="architectureReviewCannotStartWithoutValidatedDesignSubject" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.002"/>
+  <testcase name="acceptancePreservesQualifiedContractBeyondSoftBudgetAndRecordsWarning" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.003">
+    <error message="required_contract_phase is missing: ctx.test" type="java.lang.IllegalArgumentException"><![CDATA[java.lang.IllegalArgumentException: required_contract_phase is missing: ctx.test
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:66)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptancePreservesQualifiedContractBeyondSoftBudgetAndRecordsWarning(ContextBuildPackageHandlerTest.java:2339)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+  </testcase>
+  <testcase name="handoffOpenRisksAndCompletedWorkRendered" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.005"/>
+  <testcase name="handoffJsonConsumedWhenPresent" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.006"/>
+  <testcase name="activeAgentProfilesOmitDuplicateRequirementProjection" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.001"/>
+  <testcase name="stateEvidenceBoundaryUsesRoutedAcceptanceAndIgnoresUnroutedNewerSidecars" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.024"/>
+  <testcase name="governedActiveProfileDoesNotRequireRequirementSection" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.004"/>
+  <testcase name="budgetOverflowDegradesGitEvidenceToDiffStat" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.006"/>
+  <testcase name="recentAgentOutputsRenderContractSidecarSummary" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.022"/>
+  <testcase name="architectureReviewSubjectKeepsLargeValidatedChecksAndEvidenceOutsideSummaryBudget" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.055">
+    <error message="routed agent evidence lineage is invalid: sidecar source is not published by the ledger node occurrence" type="java.lang.IllegalStateException"><![CDATA[java.lang.IllegalStateException: routed agent evidence lineage is invalid: sidecar source is not published by the ledger node occurrence
+	at dev.dual.runtime.handler.AgentEvidenceIndex.readEntry(AgentEvidenceIndex.java:186)
+	at dev.dual.runtime.handler.AgentEvidenceIndex.lambda$fromRefs$1(AgentEvidenceIndex.java:40)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.DistinctOps$1$2.accept(DistinctOps.java:174)
+	at java.base/java.util.stream.Streams$StreamBuilderImpl.forEachRemaining(Streams.java:411)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:803)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.AbstractList$RandomAccessSpliterator.forEachRemaining(AbstractList.java:722)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:635)
+	at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:291)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:652)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:658)
+	at java.base/java.util.stream.ReferencePipeline.toList(ReferencePipeline.java:663)
+	at dev.dual.runtime.handler.AgentEvidenceIndex.fromRefs(AgentEvidenceIndex.java:43)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.resolveRequiredArchitectureReviewSubject(ContextBuildPackageHandler.java:963)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:86)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.architectureReviewSubjectKeepsLargeValidatedChecksAndEvidenceOutsideSummaryBudget(ContextBuildPackageHandlerTest.java:700)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+  </testcase>
+  <testcase name="productReviewContextRejectsVerifiedReferenceToUnsupportedProposalVersion" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.017"/>
+  <testcase name="activeProfileKeepsRecentAgentOutputsWithoutDuplicateRequirementPressure" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.025"/>
+  <testcase name="productReviewContextRejectsTamperedProposalBeforeReviewerCanStart" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.015"/>
+  <testcase name="reviewTargetReceivesTypedSourceRereadAllowance" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.02"/>
+  <testcase name="canonicalScopeIsNotTruncatedByRecommendationLimit" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.004">
+    <failure message="canonical contract scope must not inherit the 24-file recommendation limit ==&gt; expected: &lt;true&gt; but was: &lt;false&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: canonical contract scope must not inherit the 24-file recommendation limit ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.canonicalScopeIsNotTruncatedByRecommendationLimit(ContextBuildPackageHandlerTest.java:2189)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></failure>
+  </testcase>
+  <testcase name="governedPackageWritesStructuredBudgetMetadataSidecar" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.021"/>
+  <testcase name="unknownRoutedFileIsPointerOnlyAndCannotInjectContextContent" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.004"/>
+  <testcase name="governedHappyPathRendersProfileSectionsWithoutRequirement" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.022"/>
+  <testcase name="acceptanceRequiresCompletedSelfTestEvidenceBeforeReviewerStarts" classname="dev.dual.runtime.handler.ContextBuildPackageHandlerTest" time="0.001">
+    <error message="required_contract_phase is missing: ctx.acceptance" type="java.lang.IllegalArgumentException"><![CDATA[java.lang.IllegalArgumentException: required_contract_phase is missing: ctx.acceptance
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:66)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceRequiresCompletedSelfTestEvidenceBeforeReviewerStarts(ContextBuildPackageHandlerTest.java:148)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+]]></error>
+  </testcase>
+</testsuite>

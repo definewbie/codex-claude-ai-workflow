@@ -63,13 +63,13 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         var qualifiedContract = Optional.<TaskContractProjectionVerifier.QualifiedTaskContract>empty();
         var requiresQualification = AgentRunGovernanceContext.requiresApprovedTaskContract(context);
         if (requiresQualification || "acceptance".equals(profileName)) {
-            var resolution = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
+            var resolution = TaskContractProjectionVerifier.resolve(context.ledger(), context.workspaceRoot(), context.workstreamId(), TaskContractProjectionVerifier.requiredPhase(context.definition()));
             if (resolution.failure() != null) {
-                return qualificationFailure(resolution.failure());
+                return qualificationFailure(context, resolution.failure());
             }
             qualifiedContract = resolution.qualified();
             if (requiresQualification && qualifiedContract.isEmpty()) {
-                return qualificationFailure(TaskContractProjectionVerifier.Failure.of(
+                return qualificationFailure(context, TaskContractProjectionVerifier.Failure.of(
                         "APPROVAL_BINDING_MISSING", "node requires an approved task contract"));
             }
         }
@@ -120,7 +120,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         if (reviewSubject.isPresent()) {
             try {
                 revisionBody = renderContractRevision(contractRevisionProjection(
-                        context.workspaceRoot(), context.workstreamId(), context.instance().iterationId(),
+                        context.ledger(), context.workspaceRoot(), context.workstreamId(), context.instance().iterationId(),
                         reviewSubject.get().reference()));
             } catch (IOException | IllegalArgumentException failure) {
                 return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
@@ -131,8 +131,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         String authoredBody = "";
         if (AuthoredStageLineageResolver.participates(configText(context, "target_node", ""))) {
             try {
-                authoredBody = new AuthoredStageLineageResolver(context.workspaceRoot(), context.workstreamId(), Long.MAX_VALUE)
-                        .contextBody(context);
+                var paths = new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot(), new dev.dual.core.id.DualId(context.workstreamId()));
+                authoredBody = context.ledger().inspect(paths, (scoped, files) ->
+                        new AuthoredStageLineageResolver(scoped, context.workspaceRoot(), context.workstreamId(), Long.MAX_VALUE)
+                                .contextBody(context));
             } catch (IOException | IllegalArgumentException failure) {
                 return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
                         Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
@@ -147,7 +149,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
         var requestedSections = effectiveSections(context);
         var manifest = requestedSections.stream().anyMatch(ContextBuildPackageHandler::requiresEvidenceManifest)
-                ? EvidenceManifest.rebuild(context.workspaceRoot(), workstreamDir, context.workstreamId(),
+                ? EvidenceManifest.rebuild(context.ledger(), context.workspaceRoot(), workstreamDir, context.workstreamId(),
                         context.instance().inputRefs(), OBJECT_MAPPER)
                 : null;
         var manifestPath = manifest == null ? null : manifest.write(workstreamDir, OBJECT_MAPPER);
@@ -234,7 +236,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         var budget = effectiveBudget(rawBudget);
         var handoff = loadHandoff(workstreamDir);
         var manifest = budget.sections().stream().anyMatch(req -> requiresEvidenceManifest(req.section()))
-                ? EvidenceManifest.rebuild(context.workspaceRoot(), workstreamDir, context.workstreamId(),
+                ? EvidenceManifest.rebuild(context.ledger(), context.workspaceRoot(), workstreamDir, context.workstreamId(),
                         context.instance().inputRefs(), OBJECT_MAPPER, qualifiedContract)
                 : null;
         var manifestPath = manifest == null ? null : manifest.write(workstreamDir, OBJECT_MAPPER);
@@ -570,12 +572,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             case "recent_agent_outputs" -> Files.exists(workstreamDir.resolve("runs"));
             case "git_evidence" -> Files.exists(workstreamDir.resolve("artifacts/git-evidence"));
             case "ledger_pointers" -> Files.exists(workstreamDir.resolve("events.jsonl"));
-            case "task_contract" -> qualifiedContract.isPresent()
-                    || (!AgentRunGovernanceContext.requiresApprovedTaskContract(context)
-                            && TaskContractProjectionVerifier.readLegacyProjection(
-                                    context.workspaceRoot(), context.workstreamId()).projection()
-                                    .map(TaskContractProjectionVerifier.LegacyProjection::contract)
-                                    .isPresent());
+            case "task_contract" -> qualifiedContract.isPresent();
             case "working_memory", "review_evidence" -> Files.exists(workstreamDir.resolve("memory/workstream-memory.json"));
             default -> false;
         };
@@ -752,10 +749,10 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                         builder, context, maxItems > 0 ? maxItems : 2);
             }
             case "working_memory" -> {
-                ContextPackageSectionRenderer.appendWorkingMemory(builder, workstreamDir, context.workspaceRoot());
+                ContextPackageSectionRenderer.appendWorkingMemory(context.ledger(), builder, workstreamDir, context.workspaceRoot());
             }
             case "review_evidence" -> {
-                ContextPackageSectionRenderer.appendReviewEvidenceBrief(builder, workstreamDir, context.workspaceRoot());
+                ContextPackageSectionRenderer.appendReviewEvidenceBrief(context.ledger(), builder, workstreamDir, context.workspaceRoot());
             }
             case "git_evidence" -> {
                 if (strategy == Degradation.DIFF_STAT) {
@@ -775,14 +772,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
                     ContextPackageSectionRenderer.appendQualifiedTaskContract(builder, qualifiedContract.get());
                     ContextPackageSectionRenderer.appendQualifiedRequirementResolution(builder, qualifiedContract.get());
                 } else {
-                    var legacy = TaskContractProjectionVerifier.readLegacyProjection(
-                            context.workspaceRoot(), context.workstreamId()).projection();
-                    if (legacy.isPresent()) {
-                        ContextPackageSectionRenderer.appendLegacyTaskContract(builder, legacy.get());
-                        ContextPackageSectionRenderer.appendLegacyRequirementResolution(builder, legacy.get());
-                    } else {
-                        builder.append("(task-contract.json not found)\n\n");
-                    }
+                    builder.append("(qualified contract not available)\n\n");
                 }
             }
             default -> builder.append("(unknown section)\n\n");
@@ -830,16 +820,8 @@ public final class ContextBuildPackageHandler implements TaskHandler {
         }
     }
 
-    private static NodeResult qualificationFailure(TaskContractProjectionVerifier.Failure failure) {
-        return new NodeResult(
-                TaskContractProjectionVerifier.FAILURE_OUTCOME,
-                NodeStatus.FAILED,
-                List.of(),
-                Map.of(
-                        "failure_code", TaskContractProjectionVerifier.FAILURE_OUTCOME,
-                        "reason", failure.reason(),
-                        "error", failure.message()),
-                null);
+    private static NodeResult qualificationFailure(TaskContext context, TaskContractProjectionVerifier.Failure failure) {
+        return TaskContractProjectionVerifier.failureResult(context, failure, null);
     }
 
     private static boolean requiresEvidenceManifest(String section) {
@@ -905,12 +887,12 @@ public final class ContextBuildPackageHandler implements TaskHandler {
 
         if (sections.contains("working_memory")) {
             builder.append("## Working Memory\n\n");
-            ContextPackageSectionRenderer.appendWorkingMemory(builder, workstreamDir, context.workspaceRoot());
+            ContextPackageSectionRenderer.appendWorkingMemory(context.ledger(), builder, workstreamDir, context.workspaceRoot());
         }
 
         if (sections.contains("review_evidence")) {
             builder.append("## Review Evidence Brief\n\n");
-            ContextPackageSectionRenderer.appendReviewEvidenceBrief(builder, workstreamDir, context.workspaceRoot());
+            ContextPackageSectionRenderer.appendReviewEvidenceBrief(context.ledger(), builder, workstreamDir, context.workspaceRoot());
         }
 
         if (sections.contains("git_evidence")) {
@@ -959,7 +941,7 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             return Optional.empty();
         }
         var candidates = AgentEvidenceIndex.fromRefs(
-                        context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER)
+                        context.ledger(), context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER)
                 .recent(Math.max(1, context.instance().inputRefs().size()))
                 .stream()
                 .filter(entry -> "design.claude_design".equals(entry.document().nodeId()))
@@ -978,9 +960,9 @@ public final class ContextBuildPackageHandler implements TaskHandler {
     }
 
     static Map<String, Object> contractRevisionProjection(
-            Path root, String workstreamId, String iterationId, TaskContractProposalReference candidate
+            dev.dual.ledger.file.WorkflowFileLedger ledger, Path root, String workstreamId, String iterationId, TaskContractProposalReference candidate
     ) throws IOException {
-        var resolved = new TaskContractRevisionContextResolver().resolveForProposal(root, workstreamId, candidate);
+        var resolved = new TaskContractRevisionContextResolver(ledger).resolveForProposal(root, workstreamId, candidate);
         if (!resolved.valid()) throw new IOException("CONTRACT_REVISION_CONTEXT_INVALID: " + resolved.errors());
         var revision = resolved.context();
         if (!iterationId.equals(revision.iteration().iterationId())) {
@@ -1033,11 +1015,13 @@ public final class ContextBuildPackageHandler implements TaskHandler {
             return Optional.empty();
         }
         var required = RequiredAgentEvidence.from(configured);
-        var evidence = AgentEvidenceIndex.fromRefs(
-                context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER);
-        return evidence.contains(required.nodeId(), required.sourceArtifactType(), required.decision())
-                ? Optional.empty()
-                : Optional.of(required);
+        try {
+            VerificationEvidence.verifyRequired(context.ledger(), context.workspaceRoot(), context.workstreamId(),
+                    context.instance().inputRefs(), configured);
+            return Optional.empty();
+        } catch (IOException invalid) {
+            return Optional.of(required);
+        }
     }
 
     private record RequiredAgentEvidence(String nodeId, String sourceArtifactType, String decision) {

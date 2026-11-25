@@ -21,9 +21,12 @@ public record DeliveryMergePlan(
         String commit,
         String failureCode,
         String failureReason,
-        Instant updatedAt
+        Instant updatedAt,
+        java.util.Map<String, Object> operation
 ) {
     public DeliveryMergePlan {
+        operation = operation == null ? java.util.Map.of()
+                : java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(operation));
         candidateRef = blank(candidateRef);
         candidateSha256 = blank(candidateSha256);
         baseCommit = blank(baseCommit);
@@ -53,10 +56,10 @@ public record DeliveryMergePlan(
             String failureReason
     ) {
         return new DeliveryMergePlan(
-                2, workstreamId, sourceWorktree, targetRepo, acceptanceDecision,
+                3, workstreamId, sourceWorktree, targetRepo, acceptanceDecision,
                 blank(candidateRef), blank(candidateSha256), blank(baseCommit), blank(baseTree), blank(expectedResultTree),
                 List.copyOf(changedFiles), List.copyOf(excludedFiles), status, "", blank(failureCode),
-                blank(failureReason), Instant.now()
+                blank(failureReason), Instant.now(), java.util.Map.of()
         );
     }
 
@@ -68,7 +71,7 @@ public record DeliveryMergePlan(
         return new DeliveryMergePlan(
                 schemaVersion, workstreamId, sourceWorktree, targetRepo, acceptanceDecision,
                 candidateRef, candidateSha256, baseCommit, baseTree, expectedResultTree,
-                changedFiles, excludedFiles, nextStatus, commit, blank(nextFailureCode), blank(nextFailureReason), Instant.now()
+                changedFiles, excludedFiles, nextStatus, commit, blank(nextFailureCode), blank(nextFailureReason), Instant.now(), operation
         );
     }
 
@@ -77,7 +80,7 @@ public record DeliveryMergePlan(
         return new DeliveryMergePlan(
                 schemaVersion, workstreamId, sourceWorktree, targetRepo, acceptanceDecision,
                 candidateRef, candidateSha256, baseCommit, baseTree, expectedResultTree,
-                changedFiles, excludedFiles, DeliveryMergeStatus.COMMITTED, commitSha, "", "", Instant.now()
+                changedFiles, excludedFiles, DeliveryMergeStatus.COMMITTED, commitSha, "", "", Instant.now(), operation
         );
     }
 
@@ -85,8 +88,14 @@ public record DeliveryMergePlan(
         return new DeliveryMergePlan(
                 schemaVersion, workstreamId, sourceWorktree, targetRepo, acceptanceDecision,
                 candidateRef, candidateSha256, baseCommit, baseTree, expectedResultTree,
-                changedFiles, excludedFiles, status, commit, blank(nextFailureCode), blank(nextFailureReason), Instant.now()
+                changedFiles, excludedFiles, status, commit, blank(nextFailureCode), blank(nextFailureReason), Instant.now(), operation
         );
+    }
+
+    public DeliveryMergePlan withOperation(java.util.Map<String, Object> facts) {
+        return new DeliveryMergePlan(schemaVersion, workstreamId, sourceWorktree, targetRepo, acceptanceDecision,
+                candidateRef, candidateSha256, baseCommit, baseTree, expectedResultTree, changedFiles, excludedFiles,
+                status, commit, failureCode, failureReason, Instant.now(), facts);
     }
 
     private static String blank(String value) {

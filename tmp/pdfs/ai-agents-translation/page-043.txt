@@ -1,0 +1,38 @@
+Edges
+
+   Rules that select the next node based on the current state. They can be
+    conditional branches or fixed transitions and should also detect when a
+    finish condition is met.
+
+Command
+
+  An object that combines control flow and state updates to support
+    multiactor communication. A node can both update the state and choose
+    the next node by returning a Command.
+
+So far, the tools you created earlier have only been used in stateless loops.
+Each run was independent: the model could call tools, get answers, and
+wrap up, but as soon as the run ended, all context was lost. Now, if you
+want to combine LangGraph’s concepts to build stateful agents, you need to
+embed the tools into a stateful workflow. Instead of discarding messages
+after each turn, you keep them in a structured state. This makes the system
+agentic:
+
+       The LLM node reasons about the next step.
+
+       The tool node executes external actions.
+
+       Edges route control flow based on whether tools were requested.
+
+      Memory checkpoints persist the conversation, so the agent can
+        reuse earlier results in later turns.
+
+This transforms tool use from being a one-off helper into a continuous
+reasoning–acting–adapting cycle. In the next code listings (Examples 1-5
+through 1-13), you’ll build such a stateful agent with LangGraph, starting
+from the same tools and LLM binding introduced in Examples 1-3 through
+1-4.
+
+Example 1-5 shows how a state object can be implemented in LangGraph to
+carry the conversation and coordinate control flow. You can reuse the tools
+and the bound LLM from Example 1-3 and add only what is new: a typed

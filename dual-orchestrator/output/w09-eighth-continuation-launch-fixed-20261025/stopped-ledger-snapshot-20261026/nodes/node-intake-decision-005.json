@@ -1,0 +1,29 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-intake-decision-005",
+  "nodeDefinitionId" : "intake.decision",
+  "kind" : "DECISION",
+  "handlerType" : "review.decision",
+  "status" : "COMPLETED",
+  "stageId" : "stage-intake",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "required" : true,
+    "source_node_instance_id" : "node-intake-codex_product_review-004",
+    "source_node_sha256" : "5e6a16782f031a54975f063a0adac45a740df4ebb613c2f92d05fecf353432b3",
+    "purpose" : "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "source" : "contract-sidecar",
+    "summary" : "提案完整保留用户需求、验收证据要求和实施授权边界，可以进入后续目标审批与设计计划。"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1792717621229-41527a96",
+  "startedAt" : "2026-10-23T01:07:01.239428Z",
+  "finishedAt" : "2026-10-23T01:07:01.277249Z"
+}

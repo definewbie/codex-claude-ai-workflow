@@ -1,0 +1,81 @@
+{
+  "artifact_type" : "agent_output_contract",
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "run_id" : "run-1792977352552",
+  "node_id" : "implement.claude_self_test_report",
+  "node_instance_id" : "node-implement-claude_self_test_report-031",
+  "handler_type" : "acpx.agent_run",
+  "decision" : "SELF_TEST_COMPLETE",
+  "summary" : "在仓库根实际执行 python -m unittest discover -s tests -v 2>&1 得 Ran 11 tests 与 OK（零 failure/error），11 个用例名与 tests/test_normalize_text.py 九项 CASES 逐条核对一致，README 示例经逐字符比对与 doctest 实际执行确认与实现一致，AC-1/AC-2/AC-3 全部通过。",
+  "required_keys" : [ "summary", "decision" ],
+  "allowed_decisions" : [ "SELF_TEST_INCOMPLETE", "BLOCKED", "SELF_TEST_COMPLETE" ],
+  "source_output_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.json",
+  "source_artifact_type" : "self_test_report",
+  "generated_at" : "2026-10-26T01:18:45.147999Z",
+  "control" : {
+    "summary" : "在仓库根实际执行 python -m unittest discover -s tests -v 2>&1 得 Ran 11 tests 与 OK（零 failure/error），11 个用例名与 tests/test_normalize_text.py 九项 CASES 逐条核对一致，README 示例经逐字符比对与 doctest 实际执行确认与实现一致，AC-1/AC-2/AC-3 全部通过。",
+    "decision" : "SELF_TEST_COMPLETE"
+  },
+  "control_source" : {
+    "kind" : "strict_agent_result_envelope"
+  },
+  "verification_checks" : [ {
+    "criterion_id" : "AC-1",
+    "assertion" : "实际执行的 python -m unittest discover -s tests -v 2>&1 输出 11 个用例全部 ok：九项 CASES 覆盖空串、纯 LF、CRLF、孤立 CR、混合换行 \"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、Unicode 含 U+2028 保留、末尾有换行 \"end\\r\\n\"→\"end\\n\"、末尾无换行、连续空行 \"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\" 共九类（≥八种）且每项有明确期望，test_crlf_becomes_single_lf 断言 CRLF 不拆为双 LF，test_idempotent_across_all_cases 以 subTest 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x) 实际通过，案例与 tests/test_normalize_text.py 源码逐条相符。",
+    "execution_ref" : "CURRENT",
+    "tool_call_ids" : [ ],
+    "material_refs" : [ {
+      "ref" : "tests/test_normalize_text.py",
+      "sha256" : "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be"
+    } ]
+  }, {
+    "criterion_id" : "AC-2",
+    "assertion" : "实际执行测试并合并采集：unittest 实际输出含 11 条逐用例行（方法名与测试源码一一对应、均 ok）并以 Ran 11 tests in 0.000s 与 OK 结尾，明确显示覆盖数 11 与零 failure/零 error；输出为本次运行的程序观测原样结果，非完成状态或文字结论的替代。",
+    "execution_ref" : "CURRENT",
+    "tool_call_ids" : [ ],
+    "material_refs" : [ {
+      "ref" : "tests/test_normalize_text.py",
+      "sha256" : "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be"
+    } ]
+  }, {
+    "criterion_id" : "AC-3",
+    "assertion" : "实际读取 src/normalize_text.py 与 README.md 逐字符比对：README 的导入语句 from normalize_text import normalize_newlines 与典型混合换行示例 normalize_newlines(\"a\\r\\nb\\rc\\nd\") → 'a\\nb\\nc\\nd'（另含空串 ''、末尾有换行 'end\\n'、末尾无换行 'no newline' 示例）与两步 str.replace 实现语义一致；并实际执行 PYTHONPATH=src python -B -m doctest README.md 通过（实际输出 DOCTEST_OK）。",
+    "execution_ref" : "CURRENT",
+    "tool_call_ids" : [ ],
+    "material_refs" : [ {
+      "ref" : "src/normalize_text.py",
+      "sha256" : "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c"
+    }, {
+      "ref" : "README.md",
+      "sha256" : "0af74daeacfdd946a47e88d3b3f28d41ef125285084fd5f1c8735859e5caaae5"
+    } ]
+  } ],
+  "lifecycle_status" : "READY",
+  "blocking" : false,
+  "checks_run" : [ "python --version 与 python3 --version 实测：均为 Python 3.13.0（/Users/kriswang/.pyenv/versions/3.13.0），按计划原样使用 python 命令。", "在仓库根实际执行 python -m unittest discover -s tests -v 2>&1（合并采集 stdout 与 stderr），原样保留完整实际输出。", "实际读取 tests/test_normalize_text.py 并逐条核对：11 个测试方法名与 unittest 逐用例输出一一对应；共享 CASES 表九项输入/期望（\"\"→\"\"、\"a\\nb\\n\"→\"a\\nb\\n\"、\"a\\r\\nb\"→\"a\\nb\"、\"a\\rb\"→\"a\\nb\"、\"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、\"中文\\u2028😀\\r\\nx\"→\"中文\\u2028😀\\nx\"、\"end\\r\\n\"→\"end\\n\"、\"no newline\"→\"no newline\"、\"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"）与已批准计划逐字符一致，覆盖九类输入且 test_idempotent_across_all_cases 以 subTest 断言重复规范化幂等。", "实际读取 src/normalize_text.py 与 README.md 逐字符比对：README 导入语句 from normalize_text import normalize_newlines、混合换行示例 normalize_newlines(\"a\\r\\nb\\rc\\nd\") 期望 'a\\nb\\nc\\nd'、空串示例 ''、末尾有/无换行示例 'end\\n' 与 'no newline' 均与实现语义及 CASES 同值。", "实际执行 PYTHONPATH=src python -B -m doctest README.md（doctest 通过时自身无输出，附加 echo 输出 DOCTEST_OK 作为正信号）。", "仓库卫生检查与清理：探测 __pycache__/*.pyc 副产物，删除 unittest 运行产生的 src/__pycache__ 与 tests/__pycache__，复跑 git status --porcelain -uall 确认工作区仅含三个预期交付文件。", "shasum -a 256 计算三个交付文件哈希以固化材料引用。" ],
+  "checks_skipped" : [ ],
+  "evidence" : [ "unittest 实际输出（合并采集，原样）：11 行逐用例结果 test_consecutive_blank_lines_normalized ... ok、test_crlf_becomes_single_lf ... ok、test_empty_string_returns_empty ... ok、test_idempotent_across_all_cases ... ok、test_lone_cr_becomes_lf ... ok、test_mixed_newlines_normalized ... ok、test_no_cr_left_in_output ... ok、test_pure_lf_unchanged ... ok、test_trailing_newline_absent_kept ... ok、test_trailing_newline_present_kept ... ok、test_unicode_and_line_separators_preserved ... ok（模块 test_normalize_text.TestNormalizeNewlines），随后分隔线、Ran 11 tests in 0.000s、空行、OK——覆盖数 11、零 failure、零 error，11 个方法名与测试源码完全一致，无多余或缺失败用例。", "AC-1 案例核对：CASES 九项覆盖空串、纯 LF、CRLF、孤立 CR、混合换行、Unicode（含 U+2028 保留，测试源码以显式 \\u2028 转义书写并断言 assertIn(\"\\u2028\", result)）、末尾有换行、末尾无换行、连续空行共九类（≥八种），每项有精确期望；test_crlf_becomes_single_lf 显式断言 \"a\\r\\nb\"→\"a\\nb\" 且 assertNotEqual 于 \"a\\n\\nb\" 锁定两步替换顺序；test_idempotent_across_all_cases 以 subTest 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)，全部实际执行通过。", "AC-3 双途径证据：人工逐字符比对确认 README 第 24 行导入语句、第 26-27 行混合换行示例、第 29-30 行空串示例、第 32-36 行末尾换行有无示例与 src/normalize_text.py 的两步 str.replace 实现及 tests CASES[4]/[0]/[6]/[7] 同值；PYTHONPATH=src python -B -m doctest README.md 实际执行通过，实际输出仅 DOCTEST_OK（doctest 通过时自身无输出）。", "仓库卫生：python -m unittest discover 运行产生副产物 src/__pycache__/normalize_text.cpython-313.pyc 与 tests/__pycache__/test_normalize_text.cpython-313.pyc（doctest 以 -B 运行未产生），二者非交付物已删除；清理后 git status --porcelain -uall 恰好输出 ?? README.md、?? src/normalize_text.py、?? tests/test_normalize_text.py 三行，无 __pycache__、无 .pytest_cache、无临时日志或覆盖文件，未创建任何报告文件，未触碰 .git/ 与 .agent/。", "材料哈希实测：src/normalize_text.py=68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c，tests/test_normalize_text.py=31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be，README.md=0af74daeacfdd946a47e88d3b3f28d41ef125285084fd5f1c8735859e5caaae5。" ],
+  "missing_evidence" : [ ],
+  "must_fix" : [ ],
+  "acceptance_notes" : [ "本任务约定 actual_exit_required=false，不要求工具独立测量的真实退出码；本次以 2>&1 合并采集的逐用例实际输入/输出与 Ran 11 tests/OK 摘要作为 AC-2 证据，未以完成状态或文字结论替代实测结果。", "实现、测试与 README 三方数量同步：测试方法 11 个、CASES 九项，README 第 48 行记载的用例数与类别描述与实际执行结果一致。", "doctest 以 -B 运行以避免字节码副产物；unittest 按计划原命令运行后其 __pycache__ 副产物已清理并复核，最终工作区仅含三个批准的 CREATE 文件，均未提交 git（不在本次授权内）。", "计划 open risk 中 python 命令缺失需替换 python3 的情形在本机不成立（python 与 python3 均为 Python 3.13.0），实际使用计划原命令 python -m unittest discover -s tests -v 2>&1。" ],
+  "verification_summary" : "验证充分性：按已批准 validation_plan 全部四步执行——合并采集 unittest 实际输出并核对覆盖数与零 failure/error（AC-1/AC-2）、逐条核对测试源码九项 CASES 与 11 个方法名（AC-1/AC-2）、实际读取并逐字符比对 README 与实现且以 doctest 实际执行佐证（AC-3）、副产物检查清理后工作区干净；三项准则均有本次执行的程序观测证据，无缺口。",
+  "checks" : [ ],
+  "open_risks" : [ ],
+  "changed_files" : [ ],
+  "failure" : { },
+  "stage_outcome" : "READY",
+  "stage_outcome_source" : "declared_status",
+  "evidence_state" : {
+    "blocking" : false,
+    "evidence_count" : 5,
+    "missing_evidence_count" : 0,
+    "must_fix_count" : 0,
+    "acceptance_note_count" : 4,
+    "open_risk_count" : 0
+  },
+  "authored_context" : {
+    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/prompts/implement-claude-self-test.md.manifest.json",
+    "sha256" : "4d6c97ff5f9517fb0a9ba2e3d9a5f1b1dc02572f6c604f37b14f9e19b93d9424"
+  }
+}

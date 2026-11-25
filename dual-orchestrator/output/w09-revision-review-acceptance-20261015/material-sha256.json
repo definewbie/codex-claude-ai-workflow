@@ -1,0 +1,15 @@
+{
+  "files": {
+    "documentation.diff": "5c65b89e8d0a69b6b75a2c4fa5d259465a07d4605388f5c018e78943a4b22d5f",
+    "identity-recheck.json": "b679203d460af78d914cab61dab130d597164687a0bb3aa614d08be96394d6a9",
+    "fresh-sixth-gate.md": "067be24ccf341d68a4274e40017564b88ac967dbb92cd6df2e5eb31912d7fef4",
+    "budget-proposal.json": "a6ce2e1df4dcaa8ad7adf51cfced2ec39f8b1e82a5c7c2ddd91604b448af7de6",
+    "referenced-inputs.json": "974d98e6034b1ca321f3238e8d2dd5aab00414fee96b8f6c86eacc53c70b7db2",
+    "changed-documents.json": "fa4a3b91acb34528276422f7f65be415a7522dfbd7d0b9362dc80d43638080e4",
+    "cc-review-receipt.md": "64f9728f524590d3963b40cdde5b08a7e3c85bc82093980336989a07c180bd7d",
+    "before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "225cac0e2f0f4b9a470c38237a9788c30d9c39af2f93416c825fcf6dd0b5eab1",
+    "before/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "645278cf211d02c529856e1e94be67613c4253d4fb351cde00371d7ac5dad1c8"
+  },
+  "count": 9,
+  "excludes": "this manifest"
+}

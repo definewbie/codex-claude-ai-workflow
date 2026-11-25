@@ -1,0 +1,35 @@
+Parameter-efficient fine-tuning lets you adapt models without touching
+every weight. LoRA and adapters provide modular specializations you can
+swap in and out per task or domain. Quantization shrinks memory and
+accelerates inference. Together with frameworks like bitsandbytes and
+unsloth, these techniques turn advanced optimization into a routine part of
+your build process.
+
+Taken together, these ideas close the gap between architecture, inference,
+and operations. Choose the right roles, allocate thinking where it pays off,
+optimize the parts you own, and adopt a deployment strategy that matches
+your stage.
+
+Chapter 5 shifts the focus from model architecture to system integration and
+execution. You’ll learn how to connect your agents to the outside world
+through structured tool calls, secure execution environments, and well-
+defined interface contracts.
+
+
+
+   1       Colin Raffel et al. “Exploring the Limits of Transfer Learning with a Unified Text-to-Text
+      Transformer” (2019).
+
+   2      Jacob Devlin et al. “BERT: Pre-training of Deep Bidirectional Transformers for Language
+      Understanding” (2019).
+
+   3      Yinhan Liu et al. “RoBERTa: A Robustly Optimized BERT Pretraining Approach” (2019).
+
+   4      Lola Le Breton et al. “NeoBERT: A Next-Generation BERT” (2025).
+
+   5      Benjamin Warner et al. “Smarter, Better, Faster, Longer: A Modern Bidirectional Encoder for
+       Fast, Memory Efficient, and Long Context Finetuning and Inference” (2024).
+
+   6        Jianlin Su et al. “RoFormer: Enhanced Transformer with Rotary Position Embedding” (2021).
+
+   7      Edward J. Hu et al. “LoRA: Low-Rank Adaptation of Large Language Models” (2021).

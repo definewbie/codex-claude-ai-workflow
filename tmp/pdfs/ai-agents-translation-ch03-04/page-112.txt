@@ -1,0 +1,42 @@
+ranked reasoning paths become more likely next time. This removes the need for a
+separate value model and stabilizes training through shared context.
+
+Next, the KL divergence term is estimated between the current and reference
+policies. Before that, let’s define how the model assigns probabilities to each
+sequence. For a query q and a response o, the sequence likelihood is defined as:
+
+
+                                                             |o|
+                     πθ(o ∣q) =    πθ(ot ∣q, o<t)            ∏
+                                      t=1
+
+where |o| is the number of tokens in the response. This factorization reflects how
+an autoregressive model predicts each next token conditioned on all previous ones.
+
+The KL divergence then measures how much the updated policy diverges from the
+reference one:
+
+                                             πθ(o ∣q)
+           DKL (πθ ∥πref) = Eq, o~πθ(⋅∣q)                                         [log πref(o ∣q) ]
+
+In practice, this KL term acts as a regularizer that penalizes the model for drifting
+too far from its reference, while still allowing meaningful improvement. You can
+think of it as a leash that keeps the policy stable during training. Now, the group-
+based rewards and the KL penalty are combined into the GRPO objective. For
+each query q, the model samples a group of responses {oi}Gi=1 from the old policy
+πθold. Each response contributes a token-level importance ratio wi,t(θ), which
+measures how much more (or less) likely the new policy is to generate the same
+token compared to the old one:
+
+                                        πθ(oi,t ∣q, oi,<t)
+                          wi,t(θ) =
+                                           πθold(oi,t ∣q, oi,<t)
+
+The reward for each response is normalized within the group, giving the relative
+advantage Ai:
+
+                    ri−mean (r1, r2, …, rG)
+                  Ai =
+                              std (r1, r2, …, rG)
+
+With these elements, the GRPO objective becomes:

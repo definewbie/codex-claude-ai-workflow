@@ -1,0 +1,53 @@
+
+Test run finished after 7789 ms
+[         7 containers found      ]
+[         0 containers skipped    ]
+[         7 containers started    ]
+[         0 containers aborted    ]
+[         7 containers successful ]
+[         0 containers failed     ]
+[        18 tests found           ]
+[         0 tests skipped         ]
+[        18 tests started         ]
+[         0 tests aborted         ]
+[        16 tests successful      ]
+[         2 tests failed          ]
+
+
+Failures (2):
+  JUnit Jupiter:PhasedContractContinuationTest:failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval(boolean):[1] false
+    MethodSource [className = 'dev.dual.runtime.handler.PhasedContractContinuationTest', methodName = 'failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval', methodParameterTypes = 'boolean']
+    => org.opentest4j.AssertionFailedError: expected: <3> but was: <2>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+       dev.dual.runtime.handler.PhasedContractContinuationTest.failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval(PhasedContractContinuationTest.java:136)
+       java.base/java.lang.reflect.Method.invoke(Method.java:565)
+       java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+       java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+       [...]
+  JUnit Jupiter:PhasedContractContinuationTest:failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval(boolean):[2] true
+    MethodSource [className = 'dev.dual.runtime.handler.PhasedContractContinuationTest', methodName = 'failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval', methodParameterTypes = 'boolean']
+    => org.opentest4j.AssertionFailedError: expected: <3> but was: <2>
+       org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+       org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+       org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+       org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+       org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+       dev.dual.runtime.handler.PhasedContractContinuationTest.failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval(PhasedContractContinuationTest.java:136)
+       java.base/java.lang.reflect.Method.invoke(Method.java:565)
+       java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+       java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+       [...]
+Traceback (most recent call last):
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/continuation-20261006/run-focused.py", line 14, in <module>
+    subprocess.run(['java','-cp',cp,'FocusedTests','dev.dual.runtime.FrozenRuntimeIdentityTest','dev.dual.runtime.handler.AgentRunCommitProtocolTest','dev.dual.runtime.handler.PhasedContractContinuationTest','dev.dual.runtime.handler.VerificationReadinessTest'],check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['java', '-cp', '/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/continuation-20261006/focused-classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target/test-classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/target/classes:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.18.3/jackson-databind-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.18.3/jackson-annotations-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.3/jackson-core-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.3/jackson-datatype-jsr310-2.18.3.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter/5.11.4/junit-jupiter-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.11.4/junit-jupiter-api-5.11.4.jar:/Users/kriswang/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-commons/1.11.4/junit-platform-commons-1.11.4.jar:/Users/kriswang/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.11.4/junit-jupiter-params-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.11.4/junit-jupiter-engine-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-engine/1.11.4/junit-platform-engine-1.11.4.jar::/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-launcher/1.11.4/junit-platform-launcher-1.11.4.jar', 'FocusedTests', 'dev.dual.runtime.FrozenRuntimeIdentityTest', 'dev.dual.runtime.handler.AgentRunCommitProtocolTest', 'dev.dual.runtime.handler.PhasedContractContinuationTest', 'dev.dual.runtime.handler.VerificationReadinessTest']' returned non-zero exit status 1.

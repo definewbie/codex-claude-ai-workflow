@@ -1,0 +1,72 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792719374805-953df3d6",
+  "agentTaskId" : "agt-1792719374799-9688659b",
+  "workflowExecutionId" : "wfe-1792719374715-61723cb3",
+  "nodeInstanceId" : "node-plan-decision-020",
+  "nodeDefinitionId" : "plan.decision",
+  "handlerType" : "review.decision",
+  "status" : "SUCCEEDED",
+  "pid" : 78408,
+  "outcome" : "VERIFICATION_READINESS_REQUIRED",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-23T01:36:13.635Z",
+      "input_identity" : "968b26c2c6ee1868c7aa22e7bb82bae1a8a5fd695f86d47f47431c91fc4461b8",
+      "executor_pid" : 78408
+    },
+    "decision" : "READY_TO_IMPLEMENT",
+    "source" : "contract-sidecar",
+    "summary" : "计划与已审设计一致，实施步骤和验收取证完整，可提交精确 EXECUTION 范围审批后实施。",
+    "reviewed_candidate" : {
+      "reviewer_occurrence" : "node-plan-codex_plan_review-019",
+      "schema_version" : 1,
+      "author_artifact" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719040009/outputs/plan-claude.contract.json",
+        "sha256" : "b2e9d853cc6d80f39b737950b1ae085310b87d916fd37f918c73bd4a2ee931bd"
+      },
+      "contract" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+        "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b",
+        "epoch" : 1,
+        "phase" : "GOAL"
+      },
+      "author_occurrence" : "node-plan-claude_plan-017",
+      "review_decision" : "READY_TO_IMPLEMENT",
+      "checks" : [ {
+        "rule_version" : "2",
+        "rule_id" : "review.subject.and.route",
+        "result" : "PASSED",
+        "input_refs" : [ {
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719040009/outputs/plan-claude.contract.json",
+          "sha256" : "b2e9d853cc6d80f39b737950b1ae085310b87d916fd37f918c73bd4a2ee931bd"
+        }, {
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json",
+          "sha256" : "6e96fdcba384c87642aecf835d96584f82a29119bce0c2fed976644d4c09bd3a"
+        } ]
+      } ],
+      "review_artifact" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json",
+        "sha256" : "6e96fdcba384c87642aecf835d96584f82a29119bce0c2fed976644d4c09bd3a"
+      },
+      "stage" : "plan",
+      "decision_occurrence" : "node-plan-decision-020"
+    },
+    "readiness_reason" : "VERIFICATION_READINESS_REQUIRED",
+    "readiness_detail" : "VERIFICATION_READINESS_REQUIRED: missing environment or feasibility reference",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-23T01:36:14.804987Z",
+  "finishedAt" : "2026-10-23T01:36:14.936342Z",
+  "durationMs" : 131
+}

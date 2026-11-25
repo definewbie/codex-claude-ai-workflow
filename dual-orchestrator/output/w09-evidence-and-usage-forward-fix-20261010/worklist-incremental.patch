@@ -1,0 +1,19 @@
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -810,3 +810,16 @@
+ 本次2顶层prompt（含correction）、累计runner441.492s；剩16不作重试/新例许可。具名session已close并show确认，主/修正进程及入口PID不存在，不外推任意子树全停。零Codex/关键门/产品修改/apply/commit；两工作目录clean/base不变。654输入/发行/native/config一致，首例77索引文件原样；第二例92文件停止快照归档不含非权威lock。没有代码改动/回归复跑/额外agent、没有旧样本恢复。
+ 
+ **下一步动作**：合并CC只读核两边界与前向修复方向→原owner内必要修复及合法/拒绝/同族回归→重新冻结发行/Gate，再明确当次fresh运行授权。不自动retry/第三例，不借剩余预算继续掩盖观测或合同缺口。
++
++
++### 23.8 W09 第二例评审接收、F03/F04前向修复与再冻结（2026-10-10）
++
++用户带回CC受影响评审：第二次Gate FAIL成立；F03保持产品路径validator严格、修模型侧指令；F04按completion请求身份归因，不借latest。按原owner/既定前向修复方向完成必要修复，当前 **AUTHOR_OFFLINE_PASS / REFROZEN_CANDIDATE / AWAITING_CC / FRESH_THIRD_NOT_AUTHORIZED**。材料入口：[本批assessment](../../output/w09-evidence-and-usage-forward-fix-20261010/assessment.md)。前两例仍FAIL、不恢复、不改错误run/metrics或原证据目录。
++
++F03：共享prompt contract覆盖初始/修订patch/reviewer/格式修正，作者模板移除额外durable引用歧义；空tracked inventory可空产品引用，非空须tracked fact；.agent/.git由程序binding承载不复制。原canonical/traceability/Artifact validator均未改，合法空仓与程序路径拒绝成对。F04：原projector把实际ACP session写入completion，reader只按record stream+completion session/request归属；无关联/歧义不可归因，snapshot不算请求总量，双occurrence不完整则聚合UNAVAILABLE，各次已知原值留档。显式typed per-result transport供应与生产reader实测区分；不造engine内部ID、不改权限、批准或持久化协议。
++
++13源码/资源/测试文件（7生产/资源、6测试）相对dirty开工内容单列；本清单另作增量。先红2项真实旧实现断言失败/0错误；156聚焦全绿；最终单轮clean **1779 tests / 206 suites / 0 failure/error/skipped**、654输入前后相同，不拼旧绿灯或将两次作者错误/编译失败作为先红。新package与CLI/server内嵌六模块字节一致、14资源和6元数据命令通过，选定native/config原字节不变。原真实stream只读离线对照得36945/26548/63493；这不是新原生执行或修正旧53096账本。2个隔离删除反证预期失败，单列不计Maven数量。
++
++本批无真实native/provider调用、额外agent、installer、项目提交、新target/workstream。相同session/id重用无法唯一归属时标不可归因，不为精细消歧扩追踪平台；模型是否遵守新规则、独立真实验收/交付仍未证，不关闭W项或取消NO-GO。
++
++**下一步动作**：[CC合并受影响复审prompt](../../output/w09-evidence-and-usage-forward-fix-20261010/cc-review-prompt.txt)，同时审修复/证据/新发行与[fresh第三次Gate候选](../../output/w09-evidence-and-usage-forward-fix-20261010/fresh-third-gate.md)。通过后交用户当次新授权，才创建/执行；第三例18新调用池/600s/60min/120k预警/160k止损提案不沿用首例17或二例16余额，原关键/最终门及用户commit责任保持。

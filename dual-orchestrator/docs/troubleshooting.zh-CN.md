@@ -160,11 +160,11 @@ Token source 含义：
 先跑：
 
 ```bash
-./scripts/smoke-test.sh --case lifecycle --cleanup
+rtk proxy mvn -q clean test
 dualctl doctor --workdir /path/to/repo
 ```
 
-如果 controlled smoke 通过，但 public benchmark 失败，查看本地报告：
+如果离线回归通过，但另经批准的 public benchmark 失败，查看本地报告：
 
 ```text
 docs/testing/real-case-reports/<timestamp>/

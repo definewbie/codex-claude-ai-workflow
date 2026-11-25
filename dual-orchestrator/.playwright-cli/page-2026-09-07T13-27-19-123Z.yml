@@ -1,0 +1,21 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - heading "BTC / USDT" [level=1] [ref=e4]
+      - generic [ref=e5]: 1m
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - term [ref=e8]: 最新收盘价
+        - definition [ref=e9]: "79620"
+      - generic [ref=e10]:
+        - term [ref=e11]: 最近闭合 K 线
+        - definition [ref=e12]: 2026-09-07 21:26:00
+      - generic [ref=e13]:
+        - term [ref=e14]: 同步状态
+        - definition [ref=e15]: 正常
+      - generic [ref=e16]:
+        - term [ref=e17]: 最近成功刷新
+        - definition [ref=e18]: 2026-09-07 21:27:12
+  - main [ref=e19]
+  - contentinfo [ref=e42]:
+    - paragraph [ref=e43]: 数据来源：OKX 公开行情 REST API（经本应用后端每 10 秒刷新）。页面不直接请求 OKX。

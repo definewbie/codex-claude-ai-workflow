@@ -1,0 +1,38 @@
+{
+  "checked_at": "2026-10-11T22:16:49.801081+08:00",
+  "config_and_installed_sources": {
+    "/Users/kriswang/.acpx/config.json": "6213952d843458bda48342d9d132587177dc6279f1f5f63799bde1e81185f6d6",
+    "/Users/kriswang/.claude/settings.json": "653353244cd40a3540eaa56104a414c32c1c966bc69410aa175b6f6e1fbc5c97",
+    "/Users/kriswang/.claude/settings.local.json": "2666cddb5efd27f97cebdffab9f3878d6910a49dcc6eb2b92dc2bf5a30977a5a",
+    "/Users/kriswang/.codex/config.toml": "924857f60b2c56f27709d7750759ef320b6b142c35da45e68ba067f1da704474",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh": "cfd47f649d0f940f3d5c4fb4a8808b34264dbd017f58cd4a5ada4fec07eb6c9f",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/agent-command.ts": "ccaaf63f555803452ff27a3c8fabb1ea5ec9fefe72d59876b5b0111446a8d91d",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/claude-execution-policy.ts": "aa33163a96b7edcdb843d8e870f57df07c9ef7bfdae2d662a9ade0e8b050887b",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts": "3f4204143fd1de4d160d74f4b74a966ffa6e5a12b9b682bb5a594a9309c443b5",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/runtime/engine/session-options.ts": "35c82adba710abba47d026c21109197fd9b1452c7e3ff1ca02282c40443c2fd9",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/flags.ts": "d1da4ef7f21567e8e541f97d5d9f13d8215bea2b0e0b17cf1bc4a5ef8dd77d06",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/command-handlers.ts": "f5043c98f9f3b2312baed8d48ed0ffb4e2d40b14583e42a580abb3119b629ff4",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/command-registration.ts": "da85215e7b28d0416ac7d1c659bdbfb908be97882e048a509737b6533599f89a",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json": "d9cdcf71b8974d1ed023150dc1c2146d79769d6ac6aea994b0305d2d6b895fa2",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js": "f0cbbe408bb758cc4bacdae9a244bcac6efbdb6413f680195d017648abc6d816",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/settings.js": "629348525ddd007ace9c06a16a19af6877af2a090b58255dd7f5974a6bdf2932",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts": "65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7",
+    "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js": "4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/package.json": "dc85a06d256602b6ad40429b69bc7920ee4297839136b0e722199e4c7daf8567",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/package.json": "7f06dfa738cd0e505aa6fb8fd4f038e37629fce6d67906adfdc64655a095285c",
+    "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/package.json": "7addfe1ad54d5a39a6961dd9918b9256fcc22c5a1dbdd4c83f91a41dda182965",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs": "cae60ea6827d5f9b113c88b911388983fe96e7d565a382bf25904df78ab9d0fc"
+  },
+  "observer_inputs": {
+    "gate_support.py": "037d09b61f1316aceb46abec24e5740aa79c8efa7aa7c77206267bfbafd1dd4d",
+    "run-one-step.py": "48c29654a1a149aa409f366b9bfbb234e3f1dd2e6333fef77151a8718cad8563",
+    "check_budget.py": "1aa7b7858d122f663b9c158117a350ce5a48101226121c2b55f65831ad0f0c2c",
+    "budget.json": "b02560888b636dad16a7e67d8f2df5ffdb4af878f13c2177930177fe59ba5126",
+    "test_gate_observer.py": "75ff822258d77344600c6908ec29e7d40cbc44e275fb0a9053e56d33e5e3f0bb",
+    "task-requirement.md": "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+    "run-authorization.json": "4355eeec75e723b424bb44d26f7b8db1b789375881a560d832bc7ed8d15c8926",
+    "fresh-fifth-gate.md": "2ba61ab76d1d22b485c67606522c4743b8c7320585ea8ec8a7808e11e5f07c2a"
+  },
+  "release_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-current-transcript-forward-fix-20261011/release-identity.json",
+  "no_production_or_config_changes": true
+}

@@ -1,0 +1,58 @@
+{
+  "checked_at": "2026-10-22T23:09:16.705178+08:00",
+  "status": "CC_MATERIAL_REVIEW_ACCEPTED_LOW_CONDITIONS_MET_AWAITING_CURRENT_RUN_AUTHORIZATION",
+  "real_run_authorized": false,
+  "budget_plan": {
+    "tokens": 1700000,
+    "requests": 18,
+    "active_seconds": 3600,
+    "mainline": 955000,
+    "first_admission_reserve": 1105000,
+    "first_admission_calls": 10,
+    "policy_semantics_changed": false
+  },
+  "budget_checks": {
+    "count": 21,
+    "status": "PASS",
+    "command": "python3 -B check_budget.py --self-check"
+  },
+  "observer_checks": {
+    "count": 12,
+    "status": "PASS",
+    "command": "python3 -B -m unittest -v test_gate_observer",
+    "source_equals_prior": true,
+    "test_source_equals_prior": true
+  },
+  "unauthorized_runner": {
+    "status": "EXPECTED_REJECTION",
+    "steps_created": false
+  },
+  "source_inputs": 659,
+  "jars": "FROZEN_SHA_MATCH",
+  "selected_candidate_files": 29,
+  "selected_candidate_changed": 2,
+  "whole_config_equivalence": "NOT_PROVEN",
+  "live_client_compatibility": "NOT_RUN",
+  "location": {
+    "parent": "/private/tmp/dual-w09-newlines-20261022-offline-07",
+    "target": "/private/tmp/dual-w09-newlines-20261022-offline-07/target",
+    "workspace": "/private/tmp/dual-w09-newlines-20261022-offline-07/worktree",
+    "workstream": "ws-20261022T150557Z-Y2KB",
+    "ledger": "/private/tmp/dual-w09-newlines-20261022-offline-07/worktree/.agent/workstreams/ws-20261022T150557Z-Y2KB"
+  },
+  "initial_ledger_files": 21,
+  "read_only_recheck": "PRIOR_PASS_MUST_RERUN_AFTER_CURRENT_AUTHORIZATION",
+  "model_prompts": 0,
+  "business_approvals": 0,
+  "extra_agents": 0,
+  "sixth_recovered": false,
+  "product_or_native_patch_changes": false,
+  "persistent_config_changes": false,
+  "maven_rerun": false,
+  "cc_review": "ACCEPTED_WITH_TWO_LOW_CONDITIONS_FULFILLED",
+  "next_action": "USER_CURRENT_RUN_AUTHORIZATION_THEN_READONLY_RECHECK_BEFORE_DISPATCH",
+  "cc_review_source": "User-returned independent review; author disposition in cc-review-disposition.md",
+  "post_review_document_revision_at": "2026-10-22T23:16:35.828676+08:00",
+  "low_1": "FULL_CURRENT_CONFIG_AND_PROGRAM_BYTES_SNAPSHOTTED_MATCH_REVIEWED_SHA",
+  "low_2": "TEMPORARY_LOCATION_RISK_RECORDED_CAUSE_UNCONFIRMED"
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-context-implement_claude-028",
+  "nodeDefinitionId" : "context.implement_claude",
+  "kind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "COMPLETED",
+  "stageId" : "stage-context",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315574666/outputs/acceptance-codex-review.contract.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/failure-classification.json", ".agent/workstreams/ws-20260913T160441Z-H55W/calibration/candidates/node-acceptance-classify_failure-027-implementation-bug.json", ".agent/workstreams/ws-20260913T160441Z-H55W/recovery/current-failure.md" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "loop",
+    "required" : true,
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "loop_reason" : "Acceptance rejected because implementation repair is required"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-implement_claude-028.md" ],
+  "result" : {
+    "context_package" : ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-implement_claude-028.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-implement_claude-028.json",
+    "target_node" : "implement.claude_implement",
+    "profile" : "implementation",
+    "sections" : [ "input_artifacts", "iteration_history", "human_feedback", "working_memory", "recent_agent_outputs", "git_evidence", "ledger_pointers" ],
+    "input_ref_count" : 4,
+    "generated_at" : "2026-09-13T16:06:25.217436Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315585181-1cbc895a",
+  "startedAt" : "2026-09-13T16:06:25.192856Z",
+  "finishedAt" : "2026-09-13T16:06:25.230532Z"
+}

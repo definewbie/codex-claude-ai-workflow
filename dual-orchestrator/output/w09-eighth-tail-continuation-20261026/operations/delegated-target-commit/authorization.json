@@ -1,0 +1,20 @@
+{
+  "raw_user_decision": "你提交吧，我不在电脑旁边，提交之后，确认完整e2e",
+  "scope": "Commit only the already staged fixed three-file candidate in eighth isolated target, then original finalize; no root repository commit, no push",
+  "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target",
+  "candidate_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/candidate-5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb.json",
+  "candidate_sha256": "5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb",
+  "files": [
+    "README.md",
+    "src/normalize_text.py",
+    "tests/test_normalize_text.py"
+  ],
+  "commit_message_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/commit-message.txt",
+  "commit_message_sha256": "117887f9387c497de62c1fa13aa52c3b4cb5c40a879c42759547bcc305497020",
+  "limits_unchanged": {
+    "tokens": 3000000,
+    "requests": 18,
+    "active_seconds": 3600
+  },
+  "recorded_at": "2026-10-26T11:03:58.438854+08:00"
+}

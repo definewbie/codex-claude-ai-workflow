@@ -1,0 +1,41 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1791694107537-92060a45",
+  "workflowExecutionId" : "wfe-1791694107485-d498eea5",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "nodeKind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "agent" : "claude",
+  "session" : "claude-main",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "contextPackageRef" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-intake_claude_brainstorm-001.md",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "acpx.agent_run",
+    "agent" : "claude",
+    "session" : "claude-main",
+    "prompt_template" : "intake-claude-brainstorm",
+    "context_package_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-intake_claude_brainstorm-001.md",
+    "expected_contract" : "",
+    "node_config" : {
+      "agent" : "claude",
+      "session" : "claude-main",
+      "permission_profile" : "contract_discovery",
+      "prompt_template" : "intake-claude-brainstorm",
+      "expected_artifact" : "task_contract_proposal",
+      "artifact_compiler" : "task_contract_proposal_compiler",
+      "allowed_stage_outcomes" : [ "READY", "BLOCKED" ]
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 6
+  },
+  "nodeExecutionId" : "nxe-1791694107541-7e8256e3",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-11T04:48:27.537278Z",
+  "claimedAt" : "2026-10-11T04:48:27.550860Z",
+  "completedAt" : "2026-10-11T04:49:55.530646Z"
+}

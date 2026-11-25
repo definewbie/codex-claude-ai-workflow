@@ -1,0 +1,308 @@
+--- before/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java
++++ after/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java
+@@ -7,8 +7,11 @@
+ import com.fasterxml.jackson.databind.DeserializationFeature;
+ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+ import com.fasterxml.jackson.databind.MapperFeature;
++import com.fasterxml.jackson.databind.JsonMappingException;
+ import com.fasterxml.jackson.databind.json.JsonMapper;
++import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
++import java.util.Arrays;
+ import java.util.List;
+ 
+ /** The only JSON grammar owner for final agent workflow results. */
+@@ -43,6 +46,12 @@
+             return ParseResult.failed("AGENT_RESULT_PARSE_FAILED", failure.getMessage(),
+                     ParseDiagnostic.unknownField(failure.getLocation(), failure.getPropertyName(),
+                             known == null ? List.of() : known.stream().map(Object::toString).sorted().toList()));
++        } catch (InvalidFormatException failure) {
++            var target = failure.getTargetType();
++            return ParseResult.failed("AGENT_RESULT_PARSE_FAILED", failure.getMessage(),
++                    target != null && target.isEnum()
++                            ? ParseDiagnostic.invalidEnum(failure)
++                            : ParseDiagnostic.at(ParseFailureKind.INVALID_JSON, failure.getLocation()));
+         } catch (Exception failure) {
+             return ParseResult.failed(
+                     "AGENT_RESULT_PARSE_FAILED",
+@@ -55,18 +64,41 @@
+     public enum ParseFailureKind {
+         UNEXPECTED_END_OF_INPUT,
+         UNKNOWN_FIELD,
++        INVALID_ENUM_VALUE,
+         INVALID_JSON
+     }
+ 
+     public record ParseDiagnostic(ParseFailureKind kind, long offset, int line, int column,
+-                                  String fieldName, List<String> allowedFields) {
++                                  String fieldName, List<String> allowedFields,
++                                  String fieldPath, Object actualValue, List<String> allowedValues) {
+         public ParseDiagnostic {
+             fieldName = fieldName == null ? "" : fieldName;
+             allowedFields = allowedFields == null ? List.of() : List.copyOf(allowedFields);
++            fieldPath = fieldPath == null ? "" : fieldPath;
++            allowedValues = allowedValues == null ? List.of() : List.copyOf(allowedValues);
+         }
+         private static ParseDiagnostic unknownField(JsonLocation location, String field, List<String> allowed) {
+             var at = at(ParseFailureKind.UNKNOWN_FIELD, location);
+-            return new ParseDiagnostic(at.kind(), at.offset(), at.line(), at.column(), field, allowed);
++            return new ParseDiagnostic(at.kind(), at.offset(), at.line(), at.column(), field, allowed,
++                    "", null, List.of());
++        }
++        private static ParseDiagnostic invalidEnum(InvalidFormatException failure) {
++            var at = at(ParseFailureKind.INVALID_ENUM_VALUE, failure.getLocation());
++            var allowed = Arrays.stream(failure.getTargetType().getEnumConstants())
++                    .map(value -> ((Enum<?>) value).name()).toList();
++            return new ParseDiagnostic(at.kind(), at.offset(), at.line(), at.column(), "", List.of(),
++                    jsonPointer(failure.getPath()), failure.getValue(), allowed);
++        }
++        private static String jsonPointer(List<JsonMappingException.Reference> path) {
++            var pointer = new StringBuilder();
++            for (var reference : path) {
++                if (reference.getFieldName() != null) {
++                    pointer.append('/').append(reference.getFieldName().replace("~", "~0").replace("/", "~1"));
++                } else if (reference.getIndex() >= 0) {
++                    pointer.append('/').append(reference.getIndex());
++                }
++            }
++            return pointer.toString();
+         }
+         private static ParseDiagnostic at(ParseFailureKind kind, JsonLocation location) {
+             return new ParseDiagnostic(
+@@ -74,7 +106,7 @@
+                     location == null ? -1L : location.getCharOffset(),
+                     location == null ? -1 : location.getLineNr(),
+                     location == null ? -1 : location.getColumnNr(),
+-                    "", List.of()
++                    "", List.of(), "", null, List.of()
+             );
+         }
+     }
+--- before/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java
++++ after/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java
+@@ -247,7 +247,8 @@
+         if (reason == CorrectionReason.PARSE_FAILURE) {
+             return """
+                     Typed correction reason: %s
+-                    Syntax diagnostic:
++                    Contract parse diagnostic:
++                    - code: %s
+                     %s
+ 
+                     %s
+@@ -257,6 +258,7 @@
+                     %s
+                     """.formatted(
+                     reason,
++                    parsed.errorCode(),
+                     renderParseDiagnostic(parsed.diagnostic()),
+                     parseCorrectionInstruction(parsed.diagnostic()),
+                     correctionPolicy,
+@@ -297,10 +299,21 @@
+                 ? "\n- unknown field: " + jsonDiagnostic(diagnostic.fieldName())
+                     + "\n- allowed fields in this object: " + jsonDiagnostic(diagnostic.allowedFields())
+                 : "";
+-        return "- kind: " + diagnostic.kind() + location + field;
++        var enumValue = diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.INVALID_ENUM_VALUE
++                ? "\n- field path: " + jsonDiagnostic(diagnostic.fieldPath())
++                    + "\n- actual value: " + jsonDiagnostic(diagnostic.actualValue())
++                    + "\n- allowed values: " + jsonDiagnostic(diagnostic.allowedValues())
++                : "";
++        return "- kind: " + diagnostic.kind() + location + field + enumValue;
+     }
+ 
+     private static String parseCorrectionInstruction(AgentResultEnvelopeParser.ParseDiagnostic diagnostic) {
++        if (diagnostic != null && diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.INVALID_ENUM_VALUE) {
++            return "Correct the identified enum field using a factual value from its allowed values. "
++                    + "The node contract below may restrict those values further and remains authoritative. "
++                    + "Do not change the semantic decision or invent evidence or approvals. "
++                    + "Re-emit the complete AgentResultEnvelope; do not copy the diagnostic into it.";
++        }
+         if (diagnostic != null
+                 && diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.UNEXPECTED_END_OF_INPUT) {
+             return """
+--- before/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeParserTest.java
++++ after/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeParserTest.java
+@@ -19,6 +19,57 @@
+             Set.of(),
+             Set.of("agent_output_contract")
+     );
++
++    @Test
++    void invalidEnumCarriesTypedValuePathAndDefinitionAllowlistWithoutAcceptingIt() {
++        var parsed = parser.parse(acceptanceRejectEnvelope("REVISE_PROPOSAL"));
++        assertFalse(parsed.valid());
++        assertEquals("AGENT_RESULT_PARSE_FAILED", parsed.errorCode());
++        assertEquals(AgentResultEnvelopeParser.ParseFailureKind.INVALID_ENUM_VALUE, parsed.diagnostic().kind());
++        assertEquals("/result/failure/verification_remediation", parsed.diagnostic().fieldPath());
++        assertEquals("REVISE_PROPOSAL", parsed.diagnostic().actualValue());
++        assertEquals(java.util.List.of("NONE", "EVIDENCE_COLLECTION", "TEST_CODE_CHANGE"),
++                parsed.diagnostic().allowedValues());
++        assertTrue(parsed.diagnostic().line() > 0);
++        assertTrue(parsed.diagnostic().column() > 0);
++        for (var value : parsed.diagnostic().allowedValues()) {
++            assertTrue(parser.parse(acceptanceRejectEnvelope(value)).valid());
++        }
++    }
++
++    @Test
++    void siblingEnumsKeepNestedArrayPathsAndTheirOwnAllowlists() {
++        var cases = java.util.List.of(
++                new EnumCase("design_result", "\"design\":{\"planned_files\":[{\"operation\":\"INVALID\"}]}",
++                        "/result/design/planned_files/0/operation", java.util.List.of("MODIFY", "CREATE")),
++                new EnumCase("design_result", "\"revision_responses\":[{\"disposition\":\"INVALID\"}]",
++                        "/result/revision_responses/0/disposition", java.util.List.of("ADDRESSED", "NOT_ADDRESSED")),
++                new EnumCase("task_contract_revision_patch", "\"obligation_patches\":[{\"clause_changes\":[{\"operation\":\"INVALID\"}]}]",
++                        "/result/obligation_patches/0/clause_changes/0/operation", java.util.List.of("ADD", "REPLACE")),
++                new EnumCase("task_contract_revision_patch", "\"obligation_patches\":[{\"clause_changes\":[{\"section\":\"INVALID\"}]}]",
++                        "/result/obligation_patches/0/clause_changes/0/section",
++                        java.util.List.of("ACCEPTANCE_CRITERIA", "TEST_REQUIREMENTS", "CONSTRAINTS", "NON_GOALS", "RISK_AREAS")));
++        for (var test : cases) {
++            var json = "{\"result\":{\"artifact_type\":\"" + test.artifact() + "\"," + test.fields() + "}}";
++            var parsed = parser.parse(json);
++            assertFalse(parsed.valid(), json);
++            assertEquals(AgentResultEnvelopeParser.ParseFailureKind.INVALID_ENUM_VALUE, parsed.diagnostic().kind(), json);
++            assertEquals(test.path(), parsed.diagnostic().fieldPath());
++            assertEquals("INVALID", parsed.diagnostic().actualValue());
++            assertEquals(test.allowed(), parsed.diagnostic().allowedValues());
++            assertTrue(parser.parse(json.replace("INVALID", test.allowed().getFirst())).valid());
++        }
++    }
++
++    @Test
++    void nonEnumTypeFailureDoesNotAcquireAnEnumAllowlist() {
++        var parsed = parser.parse(validEnvelope().replace("\"schema_version\": 1", "\"schema_version\": \"invalid\""));
++        assertFalse(parsed.valid());
++        assertEquals(AgentResultEnvelopeParser.ParseFailureKind.INVALID_JSON, parsed.diagnostic().kind());
++        assertTrue(parsed.diagnostic().allowedValues().isEmpty());
++    }
++
++    private record EnumCase(String artifact, String fields, String path, java.util.List<String> allowed) {}
+ 
+     @Test
+     void unknownFieldIsDiagnosedWithoutRelaxingTheClosedGrammar() {
+--- before/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java
++++ after/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java
+@@ -24,6 +24,110 @@
+ class AcpxAgentResultAcquirerTest {
+     @TempDir
+     Path tempDir;
++
++    @Test
++    void historicalHhzlEnumErrorReachesCorrectionWithoutLosingItsLegalValuesOrBuyingAnotherAttempt() throws Exception {
++        final byte[] bytes;
++        try (var input = getClass().getResourceAsStream("/agent-result/hhzl-invalid-remediation.corrected.json")) {
++            bytes = java.util.Objects.requireNonNull(input, "HHZL raw response fixture").readAllBytes();
++        }
++        assertEquals("b33d3a2ecbac2dd8f41ca3728157b5e6cd72be498813ba07be4e04e9c4139502",
++                java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes)));
++        var historical = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
++        var ws = "ws-20260903T225544Z-HHZL";
++        var run = "run-1788476621271";
++        var contract = ContractRegistry.forNode("intake.codex_product_review");
++        var contractPrompt = AgentResultPromptContract.render(ws, run, contract.nodeId(),
++                "NEEDS_REVISION", contract.allowedDecisions());
++        for (var agent : List.of("claude", "codex")) {
++            var transport = new ScriptedTransport(validResult("request-1", historical, 0),
++                    validResult("request-2", historical, 0));
++            var requests = requests("hhzl-" + agent);
++            var acquisition = new AcpxAgentResultAcquirer(transport).acquire(agent,
++                    requests.initial(), requests.correction(), contractPrompt, ws, run, contract);
++            var prompt = Files.readString(requests.correction().promptPath());
++            assertTrue(prompt.contains("kind: INVALID_ENUM_VALUE"), prompt);
++            assertTrue(prompt.contains("code: AGENT_RESULT_PARSE_FAILED"));
++            assertTrue(prompt.contains("field path: \"/result/failure/verification_remediation\""));
++            assertTrue(prompt.contains("actual value: \"REVISE_PROPOSAL\""));
++            assertTrue(prompt.contains("allowed values: [\"NONE\",\"EVIDENCE_COLLECTION\",\"TEST_CODE_CHANGE\"]"));
++            assertFalse(prompt.contains("kind: INVALID_JSON"));
++            assertFalse(prompt.contains("Cannot deserialize"), "do not copy Jackson exception prose");
++            assertFalse(prompt.contains("候选任务契约"), "do not copy the rejected task response into diagnostics");
++            assertTrue(acquisition.correctionAttempted());
++            assertFalse(acquisition.finalParse().valid(), "an unchanged illegal enum must remain invalid");
++            assertEquals(2, transport.calls, "the diagnostic must not create a third attempt");
++            assertEquals(List.of("hhzl-" + agent, "hhzl-" + agent), transport.sessions);
++        }
++    }
++
++    @Test
++    void historicalHhzlProseThenIllegalEnumDoesNotBypassGrammarOrBuyAThirdAttempt() throws Exception {
++        final byte[] initial;
++        final byte[] corrected;
++        try (var input = getClass().getResourceAsStream("/agent-result/hhzl-invalid-remediation.json");
++             var correction = getClass().getResourceAsStream("/agent-result/hhzl-invalid-remediation.corrected.json")) {
++            initial = java.util.Objects.requireNonNull(input).readAllBytes();
++            corrected = java.util.Objects.requireNonNull(correction).readAllBytes();
++        }
++        assertEquals("72956cadc7da1033068fe58b77ffcbac7f1ddcd874439ad1b8cdc7428568bbb9",
++                java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(initial)));
++        var transport = new ScriptedTransport(
++                validResult("initial", new String(initial, java.nio.charset.StandardCharsets.UTF_8), 0),
++                validResult("correction", new String(corrected, java.nio.charset.StandardCharsets.UTF_8), 0));
++        var requests = requests("hhzl-original-sequence");
++        var node = "intake.codex_product_review";
++        var acquisition = new AcpxAgentResultAcquirer(transport).acquire("codex", requests.initial(), requests.correction(),
++                AgentResultPromptContract.render("ws-20260903T225544Z-HHZL", "run-1788476621271", node,
++                        "NEEDS_REVISION", ContractRegistry.forNode(node).allowedDecisions()),
++                "ws-20260903T225544Z-HHZL", "run-1788476621271", ContractRegistry.forNode(node));
++        assertEquals("INVALID_JSON", acquisition.initialParse().diagnostic().kind().name());
++        assertEquals("INVALID_ENUM_VALUE", acquisition.finalParse().diagnostic().kind().name());
++        assertFalse(acquisition.finalParse().valid());
++        assertTrue(Files.readString(requests.correction().promptPath()).contains("kind: INVALID_JSON"));
++        assertEquals(2, transport.calls, "the original sequence exhausts its single correction; no rescue attempt");
++    }
++
++    @Test
++    void enumCorrectionRemainsSubjectToIdentityAndNodeContractValidation() throws Exception {
++        var node = "intake.codex_product_review";
++        var valid = strictEnvelope(node, "run-1");
++        var invalid = valid.replace("\"verification_remediation\" : \"NONE\"",
++                "\"verification_remediation\" : \"INVALID\"");
++        assertFalse(valid.equals(invalid), "fixture must contain the enum");
++        var wrongIdentity = valid.replace("\"run_id\" : \"run-1\"", "\"run_id\" : \"stale-run\"");
++        var wrongNodeValue = valid.replace("\"verification_remediation\" : \"NONE\"",
++                "\"verification_remediation\" : \"EVIDENCE_COLLECTION\"");
++        for (var second : List.of(valid, wrongIdentity, wrongNodeValue)) {
++            var transport = new ScriptedTransport(validResult("initial", invalid, 0), validResult("correction", second, 0));
++            var requests = requests("enum-validation");
++            var acquisition = new AcpxAgentResultAcquirer(transport).acquire("codex", requests.initial(),
++                    requests.correction(), correctionPrompt(node, "run-1"), "ws-test", "run-1", ContractRegistry.forNode(node));
++            assertTrue(acquisition.finalParse().valid());
++            assertEquals(second.equals(valid), acquisition.correctionValidation().valid());
++            assertEquals(2, transport.calls);
++            assertTrue(Files.readString(requests.correction().promptPath())
++                    .contains("node contract below may restrict those values further"));
++        }
++    }
++
++    @Test
++    void enumActualValueIsJsonEscapedInsideTheCorrectionDiagnostic() throws Exception {
++        var node = "intake.codex_product_review";
++        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
++        var raw = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(strictEnvelope(node, "run-1"));
++        var value = "BAD\"\n- kind: ACCEPTED\\value";
++        ((com.fasterxml.jackson.databind.node.ObjectNode) raw.path("result").path("failure"))
++                .put("verification_remediation", value);
++        var transport = new ScriptedTransport(validResult("initial", raw.toString(), 0), validResult("correction", raw.toString(), 0));
++        var requests = requests("enum-escaping");
++        new AcpxAgentResultAcquirer(transport).acquire("codex", requests.initial(), requests.correction(),
++                correctionPrompt(node, "run-1"), "ws-test", "run-1", ContractRegistry.forNode(node));
++        var prompt = Files.readString(requests.correction().promptPath());
++        assertTrue(prompt.contains("actual value: " + mapper.writeValueAsString(value)));
++        assertFalse(prompt.contains("\n- kind: ACCEPTED"));
++        assertEquals(2, transport.calls);
++    }
+ 
+     @Test
+     void planCorrectionRetainsFixedMethodAndDetailResponsibilitiesWithoutExtraAttempts() throws Exception {
+@@ -1018,6 +1122,11 @@
+         }
+ 
+         @Override
++        public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws java.io.IOException {
++            return next(request);
++        }
++
++        @Override
+         AcpxRunResult runAgentResultCorrection(String agent, AcpxRunRequest request) throws java.io.IOException {
+             return next(request);
+         }

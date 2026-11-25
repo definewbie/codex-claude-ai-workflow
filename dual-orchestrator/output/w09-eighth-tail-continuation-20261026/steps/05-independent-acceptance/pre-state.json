@@ -1,0 +1,46 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-acceptance-codex_verifier_review-035"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000035",
+    "updatedAt": "2026-10-26T01:19:39.136668Z",
+    "commitSequence": 135
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-acceptance-codex_verifier_review-035",
+    "nodeDefinitionId": "acceptance.codex_verifier_review",
+    "kind": "TASK",
+    "handlerType": "acpx.agent_run",
+    "status": "READY",
+    "stageId": "stage-acceptance",
+    "iterationId": "iter-003",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-acceptance_codex_verifier_review-034.md",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-acceptance_codex_verifier_review-034.json"
+    ],
+    "inputTransition": {
+      "condition": "unconditional",
+      "transition_type": "normal",
+      "required": true,
+      "source_node_instance_id": "node-context-acceptance_codex_verifier_review-034",
+      "source_node_sha256": "61212ea560e3e087dc28496c434b899e685cbf1a9eb918eb99e17e7df8329518",
+      "purpose": "Only verified complete self-test evidence may enter artifact validation."
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 1980.1119193335624
+}

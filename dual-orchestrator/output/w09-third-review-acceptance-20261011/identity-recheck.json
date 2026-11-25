@@ -1,0 +1,13 @@
+{
+  "reviewed_material_count": 487,
+  "material_diff": [],
+  "ledger_count": 288,
+  "ledger_diff": [],
+  "source_count": 654,
+  "source_diff": [],
+  "jar_diff": [],
+  "native_provider_calls": 0,
+  "tests_rerun": 0,
+  "runtime_authorization": "NOT_GRANTED_FOR_FOURTH",
+  "third_case_recovery": "NOT_PERFORMED"
+}

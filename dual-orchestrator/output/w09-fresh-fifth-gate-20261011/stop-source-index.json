@@ -1,0 +1,9 @@
+{
+  "files": {
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalRevisionMerger.java": "6d56fa042580f7f57a16c48b0fa217e53e60356b9edd0b4e1e34a7bf5ec428b6",
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java": "486fc6e8a304e362e47054246d0400f3b68b462f6b1936294f6f823044024927",
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java": "85ed81fbbbe669bc5a7fbe9262f5308b68a63450e0d5fc529876fd32b7732427",
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposal.java": "33c88b368b3993bb410434a4f658203bd304f50932812e3dccb5e382ff508d91"
+  },
+  "scope": "readonly identity and patch expressiveness; no implementation"
+}

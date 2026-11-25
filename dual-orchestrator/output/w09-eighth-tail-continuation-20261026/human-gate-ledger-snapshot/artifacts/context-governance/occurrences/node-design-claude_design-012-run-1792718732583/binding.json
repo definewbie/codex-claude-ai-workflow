@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "node_instance_id" : "node-design-claude_design-012",
+  "run_id" : "run-1792718732583",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1792718732583/repo-map.json",
+      "sha256" : "c82669f0290f007c1584063192536ce0338412afe3ead003ddbfafa81b610279"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1792718732583/planned-report.json",
+      "sha256" : "40d5f94b6a2d66591eee0fb49e26b45b285a60b6b3310e03b49059e1e44df7bd"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1792718732583/agent-capability-catalog.json",
+      "sha256" : "f2504f73eed05d7c05ab110a90ff2b3670e4c085b094988ed59d046be50897a5"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1792718732583/read-reuse-contract.json",
+      "sha256" : "c0a536bf9067c9dd7eec3b352816bdc1639fb7d566a3b13a9778eea5285a0a36"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1792718732583/working-set.json",
+      "sha256" : "f34108e2d3b1e2cd84c98513b0f438be72b9c681397daa16a1e4a1637974f837"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1792718732583/file-relevance-plan.json",
+      "sha256" : "52563c8d7b5fa45bd5b2ec44479c9b1e6c58130e9df0592941f67c9fea2e49d3"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1792718732583/stage-scope-policy.json",
+      "sha256" : "8fe8feab3baa8eca3ed533502cebc1ff5caf226fd6b30111b86df88113d49f18"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1792718732583/file-summaries.json",
+      "sha256" : "08ff9c38837dc2b42b2382507ffe47dc60d9aa7c20f336d96f213bddbc380b38"
+    }
+  }
+}

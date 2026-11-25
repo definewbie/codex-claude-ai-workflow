@@ -1,0 +1,5 @@
+{
+  "exit": 1,
+  "tests": 2,
+  "meaning": "Old operator code rejects changed parent PATH despite fixed child E; old runner does not consume explicit selected program entries. Not a Java/native test."
+}

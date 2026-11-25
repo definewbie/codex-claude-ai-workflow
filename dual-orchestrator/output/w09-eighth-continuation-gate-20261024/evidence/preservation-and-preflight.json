@@ -1,0 +1,32 @@
+{
+  "historical_package_files": {
+    "files": 402,
+    "sha256_unchanged": true,
+    "same_file_set": true
+  },
+  "stopped_ledger_files": {
+    "files": 541,
+    "sha256_unchanged": true,
+    "same_file_set": true
+  },
+  "frozen_identity": {
+    "source_inputs": 659,
+    "jars": 2,
+    "current_package_identity": "PASS"
+  },
+  "usage": {
+    "actual_tokens": 848242,
+    "completed_calls": 10,
+    "remaining_tokens": 851758,
+    "remaining_calls": 8
+  },
+  "time": {
+    "inherited_seconds": 1263.444,
+    "including_new_preflight_receipts_seconds": 1265.1044221248999,
+    "limit_seconds": 3600,
+    "scope": "Recorded program operation time; offline development/review and human waiting excluded"
+  },
+  "authorization": false,
+  "new_case_or_steps_created": false,
+  "java_native_model_calls": 0
+}

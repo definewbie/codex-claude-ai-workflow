@@ -628,8 +628,8 @@ final class AgentRunMetadataWriter {
      * Non-terminal attempt recorded at prepare time so an agent run can never
      * sit at {@code status=prepared} with no execution evidence. This is not a
      * terminal outcome; {@code AgentRunMetadataFinalizer} overwrites it on
-     * completion, and {@code AgentExecutionAttemptReconciler} closes it if the
-     * transport never returns.
+     * completion. If transport never returns, the bound R01/R02 protocol records
+     * an unknown external result; mutable metadata is not promoted into a completion.
      */
     private AgentExecutionAttempt preparedExecutionAttempt(
             Path workspaceRoot,
@@ -678,6 +678,7 @@ final class AgentRunMetadataWriter {
             map.put("sessionId", signal.sessionId());
             map.put("observedSequence", signal.observedSequence());
             map.put("superseded", signal.superseded());
+            if (signal.operationRef() != null) map.put("operationRef", signal.operationRef());
             return Map.copyOf(map);
         }).toList();
     }

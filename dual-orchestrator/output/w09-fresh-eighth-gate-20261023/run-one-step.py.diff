@@ -1,0 +1,26 @@
+--- /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/run-one-step.py
++++ /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/run-one-step.py
+@@ -7,10 +7,11 @@
+ from pathlib import Path
+ from gate_support import OUT, read, write, frozen_check, measure, planning
+ from check_budget import check
++from process_check import require_known_pids_absent
+ 
+ # This is a candidate runner, not permission to reuse a prior case or budget.
+ authorization = read(OUT / 'run-authorization.json')
+-assert authorization.get('fresh_run_authorized') is True and authorization.get('case') == 'FRESH_SEVENTH', 'Fresh seventh requires new human authorization'
++assert authorization.get('fresh_run_authorized') is True and authorization.get('case') == 'FRESH_EIGHTH', 'Fresh eighth requires new human authorization'
+ assert read(OUT / 'gate-local-preflight.json').get('status') == 'PASS_OFFLINE_PRECONDITIONS_AWAITING_RUN_APPROVAL', 'Fresh local preflight required'
+ step, expected = sys.argv[1:]
+ assert not (OUT / 'stop-required.json').exists(), 'Gate already stopped; no automatic continuation'
+@@ -33,7 +34,10 @@
+ assert identity['executable.cli'] == release['application_jars']['dual-cli']['sha256']
+ assert identity['executable.server'] == release['application_jars']['dual-server']['sha256']
+ assert identity['kernel.effective'] == 'liteflow' and identity['behavior.env.DUAL_ACPX_COMMAND_TIMEOUT_SECONDS'] == '600'
++# Same reviewed prerequisite before any step directory or Java side effect.
++process_observation = require_known_pids_absent([r['pid'] for r in read(OUT/'old-execution-recheck.json')['known_pids']])
+ folder.mkdir(parents=True)
++write(folder/'old-process-observation.json', process_observation)
+ is_model = expected in [s['node'] for s in read(OUT / 'budget.json')['stages']]
+ if is_model:
+     measured = measure(workspace, ledger)

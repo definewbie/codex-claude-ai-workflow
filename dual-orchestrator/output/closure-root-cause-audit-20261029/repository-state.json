@@ -1,0 +1,9 @@
+{
+  "head": "3362eb421514e75fdc4332f570df5bf274b3725e",
+  "statusCounts": {
+    " M": 296,
+    " D": 4,
+    "??": 84
+  },
+  "note": "Audits current dirty worktree separately from historical runs; output artifacts are untracked."
+}

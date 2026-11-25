@@ -1,0 +1,12 @@
+{
+  "result": "PASS_FOR_MATERIAL_CONSISTENCY_NOT_GATE",
+  "gate_result": "FAIL",
+  "native_prompt_calls": 5,
+  "total_tokens": 235366,
+  "stopped_ledger_count": 288,
+  "snapshot_equal_to_stopped_source": true,
+  "no_post_stop_step": true,
+  "observer_original_bytes": true,
+  "no_provider_replay": true,
+  "no_independent_review_claim": true
+}

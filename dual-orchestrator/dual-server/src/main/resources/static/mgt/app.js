@@ -281,6 +281,11 @@ async function loadOverview() {
 }
 
 function renderOverview(data) {
+  window.DualNativePermissions.render(document.getElementById("nativePermissions"), data.nativePermissions,
+    async (action, body) => {
+      await request(`${selectedBase()}/permissions/${action}?workdir=${workdirParam()}`, { method: "POST", body: JSON.stringify(body) });
+      await loadSelected();
+    });
   const workflow = data.workflow || {};
   const acceptance = data.acceptance || {};
   const goal = data.goalSatisfaction || {};
@@ -676,6 +681,26 @@ function renderOverviewDelivery(delivery) {
     <span>${escapeHtml(notDeliverable ? delivery.failureReason || "Workflow is still in progress." : `${changedFiles} changed file(s) -> ${delivery.targetRepo || ""}`)}</span>
   `;
   els.overviewDeliveryMerge.appendChild(item);
+  const guidance = document.createElement("div");
+  guidance.className = "mini-item";
+  guidance.innerHTML = `<strong>${escapeHtml(delivery.nextAction || "Inspect delivery")}</strong>
+    <span>${escapeHtml(`Stop basis: ${delivery.stopBasis || "UNKNOWN"}; recorded status: ${delivery.historicalStatus || "-"}`)}</span>`;
+  for (const command of delivery.nextCommands || []) {
+    const line = document.createElement("pre"); line.textContent = command; guidance.appendChild(line);
+  }
+  const allowed = delivery.currentActions || [];
+  const buttons = [];
+  if (allowed.includes("MERGE")) buttons.push(["Apply approved candidate", () => postAction(`${selectedBase()}/delivery/merge?workdir=${workdirParam()}`)]);
+  if (allowed.includes("FINALIZE")) buttons.push(["Confirm existing commit", () => {
+    const commit = window.prompt("Existing target commit SHA", "");
+    if (commit?.trim()) postAction(`${selectedBase()}/delivery/finalize?workdir=${workdirParam()}`, { commit: commit.trim() });
+  }]);
+  if (allowed.includes("RESOLVE_AUTHORIZE_NEW_APPLY")) buttons.push(["Check stop and authorize one new apply", () => resolveDelivery(delivery, "AUTHORIZE_NEW_APPLY")]);
+  if (allowed.includes("RESOLVE_CLOSE_OR_CONFIRM_STOP")) buttons.push(["Close application / record stop check", () => resolveDelivery(delivery, "CLOSE_APPLICATION")]);
+  for (const [label, action] of buttons) {
+    const button = document.createElement("button"); button.textContent = label; button.addEventListener("click", action); guidance.appendChild(button);
+  }
+  els.overviewDeliveryMerge.appendChild(guidance);
   if (delivery.failureReason && !notDeliverable) {
     const failure = document.createElement("div");
     failure.className = "mini-item danger-item";
@@ -685,6 +710,24 @@ function renderOverviewDelivery(delivery) {
     `;
     els.overviewDeliveryMerge.appendChild(failure);
   }
+}
+
+function resolveDelivery(delivery, disposition) {
+  const required = disposition === "AUTHORIZE_NEW_APPLY" ? "RESOLVE_AUTHORIZE_NEW_APPLY" : "RESOLVE_CLOSE_OR_CONFIRM_STOP";
+  if (!(delivery.currentActions || []).includes(required) || !delivery.resolutionTemplate?.operation_id) return;
+  const note = window.prompt("Describe the target, old operation and your decision", "");
+  if (!note?.trim()) return;
+  const request = JSON.parse(JSON.stringify(delivery.resolutionTemplate));
+  request.request_id = crypto.randomUUID(); request.disposition = disposition; request.operator_note = note.trim(); request.stop_basis = null;
+  const confirmStop = disposition === "AUTHORIZE_NEW_APPLY" || window.confirm("Have you verified the old apply stopped? Cancel leaves a close-only decision.");
+  if (confirmStop) {
+    const checks = window.prompt("Actual checks used to verify the old invocation stopped", "");
+    if (!checks?.trim() || !window.confirm("Confirm the old operation stopped. Its result may remain unknown; a new application may repeat effects. This is your declaration, not a measured exit.")) return;
+    request.stop_basis = { type: "OPERATOR_CONFIRMED_STOPPED", checked_at: new Date().toISOString(),
+      checks_performed: [checks.trim()], old_operation_stopped: true, accept_unknown_result_and_repeat_risk: true, material_refs: [] };
+  }
+  if (!window.confirm(disposition === "AUTHORIZE_NEW_APPLY" ? "Authorize one new apply of this approved candidate?" : "Close further application? An existing exact commit can still be confirmed.")) return;
+  postAction(`${selectedBase()}/delivery/resolve?workdir=${workdirParam()}`, request);
 }
 
 function renderOverviewAgentTasks(tasks) {
@@ -885,6 +928,7 @@ function renderReviewStructured(packet) {
     reviewList("Acceptance Criteria", contract.acceptanceCriteria),
     reviewList("Test Requirements", contract.testRequirements),
     reviewList("Constraints", contract.constraints),
+    reviewList("Nonessential Operation Declarations", contract.nonessentialOperationDeclarations),
   ]);
 
   appendGateEvidenceSection("Agent Review Evidence", [

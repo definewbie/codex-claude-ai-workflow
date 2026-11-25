@@ -1,0 +1,60 @@
+{
+  "artifact_type" : "agent_output_contract",
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261011T044656Z-BMDJ",
+  "run_id" : "run-1791700195359",
+  "node_id" : "design.codex_arch_review",
+  "node_instance_id" : "node-design-codex_arch_review-015",
+  "handler_type" : "acpx.agent_run",
+  "decision" : "NEEDS_REVISION",
+  "summary" : "三文件设计与算法符合目标，但实际返回值的展示仍是可选步骤，未完整落实 AC-2 的强制证据要求。",
+  "required_keys" : [ "decision", "summary" ],
+  "allowed_decisions" : [ "BLOCKED", "NEEDS_REVISION", "READY_FOR_ARCH_REVIEW" ],
+  "source_output_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700195359/outputs/design-codex-review.json",
+  "source_artifact_type" : "agent_output_contract",
+  "generated_at" : "2026-10-11T06:30:44.051401Z",
+  "control" : {
+    "decision" : "NEEDS_REVISION",
+    "summary" : "三文件设计与算法符合目标，但实际返回值的展示仍是可选步骤，未完整落实 AC-2 的强制证据要求。"
+  },
+  "control_source" : {
+    "kind" : "strict_agent_result_envelope"
+  },
+  "lifecycle_status" : "NEEDS_REVISION",
+  "blocking" : true,
+  "checks" : [ "先检查 Review Evidence Brief，再审查完整当前设计、Declared Planned Files 及已批准的目标与排除范围。", "算法先替换 CRLF 再替换单独 CR，符合字符保持要求，结果不含 CR，因此重复执行保持相同结果。", "三个候选文件分别承担函数、测试和使用说明，职责完整且与设计说明一致；当前 GOAL 批准不构成实施授权。", "测试设计覆盖所需输入类别、精确期望及幂等性，导入与执行方案无需第三方依赖或打包配置。", "逐项检查正常完成、并发、超时、外部故障、中断、恢复和回滚边界：纯函数没有持久状态或外部副作用，无需新增生命周期机制；行为由精确输出断言验证。", "README 的混合换行示例、导入方式及一致性验证计划符合 AC-3。", "AC-2 的必选验证路径仅展示源码输入、期望值和测试通过状态，实际返回值输出被列为可选补充。" ],
+  "evidence" : [ "设计给出的核心表达式为 text.replace(\"\\r\\n\", \"\\n\").replace(\"\\r\", \"\\n\")，没有扩大换行归一化范围。", "Declared Planned Files 逐项声明 CREATE src/normalize_text.py、CREATE tests/test_normalize_text.py 和 CREATE README.md，覆盖全部交付职责。", "设计列出 11 个测试方法，其中包含其他行分隔符保持性和遍历全部案例的幂等性检查。", "AC-2 验证计划将逐例证据定义为输入常量、期望字符串和 verbose 通过记录，并将打印实际返回值描述为“另可以”执行。", "已接受提案的 AC-2/TR-2 明确要求实际输入输出证据，且测试完成状态不能替代该证据。" ],
+  "missing_evidence" : [ ],
+  "must_fix" : [ "将代表性案例的实际输入、期望输出及实际返回值展示改为必选验证步骤：执行被测函数并用 repr 或等效转义表示打印三者，保留真实命令与输出，并与测试源码案例对应；同时保留 unittest 的真实覆盖数量及零 failure/error 结果。可使用临时命令完成，无需增加候选文件。" ],
+  "acceptance_notes" : [ "当前缺陷是验证计划存在可跳过的必要步骤，并非要求设计阶段提前执行测试。", "11 是计划中的测试方法数，其中包含幂等性方法；执行证据应准确区分方法数量与输入案例覆盖。", "测试发现机制已有直接脚本运行后备方案，不构成本阶段阻塞，也不需要预先增加 tests/__init__.py。", "除上述验证计划缺口外，未从所提供的完整设计中发现其他阻塞项。" ],
+  "open_risks" : [ ],
+  "changed_files" : [ ],
+  "verification_summary" : "已完成完整设计的静态评审；未执行测试、读取额外文件或修改仓库，未将设计声明视为运行证据。",
+  "failure" : {
+    "category_hint" : "验收证据路径不完整",
+    "verification_remediation" : "NONE",
+    "contract_gaps" : [ ],
+    "out_of_scope_files" : [ ],
+    "missing_tests" : [ ],
+    "context_gaps" : [ ],
+    "reason" : "设计允许仅凭源码期望值和测试通过记录完成验证，而实际返回值展示可被跳过，与 AC-2/TR-2 的强制实际输入输出证据要求不一致。"
+  },
+  "checks_run" : [ ],
+  "checks_skipped" : [ ],
+  "contract_obligations" : [ ],
+  "reread_reasons" : [ ],
+  "stage_outcome" : "NEEDS_REVISION",
+  "stage_outcome_source" : "invalid",
+  "evidence_state" : {
+    "blocking" : true,
+    "evidence_count" : 5,
+    "missing_evidence_count" : 0,
+    "must_fix_count" : 1,
+    "acceptance_note_count" : 4,
+    "open_risk_count" : 0
+  },
+  "authored_context" : {
+    "sha256" : "b40a19b04456c503eb39350470fd7058dacdc1420b89661d95e01b5d596b5a9d",
+    "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700195359/prompts/design-codex-review.md.manifest.json"
+  }
+}

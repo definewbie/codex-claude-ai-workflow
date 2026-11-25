@@ -1,0 +1,27 @@
+{
+  "checks": [
+    {
+      "command": [
+        "node",
+        "--check",
+        "dual-orchestrator/output/d04-claude-native-20260928/model-probe.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "dual-orchestrator/output/d04-claude-native-20260928/run-probe.py"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"status\": \"PREPARED_NOT_RUN\", \"model\": \"claude-sonnet-5\", \"userMessages\": 0}\n",
+      "stderr": ""
+    }
+  ],
+  "pythonSyntax": "PASS",
+  "providerTasks": 0,
+  "limitations": "Syntax/preflight only; watchdog branching has not been exhaustively tested. OS process-group stop uses existing proven primitive."
+}

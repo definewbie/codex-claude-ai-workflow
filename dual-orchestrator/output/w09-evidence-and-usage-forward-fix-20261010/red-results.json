@@ -1,0 +1,21 @@
+{
+  "selected_rows": [
+    {
+      "suite": "dev.dual.adapter.acpx.AcpxUsageReaderTest",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "dev.dual.adapter.acpx.AgentPromptRendererTest",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "only_selected_reports_counted": true,
+  "other_xml_retained_from_prior_runs_not_red_proof": true,
+  "exit": 1
+}

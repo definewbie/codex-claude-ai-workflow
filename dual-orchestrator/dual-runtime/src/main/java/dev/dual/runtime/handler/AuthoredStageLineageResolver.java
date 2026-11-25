@@ -28,13 +28,13 @@ import static dev.dual.runtime.handler.AuthoredExecutionContext.*;
 /** Resolves the two registered authored stages from declared edges and routed occurrences. */
 final class AuthoredStageLineageResolver {
     enum Stage {
-        DESIGN("design.claude_design", "design.codex_arch_review", "design.decision", "design_result", "design"),
-        PLAN("plan.claude_plan", "plan.codex_plan_review", "plan.decision", "plan_result", "plan");
+        DESIGN("design.claude_design", "design.codex_arch_review", "design.decision", "design_result", "design", "READY_FOR_ARCH_REVIEW"),
+        PLAN("plan.claude_plan", "plan.codex_plan_review", "plan.decision", "plan_result", "plan", "READY_TO_IMPLEMENT");
 
-        final String author, reviewer, decision, artifact, purpose;
-        Stage(String author, String reviewer, String decision, String artifact, String purpose) {
+        final String author, reviewer, decision, artifact, purpose, ready;
+        Stage(String author, String reviewer, String decision, String artifact, String purpose, String ready) {
             this.author = author; this.reviewer = reviewer; this.decision = decision;
-            this.artifact = artifact; this.purpose = purpose;
+            this.artifact = artifact; this.purpose = purpose; this.ready = ready;
         }
     }
 
@@ -43,12 +43,13 @@ final class AuthoredStageLineageResolver {
     private final String ws;
     private final String prefix;
     private final WorkstreamPaths paths;
-    private final WorkflowFileLedger ledger = new WorkflowFileLedger();
+    private final WorkflowFileLedger ledger;
     private final WorkflowDefinition definition;
     private final List<Event> events;
     private final long through;
 
-    AuthoredStageLineageResolver(Path root, String ws, long through) throws IOException {
+    AuthoredStageLineageResolver(WorkflowFileLedger ledger, Path root, String ws, long through) throws IOException {
+        this.ledger = java.util.Objects.requireNonNull(ledger);
         this.root = root.toAbsolutePath().normalize(); this.ws = ws;
         this.prefix = ".agent/workstreams/" + ws + "/";
         this.paths = new WorkstreamPaths(root, new DualId(ws));
@@ -68,6 +69,12 @@ final class AuthoredStageLineageResolver {
             catch (NumberFormatException failure) { throw new IOException("AUTHORED_EVENT_ID_INVALID", failure); }
             require(sequence > previous, "AUTHORED_EVENT_ORDER_INVALID");
             previous = sequence;
+            if ("node_routed".equals(text(event.get("event_type")))) {
+                var payload = map(event.get("payload"));
+                var target = definition.node(text(payload.get("to")));
+                var occurrence = ledger.loadNode(paths, text(payload.get("node_instance_id")));
+                require(target.id().equals(occurrence.nodeDefinitionId()), "AUTHORED_ROUTE_TARGET_MISMATCH");
+            }
             if (sequence <= through) history.add(new Event(sequence, id, text(event.get("event_type")), map(event.get("payload"))));
         }
         this.events = List.copyOf(history);
@@ -92,42 +99,32 @@ final class AuthoredStageLineageResolver {
             var incoming = definition.edges().stream().filter(edge -> edge.to().equals(gate.id())).toList();
             definitionRequire(!incoming.isEmpty(), "gate must have a candidate source");
             var next = soleSuccessor(definition, author.id(), "completed");
-            boolean direct = stage == Stage.PLAN && next.equals(gate.id());
-            if (direct) {
-                definitionRequire(incoming.stream().allMatch(edge -> edge.from().equals(stage.author) && edge.on().equals("completed")),
-                        "direct plan gate cannot mix reviewed sources");
-                definitionRequire(definition.nodes().stream().noneMatch(node -> node.id().equals(stage.reviewer) || node.id().equals(stage.decision)),
-                        "direct plan topology cannot retain orphan reviewer roles");
-            } else {
-                var context = definition.node(next);
-                definitionRequire(context.handlerType().equals("context.build_package") && context.kind() == NodeKind.TASK
-                        && stage.reviewer.equals(text(context.config().get("target_node"))), "review context role mismatch");
-                definitionRequire(soleSuccessor(definition, next, "completed").equals(stage.reviewer), "review context successor mismatch");
-                var reviewer = definition.node(stage.reviewer);
-                definitionRequire(reviewer.kind() == NodeKind.TASK && reviewer.handlerType().equals("acpx.agent_run"), "reviewer role mismatch");
-                definitionRequire(soleSuccessor(definition, stage.reviewer, "completed").equals(stage.decision), "review decision successor mismatch");
-                var decision = definition.node(stage.decision);
-                definitionRequire(decision.kind() == NodeKind.DECISION && decision.handlerType().equals("review.decision"), "decision role mismatch");
-                definitionRequire(incoming.stream().allMatch(edge -> edge.from().equals(stage.decision)), "reviewed gate source mismatch");
-                definitionRequire(definition.edges().stream().filter(edge -> edge.to().equals(next))
-                        .allMatch(edge -> edge.from().equals(stage.author) && edge.on().equals("completed")), "review context has an unrelated producer");
-                definitionRequire(definition.edges().stream().filter(edge -> edge.to().equals(stage.reviewer))
-                        .allMatch(edge -> edge.from().equals(next) && edge.on().equals("completed")), "reviewer bypasses its context");
-                definitionRequire(definition.edges().stream().filter(edge -> edge.to().equals(stage.decision))
-                        .allMatch(edge -> edge.from().equals(stage.reviewer) && edge.on().equals("completed")), "decision bypasses its reviewer");
-                var revision = soleSuccessor(definition, stage.decision, "NEEDS_REVISION");
-                definitionRequire(revision.equals(gate.id()) || (stage == Stage.PLAN && revision.equals(stage.author)), "unsupported revision topology");
-            }
-            definitionRequire(soleSuccessor(definition, gate.id(), "revise").equals(stage.author), "human revise must return to its author");
-            var approved = soleSuccessor(definition, gate.id(), "approved");
-            if (stage == Stage.DESIGN) definitionRequire(approved.equals(Stage.PLAN.author), "approved design must feed the planner");
-            else {
-                var target = definition.node(approved);
-                definitionRequire(approved.equals("implement.claude_implement") || (target.handlerType().equals("context.build_package")
-                        && "implement.claude_implement".equals(text(target.config().get("target_node")))
-                        && soleSuccessor(definition, approved, "completed").equals("implement.claude_implement")),
-                        "approved plan must feed implementation");
-            }
+            var context = definition.node(next);
+            definitionRequire(context.handlerType().equals("context.build_package") && context.kind() == NodeKind.TASK
+                    && stage.reviewer.equals(text(context.config().get("target_node"))), "review context role mismatch");
+            definitionRequire(soleSuccessor(definition, next, "completed").equals(stage.reviewer), "review context successor mismatch");
+            var reviewer = definition.node(stage.reviewer);
+            definitionRequire(reviewer.kind() == NodeKind.TASK && reviewer.handlerType().equals("acpx.agent_run"), "reviewer role mismatch");
+            definitionRequire(soleSuccessor(definition, stage.reviewer, "completed").equals(stage.decision), "review decision successor mismatch");
+            var decision = definition.node(stage.decision);
+            definitionRequire(decision.kind() == NodeKind.DECISION && decision.handlerType().equals("review.decision"), "decision role mismatch");
+            definitionRequire(incoming.stream().allMatch(edge -> edge.from().equals(stage.decision)
+                    && (edge.on().equals("BLOCKED") || stage == Stage.PLAN
+                    && edge.on().equals(VerificationReadiness.REQUIRED))), "ordinary review must not create a human gate");
+            if (stage == Stage.PLAN)
+                definitionRequire(soleSuccessor(definition, stage.decision, VerificationReadiness.REQUIRED).equals(gate.id()),
+                        "missing verification readiness must reach the plan gate");
+            definitionRequire(definition.edges().stream().filter(edge -> edge.to().equals(next))
+                    .allMatch(edge -> edge.from().equals(stage.author) && edge.on().equals("completed")), "review context has an unrelated producer");
+            definitionRequire(definition.edges().stream().filter(edge -> edge.to().equals(stage.reviewer))
+                    .allMatch(edge -> edge.from().equals(next) && edge.on().equals("completed")), "reviewer bypasses its context");
+            definitionRequire(definition.edges().stream().filter(edge -> edge.to().equals(stage.decision))
+                    .allMatch(edge -> edge.from().equals(stage.reviewer) && edge.on().equals("completed")), "decision bypasses its reviewer");
+            definitionRequire(soleSuccessor(definition, stage.decision, "NEEDS_REVISION").equals(stage.author), "revision must return to author");
+            definitionRequire(soleSuccessor(definition, stage.decision, stage.ready)
+                    .equals(stage == Stage.DESIGN ? Stage.PLAN.author : "contract.compile_execution"), "READY must use the reviewed candidate");
+            definitionRequire(soleSuccessor(definition, gate.id(), "revise").equals(stage.author)
+                    && soleSuccessor(definition, gate.id(), "approved").equals(stage.author), "human resolution must receive fresh independent review");
         }
     }
 
@@ -144,19 +141,20 @@ final class AuthoredStageLineageResolver {
     Snapshot prepare(String nodeInstanceId, String runId) throws IOException {
         var node = node(nodeInstanceId);
         require(participates(node.nodeDefinitionId()), "AUTHORED_ROLE_UNSUPPORTED");
-        var contractResolution = TaskContractProjectionVerifier.resolve(root, ws);
+        var contractResolution = TaskContractProjectionVerifier.resolve(ledger, root, ws,
+                TaskContractProjectionVerifier.requiredPhase(definition.node(node.nodeDefinitionId())));
         require(contractResolution.failure() == null && contractResolution.qualified().isPresent(), "AUTHORED_CONTRACT_NOT_QUALIFIED");
         var qualified = contractResolution.qualified().orElseThrow();
         var contract = new ContractIdentity(qualified.compileNodeInstanceId(), qualified.approvalGateRef(), qualified.approvalEventId(),
                 new Reference(qualified.contractRef(), qualified.sha256()), new Reference(qualified.resolutionRef(), qualified.resolutionSha256()));
         require(events.stream().anyMatch(event -> event.id().equals(contract.approvalEventId())), "AUTHORED_CONTRACT_OUTSIDE_HISTORY");
-        Approval design = null, plan = null;
+        ReviewedCandidate design = null, plan = null;
         Candidate parent = null, subject = null;
         Reference trigger = null;
         List<Obligation> obligations = List.of();
         var id = node.nodeDefinitionId();
-        if (!id.equals(Stage.DESIGN.author) && !id.equals(Stage.DESIGN.reviewer)) design = approval(Stage.DESIGN);
-        if (id.equals("implement.claude_implement") || id.equals("implement.claude_self_test_report")) plan = approval(Stage.PLAN);
+        if (!id.equals(Stage.DESIGN.author) && !id.equals(Stage.DESIGN.reviewer)) design = reviewed(Stage.DESIGN, node);
+        if (id.equals("implement.claude_implement") || id.equals("implement.claude_self_test_report")) plan = reviewed(Stage.PLAN, node);
         for (var stage : Stage.values()) {
             if (id.equals(stage.author)) {
                 var baseline = baseline(stage, node, new HashSet<>());
@@ -169,30 +167,107 @@ final class AuthoredStageLineageResolver {
         var snapshot = new Snapshot(ws, nodeInstanceId, id, runId, through, contract, design, plan, parent, subject, trigger, obligations);
         var origins = events.stream().filter(event -> event.type().equals("node_routed")
                 && nodeInstanceId.equals(text(event.payload().get("node_instance_id")))).toList();
-        require(origins.size() <= 1, "AUTHORED_NODE_ORIGIN_NOT_UNIQUE");
+        require(origins.size() == 1, "AUTHORED_NODE_ORIGIN_NOT_UNIQUE");
         if (!origins.isEmpty() && origins.getFirst().sequence() < through) {
             // Node creation, not execution retry, fixes the semantic input epoch.
-            var original = new AuthoredStageLineageResolver(root, ws, origins.getFirst().sequence()).prepare(nodeInstanceId, runId);
+            var original = new AuthoredStageLineageResolver(ledger, root, ws, origins.getFirst().sequence()).prepare(nodeInstanceId, runId);
             require(snapshot.withHistoryThrough(original.historyThrough()).equals(original), "AUTHORED_NODE_AUTHORITY_CHANGED");
             return original;
         }
         return snapshot;
     }
 
-    Approval approval(Stage stage) throws IOException {
-        Event last = null;
-        for (var event : events) {
-            if (!event.type().equals("node_routed")) continue;
-            var to = text(event.payload().get("to"));
-            var target = definition.node(to);
-            if (target.kind() == NodeKind.GATE && stage.purpose.equals(text(target.config().get("gate_purpose")))) last = event;
+    ReviewedCandidate reviewed(Stage stage, NodeInstanceDocument consumer) throws IOException {
+        var cursor = consumer;
+        var visited = new HashSet<String>();
+        while (visited.add(cursor.nodeInstanceId())) {
+            if (cursor.nodeDefinitionId().equals(stage.decision)) {
+                completed(cursor);
+                require(stage.ready.equals(text(cursor.result().get("decision"))), "AUTHORED_REVIEW_NOT_READY");
+                var facts = reviewedFacts(stage, cursor);
+                // Compare the persisted JSON representation: an epoch read into a generic map may
+                // be Integer even though TaskContract exposes long. Do not confuse that with drift.
+                require(JSON.readTree(JSON.writeValueAsBytes(facts)).equals(JSON.valueToTree(cursor.result().get("reviewed_candidate"))),
+                        "AUTHORED_REVIEWED_FACTS_MISMATCH");
+                var author = JSON.convertValue(facts.get("author_artifact"), Reference.class);
+                var doc = AgentOutputContractDocument.read(verifiedPath(root, author), JSON).orElseThrow();
+                var candidate = new Candidate(author, doc.nodeInstanceId(), doc.nodeId(), doc.runId(), doc.sourceArtifactType());
+                var event = events.stream().filter(e -> e.type().equals("node_routed")
+                        && cursorId(facts).equals(text(e.payload().get("source_node_instance_id")))
+                        && stage.ready.equals(text(e.payload().get("outcome")))).toList();
+                require(event.size() == 1, "AUTHORED_READY_ROUTE_NOT_UNIQUE");
+                return new ReviewedCandidate(reference(root, prefix + "nodes/" + cursor.nodeInstanceId() + ".json"),
+                        event.getFirst().id(), candidate);
+            }
+            var source = text(cursor.inputTransition().get("source_node_instance_id"));
+            require(!source.isBlank(), "AUTHORED_REVIEWED_MISSING: " + stage.purpose);
+            var parent = node(source);
+            var cursorInstanceId = cursor.nodeInstanceId();
+            var origins = events.stream().filter(event -> event.type().equals("node_routed")
+                    && cursorInstanceId.equals(text(event.payload().get("node_instance_id")))).toList();
+            require(origins.size() == 1 && source.equals(text(origins.getFirst().payload().get("source_node_instance_id"))),
+                    "AUTHORED_NODE_ORIGIN_NOT_UNIQUE");
+            var route = origins.getFirst();
+            require(parent.nodeDefinitionId().equals(text(route.payload().get("from")))
+                    && cursor.nodeDefinitionId().equals(text(route.payload().get("to"))), "AUTHORED_ROUTE_TARGET_MISMATCH");
+            if (Boolean.TRUE.equals(cursor.inputTransition().get("readiness_repair"))) {
+                // An explicitly recorded repair consumes the failed node's inputs, not its unsuccessful outputs.
+                var repair = JSON.valueToTree(parent.result().get("readiness_repair"));
+                var refs = new java.util.LinkedHashSet<>(parent.inputRefs());
+                refs.addAll(strings(parent.result().get("readiness_repair") instanceof Map<?, ?> fact ? fact.get("evidence_refs") : null));
+                require(parent.status() == NodeStatus.FAILED && cursor.nodeDefinitionId().equals(Stage.PLAN.author)
+                        && "revise_readiness".equals(text(route.payload().get("outcome")))
+                        && repair.path("action").asText().equals("revise_readiness") && !repair.path("note").asText().isBlank()
+                        && repair.equals(JSON.valueToTree(route.payload().get("repair")))
+                        && cursor.inputRefs().equals(List.copyOf(refs)), "AUTHORED_REPAIR_ROUTE_MISMATCH");
+            } else {
+                completed(parent);
+                require(cursor.inputRefs().equals(parent.outputRefs()), "AUTHORED_ROUTE_INPUT_MISMATCH");
+                edge(parent.nodeDefinitionId(), text(route.payload().get("outcome")), cursor.nodeDefinitionId());
+            }
+            require(reference(root, prefix + "nodes/" + source + ".json").sha256()
+                    .equals(text(cursor.inputTransition().get("source_node_sha256"))), "AUTHORED_ROUTE_SOURCE_CHANGED");
+            cursor = parent;
         }
-        require(last != null, "AUTHORED_APPROVAL_MISSING: " + stage.purpose);
-        var gate = gate(last);
-        require(gate.node().status() == NodeStatus.COMPLETED && gate.document().status().equals("resolved"), "AUTHORED_APPROVAL_NOT_COMPLETED");
-        require(text(gate.document().result().get("human_action")).equals("approved"), "AUTHORED_NOT_APPROVED");
-        require(routedAfter(last, gate.node(), "approved"), "AUTHORED_APPROVAL_NOT_ROUTED");
-        return new Approval(gate.reference(), last.id(), gateSubject(stage, gate));
+        throw new IOException("AUTHORED_ROUTE_CYCLE");
+    }
+
+    private static String cursorId(Map<String, Object> facts) { return text(facts.get("decision_occurrence")); }
+
+    Map<String, Object> reviewedFacts(Stage stage, String decisionId) throws IOException {
+        return reviewedFacts(stage, node(decisionId));
+    }
+
+    Map<String, Object> reviewedFacts(Stage stage, NodeInstanceDocument decision) throws IOException {
+        require(decision.nodeDefinitionId().equals(stage.decision), "AUTHORED_DECISION_ROLE_MISMATCH");
+        var reviewer = unique(decision.inputRefs(), stage.reviewer, "agent_output_contract");
+        require(stage.ready.equals(document(reviewer).decision()), "AUTHORED_REVIEW_NOT_READY");
+        var reviewerNode = node(reviewer.nodeInstanceId());
+        require(reviewerNode.nodeInstanceId().equals(text(decision.inputTransition().get("source_node_instance_id")))
+                && reference(root, prefix + "nodes/" + reviewer.nodeInstanceId() + ".json").sha256()
+                    .equals(text(decision.inputTransition().get("source_node_sha256"))), "AUTHORED_REVIEW_ROUTE_MISMATCH");
+        var author = reviewSubject(stage, reviewerNode);
+        var reviewedInput = verifiedCandidateSnapshot(root, ws, reviewer);
+        require(author.equals(reviewedInput.subject()), "AUTHORED_REVIEW_SUBJECT_MISMATCH");
+        var authorInput = verifiedCandidateSnapshot(root, ws, author);
+        require(authorInput.contract().equals(reviewedInput.contract()), "AUTHORED_REVIEW_CONTRACT_MISMATCH");
+        var contractRef = authorInput.contract().contract();
+        var contract = TaskContractArtifactWriter.mapper().readValue(verifiedPath(root, contractRef).toFile(),
+                dev.dual.core.contract.TaskContract.class);
+        var result = new LinkedHashMap<String, Object>();
+        result.put("schema_version", 1);
+        result.put("stage", stage.purpose);
+        result.put("author_occurrence", author.nodeInstanceId());
+        result.put("reviewer_occurrence", reviewer.nodeInstanceId());
+        result.put("decision_occurrence", decision.nodeInstanceId());
+        result.put("author_artifact", author.sidecar());
+        result.put("review_artifact", reviewer.sidecar());
+        result.put("review_decision", stage.ready);
+        result.put("contract", Map.of("phase", contract.phase().name(), "epoch", contract.epoch(),
+                "ref", contractRef.ref(), "sha256", contractRef.sha256()));
+        result.put("checks", List.of(Map.of("rule_id", "review.subject.and.route", "rule_version", "2", "result", "PASSED",
+                "input_refs", List.of(author.sidecar(), reviewer.sidecar()))));
+        return Map.copyOf(result);
     }
 
     private boolean routedAfter(Event origin, NodeInstanceDocument source, String outcome) throws IOException {
@@ -268,7 +343,7 @@ final class AuthoredStageLineageResolver {
         var projection = new LinkedHashMap<String, Object>();
         projection.put("candidate", candidate);
         projection.put("contract", inputs.contract());
-        projection.put("approvedDesign", inputs.approvedDesign());
+        projection.put("reviewedDesign", inputs.reviewedDesign());
         projection.put("activeObligations", inputs.obligations());
         projection.put("revisionResponses", candidateDocument.get("revision_responses"));
         projection.put("plannedFiles", candidateDocument.get("design"));
@@ -291,9 +366,9 @@ final class AuthoredStageLineageResolver {
             return body.toString();
         }
         if (target.equals("implement.claude_implement")) {
-            var approved = approval(Stage.PLAN);
+            var approved = reviewed(Stage.PLAN, node(context.instance().nodeInstanceId()));
             var inputs = verifiedCandidateSnapshot(root, ws, approved.candidate());
-            return inputs.render(root) + "\n## Approved implementation plan\n\n"
+            return inputs.render(root) + "\n## Reviewed implementation plan\n\n"
                     + Files.readString(verifiedPath(root, approved.candidate().sidecar()));
         }
         return "";
@@ -334,21 +409,30 @@ final class AuthoredStageLineageResolver {
         var added = new ArrayList<Obligation>();
         if (source.kind() == NodeKind.GATE) {
             require(stage.purpose.equals(text(definition.node(source.nodeDefinitionId()).config().get("gate_purpose"))), "AUTHORED_REVISION_STAGE_MISMATCH");
-            require(iteration.triggerAction().equals("revise"), "AUTHORED_REVISION_ACTION_INVALID");
+            require(Set.of("revise", "approved").contains(iteration.triggerAction()), "AUTHORED_REVISION_ACTION_INVALID");
             var event = gateEvent(source.nodeInstanceId());
             var gate = gate(event);
             require(source.status() == NodeStatus.COMPLETED && gate.document().status().equals("resolved")
-                    && text(gate.document().result().get("human_action")).equals("revise"), "AUTHORED_REVISION_GATE_UNRESOLVED");
+                    && text(gate.document().result().get("human_action")).equals(iteration.triggerAction()), "AUTHORED_REVISION_GATE_UNRESOLVED");
             var note = text(gate.document().result().get("note"));
             require(!note.isBlank(), "AUTHORED_REVISION_NOTE_MISSING");
-            edge(source.nodeDefinitionId(), "revise", stage.author);
+            edge(source.nodeDefinitionId(), iteration.triggerAction(), stage.author);
             parent = gateSubject(stage, gate); trigger = gate.reference();
             if (gate.source().nodeDefinitionId().equals(stage.decision)) {
                 addReview(added, unique(gate.node().inputRefs(), stage.reviewer, "agent_output_contract"));
             }
             added.add(new Obligation("sha256:" + trigger.sha256() + "#human-note:0", trigger, note));
+        } else if (stage == Stage.PLAN && iteration.triggerAction().equals("revise_readiness")) {
+            require(source.status() == NodeStatus.FAILED, "AUTHORED_REPAIR_FAILURE_MISSING");
+            var repair = JSON.valueToTree(source.result().get("readiness_repair"));
+            require(repair.path("action").asText().equals("revise_readiness") && !repair.path("note").asText().isBlank(),
+                    "AUTHORED_REPAIR_DECISION_MISSING");
+            parent = JSON.treeToValue(repair.path("parent_candidate"), Candidate.class);
+            require(parent.equals(reviewed(Stage.PLAN, source).candidate()), "AUTHORED_REPAIR_PARENT_MISMATCH");
+            trigger = reference(root, prefix + "nodes/" + source.nodeInstanceId() + ".json");
+            added.add(new Obligation("sha256:" + trigger.sha256() + "#human-note:0", trigger, repair.path("note").asText()));
         } else {
-            require(stage == Stage.PLAN && source.nodeDefinitionId().equals(stage.decision)
+            require(source.nodeDefinitionId().equals(stage.decision)
                     && iteration.triggerAction().equals("NEEDS_REVISION"), "AUTHORED_REVISION_TRIGGER_INVALID");
             completed(source);
             require(text(source.result().get("decision")).equals("NEEDS_REVISION"), "AUTHORED_REVISION_DECISION_MISMATCH");
@@ -359,7 +443,7 @@ final class AuthoredStageLineageResolver {
             require(parent.equals(verifiedCandidateSnapshot(root, ws, review).subject()), "AUTHORED_REVIEW_INPUT_MISMATCH");
             addReview(added, review);
         }
-        require(node(parent.nodeInstanceId()).iterationId().equals(iteration.parentIterationId())
+        require((iteration.triggerAction().equals("revise_readiness") || node(parent.nodeInstanceId()).iterationId().equals(iteration.parentIterationId()))
                 && source.iterationId().equals(iteration.parentIterationId()), "AUTHORED_REVISION_PARENT_MISMATCH");
         var previous = baseline(stage, node(parent.nodeInstanceId()), visiting);
         var all = new LinkedHashMap<String, Obligation>();
@@ -395,7 +479,7 @@ final class AuthoredStageLineageResolver {
             var document = AgentOutputContractDocument.read(path, JSON).orElseThrow(() -> new IOException("AUTHORED_SIDECAR_INVALID"));
             if (!document.nodeId().equals(expectedNode) || !document.sourceArtifactType().equals(type)) continue;
             require(document.hasRequiredTypedPayload(), "AUTHORED_TYPED_PAYLOAD_MISSING");
-            var violation = AgentOutputLineageVerifier.violation(root, ws, path, document);
+            var violation = AgentOutputLineageVerifier.violation(ledger, root, ws, path, document);
             require(violation.isEmpty(), "AUTHORED_CANDIDATE_LINEAGE_INVALID: " + violation.orElse(""));
             matches.put(ref, new Candidate(reference(root, ref), document.nodeInstanceId(), document.nodeId(), document.runId(), type));
         }

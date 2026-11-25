@@ -1,0 +1,11 @@
+{
+  "output/lifecycle-batch-05-20261008/scope-c/rule-candidates.json": "8ed5fb575d51479496c53e018c4bc1858f454176415e62a99d5e9c06c78a5f9e",
+  "output/lifecycle-batch-05-20261008/scope-c/before-sha256.json": "77b738d571c8dc97dbc6bd546f30eb25d92f39e9e3c56cb3da47eace74fb36bb",
+  "output/lifecycle-batch-05-20261008/scope-c/cc-review-prompt.md": "8ff76eb4f7ddbd628df74ba8cbc0ae38a56d5d2962ffef4313dd23d53daf4854",
+  "output/lifecycle-batch-05-20261008/scope-c/before-documents.json": "10b2040e2e6b69359c67fac18d7a10124c121af63d004bf054ec9842f12922c1",
+  "output/lifecycle-batch-05-20261008/scope-c/documentation.patch": "3a848f9a4954218b122f7978c20fc79f1d15f7cfbca5c7c98f2ff7509d678d59",
+  "output/lifecycle-batch-05-20261008/scope-c/review-disposition.md": "105ec3588c9a4395c16824307cd9d717552ed39eafadb85ad8d87ff16b115288",
+  "output/lifecycle-batch-05-20261008/scope-c/verification.json": "618f67a778da4c2cc96d69f53a77ec660b9a4ab7c9eee41f5bda163cc039df04",
+  "output/lifecycle-batch-05-20261008/scope-c/design.md": "fd56d8828a9c21e25bbe44ae298acd1ede8f99e1b86afa58a299951b5d3dfb23",
+  "output/lifecycle-batch-05-20261008/scope-c/source-index.json": "19e7098871eb5206344e3eb5f19ddecc948952087d60e5e7142f48cd9154a619"
+}

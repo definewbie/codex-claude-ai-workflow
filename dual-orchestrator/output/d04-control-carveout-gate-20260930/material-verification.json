@@ -1,0 +1,18 @@
+{
+  "status": "PASS_MATERIAL_CHECK_ONLY",
+  "gateVerdict": "FAIL",
+  "unchangedPriorFiles": 837,
+  "approvedManifestUnchanged": true,
+  "sourceIdentityFilesUnchanged": 9,
+  "codexNotRun": true,
+  "continueNotCreated": true,
+  "gitDiffCheck": "PASS",
+  "newReportLinks": "PASS",
+  "editedDocumentWhitespace": "PASS",
+  "documentHashes": {
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "5d53daaa2e6514e9bab0b63c38689b45ee81f27555a87d9c72d110d78cf5fb04",
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "1343f101cb3af39a70d2a9cd801d6d41e35b23d75b521ef362e1ed2811ed5c01",
+    "docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "3fe23129a3600677628c5f4315b38c77597d6ed15fec6693d316171b7e5567f4"
+  },
+  "limitation": "Author material check, not independent review or capability PASS"
+}

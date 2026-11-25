@@ -30,6 +30,10 @@ final class TaskContractArtifactWriter {
 
     static void writeMarkdown(TaskContract contract, Path artifactsDir) throws IOException {
         Files.createDirectories(artifactsDir);
+        Files.writeString(artifactsDir.resolve("task-contract.md"), renderMarkdown(contract), StandardCharsets.UTF_8);
+    }
+
+    static String renderMarkdown(TaskContract contract) {
         var md = new StringBuilder();
         md.append("# Task Contract\n\n");
 
@@ -55,17 +59,19 @@ final class TaskContractArtifactWriter {
 
         md.append("## Acceptance Criteria\n\n");
         for (var criterion : contract.acceptanceCriteria()) {
-            md.append("- [ ] ").append(criterion).append("\n");
+            md.append("- [ ] ").append(criterion.id()).append(": ").append(criterion.text()).append("\n");
         }
         md.append("\n");
 
-        appendListSection(md, "Test Requirements", contract.testRequirements());
+        appendListSection(md, "Test Requirements", contract.testRequirements().stream().map(c -> c.id() + ": " + c.text()).toList());
         appendListSection(md, "Constraints", contract.constraints());
         appendListSection(md, "Non-Goals", contract.nonGoals());
         appendListSection(md, "Risk Areas", contract.riskAreas());
         appendListSection(md, "Evidence References", contract.evidenceRefs());
         appendListSection(md, "Ambiguity Notes", contract.ambiguityNotes());
         appendListSection(md, "Human Questions", contract.humanQuestions());
+
+        appendListSection(md, "Nonessential Operation Declarations", nonessentialOperationDescriptions(contract));
 
         if (contract.source() != null) {
             md.append("## Source\n\n");
@@ -76,8 +82,15 @@ final class TaskContractArtifactWriter {
             md.append("\n");
         }
 
-        var mdPath = artifactsDir.resolve("task-contract.md");
-        Files.writeString(mdPath, md.toString(), StandardCharsets.UTF_8);
+        return md.toString();
+    }
+
+    static java.util.List<String> nonessentialOperationDescriptions(TaskContract contract) {
+        return contract.nonessentialOperationDeclarations().isEmpty() ? java.util.List.of("None")
+                : contract.nonessentialOperationDeclarations().stream().map(d -> d.id() + ": " + d.rationale()
+                    + "; node=" + d.nodeDefinitionId() + "; kind=" + d.operationKind()
+                    + "; criteria=" + d.criterionIds() + "; parameters_sha256=" + d.operationParametersSha256()
+                    + "; source=" + d.nodeContractRef() + "; rule=" + d.ruleIdentity()).toList();
     }
 
     static ObjectMapper mapper() {

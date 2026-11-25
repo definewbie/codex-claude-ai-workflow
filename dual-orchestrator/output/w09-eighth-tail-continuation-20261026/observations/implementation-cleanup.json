@@ -1,0 +1,17 @@
+{
+  "successful_complete_table": true,
+  "exit": 0,
+  "stderr": "",
+  "matching_rows": [],
+  "known_step_parent_pids": [
+    34825,
+    34880,
+    34971,
+    34973
+  ],
+  "successful_observation_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/operations/stop-cleanup-20261026/process-table.result.json",
+  "successful_observation_sha256": "522e48cd3f4acb0be5a14db7871307873ec10bf58d4d474601a34dc62439b783",
+  "raw_table_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/operations/stop-cleanup-20261026/process-table.private.log",
+  "raw_table_sha256": "cea0edccc7b0ee84f0f7bba55982e234e626a6f110221393ac3f187be709f0b1",
+  "scope": "Historical successful full-table absence observation only; no claim of PID permanence or arbitrary subtree stop"
+}

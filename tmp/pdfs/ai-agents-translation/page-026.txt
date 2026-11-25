@@ -1,0 +1,37 @@
+to make your agents work, since I’ll guide you through those steps in later
+chapters. However, I expect that you’re comfortable reading and modifying
+Python code, and that you’re familiar with core ML and deep learning
+concepts such as backpropagation and training loops. While you don’t need
+detailed knowledge of backpropagation, it helps you to understand how
+models learn by adjusting parameters based on training signals. Familiarity
+with linear algebra and calculus is helpful, since they underpin much of
+modern deep learning and optimization. It’s also useful if you understand
+how transformers process sequences and have at least a basic sense of how
+embeddings work or vector stores support retrieval.
+
+If you haven’t touched these topics in a while, DON’T PANIC! Just like
+The Hitchhiker’s Guide to the Galaxy advises not to panic, I’ll say the same
+here in my guide. That said, every concept will be grounded in code, so
+your knowledge becomes usable again without requiring you to dust off old
+textbooks. And no, before you ask, the answer to everything about AI
+agents is not 42, but I promise you’ll get your answers throughout this
+book.
+
+
+            CODE FOR THE BOOK
+
+      All code examples from this book are available in the accompanying GitHub repository.
+     The repository is organized by chapter, so you can easily find the code that belongs to
+      each section.
+
+
+If you’d like a closer look at transformers across different domains and how
+embeddings are used for text and other modalities, my book Transformers:
+The Definitive Guide (O’Reilly) can serve as a complementary source. It
+also explains the fundamentals of reinforcement learning, which will help
+you build a stronger foundation for understanding the advanced agent
+concepts introduced later in this book.
+
+Therefore, this book is written for readers who want to go beyond curiosity,
+which is why understanding these fundamentals is important. This includes
+data scientists, software and ML engineers who are building real systems in

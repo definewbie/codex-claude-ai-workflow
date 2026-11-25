@@ -1,0 +1,27 @@
+{
+  "verifiedAt": "2026-09-28T14:26:30.833274+00:00",
+  "status": "PASS_MATERIAL_VERIFICATION",
+  "changedDocuments": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "unrelatedFilesUnchanged": 1316,
+  "candidateAccessFiles": 142,
+  "originalAccessCandidates": 116,
+  "preconditionSites": 200,
+  "materialChecks": 17,
+  "storagePrimitiveProbe": "PASS_LOCAL_ONLY",
+  "historicalEvidenceVerified": {
+    "d04-claude-native-20260928": 9,
+    "d04-retest-preparation-20260928": 8
+  },
+  "newProviderCalls": 0,
+  "newAgents": 0,
+  "productChanges": 0,
+  "commits": 0,
+  "gitDiffCheck": "PASS",
+  "independentReview": "NOT_RUN_USER_HANDOFF",
+  "productReadiness": "NOT_IMPLEMENTATION_READY",
+  "d04": "TECHNICAL_GAP_REMAINS"
+}

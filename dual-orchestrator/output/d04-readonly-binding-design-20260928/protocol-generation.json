@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "app-server",
+    "generate-json-schema",
+    "--experimental",
+    "--out",
+    "/private/tmp/dual-d04-schema-20260928"
+  ],
+  "exitCode": 0,
+  "stderr": "WARNING: proceeding, even though we could not create PATH aliases: Operation not permitted (os error 1)",
+  "binarySha256": "b973d440acac501fd2594a43e7ca9ce41e0a65b9dfb28d0d7a7837c99e1261e3",
+  "providerInvoked": false,
+  "sessionCreated": false,
+  "interpretation": "Offline protocol export only. Startup PATH-alias setup reported denied; no escalation requested. No runtime enforcement claimed.",
+  "retainedSchemaFiles": {
+    "ThreadStartParams": "25f490368ec6df52a2a3b82a5469d2413307eb93439121b309f415b5648eee7a",
+    "ThreadStartResponse": "a338467af5fc271ace917f9d1262405642c3df3b66116aa105343db86cc9a76d",
+    "TurnStartParams": "b36fb37326b1cf69f75c8b306f1f886d53a57c4b1b985e08e298e2407ea2ad02",
+    "TurnStartResponse": "6fc49c3e5d0ce11a3a109ae194619b04d6e3ff98fa29bac683fdb754608958be",
+    "ConfigReadResponse": "96a04a3f7fff2dc7fafc9f831e8bcd422e021d697dd2c14c801f098a9f21396d",
+    "FsReadFileParams": "74b325108195fe955e6ffcb6032e9380d3bfdee8aed7d115f5f1e4b127c5d706",
+    "FsReadDirectoryParams": "c4ca6cdc129d70375fe638c723c1b1bb07a9716101525970cf77bf7560fec657"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "status": "PASS_MATERIAL_IDENTITIES_AND_OFFLINE_CHECKS",
+  "files": 66,
+  "manifest_sha256": "cbb8ea36941395de1c6ee6d2e535a066b62b87fb6d9fcd52f001fb0614e1915f",
+  "python_parse": "PASS",
+  "relative_links": "PASS",
+  "observer_launch_inputs": "PASS",
+  "initial_ledger": "21_UNCHANGED",
+  "model_runs": 0,
+  "authorization": false,
+  "cc_required": true,
+  "selected_client_config_equivalence": "NOT_PROVEN",
+  "runtime_compatibility": "NOT_RUN"
+}

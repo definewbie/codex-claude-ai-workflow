@@ -1,0 +1,21 @@
+{
+  "status": "LOW_DISPOSITION_DESIGN_ONLY_NOT_RUN",
+  "files": {
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "f8e23688bf9ab661ef48b9212147a1b1dc3441a0f06d5df51e4b523169ae0953",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "38926c63c50988275fede837f103ebac339458e717eae96f6af3870ae2532e6b",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "07dc18733ccc677343becf02c4720698da2d1c51449e01b1f51cb7d58903a761",
+    "dual-orchestrator/docs/testing/20260929-d04-three-boundary-verification-checklist.zh-CN.md": "657b9bc4009107232ff8a3514bc967d6887854d9904f7dedf5249a45fb29637a",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/baseline.json": "305d3a468d8e9da203337eaf77a41353cb3c35409acc889daeda56673cc90f50",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/before/20260927-dual-lifecycle-worklist.zh-CN.md": "a95fe5e9f5068e5439be84375d01c47d814f77cddb7b0833b9fdd1bc9d14f7ae",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/before/20260928-dual-lifecycle-detailed-design.zh-CN.md": "4e6853ebab408ba7d84a8c0162685b16a989f4879a28fae59f987fcf5051ffa4",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/before/20260929-d04-three-boundary-verification-checklist.zh-CN.md": "234068bc46a71e0b4f640393fd36dedb934dec45bfc28f0150e1be1de649fd5c",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "da4193fb9d37f07fd6ecc48ccbffb84dc5e1fd6d7e9dd849c95ddfc1792b4720",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/cc-review-received.txt": "a558bb9950103d81268e20e4c67a4ea211e25098d7f3ab204289954390389f92",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/documentation.diff": "530c1286b414943775bc561fb908793ff4892c919812beb5b8ef67f961cdc367",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/material-verification.json": "1dc03f942efed9ffff81f49d95faf35566a61ba67ac14cc8e1e90981cce517c9",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/original-cc-prompt.snapshot.txt": "af25b55d7b71da5f4f15b17728b3875024131536fdf7c534cdee1e6199dcc625",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/prior-manifest-resolution.json": "d9b4b53e47094baa57fe71b118a5253a945d7786233b73cc7c1831b03723ee6e",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/review-disposition.md": "35153b144759b3c413d5aec6d81d1b3aa83fc6f6c8ec5fb5072684ab88a93403",
+    "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/source-checks.json": "f3c6412d65f5a20a0b70792fb741f687033567b16b8fe95df98c90546979b7cf"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "status": "PREPARED_NOT_IMPLEMENTED",
+  "source_input_count": 870,
+  "source_or_test_changes": 0,
+  "expected_registration_changes": [
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md"
+  ],
+  "missing_links": [],
+  "tests_run": 0,
+  "native_provider_runs": 0,
+  "extra_agents": 0,
+  "real_gate": "NO_GO",
+  "self_check_only": true
+}

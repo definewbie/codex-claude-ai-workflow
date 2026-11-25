@@ -1,0 +1,41 @@
+{
+  "cases": [
+    {
+      "case": "w09-real-gate-20261010",
+      "checked_files": 116,
+      "unchanged": true,
+      "excluded_mutable_external_records": [
+        {
+          "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+          "reason": "Mutable primary worklist intentionally updated by subsequent batches; external to archived case bundle. Historical SHA remains recorded, not overwritten."
+        }
+      ]
+    },
+    {
+      "case": "w09-fresh-second-gate-20261010",
+      "checked_files": 153,
+      "unchanged": true,
+      "excluded_mutable_external_records": []
+    },
+    {
+      "case": "w09-fresh-third-gate-20261010",
+      "checked_files": 487,
+      "unchanged": true,
+      "excluded_mutable_external_records": []
+    },
+    {
+      "case": "w09-fresh-fourth-gate-20261011",
+      "checked_files": 738,
+      "unchanged": true,
+      "excluded_mutable_external_records": []
+    },
+    {
+      "case": "w09-current-transcript-forward-fix-20261011",
+      "checked_files": 398,
+      "unchanged": true,
+      "excluded_mutable_external_records": []
+    }
+  ],
+  "read_only": true,
+  "no_old_case_or_run_facts_changed": true
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-contract-compile-007",
+  "nodeDefinitionId" : "contract.compile",
+  "kind" : "TASK",
+  "handlerType" : "contract.compile",
+  "status" : "COMPLETED",
+  "stageId" : "stage-contract",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1789315433868/binding.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.contract.json" ],
+  "inputTransition" : {
+    "required" : true,
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/contract-resolution.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/contract-resolution.md" ],
+  "result" : {
+    "contract_id" : "tc-ws-20260913T160342Z-TVXE-v1",
+    "contract_status" : "READY_FOR_REVIEW",
+    "contract_version" : 1,
+    "task_contract_sha256" : "2c46a58aeecdd71d96f67809ac98e775bbbf9f7289dfd7c8803f26a69af4bd67",
+    "contract_resolution_sha256" : "b019a3f92b8ddefcc80b9e60d6d354ca49dcdabca140f89b7c97f21a20cec6c0",
+    "compilation_pass" : 1,
+    "artifacts" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/contract-resolution.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/contract-resolution.md" ],
+    "generated_at" : "2026-09-13T16:04:06.318339Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315446264-3cbd0817",
+  "startedAt" : "2026-09-13T16:04:06.279935Z",
+  "finishedAt" : "2026-09-13T16:04:06.330415Z"
+}

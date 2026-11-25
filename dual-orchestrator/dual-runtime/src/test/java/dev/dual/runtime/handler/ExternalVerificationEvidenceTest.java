@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ExternalVerificationEvidenceTest {
     @TempDir Path temp;
     final ObjectMapper json = new ObjectMapper().findAndRegisterModules();
-    final WorkflowFileLedger ledger = new WorkflowFileLedger();
+    final WorkflowFileLedger ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
 
     @Test void realRuntimePublishesSelfTestAndAcceptanceSidecarsWithExactMaterialRefs() throws Exception {
         for (var queued : List.of(false, true)) for (var mode : List.of("valid", "summary", "suffix")) {
@@ -26,7 +26,7 @@ class ExternalVerificationEvidenceTest {
             GitTrackedPathInventory.command(root, "add", ".");
             GitTrackedPathInventory.command(root, "-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-m", "baseline");
             var fixture = new AuthoredStageSequenceTest.Fixture(root, "src/Main.java",
-                    AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, "ws-test");
+                    AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, "ws-test", null, ledger, null, true);
             var prior = fixture.before("implement.claude_self_test_report");
             var paths = new WorkstreamPaths(root, new dev.dual.core.id.DualId("ws-test"));
             var oldDefinition = ledger.loadDefinition(paths);
@@ -35,14 +35,14 @@ class ExternalVerificationEvidenceTest {
                     .node("context.acceptance_codex_verifier_review");
             nodes.add(acceptanceContext);
             nodes.add(new NodeDefinition("repair", NodeKind.GATE, "human.review", Map.of("gate_purpose", "implementation_repair", "allowed_actions", List.of("submit_evidence"))));
-            nodes.add(new NodeDefinition("acceptance.codex_verifier_review", NodeKind.TASK, "acpx.agent_run", Map.of("expected_artifact", "acceptance_review", "requires_approved_task_contract", true)));
+            nodes.add(new NodeDefinition("acceptance.codex_verifier_review", NodeKind.TASK, "acpx.agent_run", Map.of("expected_artifact", "acceptance_review", "required_contract_phase", "EXECUTION")));
             var edges = new ArrayList<>(oldDefinition.edges());
             edges.add(new EdgeDefinition("implement.claude_self_test_report", "incomplete", "repair"));
             edges.add(new EdgeDefinition("repair", "submit_evidence", "implement.claude_self_test_report"));
             edges.add(new EdgeDefinition("implement.claude_self_test_report", "completed", acceptanceContext.id()));
             edges.add(new EdgeDefinition(acceptanceContext.id(), "completed", "acceptance.codex_verifier_review"));
             var definition = new WorkflowDefinition(oldDefinition.workflowId(), oldDefinition.version(), oldDefinition.entryNodeId(), nodes, edges);
-            new AtomicJsonWriter().write(paths.workflowDefinitionJson(), new WorkflowDefinitionDocument(1, definition.workflowId(), definition.version(), definition.entryNodeId(), nodes, edges));
+            new AtomicJsonWriter().write(paths.workflowDefinitionJson(), new WorkflowDefinitionDocument(2, definition.workflowId(), definition.version(), definition.entryNodeId(), nodes, edges));
             ledger.completeAndRoute(paths, definition, prior.instance().nodeInstanceId(), NodeStatus.COMPLETED, "incomplete", List.of(), Map.of());
             var preparation = ExternalVerificationEvidence.prepare(ledger, paths);
             ExternalVerificationEvidence.submit(ledger, paths, preparation, "runtime", List.of(report()), declaration(), "verify");
@@ -53,10 +53,10 @@ class ExternalVerificationEvidenceTest {
                 public NodeResult execute(TaskContext context) throws Exception {
                     var nodeId = context.instance().nodeInstanceId();
                     var runId = "run-" + nodeId;
-                    if (AuthoredStageLineageResolver.participates(context.definition().id())) AuthoredInputFixture.record(context, runId);
-                    var refs = EvidenceCollection.requiredReferences(context.workspaceRoot(), context.workstreamId(), nodeId);
+                    var run = OfflineAgentRun.start(context, runId);
+                    var refs = EvidenceCollection.requiredReferences(dev.dual.runtime.RuntimeTestLedger.ledger(), context.workspaceRoot(), context.workstreamId(), nodeId);
                     allRefs.add(refs);
-                    assertTrue(EvidenceCollection.promptInstruction(context.workspaceRoot(), context.workstreamId(), nodeId)
+                    assertTrue(EvidenceCollection.promptInstruction(dev.dual.runtime.RuntimeTestLedger.ledger(), context.workspaceRoot(), context.workstreamId(), nodeId)
                             .orElseThrow().contains(refs.getLast()));
                     var decision = context.definition().id().equals("implement.claude_self_test_report") ? "SELF_TEST_COMPLETE" : "ACCEPT";
                     var prompt = AgentResultPromptContract.render(context.workstreamId(), runId, context.definition().id(), decision, Set.of(decision));
@@ -65,10 +65,18 @@ class ExternalVerificationEvidenceTest {
                     if (mode.equals("summary")) evidence.add("all external checks passed");
                     else if (mode.equals("suffix")) refs.forEach(ref -> evidence.add(ref + ".old"));
                     else refs.forEach(evidence::add);
+                    // Approved operator evidence: references the submitted manifest and copied material;
+                    // no synthetic tool observation or measured process exit is produced.
+                    var material = new dev.dual.core.contract.TaskContract.Reference(refs.getLast(),
+                            TaskContractArtifactWriter.sha256(context.workspaceRoot().resolve(refs.getLast())));
+                    ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.get("result")).set("verification_checks", json.valueToTree(
+                            run.governance.qualifiedTaskContract().orElseThrow().verificationBindings().stream().map(binding ->
+                                    new AgentResultEnvelope.VerificationCheck(binding.criterionId(), "Review the submitted operator report", refs.getFirst(),
+                                            List.<String>of(), List.of(material))).toList()));
                     var output = paths.workstreamDir().resolve("runs/" + runId + "/outputs/result.json");
                     Files.createDirectories(output.getParent()); json.writeValue(output.toFile(), envelope);
                     sidecars.add(paths.workspaceRoot().relativize(AgentOutputContractSidecar.pathFor(output)).toString());
-                    return NodeResult.completed("completed", List.of(paths.workspaceRoot().relativize(output).toString()), Map.of("run_id", runId));
+                    return run.exited(List.of(paths.workspaceRoot().relativize(output).toString()));
                 }
             };
             var registry = new HandlerRegistry(List.of(handler, new ContextBuildPackageHandler()), List.of(), List.of());
@@ -92,6 +100,14 @@ class ExternalVerificationEvidenceTest {
             for (var ref : sidecars) {
                 var document = json.readTree(paths.workspaceRoot().resolve(ref).toFile());
                 assertEquals(allRefs.getFirst(), json.convertValue(document.path("evidence"), List.class));
+                var typed = AgentOutputContractDocument.read(paths.workspaceRoot().resolve(ref), json).orElseThrow();
+                VerificationEvidence.verifyPublished(ledger, root, "ws-test", typed);
+                var material = root.resolve(allRefs.getFirst().getLast());
+                var original = Files.readAllBytes(material);
+                Files.writeString(material, "modified operator report");
+                assertThrows(java.io.IOException.class, () -> VerificationEvidence.verifyPublished(ledger, root, "ws-test", typed));
+                Files.write(material, original);
+                VerificationEvidence.verifyPublished(ledger, root, "ws-test", typed);
             }
         }
     }
@@ -106,34 +122,34 @@ class ExternalVerificationEvidenceTest {
         var submission = ExternalVerificationEvidence.submit(ledger, paths, preparation, "request-1", List.of(original), declaration, "Verify this evidence");
         assertEquals(WorkflowStatus.RUNNING, ledger.loadCurrent(paths).status());
         var collection = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
-        assertEquals("collect", collection.nodeDefinitionId());
+        assertEquals("implement.claude_self_test_report", collection.nodeDefinitionId());
         var events = Files.readAllBytes(paths.eventsJsonl());
-        assertEquals(submission, ExternalVerificationEvidence.submit(new WorkflowFileLedger(), paths, preparation,
+        assertEquals(submission, ExternalVerificationEvidence.submit(dev.dual.runtime.RuntimeTestLedger.ledger(), paths, preparation,
                 "request-1", List.of(original), declaration, "Verify this evidence"));
         assertArrayEquals(events, Files.readAllBytes(paths.eventsJsonl()), "idempotent submission must not route twice");
         Files.delete(original);
-        var refs = EvidenceCollection.requiredReferences(paths.workspaceRoot(), paths.workstreamId().value(), collection.nodeInstanceId());
+        var refs = EvidenceCollection.requiredReferences(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), collection.nodeInstanceId());
         assertEquals(2, refs.size());
         assertEquals(submission.manifestRef(), refs.getFirst());
         assertEquals("device check passed", Files.readString(paths.workspaceRoot().resolve(refs.getLast())));
-        assertTrue(EvidenceCollection.promptInstruction(paths.workspaceRoot(), paths.workstreamId().value(), collection.nodeInstanceId())
+        assertTrue(EvidenceCollection.promptInstruction(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), collection.nodeInstanceId())
                 .orElseThrow().contains(refs.getLast()));
         var calls = new AtomicInteger();
-        var result = EvidenceCollection.execute(paths.workspaceRoot(), paths.workstreamId().value(), collection, () -> {
+        var result = EvidenceCollection.execute(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), collection, () -> {
             calls.incrementAndGet();
-            EvidenceCollection.verifyResult(paths.workspaceRoot(), paths.workstreamId().value(), collection.nodeInstanceId(), self(refs));
+            EvidenceCollection.verifyResult(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), collection.nodeInstanceId(), self(refs));
             return NodeResult.completed("completed", refs, Map.of());
         });
         assertEquals(1, calls.get());
         ledger.completeAndRoute(paths, ledger.loadDefinition(paths), collection.nodeInstanceId(), result.status(), result.outcome(), result.outputRefs(), result.result());
-        var acceptance = new WorkflowFileLedger().loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        var acceptance = dev.dual.runtime.RuntimeTestLedger.ledger().loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
         assertEquals("verify", acceptance.nodeDefinitionId());
-        assertEquals(refs, EvidenceCollection.requiredReferences(paths.workspaceRoot(), paths.workstreamId().value(), acceptance.nodeInstanceId()));
-        EvidenceCollection.verifyResult(paths.workspaceRoot(), paths.workstreamId().value(), acceptance.nodeInstanceId(), acceptance(refs));
-        assertThrows(java.io.IOException.class, () -> EvidenceCollection.verifyResult(paths.workspaceRoot(), paths.workstreamId().value(),
+        assertEquals(refs, EvidenceCollection.requiredReferences(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), acceptance.nodeInstanceId()));
+        EvidenceCollection.verifyResult(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), acceptance.nodeInstanceId(), acceptance(refs));
+        assertThrows(java.io.IOException.class, () -> EvidenceCollection.verifyResult(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(),
                 acceptance.nodeInstanceId(), acceptance(List.of("all checks passed"))));
         Files.writeString(paths.workspaceRoot().resolve(refs.getLast()), "tampered");
-        assertEquals(EvidenceCollection.FAILURE, EvidenceCollection.execute(paths.workspaceRoot(), paths.workstreamId().value(), acceptance,
+        assertEquals(EvidenceCollection.FAILURE, EvidenceCollection.execute(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), acceptance,
                 () -> { fail("acceptance must not run on tampered materials"); return null; }).outcome());
     }
 
@@ -162,12 +178,12 @@ class ExternalVerificationEvidenceTest {
         var preparation = ExternalVerificationEvidence.prepare(ledger, paths);
         ExternalVerificationEvidence.submit(ledger, paths, preparation, "r", List.of(report()), declaration(), "note");
         var id = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
-        var refs = EvidenceCollection.requiredReferences(paths.workspaceRoot(), paths.workstreamId().value(), id);
+        var refs = EvidenceCollection.requiredReferences(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), id);
         for (var evidence : List.of(List.of("summary only"), List.of(String.join(" ", refs)), refs.stream().map(ref -> ref + ".old").toList()))
-            assertThrows(java.io.IOException.class, () -> EvidenceCollection.verifyResult(paths.workspaceRoot(), paths.workstreamId().value(), id, self(evidence)));
-        EvidenceCollection.verifyResult(paths.workspaceRoot(), paths.workstreamId().value(), id, self(refs));
+            assertThrows(java.io.IOException.class, () -> EvidenceCollection.verifyResult(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), id, self(evidence)));
+        EvidenceCollection.verifyResult(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), id, self(refs));
         Files.writeString(paths.workspaceRoot().resolve("source.txt"), "late edit");
-        assertThrows(java.io.IOException.class, () -> EvidenceCollection.verifyResult(paths.workspaceRoot(), paths.workstreamId().value(), id, self(refs)));
+        assertThrows(java.io.IOException.class, () -> EvidenceCollection.verifyResult(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), id, self(refs)));
     }
 
     @Test void rawActionMissingNoteOldPreparationSymlinkAndLimitsCannotResolveGate() throws Exception {
@@ -190,31 +206,25 @@ class ExternalVerificationEvidenceTest {
         assertThrows(java.io.IOException.class, () -> ExternalVerificationEvidence.submit(ledger, paths, preparation, "r", List.of(report()), declaration(), "note"));
     }
 
-    @Test void partialGateWritesCannotBeRetriedAsANewDecision() throws Exception {
-        for (var afterNode : List.of(false, true)) {
-            var paths = waiting("partial-" + afterNode);
+    @Test void submissionInterruptionReplaysTheFixedMaterialWithoutANewDecision() throws Exception {
+        for (var point : List.of("before_manifest", "after_replace")) {
+            var paths = waiting("partial-" + point);
             var preparation = ExternalVerificationEvidence.prepare(ledger, paths);
             var current = ledger.loadCurrent(paths);
-            var gateId = current.activeNodeInstanceIds().getFirst();
-            var material = report(); var declaration = declaration();
-            WorkflowFileLedger failing = ledger;
-            if (afterNode) failing = new WorkflowFileLedger(new dev.dual.core.flow.FlowOrchestrationKernel() {
-                public dev.dual.core.flow.FlowValidationResult validate(WorkflowDefinition definition) {
-                    return new dev.dual.core.flow.BuiltInFlowOrchestrationKernel().validate(definition);
-                }
-                public dev.dual.core.flow.FlowAdvanceResult advance(WorkflowDefinition definition,
-                        dev.dual.core.flow.FlowExecutionSnapshot snapshot, dev.dual.core.flow.FlowSignal signal) {
-                    throw new IllegalStateException("stop between node decision and route");
-                }
-            });
-            else Files.createDirectory(paths.nodeJson(gateId).resolveSibling(gateId + ".json.tmp"));
-            var broken = failing;
-            assertThrows(Exception.class, () -> ExternalVerificationEvidence.submit(broken, paths, preparation, "r", List.of(material), declaration, "note"));
-            assertEquals(current, ledger.loadCurrent(paths));
-            var gate = json.readTree(paths.gateJson("gate-" + gateId).toFile());
-            assertEquals("resolved", gate.path("status").asText());
-            assertThrows(Exception.class, () -> ExternalVerificationEvidence.submit(new WorkflowFileLedger(), paths, preparation, "r", List.of(material), declaration, "note"));
-            assertEquals(current, ledger.loadCurrent(paths));
+            var material = report(); var declared = declaration();
+            assertThrows(java.io.IOException.class, () -> ExternalVerificationEvidence.submit(InterruptedTestLedger.at(point),
+                    paths, preparation, "r", List.of(material), declared, "note"));
+            var cold = dev.dual.runtime.RuntimeTestLedger.ledger();
+            if (point.equals("before_manifest")) assertEquals(current, cold.loadCurrent(paths));
+            else {
+                assertThrows(java.io.IOException.class, () -> cold.loadCurrent(paths));
+                try (var session = cold.writeSession(paths, "finish fixed evidence submission", "recover")) { session.commit(); }
+            }
+            var submitted = ExternalVerificationEvidence.submit(cold, paths, preparation, "r", List.of(material), declared, "note");
+            var events = Files.readAllBytes(paths.eventsJsonl());
+            assertEquals(submitted, ExternalVerificationEvidence.submit(cold, paths, preparation, "r", List.of(material), declared, "note"));
+            assertArrayEquals(events, Files.readAllBytes(paths.eventsJsonl()));
+            assertEquals("implement.claude_self_test_report", cold.loadNode(paths, cold.loadCurrent(paths).activeNodeInstanceIds().getFirst()).nodeDefinitionId());
         }
     }
 
@@ -238,9 +248,9 @@ class ExternalVerificationEvidenceTest {
         Files.delete(paths.workspaceRoot().resolve(preparation.ref()));
         assertNotEquals(0, cold(paths, id));
         Files.write(paths.workspaceRoot().resolve(preparation.ref()), original);
-        var refs = EvidenceCollection.requiredReferences(paths.workspaceRoot(), paths.workstreamId().value(), id);
+        var refs = EvidenceCollection.requiredReferences(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), id);
         var node = ledger.loadNode(paths, id);
-        assertEquals(EvidenceCollection.FAILURE, EvidenceCollection.execute(paths.workspaceRoot(), paths.workstreamId().value(), node,
+        assertEquals(EvidenceCollection.FAILURE, EvidenceCollection.execute(dev.dual.runtime.RuntimeTestLedger.ledger(), paths.workspaceRoot(), paths.workstreamId().value(), node,
                 () -> {
                     Files.delete(paths.workspaceRoot().resolve(refs.getLast()));
                     return NodeResult.completed("completed", List.of(), Map.of());
@@ -256,7 +266,7 @@ class ExternalVerificationEvidenceTest {
     }
     public static final class ColdReader {
         public static void main(String[] args) throws Exception {
-            if (EvidenceCollection.requiredReferences(Path.of(args[0]), args[1], args[2]).isEmpty()) throw new IllegalStateException("binding lost");
+            if (EvidenceCollection.requiredReferences(dev.dual.runtime.RuntimeTestLedger.ledger(), Path.of(args[0]), args[1], args[2]).isEmpty()) throw new IllegalStateException("binding lost");
         }
     }
 
@@ -274,10 +284,10 @@ class ExternalVerificationEvidenceTest {
     }
     private AgentResultEnvelope.SelfTestResult self(List<String> refs) {
         return new AgentResultEnvelope.SelfTestResult("self_test_report", "SELF_TEST_COMPLETE", "verified", "IMPLEMENTED",
-                List.of("device verification"), List.of(), refs, List.of(), List.of(), List.of(), "verified material");
+                List.of("device verification"), List.of(), refs, List.of(), List.of(), List.of(), "verified material", List.of());
     }
     private AgentResultEnvelope.AcceptanceReviewResult acceptance(List<String> refs) {
         return new AgentResultEnvelope.AcceptanceReviewResult("acceptance_review", "ACCEPT", "verified", "ACCEPTED", false,
-                List.of("device evidence"), refs, List.of(), List.of(), List.of(), List.of(), List.of(), "verified", null);
+                List.of("device evidence"), refs, List.of(), List.of(), List.of(), List.of(), List.of(), "verified", null, List.of());
     }
 }

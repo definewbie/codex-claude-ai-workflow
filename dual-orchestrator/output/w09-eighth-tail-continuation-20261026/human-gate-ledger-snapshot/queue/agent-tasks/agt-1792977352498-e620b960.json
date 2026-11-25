@@ -1,0 +1,43 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1792977352498-e620b960",
+  "workflowExecutionId" : "wfe-1792977352402-409e55c7",
+  "nodeInstanceId" : "node-implement-claude_self_test_report-031",
+  "nodeDefinitionId" : "implement.claude_self_test_report",
+  "nodeKind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "agent" : "claude",
+  "session" : "claude-main",
+  "promptTemplate" : "implement-claude-self-test",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "acpx.agent_run",
+    "agent" : "claude",
+    "session" : "claude-main",
+    "prompt_template" : "implement-claude-self-test",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "approve_all" : true,
+      "permission_profile" : "implement",
+      "prompt_template" : "implement-claude-self-test",
+      "session" : "claude-main",
+      "agent" : "claude",
+      "expected_artifact" : "self_test_report",
+      "artifact_compiler" : "self_test_report_compiler",
+      "allowed_stage_outcomes" : [ "READY", "INSUFFICIENT_EVIDENCE", "BLOCKED" ],
+      "required_contract_phase" : "EXECUTION"
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 6
+  },
+  "nodeExecutionId" : "nxe-1792977352504-5278efa1",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-26T01:15:52.498430Z",
+  "claimedAt" : "2026-10-26T01:15:52.513154Z",
+  "completedAt" : "2026-10-26T01:18:45.344247Z"
+}

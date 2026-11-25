@@ -1,0 +1,60 @@
+{
+  "artifact_type" : "agent_output_contract",
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "run_id" : "run-1792719327299",
+  "node_id" : "plan.codex_plan_review",
+  "node_instance_id" : "node-plan-codex_plan_review-019",
+  "handler_type" : "acpx.agent_run",
+  "decision" : "READY_TO_IMPLEMENT",
+  "summary" : "计划与已审设计一致，实施步骤和验收取证完整，可提交精确 EXECUTION 范围审批后实施。",
+  "required_keys" : [ "decision", "summary" ],
+  "allowed_decisions" : [ "BLOCKED", "NEEDS_REVISION", "READY_TO_IMPLEMENT" ],
+  "source_output_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.json",
+  "source_artifact_type" : "agent_output_contract",
+  "generated_at" : "2026-10-23T01:35:58.972970Z",
+  "control" : {
+    "decision" : "READY_TO_IMPLEMENT",
+    "summary" : "计划与已审设计一致，实施步骤和验收取证完整，可提交精确 EXECUTION 范围审批后实施。"
+  },
+  "control_source" : {
+    "kind" : "strict_agent_result_envelope"
+  },
+  "lifecycle_status" : "READY",
+  "blocking" : false,
+  "checks" : [ "已先审阅 Review Evidence Brief，再核对完整 plan_artifact、已审设计及用户需求；当前无待回应的修订义务。", "implementation_steps、edit_files、files 与 file_level_changes 一致，三个 CREATE 候选文件完整承担实现、测试和 README 职责。", "实现明确先替换 CRLF、再替换单独 CR，保持其他字符、空串、已有 LF、末尾换行存在性及幂等性，未扩大功能范围。", "AC-1 对应九类明确输入期望、九个类别测试及两个全表检查，混合换行期望延续 AR-1 修正。", "AC-2 明确实际执行、合并采集 stdout 与 stderr、核对测试方法与 CASES，延续 AR-2 修正；不以完成状态或文字结论替代结果。", "AC-3 明确读取源码和 README 核对导入及示例，可额外执行 doctest；导入方案与文件布局一致。", "验证执行者、证据责任节点、失败后修复重测及 python3 等价适配均已明确，未引入第三方依赖或外部服务。" ],
+  "evidence" : [ "plan_artifact.files 精确列出 CREATE src/normalize_text.py、CREATE tests/test_normalize_text.py、CREATE README.md，与已审设计候选路径及操作一致。", "共享 CASES 明确包含 \"a\\r\\nb\\rc\\nd\" → \"a\\nb\\nc\\nd\" 和 \"a\\r\\n\\r\\n\\rb\" → \"a\\n\\n\\nb\"；幂等性检查遍历同一表。", "verification_bindings 分别绑定 AC-1、AC-2、AC-3，executor 为 AGENT，detail_owner 为 implement.claude_self_test_report。", "validation_plan 要求实际执行 python -m unittest discover -s tests -v 2>&1，核对逐用例报告、Ran 11 tests、OK 及源码，并在失败修复后重新验证。", "actual_exit_required=false、expected_exit_code=null 保留了用户不要求独立测量真实退出码的约定。" ],
+  "missing_evidence" : [ ],
+  "must_fix" : [ ],
+  "acceptance_notes" : [ "READY_TO_IMPLEMENT 表示计划审查通过，不构成文件写授权；实施前仍须单独批准穷尽的 EXECUTION 精确路径与操作集合。", "11 是计划测试方法数，九类输入覆盖须结合 CASES 核对；最终报告必须使用实际执行数量与结果。", "当前没有实现或测试通过证据，属于计划阶段的正常状态；空环境引用不应被解释为环境已经验证。", "回滚仅处理本次实际新建且未被后续修改的文件；计划中的还原提交选项不构成额外 Git 写操作授权。" ],
+  "open_risks" : [ ],
+  "changed_files" : [ ],
+  "verification_summary" : "依据提供的完整计划与已审设计完成静态核对，未发现阻断实施计划审批的问题；未读取额外仓库文件、修改文件或执行测试。",
+  "failure" : {
+    "category_hint" : "",
+    "verification_remediation" : "NONE",
+    "contract_gaps" : [ ],
+    "out_of_scope_files" : [ ],
+    "missing_tests" : [ ],
+    "context_gaps" : [ ],
+    "reason" : ""
+  },
+  "checks_run" : [ ],
+  "checks_skipped" : [ ],
+  "contract_obligations" : [ ],
+  "reread_reasons" : [ ],
+  "stage_outcome" : "READY",
+  "stage_outcome_source" : "declared_status",
+  "evidence_state" : {
+    "blocking" : false,
+    "evidence_count" : 5,
+    "missing_evidence_count" : 0,
+    "must_fix_count" : 0,
+    "acceptance_note_count" : 4,
+    "open_risk_count" : 0
+  },
+  "authored_context" : {
+    "sha256" : "5446b157aab317662675ad04b48ee96d3ad9adfe554f11fca14c2e7a7c43f7b2",
+    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/prompts/plan-codex-review.md.manifest.json"
+  }
+}

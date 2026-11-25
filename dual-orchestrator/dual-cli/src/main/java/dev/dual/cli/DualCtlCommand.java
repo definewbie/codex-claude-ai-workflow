@@ -34,6 +34,7 @@ import picocli.CommandLine.Command;
                 CalibrationCommand.class,
                 ProjectionsCommand.class,
                 ReviewCommand.class,
+                PermissionsCommand.class,
                 WorkflowCommand.class
         }
 )

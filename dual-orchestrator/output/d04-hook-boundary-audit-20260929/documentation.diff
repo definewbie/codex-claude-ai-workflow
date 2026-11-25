@@ -1,0 +1,63 @@
+--- before/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -1,6 +1,6 @@
+ # Dual 生命周期可靠性：详细设计候选
+ 
+-日期：2026-09-28。阶段：P0。当前状态：**九项设计冻结，D04 技术阻塞；全案未具备实施条件、未获实施授权**。用户带回的冻结候选 CC 评审为 PASS；D01/D02/D03/D05–D10 依该结论及两项 LOW 采纳固定设计基线，见 §13/§15.1。LOW 增量由作者核验，未另经 CC 复审。2026-09-29 已纠正实验路由：本机一直使用的 Claude Code＋GLM 原生读取通过；§8.15 已补原生写入/隐藏工具及配置/scratch 切片；本轮原生补证已获用户带回的 CC 材料层 PASS，见 §8.16；§8.17 现有硬限制接口核验未取得充分证明，两候选仍暴露 collaboration；§8.18 已离线纠正注入探针判据；§8.19 已核实同版 item 协议与关键副作用先后关系，发现尚待证明的原生 PreToolUse 拦截点，未扩展为 Rust 开发；当前无可运行 Gate、不申请预算，D04 不冻结。本轮仅修订材料，无 provider 调用、额外 agent 或产品实施；历史评审和实验保留。
++日期：2026-09-28。阶段：P0。当前状态：**九项设计冻结，D04 技术阻塞；全案未具备实施条件、未获实施授权**。用户带回的冻结候选 CC 评审为 PASS；D01/D02/D03/D05–D10 依该结论及两项 LOW 采纳固定设计基线，见 §13/§15.1。LOW 增量由作者核验，未另经 CC 复审。2026-09-29 已纠正实验路由：本机一直使用的 Claude Code＋GLM 原生读取通过；§8.15 已补原生写入/隐藏工具及配置/scratch 切片；本轮原生补证已获用户带回的 CC 材料层 PASS，见 §8.16；§8.17 现有硬限制接口核验未取得充分证明，两候选仍暴露 collaboration；§8.18 已离线纠正注入探针判据；§8.19 已核实同版 item 协议与关键副作用先后关系；§8.20 进一步证明现有 PreToolUse hook 对自身错误/超时放行，已停止将其单独作为强制限制的候选；无新增运行 Gate/预算或 Rust 开发，D04 不冻结。本轮仅修订材料，无 provider 调用、额外 agent 或产品实施；历史评审和实验保留。
+ 
+ 上位契约：[R3](20260923-dual-lifecycle-reliability-design.zh-CN.md)。唯一工作索引：[主清单](20260927-dual-lifecycle-worklist.zh-CN.md)。本文展开 D01–D10，不另建工作清单或降低 R3 验收。全文“增加、迁移、必须”描述拟议目标；现状另行标明。未落实的能力不能用于当前运行准入。
+ 
+@@ -403,6 +403,8 @@
+ 
+ 收益判据固定为：产品/control/Git 在批准前不可由模型写入；必要读取、结构化设计及独立复评可完成；同版本合法续作保留限制；无虚构人工批准；不靠把失败全部拒绝来完成安全指标。
+ 
++2026-09-29 取舍证据补记：同版代码将父 turn 的 approval policy / permission profile 快照传给子配置（§8.19）；这是有利静态证据，尚不能证明子进程实际强制、后续 turn 与模式切换持续受限，不能据此将最坏情形直接降级或默认接受原生自行委派。现有 hook 的明确拒绝虽位于 handler 前，但自身错误/超时会放行（§8.20），无法单独承载故障时拒绝要求；信任装配与 managed 加载规则不等同运行期 fail-closed。hook 的新增维护成本尚无依据与 patched acpx 等量；若改变禁止委派要求或引入额外守卫，属于需用户决定的取舍。
++
+ 按用户明确要求，详细设计和后续获授权的实施过程中出现下列情况，**先停止受影响工作并等待用户确认**，不得先做完再告知：
+ 
+ - 必须修改底层引擎核心、引入独立工具服务/权限平台、外层 OS 隔离或其他超出本次 adapter 绑定方向的维护面。
+@@ -525,6 +527,16 @@
+ 本轮发现已有原生 **PreToolUse Blocked→handler 前返回** 的调用点，故不能绝对宣称无现成接口；但当前探针关闭 hooks，可信装配、匹配、失效/超时、hook 本身能力与兄弟入口不可绕过均未证明。另将本地 web.run 注册抑制与远端托管搜索声明抑制分开，不能用伪造托管结果测试本地执行拒绝。上述为同版静态证据，不是新运行证明。
+ 
+ 到此停止扩大源码排查；[CC prompt](../../output/d04-native-source-audit-20260929/cc-review.txt)供独立判断证据与继续核验价值，不直接调用 CC。不写/构建 Rust，不自动启用 hook，不执行 native/provider/注入/agent，无 runner 或预算申请。D04 仍 DESIGN GAP，其余九项设计冻结与实施未授权状态不变；若需新 authority/引擎改动或成本收益偏离，依 §8.6 交用户决定。§8.18 的“同版 wire/顺序未证”为上一轮状态，由本节静态核验推进，不追溯改写旧包；完整可运行协议与运行 Gate 仍未成立。
++
++### 8.20 hook 自身失败会放行：停止当前候选（2026-09-29）
++
++用户带回 §8.19 的 CC 材料 PASS，随后授权继续必要只读核验。见 [hook 核验报告](../../output/d04-hook-boundary-audit-20260929/assessment.md)及 [CC prompt](../../output/d04-hook-boundary-audit-20260929/cc-review.txt)。新增同版源码经 Git blob/大小/SHA256 核验；快照仅覆盖取用文件，不是全树。运行器跨多个模块，不能把“补一个模块”当成本或充分性承诺。
++
++已确认链：command_runner 启动失败/超时 → HandlerRunResult.error → PreToolUse 仅记 Failed、should_block=false → core hook_runtime Continue → registry 可继续调用目标 handler。退出码 2 缺少拒绝原因同样不阻止；明确的同步拒绝才产生 Blocked。异步/executor-scoped hook 不能作为同步强制门。多 hook 只在有人明确拒绝时阻止，不能消除全部失败的反例。
++
++配置存在 managed/trusted/hash 等装配规则，并非“没有信任机制”；required_load_errors 是加载阶段事实。已核验结果传递链不把运行失败转换为拒绝，未找到改变此行为的现有配置字段；不宣称穷尽所有引擎/管理员接口。即使配置可信，仍有独立的故障放行反例。MCP/custom 的完整覆盖及 core 配置绑定不继续扩展取证；其未决不能挽救已在 collaboration 路径失败的候选。hook 自身由 MCP 执行不等于所有 MCP 目标工具被拦截。
++
++**停止“单靠现有 PreToolUse hook 强制禁止委派”的候选，不设计或运行正常拒绝探针充抵此缺口。** 本轮无 native/provider/hook/注入/agent 或产品/Rust 改动，未新增预算。不自动补监督器、换引擎或接受原生委派；需要这些改变时按 §8.6 交用户。此次为作者静态核验，未经新增 CC 复审；D04 仍 DESIGN GAP，其他九项冻结及实施未授权状态不变。§8.19 是上一轮候选状态，不追溯篡改其证据包。
+ 
+ ## 9. D09：交付外部窗口与处置
+ 
+--- before/20260927-dual-lifecycle-worklist.zh-CN.md
++++ dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -375,3 +375,9 @@
+ 详设 §8.19 与 [核验报告](../../output/d04-native-source-audit-20260929/assessment.md)记录 Codex 0.153.4 发布身份关联、function_call 协议、native 分派与先创建子线程后发送任务的顺序；参数/容量失败不代表禁止委派。发现既有 PreToolUse 的 handler 前拦截点，但当前配置绑定与不可绕过未证；本地/托管网络工具的判据已分层。此次只读依赖源码，不引入 Rust 产品开发或修改上游。
+ 
+ 本轮零 native/session/provider/注入/agent，不增加运行预算；到此停止扩展源码排查，供 CC 独立判断静态结论及现成拦截机制是否值得继续。D04 仍 DESIGN GAP，W01–W09 不前移；新 authority/引擎机制或成本收益偏离仍须用户决定。不能把源码存在拦截点写成当前已 ENFORCED/PROVEN。
++
++### 9.13 hook 故障放行反例已确认，停止该候选（2026-09-29）
++
++详设 §8.20 / [核验材料](../../output/d04-hook-boundary-audit-20260929/assessment.md)：同版 command hook 启动失败、超时或异常退出只记 Failed，不自动阻止目标工具；完整消费者链已定位。存在配置来源信任与 managed 加载规则，但不改变已读运行期失败语义。子代理策略继承及未验证边界回写 §8.6，不据此接受自行委派或预称低维护成本。
++
++当前停止将现有 PreToolUse hook 单独作为硬限制的路线，提供 CC prompt 复核停止依据及现有配置遗漏。无新实验/预算/agent/产品或 Rust 实施；不自动新增外层守卫。D04 DESIGN GAP、W01–W09 及其他冻结项状态不变；替代机制或验收改变须用户决定。
+--- before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -2,9 +2,9 @@
+ 
+ ## 当前入口：2026-09-28 生命周期详细设计候选
+ 
+-2026-09-29 最新：已按用户要求完成 [同版协议与副作用顺序核验](../../output/d04-native-source-audit-20260929/assessment.md)，详设 §8.19、主清单 §9.12 同步。读取的是 Codex 外部依赖源码，不引入 Rust 开发。function_call 协议与先创建子线程后发送任务的顺序已静态定位；发现尚待证明的原生 PreToolUse 前置拦截点，本地/托管网络工具已分层。到此停止扩展源码排查，提供 CC prompt，不直接调用。零 native/provider/注入/agent，无产品实施或新增预算；D04 仍 DESIGN GAP，增量未经 CC 再审。
+-
+-当前状态：用户带回冻结候选 CC PASS；两项 LOW 已吸收，D01/D02/D03/D05–D10 九项设计冻结，D04 技术阻塞。详设 §13/§15.1、主清单 §9.5 与 [处置补记](../../output/freeze-review-20260928-r2/review-disposition.md)同步。修订固定了显式内核注入及执行合同中可审计的非必需声明；增量由作者核验，未另经 CC 复审。D04 当前缺口以详设 §8.19 为准：原生只读切片已有实证，额外控制面及网络工具的完整能力上限尚未证明。全案未具备实施条件，未取得实施授权；本次无 provider/agent、产品改动或历史恢复。原冻结包与旧证据保留，以下为历史进展，不能覆盖本段当前状态。
++2026-09-29 最新：§8.19 同版源码核验获用户带回 CC 材料 PASS；继续核验后确认 [hook 自身失败/超时会放行](../../output/d04-hook-boundary-audit-20260929/assessment.md)，详设 §8.20、主清单 §9.13 同步。已停止以现有 PreToolUse hook 单独承载强制禁止委派的候选，供 CC 复核停止依据；不继续运行探针，不自动补监督器、改 Rust 或放宽委派要求。本轮零 native/provider/hook/注入/agent，仅材料改动；D04 仍 DESIGN GAP，新增结论未经 CC 复审。
++
++当前状态：用户带回冻结候选 CC PASS；两项 LOW 已吸收，D01/D02/D03/D05–D10 九项设计冻结，D04 技术阻塞。详设 §13/§15.1、主清单 §9.5 与 [处置补记](../../output/freeze-review-20260928-r2/review-disposition.md)同步。修订固定了显式内核注入及执行合同中可审计的非必需声明；增量由作者核验，未另经 CC 复审。D04 当前缺口以详设 §8.20 为准：原生只读切片已有实证，额外控制面及网络工具的完整能力上限尚未证明。全案未具备实施条件，未取得实施授权；本次无 provider/agent、产品改动或历史恢复。原冻结包与旧证据保留，以下为历史进展，不能覆盖本段当前状态。
+ 
+ 最新决定：用户已接受 D04“经过证明的必要受限执行”候选，并授权调整后进行有界原生能力实验。当前口径见详细设计 §8.9/主清单 §8.3；下文无 execute 及验证未授权记录均为此前状态。结论确定前不承诺可行，不开始产品实现；D04 仍待证。[本轮结果](../../output/d04-restricted-execution-20260928/result.md)：Codex 原生命令沙箱切片通过，模型切片因探针关闭必要工具宿主而 INVALID，已停止不自动补测。补测前修正前提检查/停止条件并确认增量预算，不改旧证据。
+ 

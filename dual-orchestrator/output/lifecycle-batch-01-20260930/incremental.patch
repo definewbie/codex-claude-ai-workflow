@@ -1,0 +1,714 @@
+--- before/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java
++++ after/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java
+@@ -56,6 +56,24 @@
+                     "The agent process was interrupted before a trustworthy completion boundary."
+             );
+         }
++        if (process.usability() == ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT
++                || process.usability() == ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL) {
++            var status = signals.isEmpty()
++                    ? AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE
++                    : AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE;
++            var category = signals.isEmpty()
++                    ? RecoveryCategory.OUTPUT_INCOMPLETE
++                    : RecoveryCategory.RECOVERABLE_ADAPTER_FAILURE;
++            return new AgentExecutionOutcome(
++                    status,
++                    "process_output_incomplete",
++                    signals,
++                    false,
++                    AgentExecutionRetryPolicy.MANUAL_ONLY,
++                    category,
++                    "The agent process ended before the process boundary was trustworthy."
++            );
++        }
+         if (!evidence.agentResultContract().present() || !evidence.agentResultContract().valid()) {
+             return new AgentExecutionOutcome(
+                     AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE,
+@@ -79,24 +97,6 @@
+                     AgentExecutionRetryPolicy.MANUAL_ONLY,
+                     RecoveryCategory.ARTIFACT_CONTRACT_FAILURE,
+                     "The agent result was valid, but one or more required artifact projections failed validation."
+-            );
+-        }
+-        if (process.usability() == ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT
+-                || process.usability() == ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL) {
+-            var status = signals.isEmpty()
+-                    ? AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE
+-                    : AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE;
+-            var category = signals.isEmpty()
+-                    ? RecoveryCategory.OUTPUT_INCOMPLETE
+-                    : RecoveryCategory.RECOVERABLE_ADAPTER_FAILURE;
+-            return new AgentExecutionOutcome(
+-                    status,
+-                    "process_output_incomplete",
+-                    signals,
+-                    false,
+-                    AgentExecutionRetryPolicy.MANUAL_ONLY,
+-                    category,
+-                    "The agent process ended before the process boundary was trustworthy."
+             );
+         }
+         if (process.usability() == ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
+--- before/dual-core/src/test/java/dev/dual/core/execution/AgentExecutionOutcomeResolverTest.java
++++ after/dual-core/src/test/java/dev/dual/core/execution/AgentExecutionOutcomeResolverTest.java
+@@ -12,6 +12,23 @@
+ 
+ class AgentExecutionOutcomeResolverTest {
+     private final AgentExecutionOutcomeResolver resolver = new AgentExecutionOutcomeResolver();
++
++    @Test
++    void incompleteProcessIsPrimaryAcrossMissingEnvelopeAndInvalidArtifactCombinations() {
++        for (var process : List.of(ProcessResult.nonZeroIncomplete(5), ProcessResult.killedAfterRecoverableSignal())) {
++            for (var envelope : List.of(AgentResultContractResult.valid("READY"), AgentResultContractResult.missing())) {
++                for (var artifact : List.of(ArtifactContractResult.requiredValid("candidate"),
++                        ArtifactContractResult.requiredMissing("candidate"))) {
++                    var outcome = resolve(process, envelope, List.of(artifact), List.of());
++                    assertEquals("process_output_incomplete", outcome.primaryReason());
++                    assertFalse(outcome.nodeMaySucceed());
++                    var blocked = resolve(process, envelope, List.of(artifact),
++                            List.of(AdapterSignal.of(AdapterSignalType.RATE_LIMITED)));
++                    assertEquals("rate_limited", blocked.primaryReason());
++                }
++            }
++        }
++    }
+ 
+     @Test
+     void processOkAgentResultValidArtifactValidSucceeds() {
+@@ -281,7 +298,7 @@
+     }
+ 
+     @Test
+-    void nonZeroIncompleteWithValidAgentResultButMissingArtifactFailsContract() {
++    void nonZeroIncompleteWithValidAgentResultButMissingArtifactKeepsProcessFailure() {
+         var outcome = resolve(
+                 ProcessResult.nonZeroIncomplete(5),
+                 AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
+@@ -289,8 +306,9 @@
+                 List.of()
+         );
+ 
+-        assertEquals(AgentExecutionOutcomeStatus.CONTRACT_FAILED, outcome.status());
+-        assertEquals(RecoveryCategory.ARTIFACT_CONTRACT_FAILURE, outcome.recoveryCategory());
++        assertEquals(AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE, outcome.status());
++        assertEquals("process_output_incomplete", outcome.primaryReason());
++        assertEquals(RecoveryCategory.OUTPUT_INCOMPLETE, outcome.recoveryCategory());
+     }
+ 
+     @Test
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
+@@ -54,20 +54,37 @@
+             List<String> inputRefs,
+             NodeResult result
+     ) throws Exception {
+-        if (AgentExecutionResultFacts.inputPreparationFailed(result)) return result;
+-        if (EvidenceCollection.FAILURE.equals(result.outcome())) return result;
++        return prepare(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result)
++                .complete(workspaceRoot, false);
++    }
++
++    /** Validate in memory, persist one execution decision, then publish only eligible candidates. */
++    public NodeResult validateAndFinalize(
++            Path workspaceRoot, String workstreamId, String nodeInstanceId,
++            NodeDefinition nodeDefinition, List<String> inputRefs, NodeResult result
++    ) throws Exception {
++        return prepare(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result)
++                .complete(workspaceRoot, true);
++    }
++
++    private Validation prepare(
++            Path workspaceRoot, String workstreamId, String nodeInstanceId,
++            NodeDefinition nodeDefinition, List<String> inputRefs, NodeResult result
++    ) throws Exception {
++        if (AgentExecutionResultFacts.inputPreparationFailed(result)) return new Validation(result, null);
++        if (EvidenceCollection.FAILURE.equals(result.outcome())) return new Validation(result, null);
+         if (!"acpx.agent_run".equals(nodeDefinition.handlerType()) || Boolean.TRUE.equals(result.result().get("prepared"))) {
+-            return result;
++            return new Validation(result, null);
+         }
+         try {
+             EvidenceCollection.verify(workspaceRoot, workstreamId, nodeInstanceId);
+         } catch (java.io.IOException | IllegalArgumentException invalid) {
+-            return new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
++            return new Validation(new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
+                     Map.of("failure_code", EvidenceCollection.FAILURE, "error", String.valueOf(invalid.getMessage())),
+-                    invalid.getMessage());
++                    invalid.getMessage()), null);
+         }
+         if (!ContractRegistry.hasContract(nodeDefinition.id())) {
+-            return result;
++            return new Validation(result, null);
+         }
+         var acquisitionContract = AgentExecutionResultFacts.agentResultContract(result);
+         if (acquisitionContract.present() && !acquisitionContract.valid()) {
+@@ -79,7 +96,7 @@
+         return validateAgentOutput(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result);
+     }
+ 
+-    private NodeResult validateAgentOutput(
++    private Validation validateAgentOutput(
+             Path workspaceRoot,
+             String workstreamId,
+             String nodeInstanceId,
+@@ -124,8 +141,8 @@
+             try {
+                 EvidenceCollection.verifyResult(root, workstreamId, nodeInstanceId, parsed.envelope().result());
+             } catch (java.io.IOException | IllegalArgumentException invalid) {
+-                return new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
+-                        Map.of("failure_code", EvidenceCollection.FAILURE, "error", String.valueOf(invalid.getMessage())), invalid.getMessage());
++                return new Validation(new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
++                        Map.of("failure_code", EvidenceCollection.FAILURE, "error", String.valueOf(invalid.getMessage())), invalid.getMessage()), null);
+             }
+             if (parsed.envelope().result() instanceof AgentResultEnvelope.DesignResult design) {
+                 var errors = DesignScopeValidator.validate(root, workstreamId, design.design());
+@@ -280,7 +297,7 @@
+         return new ProposalResolution(proposal, derivation, repositoryFactBinding.verified(), null);
+     }
+ 
+-    private NodeResult withResultSidecars(
++    private Validation withResultSidecars(
+             Path root,
+             String workstreamId,
+             String nodeInstanceId,
+@@ -329,19 +346,6 @@
+                     semanticFailure.get());
+         }
+ 
+-        var publication = AgentExecutionResultFacts.attach(result,
+-                AgentResultContractResult.valid(envelope.result().decision()),
+-                List.of(ArtifactContractResult.requiredValid(envelope.result().artifactType())),
+-                document.get("reread_reasons"));
+-        var execution = new AgentRunMetadataFinalizer().assessPublication(root, publication);
+-        if (execution.status() == NodeStatus.FAILED) {
+-            return AgentExecutionResultFacts.attach(execution,
+-                    AgentResultContractResult.valid(envelope.result().decision()),
+-                    List.of(new ArtifactContractResult(envelope.result().artifactType(), true, false, false, "",
+-                            "EXECUTION_NOT_PUBLISHABLE", "Execution failed before artifact publication")),
+-                    document.get("reread_reasons"));
+-        }
+-
+         var sidecarPath = AgentOutputContractSidecar.pathFor(outputPath);
+         if (AuthoredStageLineageResolver.participates(nodeDefinition.id())) {
+             try {
+@@ -356,55 +360,82 @@
+         try {
+             EvidenceCollection.verifyResult(root, workstreamId, nodeInstanceId, envelope.result());
+         } catch (java.io.IOException | IllegalArgumentException invalid) {
+-            return new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
+-                    Map.of("failure_code", EvidenceCollection.FAILURE, "error", String.valueOf(invalid.getMessage())), invalid.getMessage());
+-        }
+-        Files.writeString(sidecarPath,
+-                OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",
+-                StandardCharsets.UTF_8);
+-        var sidecarRef = root.relativize(sidecarPath).toString();
+-        var outputRefs = new ArrayList<>(result.outputRefs());
+-        if (!outputRefs.contains(sidecarRef)) {
+-            outputRefs.add(sidecarRef);
+-        }
+-
+-        Optional<TaskContractProposalReference.Published> proposalReference = Optional.empty();
+-        if (proposalResolution.proposal() != null) {
+-            proposalReference = Optional.of(
+-                    envelope.result() instanceof AgentResultEnvelope.TaskContractRevisionPatchResult
+-                            ? TaskContractProposalReference.publishRevisionDerived(
+-                            root, workstreamId, sidecarPath, validatedDocument, OBJECT_MAPPER)
+-                            : TaskContractProposalReference.publishInitial(
+-                            root, workstreamId, sidecarPath, validatedDocument, OBJECT_MAPPER));
+-            if (!outputRefs.contains(proposalReference.get().referenceRef())) {
+-                outputRefs.add(proposalReference.get().referenceRef());
+-            }
+-        }
+-
+-        var planArtifactRef = writePlanArtifactSidecars(
+-                root, envelope, outputPath);
+-        planArtifactRef.ifPresent(ref -> {
+-            if (!outputRefs.contains(ref)) {
+-                outputRefs.add(ref);
+-            }
+-        });
+-
+-        var augmented = new LinkedHashMap<String, Object>();
+-        augmented.putAll(result.result());
+-        augmented.put("decision", envelope.result().decision());
+-        augmented.put("summary", envelope.result().summary());
+-        augmented.put("contract_sidecar_ref", sidecarRef);
+-        augmented.put("contract_sidecar_sha256", AgentOutputContractSidecar.sha256(sidecarPath));
+-        proposalReference.ifPresent(reference -> {
+-            augmented.put("task_contract_proposal_ref", reference.referenceRef());
+-            augmented.put("task_contract_proposal_id", reference.reference().proposalId());
+-        });
+-        planArtifactRef.ifPresent(ref -> augmented.put("plan_artifact_ref", ref));
+-        return AgentExecutionResultFacts.attach(new NodeResult(
+-                        result.outcome(), result.status(), outputRefs, augmented, result.errorMessage()),
++            return new Validation(new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
++                    Map.of("failure_code", EvidenceCollection.FAILURE, "error", String.valueOf(invalid.getMessage())), invalid.getMessage()), null);
++        }
++        var validated = AgentExecutionResultFacts.attach(result,
+                 AgentResultContractResult.valid(envelope.result().decision()),
+                 List.of(ArtifactContractResult.requiredValid(envelope.result().artifactType())),
+                 document.get("reread_reasons"));
++        return new Validation(validated, execution -> {
++            // A run write is an external I/O window: recheck evidence before business publication.
++            EvidenceCollection.verifyResult(root, workstreamId, nodeInstanceId, envelope.result());
++            Files.writeString(sidecarPath,
++                    OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",
++                    StandardCharsets.UTF_8);
++            var sidecarRef = root.relativize(sidecarPath).toString();
++            var outputRefs = new ArrayList<>(result.outputRefs());
++            if (!outputRefs.contains(sidecarRef)) {
++                outputRefs.add(sidecarRef);
++            }
++
++            Optional<TaskContractProposalReference.Published> proposalReference = Optional.empty();
++            if (proposalResolution.proposal() != null) {
++                proposalReference = Optional.of(
++                        envelope.result() instanceof AgentResultEnvelope.TaskContractRevisionPatchResult
++                                ? TaskContractProposalReference.publishRevisionDerived(
++                                root, workstreamId, sidecarPath, validatedDocument, OBJECT_MAPPER)
++                                : TaskContractProposalReference.publishInitial(
++                                root, workstreamId, sidecarPath, validatedDocument, OBJECT_MAPPER));
++                if (!outputRefs.contains(proposalReference.get().referenceRef())) {
++                    outputRefs.add(proposalReference.get().referenceRef());
++                }
++            }
++
++            var planArtifactRef = writePlanArtifactSidecars(
++                    root, envelope, outputPath);
++            planArtifactRef.ifPresent(ref -> {
++                if (!outputRefs.contains(ref)) {
++                    outputRefs.add(ref);
++                }
++            });
++
++            var augmented = new LinkedHashMap<String, Object>();
++            augmented.putAll(execution.result());
++            augmented.put("decision", envelope.result().decision());
++            augmented.put("summary", envelope.result().summary());
++            augmented.put("contract_sidecar_ref", sidecarRef);
++            augmented.put("contract_sidecar_sha256", AgentOutputContractSidecar.sha256(sidecarPath));
++            proposalReference.ifPresent(reference -> {
++                augmented.put("task_contract_proposal_ref", reference.referenceRef());
++                augmented.put("task_contract_proposal_id", reference.reference().proposalId());
++            });
++            planArtifactRef.ifPresent(ref -> augmented.put("plan_artifact_ref", ref));
++            return AgentExecutionResultFacts.attach(new NodeResult(
++                            execution.outcome(), execution.status(), outputRefs, augmented, execution.errorMessage()),
++                    AgentResultContractResult.valid(envelope.result().decision()),
++                    List.of(ArtifactContractResult.requiredValid(envelope.result().artifactType())),
++                    document.get("reread_reasons"));
++        });
++    }
++
++    @FunctionalInterface
++    private interface Publication {
++        NodeResult publish(NodeResult execution) throws Exception;
++    }
++
++    /** Transient validated candidate, never a persisted authority or a model-supplied control field. */
++    private record Validation(NodeResult result, Publication publication) {
++        NodeResult complete(Path root, boolean persistExecution) throws Exception {
++            var finalizer = new AgentRunMetadataFinalizer();
++            var execution = persistExecution
++                    ? finalizer.finalizeNodeResult(root, result)
++                    : publication == null ? result : finalizer.assessPublication(root, result);
++            if (publication == null || execution.status() == NodeStatus.FAILED) {
++                return execution;
++            }
++            return publication.publish(execution);
++        }
+     }
+ 
+     private record ProposalResolution(
+@@ -480,7 +511,7 @@
+         return text;
+     }
+ 
+-    private static NodeResult contractViolation(
++    private static Validation contractViolation(
+             Path workspaceRoot,
+             String workstreamId,
+             String nodeInstanceId,
+@@ -532,14 +563,14 @@
+         if (diagnostic.present() && !outputRefs.contains(diagnostic.markdownRef())) {
+             outputRefs.add(diagnostic.markdownRef());
+         }
+-        return AgentExecutionResultFacts.attach(new NodeResult(
++        return new Validation(AgentExecutionResultFacts.attach(new NodeResult(
+                 "AGENT_OUTPUT_CONTRACT_VIOLATION",
+                 NodeStatus.FAILED,
+                 outputRefs,
+                 failed,
+                 message
+         ), terminalResultFor(reason, message, validatedEnvelope),
+-                List.of(artifactResultFor(nodeDefinition, reason, message, validatedEnvelope)), null);
++                List.of(artifactResultFor(nodeDefinition, reason, message, validatedEnvelope)), null), null);
+     }
+ 
+     private static AgentResultContractResult terminalResultFor(
+--- before/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java
+@@ -16,7 +16,6 @@
+ import dev.dual.ledger.file.WorkstreamPaths;
+ import dev.dual.runtime.handler.AgentExecutionAttemptReconciler;
+ import dev.dual.runtime.handler.AgentExecutionAttemptTimeoutPolicy;
+-import dev.dual.runtime.handler.AgentRunMetadataFinalizer;
+ import dev.dual.runtime.handler.ArtifactContractValidator;
+ import dev.dual.runtime.handler.ContractEventTypes;
+ import dev.dual.runtime.handler.DecisionHandler;
+@@ -41,7 +40,6 @@
+     private final WorkflowFileLedger ledger;
+     private final HandlerRegistry handlers;
+     private final ArtifactContractValidator artifactContractValidator;
+-    private final AgentRunMetadataFinalizer runMetadataFinalizer;
+     private final AgentExecutionAttemptReconciler attemptReconciler;
+     private final StaleRunningRecovery staleRunningRecovery;
+     private final AgentTaskDispatchMode dispatchMode;
+@@ -61,7 +59,6 @@
+         this.handlers = handlers;
+         this.dispatchMode = dispatchMode == null ? AgentTaskDispatchMode.INLINE : dispatchMode;
+         this.artifactContractValidator = new ArtifactContractValidator();
+-        this.runMetadataFinalizer = new AgentRunMetadataFinalizer();
+         this.attemptReconciler = new AgentExecutionAttemptReconciler(new AgentExecutionAttemptTimeoutPolicy().timeout());
+         this.staleRunningRecovery = new StaleRunningRecovery(ledger, attemptReconciler);
+     }
+@@ -320,7 +317,7 @@
+         try {
+             var result = dev.dual.runtime.handler.EvidenceCollection.execute(command.workspaceRoot(),
+                     command.workstreamId(), nodeDoc, () -> executeNode(command, nodeDefinition, node));
+-            result = artifactContractValidator.validate(
++            result = artifactContractValidator.validateAndFinalize(
+                     command.workspaceRoot(),
+                     command.workstreamId(),
+                     node.nodeInstanceId(),
+@@ -328,7 +325,6 @@
+                     node.inputRefs(),
+                     result
+             );
+-            result = runMetadataFinalizer.finalizeNodeResult(command.workspaceRoot(), result);
+             ledger.markAgentTaskFinished(paths, agentTask, result);
+             ledger.finishNodeExecution(paths, nodeExecution, result);
+             return result;
+--- before/dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java
+@@ -12,7 +12,6 @@
+ import dev.dual.ledger.file.WorkflowExecutionStatus;
+ import dev.dual.ledger.file.WorkflowFileLedger;
+ import dev.dual.ledger.file.WorkstreamPaths;
+-import dev.dual.runtime.handler.AgentRunMetadataFinalizer;
+ import dev.dual.runtime.handler.ArtifactContractValidator;
+ import dev.dual.runtime.handler.DecisionHandler;
+ import dev.dual.runtime.handler.GateHandler;
+@@ -33,7 +32,6 @@
+     private final WorkflowFileLedger ledger;
+     private final HandlerRegistry handlers;
+     private final ArtifactContractValidator artifactContractValidator;
+-    private final AgentRunMetadataFinalizer runMetadataFinalizer;
+ 
+     public AgentWorker(WorkflowFileLedger ledger, HandlerRegistry handlers) {
+         if (ledger == null) {
+@@ -45,7 +43,6 @@
+         this.ledger = ledger;
+         this.handlers = handlers;
+         this.artifactContractValidator = new ArtifactContractValidator();
+-        this.runMetadataFinalizer = new AgentRunMetadataFinalizer();
+     }
+ 
+     public AgentWorkerResult runOne(WorkflowCommand command) throws Exception {
+@@ -114,7 +111,7 @@
+         try {
+             var result = dev.dual.runtime.handler.EvidenceCollection.execute(command.workspaceRoot(),
+                     command.workstreamId(), nodeDoc, () -> executeNode(command, nodeDefinition, node));
+-            result = artifactContractValidator.validate(
++            result = artifactContractValidator.validateAndFinalize(
+                     command.workspaceRoot(),
+                     command.workstreamId(),
+                     node.nodeInstanceId(),
+@@ -122,7 +119,6 @@
+                     node.inputRefs(),
+                     result
+             );
+-            result = runMetadataFinalizer.finalizeNodeResult(command.workspaceRoot(), result);
+             ledger.markAgentTaskFinished(paths, task, result);
+             ledger.finishNodeExecution(paths, nodeExecution, result);
+             return result;
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
+@@ -61,6 +61,68 @@
+                 context.instance().inputRefs(), unmarkedFailure);
+         assertEquals("AGENT_RESULT_MISSING", ((Map<?, ?>) validated.result().get("parse_error")).get("code"),
+                 "a FAILED status or matching reason alone cannot bypass output validation");
++    }
++
++    @Test
++    void integratedFinalizationRecordsOneDecisionBeforeSuccessfulPublication() throws Exception {
++        var f = finalizationFixture();
++        var result = finalizeCandidate(f);
++        assertEquals(NodeStatus.COMPLETED, result.status());
++        assertTrue(Files.isRegularFile(tempDir.resolve("review.contract.json")));
++        var run = LEDGER_JSON.readTree(f.runPath().toFile());
++        assertEquals("SUCCESS", run.at("/executionOutcome/status").asText());
++        assertEquals(1, run.path("executionTimeline").size());
++        assertEquals("completed", ((Map<?, ?>) result.result().get("agent_execution_outcome")).get("primaryReason"));
++    }
++
++    @Test
++    void runWriteFailureCannotPublishCandidate() throws Exception {
++        var f = finalizationFixture();
++        var permissions = Files.getPosixFilePermissions(f.runPath());
++        try {
++            Files.setPosixFilePermissions(f.runPath(), java.util.Set.of(java.nio.file.attribute.PosixFilePermission.OWNER_READ));
++            org.junit.jupiter.api.Assumptions.assumeFalse(Files.isWritable(f.runPath()),
++                    "requires an unprivileged POSIX file-write boundary");
++            var failure = assertThrows(IllegalStateException.class, () -> finalizeCandidate(f));
++            assertTrue(failure.getMessage().contains("finalize typed agent run metadata"));
++            assertFalse(Files.exists(tempDir.resolve("review.contract.json")));
++            assertFalse(LEDGER_JSON.readTree(f.runPath().toFile()).has("executionOutcome"));
++        } finally {
++            Files.setPosixFilePermissions(f.runPath(), permissions);
++        }
++    }
++
++    @Test
++    void publicationIoFailureRetainsSuccessfulExecutionRatherThanInventingContractFailure() throws Exception {
++        var f = finalizationFixture();
++        Files.createDirectory(tempDir.resolve("review.contract.json"));
++        assertThrows(java.io.IOException.class, () -> finalizeCandidate(f));
++        var run = LEDGER_JSON.readTree(f.runPath().toFile());
++        assertEquals("SUCCESS", run.at("/executionOutcome/status").asText());
++        assertTrue(run.at("/artifactContractResults/0/valid").asBoolean());
++        assertEquals(1, run.path("executionTimeline").size());
++        assertFalse(Files.isRegularFile(tempDir.resolve("review.contract.json")));
++    }
++
++    private record FinalizationFixture(dev.dual.runtime.handler.TaskHandler.TaskContext context,
++                                       Path runPath, NodeResult result) { }
++
++    private FinalizationFixture finalizationFixture() throws Exception {
++        var context = AuthoredInputFixture.before(tempDir, "ws-1", "design.codex_arch_review", "run-1");
++        var ref = write("review.json", envelope("design.codex_arch_review", reviewResult()));
++        var runRef = ".agent/workstreams/ws-1/runs/run-1/run.json";
++        var runPath = tempDir.resolve(runRef);
++        var run = (com.fasterxml.jackson.databind.node.ObjectNode) LEDGER_JSON.readTree(runPath.toFile());
++        run.set("processResult", LEDGER_JSON.valueToTree(dev.dual.core.execution.ProcessResult.exitedZero()));
++        run.putArray("adapterSignals");
++        LEDGER_JSON.writeValue(runPath.toFile(), run);
++        return new FinalizationFixture(context, runPath,
++                NodeResult.completed("completed", List.of(ref), Map.of("run_id", "run-1", "run_metadata", runRef)));
++    }
++
++    private NodeResult finalizeCandidate(FinalizationFixture f) throws Exception {
++        return validator.validateAndFinalize(tempDir, "ws-1", f.context().instance().nodeInstanceId(),
++                f.context().definition(), f.context().instance().inputRefs(), f.result());
+     }
+ 
+     @Test
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java
+@@ -276,6 +276,7 @@
+         String recommendation = "READY_FOR_PRODUCT_REVIEW";
+         String acceptanceFailure = "";
+         boolean providerDenied;
++        ProcessResult process = ProcessResult.exitedZero();
+         boolean failNodeCompletionWrite;
+         Transport(Fixture f) { this.f = f; }
+         @Override public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException { return run(request); }
+@@ -360,7 +361,7 @@
+                 var now = Instant.now();
+                 return new AcpxRunResult(now, now.plusMillis(1), List.of("fixture"), List.of(), null,
+                         new AcpxPromptCompletion("fixture", "end_turn", envelope.toString()),
+-                        new ProcessResult("fixture", null, 0, ProcessUsability.EXITED_ZERO, 1, "", "", false, false),
++                        process,
+                         providerDenied ? List.of(new dev.dual.core.execution.AdapterSignal(
+                                 dev.dual.core.execution.AdapterSignalType.RATE_LIMITED, "quota exhausted", 1)) : List.of());
+             } catch (java.io.IOException e) { throw e; }
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java
+@@ -26,6 +26,52 @@
+                 "failed provider execution must not publish a business sidecar");
+         try (var files = java.nio.file.Files.walk(f.paths.workstreamDir().resolve("runs"))) {
+             assertTrue(files.noneMatch(path -> path.toString().endsWith(".contract.json")));
++        }
++    }
++
++    @ParameterizedTest @ValueSource(booleans = {false, true})
++    void incompleteProcessCannotBeReclassifiedAsMissingArtifactAfterPublicationIsBlocked(boolean queued) throws Exception {
++        var f = new HumanRequirementContinuationSequenceTest.Fixture(root, queued);
++        f.transport.process = dev.dual.core.execution.ProcessResult.nonZeroIncomplete(5);
++        f.untilGate();
++        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.ledger.loadCurrent(f.paths).status());
++        assertEquals(List.of("intake.claude_brainstorm"), f.transport.calls);
++        var node = f.active();
++        var outcome = (Map<?, ?>) node.result().get("agent_execution_outcome");
++        assertEquals("process_output_incomplete", outcome.get("primaryReason"));
++        var run = HumanRequirementContinuationSequenceTest.JSON.readTree(
++                root.resolve(node.result().get("run_metadata").toString()).toFile());
++        assertEquals("process_output_incomplete", run.at("/executionOutcome/primaryReason").asText());
++        assertTrue(run.at("/artifactContractResults/0/valid").asBoolean(),
++                "a valid candidate does not become invalid because execution prevents publication");
++        var recovery = dev.dual.ledger.file.RecoveryAssessment.from(node, root, f.ws);
++        assertEquals("agent_output_incomplete", recovery.classification());
++        assertEquals("RETRY_AFTER_EXTERNAL_FIX", recovery.retryReadiness());
++        assertFalse(recovery.retrySafe());
++        try (var files = java.nio.file.Files.walk(f.paths.workstreamDir().resolve("runs"))) {
++            assertTrue(files.noneMatch(path -> path.toString().endsWith(".contract.json")));
++        }
++    }
++
++    @ParameterizedTest @ValueSource(booleans = {false, true})
++    void trustworthyCompleteProcessWarningPublishesAndReachesIndependentReview(boolean queued) throws Exception {
++        var f = new HumanRequirementContinuationSequenceTest.Fixture(root, queued);
++        f.transport.process = dev.dual.core.execution.ProcessResult.nonZeroComplete(5);
++        f.untilGate();
++        assertEquals(WorkflowStatus.WAITING_FOR_HUMAN, f.ledger.loadCurrent(f.paths).status());
++        assertEquals("gate.human_requirement_review", f.active().nodeDefinitionId());
++        assertEquals(List.of("intake.claude_brainstorm", "intake.codex_product_review"), f.transport.calls);
++        try (var files = java.nio.file.Files.walk(f.paths.workstreamDir().resolve("runs"))) {
++            var runs = files.filter(path -> path.getFileName().toString().equals("run.json")).toList();
++            assertEquals(2, runs.size());
++            for (var path : runs) {
++                var run = HumanRequirementContinuationSequenceTest.JSON.readTree(path.toFile());
++                assertEquals("SUCCESS_WITH_WARNINGS", run.at("/executionOutcome/status").asText());
++                long decisions = java.util.stream.StreamSupport.stream(run.path("executionTimeline").spliterator(), false)
++                        .filter(event -> "contract_validated".equals(event.path("kind").asText())).count();
++                assertEquals(1, decisions, "publication must not trigger a second execution decision");
++                assertTrue(run.at("/artifactContractResults/0/valid").asBoolean());
++            }
+         }
+     }
+ 
+--- before/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java
++++ after/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java
+@@ -293,7 +293,8 @@
+         if ("OUTPUT_INCOMPLETE".equals(recoveryCategory)) {
+             return new RecoveryAssessment(
+                     "agent_output_incomplete",
+-                    "RETRY_AFTER_OUTPUT_CONTRACT_FIX",
++                    "process_output_incomplete".equals(primaryReason)
++                            ? "RETRY_AFTER_EXTERNAL_FIX" : "RETRY_AFTER_OUTPUT_CONTRACT_FIX",
+                     blankDefault(operatorMessage, "The agent output stopped before a valid terminal control and artifact boundary."),
+                     retry,
+                     diagnosticJsonRef,
+--- before/dual-cli/src/test/java/dev/dual/cli/RecoveryShowCommandTest.java
++++ after/dual-cli/src/test/java/dev/dual/cli/RecoveryShowCommandTest.java
+@@ -118,6 +118,23 @@
+         assertFalse(printed.contains("AGENT_RESULT_MISSING"));
+     }
+ 
++    @Test
++    void incompleteProcessAndInvalidEnvelopeHaveDifferentRecoveryInstructions() throws Exception {
++        for (var reason : List.of("process_output_incomplete", "agent_result_missing_or_invalid")) {
++            var ws = "ws-" + reason;
++            writeFailure(ws, NodeStatus.FAILED, reason, Map.of("agent_execution_outcome", Map.of(
++                    "status", "OUTPUT_INCOMPLETE", "primaryReason", reason,
++                    "recoveryCategory", "OUTPUT_INCOMPLETE", "operatorMessage", "Recorded cause: " + reason,
++                    "nodeMaySucceed", false, "retryPolicy", "MANUAL_ONLY")));
++            var printed = runShow(ws);
++            assertTrue(printed.contains("- Classification: agent_output_incomplete"));
++            assertTrue(printed.contains("Recorded cause: " + reason));
++            assertTrue(printed.contains(reason.equals("process_output_incomplete")
++                    ? "- Retry Readiness: RETRY_AFTER_EXTERNAL_FIX"
++                    : "- Retry Readiness: RETRY_AFTER_OUTPUT_CONTRACT_FIX"));
++        }
++    }
++
+     private void writeDiagnostic(String diagnosticRef) throws Exception {
+         var path = tempDir.resolve(diagnosticRef);
+         Files.createDirectories(path.getParent());
+--- before/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java
++++ after/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java
+@@ -34,6 +34,7 @@
+ 
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertFalse;
++import static org.junit.jupiter.api.Assertions.assertTrue;
+ import static org.junit.jupiter.api.Assertions.assertNotNull;
+ 
+ class WorkstreamApiControllerTest {
+@@ -837,6 +838,31 @@
+         var overview = controller().overview(fixture.workstreamId(), tempDir.toString());
+         assertEquals(true, overview.toString().contains("gate subject mismatch"));
+         assertFalse(overview.toString().contains("AGENT_RESULT_MISSING"));
++    }
++
++    @Test
++    @SuppressWarnings("unchecked")
++    void incompleteProcessKeepsRecoveryAndAttentionOnExecutionRatherThanOutputRepair() throws Exception {
++        var fixture = createFailedWorkstream("ws-api-process-incomplete");
++        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
++        var ledger = new WorkflowFileLedger();
++        var nodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
++        ledger.completeAndRoute(paths, ledger.loadDefinition(paths), nodeId, NodeStatus.FAILED,
++                "process_output_incomplete", List.of(), Map.of("agent_execution_outcome", Map.of(
++                        "status", "OUTPUT_INCOMPLETE", "primaryReason", "process_output_incomplete",
++                        "recoveryCategory", "OUTPUT_INCOMPLETE", "operatorMessage", "The process did not complete reliably.",
++                        "nodeMaySucceed", false, "retryPolicy", "MANUAL_ONLY")));
++        var assessment = (Map<String, Object>) controller().currentRecovery(
++                fixture.workstreamId(), tempDir.toString()).get("assessment");
++        assertEquals("agent_output_incomplete", assessment.get("classification"));
++        assertEquals("RETRY_AFTER_EXTERNAL_FIX", assessment.get("retryReadiness"));
++        assertEquals(false, assessment.get("retrySafe"));
++        var overview = controller().overview(fixture.workstreamId(), tempDir.toString());
++        var shared = (Map<String, Object>) overview.get("recoveryAssessment");
++        assertEquals(assessment.get("reason"), shared.get("reason"));
++        assertEquals(assessment.get("retryReadiness"), shared.get("retryReadiness"));
++        assertTrue(overview.toString().contains("Inspect the recorded agent process"));
++        assertFalse(overview.toString().contains("Inspect the agent output contract"));
+     }
+ 
+     @Test
+--- before/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamAttentionEvaluator.java
++++ after/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamAttentionEvaluator.java
+@@ -316,7 +316,9 @@
+                     "critical",
+                     "Agent output incomplete",
+                     assessment.reason(),
+-                    "Inspect the agent output contract, then retry the same active node.",
++                    "RETRY_AFTER_EXTERNAL_FIX".equals(assessment.retryReadiness())
++                            ? "Inspect the recorded agent process and external failure before a manual retry."
++                            : "Inspect the agent output contract, then retry the same active node.",
+                     assessment.suggestedCommand(),
+                     assessment.retrySafe(),
+                     current.status().name(),
+--- before/dual-ledger-file/src/test/java/dev/dual/ledger/file/RecoveryAssessmentTest.java
++++ after/dual-ledger-file/src/test/java/dev/dual/ledger/file/RecoveryAssessmentTest.java
+@@ -340,21 +340,23 @@
+     }
+ 
+     @Test
+-    void agentOutputIncompleteHasExplicitProjectionAndIsNotRetrySafe() {
+-        var assessment = RecoveryAssessment.from(failedAcpxNode(Map.of(
+-                "agent_execution_outcome", Map.of(
+-                        "status", "OUTPUT_INCOMPLETE",
+-                        "primaryReason", "process_output_incomplete",
+-                        "recoveryCategory", "OUTPUT_INCOMPLETE",
+-                        "retryPolicy", "MANUAL_ONLY",
+-                        "operatorMessage", "The agent output stopped before a valid boundary."
+-                )
+-        )), tempDir, "ws-recovery");
+-
+-        assertEquals("agent_output_incomplete", assessment.classification());
+-        assertEquals("RETRY_AFTER_OUTPUT_CONTRACT_FIX", assessment.retryReadiness());
+-        assertFalse(assessment.retrySafe(),
+-                "output-incomplete is not blindly retry-safe; the output contract must be inspected first");
++    void incompleteProcessAndMissingEnvelopeRequireDifferentManualChecks() {
++        var cases = Map.of("process_output_incomplete", "RETRY_AFTER_EXTERNAL_FIX",
++                "agent_result_missing_or_invalid", "RETRY_AFTER_OUTPUT_CONTRACT_FIX");
++        for (var entry : cases.entrySet()) {
++            var assessment = RecoveryAssessment.from(failedAcpxNode(Map.of(
++                    "agent_execution_outcome", Map.of(
++                            "status", "OUTPUT_INCOMPLETE",
++                            "primaryReason", entry.getKey(),
++                            "recoveryCategory", "OUTPUT_INCOMPLETE",
++                            "retryPolicy", "MANUAL_ONLY",
++                            "operatorMessage", "The recorded boundary did not complete."
++                    )
++            )), tempDir, "ws-recovery");
++            assertEquals("agent_output_incomplete", assessment.classification());
++            assertEquals(entry.getValue(), assessment.retryReadiness());
++            assertFalse(assessment.retrySafe(), "neither failure permits blind retry");
++        }
+     }
+ 
+     private static NodeInstanceDocument failedAcpxNode(Map<String, Object> result) {

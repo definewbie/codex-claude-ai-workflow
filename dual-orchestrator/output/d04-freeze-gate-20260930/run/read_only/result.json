@@ -1,0 +1,24 @@
+{
+  "requests": 7,
+  "counts": {
+    "/root": 5,
+    "/root/probe": 2
+  },
+  "threads": {
+    "/root": "01a0f028-8cc7-7460-8f23-569403836940",
+    "/root/probe": "01a0f028-8ce1-7441-befc-d176c7f748de"
+  },
+  "child_done": true,
+  "interrupted": false,
+  "errors": [],
+  "status": "EVIDENCE_REQUIRES_REVIEW_NOT_PASS",
+  "exitCode": 0,
+  "fixture": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-child-read_only-0yiq1xda",
+  "elapsedSeconds": 1.3813506250153296,
+  "lateWrite": false,
+  "parentExitDoesNotProveAllChildrenStopped": true,
+  "after": {
+    "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-child-read_only-0yiq1xda/control/protected.txt": "a2da5a8914a43f9d2ff7883c5125f70c3e12d507f776f518bb939765eac49ae2",
+    "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-child-read_only-0yiq1xda/work/input.txt": "8fd2749504fab6be78baa67c1aba1b7c3722fea418b6244f60bb4560bc786c7e"
+  }
+}

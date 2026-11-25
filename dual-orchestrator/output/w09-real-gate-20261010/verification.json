@@ -1,0 +1,43 @@
+{
+  "verified_at": "2026-10-10T14:52:36.916137+08:00",
+  "gate_result": "FAIL",
+  "workflow_status": "WAITING_FOR_RECOVERY",
+  "workflow_agent_attempts": 1,
+  "recorded_prompt_intents": 0,
+  "no_retry_or_second_case": true,
+  "source_inputs_verified": 654,
+  "source_changes": [],
+  "frozen_jars_match": true,
+  "project_head_unchanged": true,
+  "stopped_ledger_snapshot_still_matches_original": true,
+  "native_session_record_closed": true,
+  "native_record_after_close_sha256": "745a72a9565199e4467624e9b7ff04ad5c8da2e35a5e55731a199f32702d20e2",
+  "CLI_runners": [
+    {
+      "pid": 23868,
+      "recorded_started_at": "2026-10-10T14:43:06.259952+08:00",
+      "ps_exit": 1,
+      "present_now": false,
+      "scope": "these recorded CLI runners only; no inference about arbitrary native child tree"
+    },
+    {
+      "pid": 24008,
+      "recorded_started_at": "2026-10-10T14:43:29.346071+08:00",
+      "ps_exit": 1,
+      "present_now": false,
+      "scope": "these recorded CLI runners only; no inference about arbitrary native child tree"
+    }
+  ],
+  "full_native_subtree_stop": "NOT_PROVEN",
+  "tokens": "UNAVAILABLE; no zero usage claim",
+  "target_and_workspace_product_changes": 0,
+  "models_reached": "no business prompt dispatched; no GLM/Codex response proven",
+  "documents_changed": [
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md"
+  ],
+  "links_checked": 154,
+  "missing_links": [],
+  "new_tests_run": 0,
+  "verification_limited_then_repaired": "sandbox ps limitation recorded, narrow process observation separate",
+  "next_action": "CC affected-boundary read-only review before authorized root-cause implementation/refreeze"
+}

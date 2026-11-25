@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-10-07T23:13:53.682023+08:00",
+  "checks": {
+    "tested_inputs": 945,
+    "incremental_files": 69,
+    "registered_evidence": 19,
+    "raw_suite_reports": 204,
+    "worklist": 1
+  },
+  "all_content_unchanged": true,
+  "test_runs_added": 0,
+  "code_changes": 0,
+  "native_provider_runs": 0,
+  "review_source": "User supplied CC independent review in this conversation",
+  "reviewed_snapshot_copies": [
+    "reviewed-batch.md",
+    "reviewed-verification.json",
+    "reviewed-registration-sha256.json",
+    "reviewed-worklist.md"
+  ]
+}

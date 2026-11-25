@@ -1,0 +1,21 @@
+{
+  "explicit_child_environment": {
+    "DUAL_ACPX_EXECUTABLE": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+    "DUAL_ACPX_COMMAND_TIMEOUT_SECONDS": "600",
+    "DUAL_FLOW_KERNEL": "liteflow",
+    "DUAL_OPERATOR_REGISTRY": "/private/tmp/dual-w09-newlines-20261022-offline-07/operator-workspaces.json"
+  },
+  "real_run_authorized": false,
+  "persistent_environment_changed": false,
+  "executables": {
+    "java": "/usr/bin/java",
+    "python3": "/opt/homebrew/bin/python3",
+    "node": "/usr/local/bin/node",
+    "git": "/opt/homebrew/bin/git",
+    "rtk": "/opt/homebrew/bin/rtk",
+    "claude": "/opt/homebrew/bin/claude",
+    "codex": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+    "acpx": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/acpx"
+  },
+  "process_path_sha256": "beec02d1d2a5bfdeeb92f7948b616a692ccb13e305ef996aa4b85d017d14fab5"
+}

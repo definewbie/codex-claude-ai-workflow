@@ -1,0 +1,76 @@
+{
+  "groups": {
+    "cancer-clinic-agent-runs": {
+      "workstreams": 129,
+      "status": {
+        "RUNNING": 26,
+        "WAITING_FOR_RECOVERY": 88,
+        "WAITING_FOR_HUMAN": 6,
+        "FAILED": 1,
+        "COMPLETED": 8
+      },
+      "runs": 712,
+      "logFiles": 1273,
+      "logBytes": 11881417
+    },
+    "captcha-auth-app-agent-runs": {
+      "workstreams": 6,
+      "status": {
+        "WAITING_FOR_RECOVERY": 3,
+        "COMPLETED": 2,
+        "WAITING_FOR_HUMAN": 1
+      },
+      "runs": 66,
+      "logFiles": 144,
+      "logBytes": 1636017
+    },
+    "codex-claude-ai-workflow-agent-runs": {
+      "workstreams": 1,
+      "status": {
+        "COMPLETED": 1
+      },
+      "runs": 1,
+      "logFiles": 1,
+      "logBytes": 188
+    },
+    "darwin-skill-optimizer-agent-runs": {
+      "workstreams": 1,
+      "status": {
+        "WAITING_FOR_RECOVERY": 1
+      },
+      "runs": 9,
+      "logFiles": 18,
+      "logBytes": 129622
+    },
+    "okx-btc-k-line-demo-agent-runs": {
+      "workstreams": 12,
+      "status": {
+        "WAITING_FOR_RECOVERY": 8,
+        "WAITING_FOR_HUMAN": 3,
+        "RUNNING": 1
+      },
+      "runs": 158,
+      "logFiles": 367,
+      "logBytes": 6130609
+    },
+    "repo-agent-runs": {
+      "workstreams": 1,
+      "status": {
+        "WAITING_FOR_RECOVERY": 1
+      },
+      "runs": 1,
+      "logFiles": 2,
+      "logBytes": 128
+    }
+  },
+  "workstreams": 150,
+  "uniqueIds": 150,
+  "runs": 947,
+  "nodes": 2260,
+  "events": 8628,
+  "logs": 1805,
+  "logBytes": 19777981,
+  "reportArchiveFiles": 4492,
+  "missingRegisteredWorktrees": 137,
+  "readErrors": 0
+}

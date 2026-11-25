@@ -1,0 +1,89 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1791622684602-4a7db768",
+  "agentTaskId" : "agt-1791622684598-f52c41c9",
+  "workflowExecutionId" : "wfe-1791622684542-53fcfc3a",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "handlerType" : "acpx.agent_run",
+  "status" : "FAILED",
+  "pid" : 89260,
+  "outcome" : "required_artifact_contract_failed",
+  "nodeStatus" : "FAILED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/outputs/intake-claude-brainstorm.stderr.log", ".agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/outputs/intake-claude-brainstorm.transcript.log", ".agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/outputs/intake-claude-brainstorm.json", ".agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791622684632/binding.json", ".agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/contract-failures/node-intake-claude_brainstorm-002.json", ".agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/contract-failures/node-intake-claude_brainstorm-002.md" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-10T08:58:03.401Z",
+      "input_identity" : "40ec5cb4eda91c7f4c155684d0b64fe88e884ffe52569b4d0bd13dfdcb9a09ed",
+      "executor_pid" : 89260
+    },
+    "prepared_run" : {
+      "ref" : ".agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/outputs/nxe-1791622684602-4a7db768-prepared.json",
+      "sha256" : "748947d0effd0bb7a64ff85fbfbe21efd474cc80084c7555934eafe991297414"
+    },
+    "adapter_signals" : [ ],
+    "agent" : "claude",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "task_contract_proposal",
+      "errorCode" : "TASK_CONTRACT_EVIDENCE_TRACEABILITY_INVALID",
+      "errorMessage" : "task_contract_proposal is not grounded in the tracked inventory",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : false
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : false,
+      "operatorMessage" : "The agent result was valid, but one or more required artifact projections failed validation.",
+      "primaryReason" : "required_artifact_contract_failed",
+      "recoveryCategory" : "ARTIFACT_CONTRACT_FAILURE",
+      "retryPolicy" : "MANUAL_ONLY",
+      "secondarySignals" : [ ],
+      "status" : "CONTRACT_FAILED"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "READY_FOR_PRODUCT_REVIEW",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW" ],
+    "contract_failure_diagnostic_markdown_ref" : ".agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/contract-failures/node-intake-claude_brainstorm-002.md",
+    "contract_failure_diagnostic_ref" : ".agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/contract-failures/node-intake-claude_brainstorm-002.json",
+    "contract_node_id" : "intake.claude_brainstorm",
+    "contract_required_keys" : [ "summary", "decision" ],
+    "exit_code" : 0,
+    "message" : "task_contract_proposal is not grounded in the tracked inventory",
+    "output_complete" : true,
+    "parse_error" : {
+      "code" : "TASK_CONTRACT_EVIDENCE_TRACEABILITY_INVALID",
+      "details" : {
+        "errors" : [ "evidence_refs contains a non-canonical path: .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791622684632/repo-map.json", "evidence_refs contains a non-canonical path: .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791622684632/binding.json" ]
+      },
+      "message" : "task_contract_proposal is not grounded in the tracked inventory"
+    },
+    "process_usability" : "EXITED_ZERO",
+    "reason" : "AGENT_OUTPUT_CONTRACT_VIOLATION",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791622684632/binding.json",
+    "repository_fact_binding_sha256" : "077bbbd6dd3f27398c47c524ca4228667cac44b70e2e9cc42173a3ea55ee828f",
+    "run_id" : "run-1791622684632",
+    "run_metadata" : ".agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/run.json",
+    "session" : "claude-main-ws-20261010T085617Z-8SVF-run-1791622684632",
+    "transcript_ref" : ".agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/outputs/intake-claude-brainstorm.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/outputs/nxe-1791622684602-4a7db768-completion.json",
+    "completion_sha256" : "058d3b02c6e69adaa54ab041d168481a43055deb3024f94d7fe3c73cb2ece74f",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "The agent result was valid, but one or more required artifact projections failed validation.",
+  "runRef" : "run-1791622684632",
+  "agentRunRef" : ".agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/run.json",
+  "agent" : "claude",
+  "session" : "claude-main-ws-20261010T085617Z-8SVF-run-1791622684632",
+  "exitCode" : 0,
+  "startedAt" : "2026-10-10T08:58:04.602631Z",
+  "finishedAt" : "2026-10-10T09:05:23.137632Z",
+  "durationMs" : 438535
+}

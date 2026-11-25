@@ -1,0 +1,13 @@
+{
+  "received_on": "2026-10-07",
+  "review_disposition": {
+    "ref": "cc-review-disposition.md",
+    "sha256": "39fcabe5d563b34993b16d58d16849af84ac34ba39af9b14b89f4b0d9bb6afd6"
+  },
+  "unchanged_original_materials": {
+    "checkpoint.md": "d182f9e7191492802a7b643b35ed72a070cc2e49b38c3b763526152588649fea",
+    "verification.json": "57a922df48e1c5124a62dec3df77be38ceba08c46c6bcded1940866065184db2",
+    "transition-plan.md": "b7db45b2d242efb0d3920b707eb0cfd5905d42a2a583daa6177beedc74bf7ed0",
+    "incremental.patch": "07ef6237e5478e2e7aff9c8153966a3b39cbb6d4e71ef92cc2117417dd2e97a2"
+  }
+}

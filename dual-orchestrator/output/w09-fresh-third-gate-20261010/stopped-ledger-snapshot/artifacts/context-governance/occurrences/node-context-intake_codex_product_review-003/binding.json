@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261010T124812Z-XCZL",
+  "node_instance_id" : "node-context-intake_codex_product_review-003",
+  "run_id" : "",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_codex_product_review-003/working-set.json",
+      "sha256" : "49bde56a1ac68bd7e6cf86a90bafeac6c7889f9eb81cd14797f94077c0670202"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_codex_product_review-003/read-reuse-contract.json",
+      "sha256" : "7a27da81b9204ee6240ff8ab6cb36e80d5cbb73d46c61a35bb5dba16d0838768"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_codex_product_review-003/agent-capability-catalog.json",
+      "sha256" : "3867e3cc23b98314d102d5b25bb796fafa7cbf7730cc93fd4b8c9c477128fba1"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_codex_product_review-003/planned-report.json",
+      "sha256" : "7a776862602d3337a918d08e90e50afa570cfbfe69560f0599720b7cf3b3036d"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_codex_product_review-003/repo-map.json",
+      "sha256" : "2045f8bf96fd63b9d9405ffec950e80958b66902e319d3bd5757d20ae1b85e3c"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_codex_product_review-003/file-summaries.json",
+      "sha256" : "526b33b0a697b8ca8c3c6532590febff12a07daa0ed71a9644cb6d10ecff8e36"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_codex_product_review-003/stage-scope-policy.json",
+      "sha256" : "99f75f4f1274650770e91b2b53acfb8bbf5e12a6ef24a5c636a77db440f21284"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_codex_product_review-003/file-relevance-plan.json",
+      "sha256" : "e110e8334fb5594a1e7704f5e79f68c1fb9b4c1c062457e3815f4f825e22bafb"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "status": "READ_COMPLETED",
+  "exit": 0,
+  "matched_scope_records": [],
+  "stderr": "",
+  "window": "2026-10-22 23:19:50 to 23:20:45 Asia/Shanghai",
+  "caution": "Only retained records in this window; no matches does not disprove sandbox restriction"
+}

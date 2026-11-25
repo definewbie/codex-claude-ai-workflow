@@ -1,0 +1,407 @@
+{
+  "outcomeCounts": {
+    "SUCCESS": 138,
+    "OUTPUT_INCOMPLETE": 12,
+    "RECOVERABLE_ADAPTER_FAILURE": 4,
+    "SUCCESS_WITH_WARNINGS": 2,
+    "TIMEOUT": 1,
+    "CONTRACT_FAILED": 1
+  },
+  "sessions": {
+    "workstream": {
+      "runs": 65,
+      "measuredTokens": 5750964,
+      "cachedReadTokens": 4535296,
+      "rawCostAmountSum": 3.9876800000000006
+    },
+    "run": {
+      "runs": 93,
+      "measuredTokens": 60490013,
+      "cachedReadTokens": 54323712,
+      "rawCostAmountSum": 93.52933499999996
+    }
+  },
+  "correctionCount": 27,
+  "correctionNodeMaySucceedCount": 25,
+  "corrections": [
+    {
+      "run": "run-1788346607263",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/runs/run-1788346607263/run.json",
+      "sha256": "a5908672ecab9f1f7aeb7c8dc815b84c2503a4883c3584cf47eac9dbeb246e43"
+    },
+    {
+      "run": "run-1788437649906",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/runs/run-1788437649906/run.json",
+      "sha256": "b18f8d027cea2edfad20595540933095cbccd3a0f4a8dfc35b46ea58dd638c90"
+    },
+    {
+      "run": "run-1788476621271",
+      "nodeMaySucceed": false,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/run.json",
+      "sha256": "41acbf81b8fca25fc16c0a0353684e248ffe3802d41776602ecf3133b8a8f13c"
+    },
+    {
+      "run": "run-1788496598563",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T040052Z-3B2P/.agent/workstreams/ws-20260904T040052Z-3B2P/runs/run-1788496598563/run.json",
+      "sha256": "d9e9bfbefd450d3112f9e951e06b681c430d5255d47b57c75096bcc2213bdd7f"
+    },
+    {
+      "run": "run-1788502503945",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T040052Z-3B2P/.agent/workstreams/ws-20260904T040052Z-3B2P/runs/run-1788502503945/run.json",
+      "sha256": "8e0e22f4eae4f1b5aa84c4505d0db992abb4249344f0fec4f6d65ef888122055"
+    },
+    {
+      "run": "run-1788529432936",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T131724Z-PNBV/.agent/workstreams/ws-20260904T131724Z-PNBV/runs/run-1788529432936/run.json",
+      "sha256": "0a02bedb0d7f7c1edbafebeebf1e315f4606df9196a4760d8c152be8fe3af498"
+    },
+    {
+      "run": "run-1788700653827",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9/runs/run-1788700653827/run.json",
+      "sha256": "4fc45c6ea79873eac9836c939a6ef4ba2da322f70c398d6d2cc380258a36e846"
+    },
+    {
+      "run": "run-1788706182287",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9/runs/run-1788706182287/run.json",
+      "sha256": "077941acc5ccb1c61dd2f2efe462a421dae17ff9e8d024a5bb1f0e77b0326353"
+    },
+    {
+      "run": "run-1788707809621",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9/runs/run-1788707809621/run.json",
+      "sha256": "863300671f09e2c7c14bc69b36810c009cd18c8c606958883225fae7ad8ee483"
+    },
+    {
+      "run": "run-1788708099370",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9/runs/run-1788708099370/run.json",
+      "sha256": "dc181762a32fedf63d75f1668d14c05f0bf32a102548f2c10db17a6bc076a528"
+    },
+    {
+      "run": "run-1788708435180",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9/runs/run-1788708435180/run.json",
+      "sha256": "987c21af25fbb5754bce19167125831f8e1a8183ee8821720fd57ee4ae40cefa"
+    },
+    {
+      "run": "run-1788781080688",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9/runs/run-1788781080688/run.json",
+      "sha256": "771e5d6552b2ece7e076b51f22988a0ee108ecf707acaa28060ba885a58cc9e8"
+    },
+    {
+      "run": "run-1788786861736",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9/runs/run-1788786861736/run.json",
+      "sha256": "292e776041368964528d9528037101d17e79787ac6e78b4f6381411ac6398b5b"
+    },
+    {
+      "run": "run-1788993629502",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1788993629502/run.json",
+      "sha256": "ede034596d58ff6515841945432c36f707596efc54fa8621b5bae689549a9d4c"
+    },
+    {
+      "run": "run-1788996331498",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1788996331498/run.json",
+      "sha256": "3f38bf764347619e2284aa363e4fa0e554b023cb293c98799312f7a6de2812c9"
+    },
+    {
+      "run": "run-1788996623201",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1788996623201/run.json",
+      "sha256": "fb1bdc69d26bb218447b4c36c530645de47f150013dc4e84bea64ebbf1999baf"
+    },
+    {
+      "run": "run-1788997624942",
+      "nodeMaySucceed": false,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1788997624942/run.json",
+      "sha256": "257dc2d6ec6da2347341f8a03416bd25c275e97872d7c98c9ed4851a9d6ca26a"
+    },
+    {
+      "run": "run-1789000114804",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1789000114804/run.json",
+      "sha256": "78411e22f70064783f72438135a1da79cbdaff7834f79edb8e30f1f8575dacc6"
+    },
+    {
+      "run": "run-1789001024270",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1789001024270/run.json",
+      "sha256": "b0dff656c9e940be7e66ec1c97642215b7c4fd40a41c62d5e031c7d8592ca234"
+    },
+    {
+      "run": "run-1789002242101",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1789002242101/run.json",
+      "sha256": "05775d0075fedf90f19d721b9c501d34b9678c361bac9e493e4d988f5dc3ae66"
+    },
+    {
+      "run": "run-1789002762245",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1789002762245/run.json",
+      "sha256": "7aa5893db74683da27179dfcb2aea1c826e3a938a9fc999897209f856dab2009"
+    },
+    {
+      "run": "run-1789003685804",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1789003685804/run.json",
+      "sha256": "c2541732d90b3e1ff4773f74414e461a13943d8da103c8a6597d0ab90e0bd691"
+    },
+    {
+      "run": "run-1789054039373",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260910T145051Z-245D/.agent/workstreams/ws-20260910T145051Z-245D/runs/run-1789054039373/run.json",
+      "sha256": "dd4ed2180cb7985edffb3665d6bda579e1b42e84a7713f7ac722730df0c671fb"
+    },
+    {
+      "run": "run-1789057431094",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260910T145051Z-245D/.agent/workstreams/ws-20260910T145051Z-245D/runs/run-1789057431094/run.json",
+      "sha256": "58e0acd6af7369e06440900425b5f014b53a68956ae47451add491afb657f7f8"
+    },
+    {
+      "run": "run-1789058713999",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260910T145051Z-245D/.agent/workstreams/ws-20260910T145051Z-245D/runs/run-1789058713999/run.json",
+      "sha256": "a01178fe388622585bc1cdbfbcd3441a541f4ead7bf2e7466230ca64c41bffc3"
+    },
+    {
+      "run": "run-1789059875141",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260910T145051Z-245D/.agent/workstreams/ws-20260910T145051Z-245D/runs/run-1789059875141/run.json",
+      "sha256": "def6f7b1325557dea2296eba6b46a3e326a881e4ba1236861ef6d8cacaec286c"
+    },
+    {
+      "run": "run-1789061656152",
+      "nodeMaySucceed": true,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260910T145051Z-245D/.agent/workstreams/ws-20260910T145051Z-245D/runs/run-1789061656152/run.json",
+      "sha256": "7e4bbb2b8439b0e00d28cba3fde4acb7dccc4e7ca9dad2a01c53a8a7ad2f242a"
+    }
+  ],
+  "retryEvents": [
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "line": 77,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ts": "2026-08-29T13:21:50.562389Z",
+      "payload": {
+        "previous_status": "FAILED",
+        "node_instance_id": "node-implement-claude_implement-023",
+        "note": "",
+        "recovery_gate_ids": [
+          "recovery-node-implement-claude_implement-023"
+        ],
+        "node": "implement.claude_implement"
+      }
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "line": 81,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ts": "2026-09-02T10:17:28.585478Z",
+      "payload": {
+        "previous_status": "FAILED",
+        "node": "implement.claude_implement",
+        "recovery_gate_ids": [
+          "recovery-node-implement-claude_implement-023"
+        ],
+        "note": "旧 Claude session 已关闭；policy transport 与 persistent binding replacement guard 已更新，按 retrySafe 标记重试同一实现节点。",
+        "node_instance_id": "node-implement-claude_implement-023"
+      }
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "line": 86,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ts": "2026-09-02T10:18:46.093920Z",
+      "payload": {
+        "previous_status": "FAILED",
+        "node": "implement.claude_implement",
+        "recovery_gate_ids": [
+          "recovery-node-implement-claude_implement-023"
+        ],
+        "note": "已确认失败发生在 provider 前：PATH acpx 不支持 E1 policy 参数；改用 Doctor 校验通过的 reviewed acpx fork 81acbb74。",
+        "node_instance_id": "node-implement-claude_implement-023"
+      }
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "line": 91,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ts": "2026-09-02T10:55:05.680236Z",
+      "payload": {
+        "previous_status": "FAILED",
+        "node": "implement.claude_implement",
+        "recovery_gate_ids": [
+          "recovery-node-implement-claude_implement-023"
+        ],
+        "note": "用户已明确授权在 retrySafe=false 且测试编译失败的已知风险下再执行一次同节点 provider retry；仅修复 Jackson 测试编译、运行完整测试并完成结构化交付，不扩大范围。",
+        "node_instance_id": "node-implement-claude_implement-023"
+      }
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "line": 96,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ts": "2026-09-02T10:56:33.974007Z",
+      "payload": {
+        "node_instance_id": "node-implement-claude_implement-023",
+        "note": "上一次恢复在 provider 前被 CLAUDE_EXECUTION_POLICY_CONFLICT 拒绝，未消费已授权 provider retry；冲突旧 session 已关闭，现以 fresh session 执行该次授权。",
+        "recovery_gate_ids": [
+          "recovery-node-implement-claude_implement-023"
+        ],
+        "node": "implement.claude_implement",
+        "previous_status": "FAILED"
+      }
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "line": 118,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ts": "2026-09-02T11:11:47.060674Z",
+      "payload": {
+        "previous_status": "FAILED",
+        "node": "implement.claude_implement",
+        "recovery_gate_ids": [
+          "recovery-node-implement-claude_implement-038"
+        ],
+        "note": "self-test 已将 18 个测试错误正式路由到新 repair iteration；该节点首次启动在 provider 前被旧 session policy conflict 拒绝，旧 session 已关闭。依据用户对后续同类恢复操作的 standing authorization，重试此 repair 节点。",
+        "node_instance_id": "node-implement-claude_implement-038"
+      }
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "line": 131,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ts": "2026-09-03T08:37:19.557628Z",
+      "payload": {
+        "recovery_gate_ids": [
+          "recovery-node-implement-self_test_decision-042"
+        ],
+        "note": "Route the latest typed self-test failure to the workflow-declared human implementation repair gate.",
+        "node_instance_id": "node-implement-self_test_decision-042",
+        "previous_status": "BLOCKED",
+        "node": "implement.self_test_decision"
+      }
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "line": 147,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ts": "2026-09-03T09:46:27.858011Z",
+      "payload": {
+        "node_instance_id": "node-implement-claude_implement-049",
+        "note": "Retry after verifying the prior attempt used PATH acpx 0.11.0, which lacks the reviewed E1 policy flags; force the reviewed acpx 0.13.2 binary.",
+        "recovery_gate_ids": [
+          "recovery-node-implement-claude_implement-049"
+        ],
+        "node": "implement.claude_implement",
+        "previous_status": "FAILED"
+      }
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "line": 152,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ts": "2026-09-03T09:58:13.873040Z",
+      "payload": {
+        "node_instance_id": "node-implement-claude_implement-049",
+        "note": "Retry once after a reviewed occurrence completed product edits but returned no final AgentResultEnvelope; preserve current scope and finish tests plus structured delivery only.",
+        "recovery_gate_ids": [
+          "recovery-node-implement-claude_implement-049"
+        ],
+        "node": "implement.claude_implement",
+        "previous_status": "FAILED"
+      }
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "line": 157,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ts": "2026-09-03T12:13:37.490674Z",
+      "payload": {
+        "note": "",
+        "node_instance_id": "node-implement-claude_implement-049",
+        "previous_status": "FAILED",
+        "node": "implement.claude_implement",
+        "recovery_gate_ids": [
+          "recovery-node-implement-claude_implement-049"
+        ]
+      }
+    },
+    {
+      "workstream": "ws-20260904T040052Z-3B2P",
+      "line": 50,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T040052Z-3B2P/.agent/workstreams/ws-20260904T040052Z-3B2P/events.jsonl",
+      "ts": "2026-09-04T04:54:19.413417Z",
+      "payload": {
+        "node_instance_id": "node-design-claude_design-014",
+        "note": "Retry after restoring reviewed acpx environment; prior attempt failed before provider start.",
+        "recovery_gate_ids": [
+          "recovery-node-design-claude_design-014"
+        ],
+        "node": "design.claude_design",
+        "previous_status": "FAILED"
+      }
+    },
+    {
+      "workstream": "ws-20260904T131724Z-PNBV",
+      "line": 50,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T131724Z-PNBV/.agent/workstreams/ws-20260904T131724Z-PNBV/events.jsonl",
+      "ts": "2026-09-04T14:04:10.831517Z",
+      "payload": {
+        "previous_status": "FAILED",
+        "node_instance_id": "node-design-claude_design-014",
+        "note": "恢复已验证的 acpx 运行环境；上次在 provider session 创建前失败，零 provider 调用、零 token。",
+        "recovery_gate_ids": [
+          "recovery-node-design-claude_design-014"
+        ],
+        "node": "design.claude_design"
+      }
+    },
+    {
+      "workstream": "ws-20260906T130900Z-SPM9",
+      "line": 135,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9/events.jsonl",
+      "ts": "2026-09-06T14:49:04.804379Z",
+      "payload": {
+        "previous_status": "FAILED",
+        "node": "implement.claude_implement",
+        "recovery_gate_ids": [
+          "recovery-node-implement-claude_implement-042"
+        ],
+        "note": "用户明确授权修复并继续当前节点。原 run-1788703780643 在仍有进展时被总 deadline 取消，已有产品文件保留；使用已通过 1403 项测试的新包，关闭 Dual 总 deadline，保留进展与故障检测。仅重试本节点，原合同/设计/计划和 scope 不变，不自动重试后续事故。",
+        "node_instance_id": "node-implement-claude_implement-042"
+      }
+    },
+    {
+      "workstream": "ws-20260909T151234Z-BXWV",
+      "line": 152,
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl",
+      "ts": "2026-09-09T23:51:23.793532Z",
+      "payload": {
+        "node": "implement.claude_self_test_report",
+        "recovery_gate_ids": [
+          "recovery-node-implement-claude_self_test_report-047"
+        ],
+        "note": "已检查parse诊断：自测最终JSON的verification_summary缺结束引号，自动纠正仍失败。原Maven测试已结束，当前7份XML合计49测试/5失败/27错误/0跳过，禁止沿用中段无失败猜测。仅一次同节点重试，读取最终测试证据并输出完整结构化结果；不修改源码、不后台启动后提前返回、不伪造通过。保留现有离线缓存，不扩大范围。",
+        "node_instance_id": "node-implement-claude_self_test_report-047",
+        "previous_status": "FAILED"
+      }
+    }
+  ],
+  "notes": [
+    "Cost sum is raw metadata, not verified billed dollars.",
+    "Session scope is recorded scope, not a causal estimate of avoidable cache usage.",
+    "Node success is not product delivery."
+  ]
+}

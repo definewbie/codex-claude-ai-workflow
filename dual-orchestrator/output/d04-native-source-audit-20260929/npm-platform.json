@@ -1,0 +1,38 @@
+{
+  "url": "https://registry.npmjs.org/@openai%2fcodex/0.153.4-darwin-arm64",
+  "status": 200,
+  "rawSha256": "e7f2ef043ca6267daf2e1e4e64569e179bf3a9b0dfe6493aee200b23f4b845b8",
+  "metadata": {
+    "name": "@openai/codex",
+    "version": "0.153.4-darwin-arm64",
+    "gitHead": null,
+    "repository": {
+      "url": "git+https://github.com/openai/codex.git",
+      "type": "git",
+      "directory": "codex-cli"
+    },
+    "dist": {
+      "shasum": "e41d069161e705b82a5a4b9bd4f454d6c57bb826",
+      "tarball": "https://registry.npmjs.org/@openai/codex/-/codex-0.153.4-darwin-arm64.tgz",
+      "fileCount": 7,
+      "integrity": "sha512-B1qhN3fa1ay0R0wGziXqgwSkB5icpYChNKHhtBHff/0UtSTC7z+l8aTtvMlGjH3E8HEvY3+njIJelM9CAAoVWg==",
+      "signatures": [
+        {
+          "sig": "MEYCIQDkRpqXyXYtONmO3liZSVrFXrWEUoQRBSJ3bhJ6DROnQwIhAOS+gmyGV9hzOcnscm8rFZRj34dgGC2979i19CFlSrf0",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        },
+        {
+          "sig": "MEYCIQDnI1MaLi6yFPc/elohu0CXOPBX8JPye2Q2pAYza3V/EwIhAIC8b0Zkl9YV8G6N3Lpe255b4cg7LPQIYdlv5TuRihQU",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        }
+      ],
+      "attestations": {
+        "url": "https://registry.npmjs.org/-/npm/v1/attestations/@openai%2fcodex@0.153.4-darwin-arm64",
+        "provenance": {
+          "predicateType": "https://slsa.dev/provenance/v1"
+        }
+      },
+      "unpackedSize": 288140243
+    }
+  }
+}

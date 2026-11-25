@@ -1,0 +1,24 @@
+1: ;;;;;; Common rules, functions and definitions for Application Sandboxing
+2: ;;;;;;
+3: ;;;;;; Copyright (c) 2021 Apple Inc.  All Rights reserved.
+4: ;;;;;;
+5: ;;;;;; WARNING: The sandbox rules in this file currently constitute
+6: ;;;;;; Apple System Private Interface and are subject to change at any time and
+7: ;;;;;; without notice. The contents of this file are also auto-generated and
+8: ;;;;;; not user editable; it may be overwritten at any time.
+9: (version 1)
+10: (deny default)
+11: (deny file-link)
+12: (allow file-clone (with telemetry-backtrace) (with message "131556386:clone"))
+73: (define (apply-read-and-issue-extension op path-filter)
+74:   (op file-read* file-clone path-filter)
+75:   (op file-issue-extension
+76:       (require-all
+77:         path-filter
+78:         (extension-class
+79:           "com.apple.aned.read-only"
+80:           "com.apple.app-sandbox.read"
+81:           "com.apple.cfprefsd.read"))))
+82: (define (apply-write-and-issue-extension op path-filter)
+83:   (op file-write* file-link path-filter)
+84:   (op file-issue-extension

@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "scope": "offline diagnostic mechanism only; miniature phased fixture",
+  "actual_clock_difference": true,
+  "expected_classification": "qualification_contract_contradiction",
+  "lawful_continuation": "COMPLETED",
+  "native_provider_calls": 0,
+  "first_attempt": "INVALID_FIXTURE_NO_EXPLICIT_LEDGER_SESSION",
+  "first_log": "clock-comparison-proof-first.log",
+  "final_log": "clock-comparison-proof.log",
+  "helper_sha256": "2183ab41e128c39881a0deb2f22efb5441a57838bba98c01502782bf16fbc096"
+}

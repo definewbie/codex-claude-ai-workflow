@@ -1,0 +1,50 @@
+{
+  "xnu-vfs_syscalls.c": {
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/xnu/xnu-11417.140.69/bsd/vfs/vfs_syscalls.c",
+    "bytes": 376514,
+    "sha256": "2219b3d51cc21cf018e09af2ed4bfc66f4ff1082a81b3d1b1a5aa7010abcb35b",
+    "verificationError": "Unterminated string starting at: line 1 column 607 (char 606)"
+  },
+  "xnu-mac_vfs.c": {
+    "url": "https://raw.githubusercontent.com/apple-oss-distributions/xnu/xnu-11417.140.69/security/mac_vfs.c",
+    "bytes": 71890,
+    "sha256": "84f6edf8aec47a22676c4b0abbceb24d919b5e595b4eec488517e556c76d1efe",
+    "earlierVerificationError": "IncompleteRead(97150 bytes read, 2848 more expected)",
+    "gitBlobSha": "f356cc70eee8ad21e14fdf9e595665981c840dd5",
+    "blobVerified": true,
+    "apiUrl": "https://api.github.com/repos/apple-oss-distributions/xnu/contents/security/mac_vfs.c?ref=xnu-11417.140.69"
+  },
+  "codex-seatbelt.rs": {
+    "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/sandboxing/src/seatbelt.rs",
+    "bytes": 38954,
+    "sha256": "34e03d38ca4ae347eb8523bb390e746e7c31d25cde6071b35c90454eb966eb70",
+    "verificationError": "Unterminated string starting at: line 1 column 667 (char 666)"
+  },
+  "codex-seatbelt_base_policy.sbpl": {
+    "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/sandboxing/src/seatbelt_base_policy.sbpl",
+    "bytes": 3910,
+    "sha256": "5103332ddb8885ee5e1926de6c0ef23a61f4e55e31297506ae05fa4e0b24ba74",
+    "gitBlobSha": "2fca6a886e4f3ad5a5d8d8e6e6e88894fc8f0ed9",
+    "blobVerified": true,
+    "apiUrl": "https://api.github.com/repos/openai/codex/contents/codex-rs/sandboxing/src/seatbelt_base_policy.sbpl?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a"
+  },
+  "codex-seatbelt_network_policy.sbpl": {
+    "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/sandboxing/src/seatbelt_network_policy.sbpl",
+    "bytes": 1145,
+    "sha256": "eb2bf67e7a697d954f05fbd563e5888402fde3a279ecf383832473d44831ad0a",
+    "gitBlobSha": "1bb9eb2b82aa2b15b393adcaf546ef946ad11e7c",
+    "blobVerified": true,
+    "apiUrl": "https://api.github.com/repos/openai/codex/contents/codex-rs/sandboxing/src/seatbelt_network_policy.sbpl?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a"
+  },
+  "codex-seatbelt_preferences_policy.sbpl": {
+    "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/sandboxing/src/seatbelt_preferences_policy.sbpl",
+    "bytes": 383,
+    "sha256": "bfbbe3f051112c7c24dc3a61e09b54cee7e0ea33a420ff7fa9aa4dace03d52aa",
+    "verificationError": "Remote end closed connection without response"
+  },
+  "codex-seatbelt_read_only_platform_defaults.sbpl": {
+    "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/sandboxing/src/seatbelt_read_only_platform_defaults.sbpl",
+    "error": "IncompleteRead(6890 bytes read, 406 more expected)",
+    "verificationError": "Unterminated string starting at: line 1 column 11080 (char 11079)"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "case": "OKX_JAVA_MODIFY_CANDIDATE",
+  "product_scope_confirmed": true,
+  "baseline_selection_confirmed": true,
+  "budget_approved": true,
+  "real_run_authorized": true,
+  "business_gates_delegated": false,
+  "commit_delegated": false,
+  "approved_launch_identity_sha256": "719b8f719854baf17407932f5f5d4ab8120ed666d27aac7df7de334ba5de2a41",
+  "workstream": "ws-20261026T142203Z-7SNA",
+  "budget_sha256": "f723d4dcdd38ead0e4801b58ada7d5d2a4304f4ebce3ab18c63cc2a2e9a8685a",
+  "note": "Current explicit same-case cumulative 4M amendment; no business or commit delegation.",
+  "offline_preparation_authorized": true,
+  "approval_ref": "current-approval.txt",
+  "initial_ledger_sha256": "d1b747b38d4ad8ec5cfbffb303162d8232e7568b0409ffc908bf7c3923df908b",
+  "continuation_run_authorized": true,
+  "continuation_spec_sha256": "96c8c9804d01b14b603fa0faf3dec065d23b55b725efd646368518153353826c"
+}

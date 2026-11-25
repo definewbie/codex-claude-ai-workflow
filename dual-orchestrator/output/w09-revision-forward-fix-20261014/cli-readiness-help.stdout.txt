@@ -1,0 +1,13 @@
+Usage: dualctl review record-readiness [-hV] --file=<file>
+                                       --request-id=<requestId>
+                                       --subject=<subject>
+                                       [--workdir=<workdir>] <workstreamId>
+Record verification availability without approving or running the task.
+      <workstreamId>
+      --file=<file>
+  -h, --help                Show this help message and exit.
+      --request-id=<requestId>
+
+      --subject=<subject>
+  -V, --version             Print version information and exit.
+      --workdir=<workdir>

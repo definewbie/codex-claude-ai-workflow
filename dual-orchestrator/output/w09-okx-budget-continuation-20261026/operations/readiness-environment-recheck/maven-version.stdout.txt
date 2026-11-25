@@ -1,0 +1,5 @@
+Apache Maven 3.9.10 (5f519b97e944483d878815739f519b2eade0a91d)
+Maven home: /Users/kriswang/work/opensource/maven
+Java version: 25.0.3, vendor: Oracle Corporation, runtime: /Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home
+Default locale: zh_CN_#Hans, platform encoding: UTF-8
+OS name: "mac os x", version: "15.6.1", arch: "aarch64", family: "mac"

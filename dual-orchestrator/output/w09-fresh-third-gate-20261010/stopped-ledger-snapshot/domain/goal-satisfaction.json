@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261010T124812Z-XCZL",
+  "workflowInstanceId" : "wf-ws-20261010T124812Z-XCZL",
+  "nodeInstanceId" : "node-intake-decision-005",
+  "nodeDefinitionId" : "intake.decision",
+  "iterationId" : "iter-001",
+  "outcome" : "NEEDS_REVISION",
+  "domainOutcome" : "NEEDS_REDESIGN",
+  "reason" : "功能与验收要求覆盖充分，但 C-4 将建议文件固化为产品约束，未保留用户要求的设计、计划确认及实现前单独批准边界。",
+  "evidenceRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791636690133/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.contract.json" ],
+  "sourceResult" : {
+    "summary" : "功能与验收要求覆盖充分，但 C-4 将建议文件固化为产品约束，未保留用户要求的设计、计划确认及实现前单独批准边界。",
+    "source" : "contract-sidecar",
+    "decision" : "NEEDS_REVISION"
+  },
+  "generatedAt" : "2026-10-10T12:52:46.235546Z"
+}

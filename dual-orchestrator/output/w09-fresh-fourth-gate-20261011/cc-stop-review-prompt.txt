@@ -1,0 +1,5 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 W09 第四例停止做独立受影响评审，遵守 AGENTS.md。入口：output/w09-fresh-fourth-gate-20261011/stopped-assessment.md，同目录包含原始材料及静止快照。
+
+自行重建当前批准→设计返修→复评完成→用量归因→预算止损链，核对 Gate 与领域状态分类、请求编号重用的真实含义、历史固定事实及停止处置。判断问题是否来自合法客户端形态，并核对现有 completion/命令 transcript/共享 stream 能提供的身份和用量；比较现有 owner 内的前向修复，不预设必须新增连接代或接受报告结论。检查合法续作、拒绝、写失败、重启及兄弟路径，按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 说明已证与缺口，给分级发现和未核验范围。
+
+只读，不运行 provider/native 探针，不修改材料或代码、不启动额外 agent、不恢复样本或开启新 Gate；无需重审无关历史。

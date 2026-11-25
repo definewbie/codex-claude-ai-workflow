@@ -1,0 +1,16 @@
+{
+  "target": {
+    "head": "c71273fe0ca9960aa24de708c696979c9a7dea2a",
+    "tree": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+    "common_dir": "/private/tmp/dual-w09-newlines-20261010-fresh-02/target/.git",
+    "clean": "",
+    "canonical": "/private/tmp/dual-w09-newlines-20261010-fresh-02/target"
+  },
+  "workspace": {
+    "head": "c71273fe0ca9960aa24de708c696979c9a7dea2a",
+    "tree": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+    "common_dir": "/private/tmp/dual-w09-newlines-20261010-fresh-02/target/.git",
+    "clean": "",
+    "canonical": "/private/tmp/dual-w09-newlines-20261010-fresh-02/worktree"
+  }
+}

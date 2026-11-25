@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-contract-compile-007",
+  "nodeDefinitionId": "contract.compile",
+  "kind": "TASK",
+  "handlerType": "contract.compile",
+  "status": "COMPLETED",
+  "stageId": "stage-contract",
+  "iterationId": "iter-001",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1793027022575/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.contract.json"
+  ],
+  "inputTransition": {
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256": "eb717cf8d89f5f80200282d449fabeb7dcdb099fe72777f39938c91fa20c94d7",
+    "source_node_instance_id": "node-gate-human_requirement_review-006",
+    "required": true,
+    "transition_type": "normal",
+    "condition": "unconditional"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/task-contract.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/task-contract.md",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/contract-resolution.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/contract-resolution.md"
+  ],
+  "result": {
+    "contract_id": "tc-ws-20261026T142203Z-7SNA-node-contract-compile-007",
+    "contract_status": "READY_FOR_REVIEW",
+    "contract_version": 1,
+    "contract_phase": "GOAL",
+    "contract_epoch": 1,
+    "task_contract_sha256": "41f643f07f822573dfa2a13e8f5ede75aa2efd83fdca3efa20130ca0ae2bf04f",
+    "contract_resolution_sha256": "4ea85c7039fe75749f8a59f300b60930ec86a3419024e8257f03fe14255fd482",
+    "compilation_pass": 1,
+    "artifacts": [
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/task-contract.json",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/task-contract.md",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/contract-resolution.json",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/contract-resolution.md"
+    ],
+    "generated_at": "2026-10-26T15:11:09.824162Z"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1793027469737-dda710e2",
+  "startedAt": "2026-10-26T15:11:09.747923Z",
+  "finishedAt": "2026-10-26T15:11:09.834772Z"
+}

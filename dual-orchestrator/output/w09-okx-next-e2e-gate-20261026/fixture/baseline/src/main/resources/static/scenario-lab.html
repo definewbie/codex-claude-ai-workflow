@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="用三种90天BTC行情假设比较OKX产品组合的收益与风险">
+  <title>BTC 情景与组合实验室</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/scenario-lab.css">
+</head>
+<body class="results-pending">
+<a class="skip-link" href="#main-content">跳到主要内容</a>
+
+<header class="topbar">
+  <a class="back-link" href="/" aria-label="返回收益实验台">← 收益实验台</a>
+  <div class="brand"><span class="brand-mark">SCENARIO LAB</span><strong>BTC 情景与组合实验室</strong></div>
+  <div class="top-meta"><span>UTC+8</span><span>只读</span><span id="mode-flag" class="prototype-flag">等待计算</span></div>
+</header>
+
+<main id="main-content">
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="kicker">条件分析，不是价格预测</p>
+      <h1>填写三种90天行情，<br>比较组合怎么赚、<br>最坏可能亏多少。</h1>
+      <p class="hero-note">这里不会预测 BTC 涨跌。你提供悲观、震荡和乐观三种假设，后端比较 OKX 产品组合的净收益、BTC 敞口和风险约束。</p>
+    </div>
+    <dl class="hero-facts">
+      <div><dt>分析期限</dt><dd id="hero-horizon">90 天</dd></div>
+      <div><dt>BTC 起点价</dt><dd id="hero-price">— <small>人工输入</small></dd></div>
+      <div><dt>组合资金</dt><dd id="hero-capital">200,000 <small>USDT</small></dd></div>
+      <div><dt>执行方式</dt><dd>OKX 手工操作</dd></div>
+    </dl>
+  </section>
+
+  <aside id="mode-notice" class="prototype-notice" role="note">
+    <strong>先选择如何开始</strong>
+    <span>建议先运行教学示例理解结果，再使用自己的90天假设。两种模式不会混用输入。</span>
+    <div class="mode-actions" role="group" aria-label="分析模式">
+      <button id="demo-mode" class="mode-button active" type="button">快速体验示例</button>
+      <button id="backend-mode" class="mode-button" type="button">使用我的90天假设</button>
+    </div>
+  </aside>
+
+  <section class="section-block" aria-labelledby="scenario-title">
+    <div class="section-heading">
+      <div><p class="section-index">01 · 确认本次分析输入</p><h2 id="scenario-title">先确认钱、起点价格和证据时间</h2></div>
+      <p>第一批只接受人工输入，不把静态数字冒充实时行情。教学示例只用于理解操作，不代表当前市场。</p>
+    </div>
+
+    <form id="scenario-form" class="scenario-editor" novalidate>
+      <div class="analysis-basics">
+        <label>分析时点（UTC+8）<input id="evaluation-as-of" type="datetime-local" required><small>本次计算时间，不是产品报价时间。</small></label>
+        <label>组合资金（USDT）<input id="total-capital" type="number" value="200000" min="1" required><small>三套方案都按同一笔资金比较。</small></label>
+        <label>BTC 起点价格（人工录入）<input id="starting-price" type="number" min="1" placeholder="请从 OKX 抄录" required><small>人工录入，不是实时行情。</small></label>
+        <label>产品证据确认时间（UTC+8）<input id="evidence-observed-at" type="datetime-local" required><small>只有重新核对产品参数后才能更新。</small></label>
+      </div>
+
+      <div class="step-heading">
+        <div><p class="section-index">02 · 设置三种90天行情假设</p><h2>分别假设悲观、震荡和乐观时BTC走到哪里</h2></div>
+        <p>价格是假设，不是预测。系统同时保留收益路径和更不利的风险路径。</p>
+      </div>
+
+      <div class="scenario-grid" role="group" aria-label="市场情景结果查看">
+        <button class="scenario-card" type="button" data-scenario="BEAR" aria-pressed="false" disabled>
+          <span class="scenario-number">A</span><span class="scenario-direction down">↘ 悲观情景</span>
+          <strong id="bear-card-price">请填写</strong><small id="bear-card-source">教学示例，不代表当前市场</small>
+          <span class="scenario-change" id="bear-change">等待起点价格</span><span class="path-line path-down" aria-hidden="true"></span>
+          <span class="scenario-tags"><i>结果生成后可查看</i><i id="bear-stress-tag">风险终点 43,000</i></span>
+        </button>
+        <button class="scenario-card" type="button" data-scenario="RANGE" aria-pressed="false" disabled>
+          <span class="scenario-number">B</span><span class="scenario-direction flat">↔ 震荡情景</span>
+          <strong id="range-card-price">请填写</strong><small id="range-card-source">教学示例，不代表当前市场</small>
+          <span class="scenario-change" id="range-change">等待起点价格</span><span class="path-line path-range" aria-hidden="true"></span>
+          <span class="scenario-tags"><i>结果生成后可查看</i><i id="range-stress-tag">风险终点 60,000</i></span>
+        </button>
+        <button class="scenario-card" type="button" data-scenario="BULL" aria-pressed="false" disabled>
+          <span class="scenario-number">C</span><span class="scenario-direction up">↗ 乐观情景</span>
+          <strong id="bull-card-price">请填写</strong><small id="bull-card-source">教学示例，不代表当前市场</small>
+          <span class="scenario-change" id="bull-change">等待起点价格</span><span class="path-line path-up" aria-hidden="true"></span>
+          <span class="scenario-tags"><i>结果生成后可查看</i><i id="bull-stress-tag">风险终点 94,000</i></span>
+        </button>
+      </div>
+
+      <div class="scenario-inputs">
+        <div><label for="bear-price">悲观情景：90天后BTC价格</label><div class="input-unit"><input id="bear-price" type="number" min="1" placeholder="例如 48000" required><span>USDT</span></div></div>
+        <div><label for="range-price">震荡情景：90天后BTC价格</label><div class="input-unit"><input id="range-price" type="number" min="1" placeholder="例如 66000" required><span>USDT</span></div></div>
+        <div><label for="bull-price">乐观情景：90天后BTC价格</label><div class="input-unit"><input id="bull-price" type="number" min="1" placeholder="例如 84000" required><span>USDT</span></div></div>
+      </div>
+      <div class="probability-inputs">
+        <label for="probabilities">各情景发生概率（可空）</label>
+        <div id="probabilities" class="probability-row"><input aria-label="下行情景概率" type="number" placeholder="可空" min="0" max="100"><span>/</span><input aria-label="震荡情景概率" type="number" placeholder="可空" min="0" max="100"><span>/</span><input aria-label="上行情景概率" type="number" placeholder="可空" min="0" max="100"><b>%</b></div>
+        <small>概率只用于计算达到10%/20%目标的概率，不改变组合比例和方案排序。</small>
+      </div>
+      <button id="scenario-run" class="run-button" type="submit"><span>生成组合建议</span><small>比较三种行情 · 只读</small></button>
+
+      <details class="evidence-editor product-evidence-editor">
+        <summary>产品收益与成本证据（人工录入）</summary>
+        <p>下面是可编辑的人工证据模板，不是实时产品报价。证据时间与分析时点已分开；后端仍独立裁决产品资格。</p>
+        <fieldset>
+          <legend>简单赚币与智能套利</legend>
+          <label>90 天定期净 APR<input id="fixed-apr" type="number" value="0.035" min="0" max="1" step="0.0001"></label>
+          <label>90 天定期额度<input id="fixed-cap" type="number" value="160000" min="1"></label>
+          <label>活期净 APR<input id="flex-apr" type="number" value="0.0255" min="0" max="1" step="0.0001"></label>
+          <label>活期额度<input id="flex-cap" type="number" value="200000" min="1"></label>
+          <label>套利对冲名义比例<input id="smart-hedge-ratio" type="number" value="0.95" min="0" max="1" step="0.01"></label>
+          <label>套利累计资金费率（悲观/震荡/乐观）<input id="smart-bear-rate" type="number" value="-0.005" step="0.001"><input id="smart-range-rate" type="number" value="0.010" step="0.001"><input id="smart-bull-rate" type="number" value="0.018" step="0.001"></label>
+          <label>套利参考资金 / 开仓 / 退出 / 滑点成本<input id="smart-reference-capital" type="number" value="20000" min="1"><input id="smart-opening-cost" type="number" value="20" min="0"><input id="smart-exit-cost" type="number" value="20" min="0"><input id="smart-slippage-cost" type="number" value="10" min="0"></label>
+          <label>套利再平衡 / 服务或融资成本<input id="smart-rebalance-cost" type="number" value="0" min="0"><input id="smart-service-cost" type="number" value="0" min="0"></label>
+        </fieldset>
+        <fieldset>
+          <legend>固定网格与 BTC 现货</legend>
+          <label>网格下限 / 上限 / 数量<input id="grid-lower" type="number" value="46781.1" min="1"><input id="grid-upper" type="number" value="75680.3" min="1"><input id="grid-count" type="number" value="50" min="2"></label>
+          <label>网格挂单费 / 吃单费 / 退出滑点 bps<input id="grid-maker-fee" type="number" value="0.0006" min="0" step="0.0001"><input id="grid-taker-fee" type="number" value="0.0007" min="0" step="0.0001"><input id="grid-slippage" type="number" value="10" min="0"></label>
+          <label>网格参考资金 / 其他已知成本<input id="grid-reference-capital" type="number" value="20000" min="1"><input id="grid-other-cost" type="number" value="4" min="0"></label>
+          <label>BTC 现货建仓费 / 退出费 / 滑点 bps<input id="btc-entry-fee" type="number" value="0.0007" min="0" step="0.0001"><input id="btc-exit-fee" type="number" value="0.0007" min="0" step="0.0001"><input id="btc-slippage" type="number" value="10" min="0"></label>
+        </fieldset>
+      </details>
+
+      <details class="evidence-editor path-editor">
+        <summary>高级价格过程（固定90天）</summary>
+        <p>每种行情始终包含收益估算路径和更不利的风险路径，且共用第0/30/60/90天时间轴。这里只隐藏编辑入口，不会删除压力测试。</p>
+        <fieldset>
+          <legend>收益估算路径 / 风险测试路径</legend>
+          <label>下行代表 30/60 天<input id="bear-rep-mid1" type="number" value="60000" min="1"><input id="bear-rep-mid2" type="number" value="54000" min="1"></label>
+          <label>下行压力 30/60/90 天<input id="bear-stress-mid1" type="number" value="58000" min="1"><input id="bear-stress-mid2" type="number" value="50000" min="1"><input id="bear-stress-end" type="number" value="43000" min="1"></label>
+          <label>震荡代表 30/60 天<input id="range-rep-mid1" type="number" value="56000" min="1"><input id="range-rep-mid2" type="number" value="71000" min="1"></label>
+          <label>震荡压力 30/60/90 天<input id="range-stress-mid1" type="number" value="72000" min="1"><input id="range-stress-mid2" type="number" value="54000" min="1"><input id="range-stress-end" type="number" value="60000" min="1"></label>
+          <label>上行代表 30/60 天<input id="bull-rep-mid1" type="number" value="69000" min="1"><input id="bull-rep-mid2" type="number" value="76000" min="1"></label>
+          <label>上行压力 30/60/90 天<input id="bull-stress-mid1" type="number" value="72000" min="1"><input id="bull-stress-mid2" type="number" value="90000" min="1"><input id="bull-stress-end" type="number" value="94000" min="1"></label>
+        </fieldset>
+      </details>
+
+      <details class="evidence-editor risk-editor">
+        <summary>组合风险约束</summary>
+        <p>这些限制由后端在生成方案前强制执行，页面不能绕过，也不能直接输入组合比例。</p>
+        <fieldset>
+          <legend>组合硬约束</legend>
+          <label>最低流动 USDT 比例<input id="minimum-liquid" type="number" value="0.20" min="0" max="1" step="0.05"></label>
+          <label>最大 BTC 方向敞口<input id="maximum-btc-exposure" type="number" value="0.55" min="0" max="1" step="0.05"></label>
+          <label>最大下行情景亏损<input id="maximum-bear-loss" type="number" value="0.25" min="0" max="1" step="0.05"></label>
+          <label>产品上限（定期/活期/套利/网格/BTC）<input id="max-fixed" type="number" value="0.80" min="0" max="1" step="0.05"><input id="max-flex" type="number" value="1" min="0" max="1" step="0.05"><input id="max-smart" type="number" value="0.20" min="0" max="1" step="0.05"><input id="max-grid" type="number" value="0.30" min="0" max="1" step="0.05"><input id="max-btc" type="number" value="0.30" min="0" max="1" step="0.05"></label>
+        </fieldset>
+      </details>
+    </form>
+    <p id="form-message" class="form-message" role="status">教学示例尚未运行。点击按钮后由后端生成结果。</p>
+  </section>
+
+  <section id="result-state" class="result-state" aria-live="polite"><strong>等待生成组合</strong><span>尚未生成结果。输入变化后，旧结果会立即失效。</span></section>
+
+  <section class="section-block allocation-section result-dependent" aria-labelledby="portfolio-title">
+    <div class="section-heading compact"><div><p class="section-index">03 · 组合建议</p><h2 id="portfolio-title">每种产品投入多少USDT</h2></div><p id="candidate-summary">后端最多返回保守、均衡和收益优先方案；相同方案会合并，比例为0%的产品不进入分配列表。</p></div>
+    <div class="portfolio-layout">
+      <article id="featured-plan" class="featured-plan" aria-live="polite">
+        <div class="plan-heading"><div><span id="plan-label" class="plan-label">—</span><h3 id="plan-title">—</h3></div><span id="plan-target" class="target-chip">—</span></div>
+        <div class="allocation-bar" id="allocation-bar" aria-label="组合资金比例"></div><div id="allocation-legend" class="allocation-legend"></div>
+        <div id="allocation-exclusions" class="allocation-exclusions" hidden><span>未进入当前方案</span><ul id="allocation-exclusion-list"></ul></div>
+        <div class="plan-stats">
+          <div><span>当前情景90天收益</span><strong id="focused-return">—</strong><small id="focused-income">—</small></div>
+          <div><span>简单年化</span><strong id="focused-apr">—</strong><small>后端同期限口径</small></div>
+          <div><span>组合最大回撤</span><strong id="plan-drawdown">未知</strong><small>无同步权益序列不伪造</small></div>
+          <div><span>保守 BTC 峰值敞口</span><strong id="plan-exposure">—</strong><small>各产品路径峰值之和</small></div>
+        </div>
+        <div class="plan-readout"><span id="scenario-badge">—</span><p id="scenario-explanation">—</p></div>
+      </article>
+      <aside id="plan-switcher" class="plan-switcher" aria-label="切换组合方案"></aside>
+    </div>
+  </section>
+
+  <section class="section-block result-dependent" aria-labelledby="matrix-title">
+    <div class="section-heading compact"><div><p class="section-index">04 · 三种行情结果</p><h2 id="matrix-title">同一组合在悲观、震荡和乐观行情下赚多少</h2></div><p>表格展示收益估算路径；更不利路径继续参与后端风险约束。</p></div>
+    <div class="matrix-scroll"><table class="scenario-matrix"><thead><tr><th>组合</th><th data-column="BEAR">悲观情景</th><th data-column="RANGE" class="focused">震荡情景</th><th data-column="BULL">乐观情景</th><th>判断</th></tr></thead><tbody id="matrix-body"></tbody></table></div>
+    <p class="table-footnote">所有金额、收益率、年化与目标达成数逐项来自本次 API 响应；浏览器不重算。</p>
+  </section>
+
+  <section class="insight-grid result-dependent">
+    <article class="contribution-panel">
+      <p class="section-index">05 · 产品贡献</p><h2><span id="contribution-plan">—</span>在<span id="contribution-scenario">—</span>赚亏来自哪里？</h2>
+      <div id="contribution-list" class="contribution-list"></div><p id="contribution-check" class="contribution-check"></p>
+      <p class="panel-note">贡献项是后端已经守恒校验的带符号金额。网格循环、网格库存与独立 BTC 现货分列。</p>
+    </article>
+    <article class="advisor-panel">
+      <div class="advisor-heading"><span class="advisor-mark">解</span><div><p class="section-index">规则解释 · 不改数字</p><h2 id="advisor-title">—</h2></div></div>
+      <p id="advisor-copy">—</p><div class="counter-case"><span>限制与反方理由</span><p id="advisor-counter">—</p></div><ul id="advisor-actions"></ul>
+    </article>
+  </section>
+
+  <footer class="evidence-footer result-dependent">
+    <div><span>本次分析输入</span><strong id="footer-evaluation">—</strong></div>
+    <div><span>产品资格</span><strong id="footer-evidence">—</strong></div>
+    <div><span>当前状态</span><strong id="footer-state">—</strong></div>
+    <div><span>人工边界</span><strong>不创建、不停止、不调仓</strong></div>
+  </footer>
+</main>
+
+<script src="/scenario-lab.js"></script>
+</body>
+</html>

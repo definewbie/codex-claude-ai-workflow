@@ -1,0 +1,36 @@
+{
+  "source_inputs_match": 654,
+  "jars_native_launch_and_observer": "frozen_check passed",
+  "source_snapshot_count": 437,
+  "prior_immutable_case_bundles": {
+    "w09-real-gate-20261010": {
+      "count": 116,
+      "mismatches": []
+    },
+    "w09-fresh-second-gate-20261010": {
+      "count": 153,
+      "mismatches": []
+    },
+    "w09-fresh-third-gate-20261010": {
+      "count": 487,
+      "mismatches": []
+    }
+  },
+  "product_changes": false,
+  "domain_current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261011T044656Z-BMDJ",
+    "workflowInstanceId": "wf-ws-20261011T044656Z-BMDJ",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-design-decision-021"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000021",
+    "updatedAt": "2026-10-11T06:49:09.801968Z",
+    "commitSequence": 78
+  },
+  "no_runtime_recovery_or_rewrite": true
+}

@@ -1,0 +1,35 @@
+Together, they show how structured reasoning can range from a linear chain
+of intermediate steps to a branching process of exploration and selection.
+Both highlight that when agents are guided to think in stages, whether as a
+single voice or as a coordinated team, the outcome is more deliberate and
+reliable.
+
+How to Make Your Agent Take Action and Reflect
+
+You’ve seen in the previous section that CoT and ToT can be helpful for
+reasoning, but reasoning alone isn’t enough. An agent that only reasons
+never leaves the page, and an agent that only acts can’t learn from its
+decisions. To combine the two, you need ReAct,3 which stands for
+reasoning and action. In plain terms, ReAct treats each step as a choice
+between thinking in language and acting in the environment. The agent
+looks at the current context, decides whether to produce a reasoning trace or
+call a tool, and then carries the result forward into the next step.
+Mathematically, you can think of this as mapping a context ct to an
+                                           ˆAaugmented action ˆat within an action space                       =                         A ∪L. Here A is the set
+of task-specific actions that impact the environment, while L is the set of
+language-based reasoning traces or thoughts. In other words, each step may
+produce an external action, a reasoning trace, or both.
+
+These traces are folded back into the agent’s state so that the context
+evolves as:
+
+                              ct+1 = (ct, ˆat)
+
+In addition, you follow the policy:
+
+                                  π(at|ct)
+
+Here, ot is the observation at step t, such as a user message or tool result,
+and at is the action taken in response, such as a reasoning step or tool call.
+The context can therefore be written as ct = (o1, a1, …, ot−1, at−1, ot). In
+other words, the agent carries forward not only what it has done, but also

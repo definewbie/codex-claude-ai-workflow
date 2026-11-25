@@ -1,0 +1,20 @@
+   Figure 1-4. Baseline agent architecture: an LLM alone can only predict text, but with planning,
+                   memory, and tools it becomes a usable agentic system.
+
+Planning modules guide the agent’s reasoning, ranging from simple chain-
+of-thought1 traces to more advanced approaches such as trees of thought2 or
+self-critique. Memory modules provide continuity, allowing the agent to
+recall past steps, reuse prior knowledge, or persist information across
+sessions. Tools connect the agent to its environment, whether through
+search, retrieval, code execution, or custom APIs.
+
+Moreover, a key difference between traditional LLM usage and agentic
+systems is whether the workflow is stateless or stateful. A stateless call
+treats the model like a black box: it takes a prompt, predicts the next tokens,
+and returns a result. Nothing is remembered, no actions are taken, and no
+feedback loop exists. Example 1-1 illustrates a stateless LLM call.
+
+Example 1-1. Stateless LLM call with LangChain
+llm = ChatOpenAI(model="gpt-5-mini")
+response = llm.invoke("What are AI agents?")
+print(response.content)

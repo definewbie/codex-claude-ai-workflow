@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-intake-claude_brainstorm-006",
+  "nodeDefinitionId": "intake.claude_brainstorm",
+  "kind": "TASK",
+  "handlerType": "acpx.agent_run",
+  "status": "FAILED",
+  "stageId": "stage-intake",
+  "iterationId": "iter-002",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.stderr.log",
+    ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.transcript.log",
+    ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.json",
+    ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/binding.json",
+    ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.contract.json"
+  ],
+  "inputTransition": {
+    "condition": "unconditional",
+    "transition_type": "normal",
+    "required": true,
+    "source_node_instance_id": "node-intake-decision-005",
+    "source_node_sha256": "6e8de30c35a2c395482ea0b1928105c9287d95d422a35a05afc06db811305766",
+    "purpose": "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/outputs/intake-claude-brainstorm.stderr.log",
+    ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/outputs/intake-claude-brainstorm.transcript.log",
+    ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/outputs/intake-claude-brainstorm.json",
+    ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1792021385197/binding.json",
+    ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/contract-failures/node-intake-claude_brainstorm-006.json",
+    ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/contract-failures/node-intake-claude_brainstorm-006.md"
+  ],
+  "result": {
+    "adapter_signals": [],
+    "agent": "claude",
+    "agent_execution_artifact_contract_results": [
+      {
+        "contractType": "task_contract_proposal",
+        "errorCode": "AGENT_RESULT_PARSE_FAILED",
+        "errorMessage": "Unrecognized field \"response\" (class dev.dual.runtime.handler.AgentResultEnvelope$RevisionResponse), not marked as ignorable (2 known properties: \"resolved_by_clause_ids\", \"review_obligation_id\"])\n at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 56, column: 22] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope[\"result\"]->dev.dual.runtime.handler.AgentResultEnvelope$TaskContractProposalResult[\"revision_responses\"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$RevisionResponse[\"response\"])",
+        "path": "",
+        "present": false,
+        "required": true,
+        "valid": false
+      }
+    ],
+    "agent_execution_outcome": {
+      "nodeMaySucceed": false,
+      "operatorMessage": "The final ACP assistant message did not contain a valid AgentResultEnvelope.",
+      "primaryReason": "agent_result_missing_or_invalid",
+      "recoveryCategory": "OUTPUT_INCOMPLETE",
+      "retryPolicy": "MANUAL_ONLY",
+      "secondarySignals": [],
+      "status": "OUTPUT_INCOMPLETE"
+    },
+    "agent_execution_result_contract": {
+      "decision": "",
+      "present": true,
+      "summary": "",
+      "valid": false,
+      "validationError": "Unrecognized field \"response\" (class dev.dual.runtime.handler.AgentResultEnvelope$RevisionResponse), not marked as ignorable (2 known properties: \"resolved_by_clause_ids\", \"review_obligation_id\"])\n at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 56, column: 22] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope[\"result\"]->dev.dual.runtime.handler.AgentResultEnvelope$TaskContractProposalResult[\"revision_responses\"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$RevisionResponse[\"response\"])"
+    },
+    "contract_allowed_decisions": [
+      "READY_FOR_PRODUCT_REVIEW"
+    ],
+    "contract_failure_diagnostic_markdown_ref": ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/contract-failures/node-intake-claude_brainstorm-006.md",
+    "contract_failure_diagnostic_ref": ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/contract-failures/node-intake-claude_brainstorm-006.json",
+    "contract_node_id": "intake.claude_brainstorm",
+    "contract_required_keys": [
+      "summary",
+      "decision"
+    ],
+    "exit_code": 0,
+    "message": "Unrecognized field \"response\" (class dev.dual.runtime.handler.AgentResultEnvelope$RevisionResponse), not marked as ignorable (2 known properties: \"resolved_by_clause_ids\", \"review_obligation_id\"])\n at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 56, column: 22] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope[\"result\"]->dev.dual.runtime.handler.AgentResultEnvelope$TaskContractProposalResult[\"revision_responses\"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$RevisionResponse[\"response\"])",
+    "output_complete": true,
+    "parse_error": {
+      "code": "AGENT_RESULT_PARSE_FAILED",
+      "details": {},
+      "message": "Unrecognized field \"response\" (class dev.dual.runtime.handler.AgentResultEnvelope$RevisionResponse), not marked as ignorable (2 known properties: \"resolved_by_clause_ids\", \"review_obligation_id\"])\n at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 56, column: 22] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope[\"result\"]->dev.dual.runtime.handler.AgentResultEnvelope$TaskContractProposalResult[\"revision_responses\"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$RevisionResponse[\"response\"])"
+    },
+    "process_usability": "EXITED_ZERO",
+    "reason": "AGENT_OUTPUT_CONTRACT_VIOLATION",
+    "repository_fact_binding_ref": ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1792021385197/binding.json",
+    "repository_fact_binding_sha256": "2e28174c82182c7afdb78e491d4a429a8fadc5eacb71e6b789af5d44d8cffc6b",
+    "run_id": "run-1792021385197",
+    "run_metadata": ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/run.json",
+    "session": "claude-main-ws-20261014T234009Z-RN9X-run-1792021385197",
+    "transcript_ref": ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/outputs/intake-claude-brainstorm.transcript.log",
+    "completion_ref": ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/outputs/nxe-1792021385159-7429471f-completion.json",
+    "completion_sha256": "8cd934361c9b4f8702e09c1faf6cd84dff3e619dc2f1f438d719307d7abc8852"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1792021385159-7429471f",
+  "startedAt": "2026-10-14T23:43:05.170605Z",
+  "finishedAt": "2026-10-14T23:45:06.477144Z"
+}

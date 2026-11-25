@@ -1,0 +1,38 @@
+{
+  "max_semantic_loops": 2,
+  "records": [
+    {
+      "loop": 1,
+      "kind": "SEMANTIC_REVISION",
+      "target_node_instance": "node-intake-claude_brainstorm-006",
+      "source_node": "node-intake-decision-005",
+      "review_ref": ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.json",
+      "review_sha256": "8854aa0a099f80043b2fee7fb4a3cd3331f757fa41cb179fb1625439af9632ca",
+      "must_fix": [
+        "在 AC-2 或 TR-2 中绑定实际案例输入、实际输出、期望输出与测试源码的对应证据，并明确不要求工具独立测量真实退出码。",
+        "修订 NG-3，保留三个路径的候选性质，允许设计与计划形成最终精确路径及 CREATE/MODIFY 清单，再提交单独的 EXECUTION 批准。"
+      ],
+      "new_evidence": "first independent review identified evidence wording and prematurely fixed candidate paths",
+      "new_authority": false,
+      "recorded_at": "2026-10-11T12:55:48.317089+08:00",
+      "record_timing": "operator decision before dispatch; auxiliary record script corrected after start (contract vs envelope schema)",
+      "does_not_grant": "business approval"
+    },
+    {
+      "loop": 2,
+      "kind": "SEMANTIC_REVISION",
+      "target_node_instance": "node-design-claude_design-017",
+      "source_node": "node-design-decision-016",
+      "review_ref": ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700195359/outputs/design-codex-review.contract.json",
+      "review_sha256": "59b0a93b9f2d4639fe14b2ca304f0c905a4a0f0a1cae0f3f234806f89080b721",
+      "must_fix": [
+        "将代表性案例的实际输入、期望输出及实际返回值展示改为必选验证步骤：执行被测函数并用 repr 或等效转义表示打印三者，保留真实命令与输出，并与测试源码案例对应；同时保留 unittest 的真实覆盖数量及零 failure/error 结果。可使用临时命令完成，无需增加候选文件。"
+      ],
+      "new_evidence": "actual input/expected/output demonstration was optional; independent design review requires approved AC-2/TR-2 mandatory evidence",
+      "new_authority": false,
+      "recorded_at": "2026-10-11T14:31:48.483077+08:00",
+      "record_timing": "operator decision and budget check before dispatch; auxiliary record corrected after start because records field was misnamed loops",
+      "does_not_grant": "business approval"
+    }
+  ]
+}

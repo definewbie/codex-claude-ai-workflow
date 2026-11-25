@@ -1,0 +1,25 @@
+{
+  "verified_at": "2026-10-10T14:02:17.224184+08:00",
+  "local_preparation": "PASS",
+  "real_gate": "NOT_RUN",
+  "real_run_authorization": "NOT_GRANTED",
+  "provider_calls": 0,
+  "native_client_calls": 0,
+  "acpx_metadata_commands": 2,
+  "source_inputs_checked": 654,
+  "source_changes": [],
+  "application_jars_match": true,
+  "original_project_head_unchanged": true,
+  "original_ledger_initialized_prefix_unchanged": true,
+  "initial_empty_commit_count": 1,
+  "product_files_written": 0,
+  "documentation_changes": [
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md"
+  ],
+  "detailed_design_unchanged": true,
+  "document_links_checked": 152,
+  "missing_links": [],
+  "regression_not_rerun": "no source change; earlier CC-accepted single reactor1755 evidence preserved, no added count",
+  "known_local_check_INVALID": "local-check-01-invalid.txt; corrected read-only verifier, no production change",
+  "next_action": "obtain explicit real-run authorization, then same-case Gate segmented INLINE execution and user GOAL decision"
+}

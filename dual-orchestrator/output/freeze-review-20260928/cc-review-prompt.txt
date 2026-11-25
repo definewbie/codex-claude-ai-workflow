@@ -1,0 +1,7 @@
+请在 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 按 AGENTS.md 独立复审本轮详细设计冻结候选；只读评审，不修改代码、不运行 provider、不启动额外 agent。
+
+主文：docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md（§13、§15 是当前状态）；具体材料：output/freeze-review-20260928/freeze-details.md 及其索引/JSON。对照 R3 设计与主工作清单，直接核对代码和证据，不采信作者完成声明。
+
+判断各 D 项是否已具体到可冻结，哪些仍阻塞开工。请自行重建完整用户流程、写入失败与恢复切面，检查兄弟入口、合法续作和非法拒绝；沿 Declared by、Proven by、Consumed by、Enforced before、Failure route、Cannot-bypass test 核验。区分设计决定、已取得证据和实施后验收，检查是否有未定语义、遗漏消费者、循环前置、授权放宽或新增平台性复杂度。
+
+按严重程度报告发现、代码/证据位置及修正建议，列出未核验范围和各项冻结判断。PASS 不授权实施、合入或真实运行；不预设结论。

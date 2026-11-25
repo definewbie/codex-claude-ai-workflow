@@ -1,0 +1,40 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792977578531-0228c7d2",
+  "agentTaskId" : "agt-1792977578526-6fd5ca10",
+  "workflowExecutionId" : "wfe-1792977578425-16addb73",
+  "nodeInstanceId" : "node-context-acceptance_codex_verifier_review-034",
+  "nodeDefinitionId" : "context.acceptance_codex_verifier_review",
+  "handlerType" : "context.build_package",
+  "status" : "SUCCEEDED",
+  "pid" : 42066,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-acceptance_codex_verifier_review-034.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-acceptance_codex_verifier_review-034.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-26T01:19:37.305Z",
+      "input_identity" : "77c2300a27c6959089e5b66a9faf11ed6e00b9af3dcc8efbeeb8ee1e75d72e35",
+      "executor_pid" : 42066
+    },
+    "context_package" : ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-acceptance_codex_verifier_review-034.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-acceptance_codex_verifier_review-034.json",
+    "target_node" : "acceptance.codex_verifier_review",
+    "profile" : "acceptance",
+    "sections" : [ "input_artifacts", "iteration_history", "human_feedback", "review_evidence", "recent_agent_outputs", "git_evidence", "ledger_pointers", "task_contract" ],
+    "input_ref_count" : 13,
+    "generated_at" : "2026-10-26T01:19:38.927745Z",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-26T01:19:38.531615Z",
+  "finishedAt" : "2026-10-26T01:19:38.940776Z",
+  "durationMs" : 409
+}

@@ -1,0 +1,20 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "context_governance_report",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "plan",
+  "nodeInstanceId" : "node-plan-codex_plan_review-019",
+  "nodeDefinitionId" : "plan.codex_plan_review",
+  "builderNodeDefinitionId" : "plan.codex_plan_review",
+  "targetNodeDefinitionId" : "plan.codex_plan_review",
+  "iterationId" : "iter-002",
+  "reportPhase" : "planned",
+  "plannedReadFiles" : [ ],
+  "plannedWriteFiles" : [ ],
+  "plannedPreviouslyReadFiles" : [ ],
+  "plannedRepeatedReadAvoidance" : [ ],
+  "actualReadFiles" : [ ],
+  "actualWriteFiles" : [ ],
+  "telemetryPending" : true,
+  "generatedAt" : "2026-10-23T01:35:27.411839Z"
+}

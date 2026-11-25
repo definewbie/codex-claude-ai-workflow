@@ -1,0 +1,17 @@
+{
+  "output/lifecycle-batch-06-20261009/review-acceptance-20261009/disposition.md": "76ec0b173ae617dac2b5374f507e661943061e818c00994a51b97f1973e5951e",
+  "output/lifecycle-batch-06-20261009/review-acceptance-20261009/documentation-incremental.patch": "e37967195643d0c35225861eda92009161465907cfef0444fdc93b8b4b3fb83a",
+  "output/lifecycle-batch-06-20261009/review-acceptance-20261009/cc-review.md": "f88cc81f4542d5f95057bb67a1e0870f93d010ecfa4594eac82dae0ba1378b0b",
+  "output/lifecycle-batch-06-20261009/review-acceptance-20261009/documentation-changes.json": "cfdfb11a53a176826470b2088ed5cc822439f846127bebfef9d14767f297ec6c",
+  "output/lifecycle-batch-06-20261009/review-acceptance-20261009/baseline.json": "955639d81e40d5a504a5cf19a68197db2b90385876df1eabbd07ce761f51d008",
+  "output/lifecycle-batch-06-20261009/review-acceptance-20261009/reviewed-material-sha256.json": "0bd390b46552c8e66fb3b1343d698810ed8811f08547658222621bd90fb9a888",
+  "output/lifecycle-batch-06-20261009/review-acceptance-20261009/verification.json": "7ba1b526a931c3d74cfcb4a1948d57da6ccf50f1d7462f6b2779a385c81c27bc",
+  "output/lifecycle-batch-06-20261009/review-acceptance-20261009/documents-before-text.json": "5e729693dbe1238f9be81ad303ed72d70d835605e559fa9c63bbf67987226258",
+  "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "f1ba830fea6a7468982ac2fc31422846dec6228c7d8a81faf963ccdaf23f2561",
+  "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "4968a9a72f5714973cf169b1048448f4b2b292a1ec950081b19d0cb0fef2c087",
+  "output/lifecycle-batch-06-20261009/preflight.md": "088d7165ed80129ad48f73bb91d2e729c51a52bf9b5416a745e1f3cb17a5dac1",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/protocol.md": "77c10cfad64a5b1c76f6de72feef02ba5af2830947eb2d6bfc93f3a677152038",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/examples.json": "482da2d6aa59b7988544ca4872bdadbffcf99fcc59c425cd221653dafda751e9",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/affected-scope.json": "495403c6907f0cd2319eeadd9a06007215227515a121046ab5b7b838e1d294e1",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/source-checks.json": "961ef4572786b8d109a34b2d8792c5754ccf2afd403776899e4894b45001aac2"
+}

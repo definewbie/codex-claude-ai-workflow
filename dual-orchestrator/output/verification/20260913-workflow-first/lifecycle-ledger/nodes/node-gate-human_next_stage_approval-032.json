@@ -1,0 +1,28 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-gate-human_next_stage_approval-032",
+  "nodeDefinitionId" : "gate.human_next_stage_approval",
+  "kind" : "GATE",
+  "handlerType" : "human.review",
+  "status" : "COMPLETED",
+  "stageId" : "stage-gate",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/next-stage/next-stage-prompt.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/next-stage/handoff.json" ],
+  "inputTransition" : {
+    "transition_type" : "normal",
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "required" : true,
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/next-stage/next-stage-prompt.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/next-stage/handoff.json" ],
+  "result" : {
+    "note" : "completed from CLI",
+    "human_action" : "complete",
+    "requested_action" : "complete",
+    "source_node_instance_id" : "node-stage-generate_next_prompt-031"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "",
+  "startedAt" : null,
+  "finishedAt" : "2026-09-13T16:05:41.026800Z"
+}

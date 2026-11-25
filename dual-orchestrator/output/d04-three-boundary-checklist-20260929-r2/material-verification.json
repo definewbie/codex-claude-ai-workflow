@@ -1,0 +1,16 @@
+{
+  "status": "AUTHOR_MATERIAL_CHECK_ONLY",
+  "baseline_files_checked": 1320,
+  "changed_existing_files": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+    "dual-orchestrator/docs/testing/20260929-d04-three-boundary-verification-checklist.zh-CN.md"
+  ],
+  "source_hashes_match": true,
+  "prior_manifest_references_resolved": 16,
+  "D2_P": "NOT_PRODUCED",
+  "runtime_tests": "NOT_RUN",
+  "D04": "NOT_FROZEN",
+  "independent_review_of_delta": "NOT_DONE"
+}

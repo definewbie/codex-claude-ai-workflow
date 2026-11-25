@@ -1,0 +1,2030 @@
+diff --git a/dual-orchestrator/docs/design/dual-orchestrator-current-architecture.zh-CN.md b/dual-orchestrator/docs/design/dual-orchestrator-current-architecture.zh-CN.md
+index 2f702f6f..c380ca56 100644
+--- a/dual-orchestrator/docs/design/dual-orchestrator-current-architecture.zh-CN.md
++++ b/dual-orchestrator/docs/design/dual-orchestrator-current-architecture.zh-CN.md
+@@ -1,5 +1,10 @@
+ # Dual Orchestrator 当前架构
+ 
++> 历史快照提示（2026-09-13）：本文“当前”指下面注明的8月基线，不能代表9月代码。
++> 最新接手入口为 [架构演进与交接](20260913-dual-evolution-retrospective-and-handoff.zh-CN.md)，
++> 前向改造见 [工作流优先重设计](../plans/20260913-workflow-first-convergence-redesign.zh-CN.md)。
++> 特别是模块依赖、合同批准链、执行策略与人工材料续作已演进；本文保留为历史证据。
++
+ 日期：2026-08-04
+ 基线：`72ae925a`
+ 状态：`CURRENT / PHASE A-D CLOSED / T6 FULL WORKFLOW PROVEN`
+diff --git a/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md b/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+index 09b7299f..27dcafed 100644
+--- a/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ b/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -1,5 +1,26 @@
+ # __ACTIVE__ Real-Case-Driven Orchestrator Simplification
+ 
++## 当前入口：2026-09-23 整体设计修订与只读评审
++
++用户当前要求：修正整体设计，生成 CC 只读评审提示词；用户自行发起评审，不直接调用 CC，不自动进入实现。
++当前设计入口：[完整生命周期可靠性设计](20260923-dual-lifecycle-reliability-design.zh-CN.md)。
++9·13 控制链设计保留为第一批参考；当前已有未提交实现及序列测试，尚未证明整体组合可靠交付。
++2026-09-27 补记（R3）已获用户带回的第三轮 CC 设计层 PASS：前两轮问题均确认为设计层解决，无新增 WARN/FAIL，仅余 INFO-1。本次补记其前向记录/历史不回填边界，并澄清“无记录不等于未检查”，此澄清未经独立复审。整体设计评审收口；未提交改动对账、I1 字段/写序及 I3/I4/I5/I6 等详细设计缺口仍在，不能据 PASS 开工。
++本轮只交付设计及入口说明和复审提示词，不修改 production、历史 ledger，不运行产品 E2E。此前误启动的只读 CLI 调用已停止，未形成评审结论，与用户带回的有效评审区分。
++执行与纠偏办法（设计 §7.1）最新修订也已获 CC PASS，WARN-1、LOW-1/2 均解决，无新增必须修正项。规则评审收口，四项残余留待实际批次观察；实际主清单、全量未提交改动对账及覆盖地图仍待形成，不将文本通过视为执行效果已验证。
++任何评审 PASS 均不自动授予实施、合入、历史恢复或真实验证授权。
++
++## 2026-09-13 历史入口：工作流优先收敛设计
++
++以下各日期段保留为历史记录，不再按其“下一步”直接执行。
++当时记录：HEAD `3362eb42`；6NX5在人工READY后revise的输入准备阶段停止，零provider调用，
++随后原因被后处理改写。当时新设计尚未实施；后续工作区已有未提交实现，见当前入口。历史样本不恢复。
++
++新session先读 [架构演进、失误复盘与交接](../design/20260913-dual-evolution-retrospective-and-handoff.zh-CN.md)，
++再读 [工作流优先重设计与计划](20260913-workflow-first-convergence-redesign.zh-CN.md)。
++两文档是当前接手与前向计划入口；旧网络E1、后合同E1–E4和早期Phase A–D不能混用。
++本轮只补全复盘/设计，不改production；下一实施步骤与前置以新设计§12为准。
++
+ ## 人工批准合理新增文件（2026-09-09，覆盖下方部分修正）
+ 
+ 最新：完整批准链已接通，正向序列达到真实 delivery candidate；原范围修回、证据篡改零写入、
+diff --git a/dual-orchestrator/docs/testing/verification-gates/20260909-okx-profile-aligned-fresh-e2e.md b/dual-orchestrator/docs/testing/verification-gates/20260909-okx-profile-aligned-fresh-e2e.md
+index bb687506..dd8b20c8 100644
+--- a/dual-orchestrator/docs/testing/verification-gates/20260909-okx-profile-aligned-fresh-e2e.md
++++ b/dual-orchestrator/docs/testing/verification-gates/20260909-okx-profile-aligned-fresh-e2e.md
+@@ -1,6 +1,6 @@
+ # OKX Profile-Aligned Fresh E2E
+ 
+-状态：READY FOR PREFLIGHT。用户已授权本轮执行；主 agent 自查，不冒称独立评审，不委派额外 agent。
++状态：EXECUTED / BOUNDARY STOP（Gate FAIL；workflow WAITING_FOR_RECOVERY）。主 agent 自查，不冒称独立评审，不委派额外 agent。
+ 
+ ## 目标与边界
+ 
+@@ -57,3 +57,18 @@ verify 后分段 run。用户已授权主 agent 逐门审阅并作合法决定
+ 该项 Target=Read nonce往返；SoT=实际工具及结果/transport/closure；PASS=恰一Read、nonce匹配、
+ exit0、零active信号、session关闭；失败停止前置不start，quota通知用户，无自动重跑。
+ 不新增权限探针/模型层。Codex无工具health已退出0/end_turn，响应模型gpt-6-astra，待归档机械核验。
++
++## 执行记录
++
++- 文档 checkpoint：402b829 / 7dc8b33；production checkpoint 仍为 e21c95d，JAR 未再生。
++- 前置通过：Doctor、冻结身份复算、source check、当前 GLM 单 Read nonce、Codex 无工具 health、effective workspace capture/verify。
++- 唯一 fresh 样本：`ws-20260909T113923Z-FZ8K`；旧样本未恢复。
++- intake run `run-1788954058404` 完成，4 Read / 0 Bash / 0 write；产品评审 run `run-1788954332029` 完成，READY_FOR_PRODUCT_REVIEW，无 must_fix。
++- 主 agent 阅读完整 proposal/review sidecar 后，按用户委托批准 requirement-006 与 contract-008；未变更范围或需求。proposal 绑定及其八个 artifacts 的 SHA 复算一致。
++- 初版设计 run `run-1788954529942` 完成，8 Read + 1 Glob、0 Bash/写入；评审提出数据库失败状态、关闭同步状态、前端行为测试三项 Must Fix，正常路由至 design gate-013。
++- 按用户委托 revise 后，替换设计 run `run-1788955265925` 与复审 `run-1788955656723` 完成；四项活动义务（含 human note）均有回应，复审 READY、must_fix 为空；主 agent 阅读完整替换设计及复审后批准 design gate-019。该修订无 Bash/写入，未扩大文件范围。
++- 计划 run `run-1788955786549` 完成，3 Read + 2 Glob、0 Bash/写入。主 agent 全文核对后发现 rollback_notes 含分批提交与 reset/clean，已在 plan gate-021 提交唯一范围内 revise：删除实现阶段 Git 写入/清理的隐含授权，回滚仅保留为需 operator 另行授权的人工动作；其余设计/范围/测试不变。
++- 计划修订 run `run-1788956508122` 完成，2 Read + 2 Glob、0 Bash/写入。主 agent 比对 typed plan：rollback_notes 已消除 agent 的 Git 写入/清理授权；其他实施步骤、路径、验证要求不变；file_level_changes 仅有“精度”→“精度保持”的同义增字，因此不采信其“其他字段逐字一致”的过强自述，但无实质范围变动。
++- 已按委托批准 plan gate-024，启动实现 `node-implement-claude_implement-026` / `run-1788956758608`；本次继续前复核 JAR/fork/需求/check SHA 与 GLM 配置均未变化。
++- 实现实际成功写入未批准的 OkxHttpException.java / OkxParseException.java；按本页成功越界副作用项 cancel 并关闭 session，原 runner 已退出。Gate FAIL，workflow WAITING_FOR_RECOVERY / evt-000027，完整 E2E NOT PROVEN；未重开旧样本或创建第二样本。
++- 取消后 AGENT_RESULT_MISSING 不另归因模型 JSON 缺陷；后置 scope 校验尚未执行，不冒称其失效。详见 `../real-case-reports/20260909-okx-fz8k-implementation-boundary-stop.md`，证据位于本轮 output 下 boundary-stop/。
+diff --git a/dual-orchestrator/dual-adapter-acpx/pom.xml b/dual-orchestrator/dual-adapter-acpx/pom.xml
+index 5b02175c..9f22fd9c 100644
+--- a/dual-orchestrator/dual-adapter-acpx/pom.xml
++++ b/dual-orchestrator/dual-adapter-acpx/pom.xml
+@@ -13,6 +13,12 @@
+     <artifactId>dual-adapter-acpx</artifactId>
+ 
+     <dependencies>
++        <dependency>
++            <groupId>dev.dual</groupId>
++            <artifactId>dual-flow-liteflow</artifactId>
++            <version>${project.version}</version>
++            <scope>test</scope>
++        </dependency>
+         <dependency>
+             <groupId>dev.dual</groupId>
+             <artifactId>dual-core</artifactId>
+diff --git a/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java b/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+index e2d1f609..6c9913f6 100644
+--- a/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
++++ b/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+@@ -1,6 +1,7 @@
+ package dev.dual.adapter.acpx;
+ 
+ import dev.dual.core.workflow.NodeResult;
++import dev.dual.runtime.handler.AgentExecutionResultFacts;
+ import dev.dual.core.workflow.NodeStatus;
+ import dev.dual.core.execution.AdapterSignal;
+ import dev.dual.core.execution.AgentExecutionTimelineEventKind;
+@@ -108,188 +109,217 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
+ 
+     @Override
+     public NodeResult execute(TaskContext context) throws Exception {
+-        var agent = configText(context, "agent");
+-        if (!"claude".equals(agent) && !"codex".equals(agent)) {
+-            throw new IllegalArgumentException("unsupported agent: " + agent);
+-        }
+-        var configuredSession = configText(context, "session");
+-        var promptTemplate = configText(context, "prompt_template");
+-        var runId = "run-" + Instant.now().toEpochMilli();
+-        var e1Enabled = "claude".equals(agent) && hasNamedPermissionProfile(context);
+-        var emissionContext = proposalEmissionContext(context);
+-        if (emissionContext.failed() != null) {
+-            return emissionContext.failed();
+-        }
+-        var agentResultContract = agentResultContractPrompt(
+-                context, runId, emissionContext.context());
+-        var sessionScopeConfigValue = context.definition().config().get("session_scope");
+-        var nodeConfigScope = sessionScopeConfigValue instanceof String text ? text.trim() : "";
+-        var sessionDecision = e1Enabled
+-                ? SessionScopePolicy.occurrenceBound(
+-                        configuredSession,
+-                        context.workstreamId(),
+-                        context.instance().stageId(),
+-                        context.instance().iterationId(),
+-                        runId)
+-                : SessionScopePolicy.resolve(
+-                        agent,
+-                        configuredSession,
+-                        context.workstreamId(),
+-                        context.instance().stageId(),
+-                        context.instance().iterationId(),
+-                        runId,
+-                        nodeConfigScope.isBlank() ? null : nodeConfigScope);
+-        var compactionDecision = sessionCompactionPolicy.decide(
+-                agent,
+-                context.definition().id(),
+-                context.workstreamId(),
+-                runId,
+-                configuredSession,
+-                sessionDecision,
+-                context.workspaceRoot()
+-        );
+-        if (e1Enabled && compactionDecision.enabled()) {
+-            compactionDecision = new SessionCompactionPolicy.Decision(
+-                    compactionDecision.mode(),
+-                    true,
+-                    sessionDecision.sessionName(),
+-                    sessionDecision.segmentKey(),
+-                    compactionDecision.seedKind(),
+-                    compactionDecision.reason() + "; occurrence-bound session retained"
+-            );
+-        }
+-        var session = compactionDecision.enabled() ? compactionDecision.sessionName() : sessionDecision.sessionName();
+-        var sessionMeta = SessionMeta.from(
+-                sessionDecision,
+-                context.instance().stageId(),
+-                context.instance().iterationId()
+-        );
+-        var runDir = context.workspaceRoot()
+-                .resolve(".agent")
+-                .resolve("workstreams")
+-                .resolve(context.workstreamId())
+-                .resolve("runs")
+-                .resolve(runId);
+-        var promptPath = runDir.resolve("prompts").resolve(promptTemplate + ".md");
+-        var outputPath = runDir.resolve("outputs").resolve(promptTemplate + ".json");
+-        var transcriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".transcript.log");
+-        var stderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".stderr.log");
+-        var initialOutputPath = runDir.resolve("outputs").resolve(promptTemplate + ".attempt-1.json");
+-        var correctionPromptPath = runDir.resolve("prompts").resolve(promptTemplate + ".contract-correction.md");
+-        var correctionOutputPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.json");
+-        var correctionTranscriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.transcript.log");
+-        var correctionStderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.stderr.log");
+-        Files.createDirectories(promptPath.getParent());
+-        Files.createDirectories(outputPath.getParent());
+-        var seedPath = sessionCompactionSeedWriter.write(
+-                context.workspaceRoot(),
+-                context.workstreamId(),
+-                runDir,
+-                compactionDecision
+-        ).orElse(null);
+-        var inputRefs = new java.util.ArrayList<>(context.instance().inputRefs());
+-        AgentRunGovernanceContext.PreparedContext governanceContext;
+-        try {
+-            governanceContext = AgentRunGovernanceContext.ensureQualified(context, runId);
+-            inputRefs.add(governanceContext.contextRef());
+-        } catch (AgentRunGovernanceContext.QualificationException failure) {
+-            return new NodeResult(
+-                    AgentRunGovernanceContext.QUALIFICATION_FAILURE_OUTCOME,
+-                    NodeStatus.FAILED,
+-                    List.of(),
+-                    Map.of("error", failure.getMessage()),
+-                    failure.getMessage());
+-        } catch (AgentRunGovernanceContext.AuthoredContextException failure) {
+-            return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
+-                    Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
+-        }
+-        String retryInstruction;
++        boolean providerDispatchStarted = false;
+         try {
+-            retryInstruction = retryFailureInstruction(context);
+-        } catch (java.io.IOException failure) {
+-            return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
+-                    Map.of("failure_code", "RETRY_FAILURE_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
+-        }
+-        if (seedPath != null) {
+-            inputRefs.add(context.workspaceRoot().relativize(seedPath).toString());
+-        }
+-        var compactionMeta = SessionCompactionMeta.from(compactionDecision, context.workspaceRoot(), seedPath);
+-        var effectivePermissionProfile = permissionProfile(context);
+-        if (e1Enabled && effectivePermissionProfile.approveAll()) {
+-            throw new IllegalStateException(
+-                    "NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
+-        }
+-        var networkGrant = e1Enabled && !prepareOnly
+-                ? new dev.dual.ledger.file.ExecutionNetworkGrantStore().claimIfPresent(
+-                        new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot().toRealPath(),
+-                                new dev.dual.core.id.DualId(context.workstreamId())), context.instance().nodeInstanceId(), runId)
+-                : null;
+-        var executionPolicy = e1Enabled
+-                ? ClaudeExecutionPolicy.write(
++            var agent = configText(context, "agent");
++            if (!"claude".equals(agent) && !"codex".equals(agent)) {
++                throw new IllegalArgumentException("unsupported agent: " + agent);
++            }
++            var configuredSession = configText(context, "session");
++            var promptTemplate = configText(context, "prompt_template");
++            var runId = "run-" + Instant.now().toEpochMilli();
++            var e1Enabled = "claude".equals(agent) && hasNamedPermissionProfile(context);
++            var emissionContext = proposalEmissionContext(context);
++            if (emissionContext.failed() != null) {
++                return emissionContext.failed();
++            }
++            var agentResultContract = agentResultContractPrompt(
++                    context, runId, emissionContext.context());
++            var sessionScopeConfigValue = context.definition().config().get("session_scope");
++            var nodeConfigScope = sessionScopeConfigValue instanceof String text ? text.trim() : "";
++            var sessionDecision = e1Enabled
++                    ? SessionScopePolicy.occurrenceBound(
++                            configuredSession,
++                            context.workstreamId(),
++                            context.instance().stageId(),
++                            context.instance().iterationId(),
++                            runId)
++                    : SessionScopePolicy.resolve(
++                            agent,
++                            configuredSession,
++                            context.workstreamId(),
++                            context.instance().stageId(),
++                            context.instance().iterationId(),
++                            runId,
++                            nodeConfigScope.isBlank() ? null : nodeConfigScope);
++            var compactionDecision = sessionCompactionPolicy.decide(
++                    agent,
++                    context.definition().id(),
++                    context.workstreamId(),
++                    runId,
++                    configuredSession,
++                    sessionDecision,
++                    context.workspaceRoot()
++            );
++            if (e1Enabled && compactionDecision.enabled()) {
++                compactionDecision = new SessionCompactionPolicy.Decision(
++                        compactionDecision.mode(),
++                        true,
++                        sessionDecision.sessionName(),
++                        sessionDecision.segmentKey(),
++                        compactionDecision.seedKind(),
++                        compactionDecision.reason() + "; occurrence-bound session retained"
++                );
++            }
++            var session = compactionDecision.enabled() ? compactionDecision.sessionName() : sessionDecision.sessionName();
++            var sessionMeta = SessionMeta.from(
++                    sessionDecision,
++                    context.instance().stageId(),
++                    context.instance().iterationId()
++            );
++            var runDir = context.workspaceRoot()
++                    .resolve(".agent")
++                    .resolve("workstreams")
++                    .resolve(context.workstreamId())
++                    .resolve("runs")
++                    .resolve(runId);
++            var promptPath = runDir.resolve("prompts").resolve(promptTemplate + ".md");
++            var outputPath = runDir.resolve("outputs").resolve(promptTemplate + ".json");
++            var transcriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".transcript.log");
++            var stderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".stderr.log");
++            var initialOutputPath = runDir.resolve("outputs").resolve(promptTemplate + ".attempt-1.json");
++            var correctionPromptPath = runDir.resolve("prompts").resolve(promptTemplate + ".contract-correction.md");
++            var correctionOutputPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.json");
++            var correctionTranscriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.transcript.log");
++            var correctionStderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.stderr.log");
++            Files.createDirectories(promptPath.getParent());
++            Files.createDirectories(outputPath.getParent());
++            var seedPath = sessionCompactionSeedWriter.write(
++                    context.workspaceRoot(),
++                    context.workstreamId(),
++                    runDir,
++                    compactionDecision
++            ).orElse(null);
++            var inputRefs = new java.util.ArrayList<>(context.instance().inputRefs());
++            AgentRunGovernanceContext.PreparedContext governanceContext;
++            try {
++                governanceContext = AgentRunGovernanceContext.ensureQualified(context, runId);
++                inputRefs.add(governanceContext.contextRef());
++            } catch (AgentRunGovernanceContext.QualificationException failure) {
++                return AgentExecutionResultFacts.inputPreparationFailed(
++                        AgentRunGovernanceContext.QUALIFICATION_FAILURE_OUTCOME,
++                        AgentRunGovernanceContext.QUALIFICATION_FAILURE_OUTCOME, List.of(failure.getMessage()));
++            } catch (AgentRunGovernanceContext.AuthoredContextException failure) {
++                return AgentExecutionResultFacts.inputPreparationFailed("REQUIRED_AGENT_EVIDENCE_MISSING",
++                        "AUTHORED_CONTEXT_INVALID", List.of(failure.getMessage()));
++            }
++            String retryInstruction;
++            try {
++                retryInstruction = retryFailureInstruction(context);
++            } catch (java.io.IOException failure) {
++                return AgentExecutionResultFacts.inputPreparationFailed("REQUIRED_AGENT_EVIDENCE_MISSING",
++                        "RETRY_FAILURE_CONTEXT_INVALID", List.of(failure.getMessage()));
++            }
++            if (seedPath != null) {
++                inputRefs.add(context.workspaceRoot().relativize(seedPath).toString());
++            }
++            var compactionMeta = SessionCompactionMeta.from(compactionDecision, context.workspaceRoot(), seedPath);
++            var effectivePermissionProfile = permissionProfile(context);
++            if (e1Enabled && effectivePermissionProfile.approveAll()) {
++                throw new IllegalStateException(
++                        "NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
++            }
++            var networkGrant = e1Enabled && !prepareOnly
++                    ? new dev.dual.ledger.file.ExecutionNetworkGrantStore().claimIfPresent(
++                            new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot().toRealPath(),
++                                    new dev.dual.core.id.DualId(context.workstreamId())), context.instance().nodeInstanceId(), runId)
++                    : null;
++            var executionPolicy = e1Enabled
++                    ? ClaudeExecutionPolicy.write(
++                            context.workspaceRoot(),
++                            context.workstreamId(),
++                            context.instance().nodeInstanceId(),
++                            runId,
++                            runDir,
++                            effectivePermissionProfile, networkGrant)
++                    : null;
++            var rendered = withExternalResearchGuidance(promptRenderer.renderWithSections(
++                    context.workspaceRoot(),
++                    context.workstreamId(),
++                    runId,
++                    context.definition().id(),
++                    promptTemplate,
++                    inputRefs,
++                    agentResultContract,
++                    governanceContext.trustedTaskContractPayload().orElse(null)
++            ), effectivePermissionProfile);
++            if (!retryInstruction.isEmpty()) {
++                var sections = new ArrayList<>(rendered.sections());
++                sections.add(new AgentPromptRenderer.PromptSection("Previous rejected execution", "retry_diagnostic",
++                        context.instance().nodeInstanceId(), retryInstruction, "advisory failure context; not approval", true));
++                rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + retryInstruction, List.copyOf(sections));
++            }
++            var authored = governanceContext.authoredContext().orElse(null);
++            try {
++                if (authored != null) {
++                    var body = authored.render(context.workspaceRoot());
++                    var sections = new ArrayList<>(rendered.sections());
++                    sections.add(new AgentPromptRenderer.PromptSection(
++                            dev.dual.runtime.handler.AuthoredExecutionContext.SECTION_NAME, "typed_authored_context",
++                            context.instance().nodeInstanceId(), body, "required approved and revision inputs", true));
++                    rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + body, List.copyOf(sections));
++                    agentResultContract += "\n\n" + body;
++                }
++            } catch (java.io.IOException | IllegalArgumentException failure) {
++                return AgentExecutionResultFacts.inputPreparationFailed("REQUIRED_AGENT_EVIDENCE_MISSING",
++                        "AUTHORED_CONTEXT_INVALID", List.of(failure.getMessage()));
++            }
++            var collectionInstruction = dev.dual.runtime.handler.EvidenceCollection.promptInstruction(
++                    context.workspaceRoot(), context.workstreamId(), context.instance().nodeInstanceId());
++            if (collectionInstruction.isPresent()) {
++                var instruction = collectionInstruction.orElseThrow();
++                var sections = new ArrayList<>(rendered.sections());
++                sections.add(new AgentPromptRenderer.PromptSection("Evidence collection boundary", "human_collection",
++                        context.instance().nodeInstanceId(), instruction, "source-preserving evidence collection", true));
++                rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + instruction, List.copyOf(sections));
++                agentResultContract += "\n\n" + instruction;
++            }
++            // Storage failures retain the ordinary adapter IO path, not evidence-violation semantics.
++            Files.writeString(promptPath, rendered.content(), StandardCharsets.UTF_8);
++            promptManifestWriter.write(
++                    PromptManifestWriter.manifestPathFor(promptPath), context.workstreamId(), runId,
++                    context.definition().id(), agent, promptTemplate, promptPath, rendered.sections(), authored);
++            try {
++                if (authored != null) {
++                    dev.dual.runtime.handler.AuthoredExecutionContext.verifyManifest(context.workspaceRoot(),
++                            PromptManifestWriter.manifestPathFor(promptPath), authored);
++                }
++            } catch (java.io.IOException | IllegalArgumentException failure) {
++                return AgentExecutionResultFacts.inputPreparationFailed("REQUIRED_AGENT_EVIDENCE_MISSING",
++                        "AUTHORED_CONTEXT_INVALID", List.of(failure.getMessage()));
++            }
++
++            if (prepareOnly) {
++                metadataWriter.writePrepared(
+                         context.workspaceRoot(),
+                         context.workstreamId(),
+-                        context.instance().nodeInstanceId(),
++                        context.definition().id(),
++                        agent,
++                        session,
++                        promptTemplate,
+                         runId,
+                         runDir,
+-                        effectivePermissionProfile, networkGrant)
+-                : null;
+-        var rendered = withExternalResearchGuidance(promptRenderer.renderWithSections(
+-                context.workspaceRoot(),
+-                context.workstreamId(),
+-                runId,
+-                context.definition().id(),
+-                promptTemplate,
+-                inputRefs,
+-                agentResultContract,
+-                governanceContext.trustedTaskContractPayload().orElse(null)
+-        ), effectivePermissionProfile);
+-        if (!retryInstruction.isEmpty()) {
+-            var sections = new ArrayList<>(rendered.sections());
+-            sections.add(new AgentPromptRenderer.PromptSection("Previous rejected execution", "retry_diagnostic",
+-                    context.instance().nodeInstanceId(), retryInstruction, "advisory failure context; not approval", true));
+-            rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + retryInstruction, List.copyOf(sections));
+-        }
+-        var authored = governanceContext.authoredContext().orElse(null);
+-        try {
+-            if (authored != null) {
+-                var body = authored.render(context.workspaceRoot());
+-                var sections = new ArrayList<>(rendered.sections());
+-                sections.add(new AgentPromptRenderer.PromptSection(
+-                        dev.dual.runtime.handler.AuthoredExecutionContext.SECTION_NAME, "typed_authored_context",
+-                        context.instance().nodeInstanceId(), body, "required approved and revision inputs", true));
+-                rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + body, List.copyOf(sections));
+-                agentResultContract += "\n\n" + body;
+-            }
+-        } catch (java.io.IOException | IllegalArgumentException failure) {
+-            return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
+-                    Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
+-        }
+-        var collectionInstruction = dev.dual.runtime.handler.EvidenceCollection.promptInstruction(
+-                context.workspaceRoot(), context.workstreamId(), context.instance().nodeInstanceId());
+-        if (collectionInstruction.isPresent()) {
+-            var instruction = collectionInstruction.orElseThrow();
+-            var sections = new ArrayList<>(rendered.sections());
+-            sections.add(new AgentPromptRenderer.PromptSection("Evidence collection boundary", "human_collection",
+-                    context.instance().nodeInstanceId(), instruction, "source-preserving evidence collection", true));
+-            rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + instruction, List.copyOf(sections));
+-            agentResultContract += "\n\n" + instruction;
+-        }
+-        // Storage failures retain the ordinary adapter IO path, not evidence-violation semantics.
+-        Files.writeString(promptPath, rendered.content(), StandardCharsets.UTF_8);
+-        promptManifestWriter.write(
+-                PromptManifestWriter.manifestPathFor(promptPath), context.workstreamId(), runId,
+-                context.definition().id(), agent, promptTemplate, promptPath, rendered.sections(), authored);
+-        try {
+-            if (authored != null) {
+-                dev.dual.runtime.handler.AuthoredExecutionContext.verifyManifest(context.workspaceRoot(),
+-                        PromptManifestWriter.manifestPathFor(promptPath), authored);
++                        promptPath,
++                        outputPath,
++                        transcriptPath,
++                        stderrPath,
++                        sessionMeta,
++                        compactionMeta,
++                        executionPolicy
++                );
++                return NodeResult.completed("completed", List.of(
++                        context.workspaceRoot().relativize(promptPath).toString(),
++                        governanceContext.repositoryFactBinding().ref()), Map.of(
++                        "run_id", runId,
++                        "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
++                        "agent", agent,
++                        "session", session,
++                        "repository_fact_binding_ref", governanceContext.repositoryFactBinding().ref(),
++                        "repository_fact_binding_sha256", governanceContext.repositoryFactBinding().sha256(),
++                        "prepared", true
++                ));
+             }
+-        } catch (java.io.IOException | IllegalArgumentException failure) {
+-            return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
+-                    Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
+-        }
+ 
+-        if (prepareOnly) {
+             metadataWriter.writePrepared(
+                     context.workspaceRoot(),
+                     context.workstreamId(),
+@@ -307,179 +337,155 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
+                     compactionMeta,
+                     executionPolicy
+             );
+-            return NodeResult.completed("completed", List.of(
+-                    context.workspaceRoot().relativize(promptPath).toString(),
+-                    governanceContext.repositoryFactBinding().ref()), Map.of(
+-                    "run_id", runId,
+-                    "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
+-                    "agent", agent,
+-                    "session", session,
+-                    "repository_fact_binding_ref", governanceContext.repositoryFactBinding().ref(),
+-                    "repository_fact_binding_sha256", governanceContext.repositoryFactBinding().sha256(),
+-                    "prepared", true
+-            ));
+-        }
+-
+-        metadataWriter.writePrepared(
+-                context.workspaceRoot(),
+-                context.workstreamId(),
+-                context.definition().id(),
+-                agent,
+-                session,
+-                promptTemplate,
+-                runId,
+-                runDir,
+-                promptPath,
+-                outputPath,
+-                transcriptPath,
+-                stderrPath,
+-                sessionMeta,
+-                compactionMeta,
+-                executionPolicy
+-        );
+-        var request = new AcpxRunRequest(
+-                context.workspaceRoot(),
+-                session,
+-                promptPath,
+-                transcriptPath,
+-                stderrPath,
+-                effectivePermissionProfile,
+-                event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event),
+-                executionPolicy
+-        );
+-        var correctionRequest = new AcpxRunRequest(
+-                context.workspaceRoot(),
+-                session,
+-                correctionPromptPath,
+-                correctionTranscriptPath,
+-                correctionStderrPath,
+-                AcpxPermissionProfile.contractCorrection(),
+-                event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event),
+-                executionPolicy
+-        );
+-        var authoritySnapshot = ChangeBoundaryAuthoritySnapshot.capture(
+-                context.workspaceRoot(),
+-                context.workstreamId(),
+-                request.permissionProfile().approveAll()
+-        );
+-        try {
+-            var acquisition = resultAcquirer.acquire(
+-                    agent,
+-                    request,
+-                    correctionRequest,
+-                    agentResultContract,
+-                    context.workstreamId(),
+-                    runId,
+-                    ContractRegistry.hasContract(context.definition().id())
+-                            ? ContractRegistry.forNode(context.definition().id())
+-                            : null,
+-                    authored == null ? List.of() : authored.obligations().stream()
+-                            .map(dev.dual.runtime.handler.AuthoredExecutionContext.Obligation::id).toList()
+-            );
+-            var finalResult = acquisition.finalResult();
+-            var runTimeline = new ArrayList<>(acquisition.executionTimeline());
+-            var initialUsage = usageFor(agent, acquisition.initialResult(), promptPath, stderrPath);
+-            var correctionUsage = acquisition.correctionAttempted()
+-                    ? usageFor(agent, acquisition.correctionResult(), correctionPromptPath, correctionStderrPath)
+-                    : null;
+-            var usage = acquisition.correctionAttempted()
+-                    ? AcpxUsage.aggregatePromptOccurrences(initialUsage, correctionUsage)
+-                    : initialUsage;
+-            var finalArtifact = acquisition.finalCandidate();
+-            if (acquisition.correctionAttempted()) {
+-                Files.writeString(
+-                        initialOutputPath,
+-                        acquisition.initialCandidate(),
+-                        StandardCharsets.UTF_8
+-                );
+-                Files.writeString(correctionOutputPath, finalArtifact, StandardCharsets.UTF_8);
+-            }
+-            if (finalResult.promptCompletion().completed()) {
+-                Files.writeString(outputPath, finalArtifact, StandardCharsets.UTF_8);
+-                appendTimelineEvent(
+-                        runTimeline,
+-                        finalResult.startedAt(),
+-                        AgentExecutionTimelineEventKind.ARTIFACT_EXTRACTED,
+-                        "adapter"
+-                );
+-            }
+-            var effectiveTranscriptPath = acquisition.correctionAttempted() ? correctionTranscriptPath : transcriptPath;
+-            var effectiveStderrPath = acquisition.correctionAttempted() ? correctionStderrPath : stderrPath;
+-            var outputComplete = finalResult.promptCompletion().completed();
+-            var acquisitionDocument = acquisition.toDocument(
+-                    context.workspaceRoot(),
+-                    acquisition.correctionAttempted() ? initialOutputPath : outputPath,
+-                    correctionOutputPath,
+-                    initialUsage,
+-                    correctionUsage
+-            );
+-            metadataWriter.writeCompleted(
++            var request = new AcpxRunRequest(
+                     context.workspaceRoot(),
+-                    context.workstreamId(),
+-                    context.definition().id(),
+-                    agent,
+                     session,
+-                    promptTemplate,
+-                    runId,
+-                    runDir,
+                     promptPath,
+-                    outputPath,
+-                    effectiveStderrPath,
+                     transcriptPath,
+-                    finalResult,
+-                    runTimeline,
+-                    usage,
+-                    sessionMeta,
+-                    compactionMeta,
+-                    acquisitionDocument,
+-                    governanceContext.repositoryFactBinding(),
+-                    governanceContext,
++                    stderrPath,
++                    effectivePermissionProfile,
++                    event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event),
+                     executionPolicy
+             );
+-            var candidate = NodeResult.completed(
+-                    "completed",
+-                    evidenceOutputRefs(
+-                            context,
+-                            outputPath,
+-                            transcriptPath,
+-                            stderrPath,
+-                            governanceContext.repositoryFactBinding().ref()),
+-                    resultFacts(
+-                            context,
+-                            runDir,
+-                            transcriptPath,
+-                            finalResult,
+-                            agent,
+-                            session,
+-                            runId,
+-                            outputComplete,
+-                            governanceContext.repositoryFactBinding()
+-                    )
++            var correctionRequest = new AcpxRunRequest(
++                    context.workspaceRoot(),
++                    session,
++                    correctionPromptPath,
++                    correctionTranscriptPath,
++                    correctionStderrPath,
++                    AcpxPermissionProfile.contractCorrection(),
++                    event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event),
++                    executionPolicy
+             );
+-            if (acquisition.correctionValidation() != null && !acquisition.correctionValidation().valid()) {
+-                candidate = dev.dual.runtime.handler.AgentExecutionResultFacts.rejectAgentResult(candidate,
+-                        String.join("; ", acquisition.correctionValidation().errors()));
+-            }
+-            return authoritySnapshot.enforce(candidate);
+-        } catch (Exception failure) {
+-            // If the transport persisted evidence and completion writing failed, replay that
+-            // evidence to a typed terminal disposition before propagating the handler failure.
++            var authoritySnapshot = ChangeBoundaryAuthoritySnapshot.capture(
++                    context.workspaceRoot(),
++                    context.workstreamId(),
++                    request.permissionProfile().approveAll()
++            );
++            providerDispatchStarted = true;
+             try {
+-                closeInFlightExecutionIfStarted(runDir.resolve("run.json"));
+-            } catch (Exception reconciliationFailure) {
+-                failure.addSuppressed(reconciliationFailure);
+-            }
+-            var guarded = authoritySnapshot.enforce(new NodeResult(
+-                    "AGENT_HANDLER_FAILED",
+-                    NodeStatus.FAILED,
+-                    List.of(),
+-                    Map.of(),
+-                    failure.getMessage()
+-            ));
+-            if (Boolean.TRUE.equals(guarded.result().get("change_boundary_authority_tampered"))) {
+-                return guarded;
++                var acquisition = resultAcquirer.acquire(
++                        agent,
++                        request,
++                        correctionRequest,
++                        agentResultContract,
++                        context.workstreamId(),
++                        runId,
++                        ContractRegistry.hasContract(context.definition().id())
++                                ? ContractRegistry.forNode(context.definition().id())
++                                : null,
++                        authored == null ? List.of() : authored.obligations().stream()
++                                .map(dev.dual.runtime.handler.AuthoredExecutionContext.Obligation::id).toList()
++                );
++                var finalResult = acquisition.finalResult();
++                var runTimeline = new ArrayList<>(acquisition.executionTimeline());
++                var initialUsage = usageFor(agent, acquisition.initialResult(), promptPath, stderrPath);
++                var correctionUsage = acquisition.correctionAttempted()
++                        ? usageFor(agent, acquisition.correctionResult(), correctionPromptPath, correctionStderrPath)
++                        : null;
++                var usage = acquisition.correctionAttempted()
++                        ? AcpxUsage.aggregatePromptOccurrences(initialUsage, correctionUsage)
++                        : initialUsage;
++                var finalArtifact = acquisition.finalCandidate();
++                if (acquisition.correctionAttempted()) {
++                    Files.writeString(
++                            initialOutputPath,
++                            acquisition.initialCandidate(),
++                            StandardCharsets.UTF_8
++                    );
++                    Files.writeString(correctionOutputPath, finalArtifact, StandardCharsets.UTF_8);
++                }
++                if (finalResult.promptCompletion().completed()) {
++                    Files.writeString(outputPath, finalArtifact, StandardCharsets.UTF_8);
++                    appendTimelineEvent(
++                            runTimeline,
++                            finalResult.startedAt(),
++                            AgentExecutionTimelineEventKind.ARTIFACT_EXTRACTED,
++                            "adapter"
++                    );
++                }
++                var effectiveTranscriptPath = acquisition.correctionAttempted() ? correctionTranscriptPath : transcriptPath;
++                var effectiveStderrPath = acquisition.correctionAttempted() ? correctionStderrPath : stderrPath;
++                var outputComplete = finalResult.promptCompletion().completed();
++                var acquisitionDocument = acquisition.toDocument(
++                        context.workspaceRoot(),
++                        acquisition.correctionAttempted() ? initialOutputPath : outputPath,
++                        correctionOutputPath,
++                        initialUsage,
++                        correctionUsage
++                );
++                metadataWriter.writeCompleted(
++                        context.workspaceRoot(),
++                        context.workstreamId(),
++                        context.definition().id(),
++                        agent,
++                        session,
++                        promptTemplate,
++                        runId,
++                        runDir,
++                        promptPath,
++                        outputPath,
++                        effectiveStderrPath,
++                        transcriptPath,
++                        finalResult,
++                        runTimeline,
++                        usage,
++                        sessionMeta,
++                        compactionMeta,
++                        acquisitionDocument,
++                        governanceContext.repositoryFactBinding(),
++                        governanceContext,
++                        executionPolicy
++                );
++                var candidate = NodeResult.completed(
++                        "completed",
++                        evidenceOutputRefs(
++                                context,
++                                outputPath,
++                                transcriptPath,
++                                stderrPath,
++                                governanceContext.repositoryFactBinding().ref()),
++                        resultFacts(
++                                context,
++                                runDir,
++                                transcriptPath,
++                                finalResult,
++                                agent,
++                                session,
++                                runId,
++                                outputComplete,
++                                governanceContext.repositoryFactBinding()
++                        )
++                );
++                if (acquisition.correctionValidation() != null && !acquisition.correctionValidation().valid()) {
++                    candidate = dev.dual.runtime.handler.AgentExecutionResultFacts.rejectAgentResult(candidate,
++                            String.join("; ", acquisition.correctionValidation().errors()));
++                }
++                return authoritySnapshot.enforce(candidate);
++            } catch (Exception failure) {
++                // If the transport persisted evidence and completion writing failed, replay that
++                // evidence to a typed terminal disposition before propagating the handler failure.
++                try {
++                    closeInFlightExecutionIfStarted(runDir.resolve("run.json"));
++                } catch (Exception reconciliationFailure) {
++                    failure.addSuppressed(reconciliationFailure);
++                }
++                var guarded = authoritySnapshot.enforce(new NodeResult(
++                        "AGENT_HANDLER_FAILED",
++                        NodeStatus.FAILED,
++                        List.of(),
++                        Map.of(),
++                        failure.getMessage()
++                ));
++                if (Boolean.TRUE.equals(guarded.result().get("change_boundary_authority_tampered"))) {
++                    return guarded;
++                }
++                throw failure;
+             }
+-            throw failure;
++        } catch (Exception failure) {
++            if (providerDispatchStarted) throw failure;
++            return AgentExecutionResultFacts.inputPreparationFailed("INPUT_PREPARATION_FAILED",
++                    failure.getClass().getName(), List.of(String.valueOf(failure.getMessage())));
+         }
+     }
+ 
+@@ -615,12 +621,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
+         var resolved = revisionContextResolver.resolveForIteration(
+                 context.workspaceRoot(), context.workstreamId(), context.instance().iterationId());
+         if (!resolved.valid()) {
+-            return new ProposalEmissionResolution(null, new NodeResult(
+-                    "TASK_CONTRACT_REVISION_CONTEXT_INVALID",
+-                    NodeStatus.FAILED,
+-                    List.of(),
+-                    Map.of("errors", resolved.errors()),
+-                    "task contract revision context could not be resolved"));
++            return new ProposalEmissionResolution(null, AgentExecutionResultFacts.inputPreparationFailed(
++                    "TASK_CONTRACT_REVISION_CONTEXT_INVALID", "TASK_CONTRACT_REVISION_CONTEXT_INVALID", resolved.errors()));
+         }
+         return new ProposalEmissionResolution(
+                 AgentResultPromptContract.proposalEmissionContext(resolved.context()), null);
+diff --git a/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java b/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
+index b957a8ca..33a2d48c 100644
+--- a/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
++++ b/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
+@@ -2072,7 +2072,7 @@ class AcpxAgentTaskHandlerTest {
+     }
+ 
+     @Test
+-    void rejectsUnsupportedAgent() {
++    void rejectsUnsupportedAgent() throws Exception {
+         var handler = new AcpxAgentTaskHandler(new AcpxAgentTransport(), true);
+         var definition = new NodeDefinition("design.bad_agent", NodeKind.TASK, "acpx.agent_run", Map.of(
+                 "agent", "unknown",
+@@ -2095,9 +2095,11 @@ class AcpxAgentTaskHandlerTest {
+                 null
+         );
+ 
+-        var error = assertThrows(IllegalArgumentException.class, () ->
+-                handler.execute(taskContext(tempDir, "ws-test", definition, instance)));
+-        assertTrue(error.getMessage().contains("unsupported agent"));
++        var result = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
++        assertEquals(NodeStatus.FAILED, result.status());
++        assertEquals("INPUT_PREPARATION_FAILED", result.outcome());
++        assertEquals(IllegalArgumentException.class.getName(), result.result().get("failure_code"));
++        assertTrue(result.errorMessage().contains("unsupported agent"));
+     }
+ 
+     private static final class CompletingExitFiveTransport extends AcpxAgentTransport {
+diff --git a/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredManifestDispatchTest.java b/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredManifestDispatchTest.java
+index 20d2b8c2..2cc08e28 100644
+--- a/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredManifestDispatchTest.java
++++ b/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredManifestDispatchTest.java
+@@ -10,6 +10,10 @@ import dev.dual.runtime.handler.AuthoredExecutionContext;
+ import dev.dual.runtime.handler.TaskHandler;
+ import org.junit.jupiter.api.Test;
+ import org.junit.jupiter.api.io.TempDir;
++import org.junit.jupiter.params.ParameterizedTest;
++import org.junit.jupiter.params.provider.ValueSource;
++import dev.dual.runtime.*;
++import dev.dual.runtime.handler.HandlerRegistry;
+ 
+ import java.io.IOException;
+ import java.nio.file.Files;
+@@ -24,32 +28,32 @@ class AuthoredManifestDispatchTest {
+     private static final ObjectMapper JSON = new ObjectMapper().registerModule(new JavaTimeModule());
+     @TempDir Path root;
+ 
+-    @Test
+-    void aSuccessfulWriterWithWrongIdentityCannotDispatchProvider() throws Exception {
+-        assertRejected("identity");
++    @ParameterizedTest @ValueSource(booleans = {false, true})
++    void aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(boolean queued) throws Exception {
++        assertRejected("identity", queued);
+     }
+ 
+-    @Test
+-    void retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider() throws Exception {
+-        assertRejected("body");
++    @ParameterizedTest @ValueSource(booleans = {false, true})
++    void retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(boolean queued) throws Exception {
++        assertRejected("body", queued);
+     }
+ 
+-    @Test
+-    void partialManifestCannotDispatchProvider() throws Exception {
+-        assertRejected("partial");
++    @ParameterizedTest @ValueSource(booleans = {false, true})
++    void partialManifestCannotDispatchProvider(boolean queued) throws Exception {
++        assertRejected("partial", queued);
+     }
+ 
+-    @Test
+-    void manifestWriteFailureRemainsAnIoFailureBeforeProvider() throws Exception {
+-        assertWriteFailure("design.claude_design");
++    @ParameterizedTest @ValueSource(booleans = {false, true})
++    void manifestWriteFailureRemainsAnIoFailureBeforeProvider(boolean queued) throws Exception {
++        assertWriteFailure("design.claude_design", queued);
+     }
+ 
+-    @Test
+-    void nonAuthoredSiblingPreservesTheSameIoFailureBeforeProvider() throws Exception {
+-        assertWriteFailure("intake.codex_product_review");
++    @ParameterizedTest @ValueSource(booleans = {false, true})
++    void nonAuthoredSiblingPreservesTheSameIoFailureBeforeProvider(boolean queued) throws Exception {
++        assertWriteFailure("intake.codex_product_review", queued);
+     }
+ 
+-    private void assertWriteFailure(String nodeId) throws Exception {
++    private void assertWriteFailure(String nodeId, boolean queued) throws Exception {
+         var context = context(nodeId);
+         var calls = new AtomicInteger();
+         var writes = new AtomicInteger();
+@@ -65,7 +69,10 @@ class AuthoredManifestDispatchTest {
+             }
+         };
+         var handler = new AcpxAgentTaskHandler(forbiddenTransport(calls), false, new AcpxUsageReader(), writer);
+-        assertSame(diskFailure, assertThrows(IOException.class, () -> handler.execute(context)));
++        var result = execute(context, handler, queued);
++        assertEquals("INPUT_PREPARATION_FAILED", result.result().get("reason"));
++        assertEquals(IOException.class.getName(), result.result().get("failure_code"));
++        assertEquals(List.of(diskFailure.getMessage()), result.result().get("errors"));
+         assertEquals(1, writes.get());
+         assertEquals(0, calls.get());
+     }
+@@ -84,7 +91,7 @@ class AuthoredManifestDispatchTest {
+         assertFalse(run.has("authoredContext"), "run metadata locates the manifest; it must not copy its payload");
+     }
+ 
+-    private void assertRejected(String corruption) throws Exception {
++    private void assertRejected(String corruption, boolean queued) throws Exception {
+         var context = context();
+         var writes = new AtomicInteger();
+         var calls = new AtomicInteger();
+@@ -106,14 +113,30 @@ class AuthoredManifestDispatchTest {
+                 writes.incrementAndGet();
+             }
+         };
+-        var result = new AcpxAgentTaskHandler(forbiddenTransport(calls), false, new AcpxUsageReader(), writer).execute(context);
++        var result = execute(context, new AcpxAgentTaskHandler(forbiddenTransport(calls), false, new AcpxUsageReader(), writer), queued);
+         assertEquals(1, writes.get(), "the writer returned; dispatch must independently verify its output");
+         assertEquals(0, calls.get());
+         assertEquals(NodeStatus.FAILED, result.status());
+-        assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", result.outcome());
++        assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", result.result().get("reason"));
+         assertEquals("AUTHORED_CONTEXT_INVALID", result.result().get("failure_code"));
+     }
+ 
++    private NodeInstanceDocument execute(TaskHandler.TaskContext context, AcpxAgentTaskHandler handler, boolean queued) throws Exception {
++        var ledger = new WorkflowFileLedger();
++        var paths = new WorkstreamPaths(root, new DualId(context.workstreamId()));
++        var handlers = new HandlerRegistry(List.of(handler), List.of(), List.of());
++        var command = new WorkflowCommand(root, context.workstreamId());
++        new WorkflowRuntime(ledger, handlers, queued ? AgentTaskDispatchMode.WORKER : AgentTaskDispatchMode.INLINE).resume(command);
++        if (queued) new AgentWorker(ledger, handlers).runOne(command);
++        var current = ledger.loadCurrent(paths);
++        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, current.status());
++        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
++        assertTrue(node.outputRefs().isEmpty());
++        assertFalse(node.result().containsKey("parse_error"));
++        assertEquals("input_preparation_failure", RecoveryAssessment.from(node, root, context.workstreamId()).classification());
++        return node;
++    }
++
+     private TaskHandler.TaskContext context() throws Exception {
+         return context("design.claude_design");
+     }
+diff --git a/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java b/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java
+index 255cb9ea..c0bfe28b 100644
+--- a/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java
++++ b/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java
+@@ -164,6 +164,10 @@ class RetryFailureContextSequenceTest {
+             assertEquals(1, f.transport.prompts.size());
+             assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.current().status());
+             assertEquals(NodeStatus.FAILED, f.active().status());
++            assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", f.active().result().get("reason"));
++            assertEquals("RETRY_FAILURE_CONTEXT_INVALID", f.active().result().get("failure_code"));
++            assertEquals("input_preparation_failure", RecoveryAssessment.from(f.active(), f.root, f.ws).classification());
++            assertFalse(f.active().result().containsKey("parse_error"));
+             assertTrue(f.active().outputRefs().stream().noneMatch(ref -> ref.endsWith(".contract.json")));
+             f.runtime().resume(new WorkflowCommand(f.root, f.ws));
+             assertEquals(1, f.transport.prompts.size(), "invalid context must not trigger automatic retry");
+diff --git a/dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/RecoveryShowCommandTest.java b/dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/RecoveryShowCommandTest.java
+index 56f620bc..739d87c5 100644
+--- a/dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/RecoveryShowCommandTest.java
++++ b/dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/RecoveryShowCommandTest.java
+@@ -19,6 +19,7 @@ import java.util.List;
+ import java.util.Map;
+ 
+ import static org.junit.jupiter.api.Assertions.assertEquals;
++import static org.junit.jupiter.api.Assertions.assertFalse;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+ 
+ class RecoveryShowCommandTest {
+@@ -103,6 +104,20 @@ class RecoveryShowCommandTest {
+                 + "/artifacts/contract-failures/node-design.md"));
+     }
+ 
++    @Test
++    void preparationFailureExplainsHarnessInputsInsteadOfAskingForModelJson() throws Exception {
++        var ws = "ws-input-recovery";
++        var failure = dev.dual.runtime.handler.AgentExecutionResultFacts.inputPreparationFailed(
++                "TASK_CONTRACT_REVISION_CONTEXT_INVALID", "TASK_CONTRACT_REVISION_CONTEXT_INVALID", List.of("gate subject mismatch"));
++        writeFailure(ws, failure.status(), failure.outcome(), failure.result());
++        var printed = runShow(ws);
++        assertTrue(printed.contains("input_preparation_failure"));
++        assertTrue(printed.contains("TASK_CONTRACT_REVISION_CONTEXT_INVALID"));
++        assertTrue(printed.contains("gate subject mismatch"));
++        assertFalse(printed.contains("emit the typed artifact"));
++        assertFalse(printed.contains("AGENT_RESULT_MISSING"));
++    }
++
+     private void writeDiagnostic(String diagnosticRef) throws Exception {
+         var path = tempDir.resolve(diagnosticRef);
+         Files.createDirectories(path.getParent());
+diff --git a/dual-orchestrator/dual-core/src/main/java/dev/dual/core/workflow/HumanGateActionSemantics.java b/dual-orchestrator/dual-core/src/main/java/dev/dual/core/workflow/HumanGateActionSemantics.java
+index 10f0cd71..6f5ddeb8 100644
+--- a/dual-orchestrator/dual-core/src/main/java/dev/dual/core/workflow/HumanGateActionSemantics.java
++++ b/dual-orchestrator/dual-core/src/main/java/dev/dual/core/workflow/HumanGateActionSemantics.java
+@@ -13,6 +13,11 @@ public final class HumanGateActionSemantics {
+     private HumanGateActionSemantics() {
+     }
+ 
++    /** A human revision supplies new instructions regardless of the model's recommendation. */
++    public static boolean requiresDecisionNote(String action, String sourceOutcome) {
++        return "revise".equals(action) || "clarify".equals(action) || "BLOCKED".equals(sourceOutcome);
++    }
++
+     public static List<String> allowedActions(NodeDefinition definition) {
+         var configured = definition.config().get("allowed_actions");
+         if (configured instanceof List<?> list && !list.isEmpty()) {
+diff --git a/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java b/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java
+index 76b2ea51..71ece6b1 100644
+--- a/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java
++++ b/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java
+@@ -70,6 +70,16 @@ public record RecoveryAssessment(
+         var diagnostic = readDiagnostic(root, diagnosticJsonRef);
+         var agent = blankDefault(text(result.get("agent")), "claude");
+         var session = blankDefault(text(result.get("session")), agent + "-main");
++        if (result.get("input_preparation_failure") instanceof Map<?, ?> failure
++                && node.status() == dev.dual.core.workflow.NodeStatus.FAILED
++                && Boolean.FALSE.equals(failure.get("providerInvoked"))) {
++            return new RecoveryAssessment("input_preparation_failure", "FIX_INPUTS_BEFORE_MANUAL_RETRY",
++                    "Input preparation rejected before provider dispatch: " + text(failure.get("reason"))
++                            + " / " + text(failure.get("code")) + ": " + text(failure.get("details")),
++                    "Inspect the current input identity and approval evidence before `" + retry
++                            + "`; or stop with `" + abort + "`.",
++                    "", "", Map.of(), false);
++        }
+         var outcomeAssessment = fromAgentExecutionOutcome(
+                 result.get("agent_execution_outcome"),
+                 retry,
+diff --git a/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java b/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java
+index bfb9ef82..dfcc2645 100644
+--- a/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java
++++ b/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java
+@@ -545,23 +545,10 @@ final class RoutingEngine {
+                 throw new IOException("scope revision request budget exhausted; gate remains open");
+             }
+         }
+-        if ("BLOCKED".equals(sourceOutcome) && (note == null || note.isBlank())) {
+-            throw new IOException("a decision note is required for a BLOCKED human gate");
+-        }
+-        var gatePurpose = text(definition.node(node.nodeDefinitionId()).config().get("gate_purpose"));
+-        if ("implementation_repair".equals(gatePurpose)
+-                && "revise".equals(canonicalAction)
+-                && (note == null || note.isBlank())) {
+-            throw new IOException("a decision note is required for implementation repair");
+-        }
+-        if ("design".equals(gatePurpose)
+-                && "revise".equals(canonicalAction)
+-                && (note == null || note.isBlank())) {
+-            throw new IOException("a decision note is required to revise a design");
+-        }
+-        if ("plan".equals(gatePurpose) && "revise".equals(canonicalAction)
++        if (HumanGateActionSemantics.requiresDecisionNote(canonicalAction, sourceOutcome)
+                 && (note == null || note.isBlank())) {
+-            throw new IOException("a decision note is required to revise a plan");
++            throw new IOException("a decision note is required for " + canonicalAction + " at "
++                    + node.nodeDefinitionId() + " (" + sourceOutcome + ")");
+         }
+         resolveGateDocument(paths, gate, canonicalAction, note);
+         var humanAuthorizedRevision = "revise".equals(canonicalAction)
+diff --git a/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java b/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java
+index 05c74626..8f749d95 100644
+--- a/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java
++++ b/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java
+@@ -56,7 +56,8 @@ class WorkflowGateResolutionTest {
+         var error = assertThrows(java.io.IOException.class,
+                 () -> ledger.resolveOpenGate(paths, definition, "approved", ""));
+ 
+-        assertEquals("a decision note is required for a BLOCKED human gate", error.getMessage());
++        assertTrue(error.getMessage().contains("decision note"));
++        assertTrue(error.getMessage().contains("BLOCKED"));
+         assertEquals(before, ledger.loadCurrent(paths));
+         var gate = ledger.loadOpenGateForNode(paths, before.activeNodeInstanceIds().getFirst());
+         assertEquals("open", gate.status());
+@@ -86,7 +87,8 @@ class WorkflowGateResolutionTest {
+ 
+         var missingNote = assertThrows(java.io.IOException.class,
+                 () -> ledger.resolveOpenGate(paths, definition, "revise", ""));
+-        assertEquals("a decision note is required to revise a design", missingNote.getMessage());
++        assertTrue(missingNote.getMessage().contains("decision note"));
++        assertTrue(missingNote.getMessage().contains("revise"));
+ 
+         var humanReason = "Keep the transaction design, but add a crash-recovery invariant.";
+         ledger.resolveOpenGate(paths, definition, "revise", humanReason);
+diff --git a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionResultFacts.java b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionResultFacts.java
+index ddd0fa09..960a0619 100644
+--- a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionResultFacts.java
++++ b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionResultFacts.java
+@@ -18,6 +18,36 @@ public final class AgentExecutionResultFacts {
+     private AgentExecutionResultFacts() {
+     }
+ 
++    /** Closed, machine-owned input rejection. No provider result or arbitrary metadata can enter here. */
++    public static NodeResult inputPreparationFailed(String reason, String code, List<String> details) {
++        if (reason == null || reason.isBlank() || code == null || code.isBlank()
++                || details == null || details.isEmpty()) {
++            throw new IllegalArgumentException("input rejection requires reason, code and details");
++        }
++        var errors = List.copyOf(details);
++        return new NodeResult(reason, NodeStatus.FAILED, List.of(), Map.of(
++                "reason", reason, "failure_code", code, "errors", errors,
++                "input_preparation_failure", Map.of("reason", reason, "code", code, "details", errors,
++                        "providerInvoked", false, "retryPolicy", "MANUAL_ONLY")), String.join("; ", errors));
++    }
++
++    /** Reject contradictory facts instead of letting a phase marker become a publication bypass. */
++    static boolean inputPreparationFailed(NodeResult result) {
++        if (!result.result().containsKey("input_preparation_failure")) return false;
++        if (!(result.result().get("input_preparation_failure") instanceof Map<?, ?> failure)
++                || !(failure.get("reason") instanceof String reason)
++                || !(failure.get("code") instanceof String code)
++                || !(failure.get("details") instanceof List<?> details)
++                || details.stream().anyMatch(item -> !(item instanceof String))) {
++            throw new IllegalArgumentException("invalid input preparation failure fact");
++        }
++        var expected = inputPreparationFailed(reason, code, details.stream().map(String.class::cast).toList());
++        if (!expected.equals(result)) {
++            throw new IllegalArgumentException("input preparation failure contradicts node result or execution evidence");
++        }
++        return true;
++    }
++
+     /** Carry an acquisition rejection to publication using the existing terminal contract fact. */
+     public static NodeResult rejectAgentResult(NodeResult result, String message) {
+         return attach(new NodeResult("AGENT_OUTPUT_CONTRACT_VIOLATION", NodeStatus.FAILED,
+diff --git a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunMetadataFinalizer.java b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunMetadataFinalizer.java
+index 2d9dba7a..92ef0c22 100644
+--- a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunMetadataFinalizer.java
++++ b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunMetadataFinalizer.java
+@@ -55,6 +55,16 @@ public final class AgentRunMetadataFinalizer {
+     }
+ 
+     public NodeResult finalizeNodeResult(Path workspaceRoot, NodeResult result) {
++        return resolveNodeResult(workspaceRoot, result, true);
++    }
++
++    /** Read the same execution facts before publication, without writing a terminal run projection. */
++    NodeResult assessPublication(Path workspaceRoot, NodeResult result) {
++        return resolveNodeResult(workspaceRoot, result, false);
++    }
++
++    private NodeResult resolveNodeResult(Path workspaceRoot, NodeResult result, boolean persist) {
++        if (AgentExecutionResultFacts.inputPreparationFailed(result)) return result;
+         if (!AgentExecutionResultFacts.present(result)) {
+             return result;
+         }
+@@ -63,7 +73,7 @@ public final class AgentRunMetadataFinalizer {
+                 result,
+                 AgentExecutionResultFacts.agentResultContract(result),
+                 AgentExecutionResultFacts.artifactContractResults(result),
+-                AgentExecutionResultFacts.rereadReasons(result)
++                AgentExecutionResultFacts.rereadReasons(result), persist
+         );
+         var finalized = new LinkedHashMap<String, Object>();
+         finalized.putAll(result.result());
+@@ -83,6 +93,13 @@ public final class AgentRunMetadataFinalizer {
+             AgentResultContractResult agentResultContract,
+             List<ArtifactContractResult> artifactContractResults,
+             Object rereadReasons
++    ) {
++        return finalizeRunMetadata(workspaceRoot, result, agentResultContract, artifactContractResults, rereadReasons, true);
++    }
++
++    private AgentExecutionOutcome finalizeRunMetadata(
++            Path workspaceRoot, NodeResult result, AgentResultContractResult agentResultContract,
++            List<ArtifactContractResult> artifactContractResults, Object rereadReasons, boolean persist
+     ) {
+         var runMetadataRef = text(result.result().get("run_metadata"));
+         if (runMetadataRef.isBlank()) {
+@@ -122,6 +139,7 @@ public final class AgentRunMetadataFinalizer {
+             );
+             var processResult = mergedProcessResult(json, process);
+             var finalized = executionFinalizer.finalize(baseAttempt(json, result), evidence);
++            if (!persist) return finalized.outcome();
+             json.put("schemaVersion", Math.max(json.path("schemaVersion").asInt(0), 3));
+             json.put("status", finalized.legacyStatus());
+             json.put("failureReason", finalized.legacyFailureReason());
+diff --git a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
+index b6780e1d..2e280297 100644
+--- a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
++++ b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
+@@ -54,6 +54,7 @@ public final class ArtifactContractValidator {
+             List<String> inputRefs,
+             NodeResult result
+     ) throws Exception {
++        if (AgentExecutionResultFacts.inputPreparationFailed(result)) return result;
+         if (EvidenceCollection.FAILURE.equals(result.outcome())) return result;
+         if (!"acpx.agent_run".equals(nodeDefinition.handlerType()) || Boolean.TRUE.equals(result.result().get("prepared"))) {
+             return result;
+@@ -328,6 +329,19 @@ public final class ArtifactContractValidator {
+                     semanticFailure.get());
+         }
+ 
++        var publication = AgentExecutionResultFacts.attach(result,
++                AgentResultContractResult.valid(envelope.result().decision()),
++                List.of(ArtifactContractResult.requiredValid(envelope.result().artifactType())),
++                document.get("reread_reasons"));
++        var execution = new AgentRunMetadataFinalizer().assessPublication(root, publication);
++        if (execution.status() == NodeStatus.FAILED) {
++            return AgentExecutionResultFacts.attach(execution,
++                    AgentResultContractResult.valid(envelope.result().decision()),
++                    List.of(new ArtifactContractResult(envelope.result().artifactType(), true, false, false, "",
++                            "EXECUTION_NOT_PUBLISHABLE", "Execution failed before artifact publication")),
++                    document.get("reread_reasons"));
++        }
++
+         var sidecarPath = AgentOutputContractSidecar.pathFor(outputPath);
+         if (AuthoredStageLineageResolver.participates(nodeDefinition.id())) {
+             try {
+diff --git a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/FailureArbiter.java b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/FailureArbiter.java
+index 288955eb..f79c1a84 100644
+--- a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/FailureArbiter.java
++++ b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/FailureArbiter.java
+@@ -15,8 +15,8 @@ public final class FailureArbiter {
+             case CONTRACT_GAP, CONTRACT_AMBIGUITY -> "Revise the proposal and obtain new approvals before compiling";
+             case IMPLEMENTATION_BUG -> "Repair within the approved contract, then run self-test";
+             case VERIFICATION_INSUFFICIENT -> "Collect existing verification evidence in self-test";
+-            case CONTEXT_INSUFFICIENT -> "Rebuild implementation context and address the missing prerequisites";
+-            case TOOL_LIMITATION -> "Address tool prerequisites before retrying implementation";
++            case CONTEXT_INSUFFICIENT, TOOL_LIMITATION ->
++                    "Obtain human disposition of the missing prerequisites: collect evidence or explicitly authorize repair";
+             case REVIEW_NOISE -> "Re-run acceptance review";
+         };
+         return new FailureClassification(category, "Validated explicit acceptance category: " + category,
+diff --git a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java
+index a0e95fec..949e3df5 100644
+--- a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java
++++ b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java
+@@ -145,12 +145,20 @@ public final class TaskContractRevisionContextResolver {
+         }
+         var baselines = verifiedBaselines(
+                 root, workstreamId, workstreamDir, trigger.inputRefs(), iteration.parentIterationId(),
+-                Set.of("BLOCKED"), false);
++                Set.of("READY_FOR_PRODUCT_REVIEW", "BLOCKED"), false);
+         if (baselines.size() != 1) {
+-            return failure("human requirement revision must reference exactly one verified blocked intake review",
++            return failure("human requirement revision must reference exactly one verified human-reviewable intake review",
+                     "review_count=" + baselines.size());
+         }
+         var baseline = baselines.getFirst();
++        // The completed node is not sufficient authority: the durable human decision and its
++        // routed subject must agree, exactly as for later contract rework.
++        var reader = new LateReader(root, workstreamId);
++        var verified = reader.requirementSubject(reader.gate(trigger, "revise"),
++                Set.of("READY_FOR_PRODUCT_REVIEW", "BLOCKED"));
++        require(verified.previousReference().equals(baseline.previousReference()),
++                "human requirement revision subject mismatch");
++        reader.iterationRoute(iteration, trigger);
+         return new Result(new Context(
+                 iteration,
+                 true,
+@@ -182,51 +190,12 @@ public final class TaskContractRevisionContextResolver {
+             return failure("revision trigger is not a completed contract clarification gate",
+                     iteration.triggerNodeInstanceId());
+         }
+-        var resolutionRefs = trigger.inputRefs().stream()
+-                .filter(ref -> ref != null && ref.endsWith("/artifacts/contract-resolution.json"))
+-                .toList();
+-        if (resolutionRefs.size() != 1) {
+-            return failure("contract clarification must reference exactly one contract resolution",
+-                    "resolution_count=" + resolutionRefs.size());
+-        }
+-        var resolutionPath = root.resolve(resolutionRefs.getFirst()).normalize();
+-        if (!resolutionPath.startsWith(root) || !Files.isRegularFile(resolutionPath)) {
+-            return failure("contract clarification resolution artifact is missing", resolutionRefs.getFirst());
+-        }
+-        var resolution = OBJECT_MAPPER.readValue(resolutionPath.toFile(), ContractResolutionDocument.class);
+-        if (!"APPROVE".equals(resolution.decision())
+-                || !"human_gate".equals(resolution.approvedBy())
+-                || resolution.gateRef() == null || resolution.gateRef().isBlank()) {
+-            return failure("contract clarification resolution is not bound to an approved requirement gate",
+-                    resolutionRefs.getFirst());
+-        }
+-        var requirementGatePath = root.resolve(resolution.gateRef()).normalize();
+-        if (!requirementGatePath.startsWith(root) || !Files.isRegularFile(requirementGatePath)) {
+-            return failure("approved requirement gate referenced by contract resolution is missing",
+-                    resolution.gateRef());
+-        }
+-        var requirementGate = OBJECT_MAPPER.readValue(requirementGatePath.toFile(), GateDocument.class);
+-        var gateNodePath = workstreamDir.resolve("nodes").resolve(requirementGate.nodeInstanceId() + ".json");
+-        if (!Files.isRegularFile(gateNodePath)) {
+-            return failure("approved requirement gate node is missing", requirementGate.nodeInstanceId());
+-        }
+-        var gateNode = OBJECT_MAPPER.readValue(gateNodePath.toFile(), NodeInstanceDocument.class);
+-        var gateAction = text(requirementGate.result().get("human_action"));
+-        var subjectRefs = stringList(requirementGate.result().get("subject_input_refs"));
+-        if (!"resolved".equals(requirementGate.status())
+-                || !"approved".equals(gateAction)
+-                || !"gate.human_requirement_review".equals(gateNode.nodeDefinitionId())
+-                || !iteration.parentIterationId().equals(gateNode.iterationId())) {
+-            return failure("contract resolution requirement gate lineage is invalid", resolution.gateRef());
+-        }
+-        var baselines = verifiedBaselines(
+-                root, workstreamId, workstreamDir, subjectRefs, iteration.parentIterationId(),
+-                Set.of("READY_FOR_PRODUCT_REVIEW", "BLOCKED"), false);
+-        if (baselines.size() != 1) {
+-            return failure("contract clarification must resolve exactly one verified approved proposal",
+-                    "review_count=" + baselines.size());
+-        }
+-        var baseline = baselines.getFirst();
++        // Resolve the exact compiled occurrence. The stable contract-resolution.json is rewritten
++        // by the next compile and cannot be the authority for an earlier clarification.
++        var reader = new LateReader(root, workstreamId);
++        var gate = reader.gate(trigger, "clarify");
++        var baseline = reader.compiledBaseline(gate.source().nodeInstanceId());
++        reader.iterationRoute(iteration, trigger);
+         return new Result(new Context(
+                 iteration,
+                 true,
+diff --git a/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json b/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json
+index 8ab3b42c..e216148e 100644
+--- a/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json
++++ b/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json
+@@ -1128,15 +1128,15 @@
+     {
+       "from": "acceptance.classify_failure",
+       "on": "REJECT_CONTEXT_INSUFFICIENT",
+-      "to": "context.implement_claude",
++      "to": "gate.human_implementation_repair",
+       "condition": null,
+       "metadata": {
+-        "transitionType": "loop",
++        "transitionType": "normal",
+         "branchGroupId": "",
+         "required": true,
+-        "purpose": "",
++        "purpose": "Require human disposition of missing context or tool prerequisites.",
+         "joinStrategy": "",
+-        "loopReason": "Acceptance rejected because implementation context is insufficient"
++        "loopReason": ""
+       }
+     },
+     {
+@@ -1156,15 +1156,15 @@
+     {
+       "from": "acceptance.classify_failure",
+       "on": "REJECT_TOOL_LIMITATION",
+-      "to": "context.implement_claude",
++      "to": "gate.human_implementation_repair",
+       "condition": null,
+       "metadata": {
+-        "transitionType": "loop",
++        "transitionType": "normal",
+         "branchGroupId": "",
+         "required": true,
+-        "purpose": "",
++        "purpose": "Require human disposition of missing context or tool prerequisites.",
+         "joinStrategy": "",
+-        "loopReason": "Acceptance rejected because implementation/tooling limits need repair"
++        "loopReason": ""
+       }
+     },
+     {
+diff --git a/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json b/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json
+index 938d4fe2..47293ed1 100644
+--- a/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json
++++ b/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json
+@@ -982,15 +982,15 @@
+   }, {
+     "from" : "acceptance.classify_failure",
+     "on" : "REJECT_CONTEXT_INSUFFICIENT",
+-    "to" : "context.implement_claude",
++    "to" : "gate.human_implementation_repair",
+     "condition" : null,
+     "metadata" : {
+-      "transitionType" : "loop",
++      "transitionType" : "normal",
+       "branchGroupId" : "",
+       "required" : true,
+-      "purpose" : "",
++      "purpose" : "Require human disposition of missing context or tool prerequisites.",
+       "joinStrategy" : "",
+-      "loopReason" : "Acceptance rejected because implementation context is insufficient"
++      "loopReason" : ""
+     }
+   }, {
+     "from" : "acceptance.classify_failure",
+@@ -1008,15 +1008,15 @@
+   }, {
+     "from" : "acceptance.classify_failure",
+     "on" : "REJECT_TOOL_LIMITATION",
+-    "to" : "context.implement_claude",
++    "to" : "gate.human_implementation_repair",
+     "condition" : null,
+     "metadata" : {
+-      "transitionType" : "loop",
++      "transitionType" : "normal",
+       "branchGroupId" : "",
+       "required" : true,
+-      "purpose" : "",
++      "purpose" : "Require human disposition of missing context or tool prerequisites.",
+       "joinStrategy" : "",
+-      "loopReason" : "Acceptance rejected because implementation/tooling limits need repair"
++      "loopReason" : ""
+     }
+   }, {
+     "from" : "acceptance.classify_failure",
+diff --git a/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json b/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json
+index dc67a823..7706b805 100644
+--- a/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json
++++ b/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json
+@@ -1087,15 +1087,15 @@
+     {
+       "from": "acceptance.classify_failure",
+       "on": "REJECT_CONTEXT_INSUFFICIENT",
+-      "to": "context.implement_claude",
++      "to": "gate.human_implementation_repair",
+       "condition": null,
+       "metadata": {
+-        "transitionType": "loop",
++        "transitionType": "normal",
+         "branchGroupId": "",
+         "required": true,
+-        "purpose": "",
++        "purpose": "Require human disposition of missing context or tool prerequisites.",
+         "joinStrategy": "",
+-        "loopReason": "Acceptance rejected because implementation context is insufficient"
++        "loopReason": ""
+       }
+     },
+     {
+@@ -1115,15 +1115,15 @@
+     {
+       "from": "acceptance.classify_failure",
+       "on": "REJECT_TOOL_LIMITATION",
+-      "to": "context.implement_claude",
++      "to": "gate.human_implementation_repair",
+       "condition": null,
+       "metadata": {
+-        "transitionType": "loop",
++        "transitionType": "normal",
+         "branchGroupId": "",
+         "required": true,
+-        "purpose": "",
++        "purpose": "Require human disposition of missing context or tool prerequisites.",
+         "joinStrategy": "",
+-        "loopReason": "Acceptance rejected because implementation/tooling limits need repair"
++        "loopReason": ""
+       }
+     },
+     {
+diff --git a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
+index b9f99ed7..178cb061 100644
+--- a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
++++ b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
+@@ -36,6 +36,33 @@ class ArtifactContractValidatorTest {
+     private final ArtifactContractValidator validator = new ArtifactContractValidator();
+     private String validatedNodeInstanceId;
+ 
++    @Test
++    void inputFailureCannotCarryCandidatesSuccessOrForgedExecutionFacts() throws Exception {
++        var failure = AgentExecutionResultFacts.inputPreparationFailed("INPUT_PREPARATION_FAILED",
++                "TEST_INPUT", List.of("invalid subject"));
++        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of());
++        assertEquals(failure, validator.validate(tempDir, definition, failure));
++        assertEquals(failure, new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, failure));
++        var withRun = new java.util.LinkedHashMap<>(failure.result());
++        withRun.put("run_metadata", "run.json");
++        var forgedMap = new java.util.LinkedHashMap<>(failure.result());
++        forgedMap.put("input_preparation_failure", Map.of("providerInvoked", false));
++        for (var contradictory : List.of(
++                new NodeResult(failure.outcome(), NodeStatus.COMPLETED, List.of(), failure.result(), failure.errorMessage()),
++                new NodeResult(failure.outcome(), NodeStatus.FAILED, List.of("candidate.json"), failure.result(), failure.errorMessage()),
++                new NodeResult(failure.outcome(), NodeStatus.FAILED, List.of(), withRun, failure.errorMessage()),
++                new NodeResult(failure.outcome(), NodeStatus.FAILED, List.of(), forgedMap, failure.errorMessage()))) {
++            assertThrows(IllegalArgumentException.class, () -> validator.validate(tempDir, definition, contradictory));
++            assertThrows(IllegalArgumentException.class, () -> new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, contradictory));
++        }
++        var unmarkedFailure = new NodeResult("INPUT_PREPARATION_FAILED", NodeStatus.FAILED, List.of(), Map.of(), "no stage fact");
++        var context = AuthoredInputFixture.before(tempDir, "ws-1", "design.codex_arch_review", "run-1");
++        var validated = validator.validate(tempDir, "ws-1", context.instance().nodeInstanceId(), context.definition(),
++                context.instance().inputRefs(), unmarkedFailure);
++        assertEquals("AGENT_RESULT_MISSING", ((Map<?, ?>) validated.result().get("parse_error")).get("code"),
++                "a FAILED status or matching reason alone cannot bypass output validation");
++    }
++
+     @Test
+     void validEnvelopeWritesSidecarAndRoutesTypedDecision() throws Exception {
+         var ref = write("review.json", envelope("design.codex_arch_review", reviewResult()));
+diff --git a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java
+index 4ffd9735..7a8d3c35 100644
+--- a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java
++++ b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java
+@@ -259,7 +259,7 @@ class AuthoredBoundarySequenceTest {
+         var entries = full.edges().stream().filter(edge -> edge.to().equals("context.implement_claude")
+                 || (edge.from().equals("acceptance.classify_failure")
+                     && edge.on().equals("REJECT_VERIFICATION_INSUFFICIENT"))).toList();
+-        assertEquals(8, entries.size(), "seven implementation entries and one direct self-test entry");
++        assertEquals(6, entries.size(), "five implementation entries and one direct self-test entry; prerequisites wait for a human decision");
+         for (var entry : entries) for (boolean damaged : List.of(false, true)) {
+             var f = new AuthoredStageSequenceTest.Fixture(root.resolve(entry.from() + "-" + entry.on() + "-" + damaged), "site/home.html");
+             edit(f.paths.workflowDefinitionJson(), tree -> {
+diff --git a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractCompileHandlerTest.java b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractCompileHandlerTest.java
+index 42a8d2f3..a5e95e67 100644
+--- a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractCompileHandlerTest.java
++++ b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractCompileHandlerTest.java
+@@ -126,7 +126,7 @@ class ContractCompileHandlerTest {
+     }
+ 
+     @Test
+-    void contractClarificationResolvesVerifiedProposalAndHumanNoteAsTypedObligation(@TempDir Path root)
++    void completedContractGateNodeWithoutResolvedDecisionCannotAuthorizeClarification(@TempDir Path root)
+             throws Exception {
+         prepare(root);
+         var proposalRef = writeProposal(
+@@ -140,12 +140,7 @@ class ContractCompileHandlerTest {
+         var resolved = new TaskContractRevisionContextResolver()
+                 .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
+ 
+-        assertTrue(resolved.valid(), resolved.errors().toString());
+-        assertTrue(resolved.context().revision());
+-        assertEquals("Phone authentication", resolved.context().previousProposal().objective());
+-        assertEquals(1, resolved.context().obligations().size());
+-        assertEquals("HUMAN-CLARIFY-1", resolved.context().obligations().getFirst().id());
+-        assertEquals(note, resolved.context().obligations().getFirst().text());
++        assertFalse(resolved.valid(), "a stable resolution and completed node are not a durable clarification decision");
+     }
+ 
+     @Test
+@@ -166,12 +161,11 @@ class ContractCompileHandlerTest {
+                 .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
+ 
+         assertFalse(resolved.valid());
+-        assertTrue(resolved.errors().toString().contains("approved requirement gate referenced"),
+-                resolved.errors().toString());
++        assertFalse(resolved.errors().isEmpty());
+     }
+ 
+     @Test
+-    void humanRequirementRevisionResolvesVerifiedBlockedProposalAndHumanNote(@TempDir Path root) throws Exception {
++    void completedBlockedGateNodeAloneCannotAuthorizeHumanRevision(@TempDir Path root) throws Exception {
+         prepare(root);
+         var proposalRef = writeProposal(
+                 root, "run-human-revise", "Phone authentication", List.of("README.md"), List.of());
+@@ -184,25 +178,13 @@ class ContractCompileHandlerTest {
+         var resolved = new TaskContractRevisionContextResolver()
+                 .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
+ 
+-        assertTrue(resolved.valid(), resolved.errors().toString());
+-        assertTrue(resolved.context().revision());
+-        assertEquals("Phone authentication", resolved.context().previousProposal().objective());
+-        assertEquals(1, resolved.context().obligations().size());
+-        assertEquals("HUMAN-REVISE-1", resolved.context().obligations().getFirst().id());
+-        assertEquals(note, resolved.context().obligations().getFirst().text());
+-        var promptContract = AgentResultPromptContract.render(
+-                WORKSTREAM_ID,
+-                "run-human-revise-next",
+-                "intake.claude_brainstorm",
+-                "READY_FOR_PRODUCT_REVIEW",
+-                java.util.Set.of("READY_FOR_PRODUCT_REVIEW"),
+-                AgentResultPromptContract.proposalEmissionContext(resolved.context()));
+-        assertTrue(promptContract.contains("\"id\":\"HUMAN-REVISE-1\""), promptContract);
+-        assertTrue(promptContract.contains(note), promptContract);
++        // This fixture writes only a completed node, with no resolved gate or routing event.
++        // Real READY/BLOCKED human continuations are covered through transport -> runtime -> ledger.
++        assertFalse(resolved.valid());
+     }
+ 
+     @Test
+-    void humanRequirementRevisionCannotUseNonBlockedReviewAsBaseline(@TempDir Path root) throws Exception {
++    void completedReadyGateNodeAloneCannotAuthorizeHumanRevision(@TempDir Path root) throws Exception {
+         prepare(root);
+         var proposalRef = writeProposal(
+                 root, "run-human-revise-ready", "Phone authentication", List.of("README.md"), List.of());
+@@ -214,9 +196,7 @@ class ContractCompileHandlerTest {
+         var resolved = new TaskContractRevisionContextResolver()
+                 .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
+ 
+-        assertFalse(resolved.valid());
+-        assertTrue(resolved.errors().toString().contains("verified blocked intake review"),
+-                resolved.errors().toString());
++        assertFalse(resolved.valid(), "a node document must not impersonate the durable human decision");
+     }
+ 
+     @Test
+diff --git a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRepairWorkflowDefinitionTest.java b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRepairWorkflowDefinitionTest.java
+index f9e8a4b9..0c299135 100644
+--- a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRepairWorkflowDefinitionTest.java
++++ b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRepairWorkflowDefinitionTest.java
+@@ -24,6 +24,14 @@ class AcceptanceRepairWorkflowDefinitionTest {
+         for (var variant : RESOURCES) {
+             var definition = loadResource(root, variant);
+             assertEquals(3, definition.node("acceptance.classify_failure").config().get("max_revisions"));
++            for (var prerequisite : List.of("REJECT_TOOL_LIMITATION", "REJECT_CONTEXT_INSUFFICIENT")) {
++                var routes = definition.edgesFrom("acceptance.classify_failure").stream()
++                        .filter(edge -> prerequisite.equals(edge.on())).toList();
++                assertEquals(1, routes.size());
++                assertEquals("gate.human_implementation_repair", routes.getFirst().to());
++                assertEquals("normal", routes.getFirst().metadata().transitionType(),
++                        "missing prerequisites cannot start an automatic product revision");
++            }
+             var scope = definition.edgesFrom("gate.human_implementation_repair").stream()
+                     .filter(edge -> edge.on().equals("request_scope_revision")).toList();
+             assertEquals(1, scope.size());
+diff --git a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java
+index 119864c5..3335c6a4 100644
+--- a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java
++++ b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java
+@@ -51,8 +51,8 @@ class AcceptanceRevisionBudgetTest {
+         assertStoppedBeforeNextRepair(contracts, definition, "REJECT_CONTRACT_AMBIGUITY", 3);
+ 
+         var implementation = initialize(definition, "implementation-shared");
+-        for (var outcome : List.of("REJECT_IMPLEMENTATION_BUG", "REJECT_CONTEXT_INSUFFICIENT", "REJECT_TOOL_LIMITATION")) {
+-            repairAndReturn(implementation, definition, outcome);
++        for (int round = 0; round < 3; round++) {
++            repairAndReturn(implementation, definition, "REJECT_IMPLEMENTATION_BUG");
+         }
+         assertStoppedBeforeNextRepair(implementation, definition, "REJECT_IMPLEMENTATION_BUG", 3);
+     }
+@@ -119,7 +119,8 @@ class AcceptanceRevisionBudgetTest {
+     // Real classifier config and loop edges; repair work is completed explicitly, without providers.
+     private WorkflowDefinition budgetSlice(String variant) throws Exception {
+         var bundled = AcceptanceRepairWorkflowDefinitionTest.loadResource(root, variant);
+-        var edges = new ArrayList<>(bundled.edgesFrom(CLASSIFIER));
++        var edges = new ArrayList<>(bundled.edgesFrom(CLASSIFIER).stream()
++                .filter(edge -> "loop".equals(edge.metadata().transitionType())).toList());
+         var nodes = new ArrayList<NodeDefinition>();
+         nodes.add(bundled.node(CLASSIFIER));
+         edges.stream().map(EdgeDefinition::to).distinct().forEach(target -> nodes.add(bundled.node(target)));
+diff --git a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/FullWorkflowDefinitionTest.java b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/FullWorkflowDefinitionTest.java
+index bd524778..a87a74af 100644
+--- a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/FullWorkflowDefinitionTest.java
++++ b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/FullWorkflowDefinitionTest.java
+@@ -143,9 +143,7 @@ class FullWorkflowDefinitionTest {
+         WorkflowDefinition wf = factory.forVariant("full");
+ 
+         List<String> rejectOutcomes = List.of(
+-                "REJECT_IMPLEMENTATION_BUG",
+-                "REJECT_CONTEXT_INSUFFICIENT",
+-                "REJECT_TOOL_LIMITATION"
++                "REJECT_IMPLEMENTATION_BUG"
+         );
+ 
+         for (String outcome : rejectOutcomes) {
+diff --git a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/SmallWorkflowProfileDefinitionTest.java b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/SmallWorkflowProfileDefinitionTest.java
+index d7155852..71bb6f7f 100644
+--- a/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/SmallWorkflowProfileDefinitionTest.java
++++ b/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/SmallWorkflowProfileDefinitionTest.java
+@@ -97,12 +97,12 @@ class SmallWorkflowProfileDefinitionTest {
+ 
+     @Test
+     void experimentDoesNotChangeBundledWorkflowResources() throws Exception {
+-        // Baseline includes explicit external evidence submission on all lifecycle variants.
+-        assertEquals("eda35075ae4e69e3471ec8d5bbf4043a03762c30ecdba6458fbb5da5b09324f7",
++        // Baseline includes external evidence submission and human disposition of missing prerequisites.
++        assertEquals("914ea4be11a3884e654b4a4627a0d11cdf0385f6d248f058f9927018766e1706",
+                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.full.json"));
+-        assertEquals("76e33816e6b1fe68661bec9f0ac9601cdf4ff7d83f13d0f67e064245ccf30a60",
++        assertEquals("8b2e5887f8bec6e18b546289822782e159c8ec0584d224ad715eb506cd695603",
+                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"));
+-        assertEquals("2097297b76c2e1426b56e70b7f4e241071b72fadf3fe2b2e2dfebcc5a7c197b7",
++        assertEquals("86abead15904c5106c674f3825d0bf0dff55ca6423b3e1b36e18f3a4fefad24d",
+                 sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"));
+     }
+ 
+diff --git a/dual-orchestrator/dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json b/dual-orchestrator/dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json
+index 83d6f4ef..2bcff692 100644
+--- a/dual-orchestrator/dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json
++++ b/dual-orchestrator/dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json
+@@ -999,15 +999,15 @@
+     {
+       "from": "acceptance.classify_failure",
+       "on": "REJECT_CONTEXT_INSUFFICIENT",
+-      "to": "context.implement_claude",
++      "to": "gate.human_implementation_repair",
+       "condition": null,
+       "metadata": {
+-        "transitionType": "loop",
++        "transitionType": "normal",
+         "branchGroupId": "",
+         "required": true,
+-        "purpose": "",
++        "purpose": "Require human disposition of missing context or tool prerequisites.",
+         "joinStrategy": "",
+-        "loopReason": "Acceptance rejected because implementation context is insufficient"
++        "loopReason": ""
+       }
+     },
+     {
+@@ -1027,15 +1027,15 @@
+     {
+       "from": "acceptance.classify_failure",
+       "on": "REJECT_TOOL_LIMITATION",
+-      "to": "context.implement_claude",
++      "to": "gate.human_implementation_repair",
+       "condition": null,
+       "metadata": {
+-        "transitionType": "loop",
++        "transitionType": "normal",
+         "branchGroupId": "",
+         "required": true,
+-        "purpose": "",
++        "purpose": "Require human disposition of missing context or tool prerequisites.",
+         "joinStrategy": "",
+-        "loopReason": "Acceptance rejected because implementation/tooling limits need repair"
++        "loopReason": ""
+       }
+     },
+     {
+diff --git a/dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java b/dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java
+index 4424efdc..c796d5aa 100644
+--- a/dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java
++++ b/dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java
+@@ -816,6 +816,29 @@ class WorkstreamApiControllerTest {
+         assertEquals("", response.get("markdown"));
+     }
+ 
++    @Test
++    @SuppressWarnings("unchecked")
++    void preparationFailureKeepsTheSameReasonInRecoveryAndOverview() throws Exception {
++        var fixture = createFailedWorkstream("ws-api-input-recovery");
++        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
++        var ledger = new WorkflowFileLedger();
++        var current = ledger.loadCurrent(paths);
++        var failure = dev.dual.runtime.handler.AgentExecutionResultFacts.inputPreparationFailed(
++                "TASK_CONTRACT_REVISION_CONTEXT_INVALID", "TASK_CONTRACT_REVISION_CONTEXT_INVALID", List.of("gate subject mismatch"));
++        ledger.completeAndRoute(paths, ledger.loadDefinition(paths), current.activeNodeInstanceIds().getFirst(),
++                failure.status(), failure.outcome(), failure.outputRefs(), failure.result());
++        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
++        var shared = dev.dual.ledger.file.RecoveryAssessment.from(node, tempDir, fixture.workstreamId());
++        var response = controller().currentRecovery(fixture.workstreamId(), tempDir.toString());
++        var assessment = (Map<String, Object>) response.get("assessment");
++        assertEquals("input_preparation_failure", assessment.get("classification"));
++        assertEquals(shared.reason(), assessment.get("reason"));
++        assertEquals(false, assessment.get("retrySafe"));
++        var overview = controller().overview(fixture.workstreamId(), tempDir.toString());
++        assertEquals(true, overview.toString().contains("gate subject mismatch"));
++        assertFalse(overview.toString().contains("AGENT_RESULT_MISSING"));
++    }
++
+     @Test
+     void streamReturnsSseEmitter() throws Exception {
+         var fixture = createWorkstream("ws-api-stream");
+diff --git a/dual-orchestrator/scripts/fixtures/emit-strict-agent-result.py b/dual-orchestrator/scripts/fixtures/emit-strict-agent-result.py
+index b6acefa3..14bd5388 100644
+--- a/dual-orchestrator/scripts/fixtures/emit-strict-agent-result.py
++++ b/dual-orchestrator/scripts/fixtures/emit-strict-agent-result.py
+@@ -4,18 +4,11 @@
+ import argparse
+ import json
+ import os
+-import re
++import sys
+ from pathlib import Path
+ import time
+ 
+ 
+-def prompt_field(prompt: str, name: str) -> str:
+-    matches = re.findall(rf'"{re.escape(name)}"\s*:\s*"([^"]+)"', prompt)
+-    if not matches:
+-        raise ValueError(f"strict result contract field is missing from prompt: {name}")
+-    return matches[-1]
+-
+-
+ def failure(category_hint: str = "", reason: str = "") -> dict:
+     return {
+         "category_hint": category_hint,
+@@ -24,6 +17,7 @@ def failure(category_hint: str = "", reason: str = "") -> dict:
+         "missing_tests": [],
+         "context_gaps": [],
+         "reason": reason,
++        "verification_remediation": "NONE",
+     }
+ 
+ 
+@@ -127,6 +121,25 @@ def plan_result(include_plan: bool, scenario: str) -> dict:
+         "verification_summary": "Controlled plan boundary result.",
+         "failure": failure(),
+         "plan": plan,
++        "revision_responses": [],
++    }
++
++
++def design_result() -> dict:
++    return {
++        "artifact_type": "design_result",
++        "decision": "READY_FOR_ARCH_REVIEW",
++        "summary": "Add goodbye() and its documentation within the approved two-file scope.",
++        "lifecycle_status": "READY",
++        "checks": ["Read the approved contract"],
++        "evidence": ["main.py", "README.md"],
++        "missing_evidence": [], "must_fix": [], "open_risks": [],
++        "verification_summary": "Design only; implementation and verification follow approval.",
++        "design": {"planned_files": [
++            {"path": "main.py", "operation": "MODIFY", "responsibility": "Implement goodbye()"},
++            {"path": "README.md", "operation": "MODIFY", "responsibility": "Document goodbye()"},
++        ]},
++        "revision_responses": [],
+     }
+ 
+ 
+@@ -142,6 +155,7 @@ def self_test_result() -> dict:
+         "missing_evidence": [],
+         "acceptance_notes": [],
+         "verification_summary": "Controlled smoke self-test passed.",
++        "must_fix": [],
+     }
+ 
+ 
+@@ -191,6 +205,8 @@ def result_for(template: str, profile: str, scenario: str) -> dict:
+ 
+     if template == "intake-claude-brainstorm.md":
+         return task_proposal()
++    if template == "design-claude.md":
++        return design_result()
+     if template == "plan-claude.md":
+         return plan_result(
+             not (profile == "semantic" and scenario == "plan-body"),
+@@ -216,6 +232,23 @@ def result_for(template: str, profile: str, scenario: str) -> dict:
+ 
+ 
+ def main() -> None:
++    if len(sys.argv) == 5 and sys.argv[1] == "--register-session":
++        record_id, name, cwd = sys.argv[2:]
++        path = Path.home() / ".acpx/sessions/index.json"
++        path.parent.mkdir(parents=True, exist_ok=True)
++        path.write_text(json.dumps({"schema": "acpx.session-index.v1", "entries": [{
++            "acpxRecordId": record_id, "name": name, "cwd": cwd, "closed": False,
++            "lastUsedAt": "9999-12-31T23:59:59Z",
++        }]}), encoding="utf-8")
++        return
++    if sys.argv[1:] == ["--build-info"]:
++        # Simulated transport handshake only. This fixture does not prove native policy enforcement.
++        print(json.dumps({
++            "upstream_commit": "fd173f04aa1b56f9e3f5ca5190c034ddcae28792",
++            "patch_sha256": "4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e",
++            "policy_schema": "claude_execution_policy.v2",
++        }))
++        return
+     parser = argparse.ArgumentParser()
+     parser.add_argument("--prompt", required=True)
+     parser.add_argument("--template", required=True)
+@@ -224,12 +257,13 @@ def main() -> None:
+     parser.add_argument("--session-id", required=True)
+     args = parser.parse_args()
+ 
+-    prompt = Path(args.prompt).read_text(encoding="utf-8")
++    # A prompt can quote several older envelopes. Only this execution owns the response identity.
++    run = json.loads((Path(args.prompt).parent.parent / "run.json").read_text(encoding="utf-8"))
+     envelope = {
+         "schema_version": 1,
+-        "workstream_id": prompt_field(prompt, "workstream_id"),
+-        "run_id": prompt_field(prompt, "run_id"),
+-        "node_id": prompt_field(prompt, "node_id"),
++        "workstream_id": run["workstreamId"],
++        "run_id": run["runId"],
++        "node_id": run["nodeId"],
+         "result": result_for(args.template, args.profile, args.scenario),
+     }
+     assistant_message = json.dumps(envelope, ensure_ascii=False, separators=(",", ":"))
+diff --git a/dual-orchestrator/scripts/semantic-boundary-smoke.sh b/dual-orchestrator/scripts/semantic-boundary-smoke.sh
+index cb98de72..d8b0096c 100755
+--- a/dual-orchestrator/scripts/semantic-boundary-smoke.sh
++++ b/dual-orchestrator/scripts/semantic-boundary-smoke.sh
+@@ -65,6 +65,10 @@ if [[ "${1:-}" == "--version" ]]; then
+   echo "semantic-boundary-fake-acpx 1.0"
+   exit 0
+ fi
++if [[ "${1:-}" == "build-info" ]]; then
++  python3 "${DUAL_AGENT_RESULT_EMITTER:?}" --build-info
++  exit 0
++fi
+ 
+ agent=""
+ prompt=""
+@@ -74,6 +78,20 @@ while [[ $# -gt 0 ]]; do
+     claude|codex)
+       agent="$1"
+       if [[ "${2:-}" == "sessions" ]]; then
++        session_action="${3:-}"
++        if [[ "$session_action" == "ensure" || "$session_action" == "new" ]]; then
++          shift 3
++          while [[ $# -gt 0 ]]; do
++            if [[ "$1" == "--name" ]]; then shift; session_name="${1:-}"; fi
++            shift
++          done
++          session_id="$(python3 - "$session_name" <<'PY'
++import sys, uuid
++print(uuid.uuid5(uuid.NAMESPACE_URL, "dual-semantic-smoke:" + sys.argv[1]))
++PY
++)"
++          python3 "${DUAL_AGENT_RESULT_EMITTER:?}" --register-session "$session_id" "$session_name" "$(pwd -P)"
++        fi
+         exit 0
+       fi
+       shift
+@@ -236,6 +254,11 @@ run_until_boundary() {
+       break
+     fi
+     if printf '%s\n' "$status" | grep -q "WAITING_FOR_HUMAN"; then
++      if printf '%s\n' "$status" | grep -q 'Active node definition: gate.human_next_stage_approval'; then
++        PATH="$fake_bin:$PATH" DUAL_SEMANTIC_CASE="$case_name" dualctl review complete \
++          --workdir "$workdir" "$ws" >/dev/null
++        break
++      fi
+       approve=$(PATH="$fake_bin:$PATH" DUAL_SEMANTIC_CASE="$case_name" dualctl review approve --run --max-steps 20 --workdir "$workdir" "$ws" 2>&1 || true)
+       if printf '%s\n' "$approve" | grep -q "WAITING_FOR_RECOVERY\|FAILED\|COMPLETED"; then
+         break
+@@ -260,18 +283,23 @@ assert_plan_body() {
+ assert_review_noise() {
+   local workdir="$1" ws="$2"
+   local class_json="$workdir/.agent/workstreams/$ws/artifacts/failure-classification.json"
+-  [[ -f "$class_json" ]] || fail "review-noise: expected failure-classification.json"
+-  local category
+-  category=$(python3 -c "import json; print(json.load(open('$class_json')).get('category',''))")
+-  [[ "$category" != "REVIEW_NOISE" ]] || fail "review-noise: summary text incorrectly classified as REVIEW_NOISE"
+-  [[ "$category" == "IMPLEMENTATION_BUG" ]] || fail "review-noise: expected IMPLEMENTATION_BUG fallback, got $category"
+-  pass "review-noise: prose summary did not trigger REVIEW_NOISE"
++  [[ ! -f "$class_json" ]] || fail "review-noise: prose cannot supply a missing typed category"
++  python3 - "$workdir/.agent/workstreams/$ws" <<'PY' || fail "review-noise: missing category was not rejected at acceptance"
++import json, pathlib, sys
++nodes = [json.loads(p.read_text()) for p in (pathlib.Path(sys.argv[1]) / "nodes").glob("*.json")]
++reviews = [n for n in nodes if n["nodeDefinitionId"] == "acceptance.codex_verifier_review"]
++assert len(reviews) == 1 and reviews[0]["status"] == "FAILED"
++assert "failure.category_hint" in json.dumps(reviews[0]["result"]["parse_error"])
++PY
++  pass "review-noise: prose cannot replace a required typed acceptance category"
+ }
+ 
+ assert_reread_reason() {
+   local workdir="$1" ws="$2"
+   local ws_dir="$workdir/.agent/workstreams/$ws"
+   local metrics="$ws_dir/metrics/workstream-metrics.json"
++  dualctl status --workdir "$workdir" "$ws" | grep -q 'Status: COMPLETED' \
++    || fail "reread-reason: the complete valid workflow must still finish"
+   ! grep -R "REREAD_POLICY_DENIED" "$ws_dir" >/dev/null \
+     || fail "reread-reason: repeated read still invalidated the artifact"
+   [[ -f "$metrics" ]] || fail "reread-reason: expected workstream metrics"
+@@ -286,11 +314,14 @@ PY
+   pass "reread-reason: repeated read is telemetry and does not invalidate the artifact"
+ }
+ 
+-run_case() {
++run_case() (
+   local case_name="$1"
+   local root="/tmp/dual-semantic-${case_name}-$$"
+   local repo="$root/repo"
+   local fake_bin="$root/bin"
++  mkdir -p "$root/home"
++  export HOME="$root/home"
++  export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }-Duser.home=$HOME"
+   setup_repo "$repo"
+   make_fake_acpx "$fake_bin"
+   log "Running $case_name"
+@@ -309,7 +340,7 @@ run_case() {
+   else
+     log "Kept $root"
+   fi
+-}
++)
+ 
+ case "$CASE_NAME" in
+   all)
+diff --git a/dual-orchestrator/scripts/smoke-test.sh b/dual-orchestrator/scripts/smoke-test.sh
+index d54fb310..e82f2f4b 100755
+--- a/dual-orchestrator/scripts/smoke-test.sh
++++ b/dual-orchestrator/scripts/smoke-test.sh
+@@ -269,6 +269,10 @@ if [[ "${1:-}" == "--version" ]]; then
+   echo "controlled-smoke-acpx 1.0"
+   exit 0
+ fi
++if [[ "${1:-}" == "build-info" ]]; then
++  python3 "${DUAL_AGENT_RESULT_EMITTER:?}" --build-info
++  exit 0
++fi
+ 
+ agent=""
+ prompt=""
+@@ -425,7 +429,7 @@ PY
+       if [[ "$count" -eq 1 ]]; then
+         DUAL_FIXTURE_DECISION="REJECT" \
+           DUAL_FIXTURE_SUMMARY="Controlled verifier rejected the first implementation pass to exercise repair routing." \
+-          DUAL_FIXTURE_CATEGORY_HINT="implementation_bug" \
++          DUAL_FIXTURE_CATEGORY_HINT="IMPLEMENTATION_BUG" \
+           emit_result
+         exit 0
+       fi
+@@ -518,14 +522,14 @@ assert_reject_repair_reaccept() {
+   fi
+ 
+   local acceptance_runs
+-  acceptance_runs=$(find "$WS_DIR/runs" -path "*/outputs/acceptance-codex-review.md" -type f 2>/dev/null | wc -l | tr -d ' ')
++  acceptance_runs=$(find "$WS_DIR/runs" -path "*/outputs/acceptance-codex-review.contract.json" -type f 2>/dev/null | wc -l | tr -d ' ')
+   if [[ "$acceptance_runs" -ge 2 ]]; then
+     ok "Acceptance review ran at least twice: $acceptance_runs"
+   else
+     fail "Expected at least two acceptance reviews, found $acceptance_runs"
+   fi
+ 
+-  if grep -q '"outcome":"REJECT_IMPLEMENTATION_BUG"\|"outcome":"REJECT_CONTEXT_INSUFFICIENT"\|"outcome":"REJECT_TOOL_LIMITATION"' "$WS_DIR/events.jsonl" 2>/dev/null; then
++  if grep -q '"outcome":"REJECT_IMPLEMENTATION_BUG"' "$WS_DIR/events.jsonl" 2>/dev/null; then
+     ok "Events contain REJECT repair routing outcome"
+   else
+     fail "Events missing REJECT repair routing outcome"

@@ -1,0 +1,144 @@
+{
+  "AGENTS.md": [
+    {
+      "commit": "cf547053e74311c8e27b9e3e319796b970344342",
+      "date": "2026-06-11T17:32:39+08:00",
+      "bytes": 1393,
+      "lines": 25,
+      "sha256": "6a4c5e87f19a8f14677b324c50aa0d438821826934f1b28be28160f9c2751d2f"
+    },
+    {
+      "commit": "761d89f3702231c478524c6f0006891a48a66f3a",
+      "date": "2026-06-11T17:53:30+08:00",
+      "bytes": 1962,
+      "lines": 32,
+      "sha256": "b85f9e62d807120a23d1f41f63c0a1fac835219ac8f2fbaca6133f24abd97bc7"
+    },
+    {
+      "commit": "a2da9d48b7af80d138075f126f9f52905a958ef9",
+      "date": "2026-06-13T12:15:31+08:00",
+      "bytes": 2242,
+      "lines": 36,
+      "sha256": "0e7fce1e40be405b35bc05915eff578459af8bd0f8a4ac431e9aa8a63e4debc5"
+    },
+    {
+      "commit": "8ac07f4d140ffd5e5137482f4e8d4f83b0dd2bf8",
+      "date": "2026-06-18T06:41:40+08:00",
+      "bytes": 3052,
+      "lines": 46,
+      "sha256": "1eb83366f74d475b743ee8fcebf1447bc268b4442bd41078faa22f72291f9cca"
+    },
+    {
+      "commit": "4d66e71127a892ae4768e1fe41ce4363618f86d7",
+      "date": "2026-06-27T20:59:45+08:00",
+      "bytes": 3818,
+      "lines": 54,
+      "sha256": "a6e225a950c731c9605a3fd9d8e81ec0c78fcddc96a648767a43c3e74dd6ee05"
+    },
+    {
+      "commit": "2a9300b3efbd68b3e84fc6be87b66f68bb3caf8a",
+      "date": "2026-06-28T12:41:46+08:00",
+      "bytes": 7055,
+      "lines": 101,
+      "sha256": "536e93599f772f19e0b3a99ece633138a761a46e40a836f81ba9b6a73f2f97df"
+    },
+    {
+      "commit": "73f7b9e51dbf4448fa19e8029220054ec683c7c7",
+      "date": "2026-07-01T01:55:10+08:00",
+      "bytes": 8031,
+      "lines": 111,
+      "sha256": "18e08d6932db6ee55d08556bcf047055d055143776c02c83fc10e93d5500438f"
+    },
+    {
+      "commit": "a1a70d9de31317902e6b3621a22e2f933773d925",
+      "date": "2026-09-04T19:13:30+08:00",
+      "bytes": 10496,
+      "lines": 137,
+      "sha256": "3e4d80c83ea4e88730b4db36b52edbb2682de4dc159efceb96df8cf31fec4cdb"
+    },
+    {
+      "commit": "5786738468247d3ecad3109baa143121343f5e7f",
+      "date": "2026-09-09T01:02:48+08:00",
+      "bytes": 11419,
+      "lines": 145,
+      "sha256": "c6aa4c5129894e0128e5c30b9cecffcaedbbcf8c423334cbca09ec4920ffa0aa"
+    },
+    {
+      "commit": "WORKTREE_UNCOMMITTED",
+      "bytes": 16969,
+      "lines": 197,
+      "sha256": "646d655adc7d2744bc7a5599e00caef4c2ae4be951b30db644eeadbf2329258e"
+    }
+  ],
+  "dual-orchestrator/docs/engineering-checklist.md": [
+    {
+      "commit": "cf547053e74311c8e27b9e3e319796b970344342",
+      "date": "2026-06-11T17:32:39+08:00",
+      "bytes": 2695,
+      "lines": 73,
+      "sha256": "cdd2976782394fe2c2eb7bd985512d286b75e00d720d279afeb6a30e2387151b"
+    },
+    {
+      "commit": "761d89f3702231c478524c6f0006891a48a66f3a",
+      "date": "2026-06-11T17:53:30+08:00",
+      "bytes": 3457,
+      "lines": 90,
+      "sha256": "b694ae92861eb4281f39a76564b9f372f604f8ec8a782e264b5a43e3b7e2a808"
+    },
+    {
+      "commit": "a2da9d48b7af80d138075f126f9f52905a958ef9",
+      "date": "2026-06-13T12:15:31+08:00",
+      "bytes": 4787,
+      "lines": 110,
+      "sha256": "cdbc4c304ef0971f499144904cf903f2a1b50c6eeab1876886ab9a4c333d7871"
+    },
+    {
+      "commit": "8ac07f4d140ffd5e5137482f4e8d4f83b0dd2bf8",
+      "date": "2026-06-18T06:41:40+08:00",
+      "bytes": 10985,
+      "lines": 248,
+      "sha256": "bd5613165b129c9b87b5e3d79ad56d94fe76c4d6e3cec746800abc232b9fa5e0"
+    },
+    {
+      "commit": "0dcf1720c77ea872d1a0ba945e003d4c2777ea2a",
+      "date": "2026-06-19T15:02:42+08:00",
+      "bytes": 11296,
+      "lines": 253,
+      "sha256": "b1855d038b62b6da9512940b059e03c34d2a74eaf394e923ba426498657a0998"
+    },
+    {
+      "commit": "4d66e71127a892ae4768e1fe41ce4363618f86d7",
+      "date": "2026-06-27T20:59:45+08:00",
+      "bytes": 11775,
+      "lines": 260,
+      "sha256": "cd2d6d0a6ea7a4dd147894b64670667458efd5703a33c6980f473ca654e874fe"
+    },
+    {
+      "commit": "0a981120f17875fb43d0290d5a7744d281500c6e",
+      "date": "2026-07-01T06:23:39+08:00",
+      "bytes": 13305,
+      "lines": 297,
+      "sha256": "7f001707fa49cb4a64e1553fe5a149f6c5e71e3a3e41533aee060154e8d89457"
+    },
+    {
+      "commit": "b5f73ac2d587219281087b600a06d6474cbaa032",
+      "date": "2026-07-01T06:51:04+08:00",
+      "bytes": 14238,
+      "lines": 313,
+      "sha256": "616856b9a04aafa354f56c1614adf740c04d789fe3ac15cfc6ca4d939b2939ac"
+    },
+    {
+      "commit": "b197ce90ebf2cb4d094c4fdeb388e015e208aafa",
+      "date": "2026-09-12T07:10:48+08:00",
+      "bytes": 14840,
+      "lines": 316,
+      "sha256": "654d6d11b38fa177fe5ece62e7ac949eb8c501547eaa671103169b7299d2e52e"
+    },
+    {
+      "commit": "WORKTREE_UNCOMMITTED",
+      "bytes": 15558,
+      "lines": 316,
+      "sha256": "8eb42fdcd2c09174edfd08f1c522030540bfbf90a072db68a1a1220a49dcd0a9"
+    }
+  ]
+}

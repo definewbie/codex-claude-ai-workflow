@@ -1,0 +1,30 @@
+{
+  "kind": "local operator program observation, not execution inside Claude/Codex",
+  "exit": 0,
+  "observation": {
+    "executable": "/opt/homebrew/opt/python@3.13/bin/python3.13",
+    "version": "3.13.1 (main, Dec  3 2024, 17:59:52) [Clang 16.0.0 (clang-1600.0.26.4)]",
+    "unittest": "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/__init__.py",
+    "importlib": "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py",
+    "isolated": 1
+  },
+  "dependencies": [
+    {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+      "sha256": "667f456638186ffffe0bf853d6d510b0d65b523b216161a7e179a50d14445407",
+      "absent": false
+    },
+    {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/__init__.py",
+      "sha256": "7c22ee0c503b75aba5221e3e8189f9bf4632f85a43315ff841ec9d26a68e3551",
+      "absent": false
+    },
+    {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py",
+      "sha256": "72b07de4133a7e39b2f6a7920465669aa04626f217e800779587bc0713fe002e",
+      "absent": false
+    }
+  ],
+  "native_tool_capability": "NOT_PROVEN",
+  "provider_calls": 0
+}

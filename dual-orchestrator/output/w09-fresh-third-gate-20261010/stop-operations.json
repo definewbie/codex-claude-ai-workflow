@@ -1,0 +1,98 @@
+[
+  {
+    "agent": "claude",
+    "session": "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680",
+    "action": "show",
+    "exit": 0,
+    "at": "2026-10-10T22:17:58.614260+08:00",
+    "stdout_sha256": "09bac99784ad3bd69a0a9d71154018a427517c9ddd3d5c520a56eb02ea07211c"
+  },
+  {
+    "agent": "claude",
+    "session": "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680",
+    "action": "close",
+    "exit": 0,
+    "at": "2026-10-10T22:17:58.727250+08:00",
+    "stdout_sha256": "31370bf24f194709d06ebef0b236a524011f073dead8d5df1540a4ed117894c4"
+  },
+  {
+    "agent": "claude",
+    "session": "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680",
+    "action": "show",
+    "exit": 0,
+    "at": "2026-10-10T22:17:58.824691+08:00",
+    "stdout_sha256": "b0dc7755b4e6b737b950c2ef0970781c01bda69b1fe61f608669818b470cad1a"
+  },
+  {
+    "agent": "claude",
+    "session": "claude-main-ws-20261010T124812Z-XCZL-run-1791636803114",
+    "action": "show",
+    "exit": 0,
+    "at": "2026-10-10T22:17:58.924035+08:00",
+    "stdout_sha256": "41bb007a8e93d904f189384bd1def5df0f14594e470caf358b73efa1b9ccc60d"
+  },
+  {
+    "agent": "claude",
+    "session": "claude-main-ws-20261010T124812Z-XCZL-run-1791636803114",
+    "action": "close",
+    "exit": 0,
+    "at": "2026-10-10T22:17:59.041004+08:00",
+    "stdout_sha256": "630b7384cd55e90507649ce072d53ab2cfe629454ea9afdb65db178c3144552e"
+  },
+  {
+    "agent": "claude",
+    "session": "claude-main-ws-20261010T124812Z-XCZL-run-1791636803114",
+    "action": "show",
+    "exit": 0,
+    "at": "2026-10-10T22:17:59.144870+08:00",
+    "stdout_sha256": "a82017a86d7dec67d54aa920170df9a76216fde3063577705cd8180ff292bd51"
+  },
+  {
+    "agent": "claude",
+    "session": "claude-main-ws-20261010T124812Z-XCZL-run-1791641578962",
+    "action": "show",
+    "exit": 0,
+    "at": "2026-10-10T22:17:59.242681+08:00",
+    "stdout_sha256": "824ff928ea09a51ca45a46f3fbfe6581750fde896d79d478043768d993b2b67c"
+  },
+  {
+    "agent": "claude",
+    "session": "claude-main-ws-20261010T124812Z-XCZL-run-1791641578962",
+    "action": "close",
+    "exit": 0,
+    "at": "2026-10-10T22:17:59.411566+08:00",
+    "stdout_sha256": "7668510bd8a9603300396b04d6a1169bb1c7df85eae08196150a893575d41509"
+  },
+  {
+    "agent": "claude",
+    "session": "claude-main-ws-20261010T124812Z-XCZL-run-1791641578962",
+    "action": "show",
+    "exit": 0,
+    "at": "2026-10-10T22:17:59.509085+08:00",
+    "stdout_sha256": "2e12f680c089a2b0e2c5fb6c73f541d52b398723c821ee27503e4138af3b44ee"
+  },
+  {
+    "agent": "codex",
+    "session": "codex-reviewer-ws-20261010T124812Z-XCZL",
+    "action": "show",
+    "exit": 0,
+    "at": "2026-10-10T22:17:59.613344+08:00",
+    "stdout_sha256": "87ef8a5ffa611763e5d337453134aafaf1a36d9e178256504c76aa48e37a2478"
+  },
+  {
+    "agent": "codex",
+    "session": "codex-reviewer-ws-20261010T124812Z-XCZL",
+    "action": "close",
+    "exit": 0,
+    "at": "2026-10-10T22:17:59.727495+08:00",
+    "stdout_sha256": "5d1129013047989459457635f76987f4539c035807222f531c1ec97e63af6583"
+  },
+  {
+    "agent": "codex",
+    "session": "codex-reviewer-ws-20261010T124812Z-XCZL",
+    "action": "show",
+    "exit": 0,
+    "at": "2026-10-10T22:17:59.825074+08:00",
+    "stdout_sha256": "0b9065fc79143c98378820980772a2803c3cae6000bee72b5fbb1982dd7215e2"
+  }
+]

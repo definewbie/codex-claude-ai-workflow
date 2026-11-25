@@ -346,6 +346,11 @@ function renderAll() {
   renderEvidence(status);
   renderLoopHistory();
   renderRca(status);
+  window.DualNativePermissions.render(document.getElementById("nativePermissions"), overview.nativePermissions,
+    async (action, body) => {
+      await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/permissions/${action}?workdir=${selectedWorkdirParam()}`, { method: "POST", body: JSON.stringify(body) });
+      await loadSelected();
+    });
 }
 
 function renderLifecycle() {
@@ -470,6 +475,7 @@ function renderEvidence(status) {
       ["原因", guidance.reason || decision.summary || "-"],
     ], [
       ...authoredStageEvidence(packet.authoredStage),
+      ...asList(contract.nonessentialOperationDeclarations).map(item => `非必需操作声明：${item}`),
       ...(packet.externalEvidenceInstructions ? [packet.externalEvidenceInstructions] : []),
       ...(asList(decision.mustFix).map((item) => `Must Fix：${item}`)),
       ...(asList(state.review?.actionRequests).map((item) => `待处理动作需求：${item.content?.expected_result || ""}`)),
@@ -1190,6 +1196,10 @@ function allowedActions(status) {
     } else {
       actions.push({ label: "查看交付差异", kind: "primary", onClick: () => switchView("management") });
     }
+    if (asList(delivery.currentActions).includes("RESOLVE_AUTHORIZE_NEW_APPLY"))
+      actions.push({ label: "核实停止并授权一次重试", kind: "subtle", onClick: () => resolveDelivery("AUTHORIZE_NEW_APPLY") });
+    if (asList(delivery.currentActions).includes("RESOLVE_CLOSE_OR_CONFIRM_STOP"))
+      actions.push({ label: "关闭再次应用／记录停止核实", kind: "subtle", onClick: () => resolveDelivery("CLOSE_APPLICATION") });
     actions.push({ label: "打开旧管理面板", kind: "ghost", onClick: openOldPanel });
     return actions;
   }
@@ -1217,7 +1227,8 @@ function approveAndRun() {
   }
   postAction(
     `/api/workstreams/${encodeURIComponent(state.selectedId)}/review/approve?workdir=${selectedWorkdirParam()}&run=true&maxSteps=80`,
-    { note }
+    // Bind the decision to the gate occurrence this page rendered; the server refuses it if the open gate moved on.
+    { note, gateNodeInstanceId: state.review?.gateNodeInstanceId || state.review?.packet?.gateNodeInstanceId || null }
   );
 }
 
@@ -1324,6 +1335,28 @@ function finalizeDelivery() {
   );
 }
 
+function resolveDelivery(disposition) {
+  const delivery = deliveryView();
+  const required = disposition === "AUTHORIZE_NEW_APPLY" ? "RESOLVE_AUTHORIZE_NEW_APPLY" : "RESOLVE_CLOSE_OR_CONFIRM_STOP";
+  if (!asList(delivery.currentActions).includes(required) || !delivery.resolutionTemplate?.operation_id) return;
+  const note = window.prompt("请说明你核对的目标仓库、旧应用操作及本次决定：", "");
+  if (!note?.trim()) return;
+  const request = JSON.parse(JSON.stringify(delivery.resolutionTemplate));
+  request.request_id = crypto.randomUUID(); request.disposition = disposition; request.operator_note = note.trim();
+  request.stop_basis = null;
+  const confirmStop = disposition === "AUTHORIZE_NEW_APPLY" || window.confirm("是否同时记录：你已经核实旧应用进程停止？未核实请选择取消；仍可只关闭再次应用。");
+  if (confirmStop) {
+    const checks = window.prompt("请填写实际采取的停止核查方法（旧进程、相关终端或执行记录）：", "");
+    if (!checks?.trim()) return;
+    if (!window.confirm("确认旧操作已经停止，理解其结果可能仍未知；本声明不等于程序测量证据。新应用还可能重复已有副作用。")) return;
+    request.stop_basis = { type: "OPERATOR_CONFIRMED_STOPPED", checked_at: new Date().toISOString(),
+      checks_performed: [checks.trim()], old_operation_stopped: true,
+      accept_unknown_result_and_repeat_risk: true, material_refs: [] };
+  }
+  if (!window.confirm(disposition === "AUTHORIZE_NEW_APPLY" ? "授权对这个批准候选尝试一次新应用？服务器会重核身份与目标状态。" : "关闭这个候选的再次应用？已存在的精确提交仍可按条件确认。")) return;
+  postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/delivery/resolve?workdir=${selectedWorkdirParam()}`, request);
+}
+
 function commandForStatus(status, assessment) {
   const task = selectedTask();
   const effectiveWorkdir = task?.effectiveWorkdir || state.workdir || ".";
@@ -1343,12 +1376,7 @@ function commandForStatus(status, assessment) {
   }
   if (status === "COMPLETED") {
     const delivery = deliveryView();
-    if (delivery.canFinalize) {
-      return `${jar} delivery finalize --workdir "${effectiveWorkdir}" --commit <target_commit_sha> ${state.selectedId}`;
-    }
-    if (delivery.canMerge) {
-      return `${jar} delivery merge --workdir "${effectiveWorkdir}" --target "<original_repo>" ${state.selectedId}`;
-    }
+    if (asList(delivery.nextCommands).length) return delivery.nextCommands.join("\n");
     return `${jar} summary ${base}`;
   }
   return `${jar} status ${base}`;
@@ -1830,7 +1858,7 @@ function deliveryEvidenceCard() {
     bullets.push(`命令：${command}`);
   });
   if (delivery.canFinalize) {
-    bullets.push("说明：当前只完成暂存，没有自动提交、推送或创建 PR。");
+    bullets.push("说明：目标仓库已有匹配提交；登记只确认现有提交，不会再应用或推送。");
   }
   if (!bullets.length) {
     bullets.push("暂无可展示的交付证据。");
@@ -1840,6 +1868,8 @@ function deliveryEvidenceCard() {
     ["最终验收", delivery.acceptanceDecision || state.overview?.acceptance?.finalDecision || "-"],
     ["目标结果", delivery.goalOutcome || state.overview?.goalSatisfaction?.domainOutcome || "-"],
     ["目标仓库", delivery.targetRepo || "-"],
+    ["停止依据", delivery.stopBasis || "UNKNOWN"],
+    ["历史交付", delivery.historicalStatus || "-"],
     ["业务改动", changedFiles.length ? `${changedFiles.length} 个文件` : "-"],
     ["终态保护", "已完成任务只能查看、导出或显式合并"],
   ], bullets);

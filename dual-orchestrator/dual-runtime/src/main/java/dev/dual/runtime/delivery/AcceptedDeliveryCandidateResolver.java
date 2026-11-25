@@ -26,8 +26,8 @@ public final class AcceptedDeliveryCandidateResolver {
     private final WorkflowFileLedger ledger;
     private final DeliveryCandidateWriter candidateWriter;
 
-    public AcceptedDeliveryCandidateResolver() {
-        this(new ObjectMapper().findAndRegisterModules(), new WorkflowFileLedger(), new DeliveryCandidateWriter());
+    public AcceptedDeliveryCandidateResolver(WorkflowFileLedger ledger) {
+        this(new ObjectMapper().findAndRegisterModules(), ledger, new DeliveryCandidateWriter());
     }
 
     AcceptedDeliveryCandidateResolver(ObjectMapper objectMapper, WorkflowFileLedger ledger, DeliveryCandidateWriter candidateWriter) {
@@ -37,6 +37,10 @@ public final class AcceptedDeliveryCandidateResolver {
     }
 
     public Accepted resolve(WorkstreamPaths paths) throws IOException {
+        return ledger.inspect(paths, (scoped, files) -> new AcceptedDeliveryCandidateResolver(objectMapper, scoped, candidateWriter).resolveSnapshot(paths));
+    }
+
+    private Accepted resolveSnapshot(WorkstreamPaths paths) throws IOException {
         var occurrence = lastAcceptanceOccurrence(paths);
         var node = ledger.loadNode(paths, occurrence.nodeInstanceId());
         if (!"gate.human_acceptance".equals(node.nodeDefinitionId()) || node.status() != NodeStatus.COMPLETED) {

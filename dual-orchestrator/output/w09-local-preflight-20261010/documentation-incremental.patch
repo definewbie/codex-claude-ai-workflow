@@ -1,0 +1,33 @@
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -40,8 +40,8 @@
+ | W05 同冻结身份中断恢复；外部未知人工裁定；终态不重开 | I5/I1；D06/D07 ledger/runtime/worker/kernel | B02 holder、B03 本地协议/构造与身份、B04/B05/B06 写点/冷 JVM 独立 PASS，见 §23 | kernel 内部 I/O 专项与部署拓扑未全证，保留；首 Gate 限单 JVM 路由/ClassLoader，实际身份/停止核验不能以测试 JVM 代替 | 具名协议离线有据；I5 全故障/部署普适性未关闭 |
+ | W06 验收满足→候选批准→目标 Git 应用→实际提交→交付确认/中断处置 | I6，§4 交付行；candidate、DeliveryApplicationService、Git、query | T12；B06 四变体×inline/worker 受控完整批准链接临时真实 Git apply/人工实际 commit/finalize；写点、冷 JVM、拒绝/续作与同源投影证据见 §22.3；CC 批末独立 PASS 见 §22.4 | 本批实施/离线接线范围收口；LOW-1 查询锁序常驻化已登记，现有一次性反证仍有效；真实目标 Git、浏览器视觉与真实客户端未证，归组合准入/Gate；不自动 commit 或盲目重 apply | W04 验收/批准；W05 本地边界；B06/W06/D09 批次 CLOSED / PASS（离线范围）；真实交付证明未关闭，NO-GO 保持 |
+ | W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | 单一示例/typed 去重/受限 correction 已有；本轮逐字段案头表完成，见 §23 | G01 已在既有 prompt/template owner 修正并扫 intake/design/plan/reviewer/implement，共同保留严格身份；实际模型负担待真实 Gate，不承诺 token 节省 | 案头审计和 G01 离线修正已获 CC 合并独立 PASS；真实回应负担 NOT PROVEN |
+-| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 历史查询 LOW 常驻 6/0 与隔离反证；§23.1 本轮单轮 1755/206/0、654 输入同一性及新发行核验；CC PASS 接收见 §23.2 | 本轮 G01 修正/G02 元数据/G03 出口/G04 新发行候选见 §23.1；G05 与最终动态前提未齐；browser/真实 worker 未证，首个 CLI/INLINE 不关闭整体 W08 | 准备批次 CLOSED/PASS（离线）；CC 合并独立 PASS 见 §23.2；实际前提/G05/真实运行未批准 |
+-| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh 小型 Python 需求与 Gate 仅为草案，不授执行/写权 | CC 已合并核对本轮 G01/发行/Gate；G05 当次前提/需求/目标/预算及真实运行明确批准后才运行；自然未触发分支 NOT EXERCISED、不恢复旧样本 | NOT RUN / NOT AUTHORIZED；真实 NO-GO 保持 |
++| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 历史查询 LOW 常驻 6/0 与隔离反证；§23.1 本轮单轮 1755/206/0、654 输入同一性及新发行核验；CC PASS 接收见 §23.2 | 本轮 G01/G02–G04 见 §23.1；G05 本地批准/实际初始化前提见 §23.3；真实握手、业务 occurrence/工具证据在获准运行内核验；browser/真实 worker 未证，首个 CLI/INLINE 不关闭整体 W08 | 准备批次 CLOSED/PASS（离线）；CC 合并独立 PASS 见 §23.2；G05 本地准备批准及前提核验见 §23.3；真实运行仍未授权 |
++| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh Python 任务与 Gate 已受审；§23.3 G05 本地准备已批准并建立新实例，真实流程未执行 | CC 已合并核对本轮 G01/发行/Gate；G05 当次前提/需求/目标/预算及真实运行明确批准后才运行；自然未触发分支 NOT EXERCISED、不恢复旧样本 | 本地准备 PASS / 新实例已建立；真实流程 NOT RUN / NOT AUTHORIZED，见 §23.3 |
+ 
+ ### 2.1 次序、依赖与独立评审触发
+ 
+@@ -748,4 +748,18 @@
+ 
+ G01 与 G02–G04 具名材料范围收口；总体 W08/W09、真实客户端/工具/目标交付能力未证，真实 NO-GO 保持。实际启动/配置/当前 GOAL/readiness 等动态前置仍在合法时点核验；不把材料 PASS 当程序事实或运行许可。
+ 
+-下一步唯一用户决定：[G05 任务/目标/预算/责任审批摘要](../../output/w08-preparation-review-acceptance-20261010/g05-approval-proposal.md)。只摘录现有已评审 Gate，不加额度或改变验收；原样无需追加 CC 轮次，实质变更重核受影响结论。G05 与真实运行授权当前均未取得；用户若明确一次授权覆盖当次准备与运行，前置核齐后不重复申请同一许可。关键/最终业务门与原生逐请求批准仍按原 Gate 保留。
++下一步唯一用户决定：[G05 任务/目标/预算/责任审批摘要](../../output/w08-preparation-review-acceptance-20261010/g05-approval-proposal.md)。只摘录现有已评审 Gate，不加额度或改变验收；原样无需追加 CC 轮次，实质变更重核受影响结论。截至本节接收时 G05 与真实运行授权均未取得（最新本地批准见 §23.3）；用户若明确一次授权覆盖当次准备与运行，前置核齐后不重复申请同一许可。关键/最终业务门与原生逐请求批准仍按原 Gate 保留。
++
++### 23.3 G05 本地批准、fresh 初始化与运行前核验（2026-10-10）
++
++用户“批准”按此前明确划分受理为当次 G05 任务/目标/预算/责任及本地准备；**不扩大为真实模型调用或关键门预批准**。本地准备 PASS，真实 Gate NOT RUN / NOT AUTHORIZED；材料见[本地准备报告](../../output/w09-local-preflight-20261010/assessment.md)与[P01–P08 实测核对](../../output/w09-local-preflight-20261010/gate-local-preflight.json)。没有新设计决定，无需为本次状态补记单开 CC 轮次。
++
++新 target `/private/tmp/dual-w09-newlines-20261010/target` 只建立一次空基准提交 `6081fc1888db9a6a61291a7d0822537d8a0f89ff`；原 Dual 仓库未提交。冻结 CLI `start` 未带 --run，由原 owner 创建 linked worktree `/private/tmp/dual-w09-newlines-20261010/worktree` 与分支 `codex/w09-newlines-20261010`，新 workstream `ws-20261010T055644Z-6QCS`，workflow `agent-lifecycle-terminal-delivery@5`；只有 READY context intake 节点，无 agent run/native session/业务批准。RUNNING 是实例状态，不能推成模型正在执行；start 的旧 design 摘要不作当前入口事实。
++
++654 冻结输入与 CLI/server JAR 字节复核一致；原 frozenRuntimeIdentity 确认 liteflow/600s/实际发行 SHA。初始化 JVM 的 entrypoint/kernel code source 与同 loader 有实际日志；后续路由 JVM仍须重核，不冒称 holder 已加载/执行。实际 effective workspace 的 build-info/config 两次 metadata 核 wrapper/dist/patch=1517f828/launch-spec 与受审组合一致；原 global config 未变，无 project override。Python/stdlib 宿主条件实测一致，不能当原生工具或产品测试证据。新 target/worktree 的 canonical/common-dir/base/tree/clean均核对；局部 registry仅索引。
++
++P01/P08 当次提案及限额已批准，GOAL/EXECUTION/最终交付仍等实际门的用户决定；readiness须等真实 GOAL/等待 occurrence，不提前造 ref。P05 native ask、P06 原生工具与 usage、真实独立验收/产品交付均未运行；自然未发生路径不填 PASS。18顶层调用/60min主动窗口/120k预警/160k可见实际token止损/最多两次有证据修订不变，最终产品 commit仍由用户执行。
++
++本地核验脚本一次误用绝对 Path.parts[0]，结果 INVALID；已保留错误及实际目录清单，改成 entry name 后只读重核通过，未修改生产或账本、未重新 init。原回归未重跑，不拼接或增加测试数量。
++
++**下一步**：明确授权真实运行后，在此新实例按原 Gate 单 INLINE、逐段执行，每段前核身份/状态/预算，真实 GOAL 门先交用户；外部 UNKNOWN/新 authority/范围或成本偏差继续按原止损，真实 NO-GO在取得当次运行授权前保持。

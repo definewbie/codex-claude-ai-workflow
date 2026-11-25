@@ -1,0 +1,28 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-gate-contract_review-008",
+  "nodeDefinitionId" : "gate.contract_review",
+  "kind" : "GATE",
+  "handlerType" : "human.review",
+  "status" : "COMPLETED",
+  "stageId" : "stage-gate",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/contract-resolution.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/contract-resolution.md" ],
+  "inputTransition" : {
+    "required" : true,
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/contract-resolution.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/contract-resolution.md" ],
+  "result" : {
+    "source_node_instance_id" : "node-contract-compile-007",
+    "requested_action" : "approve",
+    "human_action" : "approved",
+    "note" : ""
+  },
+  "runRef" : null,
+  "latestExecutionId" : "",
+  "startedAt" : null,
+  "finishedAt" : "2026-09-13T16:04:08.124182Z"
+}

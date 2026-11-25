@@ -1,0 +1,901 @@
+{
+  "classification": "PASS",
+  "scope": "single clean whole reactor, offline tests only; B03 remains IN_PROGRESS and self-review WARN",
+  "command": "mvn -q clean test",
+  "log": "reactor-final-3.log",
+  "exit_code": 0,
+  "source_files": 636,
+  "source_unchanged": true,
+  "source_mismatches": [],
+  "source_snapshot_before": "final3-pre-reactor-sha256.json",
+  "source_snapshot_after": "final3-after-reactor-sha256.json",
+  "changed_source_files": 32,
+  "modules": {
+    "dual-adapter-acpx": {
+      "tests": 433,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 34
+    },
+    "dual-adapter-git": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 2
+    },
+    "dual-cli": {
+      "tests": 94,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 26
+    },
+    "dual-core": {
+      "tests": 126,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 16
+    },
+    "dual-flow-liteflow": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 4
+    },
+    "dual-ledger-file": {
+      "tests": 153,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 23
+    },
+    "dual-runtime": {
+      "tests": 719,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 80
+    },
+    "dual-server": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 13
+    }
+  },
+  "total": {
+    "tests": 1627,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": 198
+  },
+  "reports": [
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest.xml",
+      "sha256": "8916b419ab26bbe6948c9568346bad0ab9450aaa09b58ebfaec4ca6b98429ef0"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.xml",
+      "sha256": "5d299a8f851e536c1c37e6a367a6c23d13680b411acede579927dddcebcecc08"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxAgentTransportTest.xml",
+      "sha256": "41a6943b91580616587cbeb529013a5f40020afbc82d06662b5dfda316a54684"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxExecutionEventTest.xml",
+      "sha256": "f2afdf180ffb38f3eb8576cdc8f8e8807583710620c474e8c52859fd461de0da"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxExecutionFactOwnershipBoundaryTest.xml",
+      "sha256": "1bd6fbde43159c4e69de3c7252cc8753a7fe426aba6ee54a1a3b5281dabba578"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxFailureSignalCatalogTest.xml",
+      "sha256": "237e6474af8a0e220fd6a2ac871c12127f8686884c73ce9accbea7cfbd24241b"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxNativeCommandSequenceTest.xml",
+      "sha256": "aa9fe485062539f607e3cd0016da48149ad7828d0e01d59b95955c646ac8374f"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxProcessCleanupPolicyTest.xml",
+      "sha256": "22e648a6c6307e2f80885c8cd7e6c6dba5c0babb30c1547dd48d07314445c1fd"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxProviderMetadataTest.xml",
+      "sha256": "491f204e9a1d93c7a4a22622045218777718bc59be97217963c1863310d676a5"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxSessionLifecycleTest.xml",
+      "sha256": "e02a13e7e7fd54db2148838d2ef19708517e4b5b28016549901233cb6479e105"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest.xml",
+      "sha256": "808f2008b5bcbbf03112d2eea15588449cdd27a658783829b4e8246a5c004fe2"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxToolObservationsTest.xml",
+      "sha256": "107e36f6838dd8ac89bcd061e29119dbc33fcb9f261d36be90b8a1dccfe4a830"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxTranscriptToolUsageReaderTest.xml",
+      "sha256": "91c19faac0a74fdd6b0fbd97352c82a3c97f47ba10d793ff0059c00069bb0321"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxUsageReaderTest.xml",
+      "sha256": "10bf9ceb601c55634d50375cdcaa4ca39f4974d2c4d67654cd889bcf1cd795a8"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactoryTest.xml",
+      "sha256": "ebda4252d0a79302ca2f010c7c621aa4899189fc8e6f80ed986b036d8b56d7ab"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentExecutionHealthTest.xml",
+      "sha256": "5f1239e1b559741528f5dfecd67f5d61c0dade092d6d8890eae3ae6b78d3f6c5"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentLifecycleEventReaderTest.xml",
+      "sha256": "27759fdb3ffea88a695ed9d4188aefb8f57bbb21c490c29ad7c15e4c4d737116"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentPromptRendererTest.xml",
+      "sha256": "2753e14ed6a0face0dcc7220d32fdd760110176ef8ed42e9c0117da30276a4d7"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentRunnerKindTest.xml",
+      "sha256": "044b9328426d9bf1881c2b2b045fafb7273fd167678af24148c66717095e2f1a"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AuthoredManifestDispatchTest.xml",
+      "sha256": "50398051c595fb14dfdd6c1e5cbec1e22a7b39126864538c9dff0a82420dbdc6"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.xml",
+      "sha256": "7b5b4c016f3a66efc532078b1d8709ff9ae254a9d4806e118e7872b3172c34c2"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ClaudeExecutionPolicyTest.xml",
+      "sha256": "14b183e990605ac2c3e46713a97c38a5025d6bb73daaa7c072aab4acc7317112"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ContextGovernanceActualReportWriterTest.xml",
+      "sha256": "10d267d49e0a5ea64181dcc0af0d8afc00e8fd7131ccf01857dc915e26508fd1"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest.xml",
+      "sha256": "a9e5b7094119ba6e455b520c73be1314f417bce8de8d2b437aabbcd91625d7a6"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.PromptManifestWriterTest.xml",
+      "sha256": "d9e8f92a484b66f309e07ba0ae19d8906c7486456dc8b6502dab09adfe2cb376"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.PromptTemplateConsistencyTest.xml",
+      "sha256": "bfe42e5a80f68d6f088961b6d19d07ad126ef8fb104b60fdf5fb65b5cdcb1367"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ReadFileSummaryTest.xml",
+      "sha256": "89113eeb9bebebf2dd403d1da8cf037e265eb90287ea417e26c8d1b21f6a7542"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.RetryFailureContextSequenceTest.xml",
+      "sha256": "23c7b3392bd2afe284b56efb26bb63f963cc8535c5102f158a8c4cd3141b16e0"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.SessionCompactionPolicyTest.xml",
+      "sha256": "fe975f86271f045030472940fa272c2c8fcf09f9bcabd7c1854aecc91671a32a"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.SessionCompactionSignalTest.xml",
+      "sha256": "21abf10bf14ab8a31aad4917898ee6a3f34fc88ae2907cea89d109453ba8c114"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.SessionScopePolicyTest.xml",
+      "sha256": "435037afb137334eaf147f2f537ce1d4eee62cd6e1642308bfa54d758471c4dd"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ToolUsageCapabilityClassifierTest.xml",
+      "sha256": "4f6e6565390588c3c6cd4d9cc2d0637c026a4ea7865c335277f122719048d807"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.xml",
+      "sha256": "aacab63648cd30b0ce9f906fb9c0a0bbacf4f475ea30ac658b6fa04bab4b71fb"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.xml",
+      "sha256": "bd35667ffaac2a2fafab30d8bc51312939746593c6858f4b54af94009d298e3b"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-git/TEST-dev.dual.adapter.git.GitPatchMergeServiceTest.xml",
+      "sha256": "c73a7a24619e397e8fcc4f6fceda90b5bc97016402f70d78282d28ba1ec305af"
+    },
+    {
+      "path": "reactor-reports/dual-adapter-git/TEST-dev.dual.adapter.git.GitWorkspaceServiceTest.xml",
+      "sha256": "0708622eb40e0eb171ae096887bc4cab943ff2f596d82f572e3c2b399d5bb049"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.AutoRunCommandTest.xml",
+      "sha256": "59d320755f052d9f92a4127ecf7e100ecb02b2827ca02933b700d2728404c456"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.CalibrationCommandTest.xml",
+      "sha256": "fb9ccdf4abdd2584f2c314297b331866687d4cdc11e486f005f6ac8de4d5080f"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.CliLedgerFactoryTest.xml",
+      "sha256": "b86f8ac74054418c9bd78f8455a0f10aa9000ea20cede97b75db0063dd9e8805"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.CliNextActionHintsTest.xml",
+      "sha256": "13d36b0297e566c71ad244785f07c5c94fff5c30149e960a9b5800f20b0e143c"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.DeliveryMergeCommandTest.xml",
+      "sha256": "c8e278d01b563c4053197aef151a6bab2c38dadbbe1abd78f93b1e239710809b"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.DoctorCommandTest.xml",
+      "sha256": "cb3247bb3c4a0b5a97c4732dc6ba1431ce187020890726adbff2df9dbd600ffc"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.InspectRunnerKindConsistencyTest.xml",
+      "sha256": "eb410b6addd93de5b07e3bbad9282393530d6d128b4d3227e00df5ca749446ec"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.ProjectionsRefreshCommandTest.xml",
+      "sha256": "a51d321f8c7d6a9b913ee54653d408ea233c59aaeea45b625101e20b0f78c607"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.RecoveryCommandTest.xml",
+      "sha256": "e0a1ba93d619c098e8ef7307a4e737fb044dfc9b0e68e38c8da1e584468f20ff"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.RecoveryNetworkCommandTest.xml",
+      "sha256": "ed68547c25ae7db3f4ca96c91ebd8391d14aae9a60e8ff59c8d981b9493e1955"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.RecoveryShowCommandTest.xml",
+      "sha256": "a1a843f019ccb71f23435518d59d16050ec7e96edbf88a27718a8d8481950da6"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.RecoveryStaleCommandTest.xml",
+      "sha256": "1b01a2349c8ea18a184931eacf865ad0a44719586e7684506e8aea8d1e84a175"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.ResumeCommandTest.xml",
+      "sha256": "f08b09ded554ae4d3e71af499179f7b8d3a03264990939c3ee84f64adf8bdd8d"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.RetryCommandTest.xml",
+      "sha256": "a040b0e661f2d773875747fc11e8b0c6bdb411c71fbd04ccdfe55d539cc422c7"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.ReviewDecideCommandTest.xml",
+      "sha256": "b763320f61df12e1b0f37a52db68accdc4561382430370dd1a7c8f2f75910169"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.ReviewPacketCliHintsTest.xml",
+      "sha256": "8b3f1cbb0d2e8a79c2c8fb992e57511bed36c44809bb232240f718ee7d9950be"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.ReviewRequestActionCommandTest.xml",
+      "sha256": "72f8839d82d58f5a5653b42640e44f60faf5020397935d0a0536f8279afd6385"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.ReviewShowCommandTest.xml",
+      "sha256": "93b14937d16de4f553d184493cf48f2110f04257c41de3f26efeb386ce53ffb6"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.SessionsReapCommandTest.xml",
+      "sha256": "5f08ba90b66782e8f0fb826e54e3870ec7a6492c62b44b17dfa5094b6764bbd0"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.StartCommandVariantTest.xml",
+      "sha256": "b3b01117514e7e14d8852a1edd454ded8491eb6ff7d8dba951cbd48c79e64e14"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.StatusCommandTest.xml",
+      "sha256": "372733d05b78127fb1eec289a159fe199dce5d0c64eb839d104ed54282f201ef"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.SummaryCommandTest.xml",
+      "sha256": "985bbc98ec63073c60efd43e758999e3edd567c7c66ce6159b454d72158a1a20"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.TimelineCommandTest.xml",
+      "sha256": "efb4bfff9e3fc6dc34f3983088988f1db74d56bfad21929331661e1f924c9e9e"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.TraceCommandTest.xml",
+      "sha256": "19572c45f6984d599f0451e0d8787eccd5cc1d6722d28a0d8d9f99c2696d9be5"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.WatchCommandTest.xml",
+      "sha256": "b9cdb969b0d9a9a809bfa622b5b1b0653bf694d40fefe12d27674acd2eefbb04"
+    },
+    {
+      "path": "reactor-reports/dual-cli/TEST-dev.dual.cli.WorkflowPrintDefaultCommandTest.xml",
+      "sha256": "127e284425c650e3ef96817f45daae76723f08ee05bcccc078b40233a4258333"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.arbitration.FailureClassificationTest.xml",
+      "sha256": "d231342f4cd086702e1e792c5b50faf953cf601bb939691eeab1ad007b9ac5b2"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.contract.PhasedContractTest.xml",
+      "sha256": "c280510aadf4ce2185f0f473fa7c95b7476d87dddefd5fa596f518b0322b7d01"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.contract.TaskContractTest.xml",
+      "sha256": "6a342bd2200ca9d4a412f13df12ee833e6384e5e79c06162e8357ea81463458c"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.domain.PromptLanguageTest.xml",
+      "sha256": "5deab9f689a3900fb1a16341bafdc254389fee72aeea8ef1d258157fa5f2a807"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionAttemptTest.xml",
+      "sha256": "890326a328e8a7c75192060afe2192b9f225c35fa013e220bd61fe641f566b11"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionFinalizerTest.xml",
+      "sha256": "55736500d8fa6dbbcb84b7ee3f93edbf8757d100039e926a67fa56077e12ad76"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionOutcomeResolverTest.xml",
+      "sha256": "c9562e8a1edaaa4ca2ce0c3a3d6f5b6d3f34a2cbff152f1fd1ac14f3eed21acb"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.id.DualIdGeneratorTest.xml",
+      "sha256": "84371a171dffc5ebc566ce1d4c6cf6e98442be44d912daddf293f72ab9ee2231"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.provider.ProviderBillingCsvCalibrationTest.xml",
+      "sha256": "35bafe68102d2b5943afa450e94d5555ce9ab0b13eaded65969d0afb3d9cf5c9"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.provider.ProviderCachePolicyTest.xml",
+      "sha256": "ded35e00804541e5b008299b260cc636d4a3610f8b34b5c16af6b30abc71f539"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.provider.ProviderPricingCatalogTest.xml",
+      "sha256": "e97514b648205c8b01a3b6008e2336920d977efcd8af68f876db439e047c058d"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest.xml",
+      "sha256": "72fb7c7e962db0cc94188b71412bb142d3df585a626b20ab17ae053e25219cb0"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.workflow.EdgeConditionTest.xml",
+      "sha256": "3c7fa63b8b993e976307a07b218ad8ee9e918002ee60c3621aebacc032437587"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.workflow.EdgeDefinitionTest.xml",
+      "sha256": "4f5f3d10ae5a639fd20150f89bdf386d642708f451c6540808c4f987653c3c0e"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.workflow.HumanGateActionSemanticsTest.xml",
+      "sha256": "8096c085c067c2b789496253ec68b8e00991322c7ba164e32d519f3724ee4719"
+    },
+    {
+      "path": "reactor-reports/dual-core/TEST-dev.dual.core.workflow.WorkflowDefinitionTest.xml",
+      "sha256": "06a1709adbeb1c4214d9a3b0d8265bdfc8e817110177a9733eab20dd46dc3247"
+    },
+    {
+      "path": "reactor-reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.FlowKernelProviderTest.xml",
+      "sha256": "c9f920d625473aac7b49f638abe8d6dd314adf413947baf4b6f40b4231d4107f"
+    },
+    {
+      "path": "reactor-reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest.xml",
+      "sha256": "b2481b6b59d96df3e600f74c4ef399bccd3219c9b012dc25e6ca09e7f51cd96b"
+    },
+    {
+      "path": "reactor-reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest.xml",
+      "sha256": "739b8768c528dd15865a11030effa512f6cfbcd78f0fd60b941a0f39181ad113"
+    },
+    {
+      "path": "reactor-reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest.xml",
+      "sha256": "67fd23b14afa8021a9723a8741ac9950d631000acafc2f29e814fa93dd800ef1"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.CheckpointDocumentTest.xml",
+      "sha256": "8aa93c0b9a567cbae0037183dd9bc84a23612f9c6a9b697a22f692e4a2b96b28"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.ConditionalEdgeRoutingTest.xml",
+      "sha256": "9d3c7f9551f06a60119d5d88b4495221542ef5e4361e1a1f816ea8886a9aafdd"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.DeliveryCandidateWriterTest.xml",
+      "sha256": "f2952245df59646cd13aa8862764cddf6fa04746ac688f521834863dc9f4c5f4"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.DeliveryMergePlanTest.xml",
+      "sha256": "9064eda92374a4f09a3a67912b7acb026f373269069890edae2e4e78eeaa5931"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.ExecutionClaimSequenceTest.xml",
+      "sha256": "cf4c6b39e0ddbb282f19624e80b1d28f20d965918152860c388bc8e1093dedfc"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.ExecutionConsistencyClassifierTest.xml",
+      "sha256": "a8e0e791d4257db84c15f00de2cdde50ba4cf1af6ab97db5e357613e9917ba99"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.xml",
+      "sha256": "d482f76faa7a41305c8102d47f5cad15e85db1e20303b35bf47e54bc9f68e5b8"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.FileLedgerStoreTest.xml",
+      "sha256": "35e3791dac3c3645faf1d4cc82b0cbf1db6f85d3411aba16d10a7a6bec5efef1"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.HumanActionRequestTest.xml",
+      "sha256": "dcecaecc1fa072f3c77adf254475d7e2ff82fb257b64c96a2fcd195f9d91ce9a"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.IterationRefTest.xml",
+      "sha256": "d587e2d85f33105cba4af8ffab809008280742bf0134f4e8b3404329d815bf09"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.LedgerMigratorTest.xml",
+      "sha256": "92a6b70fadeb583e5122e0b32687e66b87122c483cf192b48c4525a992fa38c1"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.LedgerSessionTest.xml",
+      "sha256": "2c4f660a26da67f7babd91683ec57b55d865568bd8819732d3acc3d126c635a6"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.MetricsProjectionWriterTest.xml",
+      "sha256": "297bb3656f5aec6ecd4c2aa8010a702cca7272febdd3cbcf7ca01550a3b15be9"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.xml",
+      "sha256": "09ccf075f81e6f22b972fb213720ef8e6500f784b8a8185f918524ccba67b255"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.OperatorWorkspaceRegistryTest.xml",
+      "sha256": "44d4752b3f53c075de07603e3aced0860d7985b86af4c12cd37aafadccfeadd2"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.ParallelFanOutTest.xml",
+      "sha256": "0d0200e1ccf091b0e9e31c5dd1f50094ab599e40865e7b29ba0012f61740fcf5"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.RecoveryAssessmentTest.xml",
+      "sha256": "64718ec2a25da74886328fb115e2f72e536a18267c9cdb16baf75b6d75c57d50"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.RetryFailureContextTest.xml",
+      "sha256": "0154838fe773f9325c29d80fb618a5ea86891a1b08b18fcf6d64591851673949"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkflowCommitSequenceTest.xml",
+      "sha256": "bd4c328214ae7b172364ce7ce7538218ce1a74dd5dd61097725b4c7dbb59e462"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkflowFileLedgerTest.xml",
+      "sha256": "64fc77e6c54e5bb330ebe9a9bad0cba4a1f1dd32992bf1b6fe9caa055524f345"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkflowGateResolutionTest.xml",
+      "sha256": "64447b69a4b06086d3de245675ed1d6788866518fa85008bd8ab891e67cd15f4"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.xml",
+      "sha256": "97fd7018b74a6dfeadb0636547b0dadf8552b2c86c68f983ef857709f2f2c5af"
+    },
+    {
+      "path": "reactor-reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkstreamLockTest.xml",
+      "sha256": "a4a34bb81ec451b187e98b552d7ca5d072718cb873a07660ecce4550d1fbbbb5"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.FrozenRuntimeIdentityTest.xml",
+      "sha256": "d0f7b21ddaed0558011b7a2fff9f7a2b8157a8cf0a49fb8f48f7fd239c058565"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.RunningStateGuardTest.xml",
+      "sha256": "503c5f8e87a44392d2e3fdf082e7a46bc6d0339f0102cbb05158c5fe4ff3e2cc"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.StaleRunningRecoveryTest.xml",
+      "sha256": "c3f8d88fc1b55c1ac6a6739092129d1b5c39a9516b3197cb2f86daaf307ef127"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.WorkflowRuntimeEventTest.xml",
+      "sha256": "fc3553ad8b7c9b1e47b60f3ac0bf1c0076869f79480d48dff9b67a80c37fef36"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.WorkflowRuntimeTest.xml",
+      "sha256": "484c0ac56e5c1c9d1f2665c45077e2f37cfecf67b2d40c3abf7422dabc635cc5"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.delivery.DeliveryApplicationServiceTest.xml",
+      "sha256": "4d2912f364f87e19f3a0d5358483874b7c22f2f9df4e393623b6c1cce2d2839d"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.governance.AgentCapabilityCatalogTest.xml",
+      "sha256": "c33ba343d8202510a9b0b73941e7dcb39ee95510cac25fd5a9a5513a098238de"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AcceptanceRepairInterruptionTest.xml",
+      "sha256": "d321b45358a1a224abad5e0979ef66024f2ce1ff081eb25cd432b383c8292516"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AcceptanceRepairSequenceTest.xml",
+      "sha256": "f6f465c5d70b9beab19e20550e929bfd179ef231677a90c3e62dd379e962bd2b"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentContractSemanticsTest.xml",
+      "sha256": "2fb6e705bc661b980adbd28d9415c17ae7d8c6857ef66799afde82f1af94fa14"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentEvidenceIndexTest.xml",
+      "sha256": "aa7a9318dba2e2a4ae145ff3bf5a84859563f2822526048a9a786425eaa16744"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultEnvelopeParserTest.xml",
+      "sha256": "53666125be5141da561e8b0b6f3216abdc808e0365f7361361b35811de856186"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest.xml",
+      "sha256": "aec7badd714234de6398e586fe2842100d82921d788bd7678533d8ffd6b830ef"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultPromptContractTest.xml",
+      "sha256": "7bf97e4e2304a10593d8a5afcbd94ae2757774bbe3ed81842a5e4dfdb03257d0"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentRunCommitProtocolTest.xml",
+      "sha256": "6422cca113103483b9820f38c32904905f237d0dac6fa8fde684cf591bfe5418"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentRunMetadataFinalizerTest.xml",
+      "sha256": "3099458256e9b322cc7985431dbd215fdd06509ec7918184be2915ec4884e003"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest.xml",
+      "sha256": "5abe845efe73274d7d4cf4a307ad040f75f0dff37800a1cf197ddc7c34652aac"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ArtifactContractValidatorTest.xml",
+      "sha256": "e5bbf5f737bf7b0d2660424efe0290c14eff81170b8d533c120161561ac2e9a6"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredBoundarySequenceTest.xml",
+      "sha256": "e728d91df975d3277a4e1378057c4f3efdb9f61c359d72dc81de2b8f0e83b4d5"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredDefinitionTest.xml",
+      "sha256": "d1e520835aa4724f05054cc09eead630ca359e665c8cca4eef05b284d154c2a8"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredRevisionContractTest.xml",
+      "sha256": "f9c19da30c0f4b044db033930ebcb315f4b53c25c2bb0c949a552d4ce9309e17"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredRevisionCoverageTest.xml",
+      "sha256": "efd1dd4ae88932c186a5f9920588c330299f656cd647fa331f117edb6bf673ad"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredStageSequenceTest.xml",
+      "sha256": "e7c96af81d1c4089c33b3eb561646a4118fcf377775c5ff7f5828725664c3511"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.BuiltinHandlerTest.xml",
+      "sha256": "b64fd7ec9b255dfa9ebd008a08953b918d46ff52a49b2ffddb1549ea5cc22852"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest.xml",
+      "sha256": "cdfe9d9d7c7ca434aa652bcd6316a7acd7689ad704fea295fa51a0859c7c2078"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ChangeScopeEvaluationTest.xml",
+      "sha256": "7b283b55cbdfdb7adb526ae0204fe800a32de0cdcc8593d6598c024f4317baf9"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest.xml",
+      "sha256": "d77f2f9d4c398f54b83c397c984ac267fcde33390233f153dc88512e6f0f9b39"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContextBudgetOverrideTest.xml",
+      "sha256": "4c20b63b94d3abf1c516801f6d91cf143e9237873e812a5ffd11a179c3927116"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContextBuildPackageHandlerTest.xml",
+      "sha256": "3d7f2c8d156e3991c8918f305324f32c1862225cf72aaf57ed194a88d308f3db"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContextTaskContractSectionTest.xml",
+      "sha256": "c74a38aa29fdfea2fb1a834bf2d87e3de0f05bbe5dd306178561819ecbd03330"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractCompileHandlerTest.xml",
+      "sha256": "d635df4cf75610b07b1d1e0770440703a2036a38b905e49e7d606b0fc3bc8fcf"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractLifecycleLedgerTest.xml",
+      "sha256": "ed97da8606aa7c82f1a751105a8903be895bebdcd3b0df23b1a0fe7fdd192dce"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractRegistryTest.xml",
+      "sha256": "c632cf96ecf09ce3084893fe165ef20a2ba05ce2f82526b66d3a612977359210"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractReviewGateTest.xml",
+      "sha256": "cc74dec6b55620320d87d7676ca53f674f243d57abf1baf81d99210a315e5d42"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractRevisionDisplayTest.xml",
+      "sha256": "783a28ace0e5b71ef26dc6a8ad88fce7a14b7f1797a548fcaae1738757d45b5d"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.EvidenceCollectionSequenceTest.xml",
+      "sha256": "365ed3e88562b3f5d239003898b9dfe97bbde493433d8b3bdf3d6def50f90ecb"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.EvidenceCollectionSourceTest.xml",
+      "sha256": "49bee6c6d730916ce611421425400ed0d5bb97214f55d4da9affc5840b7a17a0"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ExternalVerificationEvidenceTest.xml",
+      "sha256": "934f5fab73a6eeb72102e97ed0e3bdac377cab24ea606c029a702c06045d20ed"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.FailureArbiterTest.xml",
+      "sha256": "1ca3de1fdd38c9c09f82ac91708cc4ee1888c328391f0021393b7afd79b468ec"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.FailureClassifyHandlerTest.xml",
+      "sha256": "43fa44889c8f548ece30968c145fa463d7e0dbbbf926b2bbe4f13e66bd2193cc"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.FailureClassifyRegistryTest.xml",
+      "sha256": "fa07ef1a1ad3073c3e14e41273caba7d87702c92675c3cb2a3909856313baa50"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.HandlerRegistryTest.xml",
+      "sha256": "1fb0f454220962f4764419c7843df5e2468345b5cc1802a50067ec20485da592"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.LateContractRevisionContextTest.xml",
+      "sha256": "90063ed749e7d8391b3b1f48a2797c290396f1dd39c708ce7b2e20f0989271c0"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.LateProposalScopeTest.xml",
+      "sha256": "f5b309ca60f00b72165ca8a75d519ec3af837d0dd9fb253c64da5b35f508236c"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.LegacyContractConsumerRejectionTest.xml",
+      "sha256": "069edfeb317fe76f6fb2b6acfe8aa4b4b9592b1008de06e0b25f1d0de6e3d8e5"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.PermissionEvidenceSequenceTest.xml",
+      "sha256": "028c1cdf1bc0d4a8cd8affb348baa8f45bf0a6df9ceb5d3d86f61ce66f3e764d"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.PhasedContractContinuationTest.xml",
+      "sha256": "318c23cf1ddd89ef96e9e9d1315d86ea901433b15d01807d9b82e5de1dd5aa9b"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.PlanArtifactDocumentTest.xml",
+      "sha256": "a7052fe58a3bf5e9e2f7316da73f2e173500bb837ed1df492d9e984a40dc3beb"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest.xml",
+      "sha256": "3e8b857db4723b32268def23560c327f683d7d16b852684384da6c7efaf46c52"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ReadinessRoutingDefinitionTest.xml",
+      "sha256": "68d8c73912deca6dd4902a4bb8570fbe7ab7dbc7d1799e2415268c90da2066ef"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest.xml",
+      "sha256": "46011db1a5b9012558488580373e1b9f4b96a0af2300f2724cbcf343bfed7894"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ReportFailureClassificationTest.xml",
+      "sha256": "d774998d0dfb2c2f8866e0f7890f330b9bbd461af07c5f4a207e7d37dd49c69c"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ReportGenerateFinalHandlerTest.xml",
+      "sha256": "223acb6b2c9b054fe17f3520d88d864abb3f840d48b3fd4799e9a88914a24bda"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.ReportTaskContractTest.xml",
+      "sha256": "b909786b57fec287a5c67bbf8fa3018f0d806d821f502c3ae1b0311f23f84d9b"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.SelfTestContinuationSequenceTest.xml",
+      "sha256": "e1f34dc07be05b9394657c4472718277426744f4d6f106c6447ac14384a784bf"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest.xml",
+      "sha256": "ca35419a02de3581627247158cd7f0d71e8536fd7166acf920a17fa2718223be"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.StageOutcomeCompilerTest.xml",
+      "sha256": "564761064c9e981005a2b85ce877f47bd81326e0606cebbdcd55035fe6d32c3f"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractArtifactWriterTest.xml",
+      "sha256": "885b0954666f975d1220ec138bb5c6f80535c1b2dffec84f81bb4e881234d8bb"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractProjectionVerifierTest.xml",
+      "sha256": "18c307cc7b3805e4f437b458ba92e9c4239a3a512925cf330bd23774e6621ef1"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest.xml",
+      "sha256": "bb057e19e1717d71befa01ae66d92edddfe627974229182904ae3223abeaa3dd"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractProposalValidatorTest.xml",
+      "sha256": "551e016cdf0a94e31637d36db6f820abb2acb09f4e31128c03fdcde071518894"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest.xml",
+      "sha256": "66b735a4c4bb9d79358caf759e6d9bf8607ee4108ad22cf7ab72eb8c0d74a1db"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractScopeResolverTest.xml",
+      "sha256": "a76bbe2bfd00bbd635d28189d8fa6fe54ac8e134806c748288a849b92a880b05"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.TokenEstimatorTest.xml",
+      "sha256": "37f645e2753ee5093d0da72a8a24f3eb76159f4fb8031352dc4dab80b371fc03"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.TypedContextPayloadBoundaryTest.xml",
+      "sha256": "5a8816c6475302320281d29df6916cc49100c621797522b7a0559517dc2b5d8e"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.TypedDesignScopeTest.xml",
+      "sha256": "9304fefc55134be431e137df8a7e96e66aa286d19098e2e1ba8bdb664826c72b"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.TypedPlanScopeTest.xml",
+      "sha256": "99cc70e35a567ef4cd9adb9949a747d0fcbb8920b717baba0f94c846f0b61c0b"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.VerificationEvidenceSequenceTest.xml",
+      "sha256": "cd95e4304c11397dd934ac34edc98d5e02392d3d48d0300e73590a458e6ee308"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.VerificationReadinessTest.xml",
+      "sha256": "10a003c616e9cb0b01d041f7a445c71dce4a8bac4a9448df9e0a3d5206599de6"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.WorkflowIntegrationTest.xml",
+      "sha256": "bd98d6bd5729728f7c267ec3dcba5db0f0405e4a925cb93136ddf28b70c9709c"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.handler.WorkstreamMemoryProjectionTest.xml",
+      "sha256": "5812363853648b1d6f97b07d3e51127c558ae1a892d05e91b606b45dd805d98d"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest.xml",
+      "sha256": "d4dd9cf9fe483752dc9d78c6f9aefa072a6d36b274d5ec0e7fe5daabcd95c868"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest.xml",
+      "sha256": "36dcb1887ad5de959a67db242ad44491149a3d81d444340c910d53ac5aa85633"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest.xml",
+      "sha256": "79f950cef4ac77c85894fc41124faea540f13685b9a2343d156b107516afc20a"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest.xml",
+      "sha256": "5318f1691542019382ad6c2a32c724ad8a65ffa3bf1c795c985d91888bb0a5b1"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest.xml",
+      "sha256": "acfc8a9c396f4c7b7131028c5ed18cbfe4517548fcfe18f91242b78a5273e195"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest.xml",
+      "sha256": "f4058144a7e1312c1e88761e79f0d7d18df1dae97333b746584ef242c0e81d8a"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest.xml",
+      "sha256": "82eeed8e132ba95cada929367f91dfaf7a32968f4531d621468054bd3dc6b483"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest.xml",
+      "sha256": "895fb2a700bcd4701ed85f69febca74fe570c08b9ee78148c2fda79aef11e74e"
+    },
+    {
+      "path": "reactor-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest.xml",
+      "sha256": "35fc64eb1dcfad4928f0d5dbc8591f21c8c50150a544d0a01b1dfeb97029f665"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.BackgroundSchedulerServiceTest.xml",
+      "sha256": "7d745f05c267f3de9ee599a68419438b39fc09a90b38b544243dd634b5033845"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.DeliveryViewServiceTest.xml",
+      "sha256": "0ee35e1fe442b00f51656c447cdc2e745c06ca0f52a59490ac3cc9c99e107e0c"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.DualServerApplicationContextTest.xml",
+      "sha256": "96a3537b8382214883a523df6377f1393843772e98f7b5b78ae403c8ed9f2075"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.NotificationServiceTest.xml",
+      "sha256": "11d673b17670476675901d2e4e5cdd2934f8b974cdf8dc31f7ae9e1176353c96"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.SchedulerApiControllerTest.xml",
+      "sha256": "61d5012220b68ef91cafbe5d6fb2f1372828c0bff465b29e3d300d36075d0f29"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.SchedulerPolicyTest.xml",
+      "sha256": "0eac98284efccd31184779b4850c0e1f421c99b4d77228f7913d738fc3a9b057"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.SchedulerServiceTest.xml",
+      "sha256": "c5ee7ebb2fea45f5cb7fdd1acef6f2ddb5be64b3e2b2fbdf496b2102546f0c3f"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.ServerLedgerFactoryTest.xml",
+      "sha256": "caa366086db74437bc87cde0f05c98fa57892c0302adb66ab756fc2f3bd56d74"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.StaticConsoleProjectionBoundaryTest.xml",
+      "sha256": "e823df4cb350a185ec603d2a0d2a354b76a58f23319966b5ba0fd730dc89bd92"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.WorkspaceBrowseControllerTest.xml",
+      "sha256": "97c4a34a894abea45474272498984b7d2cd2842a35a504c2fe2cf716b149ff41"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.WorkspaceRegistryServiceTest.xml",
+      "sha256": "d9b7a869efb94d466e7f3fb84c9eac2cda444fd99dba8d9bc51b6d348a9834ac"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.WorkstreamActionServiceTest.xml",
+      "sha256": "7d638f5152b9dd5d0f8fe9204f4accbcee83f4640432e7ff93b60c31108d5db7"
+    },
+    {
+      "path": "reactor-reports/dual-server/TEST-dev.dual.server.WorkstreamApiControllerTest.xml",
+      "sha256": "d2163f189ef3ca4f9e81baf0f053782e3a1c5ecf8ba7787d86240f33a6db9a55"
+    }
+  ],
+  "live_provider_runs": 0,
+  "native_client_runs": 0,
+  "extra_agents": 0,
+  "commits": 0,
+  "remaining": [
+    "Declaration all-criteria matching versus frozen affected-criteria semantics needs independent judgment; do not close W02",
+    "Actual native/adapter/effective-config identity producer and R01/dispatch/recovery enforcement",
+    "Legacy smoke migration or retirement and active-reference sweep",
+    "Existing B03 full close checklist and independent review"
+  ],
+  "excluded_from_batch": [
+    "D04 complete C/X native permission-reply bridge"
+  ],
+  "additional_checks": [
+    "Both console JavaScript syntax checks passed before final source freeze",
+    "git diff --check passed; final documentation check separately"
+  ],
+  "counterproof_logs": [
+    "core-red.log",
+    "sibling-red.log",
+    "unresolved-red.log"
+  ],
+  "intermediate_results": [
+    "reactor-clean.log INVALID mixed source compile",
+    "reactor-final.log FAIL incomplete transport protocol fixture",
+    "reactor-final-2.log PASS for prior stable source only; not merged into this result"
+  ],
+  "observed_head_after_run": "3362eb421514e75fdc4332f570df5bf274b3725e",
+  "final_documentation_diff_check": "PASS"
+}

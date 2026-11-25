@@ -1,0 +1,40 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "workstream_memory",
+  "workstreamId" : "ws-20261010T055644Z-6QCS",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+  "iterationId" : "iter-001",
+  "decidedScope" : [ ],
+  "nonGoals" : [ ],
+  "decisions" : [ ],
+  "readFiles" : [ ],
+  "openIssues" : [ ],
+  "priorVerdicts" : [ ],
+  "priorFailures" : [ {
+    "node" : "intake.claude_brainstorm",
+    "runId" : "run-1791614610585",
+    "reason" : "ADAPTER_INCOMPATIBLE",
+    "resolved" : false
+  } ],
+  "refsSemantics" : "latest_projection_refs",
+  "refs" : {
+    "repoMap" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/repo-map.json",
+    "stageScopePolicy" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/stage-scope-policy.json",
+    "repositoryFactBinding" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/binding.json",
+    "fileRelevancePlan" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/file-relevance-plan.json",
+    "fileSummaries" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/file-summaries.json",
+    "readReuseContract" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/read-reuse-contract.json",
+    "workingSet" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/working-set.json"
+  },
+  "generatedAt" : "2026-10-10T06:43:30.632344Z",
+  "qualifiedTaskContract" : {
+    "status" : "unavailable"
+  },
+  "lastStageOutcome" : { },
+  "fieldSemantics" : {
+    "machineDecisionFields" : [ "decision", "stage_outcome", "lifecycle_status", "blocking", "sourceField", "status" ],
+    "projectionOnlyFields" : [ "summary", "desc", "verificationSummary" ]
+  },
+  "updatedAt" : "2026-10-10T06:43:34.140955Z"
+}

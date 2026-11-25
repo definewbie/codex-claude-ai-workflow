@@ -1,0 +1,65 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-plan-decision-020",
+  "nodeDefinitionId" : "plan.decision",
+  "kind" : "DECISION",
+  "handlerType" : "review.decision",
+  "status" : "COMPLETED",
+  "stageId" : "stage-plan",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json" ],
+  "inputTransition" : {
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256" : "22d6d233a3a24a5b7f5a32dcc70ade509f1f5672dedac29b197f82e2ef203408",
+    "source_node_instance_id" : "node-plan-codex_plan_review-019",
+    "required" : true,
+    "transition_type" : "normal",
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json" ],
+  "result" : {
+    "decision" : "READY_TO_IMPLEMENT",
+    "source" : "contract-sidecar",
+    "summary" : "计划与已审设计一致，实施步骤和验收取证完整，可提交精确 EXECUTION 范围审批后实施。",
+    "reviewed_candidate" : {
+      "reviewer_occurrence" : "node-plan-codex_plan_review-019",
+      "schema_version" : 1,
+      "author_artifact" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719040009/outputs/plan-claude.contract.json",
+        "sha256" : "b2e9d853cc6d80f39b737950b1ae085310b87d916fd37f918c73bd4a2ee931bd"
+      },
+      "contract" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+        "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b",
+        "epoch" : 1,
+        "phase" : "GOAL"
+      },
+      "author_occurrence" : "node-plan-claude_plan-017",
+      "review_decision" : "READY_TO_IMPLEMENT",
+      "checks" : [ {
+        "rule_version" : "2",
+        "rule_id" : "review.subject.and.route",
+        "result" : "PASSED",
+        "input_refs" : [ {
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719040009/outputs/plan-claude.contract.json",
+          "sha256" : "b2e9d853cc6d80f39b737950b1ae085310b87d916fd37f918c73bd4a2ee931bd"
+        }, {
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json",
+          "sha256" : "6e96fdcba384c87642aecf835d96584f82a29119bce0c2fed976644d4c09bd3a"
+        } ]
+      } ],
+      "review_artifact" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json",
+        "sha256" : "6e96fdcba384c87642aecf835d96584f82a29119bce0c2fed976644d4c09bd3a"
+      },
+      "stage" : "plan",
+      "decision_occurrence" : "node-plan-decision-020"
+    },
+    "readiness_reason" : "VERIFICATION_READINESS_REQUIRED",
+    "readiness_detail" : "VERIFICATION_READINESS_REQUIRED: missing environment or feasibility reference"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1792719374805-953df3d6",
+  "startedAt" : "2026-10-23T01:36:14.815892Z",
+  "finishedAt" : "2026-10-23T01:36:14.938605Z"
+}

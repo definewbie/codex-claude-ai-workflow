@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "prompt",
+  "runId" : "run-1792977352552",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "nodeId" : "implement.claude_self_test_report",
+  "agent" : "claude",
+  "session" : "claude-main-ws-20261023T005431Z-9YYF-run-1792977352552",
+  "promptTemplate" : "implement-claude-self-test",
+  "workdir" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+  "artifactPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/prompts/implement-claude-self-test.md",
+  "contentType" : "text/markdown",
+  "byteSize" : 49023,
+  "estimatedTokens" : 12256,
+  "lineCount" : 442,
+  "sha256" : "c19b8fa2519b64e78fb9354fd75aa22bf84b84b1f055f9f68efd15267fec1fbe",
+  "generatedAt" : "2026-10-26T01:18:45.098443Z"
+}

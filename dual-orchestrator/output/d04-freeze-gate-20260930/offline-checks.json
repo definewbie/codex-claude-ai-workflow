@@ -1,0 +1,9 @@
+{
+  "status": "OFFLINE_CHECKS_PASS_NOT_NATIVE_PROOF",
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "nativeSessions": 0,
+  "realProviderCalls": 0,
+  "productTestsRun": false
+}

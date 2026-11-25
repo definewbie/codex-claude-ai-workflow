@@ -33,7 +33,10 @@ public record PlanArtifactDocument(
         List<String> knownRisks,
         List<String> humanReviewChecklist,
         boolean editFilesDeclared,
-        boolean referenceFilesDeclared
+        boolean referenceFilesDeclared,
+        List<dev.dual.core.contract.TaskContract.ScopeEntry> files,
+        List<dev.dual.core.contract.TaskContract.VerificationBinding> verificationBindings,
+        List<dev.dual.core.contract.TaskContract.Reference> authorityRefs
 ) {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
@@ -41,7 +44,7 @@ public record PlanArtifactDocument(
     public static PlanArtifactDocument from(Map<String, Object> document) {
         return new PlanArtifactDocument(
                 text(document.get("artifact_type")),
-                intValue(document.get("schema_version"), 1),
+                intValue(document.get("schema_version"), 0),
                 stringList(document.get("implementation_steps")),
                 stringList(document.get("edit_files")),
                 stringList(document.get("reference_files")),
@@ -51,7 +54,10 @@ public record PlanArtifactDocument(
                 stringList(document.get("known_risks")),
                 stringList(document.get("human_review_checklist")),
                 document.containsKey("edit_files"),
-                document.containsKey("reference_files")
+                document.containsKey("reference_files"),
+                typedList(document.get("files"), dev.dual.core.contract.TaskContract.ScopeEntry.class),
+                typedList(document.get("verification_bindings"), dev.dual.core.contract.TaskContract.VerificationBinding.class),
+                typedList(document.get("authority_refs"), dev.dual.core.contract.TaskContract.Reference.class)
         );
     }
 
@@ -69,6 +75,9 @@ public record PlanArtifactDocument(
      * a missing field is a {@code PLAN_ARTIFACT_BODY_MISSING} failure.
      */
     public Optional<String> missingRequiredField() {
+        if (schemaVersion != 2) return Optional.of("schema_version");
+        if (files.isEmpty()) return Optional.of("files");
+        if (verificationBindings.isEmpty()) return Optional.of("verification_bindings");
         if (implementationSteps.isEmpty()) {
             return Optional.of("implementation_steps");
         }
@@ -94,6 +103,12 @@ public record PlanArtifactDocument(
             return Optional.of("human_review_checklist");
         }
         return Optional.empty();
+    }
+
+    private static <T> List<T> typedList(Object value, Class<T> type) {
+        if (!(value instanceof List<?> values)) throw new IllegalArgumentException("missing typed plan list");
+        var mapper = new ObjectMapper();
+        return values.stream().map(item -> mapper.convertValue(item, type)).toList();
     }
 
     private static List<String> stringList(Object value) {

@@ -1,0 +1,23 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "file_relevance_plan",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "implement",
+  "nodeInstanceId" : "node-implement-claude_implement-030",
+  "nodeDefinitionId" : "implement.claude_implement",
+  "builderNodeDefinitionId" : "implement.claude_implement",
+  "targetNodeDefinitionId" : "implement.claude_implement",
+  "iterationId" : "iter-003",
+  "source" : "task_contract_scope+git_evidence",
+  "trackedInventoryRef" : "",
+  "trackedInventoryHead" : "",
+  "trackedInventorySha256" : "",
+  "trackedInventoryPathCount" : 0,
+  "readCandidates" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "contractScopeCandidates" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "writeCandidates" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "previouslyReadFiles" : [ ],
+  "repeatedReadAvoidance" : [ ],
+  "expansionRules" : [ "Use only routed artifacts and canonical task-contract or Git facts as prepared context.", "Do not re-read previously inspected files unless this stage needs fresh file contents.", "Do not infer task relevance from filenames, directory layout, or requirement prose." ],
+  "generatedAt" : "2026-10-25T22:36:33.835955Z"
+}

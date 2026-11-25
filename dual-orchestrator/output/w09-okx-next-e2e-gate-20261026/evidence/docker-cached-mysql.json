@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/usr/local/bin/docker",
+    "image",
+    "inspect",
+    "mysql:8.4",
+    "--format",
+    "{{.Id}}"
+  ],
+  "exit_code": 1,
+  "stdout": "\n",
+  "stderr": "permission denied while trying to connect to the docker API at unix:///Users/kriswang/.docker/run/docker.sock\n",
+  "elapsed_seconds": 0.11277749994769692
+}

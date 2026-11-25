@@ -1,0 +1,4 @@
+ README.md                    | 62 ++++++++++++++++++++++++++++++
+ src/normalize_text.py        | 20 ++++++++++
+ tests/test_normalize_text.py | 91 ++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 173 insertions(+)

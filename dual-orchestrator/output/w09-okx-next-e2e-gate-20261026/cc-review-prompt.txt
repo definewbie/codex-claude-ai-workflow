@@ -1,0 +1,22 @@
+请只读合并复审 OKX Java MODIFY E2E 的 fresh 离线装配，不编码、不改原项目/历史、不启动模型或原生会话、不执行真实 runner、不联系交易所、不代用户授权。自行裁定 PASS/WARN/FAIL，不预填结论。
+
+仓库：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow
+材料：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026
+原项目：/Users/kriswang/work/projects/ai/ai-crypto-arbitrage
+固定源提交：931db5db8fc468c61eb2c441d21a1da7facf69a1
+
+读 AGENTS.md/engineering-checklist，按 boundary-first-engineering。先读 task-requirement、verification-gate、verification-exits、fresh-assembly-design、assembly-verification、cc-review-disposition；再检查实际 admission.py、prepare-offline.py、run-one-step.py、pre-dispatch-recheck.py、gate_support.py、process_check.py、预算与授权/launch/初始清单。请自行沿代码重建链，不只核作者说明。
+
+原始证据入口：baseline-full-receipt/log/reports、mysql-suite-count-confirmation、false-authorization-proof、fresh-preparation-result、operations/*原始回执、fresh-assembly-tests-final.log/json、fresh-counterproof、reuse-and-diff-scope、fresh-read-only-recheck、preservation-after-assembly；以实际存在文件为准。测试产物和替身不可外推真实native能力。
+
+重点：
+1. 产品阈值公式/单位/未知/精度/既有建议不变是否正确且值得做？独立核算180/20/10000与0.019/0.02/0.021，不把历史情景阈值当预测/投资指令。源代码/规范是否支持，不只复述任务。
+2. 新target树、305归档、原脏树、程序产生的workstream、旧终态是否隔离？新本地commit与源commit历史是否诚实区分？逐项核11个MySQL类与XML，而非按名称猜数量。166/29/24/3各层不相加。
+3. 复用E是否一次构造并用于实际Popen，父PATH是否仅诊断？五路程序/字节/配置消费是否有重新解析旁路？两类消失窗口、未完step/process、pending、超时、UNKNOWN后的处置能否误判为无执行或允许重发？无旧PID是否被错误称为全子树停机？
+4. 未授权实际拒绝时点、当次case/workstream/初始清单/预算/launch SHA绑定是否完整？旧true能否借用？授权文件可变与固定launch的顺序是否安全，business/commit未委派是否清楚？原需求/EXECUTION/交付门仍由当前subject决定，不能被运行批准替代。
+5. 用量仍唯一来自原run/occurrence与固定完成/日志吗？当前transcript/严格共享回退、历史追加、缺失/部分/快照、冷读的义务是否保留？新账不继承旧余额；本案时间回执有无遗漏或重复？缺回执如何停止？3M/18/3600、尾链+重入+一次修正以及时间储备是否按新预算真实消费？语义循环上限哪些是人工检查，不把operator义务冒称自动guard。
+6. 从准备→无--run初始化→未批→具名批准→单步→业务门→实现/自测/独立验收→candidate→apply→commit→finalize，重建完整transition和每个durable-write间失败、冷重启、retry/resume/abort/terminal及兄弟入口。六维：Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test。区分本案实际Java初始化、离线替身与未来真实模型E2E。
+7. 检查29项实际断言和3隔离反证有无假通过/测试作者错误被当生产先红；实际Java初始化未改产品、无模型调用的证据是否足够？原659/JAR/33配置的保全口径与新launch是否可核？原生Maven/Docker出口在真实EXECUTION前仍需什么最小核对？
+8. 3M是提案而非批准：校准来自一个Python CREATE案的2,077,707实测，不用旧1.61M规划冒称实耗。评估余量/必要剩余动作，避免新增Java/acpx/契约机制、环境认证、进程监督或新实验。
+
+输出：核心裁定、分级发现、证据边界、最小下一步。分别裁定产品切片、离线装配、是否具备实际启动资格；指明技术前提和用户待决项。不要预填期望结论，不把本复审当预算、运行或业务批准。

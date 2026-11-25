@@ -1,0 +1,41 @@
+With the graph defined, you need to make it runnable and persistent.
+Example 1-6 compiles the graph with an in-memory checkpointer and
+assigns a thread ID. The checkpointer restores prior messages on each turn
+so the agent can reuse earlier results. The thread ID separates branches, so
+you can run parallel conversations without interference.
+
+Example 1-6. Compile with in-memory checkpoints and configure a thread
+checkpointer = MemorySaver()
+app = graph.compile(checkpointer=checkpointer)
+
+cfg = {"configurable": {"thread_id": "nyc-weather-session"}}
+
+    Lightweight, per-thread checkpointing that persists state across turns.
+
+   Produces a runnable app that knows how to save and load state.
+
+  A thread ID identifies one conversation branch. New IDs create new
+    branches.
+
+Once you have a runnable app and checkpoints in place, the next step is to
+make its execution observable. You want to see what the graph is doing,
+which messages are flowing, and how tool outputs attach. Example 1-7
+introduces a compact helper that formats messages into a single readable
+line, making it easier to follow traces without overwhelming logs.
+
+Example 1-7. Format messages for compact trace output
+def _short(msg: BaseMessage, max_len: int = 140) -> str:
+    """Compact one-line view of a message."""
+    role = type(msg).__name__.replace("Message", "").lower()
+    content = getattr(msg, "content", "")
+    if isinstance(content, list):
+        # some tool outputs can be list payloads
+        try:
+            content = json.dumps(content)
+        except Exception:
+            content = str(content)
+    text = str(content).replace("\n", " ").strip()
+    if len(text) > max_len:
+        text = text[: max_len - 3] + "..."
+    if hasattr(msg, "tool_calls") and getattr(msg, "tool_calls"):
+        tnames = [tc.get("name", "tool") for tc in msg.tool_calls]

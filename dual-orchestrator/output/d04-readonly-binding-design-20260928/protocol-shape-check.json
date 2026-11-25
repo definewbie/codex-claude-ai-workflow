@@ -1,0 +1,12 @@
+{
+  "checks": {
+    "threadHasSandbox": true,
+    "threadHasApprovalPolicy": true,
+    "turnHasSandboxPolicy": true,
+    "readOnlyVariantExists": true,
+    "threadResponseHasSandbox": true,
+    "threadResponseHasProfile": true,
+    "turnResponseDoesNotSupplyPolicy": true
+  },
+  "scope": "Offline schema shape validation only; not native enforcement or model usability proof."
+}

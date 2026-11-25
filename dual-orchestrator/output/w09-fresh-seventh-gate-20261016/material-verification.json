@@ -1,0 +1,23 @@
+{
+  "status": "AUTHOR_OFFLINE_MATERIAL_CHECK_PASS_NOT_CC_OR_RUN_AUTHORIZATION",
+  "files": 96,
+  "manifest_sha256": "cd218245571d3dc4db61cfa86e71761e7c803a5bf459a47c8a3d80689cb8d2bf",
+  "all_hashes_match": true,
+  "source_inputs": 659,
+  "source_unchanged": true,
+  "observer_tests": 12,
+  "budget_cases": 13,
+  "real_authorization_negative_checks": 2,
+  "isolated_early_guard_cases": 3,
+  "inherited_reactor_tests": 1813,
+  "inherited_reactor_suites": 210,
+  "new_maven_run": false,
+  "fresh_real_run_authorized": false,
+  "native_provider_calls": 0,
+  "native_sessions_created": 0,
+  "business_approvals": 0,
+  "sixth_recovered": false,
+  "seventh_offline_initialized": true,
+  "seventh_real_run_started": false,
+  "source_of_run_authority": "New user approval required; never this verification report"
+}

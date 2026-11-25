@@ -1,0 +1,11 @@
+{
+  "original_ledger": "/private/tmp/dual-w09-newlines-20261010/worktree/.agent/workstreams/ws-20261010T055644Z-6QCS",
+  "indexed_files": 77,
+  "indexed_before_after_equal": true,
+  "unindexed_empty_lock_files": [
+    ".mutation.lock",
+    "runs/run-1791614610585/.mutation.lock"
+  ],
+  "initial_verification": "INVALID comparison: snapshot index intentionally excludes lock files; no indexed byte changes",
+  "no_resume_or_ledger_mutation_performed": true
+}

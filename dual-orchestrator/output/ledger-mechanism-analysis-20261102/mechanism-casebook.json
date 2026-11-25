@@ -1,0 +1,271 @@
+{
+  "scope": "Read-only historical analysis. No production edits, new provider runs, historical recovery, or new agents. Natural contrasts only; no randomized causal experiment or new historical deterministic replay performed.",
+  "records": [
+    {
+      "case": "7SNA",
+      "mechanism": "Mechanical author bindings incorrect; deterministic coverage rejection occurs after independent reviewer accepts. Environment declarations were newly supplied, not all pre-existing facts.",
+      "observedAction": "Operator registers readiness and requests author/reviewer revision with exact AC IDs and references.",
+      "observedResult": "Revised plan and reviewer output retained; ledger ends at next reviewer dispatch. No second plan.decision failure is recorded.",
+      "supports": "Move already-enforced cheap checks before paid review; reduce retyping of existing authoritative fields.",
+      "doesNotProve": "That all intervention was redundant, that latest prompt still fails, or that program assembly raises delivery rate.",
+      "refs": [
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030521008/outputs/plan-claude.plan.json",
+          "line": 26,
+          "sha256": "3aa7f3135317a9d7bb22c50e578e583d9376dcde06134d7121923d54ff0d5c3d"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.json",
+          "line": 1,
+          "sha256": "8158ce442018a05da7951eccd8b834efa81023839fa4f793c59b1a5da98b1f2d"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/nodes/node-plan-decision-020.json",
+          "line": 58,
+          "sha256": "b0fbffbc499e4d4dd498d0b9bf98c0d16ceaa6c0ff29debf5990352998af15f2"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/events.jsonl",
+          "line": 77,
+          "sha256": "820b2286e7345489c78fe7f3ce4acf4ed1565ac1758a15710085db2416c7492d"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/events.jsonl",
+          "line": 79,
+          "sha256": "820b2286e7345489c78fe7f3ce4acf4ed1565ac1758a15710085db2416c7492d"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/events.jsonl",
+          "line": 87,
+          "sha256": "820b2286e7345489c78fe7f3ce4acf4ed1565ac1758a15710085db2416c7492d"
+        }
+      ]
+    },
+    {
+      "case": "MBC2",
+      "mechanism": "Revision baseline SHA mismatch.",
+      "observedAction": "Case stopped; later program-owned revision binding exists in current source.",
+      "observedResult": "No repaired historical delivery established.",
+      "supports": "Program should bind authoritative baseline identity, not require error-prone retyping.",
+      "doesNotProve": "Current implementation has the same bug or old ledger should be made compatible.",
+      "refs": [
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/nodes/node-intake-claude_brainstorm-006.json",
+          "line": 24,
+          "sha256": "8ec8f5a5518ef0ba01b35f90e75b0d736f38bde8c2c9ffbe0fe02031459c1e24"
+        }
+      ]
+    },
+    {
+      "case": "AHBV",
+      "mechanism": "Implementation BLOCKED by denied Edit, no changed files; old execution records success with warnings; self-test sends missing implementation to product repair.",
+      "observedAction": "Stale execution recovered; note claims corrected permission mapping; first retry then protocol failure, another retry.",
+      "observedResult": "Later ACCEPT_WITH_NOTES and workflow_completed. No retained target-commit receipt in this case.",
+      "supports": "Separate execution capability recovery from product-code repair.",
+      "doesNotProve": "Exact binary change, automatic retry sufficiency, or target repository delivery.",
+      "refs": [
+        {
+          "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260828T054556Z-AHBV/.agent/workstreams/ws-20260828T054556Z-AHBV/runs/run-1787910664384/run.json",
+          "line": 119,
+          "sha256": "246e08f477b7359b57e146fa9619ca95f5e80b9b445cbe8b5a46c85952bca849"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260828T054556Z-AHBV/.agent/workstreams/ws-20260828T054556Z-AHBV/events.jsonl",
+          "line": 72,
+          "sha256": "ba1639464f9872a084a60ebd3b2169e69dc595c7ec67942c52e1ce3aa15629ff"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260828T054556Z-AHBV/.agent/workstreams/ws-20260828T054556Z-AHBV/events.jsonl",
+          "line": 80,
+          "sha256": "ba1639464f9872a084a60ebd3b2169e69dc595c7ec67942c52e1ce3aa15629ff"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260828T054556Z-AHBV/.agent/workstreams/ws-20260828T054556Z-AHBV/events.jsonl",
+          "line": 84,
+          "sha256": "ba1639464f9872a084a60ebd3b2169e69dc595c7ec67942c52e1ce3aa15629ff"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260828T054556Z-AHBV/.agent/workstreams/ws-20260828T054556Z-AHBV/events.jsonl",
+          "line": 85,
+          "sha256": "ba1639464f9872a084a60ebd3b2169e69dc595c7ec67942c52e1ce3aa15629ff"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260828T054556Z-AHBV/.agent/workstreams/ws-20260828T054556Z-AHBV/events.jsonl",
+          "line": 160,
+          "sha256": "ba1639464f9872a084a60ebd3b2169e69dc595c7ec67942c52e1ce3aa15629ff"
+        }
+      ]
+    },
+    {
+      "case": "BXWV",
+      "mechanism": "Acceptance reaches no must_fix and EVIDENCE_COLLECTION; classified verification insufficiency then self-test incompleteness leads back to implementation.",
+      "observedAction": "Evidence-report step first, then automatic product implementation loop.",
+      "observedResult": "Final implementation fails; no next linked retry in retained ledger.",
+      "supports": "Evidence insufficiency must retain its meaning across subsequent decisions; use existing collection/external-evidence path before code repair.",
+      "doesNotProve": "All review loops wasteful, that extra evidence was available, that all preceding source fixes unnecessary, or that timeout work safe to resume.",
+      "refs": [
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1789003988271/outputs/acceptance-codex-review.json",
+          "line": 27,
+          "sha256": "bcd5f368351b260e1458f0761f54f2f00353e27c4251f897baaf8e3df032c75e"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl",
+          "line": 316,
+          "sha256": "5b889c7776a9622b9cc5ace82946fa4bfb950d0ba0e2aa57901625ce8ad35e92"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl",
+          "line": 326,
+          "sha256": "5b889c7776a9622b9cc5ace82946fa4bfb950d0ba0e2aa57901625ce8ad35e92"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl",
+          "line": 327,
+          "sha256": "5b889c7776a9622b9cc5ace82946fa4bfb950d0ba0e2aa57901625ce8ad35e92"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl",
+          "line": 331,
+          "sha256": "5b889c7776a9622b9cc5ace82946fa4bfb950d0ba0e2aa57901625ce8ad35e92"
+        }
+      ]
+    },
+    {
+      "case": "HHZL",
+      "mechanism": "Original final includes prose plus JSON; one syntax correction produces JSON with invalid enum REVISE_PROPOSAL.",
+      "observedAction": "One deny-tools contract correction.",
+      "observedResult": "Corrected result still invalid, MANUAL_ONLY.",
+      "supports": "Classify current error precisely; assess bounded correction by error type.",
+      "doesNotProve": "Jackson bug, correction prompt dropping an enum error not yet produced, or guaranteed success from more retries.",
+      "refs": [
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/run.json",
+          "line": 61,
+          "sha256": "41acbf81b8fca25fc16c0a0353684e248ffe3802d41776602ecf3133b8a8f13c"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/run.json",
+          "line": 218,
+          "sha256": "41acbf81b8fca25fc16c0a0353684e248ffe3802d41776602ecf3133b8a8f13c"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/prompts/intake-codex-product-review.contract-correction.md",
+          "line": 1,
+          "sha256": "187e7c978f1516b44d1cff6414a4814940fbacc4977bb20f5d4de23e30667968"
+        }
+      ]
+    },
+    {
+      "case": "3B2P",
+      "mechanism": "Bootstrap failure and business-design revisions occur at different transitions.",
+      "observedAction": "Retry note claims restored reviewed acpx environment; later three human design revisions.",
+      "observedResult": "Continued past bootstrap, later revision limit. Final requested repair includes SQLite write ordering and preserved K-line data on failure.",
+      "supports": "Repairing execution removes a local obstruction; real product defects can remain.",
+      "doesNotProve": "Revision cap itself caused failure of already-qualified product; raising cap improves delivery.",
+      "refs": [
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T040052Z-3B2P/.agent/workstreams/ws-20260904T040052Z-3B2P/events.jsonl",
+          "line": 49,
+          "sha256": "31964751a4e540dac5730cffd3f96fc8e904095f0ed6ff3f311d231cb0f6b697"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T040052Z-3B2P/.agent/workstreams/ws-20260904T040052Z-3B2P/events.jsonl",
+          "line": 50,
+          "sha256": "31964751a4e540dac5730cffd3f96fc8e904095f0ed6ff3f311d231cb0f6b697"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T040052Z-3B2P/.agent/workstreams/ws-20260904T040052Z-3B2P/gates/gate-node-gate-human_design_approval-038.json",
+          "line": 14,
+          "sha256": "59e919803ce860979b466585e592c4dca4c9ee7ba82b6ee8cbcd679d41952102"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T040052Z-3B2P/.agent/workstreams/ws-20260904T040052Z-3B2P/events.jsonl",
+          "line": 121,
+          "sha256": "31964751a4e540dac5730cffd3f96fc8e904095f0ed6ff3f311d231cb0f6b697"
+        }
+      ]
+    },
+    {
+      "case": "9YYF",
+      "mechanism": "Positive control: similar gates, readiness registration and independent reviews can reach actual delivery.",
+      "observedAction": "Operator adds three real readiness declarations; author/reviewer revision, exact execution approval, implementation and acceptance.",
+      "observedResult": "delivery_committed with commit f8ec3d41cbe1cac554a78c3131372af434440691; earlier independent verification matched Git tree/files and reran 11 unit tests and README doctest.",
+      "supports": "Preserve useful quality review and necessary human declarations; measure actual delivered candidate.",
+      "doesNotProve": "Generic success rate, cheap automation, or broad product correctness from one small task.",
+      "refs": [
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "line": 76,
+          "sha256": "477d8c0305988e19664e94c1250bbd9a40639a3d4e058eba308ba135806497fc"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "line": 77,
+          "sha256": "477d8c0305988e19664e94c1250bbd9a40639a3d4e058eba308ba135806497fc"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "line": 81,
+          "sha256": "477d8c0305988e19664e94c1250bbd9a40639a3d4e058eba308ba135806497fc"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "line": 144,
+          "sha256": "477d8c0305988e19664e94c1250bbd9a40639a3d4e058eba308ba135806497fc"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "line": 149,
+          "sha256": "477d8c0305988e19664e94c1250bbd9a40639a3d4e058eba308ba135806497fc"
+        }
+      ]
+    },
+    {
+      "case": "FUMK",
+      "mechanism": "INPUT_INCOMPLETE failures occur at planning, implementation and acceptance, not three identical retries of one node.",
+      "observedAction": "Retry at each boundary, plus an implementation timeout retry.",
+      "observedResult": "Progress after several retries; case snapshot remains RUNNING.",
+      "supports": "Join node identity and causal order before inferring repeated causes or remedy success.",
+      "doesNotProve": "Unchanged-input threefold repetition, retry alone caused progress, or qualified delivery.",
+      "refs": [
+        {
+          "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T043128Z-FUMK/.agent/workstreams/ws-20260708T043128Z-FUMK/events.jsonl",
+          "line": 60,
+          "sha256": "ee39b176089535f38793c91dac23ba92f79b11b773884d8f6ec87feeb40b6667"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T043128Z-FUMK/.agent/workstreams/ws-20260708T043128Z-FUMK/events.jsonl",
+          "line": 89,
+          "sha256": "ee39b176089535f38793c91dac23ba92f79b11b773884d8f6ec87feeb40b6667"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T043128Z-FUMK/.agent/workstreams/ws-20260708T043128Z-FUMK/events.jsonl",
+          "line": 95,
+          "sha256": "ee39b176089535f38793c91dac23ba92f79b11b773884d8f6ec87feeb40b6667"
+        },
+        {
+          "path": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T043128Z-FUMK/.agent/workstreams/ws-20260708T043128Z-FUMK/events.jsonl",
+          "line": 119,
+          "sha256": "ee39b176089535f38793c91dac23ba92f79b11b773884d8f6ec87feeb40b6667"
+        }
+      ]
+    }
+  ],
+  "decisions": {
+    "prioritize_for_validation": [
+      "Program-owned mechanical binding and earlier deterministic checks, while preserving missing-readiness gate.",
+      "Preserve typed distinction between execution failure, missing evidence, and product defect across full routing."
+    ],
+    "conditional": [
+      "Bounded automatic recovery only for a defined safe error subtype with valid authorization and known external state."
+    ],
+    "not_supported_as_first_fix": [
+      "Blanket retry increase",
+      "Blanket revision-cap increase",
+      "Remove independent review or lower quality gates",
+      "Claim cachedRead is waste or claim fixed session-scope savings",
+      "Add OS write-prevention outside accepted evidence-admission design"
+    ]
+  }
+}

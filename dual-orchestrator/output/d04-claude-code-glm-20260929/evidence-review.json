@@ -1,0 +1,47 @@
+{
+  "status": "PASS_NATIVE_READ_SURFACE",
+  "modelClient": "Claude Code",
+  "backendConfiguredEndpoint": "https://open.bigmodel.cn/api/anthropic",
+  "actualModelInInitAndMessages": "glm-5.3",
+  "elapsedSeconds": 10.19,
+  "actualTools": 4,
+  "readOracle": "PASS",
+  "fixtureUnchanged": true,
+  "nativeWriteDenial": "NOT_TESTED_NO_WRITE_CALL",
+  "hiddenToolDispatch": "UNPROVEN",
+  "hostConfigAndScratchBoundary": "UNPROVEN",
+  "bareJsonFormat": "FAIL_EXTRA_PROSE_AND_FENCE",
+  "strictDualArtifactContract": "NOT_TESTED",
+  "rawUsage": {
+    "input_tokens": 2351,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 5952,
+    "output_tokens": 285,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "",
+    "iterations": [],
+    "speed": "standard"
+  },
+  "billingMode": "provider_configured_unpriced",
+  "moneyComputable": false,
+  "sdkReportedEstimateUsd": 0.021856,
+  "sdkCostBasis": "unknown",
+  "sdkRawProviderLabel": "firstParty",
+  "moneyNote": "SDK costBasis=unknown; raw firstParty labels protocol route, not evidence of Anthropic backend/billing. Estimate is not GLM bill.",
+  "subagentsSpawned": 0,
+  "providerTasks": 1,
+  "D04": "DESIGN_GAP",
+  "independentReview": false,
+  "eventSha256": "418480a21ad0790e8cae5f91ef0afad48e46c6c532f4b524c0ac3db6c38e9104"
+}

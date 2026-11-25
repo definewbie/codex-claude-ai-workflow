@@ -21,7 +21,7 @@ public final class ReviewDecisionHandler implements DecisionHandler {
     @Override
     public NodeResult evaluate(DecisionContext context) throws Exception {
         var read = AgentEvidenceIndex.latestDecisionFromRefs(
-                context.workspaceRoot(),
+                context.ledger(), context.workspaceRoot(),
                 context.workstreamId(),
                 context.instance().inputRefs(),
                 OBJECT_MAPPER
@@ -35,6 +35,11 @@ public final class ReviewDecisionHandler implements DecisionHandler {
                     allowedDecisions(context.definition().id()), read);
         }
         var document = read.entry().document();
+        try { VerificationEvidence.verifyPublished(context.ledger(), context.workspaceRoot(), context.workstreamId(), document); }
+        catch (java.io.IOException invalid) {
+            return failed("VERIFICATION_EVIDENCE_INVALID", invalid.getMessage(), context,
+                    allowedDecisions(context.definition().id()), read);
+        }
         if ("implement.self_test_decision".equals(context.definition().id())
                 && !"self_test_report".equals(document.sourceArtifactType())) {
             return failed("INVALID_CONTRACT_SIDECAR", "self-test decision requires a self_test_report",
@@ -69,6 +74,43 @@ public final class ReviewDecisionHandler implements DecisionHandler {
                 case "BLOCKED" -> "HUMAN_REVIEW";
                 default -> throw new IllegalStateException("unsupported self-test decision: " + decision);
             });
+        }
+        if (java.util.Set.of("READY_FOR_ARCH_REVIEW", "READY_TO_IMPLEMENT").contains(decision)) {
+            for (var stage : AuthoredStageLineageResolver.Stage.values()) {
+                if (!stage.decision.equals(context.definition().id())) continue;
+                var resolver = new AuthoredStageLineageResolver(context.ledger(), context.workspaceRoot(),
+                        context.workstreamId(), Long.MAX_VALUE);
+                facts.put("reviewed_candidate", resolver.reviewedFacts(stage, context.instance().nodeInstanceId()));
+            }
+        }
+        if ("plan.decision".equals(context.definition().id()) && "READY_TO_IMPLEMENT".equals(decision)) {
+            var paths = new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot(),
+                    new dev.dual.core.id.DualId(context.workstreamId()));
+            var missing = context.ledger().inspect(paths, (ledger, files) -> {
+                var resolution = TaskContractProjectionVerifier.resolve(ledger, context.workspaceRoot(),
+                        context.workstreamId(), dev.dual.core.contract.TaskContract.Phase.GOAL);
+                if (resolution.failure() != null || resolution.qualified().isEmpty())
+                    throw new java.io.IOException("Plan has no current approved GOAL");
+                var reviewed = OBJECT_MAPPER.convertValue(facts.get("reviewed_candidate"), Map.class);
+                var author = OBJECT_MAPPER.convertValue(reviewed.get("author_artifact"), AuthoredExecutionContext.Reference.class);
+                var authorDocument = AgentOutputContractDocument.read(AuthoredExecutionContext.verifiedPath(context.workspaceRoot(), author), OBJECT_MAPPER);
+                var plan = authorDocument.map(AgentOutputContractDocument::planArtifact).orElse(null);
+                if (plan == null || plan.missingRequiredField().isPresent())
+                    throw new java.io.IOException("Reviewed plan is incomplete");
+                try {
+                    VerificationReadiness.validateBindings(ledger, context.workspaceRoot(), context.workstreamId(),
+                            resolution.qualified().orElseThrow(), plan.verificationBindings());
+                    return "";
+                } catch (java.io.IOException failure) {
+                    return failure.getMessage();
+                }
+            });
+            if (!missing.isEmpty()) {
+                facts.put("readiness_reason", VerificationReadiness.REQUIRED);
+                facts.put("readiness_detail", missing);
+                // Preserve the independent review; this is a program-owned routing decision.
+                return NodeResult.completed(VerificationReadiness.REQUIRED, context.instance().inputRefs(), facts);
+            }
         }
         return NodeResult.completed(decision, context.instance().inputRefs(), facts);
     }

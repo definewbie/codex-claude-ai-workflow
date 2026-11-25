@@ -1,0 +1,56 @@
+
+> acpx@0.13.2 lint /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source
+> oxlint --type-aware --deny-warnings src scripts examples test conformance && pnpm run lint:persisted-key-casing && pnpm run lint:flow-schema-terms
+
+src/acp/claude-execution-policy.ts:270:76: error eslint(no-useless-escape): Unnecessary escape character '[' help: Replace `\[` with `[`.
+src/acp/claude-execution-policy.ts:278:52: error eslint(curly): Expected { after 'if' condition. help: Replace `return false;` with `{return false;}`.
+src/cli/queue/ipc.ts:230:18: error eslint(curly): Expected { after 'if' condition. help: Replace `clearTimeout(timer);` with `{clearTimeout(timer);}`.
+src/cli/queue/ipc.ts:243:18: error eslint(curly): Expected { after 'if' condition. help: Replace `clearTimeout(timer);` with `{clearTimeout(timer);}`.
+src/cli/queue/ipc.ts:557:39: error eslint(curly): Expected { after 'if' condition. help: Replace `throw new Error("Permission request expired; do not resend");` with `{throw new Error("Permission request expired; do not resend");}`.
+src/cli/queue/ipc.ts:560:5: error eslint(curly): Expected { after 'if' condition. help: Replace `throw new Error("Permission request owner no longer exists");` with `{throw new Error("Permission request owner no longer exists");}`.
+src/cli/queue/ipc.ts:573:18: error eslint(curly): Expected { after 'if' condition. help: Replace `throw new Error("Permission reply delivery is unknown; do not resend");` with `{throw new Error("Permission reply delivery is unknown; do not resend");}`.
+src/acp/terminal-manager.ts:443:18: error eslint(curly): Expected { after 'if' condition. help: Replace `return await confirm();` with `{return await confirm();}`.
+test/permission-replies.test.ts:87:33: error eslint(curly): Expected { after 'for-of'. help: Replace `assert.equal(replies.reply({ ...valid, ...change }), false);` with `{assert.equal(replies.reply({ ...valid, ...change }), false);}`.
+test/permission-replies.test.ts:224:5: error eslint(curly): Expected { after 'for-of'. help: Replace `await withTempHome(async (dir) => { const sessionId = "lost-permission"; const paths = queuePaths(dir, sessionId); await writeQueueOwnerLock({ ...paths, pid: process.pid, sessionId, ownerGeneration: 7 }); let attempts = 0; con...` with `{await withTempHome(async (dir) => { const sessionId = "lost-permission"; const paths = queuePaths(dir, sessionId); await writeQueueOwnerLock({ ...paths, pid: process.pid, sessionId, ownerGeneration: 7 }); let attempts = 0; co...`.
+test/permission-replies.test.ts:231:22: error eslint(curly): Expected { after 'if' condition. help: Replace `socket.destroy();` with `{socket.destroy();}`.
+src/permissions.ts:369:8: error eslint(complexity): function `resolveAutomaticPermissionRequest` has a complexity of 12. Maximum allowed is 8.
+src/permissions.ts:375:29: error eslint(curly): Expected { after 'if' condition. help: Replace `return { response: cancelled() };` with `{return { response: cancelled() };}`.
+src/permissions.ts:379:36: error eslint(curly): Expected { after 'if' condition. help: Replace `return selectedOrFirst(options, allow);` with `{return selectedOrFirst(options, allow);}`.
+src/permissions.ts:380:33: error eslint(curly): Expected { after 'if' condition. help: Replace `return selectedOrCancelled(reject);` with `{return selectedOrCancelled(reject);}`.
+src/permissions.ts:381:37: error eslint(curly): Expected { after 'if' condition. help: Replace `return undefined;` with `{return undefined;}`.
+src/cli/queue/permission-replies.ts:59:50: error eslint(curly): Expected { after 'for-of'. help: Replace `pending.finish({ cancel: true });` with `{pending.finish({ cancel: true });}`.
+src/cli/queue/permission-replies.ts:75:7: error eslint(curly): Expected { after 'if' condition. help: Replace `return { cancel: true };` with `{return { cancel: true };}`.
+src/cli/queue/permission-replies.ts:77:38: error eslint(curly): Expected { after 'if' condition. help: Replace `return { cancel: true };` with `{return { cancel: true };}`.
+src/cli/queue/permission-replies.ts:103:37: error eslint(curly): Expected { after 'if' condition. help: Replace `return;` with `{return;}`.
+src/cli/queue/permission-replies.ts:106:20: error eslint(curly): Expected { after 'if' condition. help: Replace `clearTimeout(timer);` with `{clearTimeout(timer);}`.
+src/cli/queue/permission-replies.ts:129:8: error eslint(complexity): method `reply` has a complexity of 13. Maximum allowed is 8.
+src/cli/queue/permission-replies.ts:132:83: error eslint(curly): Expected { after 'if' condition. help: Replace `return false;` with `{return false;}`.
+src/cli/queue/permission-replies.ts:138:7: error eslint(curly): Expected { after 'if' condition. help: Replace `return false;` with `{return false;}`.
+src/cli/queue/permission-replies.ts:139:73: error eslint(curly): Expected { after 'if' condition. help: Replace `return false;` with `{return false;}`.
+src/cli/queue/permission-replies.ts:141:85: error eslint(curly): Expected { after 'if' condition. help: Replace `return false;` with `{return false;}`.
+test/claude-execution-policy.test.ts:24:21: error eslint(no-unsafe-optional-chaining): Unsafe usage of optional chaining help: If this short-circuits with 'undefined' the evaluation will throw TypeError
+test/claude-execution-policy.test.ts:111:21: error eslint(no-unsafe-optional-chaining): Unsafe usage of optional chaining help: If this short-circuits with 'undefined' the evaluation will throw TypeError
+src/runtime/engine/reconnect.ts:338:8: error eslint(complexity): async function `connectAndLoadSession` has a complexity of 9. Maximum allowed is 8.
+src/filesystem.ts:183:18: error eslint(curly): Expected { after 'if' condition. help: Replace `return await confirm();` with `{return await confirm();}`.
+src/cli/queue/messages.ts:495:8: error eslint(complexity): function `parseNativePermissionReply` has a complexity of 12. Maximum allowed is 8.
+src/cli/queue/messages.ts:509:5: error eslint(curly): Expected { after 'if' condition. help: Replace `return null;` with `{return null;}`.
+src/cli/queue/messages.ts:516:5: error eslint(curly): Expected { after 'if' condition. help: Replace `return null;` with `{return null;}`.
+src/cli/queue/messages.ts:521:5: error eslint(curly): Expected { after 'if' condition. help: Replace `return null;` with `{return null;}`.
+src/cli/queue/messages.ts:526:5: error eslint(curly): Expected { after 'if' condition. help: Replace `return null;` with `{return null;}`.
+src/cli/queue/messages.ts:540:5: error eslint(curly): Expected { after 'if' condition. help: Replace `return null;` with `{return null;}`.
+src/cli/queue/messages.ts:549:1: error eslint(complexity): function `parseSubmitRequest` has a complexity of 13. Maximum allowed is 8.
+src/cli/command-handlers.ts:319:8: error eslint(complexity): async function `handlePrompt` has a complexity of 10. Maximum allowed is 8.
+src/cli/command-handlers.ts:327:139: error eslint(curly): Expected { after 'if' condition. help: Replace `throw new Error("Online permission replies require JSON, a finite timeout, and zero prompt retries");` with `{throw new Error("Online permission replies require JSON, a finite timeout, and zero prompt retries");}`.
+src/cli/command-handlers.ts:403:38: error eslint(curly): Expected { after 'if' condition. help: Replace `throw new Error("Online permission replies require a persistent queue prompt, not exec");` with `{throw new Error("Online permission replies require a persistent queue prompt, not exec");}`.
+src/cli/command-handlers.ts:558:15: error eslint(curly): Expected { after 'if' condition. help: Replace `throw new Error("Malformed exact permission reply");` with `{throw new Error("Malformed exact permission reply");}`.
+src/cli/command-handlers.ts:561:59: error eslint(curly): Expected { after 'if' condition. help: Replace `throw new Error("Permission reply has no matching persistent session");` with `{throw new Error("Permission reply has no matching persistent session");}`.
+src/cli/command-handlers.ts:564:18: error eslint(curly): Expected { after 'if' condition. help: Replace `process.exitCode = EXIT_CODES.PERMISSION_DENIED;` with `{process.exitCode = EXIT_CODES.PERMISSION_DENIED;}`.
+src/acp/client.ts:736:7: error eslint(curly): Expected { after 'if' condition. help: Replace `this.options.onPermissionRequestExact = options.onPermissionRequestExact;` with `{this.options.onPermissionRequestExact = options.onPermissionRequestExact;}`.
+src/acp/client.ts:899:46: error eslint(complexity): private method `resolveClaudeExecutionPolicyBinding` has a complexity of 10. Maximum allowed is 8.
+src/acp/client.ts:2034:45: error eslint(complexity): private async method `handleExactPermissionRequest` has a complexity of 11. Maximum allowed is 8.
+src/acp/client.ts:2071:35: error eslint(complexity): private async method `askExactPermission` has a complexity of 10. Maximum allowed is 8.
+src/acp/client.ts:2078:21: error eslint(curly): Expected { after 'if' condition. help: Replace `return cancelledPermissionResponse();` with `{return cancelledPermissionResponse();}`.
+src/acp/client.ts:2090:9: error eslint(curly): Expected { after 'if' condition. help: Replace `return cancelledPermissionResponse();` with `{return cancelledPermissionResponse();}`.
+src/acp/client.ts:2095:9: error eslint(curly): Expected { after 'if' condition. help: Replace `return cancelledPermissionResponse();` with `{return cancelledPermissionResponse();}`.
+src/acp/client.ts:2461:49: error eslint(curly): Expected { after 'if' condition. help: Replace `return undefined;` with `{return undefined;}`.
+ ELIFECYCLE  Command failed with exit code 1.

@@ -1,0 +1,1 @@
+Use Read exactly once to read /private/tmp/dual-glm-read-20260909-01/nonce.txt. No other tools. Reply only with JSON {"nonce":"<file contents>"}.

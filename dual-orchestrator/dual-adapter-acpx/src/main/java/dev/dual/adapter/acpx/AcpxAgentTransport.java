@@ -99,7 +99,7 @@ public class AcpxAgentTransport {
                 sessionCommandTimeout, configuredCommandTimeout(System.getenv(ACPX_COMMAND_TIMEOUT_ENV)));
     }
 
-    private AcpxAgentTransport(
+    AcpxAgentTransport(
             String acpxExecutable,
             String claudeExecutable,
             Duration recoverableSignalGrace,
@@ -219,7 +219,7 @@ public class AcpxAgentTransport {
             return null;
         }
         var command = List.of(acpxExecutable, "build-info", "--json");
-        var result = runSessionCommand(command, request.workdir(), false, sessionCommandTimeout);
+        var result = observedSessionCommand(agent, request, command, "build_identity", false, false, sessionCommandTimeout);
         if (!result.success()) {
             return result.withOutput("NETWORK_AUTHORITY_NOT_CONFIGURED: patched acpx build-info is unavailable"
                     + (result.output().isBlank() ? "" : " - " + result.output()));
@@ -243,23 +243,103 @@ public class AcpxAgentTransport {
     }
 
     private AcpxRunResult run(String agent, AcpxRunRequest request) throws IOException, InterruptedException {
+        var compatibilityFailure = sessionCompatibilityFailure(agent, request);
+        if (compatibilityFailure != null) return compatibilityFailure;
         var command = new ArrayList<String>();
         command.add(acpxExecutable);
-        // A total deadline is an explicit operator budget, not a test of agent progress.
-        if (!commandTimeout.isZero()) {
-            command.add("--timeout");
-            command.add(Long.toString(commandTimeout.toSeconds()));
-        }
-        command.add("--ttl");
-        command.add(Long.toString(queueTtl.toSeconds()));
-        addPermissionArguments(command, request);
-        addExecutionPolicyArguments(command, agent, request);
-        command.add(agent);
-        command.add("-s");
-        command.add(request.sessionName());
-        command.add("-f");
-        command.add(request.promptPath().toString());
+        if (!commandTimeout.isZero()) { command.add("--timeout"); command.add(Long.toString(commandTimeout.toSeconds())); }
+        command.add("--ttl"); command.add(Long.toString(queueTtl.toSeconds()));
+        addPermissionArguments(command, request); addExecutionPolicyArguments(command, agent, request);
+        command.addAll(List.of(agent, "-s", request.sessionName(), "-f", request.promptPath().toString()));
+        var intent = commandIntent(agent, request, command, "prompt", false);
+        var result = runPrompt(agent, request, command);
+        commandResult(request, intent, Map.of("exit_code", result.exitCode(), "process", result.processResult(),
+                "prompt_completion", result.promptCompletion()));
+        return result;
+    }
 
+    /** Fix configured inputs, without interpreting npm/config or pinning native versions. */
+    Map<String, Object> invocationInputs(String agent, Path workdir, String session) throws IOException {
+        var environment = new java.util.TreeMap<String, String>();
+        for (var key : List.of("PATH", agent.equals("claude") ? "CLAUDE_CODE_EXECUTABLE" : "CODEX_PATH"))
+            environment.put(key, System.getenv(key) == null ? "" : System.getenv(key));
+        return Map.of("schema", "dual.acpx.invocation.v1", "executable", acpxExecutable,
+                "agent", agent, "cwd", workdir.toRealPath().toString(), "session", session,
+                "launch_environment", environment);
+    }
+
+    private List<String> requestOptions(String agent, AcpxRunRequest request) throws IOException {
+        var args = new ArrayList<String>();
+        addPermissionArguments(args, request); addExecutionPolicyArguments(args, agent, request);
+        return List.copyOf(args);
+    }
+
+    List<String> requestOptions(String agent, Path workdir, AcpxPermissionProfile profile, ClaudeExecutionPolicy.Binding policy) throws IOException {
+        return requestOptions(agent, new AcpxRunRequest(workdir, "unused", Path.of("unused"),
+                Path.of("unused"), Path.of("unused"), profile, null, policy));
+    }
+
+    private AcpxRunResult sessionCompatibilityFailure(String agent, AcpxRunRequest request) throws IOException, InterruptedException {
+        var command = List.of(acpxExecutable, "--format", "json", agent, "sessions", "show", request.sessionName());
+        var intent = commandIntent(agent, request, command, "session_compatibility", false);
+        var result = runSessionCommand(command, request.workdir(), false, sessionCommandTimeout);
+        if (!result.success()) {
+            var summary = Map.<String, Object>of("available", false, "source", "acpx.sessions.show");
+            commandResult(request, intent, Map.of("success", false, "timed_out", result.timedOut(),
+                    "exit_code", result.exitCode(), "session_metadata", summary));
+            var failure = result.withOutput("session metadata command failed; inspect the recorded command status");
+            appendSessionCommandFailure(request.stderrPath(), "compatibility", agent, request.sessionName(), failure);
+            return failure.toRunResult();
+        }
+        var assessment = AcpxSessionCompatibility.assess(result.output(), request.workdir(), request.sessionName());
+        commandResult(request, intent, Map.of("success", true, "timed_out", false, "exit_code", 0,
+                "session_metadata", assessment.observation()));
+        if (assessment.compatible()) return null;
+        var failure = result.asFailure(OBJECT_MAPPER.writeValueAsString(assessment.observation()));
+        appendSessionCommandFailure(request.stderrPath(), "compatibility", agent, request.sessionName(), failure);
+        return failure.toRunResult(AdapterSignalType.ADAPTER_INCOMPATIBLE);
+    }
+
+    private static String contentHash(byte[] bytes) {
+        try { return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes)); }
+        catch (java.security.NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
+    }
+
+    private Map<String, Object> commandIntent(String agent, AcpxRunRequest request, List<String> command, String purpose, boolean cleanup) throws IOException {
+        var details = new java.util.LinkedHashMap<String, Object>();
+        details.put("command_id", java.util.UUID.randomUUID().toString());
+        details.put("purpose", purpose); details.put("cleanup", cleanup);
+        details.put("command", List.copyOf(command)); details.put("session", request.sessionName());
+        details.put("invocation", invocationInputs(agent, request.workdir(), request.sessionName()));
+        // Cancelling the original session grants no execution authority. Invalidated policy must not prevent cleanup.
+        details.put("request_options", cleanup ? List.of() : requestOptions(agent, request));
+        if (purpose.equals("prompt")) {
+            details.put("prompt", request.promptPath().toString());
+            details.put("prompt_sha256", contentHash(Files.readAllBytes(request.promptPath())));
+        }
+        recordEvent(new ArrayList<>(), request, AcpxExecutionEvent.now(AgentExecutionTimelineEventKind.COMMAND_INTENT,
+                "adapter", 0, Instant.now(), details));
+        return details;
+    }
+
+    private void commandResult(AcpxRunRequest request, Map<String, Object> intent, Map<String, Object> observation) {
+        var details = new java.util.LinkedHashMap<String, Object>(intent); details.put("observation", observation);
+        recordEvent(new ArrayList<>(), request, AcpxExecutionEvent.now(AgentExecutionTimelineEventKind.COMMAND_RESULT,
+                "adapter", 0, Instant.now(), details));
+    }
+
+    private SessionCommandResult observedSessionCommand(String agent, AcpxRunRequest request, List<String> command, String purpose,
+                                                        boolean cleanup, boolean simple, Duration timeout) throws InterruptedException {
+        final Map<String, Object> intent;
+        try { intent = commandIntent(agent, request, command, purpose, cleanup); }
+        catch (IOException failure) { throw new java.io.UncheckedIOException(failure); }
+        var result = runSessionCommand(command, request.workdir(), simple, timeout);
+        commandResult(request, intent, Map.of("success", result.success(), "timed_out", result.timedOut(),
+                "exit_code", result.exitCode(), "output", result.output()));
+        return result;
+    }
+
+    private AcpxRunResult runPrompt(String agent, AcpxRunRequest request, List<String> command) throws IOException, InterruptedException {
         var managedProcessBaseline = managedToolPids();
         var sessionStreamBaseline = sessionStreamBaseline(request);
         var startedAt = Instant.now();
@@ -285,7 +365,7 @@ public class AcpxAgentTransport {
                     startedAt,
                     Map.of("pid", process.pid())
             ));
-            var waitResult = waitForExitOrRecoverableSignal(process, request, sessionStreamBaseline);
+            var waitResult = waitForExitOrRecoverableSignal(agent, process, request, sessionStreamBaseline);
             timeline.addAll(waitResult.executionTimeline());
             if (requiresSessionClosure(waitResult)) {
                 waitResult = withSessionClosure(agent, request, waitResult, timeline, startedAt);
@@ -326,7 +406,8 @@ public class AcpxAgentTransport {
                     null,
                     waitResult.promptCompletion(),
                     processResult,
-                    waitResult.signals()
+                    waitResult.signals(),
+                    waitResult.toolObservations()
             );
         } catch (InterruptedException failure) {
             Thread.interrupted();
@@ -336,6 +417,8 @@ public class AcpxAgentTransport {
             } finally {
                 Thread.currentThread().interrupt();
             }
+        } catch (NativePermissionBridgeException failure) {
+            return transportExceptionResult(agent, request, startedAt, process.pid(), failure, false, quiesceSession(agent, request));
         } catch (ExecutionEventPersistenceException failure) {
             return transportExceptionResult(
                     agent,
@@ -394,7 +477,7 @@ public class AcpxAgentTransport {
         var signals = new ArrayList<AdapterSignal>();
         if (!interrupted) {
             signals.add(new AdapterSignal(
-                        AdapterSignalType.PROCESS_STALLED,
+                        failure instanceof NativePermissionBridgeException ? AdapterSignalType.NATIVE_PERMISSION_INTERRUPTED : AdapterSignalType.PROCESS_STALLED,
                         message,
                         0,
                         "transport",
@@ -432,8 +515,23 @@ public class AcpxAgentTransport {
         );
     }
 
+    long permissionBudgetMillis(AcpxPermissionProfile profile) {
+        return profile.denyAll() || profile.simpleClaudeCode() ? 0 : commandTimeout.toMillis();
+    }
+    private boolean onlinePermissions(AcpxRunRequest request) {
+        return request.executionEventSink().permissionRepliesEnabled() && permissionBudgetMillis(request.permissionProfile()) > 0;
+    }
+    List<String> requestOptions(String agent, Path workdir, AcpxPermissionProfile profile, ClaudeExecutionPolicy.Binding policy, boolean bridge) throws IOException {
+        var preview = new AcpxExecutionEventSink() {
+            public void accept(AcpxExecutionEvent event) {}
+            public boolean permissionRepliesEnabled() { return bridge; }
+        };
+        return requestOptions(agent, new AcpxRunRequest(workdir, "unused", Path.of("unused"), Path.of("unused"), Path.of("unused"), profile, preview, policy));
+    }
+
     private void addPermissionArguments(ArrayList<String> command, AcpxRunRequest request) {
-        if (request.permissionProfile().promptRetries() > 0) {
+        if (onlinePermissions(request)) { command.add("--format"); command.add("json"); command.add("--permission-replies"); }
+        if (!onlinePermissions(request) && request.permissionProfile().promptRetries() > 0) {
             command.add("--prompt-retries");
             command.add(Integer.toString(request.permissionProfile().promptRetries()));
         }
@@ -522,7 +620,7 @@ public class AcpxAgentTransport {
         var kind = switch (event.kind()) {
             case PROMPT_ACCEPTED -> AgentExecutionTimelineEventKind.PROMPT_ACCEPTED;
             case PROMPT_COMPLETED -> AgentExecutionTimelineEventKind.PROMPT_COMPLETED;
-            case PERMISSION_APPROVED, PERMISSION_DENIED, PERMISSION_CANCELLED ->
+            case PERMISSION_APPROVED, PERMISSION_DENIED, PERMISSION_CANCELLED, PERMISSION_UNRESOLVED ->
                     AgentExecutionTimelineEventKind.PERMISSION_DECISION;
             default -> null;
         };
@@ -537,6 +635,7 @@ public class AcpxAgentTransport {
                 event.kind() == AgentLifecycleEvent.Kind.PERMISSION_APPROVED
                         || event.kind() == AgentLifecycleEvent.Kind.PERMISSION_DENIED
                         || event.kind() == AgentLifecycleEvent.Kind.PERMISSION_CANCELLED
+                        || event.kind() == AgentLifecycleEvent.Kind.PERMISSION_UNRESOLVED
                         ? permissionTimelineDetails(event, request)
                         : Map.of("lifecycleSequence", event.sequence())
         ));
@@ -582,7 +681,7 @@ public class AcpxAgentTransport {
         command.add(request.permissionProfile().requiresFreshSession() ? "new" : "ensure");
         command.add("--name");
         command.add(request.sessionName());
-        var result = runSessionCommand(command, request.workdir(), request.permissionProfile().simpleClaudeCode());
+        var result = observedSessionCommand(agent, request, command, "session_ensure", false, request.permissionProfile().simpleClaudeCode(), sessionCommandTimeout);
         if (result.success()) {
             return result;
         }
@@ -598,13 +697,14 @@ public class AcpxAgentTransport {
 
     private SessionCommandResult rebuildSession(String agent, AcpxRunRequest request)
             throws IOException, InterruptedException {
-        closeSession(agent, request);
+        var closed = closeSession(agent, request);
+        if (!closed.success()) return closed;
         return ensureSession(agent, request);
     }
 
-    private void closeSession(String agent, AcpxRunRequest request) throws InterruptedException {
+    private SessionCommandResult closeSession(String agent, AcpxRunRequest request) throws InterruptedException {
         var command = List.of(acpxExecutable, agent, "sessions", "close", request.sessionName());
-        var result = runSessionCommand(command, request.workdir());
+        var result = observedSessionCommand(agent, request, command, "session_close", true, false, sessionCommandTimeout);
         if (!result.success()) {
             appendSessionCommandFailure(
                     request.stderrPath(),
@@ -614,6 +714,7 @@ public class AcpxAgentTransport {
                     result
             );
         }
+        return result;
     }
 
     /**
@@ -724,6 +825,7 @@ public class AcpxAgentTransport {
     }
 
     private ProcessWaitResult waitForExitOrRecoverableSignal(
+            String agent,
             Process process,
             AcpxRunRequest request,
             Map<String, Long> sessionStreamBaseline
@@ -742,6 +844,7 @@ public class AcpxAgentTransport {
                 request.stderrPath(),
                 Path.of(System.getProperty("user.home"), ".acpx", "sessions"),
                 sessionStreamBaseline);
+        var permissionWait = new NativePermissionWait(agent, request, eventReader, timeline, startedAt);
         var health = new AgentExecutionHealth(
                 new AcpxFailureSignalCatalog(),
                 recoverableSignalGrace,
@@ -754,6 +857,7 @@ public class AcpxAgentTransport {
                     health.observe(event, elapsed);
                     recordLifecycleBoundary(timeline, request, event, startedAt);
                 }
+                permissionWait.end();
                 var assessment = health.assess(elapsed);
                 var exitCode = process.exitValue();
                 var signals = new ArrayList<>(assessment.signals());
@@ -771,7 +875,8 @@ public class AcpxAgentTransport {
                         eventReader.promptCompletion(),
                         signals,
                         terminalSignal,
-                        false
+                        false,
+                        eventReader.toolObservations()
                 );
             }
             var elapsed = Duration.between(startedAt, Instant.now());
@@ -779,7 +884,8 @@ public class AcpxAgentTransport {
                 health.observe(event, elapsed);
                 recordLifecycleBoundary(timeline, request, event, startedAt);
             }
-            var assessment = health.assess(elapsed);
+            boolean waiting = permissionWait.tick();
+            var assessment = health.assess(elapsed, waiting);
             if (assessment.status() == AgentExecutionHealth.Status.RECOVERABLE_FAILURE) {
                 appendAdapterDiagnostic(request.stderrPath(), assessment.signal(), startedAt, true);
                 recordEvent(timeline, request, AcpxExecutionEvent.now(
@@ -801,7 +907,8 @@ public class AcpxAgentTransport {
                         eventReader.promptCompletion(),
                         assessment.signals(),
                         assessment.signal(),
-                        true
+                        true,
+                        eventReader.toolObservations()
                 );
             }
         }
@@ -816,6 +923,7 @@ public class AcpxAgentTransport {
     }
 
     private boolean isMissingSession(AcpxRunRequest request, AcpxRunResult result) {
+        if (onlinePermissions(request)) return false; // An ask must never turn into prompt replay.
         if (result.exitCode() != 4) {
             return false;
         }
@@ -823,6 +931,7 @@ public class AcpxAgentTransport {
     }
 
     private boolean isReconnectRequired(AcpxRunRequest request, AcpxRunResult result) {
+        if (onlinePermissions(request)) return false;
         if (result.exitCode() != 4) {
             return false;
         }
@@ -905,26 +1014,28 @@ public class AcpxAgentTransport {
                 result.promptCompletion(),
                 signals,
                 terminalSignal,
-                result.terminatedByHealth()
+                result.terminatedByHealth(),
+                result.toolObservations()
         );
     }
 
+    /** Exact-session recovery stop. The supplied sink must persist both command intents and observations. */
+    public boolean stopRecordedSession(String agent, AcpxRunRequest request) throws InterruptedException {
+        if (!java.util.Set.of("claude", "codex").contains(agent) || request.sessionName() == null || request.sessionName().isBlank())
+            throw new IllegalArgumentException("recorded provider and session are required");
+        return quiesceSession(agent, request).disposition() != SessionClosureDisposition.FAILED;
+    }
+
     private SessionClosureResult quiesceSession(String agent, AcpxRunRequest request) throws InterruptedException {
-        var cancel = runSessionCommand(
+        var cancel = observedSessionCommand(agent, request,
                 List.of(acpxExecutable, agent, "cancel", "-s", request.sessionName()),
-                request.workdir(),
-                false,
-                closureCommandTimeout()
-        );
+                "session_cancel", true, false, closureCommandTimeout());
         if (cancel.success()) {
             return new SessionClosureResult(SessionClosureDisposition.CANCELLED, cancel, null);
         }
-        var close = runSessionCommand(
+        var close = observedSessionCommand(agent, request,
                 List.of(acpxExecutable, agent, "sessions", "close", request.sessionName()),
-                request.workdir(),
-                false,
-                closureCommandTimeout()
-        );
+                "session_close", true, false, closureCommandTimeout());
         return new SessionClosureResult(
                 close.success() ? SessionClosureDisposition.CLOSED_AFTER_CANCEL : SessionClosureDisposition.FAILED,
                 cancel,
@@ -1154,8 +1265,12 @@ public class AcpxAgentTransport {
         }
 
         AcpxRunResult toRunResult() {
+            return toRunResult(AdapterSignalType.SESSION_BOOTSTRAP_FAILED);
+        }
+
+        AcpxRunResult toRunResult(AdapterSignalType type) {
             var signal = new AdapterSignal(
-                    AdapterSignalType.SESSION_BOOTSTRAP_FAILED,
+                    type,
                     output,
                     0,
                     "session_command",
@@ -1191,7 +1306,8 @@ public class AcpxAgentTransport {
             AcpxPromptCompletion promptCompletion,
             List<AdapterSignal> signals,
             AdapterSignal signal,
-            boolean terminatedByHealth
+            boolean terminatedByHealth,
+            List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> toolObservations
     ) {
         ProcessWaitResult {
             signals = signals == null ? List.of() : List.copyOf(signals);
@@ -1271,6 +1387,110 @@ public class AcpxAgentTransport {
         } catch (RuntimeException ignored) {
             return path == null ? "" : path.toString();
         }
+    }
+
+    private final class NativePermissionWait {
+        private final String agent;
+        private final AcpxRunRequest request;
+        private final AgentLifecycleEventReader reader;
+        private final List<AcpxExecutionEvent> timeline;
+        private final Instant started;
+        private final Map<String, Map<String, Object>> pending = new java.util.LinkedHashMap<>();
+        // Eligibility exists only in this original live call; never reconstructed from durable C.
+        private final Map<String, Map<String, Object>> readyReplies = new java.util.LinkedHashMap<>();
+        private final Set<String> externalAttempts = new java.util.HashSet<>();
+        private final Map<String, Map<String, Object>> awaitingRecord = new java.util.LinkedHashMap<>();
+        private final Map<String, Map<String, Object>> seen = new java.util.LinkedHashMap<>();
+        private NativePermissionWait(String agent, AcpxRunRequest request, AgentLifecycleEventReader reader, List<AcpxExecutionEvent> timeline, Instant started) {
+            this.agent = agent; this.request = request; this.reader = reader; this.timeline = timeline; this.started = started;
+        }
+        boolean tick() {
+            if (!onlinePermissions(request)) return false;
+            String sendingKey = null;
+            try {
+                if (request.executionEventSink().permissionRepliesClosed()) throw new IOException("permission submissions closed; original stop must be reconciled");
+                for (var nativeRequest : reader.readPermissionRequests()) {
+                    var key = String.valueOf(nativeRequest.get("requestKey"));
+                    var prior = seen.putIfAbsent(key, nativeRequest);
+                    if (prior != null && !prior.equals(nativeRequest)) throw new IOException("native request identity changed");
+                    if (prior == null) awaitingRecord.put(key, nativeRequest);
+                }
+                for (var entry : new ArrayList<>(awaitingRecord.entrySet())) {
+                    var nativeRequest = entry.getValue();
+                    request.executionEventSink().permissionRequest(nativeRequest); // R first; uncommitted BUSY retains this frame.
+                    pending.put(entry.getKey(), nativeRequest);
+                    awaitingRecord.remove(entry.getKey());
+                    recordEvent(timeline, request, AcpxExecutionEvent.now(AgentExecutionTimelineEventKind.NATIVE_PERMISSION_REQUEST,
+                            "adapter", timeline.size(), started, nativeRequest));
+                }
+                if (Duration.between(started, Instant.now()).compareTo(commandTimeout) >= 0) throw new IOException("finite native permission/command budget elapsed");
+                for (var entry : new ArrayList<>(pending.entrySet())) {
+                    long deadline = ((Number) entry.getValue().get("deadlineMs")).longValue();
+                    if (System.currentTimeMillis() >= deadline) throw new IOException("native permission request expired");
+                    var key = entry.getKey();
+                    if (!readyReplies.containsKey(key)) {
+                        var committed = request.executionEventSink().permissionReply(key);
+                        if (committed.isEmpty()) continue;
+                        readyReplies.put(key, committed.orElseThrow());
+                    }
+                    sendingKey = key;
+                    send(key, readyReplies.get(key), deadline);
+                    pending.remove(key); readyReplies.remove(key); sendingKey = null;
+                }
+                return !pending.isEmpty();
+            } catch (dev.dual.ledger.file.WorkstreamLockedException busy) {
+                if (sendingKey != null && externalAttempts.contains(sendingKey))
+                    throw new NativePermissionBridgeException("permission IPC was attempted; busy result recording is UNKNOWN, never resent", busy);
+                // Before IPC, retain only this live call's fresh C while a local lock is briefly busy.
+                // This is not a new qualification, another C, an IPC retry, or a durable outbox.
+                if (Duration.between(started, Instant.now()).compareTo(commandTimeout) >= 0)
+                    throw new NativePermissionBridgeException("local permission lock remained busy until the finite budget expired", busy);
+                return true;
+            } catch (IOException | RuntimeException error) {
+                throw new NativePermissionBridgeException("native permission continuation stopped; do not resend or overlap the original execution", error);
+            }
+        }
+        private void send(String key, Map<String, Object> reply, long deadline) throws IOException {
+            var json = new com.fasterxml.jackson.databind.ObjectMapper();
+            var command = List.of(acpxExecutable, "--format", "json", agent, "permission-reply", "-s", request.sessionName(), "--reply", json.writeValueAsString(reply));
+            request.executionEventSink().permissionObservation(key, "send-intent", Map.of("reply", reply, "command", command,
+                    "invocation", invocationInputs(agent, request.workdir(), request.sessionName()), "automatic_retry", false));
+            if (request.executionEventSink().permissionRepliesClosed()) throw new IOException("C committed but X observed before sending");
+            long remaining = Math.min(deadline - System.currentTimeMillis(), sessionCommandTimeout.toMillis());
+            if (remaining <= 0) throw new IOException("C committed but live request expired before sending");
+            if (!externalAttempts.add(key)) throw new IOException("permission IPC was already attempted; no resend");
+            SessionCommandResult result;
+            try { result = runSessionCommand(command, request.workdir(), false, Duration.ofMillis(remaining)); }
+            catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); throw new IOException("permission IPC interrupted; delivery unknown", interrupted); }
+            var ack = json.createObjectNode();
+            try {
+                var parsed = json.readTree(result.output());
+                if (parsed != null && parsed.isObject()) ack = (com.fasterxml.jackson.databind.node.ObjectNode) parsed;
+            } catch (IOException ignored) { /* A missing valid receipt is UNKNOWN, never successful delivery. */ }
+            boolean identity = "dual.native.permission.reply.v1".equals(ack.path("schema").asText())
+                    && key.equals(ack.path("requestKey").asText()) && ack.path("ownerGeneration").asLong() == ((Number) reply.get("ownerGeneration")).longValue();
+            boolean accepted = identity && result.success() && ack.path("consumed").isBoolean() && ack.path("consumed").asBoolean();
+            var observation = new java.util.LinkedHashMap<String, Object>();
+            observation.put("delivery", accepted ? "ACKNOWLEDGED" : identity && ack.path("consumed").isBoolean() && !ack.path("consumed").asBoolean() ? "REJECTED" : "UNKNOWN");
+            observation.put("ack", ack); observation.put("exit_code", result.exitCode()); observation.put("timed_out", result.timedOut());
+            observation.put("business_completed", false); observation.put("automatic_retry", false);
+            request.executionEventSink().permissionObservation(key, "send-result", observation);
+            recordEvent(timeline, request, AcpxExecutionEvent.now(AgentExecutionTimelineEventKind.NATIVE_PERMISSION_REPLY,
+                    "adapter", timeline.size(), started, observation));
+            if (!accepted) throw new IOException("permission reply was rejected or delivery is unknown; no resend");
+        }
+        void end() {
+            if (!onlinePermissions(request)) return;
+            try {
+                for (var key : pending.keySet()) request.executionEventSink().permissionObservation(key, "send-result",
+                        Map.of("delivery", "REQUEST_ENDED", "attempted", false, "business_completed", false));
+                pending.clear();
+            } catch (IOException error) { throw new NativePermissionBridgeException("request ended but its final observation could not be recorded", error); }
+        }
+    }
+
+    private static final class NativePermissionBridgeException extends RuntimeException {
+        private NativePermissionBridgeException(String message, Throwable cause) { super(message, cause); }
     }
 
     private static final class ExecutionEventPersistenceException extends RuntimeException {

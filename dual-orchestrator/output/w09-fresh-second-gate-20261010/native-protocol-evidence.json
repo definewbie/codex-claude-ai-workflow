@@ -1,0 +1,77 @@
+{
+  "session_record_path": "/Users/kriswang/.acpx/sessions/e67d5ff9-924f-403b-8fc4-98ccd7d42f62.json",
+  "session_record_sha256_at_stop": "12520fd154955ebdd4085158ff8615052513ada56f1b92510bf6aef681bab757",
+  "stream_path": "/Users/kriswang/.acpx/sessions/e67d5ff9-924f-403b-8fc4-98ccd7d42f62.stream.ndjson",
+  "stream_sha256_at_stop": "1febcfcec465e01141f545b8c5a1abd5621aff12816d3ba4c3cfd407bf44c61a",
+  "stream_bytes_at_stop": 4665399,
+  "protocol": [
+    {
+      "direction": "request",
+      "id": 3,
+      "sessionId": "60521b08-07f4-4cc7-b656-71a2af3d7c26",
+      "text_length": 16115,
+      "text_sha256": "19a25c123e87f86842b05e3a660088e8adb30f270365cf2759083f2cf6ccd854"
+    },
+    {
+      "direction": "response",
+      "id": 3,
+      "result": {
+        "stopReason": "end_turn",
+        "usage": {
+          "inputTokens": 17904,
+          "outputTokens": 14305,
+          "cachedReadTokens": 4736,
+          "cachedWriteTokens": 0,
+          "totalTokens": 36945
+        }
+      }
+    },
+    {
+      "direction": "request",
+      "id": 4,
+      "sessionId": "60521b08-07f4-4cc7-b656-71a2af3d7c26",
+      "text_length": 4255,
+      "text_sha256": "0c62ed717d5aebda344172c62145a0a73a5023ee501ac64ee0b61f055049ae50"
+    },
+    {
+      "direction": "response",
+      "id": 4,
+      "result": {
+        "stopReason": "end_turn",
+        "usage": {
+          "inputTokens": 3950,
+          "outputTokens": 4806,
+          "cachedReadTokens": 17792,
+          "cachedWriteTokens": 0,
+          "totalTokens": 26548
+        }
+      }
+    }
+  ],
+  "native_usage": {
+    "request_token_usage": {
+      "0ccc06a6-eed9-4321-a981-f0d90158fb0f": {
+        "input_tokens": 17904,
+        "output_tokens": 14305,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 4736,
+        "total_tokens": 36945
+      },
+      "4b68b9ed-3f17-4dcf-b99f-3cab0c0d7248": {
+        "input_tokens": 3950,
+        "output_tokens": 4806,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 17792,
+        "total_tokens": 26548
+      }
+    },
+    "cumulative_token_usage": {
+      "input_tokens": 3950,
+      "output_tokens": 4806,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 17792,
+      "total_tokens": 26548
+    }
+  },
+  "hidden_thought_text_omitted": true
+}

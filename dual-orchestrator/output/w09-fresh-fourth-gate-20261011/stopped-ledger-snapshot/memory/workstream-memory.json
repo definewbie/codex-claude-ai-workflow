@@ -1,0 +1,41 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "workstream_memory",
+  "workstreamId" : "ws-20261011T044656Z-BMDJ",
+  "stageId" : "design",
+  "nodeInstanceId" : "node-design-codex_arch_review-020",
+  "iterationId" : "iter-003",
+  "decidedScope" : [ ],
+  "nonGoals" : [ "不提供命令行入口、文件读写或批量处理能力，仅提供纯字符串函数。", "不做编码转换，也不归一化 CRLF/CR 之外的行分隔符（它们属于其他字符，按 C-1 原样保留）。", "不将用户建议的三个文件（src/normalize_text.py、tests/test_normalize_text.py、README.md）视为 GOAL 阶段固化的实现文件集合：它们仅为候选路径，本条款不预先限定设计、计划阶段形成的最终精确仓库相对路径清单与逐项 CREATE/MODIFY 操作类型（含确需新增的文件如 tests/__init__.py）；实现前须单独提交 EXECUTION 批准，其 scope.included 逐项列明精确仓库相对路径及 CREATE/MODIFY，只有该获批清单是仓库修改的穷尽授权集。" ],
+  "decisions" : [ ],
+  "readFiles" : [ ],
+  "openIssues" : [ ],
+  "priorVerdicts" : [ ],
+  "priorFailures" : [ ],
+  "refsSemantics" : "latest_projection_refs",
+  "refs" : {
+    "repoMap" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/repo-map.json",
+    "stageScopePolicy" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/stage-scope-policy.json",
+    "repositoryFactBinding" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/binding.json",
+    "fileRelevancePlan" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/file-relevance-plan.json",
+    "fileSummaries" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/file-summaries.json",
+    "readReuseContract" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/read-reuse-contract.json",
+    "workingSet" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-020-run-1791701323469/working-set.json"
+  },
+  "generatedAt" : "2026-10-11T06:48:43.561744Z",
+  "qualifiedTaskContract" : {
+    "phase" : "GOAL",
+    "status" : "qualified_projection",
+    "sha256" : "a2d79a4285314ee4e8f07cb02808afa19d012ba415234a025b6907777cd1891c",
+    "contractVersion" : 1,
+    "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/task-contract.json",
+    "epoch" : 1,
+    "contractId" : "tc-ws-20261011T044656Z-BMDJ-node-contract-compile-012"
+  },
+  "lastStageOutcome" : { },
+  "fieldSemantics" : {
+    "machineDecisionFields" : [ "decision", "stage_outcome", "lifecycle_status", "blocking", "sourceField", "status" ],
+    "projectionOnlyFields" : [ "summary", "desc", "verificationSummary" ]
+  },
+  "updatedAt" : "2026-10-11T06:49:09.549228Z"
+}

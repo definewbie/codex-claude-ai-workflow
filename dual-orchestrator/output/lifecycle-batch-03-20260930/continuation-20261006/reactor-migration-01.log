@@ -1,0 +1,281 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] dual-cli                                                           [jar]
+[INFO] dual-server                                                        [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/9]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.core.contract.TaskContractTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.163 s -- in dev.dual.core.contract.TaskContractTest
+[INFO] Running dev.dual.core.contract.PhasedContractTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.029 s -- in dev.dual.core.contract.PhasedContractTest
+[INFO] Running dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Running dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Running dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Running dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Running dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Running dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Running dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Running dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Running dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Running dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Running dev.dual.core.workflow.EdgeConditionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.core.workflow.EdgeConditionTest
+[INFO] Running dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Running dev.dual.core.id.DualIdGeneratorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.core.id.DualIdGeneratorTest
+[INFO] Running dev.dual.core.domain.PromptLanguageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.core.domain.PromptLanguageTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 123, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/9]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Running dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.024 s -- in dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Running dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.095 s -- in dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Running dev.dual.ledger.file.FileLedgerStoreTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.144 s -- in dev.dual.ledger.file.FileLedgerStoreTest
+[INFO] Running dev.dual.ledger.file.IterationRefTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.ledger.file.IterationRefTest
+[INFO] Running dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.249 s -- in dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[INFO] Running dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.461 s -- in dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Running dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Running dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Running dev.dual.ledger.file.WorkflowGateResolutionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.187 s -- in dev.dual.ledger.file.WorkflowGateResolutionTest
+[INFO] Running dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.079 s -- in dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[INFO] Running dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.461 s -- in dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[INFO] Running dev.dual.ledger.file.ParallelFanOutTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.165 s -- in dev.dual.ledger.file.ParallelFanOutTest
+[INFO] Running dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Running dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Running dev.dual.ledger.file.WorkflowFileLedgerTest
+[ERROR] Tests run: 50, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 1.384 s <<< FAILURE! -- in dev.dual.ledger.file.WorkflowFileLedgerTest
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.revisionBudgetCountsExactRepairTargetInsteadOfSharedStage -- Time elapsed: 0.006 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <0> but was: <1>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.revisionBudgetCountsExactRepairTargetInsteadOfSharedStage(WorkflowFileLedgerTest.java:910)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.revisionBudgetSeparatesDifferentOwnersOfTheSameRepairTarget -- Time elapsed: 0.004 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <1> but was: <2>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.revisionBudgetSeparatesDifferentOwnersOfTheSameRepairTarget(WorkflowFileLedgerTest.java:933)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Running dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.443 s -- in dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[INFO] Running dev.dual.ledger.file.ExecutionClaimSequenceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.071 s -- in dev.dual.ledger.file.ExecutionClaimSequenceTest
+[INFO] Running dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.164 s -- in dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Running dev.dual.ledger.file.HumanActionRequestTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.107 s -- in dev.dual.ledger.file.HumanActionRequestTest
+[INFO] Running dev.dual.ledger.file.LedgerSessionTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.532 s -- in dev.dual.ledger.file.LedgerSessionTest
+[INFO] Running dev.dual.ledger.file.RetryFailureContextTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.279 s -- in dev.dual.ledger.file.RetryFailureContextTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   WorkflowFileLedgerTest.revisionBudgetCountsExactRepairTargetInsteadOfSharedStage:910 expected: <0> but was: <1>
+[ERROR]   WorkflowFileLedgerTest.revisionBudgetSeparatesDifferentOwnersOfTheSameRepairTarget:933 expected: <1> but was: <2>
+[INFO] 
+[ERROR] Tests run: 153, Failures: 2, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Skipping dual-flow-liteflow
+[INFO] This project has been banned from the build due to previous failures.
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [4/9]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.adapter.git.GitPatchMergeServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.860 s -- in dev.dual.adapter.git.GitPatchMergeServiceTest
+[INFO] Running dev.dual.adapter.git.GitWorkspaceServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.105 s -- in dev.dual.adapter.git.GitWorkspaceServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Skipping dual-runtime
+[INFO] This project has been banned from the build due to previous failures.
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Skipping dual-adapter-acpx
+[INFO] This project has been banned from the build due to previous failures.
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Skipping dual-cli
+[INFO] This project has been banned from the build due to previous failures.
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Skipping dual-server
+[INFO] This project has been banned from the build due to previous failures.
+[INFO] ------------------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.805 s]
+[INFO] dual-ledger-file ................................... FAILURE [  8.198 s]
+[INFO] dual-flow-liteflow ................................. SKIPPED
+[INFO] dual-adapter-git ................................... SUCCESS [  1.177 s]
+[INFO] dual-runtime ....................................... SKIPPED
+[INFO] dual-adapter-acpx .................................. SKIPPED
+[INFO] dual-cli ........................................... SKIPPED
+[INFO] dual-server ........................................ SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  10.325 s
+[INFO] Finished at: 2026-10-06T17:20:09+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project dual-ledger-file: There are test failures.
+[ERROR] 
+[ERROR] See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-ledger-file

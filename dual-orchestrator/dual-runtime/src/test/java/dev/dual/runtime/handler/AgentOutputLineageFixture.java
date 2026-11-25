@@ -70,6 +70,12 @@ public final class AgentOutputLineageFixture {
             String iterationId,
             List<String> inputRefs
     ) throws Exception {
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
+        if (!Files.exists(paths.workstreamJson())) {
+            var definition = new dev.dual.core.workflow.WorkflowDefinition("evidence-fixture", 1, "fixture",
+                    List.of(new dev.dual.core.workflow.NodeDefinition("fixture", NodeKind.TASK, "noop.task", Map.of())), List.of());
+            dev.dual.runtime.RuntimeTestLedger.initialize(dev.dual.runtime.RuntimeTestLedger.ledger(), paths, "evidence-fixture", definition);
+        }
         var sidecar = MAPPER.readValue(sidecarPath.toFile(), MAP_TYPE);
         var runId = text(sidecar.get("run_id"));
         var nodeId = text(sidecar.get("node_id"));

@@ -1,0 +1,13 @@
+{
+  ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority/network-grants/grant-c7f2e9b3-a080-4b40-9eee-ed58e5e509c4.json" : "2c18ea4e0e761f132c36eed0cfbf49d3713e7f4decb217ec8bfcb06e0380ced6",
+  ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority/sacrificial-bash.txt" : "15b95b84bbec44d94a688b6965093e07b2ccb28e6945801dc1e8ffd677f2ff8a",
+  ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority/sacrificial-edit.txt" : "15b95b84bbec44d94a688b6965093e07b2ccb28e6945801dc1e8ffd677f2ff8a",
+  ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority/sacrificial-write.txt" : "15b95b84bbec44d94a688b6965093e07b2ccb28e6945801dc1e8ffd677f2ff8a",
+  ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/node-context-003.json" : "4bb2053daa229c4b295ec6b291327ad536d047b6ee362c9b9d35d07882cfeb3f",
+  ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/node-entry-001.json" : "9df35d0cffa6bc997d3161c5cb5f3e85538394ce22bcd1a4887cead6108d5dc9",
+  ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/node-gate-002.json" : "fc216ea80a35fbe3596cfafd0128a697f900c3947e625e0909b6ce4b1b2b7909",
+  ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/node-target-004.json" : "1d7aa2307949e4d0acebdaa66889a5374642f67e7e326be8535c57871c2be3bc",
+  ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/sacrificial-bash.txt" : "15b95b84bbec44d94a688b6965093e07b2ccb28e6945801dc1e8ffd677f2ff8a",
+  ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/sacrificial-edit.txt" : "15b95b84bbec44d94a688b6965093e07b2ccb28e6945801dc1e8ffd677f2ff8a",
+  ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/sacrificial-write.txt" : "15b95b84bbec44d94a688b6965093e07b2ccb28e6945801dc1e8ffd677f2ff8a"
+}

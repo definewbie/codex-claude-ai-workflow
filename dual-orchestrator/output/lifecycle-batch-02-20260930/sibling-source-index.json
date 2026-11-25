@@ -1,0 +1,116 @@
+[
+  {
+    "path": "dual-cli/src/main/java/dev/dual/cli/ProjectionsRefreshCommand.java",
+    "line": 40,
+    "text": "new WorkflowFileLedger().refreshProjections(paths);",
+    "sha256": "1307a65467b3b0ff75cc2e6cd89eb3d7e68d5f8c6fcc3021cecb0d93a5dd79c1"
+  },
+  {
+    "path": "dual-cli/src/main/java/dev/dual/cli/CliLedgerFactory.java",
+    "line": 14,
+    "text": "return new WorkflowFileLedger(FlowKernelProvider.create(configuredKernel()));",
+    "sha256": "523e18c8413e462be44f7057e2b888afe3ab948e5e3037b9432b134c3b70cd93"
+  },
+  {
+    "path": "dual-server/src/main/java/dev/dual/server/ServerLedgerFactory.java",
+    "line": 14,
+    "text": "return new WorkflowFileLedger(FlowKernelProvider.create(configuredKernel()));",
+    "sha256": "c359d7f68e6e7d7da25fd4c1b0b6826f5f6b12485f7e7e1d500df3c7b0c7ce55"
+  },
+  {
+    "path": "dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java",
+    "line": 4,
+    "text": "import com.yomahub.liteflow.core.FlowExecutorHolder;",
+    "sha256": "0931ce1cfe919b4c269e012a81afa1d5bdebc6fcb5e7c28132e16429735741ff"
+  },
+  {
+    "path": "dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java",
+    "line": 48,
+    "text": "synchronized (FlowExecutorHolder.class) {",
+    "sha256": "0931ce1cfe919b4c269e012a81afa1d5bdebc6fcb5e7c28132e16429735741ff"
+  },
+  {
+    "path": "dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java",
+    "line": 77,
+    "text": "FlowExecutorHolder.clean();",
+    "sha256": "0931ce1cfe919b4c269e012a81afa1d5bdebc6fcb5e7c28132e16429735741ff"
+  },
+  {
+    "path": "dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java",
+    "line": 84,
+    "text": "synchronized (FlowExecutorHolder.class) {",
+    "sha256": "0931ce1cfe919b4c269e012a81afa1d5bdebc6fcb5e7c28132e16429735741ff"
+  },
+  {
+    "path": "dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java",
+    "line": 85,
+    "text": "FlowExecutorHolder.clean();",
+    "sha256": "0931ce1cfe919b4c269e012a81afa1d5bdebc6fcb5e7c28132e16429735741ff"
+  },
+  {
+    "path": "dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java",
+    "line": 100,
+    "text": "FlowExecutorHolder.clean();",
+    "sha256": "0931ce1cfe919b4c269e012a81afa1d5bdebc6fcb5e7c28132e16429735741ff"
+  },
+  {
+    "path": "dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java",
+    "line": 101,
+    "text": "return FlowExecutorHolder.loadInstance(config);",
+    "sha256": "0931ce1cfe919b4c269e012a81afa1d5bdebc6fcb5e7c28132e16429735741ff"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java",
+    "line": 27,
+    "text": "private final WorkflowFileLedger ledger = new WorkflowFileLedger();",
+    "sha256": "8810b33f4816d325b40e02e190fc870aef40ac9f2cf2237954c46841624e6c74"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputLineageVerifier.java",
+    "line": 28,
+    "text": "var ledger = new WorkflowFileLedger();",
+    "sha256": "1558a98205c8635cb885d422c8fd3a73b514994bf6f78f6609ca59d90a7ffe5f"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+    "line": 46,
+    "text": "private final WorkflowFileLedger ledger = new WorkflowFileLedger();",
+    "sha256": "b9e9e7999b9de918a14554848edf11bba883e4b37a129778e200ae55cce724ec"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+    "line": 49,
+    "text": "var ledger = new WorkflowFileLedger();",
+    "sha256": "ca89b47141b785835be0cbdcdbdcbfdf08aee6b3e36396fe4b2a3f1b28975738"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+    "line": 167,
+    "text": "var producer = new WorkflowFileLedger().loadNode(paths, entry.document().nodeInstanceId());",
+    "sha256": "ca89b47141b785835be0cbdcdbdcbfdf08aee6b3e36396fe4b2a3f1b28975738"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+    "line": 186,
+    "text": "var ledger = new WorkflowFileLedger();",
+    "sha256": "ca89b47141b785835be0cbdcdbdcbfdf08aee6b3e36396fe4b2a3f1b28975738"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+    "line": 257,
+    "text": "var producer = new WorkflowFileLedger().loadNode(paths, entry.document().nodeInstanceId());",
+    "sha256": "ca89b47141b785835be0cbdcdbdcbfdf08aee6b3e36396fe4b2a3f1b28975738"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+    "line": 34,
+    "text": "new WorkflowFileLedger(),",
+    "sha256": "0a035ac6aa530522103b439919377d901986594c4ca18fec4a4ff73b705829ca"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/delivery/AcceptedDeliveryCandidateResolver.java",
+    "line": 30,
+    "text": "this(new ObjectMapper().findAndRegisterModules(), new WorkflowFileLedger(), new DeliveryCandidateWriter());",
+    "sha256": "4ca82424dd402f3bad10718658f57ba7bef3947f9cc89cd29176572e4af50ed8"
+  }
+]

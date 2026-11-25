@@ -1,0 +1,12 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20260909T113923Z-FZ8K",
+  "workflowInstanceId" : "wf-ws-20260909T113923Z-FZ8K",
+  "workflowId" : "agent-lifecycle-small-plan-human-review-experiment",
+  "definitionVersion" : 1,
+  "status" : "WAITING_FOR_RECOVERY",
+  "activeNodeInstanceIds" : [ "node-implement-claude_implement-026" ],
+  "openGateIds" : [ "recovery-node-implement-claude_implement-026" ],
+  "lastEventId" : "evt-000027",
+  "updatedAt" : "2026-09-09T12:51:32.306518Z"
+}

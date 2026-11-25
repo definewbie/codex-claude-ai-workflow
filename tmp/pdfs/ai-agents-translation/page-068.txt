@@ -1,0 +1,21 @@
+why it chose that path. This recursive structure is what enables reflection:
+the agent’s future decisions are informed by both its history of actions and
+the reasoning it has accumulated. The flow diagram in Figure 2-3 illustrates
+a minimal agent loop implemented in LangGraph.
+
+
+
+
+
+  Figure 2-3. Control-flow diagram of a ReAct agent. This loop is the operational form of the policy
+                                                π(at|ct).
+
+The process begins at __start__; this hands control to the agent, and
+then branches depending on the outcome:
+
+           If the agent decides it has reached a conclusion, it produces an end
+         signal and moves to __end__.
+
+           If more reasoning or action is required, the agent issues a continue
+         signal, possibly calling tools to gather additional information or
+        perform actions.

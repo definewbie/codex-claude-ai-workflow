@@ -1,0 +1,9 @@
+{
+  "pid": 67972,
+  "argv": [
+    "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+    "status",
+    "--porcelain",
+    "--untracked-files=all"
+  ]
+}

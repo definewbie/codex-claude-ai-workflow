@@ -1,0 +1,2 @@
+Exception in thread "main" java.lang.AssertionError: missing product evidence guard
+	at dev.dual.adapter.acpx.RealUsageProof.main(RealUsageProof.java:12)

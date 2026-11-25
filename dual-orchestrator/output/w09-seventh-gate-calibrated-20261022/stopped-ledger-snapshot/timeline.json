@@ -1,0 +1,121 @@
+{
+  "schemaVersion" : 1,
+  "commitSequence" : 10,
+  "workstreamId" : "ws-20261022T150557Z-Y2KB",
+  "workflowInstanceId" : "wf-ws-20261022T150557Z-Y2KB",
+  "workflowId" : "agent-lifecycle-terminal-delivery",
+  "definitionVersion" : 5,
+  "workflowStatus" : "WAITING_FOR_RECOVERY",
+  "activeNodeInstanceIds" : [ "node-intake-claude_brainstorm-002" ],
+  "openGateIds" : [ "recovery-node-intake-claude_brainstorm-002" ],
+  "updatedAt" : "2026-10-22T15:20:40.159128Z",
+  "nodes" : [ {
+    "nodeInstanceId" : "node-context-intake_claude_brainstorm-001",
+    "nodeDefinitionId" : "context.intake_claude_brainstorm",
+    "displayName" : "context.intake_claude_brainstorm",
+    "kind" : "TASK",
+    "handlerType" : "context.build_package",
+    "status" : "COMPLETED",
+    "stageId" : "stage-context",
+    "iterationId" : "iter-001",
+    "inputRefs" : [ ],
+    "outputRefs" : [ ".agent/workstreams/ws-20261022T150557Z-Y2KB/context/node-context-intake_claude_brainstorm-001.md" ],
+    "runRef" : null,
+    "latestExecutionId" : "nxe-1792682387210-3b0e4357",
+    "startedAt" : "2026-10-22T15:19:47.218827Z",
+    "finishedAt" : "2026-10-22T15:19:47.271239Z",
+    "durationMs" : 52,
+    "result" : {
+      "context_package" : ".agent/workstreams/ws-20261022T150557Z-Y2KB/context/node-context-intake_claude_brainstorm-001.md",
+      "context_package_metadata" : ".agent/workstreams/ws-20261022T150557Z-Y2KB/context/node-context-intake_claude_brainstorm-001.json",
+      "target_node" : "intake.claude_brainstorm",
+      "profile" : "intake",
+      "sections" : [ "task_contract", "ledger_pointers" ],
+      "input_ref_count" : 0,
+      "generated_at" : "2026-10-22T15:19:47.257282Z"
+    }
+  }, {
+    "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+    "nodeDefinitionId" : "intake.claude_brainstorm",
+    "displayName" : "intake.claude_brainstorm",
+    "kind" : "TASK",
+    "handlerType" : "acpx.agent_run",
+    "status" : "FAILED",
+    "stageId" : "stage-intake",
+    "iterationId" : "iter-001",
+    "inputRefs" : [ ".agent/workstreams/ws-20261022T150557Z-Y2KB/context/node-context-intake_claude_brainstorm-001.md" ],
+    "outputRefs" : [ ".agent/workstreams/ws-20261022T150557Z-Y2KB/runs/run-1792682394836/outputs/intake-claude-brainstorm.stderr.log", ".agent/workstreams/ws-20261022T150557Z-Y2KB/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1792682394836/binding.json", ".agent/workstreams/ws-20261022T150557Z-Y2KB/artifacts/contract-failures/node-intake-claude_brainstorm-002.json", ".agent/workstreams/ws-20261022T150557Z-Y2KB/artifacts/contract-failures/node-intake-claude_brainstorm-002.md" ],
+    "runRef" : null,
+    "latestExecutionId" : "nxe-1792682394810-11c05b13",
+    "startedAt" : "2026-10-22T15:19:54.819036Z",
+    "finishedAt" : "2026-10-22T15:20:40.156712Z",
+    "durationMs" : 45337,
+    "result" : {
+      "adapter_signals" : [ {
+        "message" : "",
+        "observedSequence" : 0,
+        "sessionId" : "",
+        "source" : "session_command",
+        "superseded" : false,
+        "type" : "SESSION_BOOTSTRAP_FAILED"
+      } ],
+      "agent" : "claude",
+      "agent_execution_artifact_contract_results" : [ {
+        "contractType" : "task_contract_proposal",
+        "errorCode" : "",
+        "errorMessage" : "",
+        "path" : "",
+        "present" : false,
+        "required" : false,
+        "valid" : false
+      } ],
+      "agent_execution_outcome" : {
+        "nodeMaySucceed" : false,
+        "operatorMessage" : "Blocking adapter signal: SESSION_BOOTSTRAP_FAILED",
+        "primaryReason" : "session_bootstrap_failed",
+        "recoveryCategory" : "RECOVERABLE_ADAPTER_FAILURE",
+        "retryPolicy" : "MANUAL_ONLY",
+        "secondarySignals" : [ {
+          "message" : "",
+          "observedSequence" : 0,
+          "sessionId" : "",
+          "severity" : "RECOVERABLE",
+          "source" : "session_command",
+          "superseded" : false,
+          "type" : "SESSION_BOOTSTRAP_FAILED"
+        } ],
+        "status" : "RECOVERABLE_ADAPTER_FAILURE"
+      },
+      "agent_execution_result_contract" : {
+        "decision" : "",
+        "present" : false,
+        "summary" : "",
+        "valid" : false,
+        "validationError" : "agent result is missing"
+      },
+      "contract_allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW" ],
+      "contract_failure_diagnostic_markdown_ref" : ".agent/workstreams/ws-20261022T150557Z-Y2KB/artifacts/contract-failures/node-intake-claude_brainstorm-002.md",
+      "contract_failure_diagnostic_ref" : ".agent/workstreams/ws-20261022T150557Z-Y2KB/artifacts/contract-failures/node-intake-claude_brainstorm-002.json",
+      "contract_node_id" : "intake.claude_brainstorm",
+      "contract_required_keys" : [ "summary", "decision" ],
+      "exit_code" : 4,
+      "message" : "No readable agent output artifact found for contract validation.",
+      "output_complete" : false,
+      "parse_error" : {
+        "code" : "AGENT_RESULT_MISSING",
+        "details" : { },
+        "message" : "No readable agent output artifact found for contract validation."
+      },
+      "process_usability" : "TIMED_OUT",
+      "reason" : "AGENT_OUTPUT_CONTRACT_VIOLATION",
+      "repository_fact_binding_ref" : ".agent/workstreams/ws-20261022T150557Z-Y2KB/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1792682394836/binding.json",
+      "repository_fact_binding_sha256" : "428014efdac4c84dac296b996736040bfdd256d0fb41a74ea2e2c42187596998",
+      "run_id" : "run-1792682394836",
+      "run_metadata" : ".agent/workstreams/ws-20261022T150557Z-Y2KB/runs/run-1792682394836/run.json",
+      "session" : "claude-main-ws-20261022T150557Z-Y2KB-run-1792682394836",
+      "transcript_ref" : ".agent/workstreams/ws-20261022T150557Z-Y2KB/runs/run-1792682394836/outputs/intake-claude-brainstorm.transcript.log",
+      "completion_ref" : ".agent/workstreams/ws-20261022T150557Z-Y2KB/runs/run-1792682394836/outputs/nxe-1792682394810-11c05b13-completion.json",
+      "completion_sha256" : "6c02af366ac16f62b52d35aae6437c4123ba3d4620dc6373f571fdf260c8b8f3"
+    }
+  } ]
+}

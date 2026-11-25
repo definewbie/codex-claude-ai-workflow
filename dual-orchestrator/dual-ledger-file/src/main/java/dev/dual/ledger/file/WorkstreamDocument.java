@@ -15,11 +15,12 @@ public record WorkstreamDocument(
         String currentIterationId,
         String requirementPath,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        java.util.Map<String, String> frozenRuntimeIdentity
 ) {
-    static WorkstreamDocument from(Workstream workstream) {
+    static WorkstreamDocument from(Workstream workstream, java.util.Map<String, String> identity) {
         return new WorkstreamDocument(
-                workstream.schemaVersion(),
+                2,
                 workstream.workstreamId().value(),
                 workstream.title(),
                 workstream.status().name().toLowerCase(),
@@ -32,7 +33,8 @@ public record WorkstreamDocument(
                 workstream.currentIterationId(),
                 workstream.requirementPath(),
                 workstream.createdAt(),
-                workstream.updatedAt()
+                workstream.updatedAt(),
+                java.util.Map.copyOf(identity)
         );
     }
 

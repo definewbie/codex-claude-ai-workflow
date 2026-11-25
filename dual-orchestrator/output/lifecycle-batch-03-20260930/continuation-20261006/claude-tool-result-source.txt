@@ -1,0 +1,108 @@
+517:             // it — so preferring `toolUse.id` only adds a source for the case where the
+518:             // result block carries no id at all. Anything that isn't a non-empty
+519:             // string is no id at all: `""` matches no terminal, and stringifying a
+520:             // present-but-undefined field would invent the literal `"undefined"`.
+521:             const terminalIdOf = (id) => typeof id === "string" && id.length > 0 ? id : undefined;
+522:             const terminalId = terminalIdOf(toolUse?.id) ??
+523:                 terminalIdOf("tool_use_id" in toolResult ? toolResult.tool_use_id : undefined);
+524:             const isError = "is_error" in toolResult && toolResult.is_error;
+525:             // Extract output and exit code from either format:
+526:             // 1. The structured BashOutput (message-level tool_use_result): its
+527:             //    stdout/stderr exclude the model-directed suffixes the raw text
+528:             //    carries (stale-read hints, gh rate-limit hints, the
+529:             //    persisted-output wrapper for too-large outputs — the interruption
+530:             //    and truncation facts those carried are re-established from the
+531:             //    structured flags below). Skipped for image output (the raw content
+532:             //    array carries the actual image blocks) and backgrounded commands
+533:             //    (the raw text carries the background-task notice; structured
+534:             //    stdout may be empty).
+535:             // 2. BetaBashCodeExecutionResultBlock: { type: "bash_code_execution_result", stdout, stderr, return_code }
+536:             // 3. Plain string content from a regular tool_result
+537:             // 4. Array content (e.g. [{ type: "text", text: "..." }] for stdout,
+538:             //    or [{ type: "image", source: {...} }] when the local Bash tool
+539:             //    produces an image, e.g. piping a base64 data URI)
+540:             let output = "";
+541:             let exitCode = isError ? 1 : 0;
+542:             const structuredBash = structuredResult(toolUseResult);
+543:             if (structuredBash &&
+544:                 typeof structuredBash.stdout === "string" &&
+545:                 typeof structuredBash.stderr === "string" &&
+546:                 !structuredBash.isImage &&
+547:                 structuredBash.backgroundTaskId === undefined) {
+548:                 output = [structuredBash.stdout, structuredBash.stderr].filter(Boolean).join("\n");
+549:                 // Two raw-text notices don't survive the structured stdout/stderr —
+550:                 // re-establish them so the client isn't shown a clean-looking result:
+551:                 // the CLI appends its abort marker only to the model-facing text, and
+552:                 // an aborted command isn't a success, so synthesize a failing exit
+553:                 // code when the result wasn't already an error.
+554:                 if (structuredBash.interrupted) {
+555:                     output = [output, "[Command was aborted before completion]"].filter(Boolean).join("\n");
+556:                     exitCode = 1;
+557:                 }
+558:                 // Structured stdout is clipped (~30k chars) when the full output was
+559:                 // persisted to disk; without this note the clip is silent and the
+560:                 // path to the full output is lost.
+561:                 if (typeof structuredBash.persistedOutputPath === "string") {
+562:                     const size = typeof structuredBash.persistedOutputSize === "number"
+563:                         ? ` (${structuredBash.persistedOutputSize} bytes total)`
+564:                         : "";
+565:                     output = [
+566:                         output,
+567:                         `[Output truncated${size}: full output saved to ${structuredBash.persistedOutputPath}]`,
+568:                     ]
+569:                         .filter(Boolean)
+570:                         .join("\n");
+571:                 }
+572:             }
+573:             else if (result &&
+574:                 typeof result === "object" &&
+575:                 "type" in result &&
+576:                 result.type === "bash_code_execution_result") {
+577:                 const bashResult = result;
+578:                 output = [bashResult.stdout, bashResult.stderr].filter(Boolean).join("\n");
+579:                 exitCode = bashResult.return_code;
+580:             }
+581:             else if (typeof result === "string") {
+582:                 output = result;
+583:             }
+584:             else if (Array.isArray(result) && result.length > 0) {
+585:                 const textOnly = result.every((c) => c && typeof c === "object" && typeof c.text === "string");
+586:                 if (textOnly) {
+587:                     output = result.map((c) => c.text).join("\n");
+588:                 }
+589:                 else {
+590:                     // Image (or mixed non-text) content. Binary payloads can't be
+591:                     // streamed through the terminal-output _meta channel, so bypass
+592:                     // it and surface the blocks as ACP content. This handles the
+593:                     // local Bash tool's image output, which previously failed the
+594:                     // text-only guard and was silently dropped.
+595:                     return toAcpContentUpdate(result, isError);
+596:                 }
+597:             }
+598:             // Without a terminal id there is nothing the client can reconcile these
+599:             // metas against, and emitting them anyway strands the output: a client that
+600:             // buffers output/exit for terminals it has not been told about (Zed keeps
+601:             // them in `pending_terminal_output`/`pending_terminal_exit`, drained only on
+602:             // a matching create) would hold them forever behind an id that never
+603:             // arrives, showing an empty terminal. Fall through to the code-block
+604:             // rendering below instead.
+605:             if (supportsTerminalOutput && terminalId !== undefined) {
+606:                 return {
+607:                     content: [{ type: "terminal", terminalId }],
+608:                     _meta: {
+609:                         terminal_info: {
+610:                             terminal_id: terminalId,
+611:                         },
+612:                         terminal_output: {
+613:                             terminal_id: terminalId,
+614:                             data: output,
+615:                         },
+616:                         terminal_exit: {
+617:                             terminal_id: terminalId,
+618:                             exit_code: exitCode,
+619:                             signal: null,
+620:                         },
+621:                     },
+622:                 };
+623:             }
+624:             // Fallback: format output as a code block without terminal _meta

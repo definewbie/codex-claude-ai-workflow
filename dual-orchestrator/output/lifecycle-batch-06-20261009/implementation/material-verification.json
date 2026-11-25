@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "source_identity_unchanged": true,
+  "source_inputs": 654,
+  "authorized_source_changes": 21,
+  "final_report_suites": 206,
+  "final_report_counts": {
+    "tests": 1752,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "immutable_reviewed_materials_unchanged": {
+    "output/lifecycle-batch-06-20261009/wiring-candidate/cc-review-prompt.md": true,
+    "output/lifecycle-batch-06-20261009/wiring-candidate/preflight-material-sha256.json": true,
+    "output/lifecycle-batch-06-20261009/wiring-candidate/documentation-incremental.patch": true,
+    "output/lifecycle-batch-06-20261009/wiring-candidate/examples.json": true,
+    "output/lifecycle-batch-06-20261009/wiring-candidate/affected-scope.json": true,
+    "output/lifecycle-batch-06-20261009/wiring-candidate/documentation-changes.json": true,
+    "output/lifecycle-batch-06-20261009/wiring-candidate/baseline.json": true,
+    "output/lifecycle-batch-06-20261009/wiring-candidate/self-review.md": true,
+    "output/lifecycle-batch-06-20261009/wiring-candidate/source-checks.json": true,
+    "output/lifecycle-batch-06-20261009/wiring-candidate/verification.json": true,
+    "output/lifecycle-batch-06-20261009/wiring-candidate/documents-before-text.json": true,
+    "output/lifecycle-batch-06-20261009/wiring-candidate/protocol.md": true,
+    "output/lifecycle-batch-06-20261009/review-acceptance-20261009/disposition.md": true,
+    "output/lifecycle-batch-06-20261009/review-acceptance-20261009/documentation-incremental.patch": true,
+    "output/lifecycle-batch-06-20261009/review-acceptance-20261009/cc-review.md": true,
+    "output/lifecycle-batch-06-20261009/review-acceptance-20261009/documentation-changes.json": true,
+    "output/lifecycle-batch-06-20261009/review-acceptance-20261009/baseline.json": true,
+    "output/lifecycle-batch-06-20261009/review-acceptance-20261009/reviewed-material-sha256.json": true,
+    "output/lifecycle-batch-06-20261009/review-acceptance-20261009/verification.json": true,
+    "output/lifecycle-batch-06-20261009/review-acceptance-20261009/documents-before-text.json": true,
+    "output/lifecycle-batch-06-20261009/preflight.md": true
+  },
+  "preflight_postreview_low_disposition_matches_receipt": true,
+  "broken_batch_links": [],
+  "docs_updated_after_tests_only": true,
+  "state": "IMPLEMENTED_OFFLINE / PENDING_CC_BATCH_REVIEW",
+  "live_native_provider_runs": 0,
+  "project_commits": 0
+}

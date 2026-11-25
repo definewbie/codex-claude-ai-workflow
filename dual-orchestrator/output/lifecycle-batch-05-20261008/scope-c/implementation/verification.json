@@ -1,0 +1,49 @@
+{
+  "status": "PASS_OPENING_PRECONDITION_ONLY",
+  "B05": "IN_PROGRESS",
+  "coverage": "rejection-site mechanical inventory only; not runtime diagnostics or full lifecycle proof",
+  "focused_test": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "log": "rejection-inventory-final.log",
+    "single_focused_invocation": true,
+    "full_reactor_regression": false
+  },
+  "existing_source_files_unchanged": 638,
+  "changed_from_baseline": [
+    "docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md"
+  ],
+  "added_from_baseline": [
+    "dual-runtime/src/test/resources/contract-qualification-rejection-sites.json",
+    "dual-runtime/src/test/java/dev/dual/runtime/handler/ContractQualificationRejectionInventoryTest.java"
+  ],
+  "deleted_from_baseline": [],
+  "production_source_changes": 0,
+  "native_provider_runs": 0,
+  "extra_agents": 0,
+  "implemented_rules": 0,
+  "whole_family_completed": false,
+  "full_D01_W01_completed": false,
+  "real_run_no_go": true,
+  "current_material_sha256": {
+    "docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md": "7103adc6a6f90e579d4ba23e6dcffb96f035d7979358f780e1fcdf154d1e14b1",
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "709aecc8685f4627cb7863b042d7a26d3ef35f1e7aa44ac1eb7bff289d354ede",
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "daad21918e9ae488c033b18ca81932d9b129b31c64f62b7a9e61565f304f1259",
+    "dual-runtime/src/test/resources/contract-qualification-rejection-sites.json": "df8e3649fbed9725bb360818dbae2123ee458ab326d1f753a4711cb1af20cc9b",
+    "dual-runtime/src/test/java/dev/dual/runtime/handler/ContractQualificationRejectionInventoryTest.java": "baa42db0d64ef300a818e7ef7ce0edd6822243c3b1f417efa72fac5a47f2e1a3",
+    "output/lifecycle-batch-05-20261008/scope-c/design.md": "8749bb0941cc35f7a69cb65f9ed4151509c45f2e05b72fc2113924ccdd22b409",
+    "output/lifecycle-batch-05-20261008/scope-c/implementation/cc-review-received.md": "f1c269dc8a678aef7553092f30fd8c7b14980884f180bc817abf284962414df5"
+  },
+  "remaining": [
+    "actual family rule/check input production",
+    "L04 decision_checks and exact target lineage",
+    "R03/L03 closed continuation_failure",
+    "RecoveryAssessment four classes without second authority",
+    "legal continuation and reject controls, failure prefixes/cold JVM/siblings",
+    "source-stable full offline regression and merged B05 independent review"
+  ]
+}

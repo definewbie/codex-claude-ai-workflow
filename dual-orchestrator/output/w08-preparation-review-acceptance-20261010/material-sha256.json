@@ -1,0 +1,13 @@
+{
+  "files": {
+    "output/w08-preparation-review-acceptance-20261010/cc-review.txt": "9607da1accbb16d728968acbdf1eb37e402f974fd8995820c33e5237251c66e7",
+    "output/w08-preparation-review-acceptance-20261010/disposition.md": "425237dbd1a14132918daa5236761990f0169582763b7a8694b6290a1d9a4832",
+    "output/w08-preparation-review-acceptance-20261010/documentation-incremental.patch": "217b3533872fe08f83bdfe6e8ccdf4706fdf4b14a9e5dc6de33e02e572838124",
+    "output/w08-preparation-review-acceptance-20261010/g05-approval-proposal.md": "8e8e64bf5e15272c7a0cbe490655d454bb3d1297324c0411c796b2f6101874e2",
+    "output/w08-preparation-review-acceptance-20261010/plans-before.json": "3aceffc39185c440066be71b250fe21e34e4c08ca6664bb99988f1ae0c9c4e6e",
+    "output/w08-preparation-review-acceptance-20261010/receipt-verification.json": "be56b855ae3a8e9856945f786ba3588bfdbbed00167a3c06bf442a16c4e0968c",
+    "output/w08-preparation-review-acceptance-20261010/verification.json": "e5b99fe11ae367318956fc338425577a1d2d61d81ae5b6c1cf2b333e93f566f1",
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "799f4bccfaa742e9cde9b0cf08e25dc9a844115ad5446939d6fb0e7d8a3a77ee",
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "3c37e1c462f394e4a7f1ab7bcd2c2355f52d076e0b77c0073407a3d6c55d1996"
+  }
+}

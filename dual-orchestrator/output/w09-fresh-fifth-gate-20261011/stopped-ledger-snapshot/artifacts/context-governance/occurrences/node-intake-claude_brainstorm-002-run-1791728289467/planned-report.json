@@ -1,0 +1,20 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "context_governance_report",
+  "workstreamId" : "ws-20261011T141651Z-MBC2",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "builderNodeDefinitionId" : "intake.claude_brainstorm",
+  "targetNodeDefinitionId" : "intake.claude_brainstorm",
+  "iterationId" : "iter-001",
+  "reportPhase" : "planned",
+  "plannedReadFiles" : [ ],
+  "plannedWriteFiles" : [ ],
+  "plannedPreviouslyReadFiles" : [ ],
+  "plannedRepeatedReadAvoidance" : [ ],
+  "actualReadFiles" : [ ],
+  "actualWriteFiles" : [ ],
+  "telemetryPending" : true,
+  "generatedAt" : "2026-10-11T14:18:09.506795Z"
+}

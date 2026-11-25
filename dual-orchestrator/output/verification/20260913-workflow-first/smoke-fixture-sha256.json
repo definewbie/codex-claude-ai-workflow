@@ -1,0 +1,5 @@
+{
+  "scripts/smoke-test.sh": "89a7070c55eb0197369ad86ef00f0456b7eb600ba4106aa7702d7646b5d5ed0a",
+  "scripts/semantic-boundary-smoke.sh": "60a73823d23e576868a1c2bb1321a865f4231f7950b9c924c16cef77f6cced31",
+  "scripts/fixtures/emit-strict-agent-result.py": "29617e68343b3400966782e97f1f9c8e492ca3329732f4df3ff01231a4737442"
+}

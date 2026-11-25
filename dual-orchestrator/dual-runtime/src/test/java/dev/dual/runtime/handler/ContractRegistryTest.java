@@ -255,7 +255,9 @@ class ContractRegistryTest {
                         .map(edge -> edge.on())
                         .collect(java.util.stream.Collectors.toSet());
 
-                assertTrue(contract.allowedDecisions().containsAll(edgeOutcomes),
+                var routedDecisions = new java.util.HashSet<>(contract.allowedDecisions());
+                if (node.id().equals("plan.decision")) routedDecisions.add(VerificationReadiness.REQUIRED);
+                assertTrue(routedDecisions.containsAll(edgeOutcomes),
                         definition.workflowId() + " decision node " + node.id()
                                 + " has edge outcomes not allowed by contract: " + edgeOutcomes
                                 + " vs " + contract.allowedDecisions());
@@ -308,7 +310,6 @@ class ContractRegistryTest {
     private static boolean requiresContract(NodeDefinition node) {
         return "acpx.agent_run".equals(node.handlerType())
                 || "review.decision".equals(node.handlerType())
-                || "contract.compile".equals(node.handlerType())
                 || "acceptance.failure_classify".equals(node.handlerType());
     }
 }

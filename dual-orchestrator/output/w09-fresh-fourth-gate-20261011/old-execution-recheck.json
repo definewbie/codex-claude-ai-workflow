@@ -1,0 +1,107 @@
+{
+  "sessions": [
+    {
+      "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680",
+      "record_id": "d1587a2b-1836-4d4d-aee2-b39a5762d344",
+      "closed": true,
+      "metadata_sha256": "d9ed943a27b3fc35e10ad7ae1e3bade2453e38629aff81d99255a0350921c6dd"
+    },
+    {
+      "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791636803114",
+      "record_id": "5d7146fd-ea25-4ae9-b028-2ea4ba57bb18",
+      "closed": true,
+      "metadata_sha256": "6684ffd3e175b9856b3ff5ab1a1507f4c63a11ce41fa00a674c2ee84b6871ad0"
+    },
+    {
+      "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791641578962",
+      "record_id": "26a99c40-bdba-4c61-9037-c7d68880d0bd",
+      "closed": true,
+      "metadata_sha256": "55ddb6c3665acb307d0001a21f169c6797e7b0d446f95933cca74c8df7b0a249"
+    },
+    {
+      "name": "codex-reviewer-ws-20261010T124812Z-XCZL",
+      "record_id": "01a125de-60c0-7453-a3eb-cc55042b4faa",
+      "closed": true,
+      "metadata_sha256": "5623448f58675528214a401e60e365ac5bffcfd9f4ac28b8ebc39c196dd0cd58"
+    },
+    {
+      "name": "claude-main-ws-20261010T055644Z-6QCS-run-1791614610585",
+      "closed": true,
+      "case": "w09-real-gate-20261010",
+      "metadata_sha256": "745a72a9565199e4467624e9b7ff04ad5c8da2e35a5e55731a199f32702d20e2"
+    },
+    {
+      "name": "claude-main-ws-20261010T085617Z-8SVF-run-1791622684632",
+      "closed": true,
+      "case": "w09-fresh-second-gate-20261010",
+      "metadata_sha256": "12520fd154955ebdd4085158ff8615052513ada56f1b92510bf6aef681bab757"
+    }
+  ],
+  "known_pids": [
+    {
+      "pid": 45722,
+      "absent": true
+    },
+    {
+      "pid": 45900,
+      "absent": true
+    },
+    {
+      "pid": 45942,
+      "absent": true
+    },
+    {
+      "pid": 46715,
+      "absent": true
+    },
+    {
+      "pid": 46753,
+      "absent": true
+    },
+    {
+      "pid": 47523,
+      "absent": true
+    },
+    {
+      "pid": 49255,
+      "absent": true
+    },
+    {
+      "pid": 49403,
+      "absent": true
+    },
+    {
+      "pid": 49443,
+      "absent": true
+    },
+    {
+      "pid": 50095,
+      "absent": true
+    },
+    {
+      "pid": 50119,
+      "absent": true
+    },
+    {
+      "pid": 50127,
+      "absent": true
+    },
+    {
+      "pid": 50391,
+      "absent": true
+    },
+    {
+      "pid": 53236,
+      "absent": true
+    },
+    {
+      "pid": 53420,
+      "absent": true
+    },
+    {
+      "pid": 53509,
+      "absent": true
+    }
+  ],
+  "arbitrary_children_stop": "NOT_PROVEN"
+}

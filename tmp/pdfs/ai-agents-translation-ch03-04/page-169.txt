@@ -1,0 +1,41 @@
+consistency checks). The result is slower generation, but deeper and more
+reliable decision making.
+
+In team-member terms, these are the colleagues who don’t rush to speak.
+They think, reflect, and sometimes even argue with themselves before
+offering an answer. They’re slower, but they often save the whole team
+from avoidable mistakes. They’re the reflective minds in an otherwise
+reactive system.
+
+Thinking modes
+
+Modern reasoning models support a control surface for how they reason.
+You can switch between a thinking mode and a fast response mode with
+deployment-specific switches. With the Transformers library, you can
+enable or disable the internal reasoning trace directly in the chat template
+(Example 4-1).
+
+Example 4-1. Switching between thinking and nonthinking mode with
+Transformers
+text = tokenizer.apply_chat_template(
+    messages,
+    tokenize=False,
+    add_generation_prompt=True,
+    enable_thinking=True
+)
+
+   Enable thinking, which is the default mode
+
+With OpenAI-compatible servers such as vLLM, you can pass mode
+switches through the client call; see Example 4-2.
+
+Example 4-2. Switching between thinking and nonthinking mode with vLLM
+chat_response = client.chat.completions.create(
+    model="Qwen/Qwen3-8B",
+    messages=[
+        {"role": "user", "content":
+        "What are reasoning models, in terms of large language
+models?"},
+    ],
+    max_tokens=8192,
+    temperature=0.7,

@@ -1,0 +1,11 @@
+{
+  "checked_at": "2026-10-10T17:16:53.561415+08:00",
+  "valid_structured_json_files": 109,
+  "preserved_original_non_json_candidate": [
+    "stopped-ledger-snapshot/runs/run-1791622684632/outputs/intake-claude-brainstorm.attempt-1.json"
+  ],
+  "initial_blanket_json_verification": "INVALID verifier expectation: raw primary response is intentionally retained in original .json filename; not all candidate outputs are parsed artifacts",
+  "source_inputs_unchanged": 654,
+  "stopped_prefix_unchanged": 92,
+  "no_original_candidate_modified": true
+}

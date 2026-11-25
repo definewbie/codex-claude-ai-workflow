@@ -1,0 +1,13 @@
+Step 1: intake.claude_brainstorm -> RUNNING (resumed workflow)
+Step 2: context.intake_codex_product_review -> RUNNING (resumed workflow)
+Step 3: intake.codex_product_review -> RUNNING (resumed workflow)
+Step 4: intake.decision -> RUNNING (resumed workflow)
+Step 5: gate.human_requirement_review -> WAITING_FOR_HUMAN (resumed workflow)
+
+Next actions:
+  1. Read the current review packet:
+     dualctl review show --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K ws-20260909T113923Z-FZ8K
+     packet: /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K/.agent/workstreams/ws-20260909T113923Z-FZ8K/reviews/node-gate-human_requirement_review-006.md
+  2. Choose one action after review:
+     dualctl approve --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K --run ws-20260909T113923Z-FZ8K
+     dualctl revise --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K --run --feedback-file feedback.md ws-20260909T113923Z-FZ8K

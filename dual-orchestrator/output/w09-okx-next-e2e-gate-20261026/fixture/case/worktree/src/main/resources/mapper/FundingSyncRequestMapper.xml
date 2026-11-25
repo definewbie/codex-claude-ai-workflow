@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="app.cryptoincome.funding.infrastructure.mybatis.FundingSyncRequestMapper">
+    <insert id="insertOrGetId"
+            parameterType="app.cryptoincome.funding.infrastructure.mybatis.FundingSyncRequestEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO funding_sync_request (request_key, instrument_id, page_limit)
+        VALUES (#{requestKey}, #{instrumentId}, #{pageLimit})
+        ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)
+    </insert>
+
+    <select id="selectByKeyForUpdate"
+            resultType="app.cryptoincome.funding.infrastructure.mybatis.FundingSyncRequestEntity">
+        SELECT * FROM funding_sync_request WHERE request_key = #{requestKey} FOR UPDATE
+    </select>
+
+    <select id="selectByKey"
+            resultType="app.cryptoincome.funding.infrastructure.mybatis.FundingSyncRequestEntity">
+        SELECT * FROM funding_sync_request WHERE request_key = #{requestKey}
+    </select>
+
+    <select id="selectByIdForUpdate"
+            resultType="app.cryptoincome.funding.infrastructure.mybatis.FundingSyncRequestEntity">
+        SELECT * FROM funding_sync_request WHERE id = #{id} FOR UPDATE
+    </select>
+
+    <select id="selectStaleRunning"
+            resultType="app.cryptoincome.funding.infrastructure.mybatis.StaleExecutionRow">
+        SELECT r.request_key AS request_key, r.id AS request_id, r.current_run_id AS run_id,
+               r.instrument_id, r.page_limit, ar.started_at
+        FROM funding_sync_request r
+        JOIN analysis_run ar ON ar.id = r.current_run_id
+        WHERE r.state = 'RUNNING'
+          AND ar.started_at &lt; CURRENT_TIMESTAMP(6) - INTERVAL #{micros} MICROSECOND
+        ORDER BY ar.started_at
+    </select>
+
+    <update id="markRunning">
+        UPDATE funding_sync_request
+        SET state = 'RUNNING', current_run_id = #{runId}, next_attempt = next_attempt + 1
+        WHERE id = #{id} AND state = 'READY' AND current_run_id IS NULL
+    </update>
+
+    <update id="markReady">
+        UPDATE funding_sync_request
+        SET state = 'READY', current_run_id = NULL
+        WHERE id = #{id} AND state = 'RUNNING' AND current_run_id = #{runId}
+    </update>
+
+    <update id="markSucceeded">
+        UPDATE funding_sync_request
+        SET state = 'SUCCEEDED', current_run_id = NULL, successful_run_id = #{runId}
+        WHERE id = #{id} AND state = 'RUNNING' AND current_run_id = #{runId}
+    </update>
+</mapper>

@@ -1,0 +1,175 @@
+{
+  "scope": "real acpx host handlers only; no provider, no ACP wire, no model tools",
+  "capturedAt": "2026-09-28T03:57:54.308Z",
+  "scratch": "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF",
+  "cases": [
+    {
+      "name": "necessary_full_read",
+      "observed": "alpha\nbeta\ngamma\n",
+      "assertion": "PASS"
+    },
+    {
+      "name": "necessary_window_read",
+      "observed": "beta",
+      "assertion": "PASS"
+    },
+    {
+      "name": "existing_file_modify_blocked",
+      "observed": {
+        "error": "PermissionDeniedError",
+        "message": "Permission denied for fs/write_text_file"
+      },
+      "assertion": "PASS"
+    },
+    {
+      "name": "new_file_create_blocked",
+      "observed": {
+        "error": "PermissionDeniedError",
+        "message": "Permission denied for fs/write_text_file"
+      },
+      "assertion": "PASS"
+    },
+    {
+      "name": "terminal_request_blocked",
+      "observed": {
+        "error": "PermissionDeniedError",
+        "message": "Permission denied for terminal/create"
+      },
+      "assertion": "PASS"
+    },
+    {
+      "name": "deny_all_breaks_necessary_read",
+      "observed": {
+        "error": "PermissionDeniedError",
+        "message": "Permission denied for fs/read_text_file (--deny-all)"
+      },
+      "assertion": "PASS"
+    },
+    {
+      "name": "terminal_false_is_not_a_hard_guard",
+      "observed": {
+        "executed": true,
+        "permissionMode": "approve-all",
+        "terminal": false
+      },
+      "assertion": "PASS"
+    }
+  ],
+  "events": [
+    {
+      "method": "fs/read_text_file",
+      "status": "running",
+      "summary": "read_text_file: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/sample.txt",
+      "timestamp": "2026-09-28T03:57:54.281Z"
+    },
+    {
+      "method": "fs/read_text_file",
+      "status": "completed",
+      "summary": "read_text_file: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/sample.txt",
+      "timestamp": "2026-09-28T03:57:54.282Z"
+    },
+    {
+      "method": "fs/read_text_file",
+      "status": "running",
+      "summary": "read_text_file: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/sample.txt",
+      "details": "line=2, limit=1",
+      "timestamp": "2026-09-28T03:57:54.282Z"
+    },
+    {
+      "method": "fs/read_text_file",
+      "status": "completed",
+      "summary": "read_text_file: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/sample.txt",
+      "details": "line=2, limit=1",
+      "timestamp": "2026-09-28T03:57:54.282Z"
+    },
+    {
+      "method": "fs/write_text_file",
+      "status": "running",
+      "summary": "write_text_file: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/sample.txt",
+      "details": "unauthorized",
+      "timestamp": "2026-09-28T03:57:54.282Z"
+    },
+    {
+      "method": "fs/write_text_file",
+      "status": "failed",
+      "summary": "write_text_file: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/sample.txt",
+      "details": "Permission denied for fs/write_text_file",
+      "timestamp": "2026-09-28T03:57:54.282Z"
+    },
+    {
+      "method": "fs/write_text_file",
+      "status": "running",
+      "summary": "write_text_file: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/created.txt",
+      "details": "unauthorized",
+      "timestamp": "2026-09-28T03:57:54.282Z"
+    },
+    {
+      "method": "fs/write_text_file",
+      "status": "failed",
+      "summary": "write_text_file: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/created.txt",
+      "details": "Permission denied for fs/write_text_file",
+      "timestamp": "2026-09-28T03:57:54.282Z"
+    },
+    {
+      "method": "terminal/create",
+      "status": "running",
+      "summary": "terminal/create: /Users/kriswang/.nvm/versions/node/v22.21.0/bin/node \"-e\" \"require(\\\"node:fs\\\").writeFileSync(process.argv[1], \\\"executed\\\")\" \"/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/execution-marker\"",
+      "timestamp": "2026-09-28T03:57:54.283Z"
+    },
+    {
+      "method": "terminal/create",
+      "status": "failed",
+      "summary": "terminal/create: /Users/kriswang/.nvm/versions/node/v22.21.0/bin/node \"-e\" \"require(\\\"node:fs\\\").writeFileSync(process.argv[1], \\\"executed\\\")\" \"/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/execution-marker\"",
+      "details": "Permission denied for terminal/create",
+      "timestamp": "2026-09-28T03:57:54.283Z"
+    },
+    {
+      "method": "fs/read_text_file",
+      "status": "running",
+      "summary": "read_text_file: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/sample.txt",
+      "timestamp": "2026-09-28T03:57:54.283Z"
+    },
+    {
+      "method": "fs/read_text_file",
+      "status": "failed",
+      "summary": "read_text_file: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/sample.txt",
+      "details": "Permission denied for fs/read_text_file (--deny-all)",
+      "timestamp": "2026-09-28T03:57:54.283Z"
+    },
+    {
+      "method": "terminal/create",
+      "status": "running",
+      "summary": "terminal/create: /Users/kriswang/.nvm/versions/node/v22.21.0/bin/node \"-e\" \"require(\\\"node:fs\\\").writeFileSync(process.argv[1], \\\"executed\\\")\" \"/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/execution-marker\"",
+      "timestamp": "2026-09-28T03:57:54.283Z"
+    },
+    {
+      "method": "terminal/create",
+      "status": "completed",
+      "summary": "terminal/create: /Users/kriswang/.nvm/versions/node/v22.21.0/bin/node \"-e\" \"require(\\\"node:fs\\\").writeFileSync(process.argv[1], \\\"executed\\\")\" \"/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-host-proof-L7ynOF/execution-marker\"",
+      "details": "terminalId=b33bd933-294e-41cf-aa3e-2eaa308e62ee",
+      "timestamp": "2026-09-28T03:57:54.284Z"
+    },
+    {
+      "method": "terminal/wait_for_exit",
+      "status": "completed",
+      "summary": "terminal/wait_for_exit: b33bd933-294e-41cf-aa3e-2eaa308e62ee",
+      "details": "exitCode=0, signal=null",
+      "timestamp": "2026-09-28T03:57:54.308Z"
+    },
+    {
+      "method": "terminal/release",
+      "status": "running",
+      "summary": "terminal/release: b33bd933-294e-41cf-aa3e-2eaa308e62ee",
+      "timestamp": "2026-09-28T03:57:54.308Z"
+    },
+    {
+      "method": "terminal/release",
+      "status": "completed",
+      "summary": "terminal/release: b33bd933-294e-41cf-aa3e-2eaa308e62ee",
+      "timestamp": "2026-09-28T03:57:54.308Z"
+    }
+  ],
+  "finalOriginalSha": "4fdbc441ea7b546100e086ac1e4fc5ae6749b7314311c99db05be450eca12996",
+  "expectedOriginalSha": "4fdbc441ea7b546100e086ac1e4fc5ae6749b7314311c99db05be450eca12996",
+  "providerCalls": 0
+}

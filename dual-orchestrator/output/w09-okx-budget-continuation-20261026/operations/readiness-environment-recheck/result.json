@@ -1,0 +1,36 @@
+{
+  "exit": 0,
+  "elapsed_seconds": 0.6649029578547925,
+  "commands": [
+    {
+      "name": "maven-version",
+      "exit": 0,
+      "stdout_ref": "maven-version.stdout.txt",
+      "stdout_sha256": "c1617fad1c8111daa7f212da1dfdb7ba032ca10d3f433bfb7389b0e6904b5bd2",
+      "stderr_ref": "maven-version.stderr.txt"
+    },
+    {
+      "name": "docker-server",
+      "exit": 0,
+      "stdout_ref": "docker-server.stdout.txt",
+      "stdout_sha256": "af4d57fbab98c45fb41bb573763dd479271377c22faef4dcf20666bc6dc5f51b",
+      "stderr_ref": "docker-server.stderr.txt"
+    },
+    {
+      "name": "mysql-cache",
+      "exit": 0,
+      "stdout_ref": "mysql-cache.stdout.txt",
+      "stdout_sha256": "3eb68b5b176c6de1787d6e5bf0caa414ddf1404807138c5a42c4413c60fd7fa0",
+      "stderr_ref": "mysql-cache.stderr.txt"
+    },
+    {
+      "name": "ryuk-cache",
+      "exit": 0,
+      "stdout_ref": "ryuk-cache.stdout.txt",
+      "stdout_sha256": "d20cd068f539a676d5ff93fa8bd123e299d031a205b158cc091cae166b614044",
+      "stderr_ref": "ryuk-cache.stderr.txt"
+    }
+  ],
+  "model_calls": 0,
+  "meaning": "Host tools/cache availability only; no current product test or actual native process-exit proof"
+}

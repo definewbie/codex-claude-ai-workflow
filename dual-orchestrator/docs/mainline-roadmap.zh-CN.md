@@ -42,6 +42,8 @@ P0 是阻塞真实使用的能力。
 
 P0 必须一次性收尾，退出标准固定。Real-case 是验收门，不是无限探索循环。
 
+验收口径遵循 [AGENTS.md — Acceptance Outcomes](../../AGENTS.md#acceptance-outcomes)：`ACCEPTED` 与 `ACCEPT_WITH_NOTES` 均允许进入既有交付流程，非阻塞性 notes 随 delivery merge 一并交付；`REJECTED` 经既有合法转换进入 repair loop，不是 workstream 终态。交付资格、必要批准和 terminal guard 保持有效。
+
 退出标准：
 
 | 边界 | 必须提供的证据 |

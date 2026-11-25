@@ -1,0 +1,35 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "workstream_memory",
+  "workstreamId" : "ws-20261014T234009Z-RN9X",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-006",
+  "iterationId" : "iter-002",
+  "decidedScope" : [ ],
+  "nonGoals" : [ ],
+  "decisions" : [ ],
+  "readFiles" : [ ],
+  "openIssues" : [ ],
+  "priorVerdicts" : [ ],
+  "priorFailures" : [ ],
+  "refsSemantics" : "latest_projection_refs",
+  "refs" : {
+    "repositoryFactBinding" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1792021385197/binding.json",
+    "fileRelevancePlan" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1792021385197/file-relevance-plan.json",
+    "fileSummaries" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1792021385197/file-summaries.json",
+    "readReuseContract" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1792021385197/read-reuse-contract.json",
+    "workingSet" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1792021385197/working-set.json",
+    "repoMap" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1792021385197/repo-map.json",
+    "stageScopePolicy" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1792021385197/stage-scope-policy.json"
+  },
+  "generatedAt" : "2026-10-14T23:43:05.280425Z",
+  "qualifiedTaskContract" : {
+    "status" : "stale_projection"
+  },
+  "lastStageOutcome" : { },
+  "fieldSemantics" : {
+    "projectionOnlyFields" : [ "summary", "desc", "verificationSummary" ],
+    "machineDecisionFields" : [ "decision", "stage_outcome", "lifecycle_status", "blocking", "sourceField", "status" ]
+  },
+  "updatedAt" : "2026-10-14T23:45:06.440992Z"
+}

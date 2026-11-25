@@ -1,0 +1,50 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-implement-claude_self_test_report-031"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000031",
+    "updatedAt": "2026-10-25T22:45:12.636598Z",
+    "commitSequence": 118
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-implement-claude_self_test_report-031",
+    "nodeDefinitionId": "implement.claude_self_test_report",
+    "kind": "TASK",
+    "handlerType": "acpx.agent_run",
+    "status": "READY",
+    "stageId": "stage-implement",
+    "iterationId": "iter-003",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.stderr.log",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.transcript.log",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_implement-030-run-1792967793610/binding.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/verification-observations.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.contract.json"
+    ],
+    "inputTransition": {
+      "purpose": "Seed the first Claude intake run with repo-scope context.",
+      "source_node_sha256": "3015598445b7b001d2912c504d7d076bfffd1e6d6e716b0372033fdfdc77c965",
+      "source_node_instance_id": "node-implement-claude_implement-030",
+      "required": true,
+      "transition_type": "normal",
+      "condition": "unconditional"
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 1799.732919333562
+}

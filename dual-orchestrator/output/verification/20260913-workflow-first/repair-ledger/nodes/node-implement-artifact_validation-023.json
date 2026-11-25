@@ -1,0 +1,38 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-implement-artifact_validation-023",
+  "nodeDefinitionId" : "implement.artifact_validation",
+  "kind" : "TASK",
+  "handlerType" : "artifact.validate",
+  "status" : "COMPLETED",
+  "stageId" : "stage-implement",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-021-run-1789315563945/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.contract.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/git-evidence.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/base-commit.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/head-commit.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/branch.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/git-root.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/git-status-short.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/git-name-status.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/diff.stat", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/diff.patch", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/changed-files.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/change-scope-evaluation.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/occurrences/node-implement-artifact_validation-023/change-scope-evaluation-9b0c1dd63467fed6b540b99f253bdbc6c04b1c79466f5758e58622677961f8f1.json" ],
+  "result" : {
+    "validation" : "git_evidence_collected",
+    "mode" : "git-evidence",
+    "git_available" : true,
+    "has_changes" : true,
+    "changed_file_count" : 2,
+    "hygiene_warning_count" : 0,
+    "change_scope_status" : "PASS",
+    "change_scope_violation_count" : 0,
+    "change_scope_missing_declared_count" : 0,
+    "evidence_path" : ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/git-evidence.json",
+    "change_scope_evaluation_path" : ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/change-scope-evaluation.json",
+    "change_scope_evaluation_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/occurrences/node-implement-artifact_validation-023/change-scope-evaluation-9b0c1dd63467fed6b540b99f253bdbc6c04b1c79466f5758e58622677961f8f1.json",
+    "change_scope_evaluation_sha256" : "9b0c1dd63467fed6b540b99f253bdbc6c04b1c79466f5758e58622677961f8f1",
+    "error" : null
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315574461-3a2349c5",
+  "startedAt" : "2026-09-13T16:06:14.471427Z",
+  "finishedAt" : "2026-09-13T16:06:14.569992Z"
+}

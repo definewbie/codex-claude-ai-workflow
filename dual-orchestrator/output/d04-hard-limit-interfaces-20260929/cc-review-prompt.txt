@@ -1,0 +1,3 @@
+请独立复审 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator。
+遵守 AGENTS.md，先读 output/d04-hard-limit-interfaces-20260929/assessment.md，再核对原始证据和详设 §8.17。重点判断：现有硬限制接口是否遗漏、证据是否支持 D04 冻结、未决项是否确为必要前置。自行重建完整 transition 与失败切面，检查 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test，兼顾合法读取与非法拒绝。
+不要沿用作者结论；列发现、证据及未核验范围。本轮只读评审，不改代码、不启动 agent/模型/原生实验，不自动实施。若仍有缺口，请指出具体既有接口或需要用户决定的取舍，不预设冻结 PASS。

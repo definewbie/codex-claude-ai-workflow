@@ -1,0 +1,337 @@
+{
+  "workstream": "ws-20260913T004742Z-6NX5",
+  "verdict": "FAIL",
+  "reason": "LEGAL_HUMAN_REQUIREMENT_REVISE_REJECTED_BEFORE_PROVIDER",
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20260913T004742Z-6NX5",
+    "workflowInstanceId": "wf-ws-20260913T004742Z-6NX5",
+    "workflowId": "agent-lifecycle-small-plan-human-review-experiment",
+    "definitionVersion": 1,
+    "status": "WAITING_FOR_RECOVERY",
+    "activeNodeInstanceIds": [
+      "node-intake-claude_brainstorm-012"
+    ],
+    "openGateIds": [
+      "recovery-node-intake-claude_brainstorm-012"
+    ],
+    "lastEventId": "evt-000014",
+    "updatedAt": "2026-09-13T01:00:22.307504Z"
+  },
+  "failedNode": {
+    "id": "node-intake-claude_brainstorm-012",
+    "runRef": null,
+    "executionId": "nxe-1789261222247-97563d47",
+    "errors": [
+      "human requirement revision must reference exactly one verified blocked intake review",
+      "review_count=0"
+    ],
+    "projectedParseError": {
+      "details": {},
+      "code": "AGENT_RESULT_MISSING",
+      "message": "No readable agent output artifact found for contract validation."
+    }
+  },
+  "businessRuns": [
+    {
+      "runId": "run-1789260534648",
+      "nodeId": "intake.claude_brainstorm",
+      "session": "claude-main-ws-20260913T004742Z-6NX5-run-1789260534648",
+      "status": "completed",
+      "exitCode": 0,
+      "durationMs": 221375,
+      "adapterSignals": [],
+      "usage": {
+        "inputTokens": 8657,
+        "outputTokens": 18350,
+        "cachedReadTokens": 6016,
+        "cachedWriteTokens": 0,
+        "totalTokens": 33023,
+        "costAmount": 0.505043,
+        "costCurrency": "USD",
+        "source": "acpx_stream",
+        "measurementType": "PROVIDER_RUN_USAGE",
+        "attribution": "LATEST_PROMPT_IN_SESSION",
+        "cumulative": false,
+        "contextUsedTokens": 0,
+        "sessionCostAmount": 0.505043,
+        "sessionCostCurrency": "USD",
+        "providerId": "zhipu",
+        "model": "glm-5.3",
+        "billingMode": "subscription_token_only",
+        "providerMetadataSource": "acpx_session_json",
+        "unavailableReason": ""
+      },
+      "runSha": "e5f6f9226e90ba352d597dd4efa98c4c5ce0b136245291ac9546b49e8c93dcd9",
+      "sidecar": ".agent/workstreams/ws-20260913T004742Z-6NX5/runs/run-1789260534648/outputs/intake-claude-brainstorm.contract.json",
+      "sidecarSha": "bffbcf7f8524ea57fc3f9b01ee97fb2ebc45b76b8c0face925a42c3c02f33021",
+      "actualReport": {
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260913T004742Z-6NX5/.agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/intake.claude_brainstorm-actual-run-1789260534648.json",
+        "sha256": "3d6505b4b1607dff7c353100273579bbe4845884af957bd03c1716fde6e9e185"
+      }
+    },
+    {
+      "runId": "run-1789260759505",
+      "nodeId": "intake.codex_product_review",
+      "session": "codex-reviewer-ws-20260913T004742Z-6NX5",
+      "status": "completed",
+      "exitCode": 0,
+      "durationMs": 54809,
+      "adapterSignals": [],
+      "usage": {
+        "inputTokens": 19874,
+        "outputTokens": 1452,
+        "cachedReadTokens": 12928,
+        "cachedWriteTokens": 0,
+        "totalTokens": 34254,
+        "costAmount": null,
+        "costCurrency": "",
+        "source": "acpx_stream",
+        "measurementType": "PROVIDER_RUN_USAGE",
+        "attribution": "LATEST_PROMPT_IN_SESSION",
+        "cumulative": false,
+        "contextUsedTokens": 0,
+        "sessionCostAmount": null,
+        "sessionCostCurrency": "",
+        "providerId": "openai",
+        "model": "GPT-6-Astra",
+        "billingMode": "metered",
+        "providerMetadataSource": "acpx_session_json",
+        "unavailableReason": ""
+      },
+      "runSha": "0eb77b23a3ae6e56f01c4c8c6d6f77c57148afb4c56f27af7aee83e16a12b905",
+      "sidecar": ".agent/workstreams/ws-20260913T004742Z-6NX5/runs/run-1789260759505/outputs/intake-codex-product-review.contract.json",
+      "sidecarSha": "ab5bd27ac47d256df394bf03b02be524bc2ae27d53e2e8e168a285191bb9a027",
+      "actualReport": {
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260913T004742Z-6NX5/.agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/intake.codex_product_review-actual-run-1789260759505.json",
+        "sha256": "ebd6366b8d82fed88411121babd724f068abddbb681d1ac42116b78445421ecc"
+      }
+    },
+    {
+      "runId": "run-1789260819142",
+      "nodeId": "intake.claude_brainstorm",
+      "session": "claude-main-ws-20260913T004742Z-6NX5-run-1789260819142",
+      "status": "completed",
+      "exitCode": 0,
+      "durationMs": 110835,
+      "adapterSignals": [],
+      "usage": {
+        "inputTokens": 19976,
+        "outputTokens": 7961,
+        "cachedReadTokens": 12032,
+        "cachedWriteTokens": 0,
+        "totalTokens": 39969,
+        "costAmount": 0.304921,
+        "costCurrency": "USD",
+        "source": "acpx_stream",
+        "measurementType": "PROVIDER_RUN_USAGE",
+        "attribution": "LATEST_PROMPT_IN_SESSION",
+        "cumulative": false,
+        "contextUsedTokens": 0,
+        "sessionCostAmount": 0.304921,
+        "sessionCostCurrency": "USD",
+        "providerId": "zhipu",
+        "model": "glm-5.3",
+        "billingMode": "subscription_token_only",
+        "providerMetadataSource": "acpx_session_json",
+        "unavailableReason": ""
+      },
+      "runSha": "7069ff81e9938cb41979a0b3386e72f05e2a820b8252c1f2fe238b45f7de134d",
+      "sidecar": ".agent/workstreams/ws-20260913T004742Z-6NX5/runs/run-1789260819142/outputs/intake-claude-brainstorm.contract.json",
+      "sidecarSha": "88a588820e99bfefc1107e7cc262e29474fec89ba984c762af908c370dc110ea",
+      "actualReport": {
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260913T004742Z-6NX5/.agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/intake.claude_brainstorm-actual-run-1789260819142.json",
+        "sha256": "721b59be360ee1890a1e4c0e7b13284efb3c35f8cba6189e46709a79bd9a5ae8"
+      }
+    },
+    {
+      "runId": "run-1789260933290",
+      "nodeId": "intake.codex_product_review",
+      "session": "codex-reviewer-ws-20260913T004742Z-6NX5",
+      "status": "completed",
+      "exitCode": 0,
+      "durationMs": 32295,
+      "adapterSignals": [],
+      "usage": {
+        "inputTokens": 18558,
+        "outputTokens": 851,
+        "cachedReadTokens": 32640,
+        "cachedWriteTokens": 0,
+        "totalTokens": 52049,
+        "costAmount": null,
+        "costCurrency": "",
+        "source": "acpx_stream",
+        "measurementType": "PROVIDER_RUN_USAGE",
+        "attribution": "LATEST_PROMPT_IN_SESSION",
+        "cumulative": false,
+        "contextUsedTokens": 0,
+        "sessionCostAmount": null,
+        "sessionCostCurrency": "",
+        "providerId": "openai",
+        "model": "GPT-6-Astra",
+        "billingMode": "metered",
+        "providerMetadataSource": "acpx_session_json",
+        "unavailableReason": ""
+      },
+      "runSha": "52b65cf19af9bff11fc60e4a6d3a230a52a682f5203b4886484e75deeb0b4e74",
+      "sidecar": ".agent/workstreams/ws-20260913T004742Z-6NX5/runs/run-1789260933290/outputs/intake-codex-product-review.contract.json",
+      "sidecarSha": "f765747d0444fdb5899a793e21e3475c058fe84df1bb17431b36478eeb03c176",
+      "actualReport": {
+        "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260913T004742Z-6NX5/.agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/intake.codex_product_review-actual-run-1789260933290.json",
+        "sha256": "87938dbe273e5867b91afefd50e7d17c69d10b4d50c7834ad4bb9b051fdaa271"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "sidecar": ".agent/workstreams/ws-20260913T004742Z-6NX5/runs/run-1789260534648/outputs/intake-claude-brainstorm.contract.json",
+      "sidecarSha": "bffbcf7f8524ea57fc3f9b01ee97fb2ebc45b76b8c0face925a42c3c02f33021",
+      "binding": {
+        "artifact_ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789260534648/binding.json",
+        "sha256": "aa68e114c867f2ced898dd08843958aba52413273e9d7e76125ba59db421124d"
+      },
+      "inventoryHead": "c84807946493a603c789ee40c6a4c615aa846c3b",
+      "inventorySha": "df80ed33104a28c6285358790cf77533328b089bd62e5a10379e37ec6e9f9298",
+      "artifacts": [
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789260534648/working-set.json",
+          "sha256": "6c2b9ee158f04c06d1a875d3224a01174afd2ca400a72321f7b1c7391283b9bd"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789260534648/file-relevance-plan.json",
+          "sha256": "645b1de8082077b8985738f73b2b220e918cb46484f7e27a0d3a0712cfc82a3d"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789260534648/stage-scope-policy.json",
+          "sha256": "dbc599daa4fb57c058999b8572922c6896eb01b1f0785eb66c213e04206c13a2"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789260534648/file-summaries.json",
+          "sha256": "ab4cb67bbecbb65cfb518691911a98117387d8d904ad0cd1fc6277217d034ac5"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789260534648/repo-map.json",
+          "sha256": "698c64c7f37a8f921ed8a16f561a215868319130158312e5834750a879be6ebc"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789260534648/planned-report.json",
+          "sha256": "728317474c8f99e574de436ac30bc9746d429cb3c6bae93795a64fec562f0d3b"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789260534648/agent-capability-catalog.json",
+          "sha256": "449fe018d402a596aca330d6b3d2711c236f18ffba4f7a8bbaf14ec79a8e3a62"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789260534648/read-reuse-contract.json",
+          "sha256": "2983ede3e4129e21535533377567df60eb51ee0b6727de557f381a8806819c74"
+        }
+      ]
+    },
+    {
+      "sidecar": ".agent/workstreams/ws-20260913T004742Z-6NX5/runs/run-1789260819142/outputs/intake-claude-brainstorm.contract.json",
+      "sidecarSha": "88a588820e99bfefc1107e7cc262e29474fec89ba984c762af908c370dc110ea",
+      "binding": {
+        "artifact_ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1789260819142/binding.json",
+        "sha256": "b5067218473208b354f1878baa9992714ee990e79dda5531a7a1dab665a81b70"
+      },
+      "inventoryHead": "c84807946493a603c789ee40c6a4c615aa846c3b",
+      "inventorySha": "df80ed33104a28c6285358790cf77533328b089bd62e5a10379e37ec6e9f9298",
+      "artifacts": [
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1789260819142/working-set.json",
+          "sha256": "2116c73e0761f50bfe2dcf5e372169e7bda853a45adacfd5a56dec7476d235e5"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1789260819142/file-relevance-plan.json",
+          "sha256": "71b72770b1da74e5a6be15a417f211c5f5dec4d83ca2531ec573174cf34d57bb"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1789260819142/stage-scope-policy.json",
+          "sha256": "b6159f75e13ae1648eb72593860297e11c6786f9ecb35b7798c0ec34642a4a5b"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1789260819142/file-summaries.json",
+          "sha256": "049fba3ad7777fd79480b48cb0be03e4380599516d20e4904d977bfad5ef6cdf"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1789260819142/repo-map.json",
+          "sha256": "cf79d56c9bf0e4bea03029ea2eca06aa28dc321c52ceb72e66d179733761922f"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1789260819142/planned-report.json",
+          "sha256": "e2d444bd51cc9a142ebb6d263d1bc1bad7b819181d0eb3f8a30be7ff84ed42da"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1789260819142/agent-capability-catalog.json",
+          "sha256": "449fe018d402a596aca330d6b3d2711c236f18ffba4f7a8bbaf14ec79a8e3a62"
+        },
+        {
+          "ref": ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1789260819142/read-reuse-contract.json",
+          "sha256": "6288bc4e34a33e379895003087a91f369f4ad5ed80e75f42478d4b0bb99b239b"
+        }
+      ]
+    }
+  ],
+  "sessions": [
+    {
+      "recordId": "5729b9f7-b2a9-4364-8f35-4237bcb975ab",
+      "name": "claude-main-ws-20260913T004742Z-6NX5-run-1789260534648",
+      "cwd": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260913T004742Z-6NX5",
+      "closed": true,
+      "sha256": "e2bd5eb24d07e5d82bbf9c06a01368c8f70b8213b644b0f23fec941f43fca20e"
+    },
+    {
+      "recordId": "5d6737d0-073e-42f7-b7d2-1d229d5bd591",
+      "name": "claude-main-ws-20260913T004742Z-6NX5-run-1789260819142",
+      "cwd": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260913T004742Z-6NX5",
+      "closed": true,
+      "sha256": "8b63b1a56887e42e5168ec80d5dab7e01ed7d46ca6e65e1bfb5369376bc8701e"
+    },
+    {
+      "recordId": "01a09840-8aef-71a1-93a1-872597c22f78",
+      "name": "codex-reviewer-ws-20260913T004742Z-6NX5",
+      "cwd": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260913T004742Z-6NX5",
+      "closed": true,
+      "sha256": "f8715962746d3b797b4d9d0f6c7b678d4f08dd3a2a23dbd4317589990fe00d65"
+    }
+  ],
+  "snapshots": [
+    {
+      "ref": "workflow/current.json",
+      "sha256": "a50a742d29b79475c37a601b4df9f738b5f919bb02a7885503079f21b3174c97"
+    },
+    {
+      "ref": "nodes/node-gate-human_requirement_review-011.json",
+      "sha256": "ec096fb2cab7db768886ddc63ae162502e6488588ad9412a94022c7bd87072d8"
+    },
+    {
+      "ref": "nodes/node-intake-claude_brainstorm-012.json",
+      "sha256": "c118806110b75360634be905598b90f2c73eee69d311ef2ffe20755a1ccf1021"
+    },
+    {
+      "ref": "iterations/iter-003.json",
+      "sha256": "8c82a6efe5f37b3e1a3202a096f767fb9150b8f8b5cc3231d691c39e376af409"
+    },
+    {
+      "ref": "reviews/node-gate-human_requirement_review-011.md",
+      "sha256": "c08b9f00dc6607964aaa541f61829bb83aede86e18ebffb09abd5d8e19d98ea5"
+    },
+    {
+      "ref": "artifacts/contract-failures/node-intake-claude_brainstorm-012.json",
+      "sha256": "d231ad521c168d448fbb317e453e1e271f921a83376e6158e75d635c961e027c"
+    },
+    {
+      "ref": "recovery/current-failure.md",
+      "sha256": "cded954fd6877cfb46a03dd1665dd201ac760117f2ecbebfb7822e59092815d6"
+    },
+    {
+      "ref": "events.jsonl",
+      "sha256": "819ee614d96f571545e16ba89853c092dc47e167d19e45f4a8f64adeabffa1a7"
+    }
+  ],
+  "targetHead": "c84807946493a603c789ee40c6a4c615aa846c3b",
+  "targetTree": "81520ac179f17c35c7c358c2a02102007cbe7cba",
+  "productWorkingTreeClean": true,
+  "frozenInputsUnchanged": true,
+  "newRetryDiagnosticBranch": "NOT EXERCISED"
+}

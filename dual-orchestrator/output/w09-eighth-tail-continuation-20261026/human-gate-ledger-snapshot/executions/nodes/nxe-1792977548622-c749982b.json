@@ -1,0 +1,37 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792977548622-c749982b",
+  "agentTaskId" : "agt-1792977548616-5edde94f",
+  "workflowExecutionId" : "wfe-1792977548517-fcc099fc",
+  "nodeInstanceId" : "node-implement-self_test_decision-032",
+  "nodeDefinitionId" : "implement.self_test_decision",
+  "handlerType" : "review.decision",
+  "status" : "SUCCEEDED",
+  "pid" : 41968,
+  "outcome" : "SELF_TEST_COMPLETE",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/verification-observations.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-26T01:19:07.419Z",
+      "input_identity" : "5926eb7a2598d4d81e89d9dd9032ea8fa7d2aa4615eb5c0576833a335434f392",
+      "executor_pid" : 41968
+    },
+    "decision" : "SELF_TEST_COMPLETE",
+    "source" : "contract-sidecar",
+    "summary" : "在仓库根实际执行 python -m unittest discover -s tests -v 2>&1 得 Ran 11 tests 与 OK（零 failure/error），11 个用例名与 tests/test_normalize_text.py 九项 CASES 逐条核对一致，README 示例经逐字符比对与 doctest 实际执行确认与实现一致，AC-1/AC-2/AC-3 全部通过。",
+    "continuation_kind" : "COMPLETE",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-26T01:19:08.622623Z",
+  "finishedAt" : "2026-10-26T01:19:08.881216Z",
+  "durationMs" : 258
+}

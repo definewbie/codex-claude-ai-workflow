@@ -1,0 +1,64 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-stage-claude_handoff-040",
+  "nodeDefinitionId" : "stage.claude_handoff",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-stage",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/delivery/commit-message.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/delivery/pr-body.md", ".agent/workstreams/ws-20260913T160441Z-H55W/delivery/candidates/node-delivery-prepare_pr-038/candidate-424ab53f897e1152753a30461c859ba0d8f55de308143b6940bf0a50b1ab1c9c.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315619142/outputs/stage-claude-handoff.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315619142/outputs/stage-claude-handoff.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315619142/outputs/stage-claude-handoff.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-stage-claude_handoff-040-run-1789315619142/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315619142/outputs/stage-claude-handoff.contract.json" ],
+  "result" : {
+    "run_id" : "run-1789315619142",
+    "run_metadata" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315619142/run.json",
+    "agent" : "claude",
+    "session" : "claude-main-ws-20260913T160441Z-H55W-run-1789315619142",
+    "exit_code" : 0,
+    "transcript_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315619142/outputs/stage-claude-handoff.transcript.log",
+    "output_complete" : true,
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-stage-claude_handoff-040-run-1789315619142/binding.json",
+    "repository_fact_binding_sha256" : "cd58cf9326404071d6c56fcbfabb8d4feada1b42638437a834bdc27e2e90be01",
+    "process_usability" : "EXITED_ZERO",
+    "adapter_signals" : [ ],
+    "decision" : "HANDOFF_READY",
+    "summary" : "Controlled handoff is ready.",
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315619142/outputs/stage-claude-handoff.contract.json",
+    "contract_sidecar_sha256" : "991f8c1dafcaee13774633a0d66b0a7d0065ad0bf8fd2d5e68f0d6388d605a83",
+    "agent_execution_result_contract" : {
+      "present" : true,
+      "valid" : true,
+      "decision" : "HANDOFF_READY",
+      "summary" : "",
+      "validationError" : ""
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "stage_handoff",
+      "required" : true,
+      "present" : true,
+      "valid" : true,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "agent_execution_outcome" : {
+      "status" : "SUCCESS",
+      "primaryReason" : "completed",
+      "nodeMaySucceed" : true,
+      "retryPolicy" : "NONE",
+      "recoveryCategory" : "NONE",
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315619099-5da3a09b",
+  "startedAt" : "2026-09-13T16:06:59.127931Z",
+  "finishedAt" : "2026-09-13T16:07:09.644251Z"
+}

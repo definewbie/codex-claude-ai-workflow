@@ -1,0 +1,7 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 做 W09 第六例 F1/F2 有界前向修复的合并受影响独立复审，遵守 AGENTS.md。入口：output/w09-sixth-forward-fix-20261015/assessment.md。请自行重建提示契约→原始产物→严格解析→一次修正→唯一结果/固定完成，以及混合日志→协议识别→用量归因→固定 occurrence→聚合/预算核对的真实链路，不预设结论。
+
+重点：封闭 RevisionResponse 是否仍严格；full/patch/initial及修正提示是否与同一 record 同源；unknown-field 是否保留具体字段/合法字段并被唯一一次修正实际消费；正文（含单行{id,text}）与真正坏协议帧是否正确区分，错身份/重复/部分量/快照与严格共享出口是否保持；未来 observer候选是否同向、是否把新分析误当旧事实或预算authority。请检查完整 transition、关键失败前缀/冷读及兄弟入口，用 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给出分级发现、证据和未核验范围。
+
+材料包括 incremental.patch/changed-files、开工前副本、red与中断日志、最终单轮报告、旧材料只读对照、发行身份。请区分测试作者错误/候选自查错误/旧生产反证，以及离线证明/旧真实材料重放/新真实能力。无须重审无关历史或盲目重跑全模块；必要离线核验与本批证据分开报告。单独判断修复证据与发行候选；核实范围和ROI，有无不必要的新机制。
+
+只读：不改源码/文档/历史 ledger，不运行 native/provider/installer/真实Gate，不启动额外agent，不恢复第六例、不启动第七例、不沿用旧余额。全主链后半段仍未真实证明；本轮评审也不代替下一次运行授权。

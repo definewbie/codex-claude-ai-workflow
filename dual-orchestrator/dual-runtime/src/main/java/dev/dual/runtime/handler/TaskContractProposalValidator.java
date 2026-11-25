@@ -237,6 +237,23 @@ final class TaskContractProposalValidator {
         return errors;
     }
 
+    /** Bounded full revision: goal/exclusions may change, ordinary fields retain their patch limits. */
+    public List<String> validateGoalReproposal(TaskContractProposal previous, TaskContractProposal revised) {
+        var errors = new ArrayList<String>();
+        if (previous == null || revised == null) return List.of("goal re-proposal baseline absent");
+        if (previous.objective().trim().equals(revised.objective().trim())
+                && new HashSet<>(previous.scope().excluded()).equals(new HashSet<>(revised.scope().excluded())))
+            errors.add("goal re-proposal requires actual objective or exclusion change");
+        if (!revised.scope().included().containsAll(previous.scope().included())) errors.add("scope removal/change is not allowed");
+        if (!revised.evidenceRefs().containsAll(previous.evidenceRefs())) errors.add("evidence removal is not allowed");
+        if (!revised.openQuestions().equals(previous.openQuestions())) errors.add("open-question change is not allowed");
+        var before=clauseSnapshot(previous);var after=clauseSnapshot(revised);
+        for(var id:before.keySet()) if(after.containsKey(id) && !before.get(id).section().equals(after.get(id).section()))
+            errors.add("clause section move is not allowed: " + id);
+        errors.addAll(validateRevisionDelta(previous,revised).stream().map(RevisionDeltaError::message).toList());
+        return List.copyOf(errors);
+    }
+
     List<RevisionDeltaError> validateRevisionDelta(
             TaskContractProposal previous,
             TaskContractProposal current
@@ -436,8 +453,8 @@ final class TaskContractProposalValidator {
             List<TaskContract.ScopeEntry> entries,
             List<String> errors
     ) {
-        if (entries == null || entries.isEmpty()) {
-            errors.add("scope.included must not be empty");
+        if (entries == null) {
+            errors.add("scope.included must be present (GOAL may propose no files)");
             return;
         }
         var seen = new HashSet<String>();

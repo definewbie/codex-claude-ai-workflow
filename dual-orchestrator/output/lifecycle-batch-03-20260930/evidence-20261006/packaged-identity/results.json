@@ -1,0 +1,68 @@
+[
+  {
+    "name": "cli-initialize",
+    "command": [
+      "rtk",
+      "proxy",
+      "java",
+      "-Dloader.path=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/evidence-20261006/packaged-identity/classes",
+      "-Dloader.main=IdentityProbe",
+      "-cp",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+      "org.springframework.boot.loader.launch.PropertiesLauncher",
+      "dev.dual.cli.CliLedgerFactory",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/evidence-20261006/packaged-identity/workspace",
+      "initialize",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/evidence-20261006/packaged-identity/cli-initialize.json"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "server-read",
+    "command": [
+      "rtk",
+      "proxy",
+      "java",
+      "-Dloader.path=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/evidence-20261006/packaged-identity/classes",
+      "-Dloader.main=IdentityProbe",
+      "-cp",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/target/dual-server-0.1.0-SNAPSHOT.jar",
+      "org.springframework.boot.loader.launch.PropertiesLauncher",
+      "dev.dual.server.ServerLedgerFactory",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/evidence-20261006/packaged-identity/workspace",
+      "read",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/evidence-20261006/packaged-identity/server-read.json"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "cli-read",
+    "command": [
+      "rtk",
+      "proxy",
+      "java",
+      "-Dloader.path=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/evidence-20261006/packaged-identity/classes",
+      "-Dloader.main=IdentityProbe",
+      "-cp",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+      "org.springframework.boot.loader.launch.PropertiesLauncher",
+      "dev.dual.cli.CliLedgerFactory",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/evidence-20261006/packaged-identity/workspace",
+      "read",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/evidence-20261006/packaged-identity/cli-read.json"
+    ],
+    "exit_code": 0
+  },
+  {
+    "same_identity": true,
+    "jars": {
+      "dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar": "b389692c88ec5e402a4c39a789a63c28c12c886559f961b135030f766fb400ad",
+      "dual-server/target/dual-server-0.1.0-SNAPSHOT.jar": "d5df52fdf0a16bd4e189b0259cdaf2c9dafe92fa8c4513ad2a19975a8c7da75c"
+    },
+    "probe_source_sha256": "4f27ef902dcbc00c9e32ab49c6e462ced077b7030b440951d213af7b2fa53107",
+    "probe_class_sha256": "7896023ff7af67556f14391f390117468d604cb82d337e7ddb865e3245a1303c",
+    "live_provider_runs": 0,
+    "native_client_runs": 0,
+    "note": "Fresh packaged factory/L00 protocol probe, three separate JVMs. Not full workflow cold recovery, not native configuration identity proof."
+  }
+]

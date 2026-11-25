@@ -1,0 +1,17 @@
+{
+  "schemaVersion" : 1,
+  "gateId" : "gate-node-gate-human_plan_approval-018",
+  "nodeInstanceId" : "node-gate-human_plan_approval-018",
+  "gateType" : "human.review",
+  "status" : "resolved",
+  "allowedActions" : [ "approve", "revise" ],
+  "openedAt" : "2026-09-13T16:05:51.160531Z",
+  "resolvedAt" : "2026-09-13T16:05:52.869421Z",
+  "result" : {
+    "source_outcome" : "READY_TO_IMPLEMENT",
+    "subject_input_refs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-plan-codex_plan_review-016-run-1789315540711/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.contract.json" ],
+    "source_node_instance_id" : "node-plan-decision-017",
+    "human_action" : "approved",
+    "note" : ""
+  }
+}

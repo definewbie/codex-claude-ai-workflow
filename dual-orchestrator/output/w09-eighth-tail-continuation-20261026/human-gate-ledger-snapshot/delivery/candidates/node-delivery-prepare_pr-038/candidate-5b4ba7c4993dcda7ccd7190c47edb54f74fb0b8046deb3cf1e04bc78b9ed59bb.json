@@ -1,0 +1,26 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "producerNodeInstanceId" : "node-delivery-prepare_pr-038",
+  "iterationId" : "iter-003",
+  "sourceWorkspaceId" : "wsp-20261023T005431Z-29TT",
+  "sourceEffectiveWorkdir" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+  "baseCommit" : "c442fd02fb39d87481bbd940aa5f270947a72a60",
+  "baseTree" : "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+  "acceptedFiles" : [ "README.md", "src/normalize_text.py", "tests/test_normalize_text.py" ],
+  "excludedFiles" : [ ],
+  "patch" : {
+    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/merge.patch",
+    "sha256" : "382a66c6778bdc10472efe46bb02359fd1cf1204c6426a3943f80dd0e7aaf857"
+  },
+  "expectedResultTree" : "0233afaf8755e44b6c8ab156e311ffbef6e50983",
+  "commitMessage" : {
+    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/commit-message.txt",
+    "sha256" : "117887f9387c497de62c1fa13aa52c3b4cb5c40a879c42759547bcc305497020"
+  },
+  "prBody" : {
+    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/pr-body.md",
+    "sha256" : "c8210d698a439166cd6e696eae57a98e982dd452c7a297fdee9610c4ed1b6ffd"
+  },
+  "createdAt" : "2026-10-26T01:21:59.683720Z"
+}

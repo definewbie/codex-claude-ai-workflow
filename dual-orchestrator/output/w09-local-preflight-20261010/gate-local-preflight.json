@@ -1,0 +1,68 @@
+{
+  "checked_at": "2026-10-10T14:00:54.668010+08:00",
+  "local_preparation_status": "PASS; no local blocker discovered",
+  "real_gate_result": "NOT_RUN",
+  "real_run_authorization": "NOT_GRANTED",
+  "checks": [
+    {
+      "id": "P01",
+      "local_status": "APPROVED_G05_REQUIREMENT_ONLY",
+      "basis": "authorization.json + reviewed task-requirement.md",
+      "remaining": "Real GOAL, exact EXECUTION and final delivery gates require user decisions on their actual occurrences."
+    },
+    {
+      "id": "P02",
+      "local_status": "PASS_OFFLINE_AND_INDEPENDENT_REVIEW",
+      "basis": "W08 preparation CC PASS; current 654 sources still identical",
+      "remaining": "Real rendered artifact and model behavior observed during run, not proven by this local preparation."
+    },
+    {
+      "id": "P03",
+      "local_status": "PASS_LOCAL_INITIALIZATION",
+      "basis": "actual frozenRuntimeIdentity, JAR hashes, start classloading source/same loader evidence",
+      "remaining": "Recheck next routing JVM selection/content/loader; only one INLINE routing runner at a time."
+    },
+    {
+      "id": "P04",
+      "local_status": "PASS_METADATA_IN_EFFECTIVE_WORKSPACE",
+      "basis": "actual selected acpx build-info + config, wrapper/dist and launch-spec SHA",
+      "remaining": "Claude/Codex native ACP handshake/model connection NOT_RUN; local metadata is not capability proof."
+    },
+    {
+      "id": "P05",
+      "local_status": "CONFIGURED_NOT_EXERCISED",
+      "basis": "command timeout 600 captured by original runtime identity; reviewed C/X implementation unchanged",
+      "remaining": "If ask occurs, user decides offered once choices, preserve actual request and C/X/result; absence remains NOT_EXERCISED."
+    },
+    {
+      "id": "P06",
+      "local_status": "PASS_HOST_PREREQUISITES_AND_DEFINED_EXIT",
+      "basis": "Python/unittest/importlib observed from effective workspace; approved AC requirements and original readiness path",
+      "remaining": "No readiness registration before real GOAL/waiting occurrence; actual native tool results required at consumer. No candidate ref is valid runtime evidence."
+    },
+    {
+      "id": "P07",
+      "local_status": "PASS_FRESH_LOCAL_INSTANCE",
+      "basis": "parent checked absent; new empty target base/worktree/original ledger; clean and shared Git common-dir checked",
+      "remaining": "Preserve this same fresh case, no reinitialization, no old session/resume, no external attempt yet."
+    },
+    {
+      "id": "P08",
+      "local_status": "APPROVED_LIMITS_NOT_STARTED",
+      "basis": "user G05 local approval: 18 calls/60min active/160k visible actual token, warning120k, no product commit delegation",
+      "remaining": "Explicit real-run authorization pending; before each dispatch inspect original state/budget, first completed usage missing => stop."
+    }
+  ],
+  "provider_calls": 0,
+  "native_ACP_sessions_created": 0,
+  "business_gates_approved": 0,
+  "budgets": {
+    "top_level_calls_max": 18,
+    "active_minutes_max": 60,
+    "command_timeout_seconds": 600,
+    "visible_actual_token_warning": 120000,
+    "visible_actual_token_stop": 160000,
+    "semantic_revision_loops_max": 2
+  },
+  "measurement_scope": "metadata/init/host observations only; no price/usage or native capability fabricated"
+}

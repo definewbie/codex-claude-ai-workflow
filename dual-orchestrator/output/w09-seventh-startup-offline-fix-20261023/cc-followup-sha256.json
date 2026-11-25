@@ -1,0 +1,25 @@
+{
+  "checked_at": "2026-10-22T23:05:20.419613+00:00",
+  "files": {
+    "cache-mtime-followup.json": "b4a4afefe9d43b6023114a8cb67456237b94a784d6aed22f184b5eaffaaf0a39",
+    "cc-review-disposition.md": "929c352d761d5d9c2df5e2df312a403b0fbd298d66795aa730da46956970ca02",
+    "native-initialization-observation-gate.md": "000eb3c8c76c46c729c986bb708aa74b16acbdb257d7e11acb103d17e10a1fc6",
+    "observation-command-candidate.json": "c449f5ed3eb08ba04b49aa8d57d01ae7a22dde760901d8e82445483d8f9f4983"
+  },
+  "additional_source_identity": {
+    ".tools/acpx-e1/source/src/cli/flags.ts": "d1da4ef7f21567e8e541f97d5d9f13d8215bea2b0e0b17cf1bc4a5ef8dd77d06",
+    ".tools/acpx-e1/source/src/cli/session/session-management.ts": "43cdbe2ed9dab541289622a56ea6abcadbac13c7366e1dd69d34d521001b56df",
+    ".tools/acpx-e1/source/src/acp/client.ts": "3f4204143fd1de4d160d74f4b74a966ffa6e5a12b9b682bb5a594a9309c443b5",
+    ".tools/acpx-e1/source/src/cli/command-registration.ts": "da85215e7b28d0416ac7d1c659bdbfb908be97882e048a509737b6533599f89a"
+  },
+  "original_material_manifest_sha256": "44c7ecfeb270b2423598742aaf907da7c8c32d7f0dde01955bf8d44934fdc002",
+  "original_material_all_verified": true,
+  "historical_snapshot_all_verified": true,
+  "new_native_initializations": 0,
+  "new_model_calls": 0,
+  "new_cases": 0,
+  "product_changes": false,
+  "candidate_execution_method": "NOT_ASSEMBLED_NOT_RUN",
+  "review": "author document/identity check; not a new CC review",
+  "next_action": "user approval of one bounded no-prompt initialization; no automatic 90s attempt or eighth case"
+}

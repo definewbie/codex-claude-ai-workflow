@@ -66,7 +66,7 @@ class ContractRevisionDisplayTest {
             f.step();
             f.until(target);
             var node = active(f);
-            var resolved = new TaskContractRevisionContextResolver().resolveForIteration(f.root, f.ws, node.iterationId());
+            var resolved = new TaskContractRevisionContextResolver(dev.dual.runtime.RuntimeTestLedger.ledger()).resolveForIteration(f.root, f.ws, node.iterationId());
             assertTrue(resolved.valid(), resolved.errors().toString());
             Files.writeString(f.root.resolve(resolved.context().lateRoot().acceptanceRef()), "{}");
             var instance = new NodeInstance(node.nodeInstanceId(), node.nodeDefinitionId(), node.kind(), node.handlerType(),
@@ -76,9 +76,15 @@ class ContractRevisionDisplayTest {
             var before = authorityHashes(f);
             var calls = List.copyOf(f.calls);
             if (target.startsWith("context.")) {
-                var result = new ContextBuildPackageHandler().execute(new TaskHandler.TaskContext(f.root, f.ws, definition, instance));
+                var result = new ContextBuildPackageHandler().execute(new TaskHandler.TaskContext(f.root, f.ws, definition, instance, dev.dual.runtime.RuntimeTestLedger.ledger()));
                 assertEquals(NodeStatus.FAILED, result.status());
-                assertEquals("CONTRACT_REVISION_CONTEXT_INVALID", result.result().get("failure_code"));
+                // R01 now binds the root evidence: reject the candidate before display projection.
+                assertEquals("failed", result.outcome());
+                assertEquals("verified task-contract proposal reference is required for product review",
+                        result.result().get("error"));
+                assertTrue(TaskContractProposalReference.resolveProposalFromRefs(f.root, f.ws,
+                        node.inputRefs(), MAPPER).isEmpty());
+                assertTrue(result.outputRefs().isEmpty());
                 assertFalse(Files.exists(f.paths.workstreamDir().resolve("context/" + node.nodeInstanceId() + ".md")));
             } else {
                 var packetPath = f.paths.workstreamDir().resolve("reviews/" + node.nodeInstanceId() + ".json");
@@ -86,8 +92,12 @@ class ContractRevisionDisplayTest {
                 var packetBefore = Files.readAllBytes(packetPath);
                 var markdownBefore = Files.readAllBytes(markdownPath);
                 assertThrows(IOException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                        new GateHandler.GateContext(f.root, f.ws, definition, instance,
-                                f.ledger.loadOpenGateForNode(f.paths, node.nodeInstanceId()).result().get("source_outcome").toString())));
+                        new GateHandler.GateContext(f.root,
+                f.ws,
+                definition,
+                instance,
+                f.ledger.loadOpenGateForNode(f.paths, node.nodeInstanceId()).result().get("source_outcome").toString(),
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
                 assertArrayEquals(packetBefore, Files.readAllBytes(packetPath));
                 assertArrayEquals(markdownBefore, Files.readAllBytes(markdownPath));
             }
@@ -103,9 +113,12 @@ class ContractRevisionDisplayTest {
         var instance = new NodeInstance(node.nodeInstanceId(), node.nodeDefinitionId(), node.kind(), node.handlerType(),
                 node.status(), node.stageId(), node.iterationId(), node.inputRefs(), node.outputRefs(), node.result(),
                 node.runRef(), node.startedAt(), node.finishedAt());
-        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(f.root, f.ws,
-                f.ledger.loadDefinition(f.paths).node(node.nodeDefinitionId()), instance,
-                f.ledger.loadOpenGateForNode(f.paths, node.nodeInstanceId()).result().get("source_outcome").toString()));
+        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(f.root,
+                f.ws,
+                f.ledger.loadDefinition(f.paths).node(node.nodeDefinitionId()),
+                instance,
+                f.ledger.loadOpenGateForNode(f.paths, node.nodeInstanceId()).result().get("source_outcome").toString(),
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
         var packet = MAPPER.readTree(f.root.resolve(result.result().get("review_packet_json").toString()).toFile());
         assertEquals(expected, packet.path("contractRevision"));
         var markdown = Files.readString(f.root.resolve(result.result().get("review_packet").toString()));
@@ -129,7 +142,7 @@ class ContractRevisionDisplayTest {
             if (key.equals("subject_input_refs")) result.putArray(key);
             else result.put(key, "forged-source");
             MAPPER.writeValue(gatePath.toFile(), gate);
-            assertThrows(IOException.class, () -> new TaskContractRevisionContextResolver()
+            assertThrows(IOException.class, () -> new TaskContractRevisionContextResolver(dev.dual.runtime.RuntimeTestLedger.ledger())
                     .proposalForContractGate(f.root, f.ws, node.nodeInstanceId()));
         }
     }
@@ -151,15 +164,19 @@ class ContractRevisionDisplayTest {
                 var markdown = f.paths.workstreamDir().resolve("reviews/" + node.nodeInstanceId() + ".md");
                 var before = Files.readAllBytes(packet);
                 var beforeMarkdown = Files.readAllBytes(markdown);
-                var file = f.paths.workstreamDir().resolve("artifacts/" + name);
+                var file = f.root.resolve(node.inputRefs().stream().filter(ref -> ref.endsWith("/" + name)).findFirst().orElseThrow());
                 var changed = (com.fasterxml.jackson.databind.node.ObjectNode) MAPPER.readTree(file.toFile());
                 changed.put(name.equals("task-contract.json") ? "objective" : "summary", "NOT THE COMPILED CANDIDATE");
                 MAPPER.writeValue(file.toFile(), changed);
                 var instance = new NodeInstance(node.nodeInstanceId(), node.nodeDefinitionId(), node.kind(), node.handlerType(),
                         node.status(), node.stageId(), node.iterationId(), node.inputRefs(), node.outputRefs(), node.result(),
                         node.runRef(), node.startedAt(), node.finishedAt());
-                assertThrows(IOException.class, () -> new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
-                        f.root, f.ws, f.ledger.loadDefinition(f.paths).node(node.nodeDefinitionId()), instance, "completed")));
+                assertThrows(IOException.class, () -> new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(f.root,
+                f.ws,
+                f.ledger.loadDefinition(f.paths).node(node.nodeDefinitionId()),
+                instance,
+                "completed",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
                 assertArrayEquals(before, Files.readAllBytes(packet));
                 assertArrayEquals(beforeMarkdown, Files.readAllBytes(markdown));
             }
@@ -168,11 +185,11 @@ class ContractRevisionDisplayTest {
 
     private static Map<String, String> authorityHashes(AcceptanceRepairSequenceTest.Fixture f) throws Exception {
         var hashes = new java.util.TreeMap<String, String>();
-        for (var name : List.of("artifacts/task-contract.json", "artifacts/contract-resolution.json")) {
-            var path = f.paths.workstreamDir().resolve(name);
-            assertTrue(Files.isRegularFile(path), name);
-            hashes.put(name, TaskContractArtifactWriter.sha256(Files.readAllBytes(path)));
+        try (var files = Files.walk(f.paths.workstreamDir().resolve("artifacts/contracts"))) {
+            for (var path : files.filter(Files::isRegularFile).toList())
+                hashes.put(f.root.relativize(path).toString(), TaskContractArtifactWriter.sha256(path));
         }
+        assertFalse(hashes.isEmpty());
         return hashes;
     }
 
@@ -186,7 +203,7 @@ class ContractRevisionDisplayTest {
     @Test
     void initialContextAndBothPacketsKeepExistingDisplayWithoutRevisionSection() throws Exception {
         var reviewRef = initialProposal();
-        var candidate = AgentEvidenceIndex.validatedDocument(root, "ws", reviewRef, MAPPER)
+        var candidate = AgentEvidenceIndex.validatedDocument(dev.dual.runtime.RuntimeTestLedger.ledger(), root, "ws", reviewRef, MAPPER)
                 .orElseThrow().reviewSubject();
         var proposalRef = ".agent/workstreams/ws/artifacts/proposal-reference.json";
         MAPPER.writeValue(root.resolve(proposalRef).toFile(), candidate.toMap());
@@ -211,10 +228,12 @@ class ContractRevisionDisplayTest {
 
     @Test
     void missingIterationCannotPublishEitherPacket() throws Exception {
+        initialProposal();
         for (var purpose : List.of("requirement", "contract")) {
             var failure = assertThrows(IOException.class, () -> new HumanReviewGateHandler()
                     .openOrInspect(gate(purpose, "iter-missing", List.of(), Map.of())));
-            assertTrue(failure.getMessage().contains("CONTRACT_REVISION_CONTEXT_INVALID"));
+            assertTrue(failure.getMessage().contains(purpose.equals("contract")
+                    ? "GOAL_CONTRACT_NOT_QUALIFIED" : "CONTRACT_REVISION_CONTEXT_INVALID"), failure.toString());
         }
         assertFalse(Files.exists(root.resolve(".agent/workstreams/ws/reviews")));
     }
@@ -222,7 +241,7 @@ class ContractRevisionDisplayTest {
     @Test
     void missingCandidateIterationFailsBeforeWritingContext() throws Exception {
         var reviewRef = initialProposal();
-        var candidate = AgentEvidenceIndex.validatedDocument(root, "ws", reviewRef, MAPPER)
+        var candidate = AgentEvidenceIndex.validatedDocument(dev.dual.runtime.RuntimeTestLedger.ledger(), root, "ws", reviewRef, MAPPER)
                 .orElseThrow().reviewSubject();
         var proposalRef = ".agent/workstreams/ws/artifacts/proposal-reference.json";
         MAPPER.writeValue(root.resolve(proposalRef).toFile(), candidate.toMap());
@@ -252,17 +271,18 @@ class ContractRevisionDisplayTest {
         config.put("target_node", "intake.codex_product_review");
         config.put("required_input_artifact", "task_contract_proposal");
         if (!governed) config.put("include_sections", List.of());
-        return new TaskHandler.TaskContext(root, "ws",
-                new NodeDefinition("ctx.review", NodeKind.TASK, "context.build_package", config),
-                node("ctx.review", NodeKind.TASK, "context.build_package", iteration, refs, Map.of()));
+        return new TaskHandler.TaskContext(root, "ws", new NodeDefinition("ctx.review", NodeKind.TASK, "context.build_package", config), node("ctx.review", NodeKind.TASK, "context.build_package", iteration, refs, Map.of()), dev.dual.runtime.RuntimeTestLedger.ledger());
     }
 
     private GateHandler.GateContext gate(String purpose, String iteration, List<String> refs, Map<String, Object> result) {
         var id = "gate." + purpose;
-        return new GateHandler.GateContext(root, "ws",
+        return new GateHandler.GateContext(root,
+                "ws",
                 new NodeDefinition(id, NodeKind.GATE, "human.review", Map.of("gate_purpose", purpose,
                         "allowed_actions", List.of("approve", "revise", "reject"))),
-                node(id, NodeKind.GATE, "human.review", iteration, refs, result), "READY_FOR_PRODUCT_REVIEW");
+                node(id, NodeKind.GATE, "human.review", iteration, refs, result),
+                "READY_FOR_PRODUCT_REVIEW",
+                dev.dual.runtime.RuntimeTestLedger.ledger());
     }
 
     private static NodeInstance node(String id, NodeKind kind, String handler, String iteration,

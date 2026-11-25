@@ -1,0 +1,16 @@
+[
+  {
+    "case": "w09-real-gate-20261010",
+    "files": 117,
+    "all_file_bytes_equal": true,
+    "added_or_removed_files": 0,
+    "no_ledger_recovery": true
+  },
+  {
+    "case": "w09-fresh-second-gate-20261010",
+    "files": 154,
+    "all_file_bytes_equal": true,
+    "added_or_removed_files": 0,
+    "no_ledger_recovery": true
+  }
+]

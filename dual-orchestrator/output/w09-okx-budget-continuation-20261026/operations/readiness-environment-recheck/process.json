@@ -1,0 +1,45 @@
+{
+  "commands": [
+    [
+      "maven-version",
+      [
+        "/Users/kriswang/work/opensource/maven/bin/mvn",
+        "-o",
+        "-v"
+      ]
+    ],
+    [
+      "docker-server",
+      [
+        "/usr/local/bin/docker",
+        "version",
+        "--format",
+        "{{.Server.Version}}"
+      ]
+    ],
+    [
+      "mysql-cache",
+      [
+        "/usr/local/bin/docker",
+        "image",
+        "inspect",
+        "mysql:8.4",
+        "--format",
+        "{{.Id}}"
+      ]
+    ],
+    [
+      "ryuk-cache",
+      [
+        "/usr/local/bin/docker",
+        "image",
+        "inspect",
+        "testcontainers/ryuk:0.14.0",
+        "--format",
+        "{{.Id}}"
+      ]
+    ]
+  ],
+  "model_calls": 0,
+  "started_at": "2026-10-26T16:12:43.116922+00:00"
+}

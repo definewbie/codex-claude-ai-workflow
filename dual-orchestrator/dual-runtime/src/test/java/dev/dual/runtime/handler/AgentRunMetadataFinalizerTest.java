@@ -92,13 +92,13 @@ class AgentRunMetadataFinalizerTest {
     }
 
     @Test
-    void malformedNodeResultAdapterSignalsCannotBecomeNoSignal() {
+    void nodeFactsCannotFinalizeWithoutProgramOwnedRunMetadata() {
         assertMalformedNodeResultSignalsRejected(null);
         assertMalformedNodeResultSignalsRejected(List.of(Map.of("type", "NOT_AN_ADAPTER_SIGNAL")));
     }
 
     @Test
-    void mapsModelMismatchFailureReasonToTypedAdapterSignal() throws Exception {
+    void consumesTypedModelMismatchSignalRatherThanLegacyReason() throws Exception {
         var runJson = tempDir.resolve(".agent/workstreams/ws-model/runs/run-1/run.json");
         Files.createDirectories(runJson.getParent());
         Files.writeString(runJson, """
@@ -111,6 +111,11 @@ class AgentRunMetadataFinalizerTest {
                   "status": "failed"
                 }
                 """);
+
+        var recorded = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(runJson.toFile());
+        recorded.set("processResult", OBJECT_MAPPER.valueToTree(Map.of("exitCode", 4, "usability", "KILLED_AFTER_RECOVERABLE_SIGNAL", "durationMs", 1)));
+        recorded.set("adapterSignals", OBJECT_MAPPER.valueToTree(List.of(Map.of("type", "MODEL_MISMATCH", "message", "native structured status", "superseded", false))));
+        OBJECT_MAPPER.writeValue(runJson.toFile(), recorded);
 
         var facts = new LinkedHashMap<String, Object>();
         facts.put("run_metadata", ".agent/workstreams/ws-model/runs/run-1/run.json");
@@ -151,6 +156,11 @@ class AgentRunMetadataFinalizerTest {
                   "status": "failed"
                 }
                 """);
+
+        var recorded = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(runJson.toFile());
+        recorded.set("processResult", OBJECT_MAPPER.valueToTree(Map.of("exitCode", 0, "usability", "EXITED_ZERO", "durationMs", 1)));
+        recorded.set("adapterSignals", OBJECT_MAPPER.valueToTree(List.of(Map.of("type", "AGENT_RECONNECT_REQUIRED", "message", "native structured status", "superseded", false))));
+        OBJECT_MAPPER.writeValue(runJson.toFile(), recorded);
 
         var facts = new LinkedHashMap<String, Object>();
         facts.put("run_metadata", ".agent/workstreams/ws-reconnect/runs/run-reconnect/run.json");
@@ -270,6 +280,11 @@ class AgentRunMetadataFinalizerTest {
                   }
                 }
                 """);
+
+        var recorded = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(runJson.toFile());
+        recorded.set("processResult", OBJECT_MAPPER.valueToTree(Map.of("exitCode", 0, "usability", "EXITED_ZERO", "durationMs", 1)));
+        recorded.set("adapterSignals", OBJECT_MAPPER.valueToTree(List.of()));
+        OBJECT_MAPPER.writeValue(runJson.toFile(), recorded);
 
         var facts = new LinkedHashMap<String, Object>();
         facts.put("run_id", "run-2");
@@ -576,8 +591,9 @@ class AgentRunMetadataFinalizerTest {
         ), AgentResultContractResult.valid("IMPLEMENTED"),
                 List.of(ArtifactContractResult.requiredValid("agent_output_contract")), null);
 
-        assertThrows(IllegalArgumentException.class,
+        var failure = assertThrows(IllegalStateException.class,
                 () -> new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult));
+        assertTrue(failure.getMessage().contains("program-owned run metadata"), failure.toString());
     }
 
     @Test
@@ -650,11 +666,11 @@ class AgentRunMetadataFinalizerTest {
         // Production path: ledger stores the finalized node result; RecoveryAssessment consumes
         // the typed executionOutcome; WorkstreamAttention renders it.
         var paths = new WorkstreamPaths(tempDir, new DualId(ws));
-        var ledger = new WorkflowFileLedger();
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
         var definition = new WorkflowDefinition("wf-bootstrap-chain", 1, "intake.codex_review",
                 List.of(new NodeDefinition("intake.codex_review", NodeKind.TASK, "acpx.agent_run", Map.of())),
                 List.of());
-        ledger.initialize(paths, "wf-bootstrap-chain", definition);
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-bootstrap-chain", definition);
         var initial = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, initial.nodeInstanceId(), NodeStatus.FAILED,
                 "session_bootstrap_failed", List.of(), finalized.result());
@@ -725,11 +741,11 @@ class AgentRunMetadataFinalizerTest {
         // Same production path as the bootstrap test: finalizer -> run.json -> ledger.
         var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, nodeResult);
         var paths = new WorkstreamPaths(tempDir, new DualId(ws));
-        var ledger = new WorkflowFileLedger();
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
         var definition = new WorkflowDefinition("wf-reconnect-chain", 1, "intake.codex_review",
                 List.of(new NodeDefinition("intake.codex_review", NodeKind.TASK, "acpx.agent_run", Map.of())),
                 List.of());
-        ledger.initialize(paths, "wf-reconnect-chain", definition);
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-reconnect-chain", definition);
         var initial = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, initial.nodeInstanceId(), NodeStatus.FAILED,
                 "RECOVERABLE_AGENT_RECONNECT", List.of(), finalized.result());

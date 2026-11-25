@@ -1,0 +1,113 @@
+{
+  "startedAt": "2026-09-28T04:18:00.718460+00:00",
+  "identity": {
+    "binary": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "binarySha256": "b973d440acac501fd2594a43e7ca9ce41e0a65b9dfb28d0d7a7837c99e1261e3",
+    "payloadSha256": "5efded51c5f8260715773dff62efd314034d088540e61bdfe9d54e730e8b7684",
+    "driverSha256": "0260500134d79bcc0d1dcf970f03b2ad2b0716f0fc24297909fb36038a2ab15d"
+  },
+  "command": [
+    "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "sandbox",
+    "-P",
+    ":read-only",
+    "-C",
+    "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-native-hdcqr7g_/workspace",
+    "--",
+    "/usr/bin/python3",
+    "-B",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-restricted-execution-20260928/native-probe.py",
+    "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-native-hdcqr7g_"
+  ],
+  "fixture": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-native-hdcqr7g_",
+  "hostWriteControl": true,
+  "before": {
+    "fixture.json": {
+      "sha256": "e2dfe5c1b708262c676be935e61da30358665820d999e65b819e1f6151a475b8"
+    },
+    "workspace/alias-to-control": {
+      "link": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-native-hdcqr7g_/workspace/.agent/nodes.json"
+    },
+    "workspace/.gitignore": {
+      "sha256": "d7d71a7189cf7613e575fb302af37136a07230acd26f439cf191251c0f0def0b"
+    },
+    "workspace/alias-to-external-git": {
+      "link": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-native-hdcqr7g_/external-git/config"
+    },
+    "external-git/config": {
+      "sha256": "68ec870e8f4732d175b9794d7859fbb7df5f51ae8dc6d2e579514c29ccc69e8a"
+    },
+    "workspace/ignored/cache": {
+      "sha256": "9820ca924a2baf475ac28b13ae20bb19f17f83eeec65e5d0084614004512f060"
+    },
+    "workspace/.agent/policy.json": {
+      "sha256": "a2adcf63a5acd2987625fed861566501914c0fedec65123a5d6d12113e326f8e"
+    },
+    "workspace/.agent/nodes.json": {
+      "sha256": "c037611c28f63b3156f65aa4003989e5d5df7421a9cea49ad1c727eaab4099a5"
+    },
+    "workspace/.git/config": {
+      "sha256": "cae33efdb02cf774435c1ff9cb16bcc1014606908530c6e1dc727615fe3e8cda"
+    },
+    "workspace/.git/HEAD": {
+      "sha256": "28d25bf82af4c0e2b72f50959b2beb859e3e60b9630a5e8c603dad4ddb2b6e80"
+    },
+    "workspace/.git/description": {
+      "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee"
+    },
+    "workspace/src/delete-me.txt": {
+      "sha256": "bf648cb437bbc2ee4366ffd111c502c6f56d0fb430ad3c9fe7ae70a867426fd9"
+    },
+    "workspace/src/rename-me.txt": {
+      "sha256": "909bb46556d922422353e95a6e9f6cecc05f7bb59682db861f837db8328240f3"
+    },
+    "workspace/src/sample.txt": {
+      "sha256": "f676bbcbf159554c7d8c27a98196616bfc45475dd9d7004cf1178faf3a2bf341"
+    },
+    "workspace/.git/info/exclude": {
+      "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1"
+    },
+    "workspace/.git/hooks/commit-msg.sample": {
+      "sha256": "1f74d5e9292979b573ebd59741d46cb93ff391acdd083d340b94370753d92437"
+    },
+    "workspace/.git/hooks/pre-rebase.sample": {
+      "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3"
+    },
+    "workspace/.git/hooks/pre-commit.sample": {
+      "sha256": "f9af7d95eb1231ecf2eba9770fedfa8d4797a12b02d7240e98d568201251244a"
+    },
+    "workspace/.git/hooks/applypatch-msg.sample": {
+      "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7"
+    },
+    "workspace/.git/hooks/fsmonitor-watchman.sample": {
+      "sha256": "e0549964e93897b519bd8e333c037e51fff0f88ba13e086a331592bf801fa1d0"
+    },
+    "workspace/.git/hooks/pre-receive.sample": {
+      "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989"
+    },
+    "workspace/.git/hooks/prepare-commit-msg.sample": {
+      "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619"
+    },
+    "workspace/.git/hooks/post-update.sample": {
+      "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5"
+    },
+    "workspace/.git/hooks/pre-merge-commit.sample": {
+      "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53"
+    },
+    "workspace/.git/hooks/pre-applypatch.sample": {
+      "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475"
+    },
+    "workspace/.git/hooks/pre-push.sample": {
+      "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a"
+    },
+    "workspace/.git/hooks/update.sample": {
+      "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106"
+    },
+    "workspace/.git/hooks/push-to-checkout.sample": {
+      "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f"
+    }
+  },
+  "providerCalls": 0,
+  "tokenCost": 0,
+  "scope": "native command sandbox only; not model/ACP/Dual lifecycle"
+}

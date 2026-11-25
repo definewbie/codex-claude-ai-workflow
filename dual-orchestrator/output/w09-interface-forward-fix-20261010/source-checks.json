@@ -1,0 +1,22 @@
+[
+  {
+    "file": ".tools/acpx-e1/source/src/acp/agent-session-id.ts",
+    "sha256": "718fd63fecf4cfed94f8e27df83e1f6ace1ec5893e1f60332b11696ad1e0b4d3"
+  },
+  {
+    "file": ".tools/acpx-e1/source/src/types.ts",
+    "sha256": "3e7d49604a93b7615e42fe5afea3b6353362456bc2586b2e4896f943e31da2da"
+  },
+  {
+    "file": "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+    "sha256": "67052899111229e15f7c87bb32fd0b3e1621d6a913bb14d9b965bc18ed3493de"
+  },
+  {
+    "file": "dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java",
+    "sha256": "cedfc36b2de5743d207ff0b2c3a54383f224dfbd01516058b957c24d8ae7675c"
+  },
+  {
+    "file": "dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcome.java",
+    "sha256": "80d521596566cea2d2ed8cb6e716cb870bc6b49e56d529c2565ed940d794eb0c"
+  }
+]

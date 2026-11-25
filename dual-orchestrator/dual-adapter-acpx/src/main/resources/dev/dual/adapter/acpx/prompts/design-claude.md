@@ -16,9 +16,10 @@ You are Claude acting as the primary architect and implementer. Use the user req
 Do not implement code in this stage. Produce an implementation-ready design that is narrow, testable, and avoids unrelated refactors.
 
 Declare the complete planned file set in `result.design.planned_files`, for initial and replacement designs alike.
-Copy exact canonical paths and operations from the approved TaskContract scope; prose cannot authorize other paths.
+Under GOAL, these are proposals, not authorization: propose exact canonical paths and operations consistent with the approved objective and exclusions. GOAL does not contain an approved implementation file set.
+Under EXECUTION, proposed paths and operations must remain within its approved scope; a change outside it requires new approval before implementation.
 Each entry assigns a responsibility, not an actual file change. CREATE files need not exist yet.
-The declared set may be a subset of approved scope, but must cover every change this design proposes.
+The declared set must cover every change this design proposes. Independent design and plan review precede exact EXECUTION scope approval; neither review nor prose authorizes repository changes.
 
 Revision discipline:
 

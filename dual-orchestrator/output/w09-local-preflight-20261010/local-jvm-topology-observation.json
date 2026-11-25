@@ -1,0 +1,53 @@
+{
+  "process": {
+    "argv": [
+      "java",
+      "-Xlog:class+load=debug:file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-local-preflight-20261010/start-classloading.log:uptime,level,tags",
+      "-jar",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+      "start",
+      "--workdir=/private/tmp/dual-w09-newlines-20261010/target",
+      "--worktree-dir=/private/tmp/dual-w09-newlines-20261010/worktree",
+      "--branch=codex/w09-newlines-20261010",
+      "--workflow-variant=terminal-delivery",
+      "--prompt-language=zh-CN",
+      "--task-file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-local-preflight-20261010/task-requirement.md"
+    ],
+    "pid": 21372,
+    "started_at": "2026-10-10T13:56:43.208837+08:00",
+    "mode": "local start without --run",
+    "provider_calls_expected": 0
+  },
+  "exit": {
+    "exit": 0,
+    "elapsed_seconds": 1.584,
+    "ended_at": "2026-10-10T13:56:44.793121+08:00"
+  },
+  "classes": {
+    "dev.dual.cli.DualCtlApplication": {
+      "source_line": "[0.123s][info ][class,load] dev.dual.cli.DualCtlApplication source: jar:nested:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar/!BOOT-INF/classes/!/",
+      "loader_line": "[0.123s][debug][class,load]  klass: 0x00000fc001051c00 super: 0x00000fc000176450 loader: [loader data: 0x0000000102240570 for instance a 'org/springframework/boot/loader/launch/LaunchedClassLoader'{0x000000043fb33c08}] bytes: 2118 checksum: fe703d92",
+      "loader_data_identity": "0x0000000102240570"
+    },
+    "dev.dual.cli.CliLedgerFactory": {
+      "source_line": "[0.821s][info ][class,load] dev.dual.cli.CliLedgerFactory source: jar:nested:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar/!BOOT-INF/classes/!/",
+      "loader_line": "[0.821s][debug][class,load]  klass: 0x00000fc001274e98 super: 0x00000fc000176450 loader: [loader data: 0x0000000102240570 for instance a 'org/springframework/boot/loader/launch/LaunchedClassLoader'{0x000000043c800010}] bytes: 1795 checksum: 2679693c",
+      "loader_data_identity": "0x0000000102240570"
+    },
+    "dev.dual.flow.liteflow.FlowKernelProvider": {
+      "source_line": "[0.821s][info ][class,load] dev.dual.flow.liteflow.FlowKernelProvider source: jar:nested:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar/!BOOT-INF/lib/dual-flow-liteflow-0.1.0-SNAPSHOT.jar!/",
+      "loader_line": "[0.821s][debug][class,load]  klass: 0x00000fc0012750a8 super: 0x00000fc000176450 loader: [loader data: 0x0000000102240570 for instance a 'org/springframework/boot/loader/launch/LaunchedClassLoader'{0x000000043c800010}] bytes: 1907 checksum: 821c2cac",
+      "loader_data_identity": "0x0000000102240570"
+    },
+    "dev.dual.flow.liteflow.LiteFlowPrototypeKernel": {
+      "source_line": "[0.821s][info ][class,load] dev.dual.flow.liteflow.LiteFlowPrototypeKernel source: jar:nested:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar/!BOOT-INF/lib/dual-flow-liteflow-0.1.0-SNAPSHOT.jar!/",
+      "loader_line": "[0.821s][debug][class,load]  klass: 0x00000fc0012754c0 super: 0x00000fc000176450 interfaces: 0x00000fc0012752b8 0x00000fc00017d050 loader: [loader data: 0x0000000102240570 for instance a 'org/springframework/boot/loader/launch/LaunchedClassLoader'{0x000000043c800010}] bytes: 6632 checksum: 188a1131",
+      "loader_data_identity": "0x0000000102240570"
+    }
+  },
+  "same_loader_for_entrypoint_and_kernel": true,
+  "holder_class": "NOT_LOADED_DURING_INITIALIZATION; recheck actual routing runner if loaded",
+  "concurrent_routing_processes_launched": 0,
+  "scope": "initialization JVM only; future run process must be checked again",
+  "class_log_sha256": "121b956ef8c4cb33255e70683c11fb11098902d333c10e1038fd8eba97124701"
+}

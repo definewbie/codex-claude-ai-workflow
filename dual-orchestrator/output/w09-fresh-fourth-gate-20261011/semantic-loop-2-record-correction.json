@@ -1,0 +1,7 @@
+{
+  "category": "OPERATOR_RECORD_SCRIPT_ERROR",
+  "no_domain_write_from_failed_script": true,
+  "correction": "use existing records schema; record timing is after start, not backdated",
+  "dispatch_precondition": "core author revision route and prior budget admission",
+  "criterion_change": false
+}

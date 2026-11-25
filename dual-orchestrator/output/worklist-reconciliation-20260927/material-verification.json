@@ -1,0 +1,30 @@
+{
+  "verifiedAt": "2026-09-27T15:12:53.151849+00:00",
+  "baseline": "baseline.json",
+  "baselineFileCount": 1317,
+  "changedExistingFiles": [
+    "dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "unchangedExistingFiles": 1315,
+  "newMainMaterial": "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+  "documents": {
+    "dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md": "ec0907f402a50e126f1bff26f33c1a475768f93438a12737990fb7706d9aa2d6",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "1bb6ee17c36fdcbd8766fcf0b57aa9c3c3c8c7a33c199e47d047293a84f7959a",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "e10184dcdf9afbc589eb8ea2b066fb628298f8a728ff0b6160eb58cddc8bca14"
+  },
+  "reconciledFileRows": 35,
+  "workItems": 10,
+  "coverageEntries": 15,
+  "pendingDesignDecisions": 10,
+  "checkedLinks": 67,
+  "missingLinks": [],
+  "testTotals": {
+    "tests": 97,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "archivedReports": 10,
+  "scope": "Material integrity and selected offline tests only; no independent review or product lifecycle completion claim."
+}

@@ -1,0 +1,23 @@
+{
+  "verifiedAt": "2026-09-28T02:19:38.516684+00:00",
+  "baselineFileCount": 1319,
+  "changedExistingFiles": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "unchangedExistingFiles": 1316,
+  "documentHashes": {
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "deb5f825128327edd670b7814ba7fd8fee90fcd5d01a0bd5adebca9c64d510e4",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "d1cdc7f8c0876dfb50872109cc741cf7b811d43c6f779688df40d2ee9c393978",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "24e4c23929fc11dc86cebf0a0ab70d4073fae6a84203792055667fdc515b61c3"
+  },
+  "previousD04ReportUnchanged": true,
+  "tablesChecked": 29,
+  "tableErrors": [],
+  "missingLinks": [],
+  "diffCheckExitCode": 0,
+  "testsRun": false,
+  "providerInvoked": false,
+  "review": "Author check of review disposition; added option not independently reviewed. D04 direction pending. Implementation not authorized."
+}

@@ -1,0 +1,19 @@
+请对 Dual 完整研发生命周期可靠性设计做一次独立只读评审，中文回答。仅评审，不自动进入实现。只读一个 reviewer，不再委派 agent；不要修改文件、运行测试/构建/provider/真实 E2E、恢复 workstream 或执行 Git 写操作。使用只读文件读取/搜索，不使用写工具。不要读取凭据或无关私人配置。
+
+仓库根：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow。先读根 AGENTS.md 中的边界及评审要求。
+主要待评审文档：dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md。
+辅助入口：dual-orchestrator/docs/plans/20260913-workflow-first-convergence-redesign.zh-CN.md 与 __ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md 的本次入口修订。
+现有评估/证据：dual-orchestrator/output/architecture-audit-20260917/assessment.zh-CN.md 与 case-evidence.zh-CN.md。
+
+HEAD 3362eb42；工作区已有未提交实现。不能把 HEAD、工作树、旧样本或旧报告的结论混同。按需要定向读当前代码、既有 R1 评估/方案比较和支持你判断的原始证据，勿重复遍历全部历史日志。报告/文档是待核验材料，不是正确答案。
+
+任务：自行重建需求/授权→设计计划→实现→自测/验收→返工或补证据→重新批准→候选交付→中断恢复的控制链。检查职责 owner、Definition/Instance/Execution、输入与 authority、durable writes/外部副作用、读模型、重启与重复动作、各 variant 和 inline/worker 兄弟路径。每个关键结论考虑 Declared by、Proven by、Consumed by、Enforced before、Failure route、Cannot-bypass test。合法继续与非法拒绝同等重要。
+
+重点判断这份“整体设计与验收契约”是否适合进入后续详细设计；它不声称每项已有逐文件实施方案。已明确留给详细设计的选择不自动算缺陷，但若这项留白掩盖了根本矛盾、必要 authority 或无法判定的完成标准，请指出。独立检查是否过度设计、过强保证、把投影当事实、把静态检查当动态证明、把正确拒绝归错因、混淆模型执行失败和业务返工、或以评审 PASS 暗中授权实现。不要只核对文档列出的自证断言，不预设 PASS 或问题数量。
+
+请输出：
+1. 设计层 PASS/WARN/FAIL 与简短理由。
+2. 按严重程度列必要修正：证据路径/位置、具体问题、完整链路影响、最小设计修正；建议与阻塞分开。
+3. 六维边界覆盖中的实质缺口与尚未核验范围。
+4. 哪些子项仍是 DESIGN GAP、是否应阻止实施；明确评审不授予实施或 E2E 权限。
+最终只返回评审文本。不要写文件，不实现，不新增泛化平台建议，不把未检查项标 PASS。

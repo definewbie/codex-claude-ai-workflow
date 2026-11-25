@@ -1,0 +1,80 @@
+{
+  "status": "INVALID",
+  "command": "rtk proxy mvn clean test",
+  "exit_code": 143,
+  "single_clean_reactor": false,
+  "seconds": 161.5,
+  "modules": {
+    "dual-adapter-acpx": {
+      "tests": 399,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 35
+    },
+    "dual-adapter-git": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 2
+    },
+    "dual-cli": {
+      "tests": 94,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 26
+    },
+    "dual-core": {
+      "tests": 126,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 16
+    },
+    "dual-flow-liteflow": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 4
+    },
+    "dual-ledger-file": {
+      "tests": 154,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 23
+    },
+    "dual-runtime": {
+      "tests": 149,
+      "failures": 0,
+      "errors": 2,
+      "skipped": 0,
+      "suites": 18
+    },
+    "dual-server": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 13
+    }
+  },
+  "total": {
+    "tests": 1024,
+    "failures": 0,
+    "errors": 2,
+    "skipped": 0,
+    "suites": 137
+  },
+  "identity_inputs": 2985,
+  "identity_drift": [],
+  "native_client_runs": 0,
+  "live_provider_runs": 0,
+  "extra_agents": 0,
+  "B03": "IN_PROGRESS_PENDING_INDEPENDENT_REVIEW",
+  "real_gate": "NO_GO",
+  "reason": "Stopped owned Maven after sibling self-review found cleanup incorrectly revalidates invalidated policy; incomplete reactor reports include untouched module reports and are not a current coverage total"
+}

@@ -1,0 +1,1 @@
+Use Read exactly once to read /private/tmp/dual-deepseek-read-20260909/nonce.txt. No other tools. Reply only with JSON {"nonce":"<file contents>"}.

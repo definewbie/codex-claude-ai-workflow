@@ -1,0 +1,47 @@
+{
+  "commit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "files": [
+    {
+      "path": "codex-rs/hooks/src/registry.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/registry.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [
+        "IncompleteRead(12474 bytes read, 3801 more expected)"
+      ],
+      "bytes": 11060,
+      "gitBlobSha": "b322da55d807157532f9b4490f0811a67805834d",
+      "sha256": "4c9e29f146fd409a515d198ae86c46d1852e8e84d4a0f3bcd73c45548311c160",
+      "blobVerified": true
+    },
+    {
+      "path": "codex-rs/hooks/src/engine/mod.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/engine/mod.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [
+        "IncompleteRead(23546 bytes read, 1528 more expected)"
+      ],
+      "bytes": 17440,
+      "gitBlobSha": "deaf29679a8ce5b35af474d4309b52a8a3a72ff7",
+      "sha256": "fbee148f9c3287798ecdd641066d56a69d8b4263be727c62615843244c4a6791",
+      "blobVerified": true
+    },
+    {
+      "path": "codex-rs/hooks/src/schema.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/schema.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [
+        "IncompleteRead(61698 bytes read, 3217 more expected)"
+      ],
+      "bytes": 46372,
+      "gitBlobSha": "5558b6665bf4a05d622f7d814b984c885e98db74",
+      "sha256": "7b5c817c279709bc5092f8b6e6147788ff369e90818ce5debee93eb25ce5de89",
+      "blobVerified": true
+    },
+    {
+      "path": "codex-rs/hooks/src/engine/discovery.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/engine/discovery.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [],
+      "bytes": 62713,
+      "gitBlobSha": "5003dbd24f081d1bc56a2f897fa51ef557a8caab",
+      "sha256": "fd05ee932079df2b5128f170beaf0d8e5c8630a56eadbcf9de9f25806e772b04",
+      "blobVerified": true
+    }
+  ]
+}

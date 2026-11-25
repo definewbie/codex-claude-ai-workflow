@@ -1,0 +1,13 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 W09 第六例停止做独立受影响评审，遵守 AGENTS.md。只读，不改代码/文档/账本，不运行native/provider/注入探针、不启动额外agent，不恢复本例或开启下一例。无需重审无关历史。
+
+入口：output/w09-fresh-sixth-gate-20261015/assessment.md。对照当次fresh-sixth-gate.md、run-authorization.json、gate-local-preflight.json、selected-release.json；现场位置见instance-location.json，stopped-ledger-snapshot及stop-session-operations保留固定材料，逐请求对照见stopped-progress.json，源码锚点见stop-source-index.json/source-excerpts.txt。提交前末检见final-identity-recheck.json。
+
+请自行重建提案→独立复评→返修决定→固定R01/资格→真实返修→一次格式修正→严格解析/唯一outcome→R03/L03→恢复→用量观察/停止链和关键失败切面，不预设作者结论。
+
+重点：
+1. Gate分类和领域状态是否准确，启动/停止/预算/历史保留有无越界；次数、部分量、案头合计与固定总量是否严格分开。
+2. 返修未知response键是正确拒绝、模型偶发不合规、提示契约缺口、修正诊断缺口中的哪些组合？请核实际full/patch分支、模型raw与修正prompt，不预设必须改生产。最小有收益的处置是什么，哪些不能放宽？
+3. current transcript的实际格式和reader强制消费是否匹配？对可读正文、真正坏协议帧、错身份/重复/部分量以及共享严格出口分别判断；现有owner能否有界解决，哪些证据/反证必要，避免“忽略坏帧”式放宽。
+4. 本次新ID/R01/full出口分别证明到哪一层、哪些尚未证明；不能将未执行的merger/复评/人门冒称真实闭合。
+
+按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 说明；给分级发现、证据、未核验范围、下一步最小修复/验证建议及ROI。区分root-cause forward fix、仍受支持历史恢复、single-case rescue；不要求救本例，不预填PASS或修复方案。

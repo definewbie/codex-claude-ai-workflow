@@ -1,0 +1,22 @@
+{
+  "source_status_unchanged": true,
+  "source_entry_count": 92,
+  "source_observed_tracked_bytes_unchanged": true,
+  "source_env_not_read": true,
+  "all_305_baseline_file_bytes_unchanged": true,
+  "prior_stop_files": [
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/stop-required.json",
+      "same": true
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/stop-required.json",
+      "same": true
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/stop-required.json",
+      "same": true
+    }
+  ],
+  "scope": "tracked source bytes and full status compared; untracked user-file contents not read; baseline build outputs are separate"
+}

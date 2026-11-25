@@ -1,0 +1,15 @@
+{
+  "case": "FRESH_SEVENTH",
+  "offline_preparation_authorized": true,
+  "fresh_run_authorized": true,
+  "user_request": "批准第七例真实运行，先完成只读重核，通过后按170万token、18次请求、60分钟及储备式准入规则执行，以跑完主流程为目标。",
+  "proposed_budget": {
+    "total_tokens": 1700000,
+    "top_level_requests": 18,
+    "active_seconds": 3600
+  },
+  "budget_plan_confirmed": true,
+  "business_gate_approvals": false,
+  "previous_balance_inherited": false,
+  "authorized_at": "2026-10-22T23:19:29.773859+08:00"
+}

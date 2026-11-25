@@ -1,0 +1,10 @@
+{
+  "output/w08-preparation-20261010/task-requirement.md": "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+  "output/w08-preparation-20261010/verification-exits.md": "7ec116c84645e8af4693025a48b4342ac324e40907efc5e00ea976d8177be91d",
+  "output/w08-preparation-20261010/criterion-exit-candidates.json": "7d584bf9ef7d9d4dfd11c037ac22f066abaa6cf47874ea28ae89708b936c2c93",
+  "output/w09-current-transcript-forward-fix-20261011/gate_support.py": "037d09b61f1316aceb46abec24e5740aa79c8efa7aa7c77206267bfbafd1dd4d",
+  "output/w09-current-transcript-forward-fix-20261011/check_budget.py": "1aa7b7858d122f663b9c158117a350ce5a48101226121c2b55f65831ad0f0c2c",
+  "output/w09-current-transcript-forward-fix-20261011/test_gate_observer.py": "75ff822258d77344600c6908ec29e7d40cbc44e275fb0a9053e56d33e5e3f0bb",
+  "output/w09-current-transcript-forward-fix-20261011/budget-dry-run.json": "f0f2aac1780320f950d2c1433a2e4b17d58e245eca089a7fc2162e0b0c8cff47",
+  "output/w09-current-transcript-forward-fix-20261011/observer-offline-verification.json": "3ef63cb846a1d6350d3c90c4b38d608089edd40241b517e727eca96c3ebbb9cf"
+}

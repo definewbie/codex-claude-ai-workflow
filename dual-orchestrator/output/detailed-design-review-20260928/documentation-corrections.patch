@@ -1,0 +1,161 @@
+--- before/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -1,6 +1,6 @@
+ # Dual 生命周期可靠性：详细设计候选
+ 
+-日期：2026-09-28。阶段：P0。状态：设计候选，尚未独立评审；不是 Implementation Ready，不授权代码实施、提交或真实运行。
++日期：2026-09-28。阶段：P0。状态：候选版获用户带回的 CC 设计层 PASS（1 WARN、3 LOW）；本轮修订及 D04 静态核验未经独立复审，处置见 §14。仍不是 Implementation Ready，不授权代码实施、提交或真实运行。
+ 
+ 上位契约：[R3](20260923-dual-lifecycle-reliability-design.zh-CN.md)。唯一工作索引：[主清单](20260927-dual-lifecycle-worklist.zh-CN.md)。本文展开 D01–D10，不另建工作清单或降低 R3 验收。全文“增加、迁移、必须”描述拟议目标；现状另行标明。未落实的能力不能用于当前运行准入。
+ 
+@@ -63,7 +63,26 @@
+ 
+ AuthoredExecutionContext 中当前 `Approval` 与 `approvedDesign/approvedPlan` 的消费改为区分 reviewed candidate 与 execution authorization 引用。可在现有 snapshot 中调整字段，不设第二套审查账本。设计/计划 reviewer 必须精确绑定作者 occurrence；执行批准绑定这两个被评候选。执行批准的作用对象是合同中的目标/精确范围/权限/必需验收；合同保存初始 reviewed design/plan refs 作为编制来源，不把后续所有技术实现细节都变成人工权限变更。实际每个 task 同时引用不可变执行合同与当前有效 reviewed candidate，资格验证二者关系。新 plan 必须经过当前语义复评，并由程序核验仍在同一目标、文件/操作、权限及必需验收内；满足时可在原执行授权内继续，不生成新的人类批准。超出任一批准边界则进入新的执行批准。
+ 
+-### 2.3 失效与预算
++### 2.3 READY 自动推进的正向账本表示（WARN-1 修订）
++
++选择正常 READY 路径不实例化人工门：`design.decision` 完成后进入 plan 的上下文/作者链，`plan.decision` 完成后进入 EXECUTION compile。gate definition 仍保留给必须人工处理的分支；不创建自动 resolved 的 gate，不写虚构的人决定。READY 只是必要条件，资格、预算及待处理的重大取舍检查仍可阻止自动推进。
++
++`ReviewDecisionHandler` 核验实际 reviewer 产物与作者谱系后，在既有 decision `NodeResult.facts` 中形成拟议 `reviewed_candidate`；ledger 是完成节点的持久化 owner。该事实包含 stage、author/reviewer/decision occurrence、作者产物与 review sidecar 的不可变 ref/SHA、实际 review decision、适用合同 phase/epoch/ref/SHA、核验规则身份与结果。它是程序核验后的复评事实，不是模型自报的 approved 标记，也不产生 scope/权限 authority。已完成 occurrence 的事实不得被后续复评覆盖。
++
++| 路径 | 持久事实与下一消费者 | 投影及失败处置 |
++|---|---|---|
++| READY 且自动推进资格成立 | decision result 固化 reviewed_candidate；AuthoredStageLineageResolver 从实际路由谱系解析它，向 planner/compiler/后继 task 提供精确引用 | 展示“复评通过／程序固化”，人工批准另由真实 gate 引用显示；无 gate 不得推导已批准 |
++| READY 但重大取舍、预算或明确人工介入要求等待 | 可保存真实复评事实，但实际后继为现有人工门 occurrence；保留触发理由及 subject | 展示“复评通过／等待人工处置”，不展示可实施；人门决定不替代 GOAL/EXECUTION 批准 |
++| NEEDS_REVISION 或 BLOCKED | 保存真实 review 与义务，经有界返工或相应人门处置 | 不生成通过的 reviewed_candidate；人同意解决办法也不能伪造 reviewer READY，须回适用作者/复评路径 |
++| 提交未完成或来源不一致 | §6 pending 或校验失败，后继不得取得可用 reviewed 引用 | BUSY/pending/失败分别显示，不能凭已落盘的一部分 facts 显示推进成功 |
++
++decision 完成（含 reviewed_candidate）、确定的后继节点/input refs、route event 和 current/instance 纳入 D06 同一次 prepared 写集；已在前序提交完成的作者/reviewer 产物以固定 ref/SHA 引用，不重新发布。后继 input refs 明确绑定该 decision occurrence；不能搜索任意“最近一次 READY”替代当前谱系。读写会话内复核本次源身份，缺事实、跨轮引用、相同路径字节漂移或 pending 均不授予推进资格。重启仅补完已准备的同次提交，不重新评审、重新路由或生成批准。
++
++人工门路径保留真正 action/subject/决定证据，与上述 reviewed 事实分字段消费。人 revise 后必须走作者修订→复评→新的 decision occurrence；READY 后进入人工处置也不能借旧 candidate 为改过的字节背书。AuthoredExecutionContext、qualification、CLI/API/UI/report 从统一 read model 分别表达 `reviewed` 与 `execution_authorized`，不以一个笼统 approved 布尔值合并。反证须覆盖正常 READY 零人工 gate、人门合法 revise 后续作、伪造 human_action 无效、各提交前缀冷读与冷启动，以及 design/plan、四变体与 inline/worker 的共享消费者。
++
++上述为设计选择，当前 ReviewDecisionHandler 仅记录 decision/source/summary 等事实，AuthoredStageLineageResolver 仍从人工门解析 Approval；没有宣称新字段、写集或投影已经实现。完整字段实例和逐消费者迁移仍按 §13 冻结。
++
++### 2.4 失效与预算
+ 
+ | 变化 | 仍可保留 | 必须重做 |
+ |---|---|---|
+@@ -220,7 +239,7 @@
+ 
+ 普通 query 只读：锁不可得返回 BUSY，看到 pending 返回持久化未完成及有限身份信息，不组装混代状态，不自动修复。resume/write 会话在新 domain 动作前完成合法 pending。reader 持锁期间 writer 不进入；不能靠“读前后各看一次 pending”防止中间发生完整提交的竞态。
+ 
+-必须迁移：WorkflowFileLedger/内部 writers、TaskContractProjectionVerifier、AuthoredStageLineageResolver、EvidenceCollection/ExternalVerificationEvidence、DeliveryApplicationService、runtime/worker claim 与 reconciler、CLI/API/query/report 的直接文件读取。静态搜索只是候选清单，不能证明绕过不存在；使用阻塞中间写点的并发 reader 测试，证明每个公开入口只返回一致快照或明确未完成。本轮生成的 [读写入口候选索引](../../output/detailed-design-20260928/boundary-access-inventory.json) 含 116 个文件、565 个匹配行，包含无关配置读取、重复调用等，绝不等于需改 116 个文件或已完成分类。完整逐方法迁移清单仍须逐条归属，不由旧 R1 的 31/84 数字替代。
++必须迁移：WorkflowFileLedger/内部 writers、TaskContractProjectionVerifier、AuthoredStageLineageResolver、EvidenceCollection/ExternalVerificationEvidence、DeliveryApplicationService、runtime/worker claim 与 reconciler、CLI/API/query/report 的直接文件读取。静态搜索只是候选清单，不能证明绕过不存在；使用阻塞中间写点的并发 reader 测试，证明每个公开入口只返回一致快照或明确未完成。本轮生成的 [读写入口候选索引](../../output/detailed-design-20260928/boundary-access-inventory.json) 含 116 个文件、565 个匹配行，包含无关配置读取、重复调用等，绝不等于需改 116 个文件或已完成分类。完整逐方法迁移清单仍须逐条归属，不由旧 R1 的 31/84 数字替代。冻结对账须为候选文件逐项记录“改／不改＋理由”，相关方法绑定 owner、写集/读会话、消费者及证明；无关配置读取说明为何不受本协议影响。新发现入口补入同一清单，不以搜索命中数自动扩大批准范围，也不以未命中排除应迁移路径。
+ 
+ 长模型调用期间不持多文件 mutation 的写锁；用现有 task/node execution 绑定活动执行者和 input epoch。进入完成会话重新核验，同 occurrence 的 competing claim 必须被 ledger 拒绝。不得为了无锁时能读就放宽当前 gate 或 ledger 完整性。
+ 
+@@ -285,7 +304,7 @@
+ | 面 | 已确认代码现状 | 实施前必须证明的具体点 |
+ |---|---|---|
+ | Claude | policy write 允许 workspace 写入；transport 绑定 ref/SHA；profile 有 contract_discovery 无 terminal 范例 | frozen adapter 对 filesystem deny/allow、原生编辑工具、terminal 的实际强制；worktree/Git/control 无写权限；模型不能改 policy 自我提权 |
+-| Codex | 走同一 ACP permission 参数，Claude binding 明确不适用 | pinned adapter 如何给每 session 绑定实际 readonly policy，并禁止继承用户高权限 session；仅观察 CLI 参数不够 |
++| Codex | 走同一 ACP permission 参数，Claude binding 明确不适用；本机 1.10.0 adapter 的常规 read-only mode 实际传 workspaceWrite（见 §8.1） | 现有 mode 不足以冻结；须决定是否调整 adapter 绑定，并证明每 session/turn 的有效只读限制及高权限 session 不可继承 |
+ | correction/session | correction 可复用既有 session；fresh 当前仅 simpleClaudeCode 控制 | 高权限旧 session 不可复用到只读阶段；降权限必须有实际有效配置证明，否则 fresh 或拒绝 |
+ | ledger/program artifacts | 运行目录在工作区内，程序要写控制文件 | adapter 与程序 writer 的实际可写面分离；只按路径豁免会容许模型冒充程序，必须证明模型不可写受保护路径 |
+ 
+@@ -296,6 +315,22 @@
+ 准备、收尾、恢复引用同一程序工件规则：WorkstreamPaths 定位路径，各现有 writer 声明本次预期输出 ref+SHA，已有 run/task 记录这些引用；不另造全局豁免 manifest。只有受保护 writer 的身份与内容均可验证才可豁免，路径命中或“位于 .agent”不足。是否现有 writer 声明已完整须逐项盘点，不能假定全部可派生。
+ 
+ AcpxAgentTaskHandler 在正常/异常退出都核验 baseline，再把结果交 ArtifactContractValidator；无法核验、发现增量或权限绑定失效时，零成功 sidecar、零后继 dispatch。执行面反证（写后还原也应被拒绝）与收尾反证（刻意移除比较）各自独立，二者互不替代。
++
++### 8.1 2026-09-28 可行性核验：常规 Codex mode 不能证明只读
++
++本轮只读检查仓库安装/配置脚本、reviewed acpx 的本地源码和已缓存的 Claude 0.70.0 / Codex 1.10.0 adapter 发布代码。源文件 SHA、定位片段及 build-info 保存在 [本轮证据](../../output/detailed-design-review-20260928/d04-feasibility.md)。缓存包与脚本默认版本对应，不证明未来实际运行解析到相同字节；D07 仍须绑定完整启动身份及实际配置。本轮没有启动 session/provider，没有执行写入攻击测试。
++
++已确认：Codex 1.10.0 的 `AgentMode.ReadOnly` 使用 `sandboxMode=workspace-write`、`sandboxPolicy.type=workspaceWrite`；普通 `sendPrompt` 每 turn 显式传入该 policy。三个公开 mode 中未找到真正 readOnly 的主执行模式，不能只改 INITIAL_AGENT_MODE 或会话初始配置就声称满足 D04。内部 `runAgentFileChangeReport` 虽使用真正 readOnly，却是独立审计调用，不能移作正常作者/评审路径的证明。这里否定的是已核验的模式绑定方案，不断言 Codex 引擎或所有外部配置都不可能实现只读。
++
++acpx 的 ACP `fs/write_text_file` 有自身许可检查，并非无条件写入；但这不能证明 provider 原生工具受同一检查。Claude 已有 policy→SDK/managed settings 传递，实际工具隔离仍未证明。传入元数据、拒绝一个 ACP 请求或收尾无差异，都不能替代 native edit、shell、子任务、额外工具及 session/correction 的共同约束。
++
++| 调整选择（均未授权实施） | 目标适合性与成本 | 尚须核验 |
++|---|---|---|
++| 优先细化现有 adapter 的强制只读绑定 | 保留现有多 agent/acpx 主流程；让角色约束绑定真正执行 policy，而非依赖 mode 名称。需维护受审 adapter 增量及版本身份，不新建权限平台 | Claude/Codex 各自的强制接口、逐 turn/恢复/模式变更不可放宽、原生与 ACP 工具面、必要只读功能仍可用；不能只改 ReadOnly 常量就称完成 |
++| 外层 OS 进程隔离 | 可独立约束子进程的本地文件写入；须区分程序控制 writer 与模型进程，新增平台及部署维护成本 | 支持操作系统、进程树/链接/外部 Git 目录、可写运行 scratch 与不可写产品/control、远端工具副作用边界 |
++| 拷贝执行工作区 | 限制回写原工作区的风险，但允许模型写副本不满足当前“执行面只读”的承诺；还需隔离宿主与控制文件 | 若选此项须先明确是否改变验收目标；路径/证据身份、回传与误回写风险不能被拷贝动作本身消除 |
++
++建议先允许第一项进入详细设计比较，仍不改 adapter、不启动模型；若现有接口不足再提交具体替代。此处涉及 adapter authority 绑定调整，按本节既定边界交用户决定。D04 不冻结，依赖该选择的实施准入保持阻塞；其他既有枚举工作不因此自动失效，也不自动升级为新的平台任务。
+ 
+ ## 9. D09：交付外部窗口与处置
+ 
+@@ -344,6 +379,7 @@
+ | 未初始化 / operator 创建 / ledger | 冻结身份+definition+entry/current/instance/event 一次 prepared 提交→唯一初始 node | 初始化全部前缀可本地续完；未知旧格式 INVALID；无 provider |
+ | 当前目标 gate / 人 approve/revise / RoutingEngine | 校验 subject/checks→固定决定/义务/后继/事件→提交→GOAL compile 或作者→复评→新批准 | 缺 note/跨轮零写；响应丢失不重复批准；本地中断续完；新内容不借旧批准 |
+ | GOAL 合格 / design/plan / runtime+adapter | readonly 绑定/baseline→dispatch→process→校验→收尾→发布/路由→reviewed candidate→EXECUTION compile | D04 未证明不可开；语义拒绝有界返工；越权不倒签；未知执行不盲重做 |
++| reviewer READY / decision handler+ledger | 核验作者/reviewer/合同谱系→reviewed_candidate+后继/event/current 同次 prepared 提交→planner 或 EXECUTION compiler；需要人工则路由实际 gate | 正常路径零人工门、零虚构批准；任意提交前缀 reader 不宣称完成；冷启零重复复评/路由；缺事实或漂移零后继资格 |
+ | EXECUTION 候选 / 人批准 / RoutingEngine | 验目标/候选/精确 scope/出口/权限→checks+决定+后继提交→qualified implementation | 未批准、漂移、缺必需出口零调用；scope revision 先撤销可执行资格再走新链 |
+ | 准备/执行结果 / runtime 或 worker | §5 阶段事实→§7 完成证据→§6 node/task/execution/sidecar 提交→真实下一 reviewer | 执行坏不发布、发布失败不改成 JSON 错、已完成不重新调用；I1 配对缺失响亮失败 |
+ | acceptance REJECT / 分类器或人处置 | 验当前 acceptance→分类和义务→代码返修或补证据→当前自测→独立验收→新候选 | 混合缺陷先真实修订再验证；旧 ACCEPT 不可复用；预算耗尽保留义务及合法基准 |
+@@ -359,7 +395,7 @@
+ 
+ | 不变量 / Declared by | Proven by（待新增/扩展） | Consumed by | Enforced before | Failure route | Cannot-bypass test |
+ |---|---|---|---|---|---|
+-| I1 / R3+§4 | HumanRequirementContinuationSequenceTest、AuthoredStageSequenceTest、HumanActionRequestTest | resolver→runtime facts→RecoveryAssessment | 后继 provider/批准扩展 | 原失败+配对，缺记录显示诊断不足 | 删配对/改 SHA 必失败；合法补足回到复评/批准 |
++| I1 / R3+§4 | HumanRequirementContinuationSequenceTest、AuthoredStageSequenceTest、HumanActionRequestTest；BUSY/pending 两个具体 UI 实例及 CLI/API/report 对照 | resolver→runtime facts→RecoveryAssessment；查询会话→统一 read model→各投影 | 后继 provider/批准扩展；一致资格/下一步声明前 | 原失败+配对，缺记录显示诊断不足；锁忙/持久化未完成不冒充已恢复 | 删配对/改 SHA 必失败；合法补足回到复评/批准；锁被占用与锁已释放但 pending 留存分别不得展示可安全续作或混代成功 |
+ | I2 / R3+§5 | WorkflowFirstLifecycleSequenceTest 常驻 E02、OutcomeResolverTest | finalizer→ledger→CLI/API/UI/report | sidecar/成功路由 | 保留最早决定性阶段原因 | 恢复旧覆盖逻辑失败；禁止全部成功也失败 |
+ | I3 / R3+§2/§8 | 四定义、qualification/authored 序列，readonly transport+工作区反证 | qualification→handler/transport | 首次产品写与每次后继 dispatch | 缺授权/只读证据失败；新批准闭环 | GOAL 不能冒充 EXECUTION；高权限 session/terminal/Edit/写后还原拒绝 |
+ | I4 / R3+§3 | EvidenceCollectionSequenceTest、ExternalVerificationEvidenceTest、REJECT 整链 | 实施准入、自测、独立验收、交付 | 首次实现及验收成功 | operator 出口或代码返工，原必需项不降级 | 删出口阻止实现；声明日志不能充机器事实；合法补证据不改源码 |
+@@ -388,8 +424,8 @@
+ |---|---|---|
+ | D01 | gate checks/continuation_failure 字段及三类诊断、缺证据规则 | 逐个现有前置 code/rule 与消费者的枚举映射；和 D06 exact write set 绑定；独立评审 |
+ | D02 | 阶段顺序、原因冲突、领域校验与发布分离、常驻回归位置 | contained permission “非必需”证据如何从现有 signal 与义务精确关联；若无关联需明确不能容纳的范围；独立评审 |
+-| D03 | 两阶段同模型、四变体逐门迁移与批准失效 | 新字段的完整 JSON 示例、compiler/qualification/authored 每个 consumer 的迁移对照及新旧格式拒绝测试设计 |
+-| D04 | 实际代码缺口、所需绑定/收尾、明确替代选择标准 | pinned Claude/Codex adapter 的 readonly 能力可行性和 writer 归属盘点；无法实现时提交具体取舍，不以 prompt 代替 |
++| D03 | 两阶段同模型、四变体逐门迁移与批准失效；§2.3 明确 READY 无人门、decision 固化及独立资格投影 | 正向账本表示独立复核，完整 JSON（含 reviewed_candidate）、与 D06 逐写点绑定、compiler/qualification/authored/各投影 consumer 迁移对照及新旧格式/伪批准拒绝测试设计 |
++| D04 | 实际代码缺口、所需绑定/收尾；§8.1 静态证据否定 pinned Codex 常规 mode 即只读的假设，并提交选择 | 用户决定调整方向后，继续 pinned Claude/Codex 有效 readonly 绑定与 writer 归属核验；强制能力仍未证明，不以 prompt/收尾或内部审计代替 |
+ | D05 | 必需项/出口字段、可信边界、四检查点 | 对代表性合法任务填完整样本（含 operator 路径），逐项验证已有 evidence 是否足够，避免 schema 有字段但无可用生产者 |
+ | D06 | 推荐 prepared、字段/写序/reader/event 规则 | 全部写集/读会话入口清单、M6 函数级桥接；核实 atomic move 与锁装配；方案独立评审 |
+ | D07 | 两层身份、dispatch intent、未知外部结果边界 | 现有 recovery action 与人工裁定 payload/执行者停止核验的逐入口对照；不能先宣称有合法 retry 出口 |
+@@ -397,6 +433,19 @@
+ | D09 | 全部已知 apply/finalize 窗口、既有状态扩展、target 锁 | Git 可观察事实与实际方法逐窗绑定、人工裁定复用入口；candidate no-change 现有语义核验，不凭本文新增 |
+ | D10 | 机器/语义字段分工、严格身份保留方案 | 重复提示/格式 correction 证据逐字段盘点，确定确有价值的删重或有据保留 |
+ 
+-这些剩余项属于同一次详细设计的证据核验与字段冻结，继续更新本文；不另开一套架构评估，也不立刻实施看哪条能过。当前没有请求新增 authority；如果 D04 或其他盘点证明现有边界不能实现所承诺能力，按 R3 交用户具体选项。
++这些剩余项属于同一次详细设计的证据核验与字段冻结，继续更新本文；不另开一套架构评估，也不立刻实施看哪条能过。本轮 D04 已按 R3 提交 adapter 绑定／OS 隔离／拷贝工作区的具体取舍；没有替用户批准该调整。其余未冻结项仍为真实待办，不因文档修订或候选版 PASS 自动关闭。
+ 
+ Boundary Review（作者自查）：DESIGN GAP。Source of truth 沿 R3 owner；投影无新增权力；本地 prepared 是持久化机制，不代作业务决定；外部未知不自动重放。无接受“以后再说”的产品债务，未冻结项明确阻塞对应实施。未运行测试/provider，未启动额外 agent，未修改源代码或既有 ledger；既有 97 项离线结果不能证明本文新方案。后续独立评审须挑战方案与剩余阻塞的必要性，不预设 PASS。
++
++## 14. 本次评审处置与核验边界
++
++用户带回的 [CC 原始评审](../../output/detailed-design-review-20260928/cc-review.txt) 为候选设计 PASS（1 WARN、3 LOW）。这是候选方案的评审结论，不是冻结版通过，更不是实施授权。
++
++- WARN-1：在 §2.3/§11/§13 补正向账本表示、owner/消费者、D06 写集及投影区别；作者已修订，须独立复核，D03 未冻结。
++- LOW-1：contained permission 与非必需义务的精确关联仍列 D02 冻结项；本轮未完成，缺关联证据不容纳的默认保持。
++- LOW-2：§12.1 I1 补 BUSY/pending 两个实际 UI 场景及 CLI/API/report 同源对照，属于未来测试义务，未声称已测。
++- LOW-3：§6.3 补候选入口逐项“改／不改＋理由”及方法/owner 归属；116 文件仍未经逐项分类，不是批准范围。
++- 较早工作清单两项 LOW 已在其 D02/W08/§8 完成文字修订，本轮核实已有内容，不重复记为新增完成。对应产品常驻回归与投影证据仍待实施。
++- CC 对 Claude-only policy binding 此前仅按命名推断；本轮直接核验 AcpxAgentTransport.validateExecutionPolicyBinding：非 Claude 携该 binding 会拒绝。补证不延伸为只读有效性结论。
++
++本轮文档修订、静态可行性证据与[材料校验](../../output/detailed-design-review-20260928/material-verification.json)独立保存，旧报告/指纹不覆盖。D04 发现常规模式映射不足后，先给出取舍，不继续默认其可行或启动适配器修改。所有产品项仍 DESIGN GAP；本次没有重跑 97 项测试，没有真实调用、历史样本恢复或提交。
+--- before/20260927-dual-lifecycle-worklist.zh-CN.md
++++ dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -51,7 +51,7 @@
+ |---|---|---|
+ | D01 续作诊断配对 | gate/decision、NodeResult 与现有失败 writer；不另建诊断 authority | 明确字段、原始证据、消费/分类条件、写入失败与冷读，不靠旧决定回填；真实合法续作与错误拒绝成对 |
+ | D02 执行失败保真 | AgentExecutionOutcomeResolver/AgentExecutionResultFacts/validator/finalizer | 定义未调用、过程不可信、输出不合法、产物不合法的适用条件及冲突矩阵；前后处理不会把衍生缺产物盖过决定性执行失败；同一语义由唯一规则消费。详细设计须明确 E02 常驻回归的源码落点、两执行入口及成功/contained-warning 对照的场景和断言；对应 W02 关闭须以这些常驻测试已在源码存在且实际通过为证据，不能只以矩阵或 resolver 改动关闭 |
+-| D03 分期批准与自动推进 | proposal/TaskContract、qualified input、四份 definition 的 gate/required refs | 目标批准与执行批准的 subject/schema、四变体逐门保留/迁移表、重大取舍和批准失效、预算耗尽出口；不得先拆掉资格校验再补批准 |
++| D03 分期批准与自动推进 | proposal/TaskContract、qualified input、四份 definition 的 gate/required refs | 目标批准与执行批准的 subject/schema、四变体逐门保留/迁移表、重大取舍和批准失效、预算耗尽出口；READY 的 decision 固化、无人工门路由、D06 写集及 reviewed/人工授权投影须冻结；不得先拆掉资格校验再补批准 |
+ | D04 只读执行面 | AcpxPermissionProfile、ClaudeExecutionPolicy、transport、既有准备/发布入口 | Claude/Codex、inline/worker、correction/session 的实际限制；baseline 和程序写入归属证据；无法证明只读时的拒绝；不为复用网络组件重开 R4/Phase B |
+ | D05 验收出口 | 现有 contract/plan/execution policy 与外部材料流程 | 必需项标识、可信方法/环境证明、检查者/时点、细化责任、失败续作；新增能力必须证明无既有替代，存在重大取舍则交用户决定 |
+ | D06 本地一致性 | R1 的 reconciliation / prepared mutation / generation pointer 比较与现有 writers | 选择方案并列出所有受影响写点、reader 可见性、event 幂等、冷启动与 queue/execution 桥接；不默认 journal，不以安全停止满足可续作 |
+@@ -255,3 +255,9 @@
+ 修订前材料已随评审保留；本次 [材料校验](../../output/worklist-reconciliation-20260928-review/material-verification.json) 单独记录，不覆盖 9·27 的指纹或将其 97 项离线结果冒充今日复跑。只修改三份文档及新增本次证据，未改变产品事实 owner、运行语义、授权范围或验收标准。问题来源是必要义务未同时写入决策结束条件和执行项；本次通过原有 D/W 引用补齐，不新增流程或治理层。
+ 
+ W00 材料任务收口不解除 D01–D10 的详细设计缺口，也不授权实施、提交、真实运行或历史恢复。下一步仍按 §2.1 形成必要详细设计，不能从材料 PASS 直接跳到修代码。
++
++### 8.1 详细设计候选评审后的进度（2026-09-28）
++
++[详细设计 §14](20260928-dual-lifecycle-detailed-design.zh-CN.md#14-本次评审处置与核验边界)登记用户带回的候选版 CC PASS（1 WARN、3 LOW）。WARN-1 的 READY 正向账本表示及 LOW-2 的 BUSY/pending 投影义务已由作者补入，LOW-3 的入口逐项改/不改及理由补入 D06 冻结要求；这些增量未获独立复审。LOW-1 的 signal/非必需义务关联仍待 D02 冻结。本清单原有 D02 常驻回归及 W08 UI/report 两项文字修订已经存在，本次未重复计作新增成果。
++
++D04 的[本机静态核验与选项](../../output/detailed-design-review-20260928/d04-feasibility.md)发现：pinned Codex adapter 常规 read-only mode 实际传 workspaceWrite；现有模式名不能证明执行面只读。已向用户提交 adapter 强制绑定、OS 隔离和拷贝工作区的差异与成本，待方向决定，不擅自变更 adapter authority 或降低验收。D01–D10 仍未整体冻结，W01–W09 均未 Promoted；本次仅改三份文档及保存核验证据。
+--- before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -3,7 +3,8 @@
+ ## 当前入口：2026-09-28 生命周期详细设计候选
+ 
+ 用户已要求进入下一步：形成必要详细设计及普通核验；CC 仍由用户自行发起，不直接调用，不自动进入实现。
+-当前契约入口：[完整生命周期可靠性设计](20260923-dual-lifecycle-reliability-design.zh-CN.md)；新增 [D01–D10 详细设计候选](20260928-dual-lifecycle-detailed-design.zh-CN.md)，含字段/写序/失败矩阵、四变体 gate 迁移与未冻结项，尚未经独立评审。
++当前契约入口：[完整生命周期可靠性设计](20260923-dual-lifecycle-reliability-design.zh-CN.md)；[D01–D10 详细设计候选](20260928-dual-lifecycle-detailed-design.zh-CN.md)已获用户带回的 CC PASS（1 WARN、3 LOW），不是冻结版通过。本次补 READY 正向账本表示、BUSY/pending 投影及入口分类要求，增量未经独立复审；D02 关联语义和 §13 枚举工作仍未完成。
++优先核验 D04 已发现实际阻塞：[pinned Codex adapter 的 read-only mode 使用 workspaceWrite](../../output/detailed-design-review-20260928/d04-feasibility.md)，不能用模式名称作只读证明。只读保存来源/指纹及取舍，待用户决定是否允许优先细化现有 adapter 的强制只读绑定；未改 adapter、配置或源代码，未启动 session/provider。D04 未冻结，实施、提交、真实运行仍未授权。
+ 9·13 控制链设计保留为第一批参考；当前已有未提交实现及序列测试，尚未证明整体组合可靠交付。
+ 2026-09-27 补记（R3）已获用户带回的第三轮 CC 设计层 PASS：前两轮问题均确认为设计层解决，无新增 WARN/FAIL，仅余 INFO-1。本次补记其前向记录/历史不回填边界，并澄清“无记录不等于未检查”，此澄清未经独立复审。整体设计评审收口；对账材料见下，I1 字段/写序及 I3/I4/I5/I6 等详细设计缺口仍在，不能据 PASS 开工。
+ 本轮交付[主工作清单、35 个相关文件对账与测试证据地图](20260927-dual-lifecycle-worklist.zh-CN.md)，保存工作区内容指纹和本轮 10 类 / 97 项离线测试通过证据；未修改 production、测试源码或历史 ledger，未运行产品 E2E。此前误启动的只读 CLI 调用已停止，未形成评审结论，与用户带回的有效评审区分。

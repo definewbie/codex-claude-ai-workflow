@@ -1,0 +1,141 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.147 s <<< FAILURE! -- in dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest
+[ERROR] dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest.historicalHhzlEnumErrorReachesCorrectionWithoutLosingItsLegalValuesOrBuyingAnotherAttempt -- Time elapsed: 0.138 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Typed correction reason: PARSE_FAILURE
+Syntax diagnostic:
+- kind: INVALID_JSON
+
+Re-emit the complete AgentResultEnvelope as one strictly valid JSON object.
+
+Your preceding final assistant message failed strict AgentResultEnvelope validation.
+Preserve its semantic decision, evidence, and conclusion using only fields declared by the contract.
+Remove every unsupported key. Do not preserve invalid object structure.
+Do not re-run the task, use tools, explain, or use Markdown.
+This is the only contract-correction attempt. Return exactly the JSON object required below.
+
+Return exactly one JSON object as the final assistant message.
+Do not use Markdown fences, XML tags, headings, commentary, or text before/after the JSON.
+Preserve the exact key names and JSON primitive types shown below. Replace example values with factual values.
+Every JSON object is closed. Do not add keys that are not declared for that object.
+Allowed `result.decision` values: [BLOCKED, NEEDS_REVISION, READY_FOR_PRODUCT_REVIEW]
+Allowed `result.failure.verification_remediation` values for this node: [NONE]
+For this node, `result.reread_reasons` must remain exactly `[]`.
+For this node, `result.failure.verification_remediation` must remain `NONE`.
+evidence_refs are canonical product-tree file paths, not program artifact references. An empty tracked-path inventory permits evidence_refs=[]; do not create files to populate it. For a non-empty inventory include at least one existing tracked product file supported by its repo-map fact. Never copy .agent/ or .git/ references into evidence_refs or evidence_ref_additions. Program repo-map/binding/context materials are carried by RepositoryFactBinding; reading them does not make them product evidence. For NEEDS_REVISION with non-empty `result.failure.contract_gaps`, `result.contract_obligations` must contain one object per contract obligation with stable string fields `id` and `text`. Otherwise it must be `[]`. Each `result.contract_obligations` item is a closed object with exactly these fields: [id, text]. No other keys are permitted.
+
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20260903T225544Z-HHZL",
+  "run_id" : "run-1788476621271",
+  "node_id" : "intake.codex_product_review",
+  "result" : {
+    "artifact_type" : "agent_output_contract",
+    "decision" : "NEEDS_REVISION",
+    "summary" : "one short sentence",
+    "lifecycle_status" : "READY",
+    "blocking" : false,
+    "checks" : [ "check or review performed" ],
+    "evidence" : [ "specific evidence" ],
+    "missing_evidence" : [ ],
+    "must_fix" : [ ],
+    "contract_obligations" : [ ],
+    "acceptance_notes" : [ ],
+    "open_risks" : [ ],
+    "changed_files" : [ ],
+    "verification_summary" : "short verification summary",
+    "failure" : {
+      "category_hint" : "",
+      "verification_remediation" : "NONE",
+      "contract_gaps" : [ ],
+      "out_of_scope_files" : [ ],
+      "missing_tests" : [ ],
+      "context_gaps" : [ ],
+      "reason" : ""
+    },
+    "reread_reasons" : [ ]
+  }
+} ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest.historicalHhzlEnumErrorReachesCorrectionWithoutLosingItsLegalValuesOrBuyingAnotherAttempt(AcpxAgentResultAcquirerTest.java:49)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] Failures: 
+[ERROR]   AcpxAgentResultAcquirerTest.historicalHhzlEnumErrorReachesCorrectionWithoutLosingItsLegalValuesOrBuyingAnotherAttempt:49 Typed correction reason: PARSE_FAILURE
+Syntax diagnostic:
+- kind: INVALID_JSON
+
+Re-emit the complete AgentResultEnvelope as one strictly valid JSON object.
+
+Your preceding final assistant message failed strict AgentResultEnvelope validation.
+Preserve its semantic decision, evidence, and conclusion using only fields declared by the contract.
+Remove every unsupported key. Do not preserve invalid object structure.
+Do not re-run the task, use tools, explain, or use Markdown.
+This is the only contract-correction attempt. Return exactly the JSON object required below.
+
+Return exactly one JSON object as the final assistant message.
+Do not use Markdown fences, XML tags, headings, commentary, or text before/after the JSON.
+Preserve the exact key names and JSON primitive types shown below. Replace example values with factual values.
+Every JSON object is closed. Do not add keys that are not declared for that object.
+Allowed `result.decision` values: [BLOCKED, NEEDS_REVISION, READY_FOR_PRODUCT_REVIEW]
+Allowed `result.failure.verification_remediation` values for this node: [NONE]
+For this node, `result.reread_reasons` must remain exactly `[]`.
+For this node, `result.failure.verification_remediation` must remain `NONE`.
+evidence_refs are canonical product-tree file paths, not program artifact references. An empty tracked-path inventory permits evidence_refs=[]; do not create files to populate it. For a non-empty inventory include at least one existing tracked product file supported by its repo-map fact. Never copy .agent/ or .git/ references into evidence_refs or evidence_ref_additions. Program repo-map/binding/context materials are carried by RepositoryFactBinding; reading them does not make them product evidence. For NEEDS_REVISION with non-empty `result.failure.contract_gaps`, `result.contract_obligations` must contain one object per contract obligation with stable string fields `id` and `text`. Otherwise it must be `[]`. Each `result.contract_obligations` item is a closed object with exactly these fields: [id, text]. No other keys are permitted.
+
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20260903T225544Z-HHZL",
+  "run_id" : "run-1788476621271",
+  "node_id" : "intake.codex_product_review",
+  "result" : {
+    "artifact_type" : "agent_output_contract",
+    "decision" : "NEEDS_REVISION",
+    "summary" : "one short sentence",
+    "lifecycle_status" : "READY",
+    "blocking" : false,
+    "checks" : [ "check or review performed" ],
+    "evidence" : [ "specific evidence" ],
+    "missing_evidence" : [ ],
+    "must_fix" : [ ],
+    "contract_obligations" : [ ],
+    "acceptance_notes" : [ ],
+    "open_risks" : [ ],
+    "changed_files" : [ ],
+    "verification_summary" : "short verification summary",
+    "failure" : {
+      "category_hint" : "",
+      "verification_remediation" : "NONE",
+      "contract_gaps" : [ ],
+      "out_of_scope_files" : [ ],
+      "missing_tests" : [ ],
+      "context_gaps" : [ ],
+      "reason" : ""
+    },
+    "reread_reasons" : [ ]
+  }
+} ==> expected: <true> but was: <false>
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project dual-adapter-acpx: There are test failures.
+[ERROR] 
+[ERROR] See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-adapter-acpx

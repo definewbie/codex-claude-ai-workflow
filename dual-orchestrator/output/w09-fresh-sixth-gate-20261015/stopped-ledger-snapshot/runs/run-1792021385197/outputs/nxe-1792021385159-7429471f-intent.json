@@ -1,0 +1,7 @@
+{
+  "prepared" : {
+    "ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/outputs/nxe-1792021385159-7429471f-prepared.json",
+    "sha256" : "e06f2ee13117beecf4bf76c1b54c79364a32e1c9aabd82e94058f56591e1f790"
+  },
+  "schema" : "dual.run.intent.v1"
+}

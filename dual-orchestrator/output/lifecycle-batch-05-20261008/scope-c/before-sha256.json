@@ -1,0 +1,19 @@
+{
+  "docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md": "42956c6f7fa1164864cda4b04c7071956ab0fd27c1d240d7fe423b34cdd9809a",
+  "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "82f1b4a7ae806c4c5e92646f9c7bd8049fb24f79abf8145121f0d978b1cf1bec",
+  "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "5b0bab469dc2f330443986064530a333baa9658b7a2b190b0906df66f024921d",
+  "docs/engineering-checklist.md": "654d6d11b38fa177fe5ece62e7ac949eb8c501547eaa671103169b7299d2e52e",
+  "docs/design/boundary-drift-review.zh-CN.md": "f3f5492e871cbcd1f66d3eb325e004e2c522bce31de78f70b74ca07c0ca14fdc",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java": "1f6c53c39a5d645bcaeb8a5dfb328cfac452b4a8ad39136f8c7ef63ec7a4b0dc",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewGateActions.java": "9c53701dac8bcea85d5b03ed68a44becd992ce884a48be27336e5094e001180f",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunGovernanceContext.java": "14f889ba0d44eee4ca5d3a0c70c4eeba5346ab409fabe09965d0acfbb7bf3d23",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionResultFacts.java": "2a8723d95600143b64bc1867883f53ded679b8e56dccf09efaeb13b382ff949c",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java": "86b156d91cb387897018bf353360cc3553c9e566c097606f490509cc3b4dc824",
+  "dual-runtime/src/main/java/dev/dual/runtime/FrozenRuntimeIdentity.java": "b2f8769687420954eef19d62f97eb25f3b329615561655edb4fda5c2b3997450",
+  "dual-runtime/src/main/java/dev/dual/runtime/RecordedExecutionRecovery.java": "91373193f72ca2548892e4a8378001d5b2d54e91889ab57b4926de3ee6ba8bb5",
+  "dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java": "8533fc0915a3043ad38cd4c63d5ce5b121f9339c9284ea9e4ea2dc803ebe6a6b",
+  "dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java": "699b4f57690985fc331124201db7f30aacddd3f209519075321e334ffc5a94ee",
+  "dual-ledger-file/src/main/java/dev/dual/ledger/file/LedgerSession.java": "906316123b925150591ded43227a0c1c1fbabc3b7ad5f42bf145af0441fbcad4",
+  "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java": "42277520edb3017ac9dfe9d59570c1268dd0f3f47d48f5cf6456e26e212b2fd9",
+  "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java": "96605a104dcf58873680153bb06acd0dea8562cbb2f87877b60f2881ceb9a7e1"
+}

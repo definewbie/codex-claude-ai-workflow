@@ -1,0 +1,49 @@
+                    )
+                )
+            )
+        ],
+        reward=0.0
+    )
+
+    off_topic_trajectory = art.Trajectory(
+        messages_and_choices=[
+            *initial_messages,
+            Choice(
+                finish_reason="stop",
+                index=0,
+                message=ChatCompletionMessage(
+                    role="assistant",
+                    content=(
+                        "Dogs are great companions under the moon. "
+                        "They bark at stars and wag their tails happily."
+                    )
+                )
+            )
+        ],
+        reward=0.0
+    )
+
+After the trajectories are generated, Example 3-3 evaluates them as a group using
+RULER. RULER serves as the scoring function, while the judge model compares
+the candidate trajectories and assigns the scores. The returned scores and
+explanations can then be used to rank the trajectories.
+
+Example 3-3. Score with RULER
+group = art.TrajectoryGroup([good_trajectory, mediocre_trajectory,
+                            off_topic_trajectory])
+judged_group = await ruler_score_group(group, "openai/o3", debug=True)
+
+With the group judged, Example 3-4 retrieves the rewards returned by RULER
+and prints a sorted leaderboard. This makes it easy to compare how the judge
+model scored each poem.
+
+Example 3-4. Show trajectory ranking
+if judged_group:
+        sorted_trajectories = sorted(judged_group.trajectories,
+                                key=lambda t: t.reward, reverse=True)
+        for rank, traj in enumerate(sorted_trajectories, 1):
+            messages = traj.messages()
+            print(f"Rank {rank}: Score {traj.reward:.3f}")
+            print(f"  Response: {messages[-1]['content'][:80]}...\n")
+
+A typical output looks like this:

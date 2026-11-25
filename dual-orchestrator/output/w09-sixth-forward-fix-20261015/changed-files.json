@@ -1,0 +1,63 @@
+{
+  "basis": "byte-exact pre-edit copies from already dirty worktree; not HEAD",
+  "files": [
+    {
+      "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "before_sha256": "ea407147135db369f91e9116db762b8399016e4c42abf0fed7aab1559980785d",
+      "after_sha256": "b1b2ab7bc734fd2979091d77b4184c8a24496b6cb182d3510d45490705c0c966"
+    },
+    {
+      "path": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "before_sha256": "19a7e6087d2ae9329929582caca27dd047acda81ea0f62b6a85028e7d965fcb2",
+      "after_sha256": "979279bdc13bea4f313b382447b2593b2bb4f9fb57c04b674677cf91002d09f5"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java",
+      "before_sha256": "c6fb4c855fbcf55f112b629c89a855f5f1a60d0d9abf304329f323a2ebd1182c",
+      "after_sha256": "ff6f992a29525994f7733656c111bd7cf3bb159b5a2835d62e070090cdf89db7"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java",
+      "before_sha256": "b1889facdb65545dd43d1912c06fab8a5d10f143f0ec7757b9f58f3d29607171",
+      "after_sha256": "f9087cb30af0fac0b0f930b3df69ce390ca8026c42289810eedd1b4480488e4e"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java",
+      "before_sha256": "6563f657259a9c2a1ca6cd0c4e1b46e65eda4bd6968c101642cd5af63584deec",
+      "after_sha256": "acd5242f826c23e1037a6634dc3c819b9d2673d330bee0e064a16b0a1b96c1c1"
+    },
+    {
+      "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java",
+      "before_sha256": "8b981511be0cc130a85edac035bce119cc3ea3f6a8b69c50edb8e9e04cec9d2e",
+      "after_sha256": "0e96cc0058922ec8e585fdd0d8eb166bf8047ffc9360c5ca90db9c95d10866c4"
+    },
+    {
+      "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCurrentTranscriptUsageTest.java",
+      "before_sha256": "6da23cc299fcd4e62e63782a940defa6437cb68af3dc35550b1a07628338d747",
+      "after_sha256": "0055a4bbd736a422c1bd60cc30b1a4e2226e5871af411e0d203d7346c4f5ef90"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java",
+      "before_sha256": "12271f14298dfd956640d45d407c2d8de915c579044739114522e0c029ccb30d",
+      "after_sha256": "e3352a0689d07fa9911b958186b61a02560f95ecd9f478b579f8d75c6db02ea7"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+      "before_sha256": "5b865fe6d32ce2af8fb822e47052fb9bdb9a60fcf43cb9248170e0000c0d6013",
+      "after_sha256": "0ae8fda308de8eff0690d1eaaf60d5c26f51902f2ebeb9c81aaefd14007590fe"
+    },
+    {
+      "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeParserTest.java",
+      "before_sha256": "adf286acc7eac696a6becad4a28e332447a8be2ccf39248fedf43339cc12c56b",
+      "after_sha256": "c1d33094dacdff4a808c23b85597d57905389a459266ea0a138951715efac885"
+    },
+    {
+      "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java",
+      "before_sha256": "dce48cdb2fa9387672986354d334833cafb03caef667f2c75fcbf63ca4e740bb",
+      "after_sha256": "cc94e3af402c76a72f2e2d47d28ba648b467f3db6c41d9a874bdb5fcf51723f0"
+    }
+  ],
+  "production_files": 5,
+  "test_files": 4,
+  "docs": 2
+}

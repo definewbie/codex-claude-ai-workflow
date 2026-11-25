@@ -1,0 +1,24 @@
+{
+  "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js",
+  "sha256": "4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268",
+  "businessBoundaryLine": 21956,
+  "counts": {
+    "bundled_sdk": {
+      "readTextFile": 7,
+      "fs_read_text_file": 4,
+      "fs/read_text_file": 1,
+      "dynamicTools": 0,
+      "fs/readFile": 0,
+      "fs/readDirectory": 0
+    },
+    "adapter_business": {
+      "readTextFile": 0,
+      "fs_read_text_file": 0,
+      "fs/read_text_file": 0,
+      "dynamicTools": 0,
+      "fs/readFile": 0,
+      "fs/readDirectory": 0
+    }
+  },
+  "limitation": "text search is not exhaustive semantic proof; native engine internals not included"
+}

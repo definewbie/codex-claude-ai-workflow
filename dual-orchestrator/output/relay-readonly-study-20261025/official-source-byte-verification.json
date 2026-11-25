@@ -1,0 +1,79 @@
+[
+  {
+    "path": "packages/connect/README.md",
+    "expected_git_blob": "f5c312776681e397f02892f35974991a88bf426b",
+    "actual_git_blob": "f5c312776681e397f02892f35974991a88bf426b",
+    "matches": true,
+    "sha256": "703388611685ff9cebdbbda66c5de5b895f161b8b87ba7204aabef3fbf86fa38"
+  },
+  {
+    "path": "packages/connect/src/index.js",
+    "expected_git_blob": "cb0ff5c3b541f646105198ee23ac0fc3d805023e",
+    "actual_git_blob": "cb0ff5c3b541f646105198ee23ac0fc3d805023e",
+    "matches": true,
+    "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+  },
+  {
+    "path": "packages/connect/src/cli.js",
+    "expected_git_blob": "7f21e477dca39d83f119752f4df523f5f8b295e8",
+    "actual_git_blob": "7f21e477dca39d83f119752f4df523f5f8b295e8",
+    "matches": true,
+    "sha256": "b9b92f1c17959f0a1baeb280231d1a1e24a3ad4a39969ad2f5052477990405b1"
+  },
+  {
+    "path": "packages/connect/src/install.js",
+    "expected_git_blob": "3ce026e63a0df90e9ec912699339fbbc608f84fb",
+    "actual_git_blob": "3ce026e63a0df90e9ec912699339fbbc608f84fb",
+    "matches": true,
+    "sha256": "1d0b502aa0f4b489056def4dac8f45b2fe82d340c4f275ed5e8aca80d5f681d7"
+  },
+  {
+    "path": "packages/connect/tests/connect.test.ts",
+    "expected_git_blob": "a4b4f0521ee4f18a3249d2c0cd90b3541e3bd953",
+    "actual_git_blob": "a4b4f0521ee4f18a3249d2c0cd90b3541e3bd953",
+    "matches": true,
+    "sha256": "4a969d0af96ec46e186dc077ad42603df7745335aba4a34b6b147e1749c80bf0"
+  },
+  {
+    "path": "packages/session/src/client.ts",
+    "expected_git_blob": "59ad2720b045aeb5bc48305cd1160379d309161d",
+    "actual_git_blob": "59ad2720b045aeb5bc48305cd1160379d309161d",
+    "matches": true,
+    "sha256": "05e376de46db081fbb9fa8042a7f4d539b81ed7bbfc3cd643232db9b3670e85a"
+  },
+  {
+    "path": "packages/session/src/types.ts",
+    "expected_git_blob": "2c4431285f445106aac16526373dc162e3f8c7bc",
+    "actual_git_blob": "2c4431285f445106aac16526373dc162e3f8c7bc",
+    "matches": true,
+    "sha256": "399e07737fff9fc1311c33133e64d1be63483878b8feac5dffb6ad0a29dfb0f2"
+  },
+  {
+    "path": "packages/sdk/src/delivery/runner.ts",
+    "expected_git_blob": "c36b4c29594a080ba203b9352c760c0c6a346912",
+    "actual_git_blob": "c36b4c29594a080ba203b9352c760c0c6a346912",
+    "matches": true,
+    "sha256": "25e2c785de7bb336ae73c046933d189d27a02f8b6dd4cfea6ab034f96bf60d3b"
+  },
+  {
+    "path": "packages/sdk/src/delivery/types.ts",
+    "expected_git_blob": "bba7d7a7acca392ad2b775c10a62751a8a0c2c89",
+    "actual_git_blob": "bba7d7a7acca392ad2b775c10a62751a8a0c2c89",
+    "matches": true,
+    "sha256": "fb8db7cb2eda03ada6e9f0226bb6818d77064b05a5882055a4106d64feb9bdac"
+  },
+  {
+    "path": "packages/sdk/src/__tests__/delivery-actions.test.ts",
+    "expected_git_blob": "0d2bc570b8efb7b82a9405ad8449351a26611cd7",
+    "actual_git_blob": "0d2bc570b8efb7b82a9405ad8449351a26611cd7",
+    "matches": true,
+    "sha256": "84e3438a525d25ff08e8311134b4063c3dab9c04e84b54fa0522d43627644795"
+  },
+  {
+    "path": "packages/sdk/src/session/types.ts",
+    "expected_git_blob": "c3837c32e167e9ba43e4b35ced159023a6066751",
+    "actual_git_blob": "c3837c32e167e9ba43e4b35ced159023a6066751",
+    "matches": true,
+    "sha256": "6b0b38220b375ae1fc7a98824a625f2951559db2641b9fd8a2048a21ca2a8b6f"
+  }
+]

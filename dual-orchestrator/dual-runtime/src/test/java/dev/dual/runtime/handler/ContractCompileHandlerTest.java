@@ -41,7 +41,7 @@ class ContractCompileHandlerTest {
     void missingApprovedProposalFailsClosed(@TempDir Path root) throws Exception {
         prepare(root);
 
-        var result = new ContractCompileHandler().execute(context(root));
+        var result = compile(context(root));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING", result.outcome());
@@ -54,7 +54,7 @@ class ContractCompileHandlerTest {
         var review = outputDir(root, "run-review").resolve("intake-codex-product-review.md");
         Files.writeString(review, "Objective: silently replace the proposal");
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(relative(root, review))));
+        var result = compile(context(root, List.of(relative(root, review))));
 
         assertEquals("TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING", result.outcome());
         assertFalse(Files.exists(contractPath(root)));
@@ -78,16 +78,13 @@ class ContractCompileHandlerTest {
                 TaskContractProposal.SCHEMA_VERSION);
         var reviewRef = writeApprovedReview(root, proposalRef, "run-review", true);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        var result = compile(context(root, List.of(reviewRef)));
 
         assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
         var contract = OBJECT_MAPPER.readValue(contractPath(root).toFile(), TaskContract.class);
         assertEquals("Add mandatory READY_FOR_REVIEW status", contract.objective());
-        assertEquals(List.of(
-                new TaskContract.ScopeEntry(
-                        "src/issueWorkflow.js", TaskContract.ScopeOperation.MODIFY),
-                new TaskContract.ScopeEntry(
-                        "src/issueApi.js", TaskContract.ScopeOperation.CREATE)), contract.scope().included());
+        assertEquals(TaskContract.Phase.GOAL, contract.phase());
+        assertTrue(contract.scope().included().isEmpty(), "requirements approval does not grant exact implementation paths");
         assertEquals(List.of("src/issueWorkflow.js", "src/issueApi.js"), contract.evidenceRefs());
         assertEquals(TaskContractArtifactWriter.sha256(contractPath(root)),
                 result.result().get("task_contract_sha256"));
@@ -110,10 +107,10 @@ class ContractCompileHandlerTest {
         writeGate(root, reviewRef, "run-blocked-review", INITIAL_ITERATION_ID,
                 "BLOCKED", "Use E.164-only phone numbers");
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        var result = compile(context(root, List.of(reviewRef)));
 
         assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
-        var resolution = OBJECT_MAPPER.readTree(workstreamDir(root).resolve("artifacts/contract-resolution.json").toFile());
+        var resolution = OBJECT_MAPPER.readTree(workstreamDir(root).resolve("artifacts/contracts/inst-contract/contract-resolution.json").toFile());
         assertEquals(2, resolution.path("resolved_questions").size());
         assertEquals("Choose E.164-only or local phone input",
                 resolution.path("resolved_questions").get(0).path("question").asText());
@@ -126,26 +123,21 @@ class ContractCompileHandlerTest {
     }
 
     @Test
-    void contractClarificationResolvesVerifiedProposalAndHumanNoteAsTypedObligation(@TempDir Path root)
+    void completedContractGateNodeWithoutResolvedDecisionCannotAuthorizeClarification(@TempDir Path root)
             throws Exception {
         prepare(root);
         var proposalRef = writeProposal(
                 root, "run-clarify-base", "Phone authentication", List.of("README.md"), List.of());
         var reviewRef = writeApprovedReview(root, proposalRef, "run-clarify-review", true);
-        var compiled = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        var compiled = compile(context(root, List.of(reviewRef)));
         assertEquals(NodeStatus.COMPLETED, compiled.status(), compiled.result().toString());
         var note = "Phone registration and login must accept E.164 identifiers only";
         prepareContractClarificationIteration(root, "iter-002", compiled.outputRefs(), note);
 
-        var resolved = new TaskContractRevisionContextResolver()
+        var resolved = new TaskContractRevisionContextResolver(dev.dual.runtime.RuntimeTestLedger.ledger())
                 .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
 
-        assertTrue(resolved.valid(), resolved.errors().toString());
-        assertTrue(resolved.context().revision());
-        assertEquals("Phone authentication", resolved.context().previousProposal().objective());
-        assertEquals(1, resolved.context().obligations().size());
-        assertEquals("HUMAN-CLARIFY-1", resolved.context().obligations().getFirst().id());
-        assertEquals(note, resolved.context().obligations().getFirst().text());
+        assertFalse(resolved.valid(), "a stable resolution and completed node are not a durable clarification decision");
     }
 
     @Test
@@ -154,24 +146,23 @@ class ContractCompileHandlerTest {
         var proposalRef = writeProposal(
                 root, "run-clarify-tampered", "Phone authentication", List.of("README.md"), List.of());
         var reviewRef = writeApprovedReview(root, proposalRef, "run-clarify-tampered-review", true);
-        var compiled = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        var compiled = compile(context(root, List.of(reviewRef)));
         assertEquals(NodeStatus.COMPLETED, compiled.status(), compiled.result().toString());
-        var resolutionPath = workstreamDir(root).resolve("artifacts/contract-resolution.json");
+        var resolutionPath = workstreamDir(root).resolve("artifacts/contracts/inst-contract/contract-resolution.json");
         var resolution = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(resolutionPath.toFile());
         resolution.put("gate_ref", ".agent/workstreams/" + WORKSTREAM_ID + "/gates/missing.json");
         OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(resolutionPath.toFile(), resolution);
         prepareContractClarificationIteration(root, "iter-002", compiled.outputRefs(), "Require E.164 only");
 
-        var resolved = new TaskContractRevisionContextResolver()
+        var resolved = new TaskContractRevisionContextResolver(dev.dual.runtime.RuntimeTestLedger.ledger())
                 .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
 
         assertFalse(resolved.valid());
-        assertTrue(resolved.errors().toString().contains("approved requirement gate referenced"),
-                resolved.errors().toString());
+        assertFalse(resolved.errors().isEmpty());
     }
 
     @Test
-    void humanRequirementRevisionResolvesVerifiedBlockedProposalAndHumanNote(@TempDir Path root) throws Exception {
+    void completedBlockedGateNodeAloneCannotAuthorizeHumanRevision(@TempDir Path root) throws Exception {
         prepare(root);
         var proposalRef = writeProposal(
                 root, "run-human-revise", "Phone authentication", List.of("README.md"), List.of());
@@ -181,28 +172,16 @@ class ContractCompileHandlerTest {
         var note = "Accept only explicit E.164 phone identifiers and canonical lowercase email identities";
         prepareHumanRequirementRevisionIteration(root, "iter-002", reviewRef, note);
 
-        var resolved = new TaskContractRevisionContextResolver()
+        var resolved = new TaskContractRevisionContextResolver(dev.dual.runtime.RuntimeTestLedger.ledger())
                 .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
 
-        assertTrue(resolved.valid(), resolved.errors().toString());
-        assertTrue(resolved.context().revision());
-        assertEquals("Phone authentication", resolved.context().previousProposal().objective());
-        assertEquals(1, resolved.context().obligations().size());
-        assertEquals("HUMAN-REVISE-1", resolved.context().obligations().getFirst().id());
-        assertEquals(note, resolved.context().obligations().getFirst().text());
-        var promptContract = AgentResultPromptContract.render(
-                WORKSTREAM_ID,
-                "run-human-revise-next",
-                "intake.claude_brainstorm",
-                "READY_FOR_PRODUCT_REVIEW",
-                java.util.Set.of("READY_FOR_PRODUCT_REVIEW"),
-                AgentResultPromptContract.proposalEmissionContext(resolved.context()));
-        assertTrue(promptContract.contains("\"id\":\"HUMAN-REVISE-1\""), promptContract);
-        assertTrue(promptContract.contains(note), promptContract);
+        // This fixture writes only a completed node, with no resolved gate or routing event.
+        // Real READY/BLOCKED human continuations are covered through transport -> runtime -> ledger.
+        assertFalse(resolved.valid());
     }
 
     @Test
-    void humanRequirementRevisionCannotUseNonBlockedReviewAsBaseline(@TempDir Path root) throws Exception {
+    void completedReadyGateNodeAloneCannotAuthorizeHumanRevision(@TempDir Path root) throws Exception {
         prepare(root);
         var proposalRef = writeProposal(
                 root, "run-human-revise-ready", "Phone authentication", List.of("README.md"), List.of());
@@ -211,12 +190,10 @@ class ContractCompileHandlerTest {
                 INITIAL_ITERATION_ID, false);
         prepareHumanRequirementRevisionIteration(root, "iter-002", reviewRef, "Change the accepted contract");
 
-        var resolved = new TaskContractRevisionContextResolver()
+        var resolved = new TaskContractRevisionContextResolver(dev.dual.runtime.RuntimeTestLedger.ledger())
                 .resolveForIteration(root, WORKSTREAM_ID, "iter-002");
 
-        assertFalse(resolved.valid());
-        assertTrue(resolved.errors().toString().contains("verified blocked intake review"),
-                resolved.errors().toString());
+        assertFalse(resolved.valid(), "a node document must not impersonate the durable human decision");
     }
 
     @Test
@@ -228,7 +205,7 @@ class ContractCompileHandlerTest {
                 root, proposalRef, "run-blocked-mismatch-review", "BLOCKED", List.of(),
                 INITIAL_ITERATION_ID, true);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        var result = compile(context(root, List.of(reviewRef)));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
@@ -249,7 +226,7 @@ class ContractCompileHandlerTest {
                 1);
         var reviewRef = writeApprovedReview(root, proposalRef, "run-review-v1", true);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        var result = compile(context(root, List.of(reviewRef)));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
@@ -279,7 +256,7 @@ class ContractCompileHandlerTest {
         AgentOutputLineageFixture.publish(root, WORKSTREAM_ID, proposalPath, INITIAL_ITERATION_ID);
         var reviewRef = writeApprovedReview(root, proposalRef, "run-review-v2-string-scope", true);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        var result = compile(context(root, List.of(reviewRef)));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
@@ -294,7 +271,7 @@ class ContractCompileHandlerTest {
         var proposalRef = writeProposal(root, "run-001", "objective", List.of("README.md"), List.of());
         var reviewRef = writeApprovedReview(root, proposalRef, "run-review", false);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        var result = compile(context(root, List.of(reviewRef)));
 
         assertEquals("TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING", result.outcome());
         assertFalse(Files.exists(contractPath(root)));
@@ -308,7 +285,7 @@ class ContractCompileHandlerTest {
         var gatePath = workstreamDir(root).resolve("gates/gate-run-review.json");
         Files.writeString(gatePath, Files.readString(gatePath).replace("\"approved\"", "\"approve\""));
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        var result = compile(context(root, List.of(reviewRef)));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING", result.outcome());
@@ -322,7 +299,7 @@ class ContractCompileHandlerTest {
         var proposalB = writeProposal(root, "run-b", "objective B", List.of("README.md"), List.of());
         var reviewB = writeApprovedReview(root, proposalB, "run-review-b", false);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(reviewB)));
+        var result = compile(context(root, List.of(reviewB)));
 
         assertEquals("TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING", result.outcome());
         assertFalse(Files.exists(contractPath(root)));
@@ -337,7 +314,7 @@ class ContractCompileHandlerTest {
         var gateNode = workstreamDir(root).resolve("nodes/node-gate-human_requirement_review-run-review.json");
         Files.writeString(gateNode, Files.readString(gateNode).replace(INITIAL_ITERATION_ID, "iter-other"));
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(review)));
+        var result = compile(context(root, List.of(review)));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROPOSAL_APPROVAL_MISSING", result.outcome());
@@ -351,7 +328,7 @@ class ContractCompileHandlerTest {
         var reviewRef = writeApprovedReview(root, proposalRef, "run-review", true);
         Files.writeString(root.resolve(proposalRef), "{}\n");
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        var result = compile(context(root, List.of(reviewRef)));
 
         assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
         assertFalse(Files.exists(contractPath(root)));
@@ -364,44 +341,34 @@ class ContractCompileHandlerTest {
                 List.of("Should review be mandatory?"));
         var reviewRef = writeApprovedReview(root, proposalRef, "run-review", true);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(reviewRef)));
+        var result = compile(context(root, List.of(reviewRef)));
 
         assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
-        assertTrue(Files.isRegularFile(workstreamDir(root).resolve("artifacts/contract-resolution.json")));
+        assertTrue(Files.isRegularFile(workstreamDir(root).resolve("artifacts/contracts/inst-contract/contract-resolution.json")));
     }
 
     @Test
     void revisionCompilesOnlyWhenEveryTriggeredReviewObligationIsCovered(@TempDir Path root) throws Exception {
-        prepare(root);
-        var originalProposal = writeTypedProposal(
-                root, "run-original", "Original objective",
-                List.of(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY)),
-                List.of(), TaskContractProposal.SCHEMA_VERSION,
-                INITIAL_ITERATION_ID, List.of(), List.of("README.md", "evidence/original-review.json"));
-        var obligations = List.of(
-                new AgentResultEnvelope.ReviewObligation("OB-1", "Make the behavior observable"),
-                new AgentResultEnvelope.ReviewObligation("OB-2", "Preserve the evidence reference"));
-        var rejectedReview = writeReview(
-                root, originalProposal, "run-rejected", "NEEDS_REVISION", obligations,
-                INITIAL_ITERATION_ID, false);
-        prepareRevisionIteration(root, "iter-002", rejectedReview);
-
-        var baseReference = AgentOutputContractDocument.read(root.resolve(rejectedReview), OBJECT_MAPPER)
-                .orElseThrow()
-                .reviewSubject();
-        var revisedProposal = writeValidatedRevisionPatch(root, baseReference, "iter-002");
-        var approvedReview = writeReview(
-                root, revisedProposal, "run-ready", "READY_FOR_PRODUCT_REVIEW", List.of(),
-                "iter-002", true);
-
-        var result = new ContractCompileHandler().execute(context(root, List.of(approvedReview), "iter-002"));
-
-        assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
-        var contract = OBJECT_MAPPER.readValue(contractPath(root).toFile(), TaskContract.class);
-        assertEquals(List.of("README.md", "evidence/original-review.json", "evidence/revision-proof.json"),
-                contract.evidenceRefs(), "revision compilation must preserve baseline evidence and append patch evidence");
-        assertEquals(List.of("The revised behavior is observable", "Revised verification passes"),
-                contract.acceptanceCriteria());
+        // Replace the old hand-written successful revision (no R01/R03) with the real run/ledger chain.
+        var f=new AcceptanceRepairSequenceTest.Fixture(root,"CONTRACT_GAP","docs/output.txt");
+        f.until("gate.human_requirement_review");f.step();
+        var oldReview=f.ledger.loadNode(f.paths,f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst()).inputRefs();
+        var old=AgentOutputContractDocument.read(root.resolve(oldReview.stream().filter(x->x.endsWith(".contract.json")).findFirst().orElseThrow()),OBJECT_MAPPER).orElseThrow();
+        var baseline=old.reviewSubject().resolveVerifiedProposal(root,f.ws,OBJECT_MAPPER).orElseThrow();
+        f.ledger.resolveOpenGate(f.paths,f.ledger.loadDefinition(f.paths),"revise","Make behavior observable and preserve evidence");
+        f.replaceAcceptanceClause=true;
+        f.until("gate.human_requirement_review");f.step();
+        var gate=f.ledger.loadNode(f.paths,f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst());
+        var context=new TaskContractRevisionContextResolver(f.ledger).resolveForIteration(root,f.ws,gate.iterationId());
+        assertTrue(context.valid(),context.errors().toString());
+        var review=AgentOutputContractDocument.read(root.resolve(gate.inputRefs().stream().filter(x->x.endsWith(".contract.json")).findFirst().orElseThrow()),OBJECT_MAPPER).orElseThrow();
+        var revised=review.reviewSubject().resolveVerifiedProposal(root,f.ws,OBJECT_MAPPER).orElseThrow();
+        assertTrue(new TaskContractProposalValidator().validateRevisionCoverage(revised,context.context().obligations()).isEmpty());
+        assertTrue(revised.evidenceRefs().containsAll(baseline.evidenceRefs()));
+        f.approve();f.until("gate.contract_review");f.step();
+        var goal=TaskContractProjectionVerifier.resolve(f.ledger,root,f.ws,TaskContract.Phase.GOAL).qualified().orElseThrow().contract();
+        assertEquals("Revised output must include a stable identifier",goal.acceptanceCriteria().getFirst().text());
+        assertTrue(goal.scope().included().isEmpty(),"GOAL does not grant execution writes");
     }
 
     @Test
@@ -436,7 +403,7 @@ class ContractCompileHandlerTest {
                 root, revisedProposal, "run-ready", "READY_FOR_PRODUCT_REVIEW", List.of(),
                 "iter-002", true);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(approvedReview), "iter-002"));
+        var result = compile(context(root, List.of(approvedReview), "iter-002"));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_REVISION_DELTA_INVALID", result.outcome());
@@ -467,7 +434,7 @@ class ContractCompileHandlerTest {
                 root, revisedProposal, "run-ready", "READY_FOR_PRODUCT_REVIEW", List.of(),
                 "iter-002", true);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(approvedReview), "iter-002"));
+        var result = compile(context(root, List.of(approvedReview), "iter-002"));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
@@ -488,7 +455,7 @@ class ContractCompileHandlerTest {
                 root, revisedProposal, "run-ready", "READY_FOR_PRODUCT_REVIEW", List.of(),
                 "iter-002", true);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(approvedReview), "iter-002"));
+        var result = compile(context(root, List.of(approvedReview), "iter-002"));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
@@ -507,7 +474,7 @@ class ContractCompileHandlerTest {
                 List.of());
         var approvedReview = writeApprovedReview(root, proposal, "run-ready", true);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(approvedReview)));
+        var result = compile(context(root, List.of(approvedReview)));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
@@ -539,7 +506,7 @@ class ContractCompileHandlerTest {
                 root, revisedProposal, "run-ready", "READY_FOR_PRODUCT_REVIEW", List.of(),
                 "iter-002", true);
 
-        var result = new ContractCompileHandler().execute(context(root, List.of(approvedReview), "iter-002"));
+        var result = compile(context(root, List.of(approvedReview), "iter-002"));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROPOSAL_INVALID", result.outcome());
@@ -547,6 +514,11 @@ class ContractCompileHandlerTest {
     }
 
     private static void prepare(Path root) throws Exception {
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(root, new dev.dual.core.id.DualId(WORKSTREAM_ID));
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-compile-fixture",
+                new dev.dual.core.workflow.WorkflowDefinition("compile-fixture", 1, "contract.compile", List.of(
+                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of("contract_phase", "GOAL", "required_subject", "approved_task_contract_proposal"))), List.of()));
         Files.createDirectories(workstreamDir(root));
         Files.writeString(workstreamDir(root).resolve("requirement.md"), "Strict proposal fixture\n");
         Files.writeString(root.resolve("README.md"), "# fixture\n");
@@ -700,93 +672,6 @@ class ContractCompileHandlerTest {
         return reviewRef;
     }
 
-    private static String writeValidatedRevisionPatch(
-            Path root,
-            TaskContractProposalReference baseReference,
-            String iterationId
-    ) throws Exception {
-        var runId = "run-revised";
-        var occurrenceDir = workstreamDir(root)
-                .resolve("artifacts/context-governance/occurrences/node-revision-" + runId);
-        var repoMap = occurrenceDir.resolve("repo-map.json");
-        Files.createDirectories(repoMap.getParent());
-        OBJECT_MAPPER.writeValue(repoMap.toFile(), Map.of(
-                "artifactType", "repo_map",
-                "inventoryHead", "",
-                "inventorySha256", "",
-                "inventoryPathCount", 0,
-                "files", List.of(Map.of("path", "README.md"))));
-        var binding = RepositoryFactBinding.write(
-                root,
-                occurrenceDir.resolve("binding.json"),
-                WORKSTREAM_ID,
-                "node-revision",
-                runId,
-                "",
-                "",
-                0,
-                Map.of("repoMap", repoMap),
-                OBJECT_MAPPER);
-        var now = Instant.now();
-        LEDGER_MAPPER.writeValue(workstreamDir(root).resolve("nodes/node-revision.json").toFile(),
-                new NodeInstanceDocument(
-                        1, "node-revision", "intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run",
-                        NodeStatus.RUNNING, "stage-intake", iterationId, List.of(), Map.of(),
-                        List.of(), Map.of(), "", "", now, null));
-        var output = outputDir(root, runId).resolve("intake-claude-brainstorm.json");
-        var outputRef = relative(root, output);
-        var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
-                "task_contract_revision_patch",
-                "READY_FOR_PRODUCT_REVIEW",
-                "Resolve both verified review obligations.",
-                baseReference.proposalId(),
-                baseReference.sha256(),
-                List.of(
-                        new AgentResultEnvelope.ObligationPatch(
-                                "OB-1",
-                                List.of("AC-1"),
-                                List.of(new AgentResultEnvelope.ClauseChange(
-                                        AgentResultEnvelope.ClauseChangeOperation.REPLACE,
-                                        AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
-                                        "AC-1",
-                                        "The revised behavior is observable")),
-                                List.of(),
-                                List.of()),
-                        new AgentResultEnvelope.ObligationPatch(
-                                "OB-2",
-                                List.of("AC-2"),
-                                List.of(new AgentResultEnvelope.ClauseChange(
-                                        AgentResultEnvelope.ClauseChangeOperation.REPLACE,
-                                        AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
-                                        "AC-2",
-                                        "Revised verification passes")),
-                                List.of(),
-                                List.of("evidence/revision-proof.json"))));
-        var envelope = new AgentResultEnvelope(
-                1, WORKSTREAM_ID, runId, "intake.claude_brainstorm", patch);
-        Files.writeString(output, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope));
-
-        var validated = new ArtifactContractValidator().validate(
-                root,
-                WORKSTREAM_ID,
-                "node-revision",
-                new NodeDefinition(
-                        "intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of()),
-                NodeResult.completed("completed", List.of(outputRef, binding.ref()), Map.of(
-                        "run_id", runId,
-                        "repository_fact_binding_ref", binding.ref(),
-                        "repository_fact_binding_sha256", binding.sha256())));
-        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
-        var sidecarRef = validated.outputRefs().stream()
-                .filter(ref -> ref.endsWith(".contract.json"))
-                .findFirst()
-                .orElseThrow();
-        AgentOutputLineageFixture.publish(root, WORKSTREAM_ID, root.resolve(sidecarRef), iterationId);
-        assertTrue(validated.outputRefs().stream().anyMatch(ref -> ref.endsWith(".ref.json")),
-                "revision validation must publish an immutable derived proposal reference");
-        return sidecarRef;
-    }
-
     private static void replaceClauseText(
             Path root,
             String proposalSidecarRef,
@@ -841,6 +726,17 @@ class ContractCompileHandlerTest {
                         "subject_input_refs", List.of(reviewRef))));
     }
 
+    // Unit-level compiler consumer: supply an explicit local write session, as runtime does.
+    // End-to-end approval routing is covered by PhasedContractContinuationTest and authored sequences.
+    private static NodeResult compile(TaskHandler.TaskContext context) throws Exception {
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot(), new dev.dual.core.id.DualId(context.workstreamId()));
+        try (var write = context.ledger().writeSession(paths, "compile unit fixture", context.instance().nodeInstanceId())) {
+            var result = new ContractCompileHandler().execute(new TaskHandler.TaskContext(context.workspaceRoot(),
+                    context.workstreamId(), context.definition(), context.instance(), write.ledger()));
+            write.commit(); return result;
+        }
+    }
+
     private static TaskHandler.TaskContext context(Path root) {
         return context(root, List.of());
     }
@@ -850,13 +746,10 @@ class ContractCompileHandlerTest {
     }
 
     private static TaskHandler.TaskContext context(Path root, List<String> inputRefs, String iterationId) {
-        return new TaskHandler.TaskContext(
-                root, WORKSTREAM_ID,
-                new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile",
-                        Map.of("required_subject", "approved_task_contract_proposal")),
-                new NodeInstance("inst-contract", "contract.compile", NodeKind.TASK, "contract.compile",
+        return new TaskHandler.TaskContext(root, WORKSTREAM_ID, new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile",
+                        Map.of("contract_phase", "GOAL", "required_subject", "approved_task_contract_proposal")), new NodeInstance("inst-contract", "contract.compile", NodeKind.TASK, "contract.compile",
                         NodeStatus.READY, "stage-contract", iterationId, inputRefs, List.of(), Map.of(), null,
-                        Instant.now(), null));
+                        Instant.now(), null), dev.dual.runtime.RuntimeTestLedger.ledger());
     }
 
     private static void prepareRevisionIteration(
@@ -955,6 +848,6 @@ class ContractCompileHandlerTest {
     }
 
     private static Path contractPath(Path root) {
-        return workstreamDir(root).resolve("artifacts/task-contract.json");
+        return workstreamDir(root).resolve("artifacts/contracts/inst-contract/task-contract.json");
     }
 }

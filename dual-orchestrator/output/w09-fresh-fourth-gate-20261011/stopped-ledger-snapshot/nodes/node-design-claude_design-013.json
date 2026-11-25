@@ -1,0 +1,69 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-design-claude_design-013",
+  "nodeDefinitionId" : "design.claude_design",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-design",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/task-contract.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/task-contract.md", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/contract-resolution.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/contract-resolution.md" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256" : "91436b26f566e8951319c980650af7fb07dec0a524fdbf0c3ba5556b0c83ccab",
+    "source_node_instance_id" : "node-contract-compile-012",
+    "required" : true,
+    "transition_type" : "normal"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791699968740/outputs/design-claude.stderr.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791699968740/outputs/design-claude.transcript.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791699968740/outputs/design-claude.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791699968740/binding.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791699968740/outputs/design-claude.contract.json" ],
+  "result" : {
+    "adapter_signals" : [ ],
+    "agent" : "claude",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "design_result",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "READY_FOR_ARCH_REVIEW",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791699968740/outputs/design-claude.contract.json",
+    "contract_sidecar_sha256" : "e36eb96ce8f6506ef62317d6ba3ad95f3a04de2bdc0df6f8db657e2e7e463c11",
+    "decision" : "READY_FOR_ARCH_REVIEW",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791699968740/binding.json",
+    "repository_fact_binding_sha256" : "196a00825849e8ace4c9ad72144678330e105425ce7aca22092aea90a7ea8a87",
+    "run_id" : "run-1791699968740",
+    "run_metadata" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791699968740/run.json",
+    "session" : "claude-main-ws-20261011T044656Z-BMDJ-run-1791699968740",
+    "summary" : "最小三文件设计：纯函数以两次 replace 将 CRLF 与单独 CR 归一为 LF，11 个 unittest 用例覆盖八类输入与幂等性，README 以显式转义示例并与代码保持一致。",
+    "transcript_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791699968740/outputs/design-claude.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791699968740/outputs/nxe-1791699968696-86d8dc02-completion.json",
+    "completion_sha256" : "5f5b70efed429c4109a21c9e0312c4533c40665392ba6b0f8fc909ac348e2a2c"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1791699968696-86d8dc02",
+  "startedAt" : "2026-10-11T06:26:08.707895Z",
+  "finishedAt" : "2026-10-11T06:29:19.896824Z"
+}

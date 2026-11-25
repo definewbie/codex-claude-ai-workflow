@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/opt/homebrew/Cellar/rtk/0.42.3/bin/rtk",
+    "proxy",
+    "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+    "status",
+    "--porcelain=v1",
+    "--untracked-files=all"
+  ],
+  "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target",
+  "purpose": "Final readback through original read model and actual target git; no workflow resume or provider"
+}

@@ -1,0 +1,715 @@
+
+FILE: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts
+SHA256: d727f05adfa38beadbc4214fbbc5a14c864dfa1eead4dd5e2a0a734a63e65a88
+638:       authPolicy: options.authPolicy ?? "skip",
+639:       permissionPolicy: snapshotPermissionPolicy(options.permissionPolicy),
+640:       elicitationModes: normalizeElicitationModes(options.elicitationModes),
+641:     };
+642:     this.eventHandlers = {
+643:       onAcpMessage: this.options.onAcpMessage,
+644:       onAcpOutputMessage: this.options.onAcpOutputMessage,
+645:       onSessionUpdate: this.options.onSessionUpdate,
+646:       onClientOperation: this.options.onClientOperation,
+647:       onPermissionEscalation: this.options.onPermissionEscalation,
+648:     };
+649: 
+650:     this.filesystem = new FileSystemHandlers({
+651:       cwd: this.options.cwd,
+652:       permissionMode: this.options.permissionMode,
+653:       nonInteractivePermissions: this.options.nonInteractivePermissions,
+654:       onOperation: (operation) => {
+655:         this.eventHandlers.onClientOperation?.(operation);
+656:       },
+657:     });
+658:     this.terminalManager = new TerminalManager({
+659:       cwd: this.options.cwd,
+660:       permissionMode: this.options.permissionMode,
+661:       nonInteractivePermissions: this.options.nonInteractivePermissions,
+662:       onOperation: (operation) => {
+663:         this.eventHandlers.onClientOperation?.(operation);
+664:       },
+665:     });
+666:   }
+667: 
+668:   get initializeResult(): InitializeResponse | undefined {
+970:       .onNotification(methods.client.session.update, async ({ params }) => {
+971:         await this.handleSessionUpdate(params);
+972:       })
+973:       .onNotification(methods.client.elicitation.complete, async () => {})
+974:       .onRequest(methods.client.session.requestPermission, async ({ params }) => {
+975:         return await this.handlePermissionRequest(params);
+976:       })
+977:       .onRequest(methods.client.elicitation.create, async ({ params, requestId, signal }) => {
+978:         return await this.handleElicitationRequest(params, requestId, signal);
+979:       })
+980:       .onRequest(methods.client.fs.readTextFile, async ({ params }) => {
+981:         return await this.handleReadTextFile(params);
+982:       })
+983:       .onRequest(methods.client.fs.writeTextFile, async ({ params }) => {
+984:         return await this.handleWriteTextFile(params);
+985:       })
+986:       .onRequest(methods.client.terminal.create, async ({ params }) => {
+987:         return await this.handleCreateTerminal(params);
+988:       })
+989:       .onRequest(methods.client.terminal.output, async ({ params }) => {
+990:         return await this.handleTerminalOutput(params);
+991:       })
+992:       .onRequest(methods.client.terminal.waitForExit, async ({ params }) => {
+993:         return await this.handleWaitForTerminalExit(params);
+994:       })
+995:       .onRequest(methods.client.terminal.kill, async ({ params }) => {
+996:         return await this.handleKillTerminal(params);
+997:       })
+998:       .onRequest(methods.client.terminal.release, async ({ params }) => {
+999:         return await this.handleReleaseTerminal(params);
+1040:   private async initializeProtocolConnection(
+1041:     connection: AcpAgentConnection,
+1042:     launch: Pick<AgentLaunchPlan, "devinAcp" | "geminiAcp">,
+1043:   ): Promise<InitializeResponse> {
+1044:     const initializePromise = connection.initialize({
+1045:       protocolVersion: PROTOCOL_VERSION,
+1046:       clientCapabilities: resolveClientCapabilities({
+1047:         devinAcp: launch.devinAcp,
+1048:         fs: this.options.fs !== false,
+1049:         terminal: this.options.terminal !== false,
+1050:         elicitationModes: this.options.elicitationModes ?? [],
+1051:       }),
+1052:       clientInfo: resolveClientInfo(launch.devinAcp),
+1053:     });
+1054:     const initialized = launch.geminiAcp
+2310:       pending.reject(error);
+2311:     }
+2312:   }
+2313: 
+2314:   private async handleReadTextFile(params: ReadTextFileRequest): Promise<ReadTextFileResponse> {
+2315:     try {
+2316:       return await this.filesystem.readTextFile(params);
+2317:     } catch (error) {
+2318:       this.recordPermissionError(params.sessionId, error);
+2319:       throw error;
+2320:     }
+2321:   }
+2322: 
+2323:   private async handleWriteTextFile(params: WriteTextFileRequest): Promise<WriteTextFileResponse> {
+2324:     try {
+2325:       return await this.filesystem.writeTextFile(params);
+2326:     } catch (error) {
+2327:       this.recordPermissionError(params.sessionId, error);
+2328:       throw error;
+2329:     }
+2330:   }
+2331: 
+2332:   private async handleCreateTerminal(
+2333:     params: CreateTerminalRequest,
+2334:   ): Promise<CreateTerminalResponse> {
+2335:     try {
+2336:       return await this.terminalManager.createTerminal(params);
+2337:     } catch (error) {
+2338:       this.recordPermissionError(params.sessionId, error);
+2339:       throw error;
+2340:     }
+2341:   }
+2342: 
+2343:   private async handleTerminalOutput(
+
+FILE: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/filesystem.ts
+SHA256: 46e7eee0d04ff262029958a232ea68acc4279c84f3e10c4941dc0a12013d5bba
+80:     permissionMode: PermissionMode,
+81:     nonInteractivePermissions?: NonInteractivePermissionPolicy,
+82:   ): void {
+83:     this.permissionMode = permissionMode;
+84:     this.nonInteractivePermissions = nonInteractivePermissions ?? "deny";
+85:   }
+86: 
+87:   async readTextFile(params: ReadTextFileRequest): Promise<ReadTextFileResponse> {
+88:     const filePath = this.resolvePathWithinRoot(params.path);
+89:     const summary = `read_text_file: ${filePath}`;
+90:     this.emitOperation({
+91:       method: "fs/read_text_file",
+92:       status: "running",
+93:       summary,
+94:       details: this.readWindowDetails(params.line, params.limit),
+95:       timestamp: nowIso(),
+96:     });
+97: 
+98:     try {
+99:       if (this.permissionMode === "deny-all") {
+100:         throw new PermissionDeniedError("Permission denied for fs/read_text_file (--deny-all)");
+101:       }
+102: 
+103:       const content = await fs.readFile(filePath, "utf8");
+104:       const sliced = this.sliceContent(content, params.line, params.limit);
+105: 
+106:       this.emitOperation({
+107:         method: "fs/read_text_file",
+108:         status: "completed",
+109:         summary,
+110:         details: this.readWindowDetails(params.line, params.limit),
+111:         timestamp: nowIso(),
+112:       });
+113:       return { content: sliced };
+114:     } catch (error) {
+115:       const message = error instanceof Error ? error.message : String(error);
+116:       this.emitOperation({
+117:         method: "fs/read_text_file",
+118:         status: "failed",
+119:         summary,
+120:         details: message,
+121:         timestamp: nowIso(),
+122:       });
+123:       throw error;
+124:     }
+125:   }
+126: 
+127:   async writeTextFile(params: WriteTextFileRequest): Promise<WriteTextFileResponse> {
+128:     const filePath = this.resolvePathWithinRoot(params.path);
+129:     const preview = toWritePreview(params.content);
+130:     const summary = `write_text_file: ${filePath}`;
+131: 
+132:     this.emitOperation({
+133:       method: "fs/write_text_file",
+134:       status: "running",
+135:       summary,
+136:       details: preview,
+137:       timestamp: nowIso(),
+138:     });
+139: 
+140:     try {
+141:       if (!(await this.isWriteApproved(filePath, preview))) {
+142:         throw new PermissionDeniedError("Permission denied for fs/write_text_file");
+143:       }
+144: 
+145:       await fs.mkdir(path.dirname(filePath), { recursive: true });
+146:       await fs.writeFile(filePath, params.content, "utf8");
+147: 
+148:       this.emitOperation({
+149:         method: "fs/write_text_file",
+150:         status: "completed",
+151:         summary,
+152:         details: preview,
+153:         timestamp: nowIso(),
+154:       });
+155:       return {};
+156:     } catch (error) {
+157:       const message = error instanceof Error ? error.message : String(error);
+158:       this.emitOperation({
+159:         method: "fs/write_text_file",
+160:         status: "failed",
+161:         summary,
+162:         details: message,
+163:         timestamp: nowIso(),
+164:       });
+165:       throw error;
+166:     }
+167:   }
+168: 
+169:   private async isWriteApproved(filePath: string, preview: string): Promise<boolean> {
+170:     if (this.permissionMode === "approve-all") {
+171:       return true;
+172:     }
+173:     if (this.permissionMode === "deny-all") {
+174:       return false;
+175:     }
+
+FILE: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/permission-prompt.ts
+SHA256: 6f86467b09ac08f2b560127eedae43c71d15775280c23a99e95f26be5ae931e1
+1: import readline from "node:readline/promises";
+2: 
+3: export type PermissionPromptOptions = {
+4:   prompt: string;
+5:   header?: string;
+6:   details?: string;
+7: };
+8: 
+9: export async function promptForPermission(options: PermissionPromptOptions): Promise<boolean> {
+10:   if (!process.stdin.isTTY || !process.stderr.isTTY) {
+11:     return false;
+12:   }
+13: 
+14:   if (options.header) {
+15:     process.stderr.write(`\n${options.header}\n`);
+16:   }
+17:   if (options.details && options.details.trim().length > 0) {
+18:     process.stderr.write(`${options.details}\n`);
+19:   }
+20: 
+21:   const rl = readline.createInterface({
+22:     input: process.stdin,
+23:     output: process.stderr,
+24:   });
+25: 
+26:   try {
+27:     const answer = await rl.question(options.prompt);
+28:     const normalized = answer.trim().toLowerCase();
+29:     return normalized === "y" || normalized === "yes";
+30:   } finally {
+31:     rl.close();
+32:   }
+33: }
+
+FILE: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/terminal-manager.ts
+SHA256: cfc45722970c870175f1534335dd79d8b7f9b4e26b748746f097d282986c5196
+188:     this.permissionMode = permissionMode;
+189:     this.nonInteractivePermissions = nonInteractivePermissions ?? "deny";
+190:   }
+191: 
+192:   async createTerminal(params: CreateTerminalRequest): Promise<CreateTerminalResponse> {
+193:     const commandLine = toCommandLine(params.command, params.args);
+194:     const summary = `terminal/create: ${commandLine}`;
+195: 
+196:     this.emitOperation({
+197:       method: "terminal/create",
+198:       status: "running",
+199:       summary,
+200:       timestamp: nowIso(),
+201:     });
+202: 
+203:     try {
+204:       if (!(await this.isExecuteApproved(commandLine))) {
+205:         throw new PermissionDeniedError("Permission denied for terminal/create");
+206:       }
+207: 
+208:       const outputByteLimit = Math.max(
+209:         0,
+210:         Math.round(params.outputByteLimit ?? DEFAULT_TERMINAL_OUTPUT_LIMIT_BYTES),
+211:       );
+212:       const { proc, spawnCommand } = await spawnTerminalProcess(params, this.cwd);
+213: 
+214:       let resolveExit: (response: WaitForTerminalExitResponse) => void = () => {};
+215:       const exitPromise = new Promise<WaitForTerminalExitResponse>((resolve) => {
+216:         resolveExit = resolve;
+217:       });
+218: 
+219:       const terminal: ManagedTerminal = {
+220:         process: proc,
+430:   private async isExecuteApproved(commandLine: string): Promise<boolean> {
+431:     if (this.permissionMode === "approve-all") {
+432:       return true;
+433:     }
+434:     if (this.permissionMode === "deny-all") {
+435:       return false;
+436:     }
+437:     if (
+438:       this.usesDefaultConfirmExecute &&
+439:       this.nonInteractivePermissions === "fail" &&
+440:       !canPromptForPermission()
+441:     ) {
+442:       throw new PermissionPromptUnavailableError();
+443:     }
+444:     return await this.confirmExecute(commandLine);
+445:   }
+446: 
+447:   private isRunning(terminal: ManagedTerminal): boolean {
+448:     return terminal.exitCode === undefined && terminal.signal === undefined;
+449:   }
+450: 
+
+FILE: /Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js
+SHA256: 4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268
+21895:       peerConnection.close(error51);
+21896:       state.connection.close(error51);
+21897:       throw error51;
+21898:     }
+21899:     return state;
+21900:   }
+21901:   openStreamConnection(stream) {
+21902:     const rawConnection = this.builder.connect(stream, stableConnectionOptions);
+21903:     return {
+21904:       rawConnection,
+21905:       connection: clientConnection(rawConnection, this.connectHandlers)
+21906:     };
+21907:   }
+21908: };
+21909: var legacyAgentRequestMethods = /* @__PURE__ */ new Set([
+21910:   AGENT_METHODS.initialize,
+21911:   AGENT_METHODS.authenticate,
+21912:   AGENT_METHODS.providers_list,
+21913:   AGENT_METHODS.providers_set,
+21914:   AGENT_METHODS.providers_disable,
+21915:   AGENT_METHODS.session_new,
+21916:   AGENT_METHODS.session_load,
+21917:   AGENT_METHODS.session_set_mode,
+21918:   AGENT_METHODS.session_set_config_option,
+21919:   AGENT_METHODS.session_prompt,
+21920:   AGENT_METHODS.session_list,
+21921:   AGENT_METHODS.session_delete,
+21922:   AGENT_METHODS.session_fork,
+21923:   AGENT_METHODS.session_resume,
+21924:   AGENT_METHODS.session_close,
+21925:   AGENT_METHODS.logout,
+21926:   AGENT_METHODS.nes_start,
+21927:   AGENT_METHODS.nes_suggest,
+21928:   AGENT_METHODS.nes_close
+21929: ]);
+21930: var legacyAgentNotificationMethods = /* @__PURE__ */ new Set([
+21931:   AGENT_METHODS.session_cancel,
+21932:   AGENT_METHODS.nes_accept,
+21933:   AGENT_METHODS.nes_reject,
+21934:   AGENT_METHODS.document_did_open,
+21935:   AGENT_METHODS.document_did_change,
+21936:   AGENT_METHODS.document_did_close,
+21937:   AGENT_METHODS.document_did_save,
+21938:   AGENT_METHODS.document_did_focus
+21939: ]);
+21940: var legacyClientRequestMethods = /* @__PURE__ */ new Set([
+21941:   CLIENT_METHODS.session_request_permission,
+21942:   CLIENT_METHODS.fs_write_text_file,
+21943:   CLIENT_METHODS.fs_read_text_file,
+21944:   CLIENT_METHODS.terminal_create,
+21945:   CLIENT_METHODS.terminal_output,
+21946:   CLIENT_METHODS.terminal_release,
+21947:   CLIENT_METHODS.terminal_wait_for_exit,
+21948:   CLIENT_METHODS.terminal_kill,
+21949:   CLIENT_METHODS.elicitation_create
+21950: ]);
+21951: var legacyClientNotificationMethods = /* @__PURE__ */ new Set([
+21952:   CLIENT_METHODS.session_update,
+21953:   CLIENT_METHODS.elicitation_complete
+21954: ]);
+21955: 
+21956: // src/CodexJsonRpcConnection.ts
+21957: var rpc = __toESM(require_main(), 1);
+21958: import { spawn } from "node:child_process";
+21959: import { createRequire } from "node:module";
+21960: 
+21961: // src/StdUtils.ts
+21962: var import_node = __toESM(require_main(), 1);
+21963: import { Readable, Writable } from "node:stream";
+21964: function createJSONRPCWriter(writable) {
+21965:   return {
+28400:   async readSessionThread(sessionId) {
+28401:     return (await this.codexClient.threadRead({
+28402:       threadId: sessionId,
+28403:       includeTurns: true
+28404:     })).thread;
+28405:   }
+28406:   async newSession(request) {
+28407:     const additionalDirectories = readAdditionalDirectories(request.cwd, request.additionalDirectories, request._meta);
+28408:     await this.refreshSkills(request.cwd, additionalDirectories);
+28409:     const response = await this.codexClient.threadStart({
+28410:       config: await this.createSessionConfig(request.cwd, additionalDirectories, request.mcpServers),
+28411:       modelProvider: this.getModelProvider(),
+28412:       cwd: request.cwd
+28413:     });
+28414:     const codexModels = await this.fetchAvailableModels();
+28415:     if (codexModels.length === 0) {
+28416:       throw new Error("Codex did not return any models");
+28417:     }
+28418:     const currentModelId = this.createModelId(codexModels, response.model, response.reasoningEffort).toString();
+28419:     return {
+28420:       sessionId: response.thread.id,
+28421:       currentModelId,
+28422:       models: codexModels,
+28423:       collaborationMode: this.getCollaborationMode(response.thread.id),
+28424:       modelProvider: response.modelProvider,
+28425:       currentServiceTier: response.serviceTier ?? null,
+28426:       additionalDirectories
+28427:     };
+28428:   }
+28429:   async closeSession(sessionId) {
+28430:     try {
+28431:       await this.codexClient.threadUnsubscribe({ threadId: sessionId });
+28432:     } finally {
+28500:   async createSessionConfig(projectPath, additionalDirectories, mcpServers) {
+28501:     const sessionRoots = [projectPath, ...additionalDirectories];
+28502:     const activeProvider = this.gatewayConfig ? {
+28503:       apiType: gatewayApiTypeFromConfig(this.gatewayConfig),
+28504:       baseUrl: this.gatewayConfig.config.base_url
+28505:     } : this.getNativeProviderConfig();
+28506:     logger.log("Creating session config", {
+28507:       projectPath,
+28508:       overrideActive: this.gatewayConfig !== null,
+28509:       modelProvider: this.getModelProvider(),
+28510:       apiType: activeProvider.apiType,
+28511:       baseUrl: activeProvider.baseUrl
+28512:     });
+28513:     const mergedConfig = {
+28514:       ...mergeGatewayConfig(this.config, this.gatewayConfig),
+28515:       projects: Object.fromEntries(sessionRoots.map((root) => [root, {
+28516:         trust_level: "trusted"
+28517:       }]))
+28518:     };
+28519:     const configWithWorkspaceRoots = mergeSandboxWorkspaceWriteRoots(mergedConfig, additionalDirectories);
+28520:     if (mcpServers.length === 0) {
+28521:       return configWithWorkspaceRoots;
+28522:     }
+28523:     const requestedServers = mcpServers.map((mcp) => ({
+28524:       name: sanitizeMcpServerName(mcp.name),
+28525:       server: mcp
+28526:     }));
+28527:     let serversToConfigure = requestedServers;
+28528:     if (shouldDeduplicateMcpConflicts()) {
+28529:       const existingNames = await this.getConfigMcpServerNames(projectPath);
+28530:       serversToConfigure = requestedServers.filter((mcp) => !existingNames.has(mcp.name));
+28531:     }
+28532:     if (serversToConfigure.length === 0) {
+28533:       return configWithWorkspaceRoots;
+28534:     }
+28535:     return {
+28536:       ...configWithWorkspaceRoots,
+28537:       "mcp_servers": Object.fromEntries(serversToConfigure.map((mcp) => [mcp.name, this.createMcpSeverConfig(mcp.server)]))
+28538:     };
+28539:   }
+28540:   async getConfigMcpServerNames(projectPath) {
+28541:     const response = await this.codexClient.configRead({ includeLayers: true, cwd: projectPath });
+28542:     const effectiveMcpServers = response?.config?.["mcp_servers"];
+28543:     const configLayers = response?.layers ?? [];
+28544:     const layerMcpServers = configLayers.map((layer) => {
+28545:       return isJsonObject(layer.config) ? layer.config["mcp_servers"] : void 0;
+28546:     });
+28547:     const configuredMcpServers = [effectiveMcpServers, ...layerMcpServers].filter(isJsonObject);
+28548:     if (configuredMcpServers.length === 0) {
+28549:       return /* @__PURE__ */ new Set();
+28550:     }
+28645:     };
+28646:     const previous = this.sessionNotificationQueues.get(sessionId);
+28647:     const next = previous ? previous.then(run, run) : run();
+28648:     this.sessionNotificationQueues.set(sessionId, next);
+28649:     void next.finally(() => {
+28650:       if (this.sessionNotificationQueues.get(sessionId) === next) {
+28651:         this.sessionNotificationQueues.delete(sessionId);
+28652:       }
+28653:     });
+28654:   }
+28655:   async sendPrompt(request, agentMode, modelId, serviceTier, disableSummary, cwd, additionalDirectories, onTurnStarted, shouldCancel) {
+28656:     const input = buildPromptItems(request.prompt);
+28657:     const effort = modelId.effort;
+28658:     await this.refreshSkills(cwd, additionalDirectories);
+28659:     if (shouldCancel?.()) {
+28660:       return null;
+28661:     }
+28662:     return await this.codexClient.runTurn({
+28663:       threadId: request.sessionId,
+28664:       input,
+28665:       approvalPolicy: agentMode.approvalPolicy,
+28666:       approvalsReviewer: agentMode.approvalsReviewer,
+28667:       sandboxPolicy: addAdditionalDirectoriesToSandboxPolicy(agentMode.sandboxPolicy, additionalDirectories),
+28668:       summary: disableSummary ? "none" : "auto",
+28669:       effort,
+28670:       model: modelId.model,
+28671:       serviceTier
+28672:     }, onTurnStarted);
+28673:   }
+28674:   async runAgentFileChangeReport(params) {
+28675:     if (params.signal?.aborted) {
+28676:       return createUnavailableAgentFileChangeReport(params.requestId, "cancelled");
+28677:     }
+28678:     const budget = new AgentFileChangeReportBudget(params.signal);
+
+FILE: /Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js
+SHA256: f0cbbe408bb758cc4bacdae9a244bcac6efbdb6413f680195d017648abc6d816
+548:         return this.ctx.notify(methods.client.session.update, params);
+549:     }
+550:     requestPermission(params, signal) {
+551:         return this.ctx.request(methods.client.session.requestPermission, params, {
+552:             cancellationSignal: signal,
+553:         });
+554:     }
+555:     readTextFile(params) {
+556:         return this.ctx.request(methods.client.fs.readTextFile, params);
+557:     }
+558:     writeTextFile(params) {
+559:         return this.ctx.request(methods.client.fs.writeTextFile, params);
+560:     }
+3999:             }
+4000:         }
+4001:     }
+4002:     async readTextFile(params) {
+4003:         const response = await this.client.readTextFile(params);
+4004:         return response;
+4005:     }
+4006:     async writeTextFile(params) {
+4007:         const response = await this.client.writeTextFile(params);
+4008:         return response;
+4009:     }
+4010:     /** Forward a permission request to the client, wiring the tool call's
+4780:         };
+4781:         // AskUserQuestion surfaces as a `permission_ask_user_question` dialog that
+4782:         // we render as a form elicitation. Without form-elicitation support there
+4783:         // is no way to present it over ACP, so keep it disabled in that case.
+4784:         const disallowedTools = elicitationSupport.form ? [] : ["AskUserQuestion"];
+4785:         // Resolve which built-in tools to expose.
+4786:         // Explicit tools array from _meta.claudeCode.options takes precedence.
+4787:         // disableBuiltInTools is a legacy shorthand for tools: [] — kept for
+4788:         // backward compatibility but callers should prefer the tools array.
+4789:         const tools = userProvidedOptions?.tools ??
+4790:             (params._meta?.disableBuiltInTools === true ? [] : { type: "preset", preset: "claude_code" });
+4791:         const abortController = userProvidedOptions?.abortController || new AbortController();
+4792:         // Per-session task state. Created here (rather than in the session record
+4793:         // below) so the TaskCreated/TaskCompleted hook callbacks can close over
+4794:         // the same Map that the streaming message handler will read from.
+4795:         const taskState = new Map();
+4796:         // Resolve every workspace root once. The hidden report tool uses this same
+4797:         // set for lexical path validation, and the SDK receives it below.
+4798:         const acpAdditionalDirectories = params.additionalDirectories ?? sessionMeta?.additionalRoots ?? [];
+4850:         const env = {
+4851:             ...process.env,
+4852:             ...userProvidedOptions?.env,
+4853:             // Client-managed LLM routing: `providers/set` config wins, else the
+4854:             // legacy gateway auth request. Routing is baked into the query at
+4855:             // creation; provider updates recreate loaded queries between turns.
+4856:             ...providerEnv,
+4857:             // Opt-in to session state events like when the agent is idle
+4858:             CLAUDE_CODE_EMIT_SESSION_STATE_EVENTS: "1",
+4859:         };
+4860:         // Scopes the context-window cache to this query's backend (see
+4861:         // `contextWindowCache`). Derived from the same `env` object handed to the
+4862:         // SDK, so per-session `_meta` env routing and ambient process-env routing
+4863:         // are distinguished exactly as the CLI will see them.
+4864:         const providerCacheKey = providerCacheKeyFor(env);
+4865:         this.logger.log(`[session/query] sessionId=${sessionId} resume=${creationOpts?.resume ?? "none"} apiType=${resolvedProvider?.apiType ?? "native"} baseUrl=${resolvedProvider?.baseUrl ?? "native"}`);
+4866:         const options = {
+4867:             systemPrompt,
+4868:             settingSources: ["user", "project", "local"],
+4869:             ...(thinking !== undefined && { thinking }),
+4870:             ...userProvidedOptions,
+4871:             ...(settings && { settings }),
+4872:             env,
+4873:             // Override certain fields that must be controlled by ACP
+4874:             cwd: params.cwd,
+4875:             includePartialMessages: true,
+4876:             forwardSubagentText,
+4877:             mcpServers: {
+4878:                 ...(userProvidedOptions?.mcpServers || {}),
+4879:                 ...mcpServers,
+4880:                 ...(fileChangeAuditSupport
+4881:                     ? { [FILE_CHANGE_AUDIT_SERVER_NAME]: fileChangeAuditSupport.mcpServer }
+4882:                     : {}),
+4883:             },
+4884:             // If we want bypassPermissions to be an option, we have to allow it here.
+4885:             // But it doesn't work in root mode, so we only activate it if it will work.
+4886:             allowDangerouslySkipPermissions: ALLOW_BYPASS,
+4887:             permissionMode,
+4888:             canUseTool: this.canUseTool(sessionId),
+4889:             // Forward MCP elicitation requests onto ACP elicitation. Only attached
+4890:             // when the client advertised support, so non-supporting clients keep the
+4891:             // SDK's default (auto-decline) behavior. (AskUserQuestion is handled in
+4892:             // canUseTool, not here.)
+4893:             ...(elicitationSupport.form || elicitationSupport.url
+4894:                 ? { onElicitation: this.handleMcpElicitation(sessionId, elicitationSupport) }
+4895:                 : {}),
+4896:             // Render the CLI's refusal-fallback consent prompt ("<model> declined —
+4897:             // retry with <fallback>?") as an ACP form elicitation. Declaring the
+4898:             // kind is the opt-in: the CLI never emits an undeclared dialog, and the
+4899:             // flow instead degrades to the classic refusal error ending the turn.
+4900:             // Gated on form elicitation since that's the only ACP surface that can
+4901:             // present a choice outside a tool call.
+4902:             ...(elicitationSupport.form
+4903:                 ? {
+4904:                     onUserDialog: this.handleUserDialog(sessionId),
+4905:                     supportedDialogKinds: [REFUSAL_FALLBACK_DIALOG_KIND],
+4906:                 }
+4907:                 : {}),
+4908:             pathToClaudeCodeExecutable: process.env.CLAUDE_CODE_EXECUTABLE ?? (await claudeCliPath()),
+4909:             extraArgs: {
+4910:                 ...userProvidedOptions?.extraArgs,
+4911:                 "replay-user-messages": "",
+4912:             },
+4913:             disallowedTools: [...(userProvidedOptions?.disallowedTools || []), ...disallowedTools],
+4914:             tools,
+4915:             hooks: {
+4916:                 ...userProvidedOptions?.hooks,
+4917:                 ...(fileChangeAuditSupport
+4918:                     ? {
+4919:                         PreToolUse: [
+4920:                             ...(userProvidedOptions?.hooks?.PreToolUse || []),
+4921:                             { hooks: [fileChangeAuditSupport.preToolUseHook] },
+4922:                         ],
+4923:                     }
+4924:                     : {}),
+4925:                 PostToolUse: [
+4926:                     ...(userProvidedOptions?.hooks?.PostToolUse || []),
+4927:                     {
+4928:                         hooks: [
+4929:                             createPostToolUseHook({
+4930:                                 onEnterPlanMode: async () => {
+4931:                                     await this.client.sessionUpdate({
+4932:                                         sessionId,
+4933:                                         update: {
+4934:                                             sessionUpdate: "current_mode_update",
+4935:                                             currentModeId: "plan",
+4936:                                         },
+4937:                                     });
+4938:                                     await this.updateConfigOption(sessionId, MODE_CONFIG_ID, "plan");
+4939:                                 },
+4940:                             }),
+4941:                         ],
+4942:                     },
+4943:                 ],
+4944:                 ...(fileChangeAuditSupport
+4945:                     ? {
+4946:                         Stop: [
+4947:                             ...(userProvidedOptions?.hooks?.Stop || []),
+4948:                             { hooks: [fileChangeAuditSupport.stopHook] },
+
+FILE: /Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts
+SHA256: 65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7
+1397:      * To restrict which tools are available, use the `tools` option instead.
+1398:      *
+1399:      * Note: passing `'Skill'` here is deprecated — use the `skills` option instead.
+1400:      */
+1401:     allowedTools?: string[];
+1402:     /**
+1403:      * Custom permission handler for controlling tool usage. Called before each
+1404:      * tool execution to determine if it should be allowed, denied, or prompt the user.
+1405:      */
+1406:     canUseTool?: CanUseTool;
+1407:     /**
+1408:      * Continue the most recent conversation in the current directory instead of starting a new one.
+1409:      * Mutually exclusive with `resume`.
+1410:      */
+1411:     continue?: boolean;
+1412:     /**
+1413:      * Current working directory for the session. Defaults to `process.cwd()`.
+1414:      */
+1415:     cwd?: string;
+1416:     /**
+1417:      * List of tool names that are disallowed. These tools will be removed
+1418:      * from the model's context and cannot be used, even if they would
+1419:      * otherwise be allowed.
+1420:      */
+1421:     disallowedTools?: string[];
+1422:     /**
+1423:      * Map of tool-name aliases applied before name resolution. When the
+1424:      * model emits a `tool_use` whose name is a key in this map, the tool
+1425:      * execution path resolves the mapped name instead.
+1426:      *
+1427:      * This lets SDK consumers redirect built-in tool names to their own
+1428:      * tools. For example, a host that runs Bash inside a remote sandbox via
+1429:      * an MCP tool can set `{ Bash: 'mcp__workspace__bash' }` so that if the
+1430:      * model emits `Bash` (e.g. because a skill document instructed it to),
+1431:      * the call is routed to the MCP tool instead of failing as unknown.
+1432:      *
+1433:      * The redirect is single-hop: an alias that points at another aliased
+1434:      * name resolves that target literally rather than following a chain, so
+1435:      * cycles like `{A: 'B', B: 'A'}` cannot loop.
+1436:      *
+1437:      * `toolAliases` is complementary to `disallowedTools`, not a replacement
+1438:      * for it: the alias only affects name-based lookup of model-emitted
+1439:      * `tool_use` blocks, whereas `disallowedTools` also blocks harness-internal
+1440:      * direct calls that hold the tool object without a name lookup.
+1441:      *
+1442:      * @example
+1443:      * ```typescript
+1444:      * toolAliases: { Bash: 'mcp__workspace__bash' }
+1445:      * ```
+1446:      */
+1447:     toolAliases?: Record<string, string>;
+1448:     /**
+1449:      * Specify the base set of available built-in tools.
+1450:      * - `string[]` - Array of specific tool names (e.g., `['Bash', 'Read', 'Edit']`)
+1451:      * - `[]` (empty array) - Disable all built-in tools
+1452:      * - `{ type: 'preset'; preset: 'claude_code' }` - Use all default Claude Code tools
+1453:      *
+1454:      * Note: native builds may provide search via Bash `find`/`grep` instead of the
+1455:      * dedicated Grep/Glob tools. List Grep/Glob here or in `allowedTools` to get them.
+1456:      */
+1457:     tools?: string[] | {
+1458:         type: 'preset';
+1459:         preset: 'claude_code';
+1460:     };
+1461:     /**
+1462:      * Environment variables for the Claude Code process.
+1463:      *
+1464:      * When set, this value REPLACES the subprocess environment entirely — it is
+1465:      * not merged with `process.env`. Spread `process.env` yourself if the

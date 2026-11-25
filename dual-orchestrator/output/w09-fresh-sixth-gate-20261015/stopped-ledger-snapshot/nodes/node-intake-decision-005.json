@@ -1,0 +1,29 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-intake-decision-005",
+  "nodeDefinitionId" : "intake.decision",
+  "kind" : "DECISION",
+  "handlerType" : "review.decision",
+  "status" : "COMPLETED",
+  "stageId" : "stage-intake",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/binding.json", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "required" : true,
+    "source_node_instance_id" : "node-intake-codex_product_review-004",
+    "source_node_sha256" : "63462ba98d777d57fb98b46abdd34d742a2ec9b868503fee8520cba13470935b",
+    "purpose" : "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/binding.json", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "decision" : "NEEDS_REVISION",
+    "source" : "contract-sidecar",
+    "summary" : "功能语义与验收要求完整，但排除项提前锁定了文件集合，与文件须经后续设计、计划和执行批准的要求冲突。"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1792021366580-011dd372",
+  "startedAt" : "2026-10-14T23:42:46.591297Z",
+  "finishedAt" : "2026-10-14T23:42:46.632230Z"
+}

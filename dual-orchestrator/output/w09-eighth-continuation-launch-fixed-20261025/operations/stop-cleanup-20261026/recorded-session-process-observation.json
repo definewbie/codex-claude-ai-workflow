@@ -1,0 +1,9 @@
+{
+  "pid": 34973,
+  "source_ref": "session-metadata-before.json",
+  "source_sha256": "b96c65c90a98e9c7fe14b39077458e8ba03074b19676ec082e6b116588b25d8d",
+  "table_result_ref": "process-table.result.json",
+  "table_result_sha256": "522e48cd3f4acb0be5a14db7871307873ec10bf58d4d474601a34dc62439b783",
+  "present": false,
+  "scope": "Recorded session main process at one successful current observation; not arbitrary subtree proof"
+}

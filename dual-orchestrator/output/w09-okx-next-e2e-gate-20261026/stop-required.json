@@ -1,0 +1,283 @@
+{
+  "reason": "INSUFFICIENT_MAINLINE_AND_CORRECTION_RESERVE",
+  "classification": "FAIL",
+  "trigger": "next model dispatch admission",
+  "at": "2026-10-26T23:18:57.751221+08:00",
+  "workstream": "ws-20261026T142203Z-7SNA",
+  "domain_current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261026T142203Z-7SNA",
+    "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-context-design_codex_arch_review-009"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000009",
+    "updatedAt": "2026-10-26T15:18:00.725257Z",
+    "commitSequence": 33
+  },
+  "domain_status_not_rewritten": true,
+  "next_dispatch": "FORBIDDEN_PENDING_CURRENT_USER_DECISION",
+  "budget_input": {
+    "actual_tokens": 986830,
+    "completed_calls": 3,
+    "active_seconds": 686.2954484990499,
+    "remaining_mainline": [
+      "design.codex_arch_review",
+      "plan.claude_plan",
+      "plan.codex_plan_review",
+      "implement.claude_implement",
+      "implement.claude_self_test_report",
+      "acceptance.codex_verifier_review"
+    ],
+    "new_extra_calls": [],
+    "measurement_complete": true,
+    "external_pending": false
+  },
+  "budget_result": {
+    "result": "STOP",
+    "reason": "INSUFFICIENT_MAINLINE_AND_CORRECTION_RESERVE",
+    "required_token_reserve": 2125000,
+    "required_call_reserve": 7,
+    "remaining_tokens": 2013170,
+    "remaining_calls": 15,
+    "warning": false
+  },
+  "fixed_usage_observation": {
+    "completed_runs": [
+      {
+        "run_id": "run-1793026771764",
+        "node_id": "intake.claude_brainstorm",
+        "agent": "claude",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 44010,
+          "outputTokens": 8992,
+          "cachedReadTokens": 164928,
+          "cachedWriteTokens": 0,
+          "totalTokens": 217930,
+          "costAmount": 0.527314,
+          "costCurrency": "USD",
+          "source": "acpx_stream",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": 0.527314,
+          "sessionCostCurrency": "USD",
+          "providerId": "zhipu",
+          "model": "glm-5.3",
+          "billingMode": "subscription_token_only",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "0ee31408-0839-4aa7-86a8-1b8a0a05aed2",
+            "record_id": "75fd08fd-0532-4728-8c47-1571b2008d04",
+            "request_id": "3",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 44010,
+              "outputTokens": 8992,
+              "cachedReadTokens": 164928,
+              "cachedWriteTokens": 0,
+              "totalTokens": 217930,
+              "costAmount": 0.527314,
+              "costCurrency": "USD",
+              "source": "acpx_stream",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": 0.527314,
+              "sessionCostCurrency": "USD",
+              "providerId": "zhipu",
+              "model": "glm-5.3",
+              "billingMode": "subscription_token_only",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "inputTokens": 44010,
+              "outputTokens": 8992,
+              "cachedReadTokens": 164928,
+              "cachedWriteTokens": 0,
+              "totalTokens": 217930
+            },
+            "transcript_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.transcript.log",
+            "transcript_sha256": "7093b89596ddf1a3df894793311db99ca7a550fb7ec3a55db7542f52e98a047e",
+            "usage_source_ref": "/Users/kriswang/.acpx/sessions/75fd08fd-0532-4728-8c47-1571b2008d04.stream.ndjson",
+            "usage_source_sha256": "8b478d040c7dfe41e25d34bb9a3724e349d044f967783cf158c349d9419f7f9b"
+          }
+        ]
+      },
+      {
+        "run_id": "run-1793027022575",
+        "node_id": "intake.codex_product_review",
+        "agent": "codex",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 2477,
+          "outputTokens": 1195,
+          "cachedReadTokens": 31488,
+          "cachedWriteTokens": 0,
+          "totalTokens": 35160,
+          "costAmount": null,
+          "costCurrency": "",
+          "source": "acpx_current_transcript",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": null,
+          "sessionCostCurrency": "",
+          "providerId": "openai",
+          "model": "GPT-6-Astra",
+          "billingMode": "metered",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "01a178bd-3b1b-7ec3-9116-3baa6222627a",
+            "record_id": "01a178bd-309e-7f13-b4f7-a9538baf1173",
+            "request_id": "3",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 2477,
+              "outputTokens": 1195,
+              "cachedReadTokens": 31488,
+              "cachedWriteTokens": 0,
+              "totalTokens": 35160,
+              "costAmount": null,
+              "costCurrency": "",
+              "source": "acpx_current_transcript",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": null,
+              "sessionCostCurrency": "",
+              "providerId": "openai",
+              "model": "GPT-6-Astra",
+              "billingMode": "metered",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "totalTokens": 35160,
+              "inputTokens": 2477,
+              "cachedReadTokens": 31488,
+              "outputTokens": 1195,
+              "thoughtTokens": 231
+            },
+            "transcript_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.transcript.log",
+            "transcript_sha256": "eba0a6a4c0dfb618b90f90b756c38e3103a6fa5f2f9b9d6bbd8354e1914e10c7",
+            "usage_source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.transcript.log",
+            "usage_source_sha256": "eba0a6a4c0dfb618b90f90b756c38e3103a6fa5f2f9b9d6bbd8354e1914e10c7"
+          }
+        ]
+      },
+      {
+        "run_id": "run-1793027503466",
+        "node_id": "design.claude_design",
+        "agent": "claude",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 71476,
+          "outputTokens": 13752,
+          "cachedReadTokens": 648512,
+          "cachedWriteTokens": 0,
+          "totalTokens": 733740,
+          "costAmount": 1.025436,
+          "costCurrency": "USD",
+          "source": "acpx_current_transcript",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": 1.025436,
+          "sessionCostCurrency": "USD",
+          "providerId": "zhipu",
+          "model": "glm-5.3",
+          "billingMode": "subscription_token_only",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "018f2a65-ea48-4381-a094-1b16d8219f1e",
+            "record_id": "8473c12f-45d4-4593-b904-65a370d0d6ab",
+            "request_id": "3",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 71476,
+              "outputTokens": 13752,
+              "cachedReadTokens": 648512,
+              "cachedWriteTokens": 0,
+              "totalTokens": 733740,
+              "costAmount": 1.025436,
+              "costCurrency": "USD",
+              "source": "acpx_current_transcript",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": 1.025436,
+              "sessionCostCurrency": "USD",
+              "providerId": "zhipu",
+              "model": "glm-5.3",
+              "billingMode": "subscription_token_only",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "inputTokens": 71476,
+              "outputTokens": 13752,
+              "cachedReadTokens": 648512,
+              "cachedWriteTokens": 0,
+              "totalTokens": 733740
+            },
+            "transcript_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.transcript.log",
+            "transcript_sha256": "55fe2a4edf3db9f5b2488a7e1556f49e5ef40ac25474109e5f1f9fbae7c37a58",
+            "usage_source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027503466/outputs/design-claude.transcript.log",
+            "usage_source_sha256": "55fe2a4edf3db9f5b2488a7e1556f49e5ef40ac25474109e5f1f9fbae7c37a58"
+          }
+        ]
+      }
+    ],
+    "actual_tokens": 986830,
+    "completed_calls": 3,
+    "measurement_complete": true,
+    "cost_note": "SDK amounts retained; not actual subscription payment. No invented mixed-provider price."
+  },
+  "prior_human_goal_approval_preserved": true
+}

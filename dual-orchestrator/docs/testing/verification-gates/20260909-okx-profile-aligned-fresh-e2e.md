@@ -1,6 +1,6 @@
 # OKX Profile-Aligned Fresh E2E
 
-状态：READY FOR PREFLIGHT。用户已授权本轮执行；主 agent 自查，不冒称独立评审，不委派额外 agent。
+状态：EXECUTED / BOUNDARY STOP（Gate FAIL；workflow WAITING_FOR_RECOVERY）。主 agent 自查，不冒称独立评审，不委派额外 agent。
 
 ## 目标与边界
 
@@ -57,3 +57,18 @@ verify 后分段 run。用户已授权主 agent 逐门审阅并作合法决定�
 该项 Target=Read nonce往返；SoT=实际工具及结果/transport/closure；PASS=恰一Read、nonce匹配、
 exit0、零active信号、session关闭；失败停止前置不start，quota通知用户，无自动重跑。
 不新增权限探针/模型层。Codex无工具health已退出0/end_turn，响应模型gpt-6-astra，待归档机械核验。
+
+## 执行记录
+
+- 文档 checkpoint：402b829 / 7dc8b33；production checkpoint 仍为 e21c95d，JAR 未再生。
+- 前置通过：Doctor、冻结身份复算、source check、当前 GLM 单 Read nonce、Codex 无工具 health、effective workspace capture/verify。
+- 唯一 fresh 样本：`ws-20260909T113923Z-FZ8K`；旧样本未恢复。
+- intake run `run-1788954058404` 完成，4 Read / 0 Bash / 0 write；产品评审 run `run-1788954332029` 完成，READY_FOR_PRODUCT_REVIEW，无 must_fix。
+- 主 agent 阅读完整 proposal/review sidecar 后，按用户委托批准 requirement-006 与 contract-008；未变更范围或需求。proposal 绑定及其八个 artifacts 的 SHA 复算一致。
+- 初版设计 run `run-1788954529942` 完成，8 Read + 1 Glob、0 Bash/写入；评审提出数据库失败状态、关闭同步状态、前端行为测试三项 Must Fix，正常路由至 design gate-013。
+- 按用户委托 revise 后，替换设计 run `run-1788955265925` 与复审 `run-1788955656723` 完成；四项活动义务（含 human note）均有回应，复审 READY、must_fix 为空；主 agent 阅读完整替换设计及复审后批准 design gate-019。该修订无 Bash/写入，未扩大文件范围。
+- 计划 run `run-1788955786549` 完成，3 Read + 2 Glob、0 Bash/写入。主 agent 全文核对后发现 rollback_notes 含分批提交与 reset/clean，已在 plan gate-021 提交唯一范围内 revise：删除实现阶段 Git 写入/清理的隐含授权，回滚仅保留为需 operator 另行授权的人工动作；其余设计/范围/测试不变。
+- 计划修订 run `run-1788956508122` 完成，2 Read + 2 Glob、0 Bash/写入。主 agent 比对 typed plan：rollback_notes 已消除 agent 的 Git 写入/清理授权；其他实施步骤、路径、验证要求不变；file_level_changes 仅有“精度”→“精度保持”的同义增字，因此不采信其“其他字段逐字一致”的过强自述，但无实质范围变动。
+- 已按委托批准 plan gate-024，启动实现 `node-implement-claude_implement-026` / `run-1788956758608`；本次继续前复核 JAR/fork/需求/check SHA 与 GLM 配置均未变化。
+- 实现实际成功写入未批准的 OkxHttpException.java / OkxParseException.java；按本页成功越界副作用项 cancel 并关闭 session，原 runner 已退出。Gate FAIL，workflow WAITING_FOR_RECOVERY / evt-000027，完整 E2E NOT PROVEN；未重开旧样本或创建第二样本。
+- 取消后 AGENT_RESULT_MISSING 不另归因模型 JSON 缺陷；后置 scope 校验尚未执行，不冒称其失效。详见 `../real-case-reports/20260909-okx-fz8k-implementation-boundary-stop.md`，证据位于本轮 output 下 boundary-stop/。

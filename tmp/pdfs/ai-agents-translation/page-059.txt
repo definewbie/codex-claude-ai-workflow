@@ -1,0 +1,32 @@
+pipeline from prompt to result, whereas the multi-step agent embeds
+reasoning, actions, and memory into an iterative loop that continues until
+the problem is solved or the computational budget is exhausted. Memory
+will be covered in depth in Chapter 10.
+
+Structured Reasoning and Action
+
+Giving agents distinct personas, sometimes called anthropomorphizing, can
+sharpen their reasoning and make their contributions more focused. A
+planner agent framed as a methodical strategist will approach problems
+differently than a critic agent framed as an evaluator. When each agent is
+given a clear role and mindset, their reasoning chains tend to be more
+coherent and their interactions in MASs more purposeful. This alignment
+improves collaboration, since each agent knows what kind of knowledge
+it’s expected to contribute.
+
+Yet defining a role is only half the picture. To make agents more effective
+you might also need to shape how the agent thinks. This is where structured
+reasoning methods such as chain of thought, tree of thoughts, and ReAct
+come into play.
+
+Letting Your AI Agents Think Out Loud
+Chain-of-thought prompting (CoT)1 is inspired by the human thought
+process; this technique first solves intermediate steps before getting to the
+final answer. While CoT often gets introduced as a prompting trick, in the
+context of AI agents CoT can serve as added reasoning steps that guide
+control flow. By forcing the model to generate intermediate steps, you gain
+better transparency over the reasoning process. It often improves reliability
+and can help smaller models perform tasks that would otherwise require a
+larger model. This keeps cost lower while providing clearer insights into
+how the agent arrives at its decisions. Table 2-2 provides ideas for prompts
+for common scenarios that you can adapt to your needs.

@@ -1,0 +1,6 @@
+{"jsonrpc":"2.0","id":8,"method":"session/prompt","params":{"sessionId":"35fbce75-0b2a-4a5f-9235-974ce24d4097"}}
+{"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"35fbce75-0b2a-4a5f-9235-974ce24d4097","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"{\"schema_version\":1,"},"messageId":"msg_20260731224818d5f7ed95a730420d"}}}
+{"jsonrpc":"2.0","id":8,"method":"session/request_permission","params":{"options":[{"optionId":"allow_once","name":"Allow once","kind":"allow_once"}]}}
+{"jsonrpc":"2.0","id":8,"result":{"outcome":{"outcome":"selected","optionId":"allow_once"}}}
+{"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"35fbce75-0b2a-4a5f-9235-974ce24d4097","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"\"result\":{\"decision\":\"IMPLEMENTED\"}}"},"messageId":"msg_20260731224818d5f7ed95a730420d"}}}
+{"jsonrpc":"2.0","id":8,"result":{"stopReason":"end_turn","usage":{"inputTokens":35273,"outputTokens":22706,"cachedReadTokens":1511488,"cachedWriteTokens":0,"totalTokens":1569467}}}

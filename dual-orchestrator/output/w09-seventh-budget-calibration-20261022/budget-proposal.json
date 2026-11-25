@@ -1,0 +1,144 @@
+{
+  "status": "ANALYSIS_ONLY_NOT_APPLIED_OR_RUN_AUTHORIZED",
+  "unit": "visible attributable request totalTokens, including cachedRead",
+  "recommended_stop": 1700000,
+  "lower_cap_option": 1500000,
+  "top_level_calls": 18,
+  "active_seconds": 3600,
+  "stages": [
+    {
+      "node": "intake.claude_brainstorm",
+      "n_requests": 9,
+      "n_cases": 5,
+      "min": 8659,
+      "median": 16911,
+      "max": 36945,
+      "old_allowance": 40000,
+      "proposed_allowance": 40000,
+      "evidence_class": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN"
+    },
+    {
+      "node": "intake.codex_product_review",
+      "n_requests": 6,
+      "n_cases": 4,
+      "min": 27428,
+      "median": 27900.5,
+      "max": 40194,
+      "old_allowance": 50000,
+      "proposed_allowance": 50000,
+      "evidence_class": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN"
+    },
+    {
+      "node": "design.claude_design",
+      "n_requests": 3,
+      "n_cases": 2,
+      "min": 85538,
+      "median": 90396,
+      "max": 130731,
+      "old_allowance": 150000,
+      "proposed_allowance": 150000,
+      "evidence_class": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN"
+    },
+    {
+      "node": "design.codex_arch_review",
+      "n_requests": 2,
+      "n_cases": 1,
+      "min": 53075,
+      "median": 61881.0,
+      "max": 70687,
+      "old_allowance": 75000,
+      "proposed_allowance": 90000,
+      "evidence_class": "SMALL_SAMPLE_PLUS_JUDGMENT_MARGIN"
+    },
+    {
+      "node": "plan.claude_plan",
+      "n_requests": 0,
+      "n_cases": 0,
+      "min": null,
+      "median": null,
+      "max": null,
+      "old_allowance": 100000,
+      "proposed_allowance": 100000,
+      "evidence_class": "UNMEASURED_PLANNING_ASSUMPTION"
+    },
+    {
+      "node": "plan.codex_plan_review",
+      "n_requests": 0,
+      "n_cases": 0,
+      "min": null,
+      "median": null,
+      "max": null,
+      "old_allowance": 75000,
+      "proposed_allowance": 75000,
+      "evidence_class": "UNMEASURED_PLANNING_ASSUMPTION"
+    },
+    {
+      "node": "implement.claude_implement",
+      "n_requests": 0,
+      "n_cases": 0,
+      "min": null,
+      "median": null,
+      "max": null,
+      "old_allowance": 200000,
+      "proposed_allowance": 200000,
+      "evidence_class": "UNMEASURED_PLANNING_ASSUMPTION"
+    },
+    {
+      "node": "implement.claude_self_test_report",
+      "n_requests": 0,
+      "n_cases": 0,
+      "min": null,
+      "median": null,
+      "max": null,
+      "old_allowance": 150000,
+      "proposed_allowance": 150000,
+      "evidence_class": "UNMEASURED_PLANNING_ASSUMPTION"
+    },
+    {
+      "node": "acceptance.codex_verifier_review",
+      "n_requests": 0,
+      "n_cases": 0,
+      "min": null,
+      "median": null,
+      "max": null,
+      "old_allowance": 100000,
+      "proposed_allowance": 100000,
+      "evidence_class": "UNMEASURED_PLANNING_ASSUMPTION"
+    }
+  ],
+  "correction_reserve": 150000,
+  "correction_observed_values": [
+    26548,
+    19570
+  ],
+  "scenarios": {
+    "mainline_only": {
+      "tokens": 955000,
+      "requests": 9
+    },
+    "mainline_readiness_one_correction": {
+      "tokens": 1280000,
+      "requests": 12
+    },
+    "mainline_readiness_intake_loop_correction": {
+      "tokens": 1370000,
+      "requests": 14
+    },
+    "mainline_readiness_design_loop_correction": {
+      "tokens": 1520000,
+      "requests": 14
+    },
+    "mainline_readiness_both_loops_correction": {
+      "tokens": 1610000,
+      "requests": 16
+    }
+  },
+  "evidence_limits": [
+    "No full-chain observation",
+    "No p95 or probability estimate",
+    "No lower bound of 1.7M proven",
+    "No per-request hard token cap",
+    "Historical reconstructed facts do not replace old budget authority"
+  ],
+  "real_run_authorized": false
+}

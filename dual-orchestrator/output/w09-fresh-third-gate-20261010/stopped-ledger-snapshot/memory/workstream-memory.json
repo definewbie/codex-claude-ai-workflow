@@ -1,0 +1,41 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "workstream_memory",
+  "workstreamId" : "ws-20261010T124812Z-XCZL",
+  "stageId" : "design",
+  "nodeInstanceId" : "node-design-claude_design-013",
+  "iterationId" : "iter-002",
+  "decidedScope" : [ ],
+  "nonGoals" : [ "不做换行规范化以外的文本处理:不去除首尾空白、不转换编码、不做 Unicode NFC/NFD 规范化、不改写制表符等其他控制字符。", "不提供命令行入口、打包发布、CI 配置或其他工程化设施。", "不支持 str 以外的输入类型,不新增换行转换相关的其他公开 API。" ],
+  "decisions" : [ ],
+  "readFiles" : [ ],
+  "openIssues" : [ ],
+  "priorVerdicts" : [ ],
+  "priorFailures" : [ ],
+  "refsSemantics" : "latest_projection_refs",
+  "refs" : {
+    "repoMap" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/repo-map.json",
+    "stageScopePolicy" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/stage-scope-policy.json",
+    "repositoryFactBinding" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/binding.json",
+    "fileRelevancePlan" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/file-relevance-plan.json",
+    "fileSummaries" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/file-summaries.json",
+    "readReuseContract" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/read-reuse-contract.json",
+    "workingSet" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/working-set.json"
+  },
+  "generatedAt" : "2026-10-10T14:12:59.061136Z",
+  "qualifiedTaskContract" : {
+    "contractId" : "tc-ws-20261010T124812Z-XCZL-node-contract-compile-012",
+    "phase" : "GOAL",
+    "status" : "qualified_projection",
+    "sha256" : "e667b5ad04308d610fb15e7c0faf23cc274c33d48784ff104ba41358eca05ed6",
+    "contractVersion" : 1,
+    "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/task-contract.json",
+    "epoch" : 1
+  },
+  "lastStageOutcome" : { },
+  "fieldSemantics" : {
+    "machineDecisionFields" : [ "decision", "stage_outcome", "lifecycle_status", "blocking", "sourceField", "status" ],
+    "projectionOnlyFields" : [ "summary", "desc", "verificationSummary" ]
+  },
+  "updatedAt" : "2026-10-10T14:16:16.036569Z"
+}

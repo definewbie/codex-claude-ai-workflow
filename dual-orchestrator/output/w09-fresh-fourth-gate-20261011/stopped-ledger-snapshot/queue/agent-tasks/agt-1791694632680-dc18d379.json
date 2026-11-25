@@ -1,0 +1,38 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1791694632680-dc18d379",
+  "workflowExecutionId" : "wfe-1791694632599-2ff7bdad",
+  "nodeInstanceId" : "node-context-intake_codex_product_review-008",
+  "nodeDefinitionId" : "context.intake_codex_product_review",
+  "nodeKind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "SUCCEEDED",
+  "agent" : "",
+  "session" : "",
+  "promptTemplate" : "",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "context.build_package",
+    "agent" : "",
+    "session" : "",
+    "prompt_template" : "",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "target_node" : "intake.codex_product_review",
+      "profile" : "product_review",
+      "required_input_artifact" : "task_contract_proposal",
+      "purpose" : "Package Claude intake output for Codex product review."
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 2
+  },
+  "nodeExecutionId" : "nxe-1791694632685-6c027f49",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-11T04:57:12.680515Z",
+  "claimedAt" : "2026-10-11T04:57:12.693931Z",
+  "completedAt" : "2026-10-11T04:57:12.795642Z"
+}

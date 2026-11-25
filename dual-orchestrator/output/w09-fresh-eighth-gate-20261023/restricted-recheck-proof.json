@@ -1,0 +1,9 @@
+{
+  "exit": 1,
+  "result": "EXPECTED_NO_GO_PROCESS_INSPECTION_ERROR",
+  "actual_full_consumer": true,
+  "zero_steps": true,
+  "zero_native_or_provider_commands": true,
+  "scope": "Full read-only consumer stopped at shared guard before admission; typed UNKNOWN is defined by the unchanged guard. Traceback does not expose original stderr, so no new EPERM-detail claim from this log alone.",
+  "checker_error": "First proof assertion wrongly expected UNKNOWN and OS stderr in exception display; checker-only assertion corrected from actual typed guard. Original consumer logs preserved."
+}

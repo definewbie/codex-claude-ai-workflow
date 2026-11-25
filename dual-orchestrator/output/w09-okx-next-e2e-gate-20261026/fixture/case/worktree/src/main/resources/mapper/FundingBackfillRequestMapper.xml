@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="app.cryptoincome.funding.infrastructure.mybatis.FundingBackfillRequestMapper">
+    <insert id="insertOrGetId"
+            parameterType="app.cryptoincome.funding.infrastructure.mybatis.FundingBackfillRequestEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO funding_backfill_request (request_key, instrument_id, window_start, window_end, page_limit)
+        VALUES (#{requestKey}, #{instrumentId}, #{windowStart}, #{windowEnd}, #{pageLimit})
+        ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)
+    </insert>
+
+    <select id="selectByKeyForUpdate"
+            resultType="app.cryptoincome.funding.infrastructure.mybatis.FundingBackfillRequestEntity">
+        SELECT * FROM funding_backfill_request WHERE request_key = #{requestKey} FOR UPDATE
+    </select>
+
+    <select id="selectByIdForUpdate"
+            resultType="app.cryptoincome.funding.infrastructure.mybatis.FundingBackfillRequestEntity">
+        SELECT * FROM funding_backfill_request WHERE id = #{id} FOR UPDATE
+    </select>
+
+    <select id="selectStaleRunning"
+            resultType="app.cryptoincome.funding.infrastructure.mybatis.StaleExecutionRow">
+        SELECT r.request_key AS request_key, r.id AS request_id, r.current_run_id AS run_id,
+               r.instrument_id, r.page_limit AS page_limit, ar.started_at
+        FROM funding_backfill_request r
+        JOIN analysis_run ar ON ar.id = r.current_run_id
+        WHERE r.state = 'RUNNING'
+          AND ar.started_at &lt; CURRENT_TIMESTAMP(6) - INTERVAL #{micros} MICROSECOND
+        ORDER BY ar.started_at
+    </select>
+
+    <update id="markRunning">
+        UPDATE funding_backfill_request
+        SET state = 'RUNNING', current_run_id = #{runId}, next_attempt = next_attempt + 1
+        WHERE id = #{id} AND state = 'IDLE' AND current_run_id IS NULL
+    </update>
+
+    <update id="releaseRunning">
+        UPDATE funding_backfill_request
+        SET state = 'IDLE', current_run_id = NULL
+        WHERE id = #{id} AND state = 'RUNNING' AND current_run_id = #{runId}
+    </update>
+
+    <update id="advanceCursor">
+        UPDATE funding_backfill_request
+        SET cursor_ts = #{cursor}, pages_fetched = pages_fetched + 1,
+            earliest_fact_time = #{earliest}, latest_fact_time = #{latest}
+        WHERE id = #{id} AND state = 'RUNNING' AND current_run_id = #{runId}
+    </update>
+
+    <update id="finishExecution">
+        UPDATE funding_backfill_request
+        SET state = #{state}, coverage_state = #{coverage}, current_run_id = NULL
+        WHERE id = #{id} AND state = 'RUNNING' AND current_run_id = #{runId}
+    </update>
+</mapper>

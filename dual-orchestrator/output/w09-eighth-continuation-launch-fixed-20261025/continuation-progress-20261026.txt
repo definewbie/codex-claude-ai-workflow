@@ -1,0 +1,19 @@
+第八例续作进度（2026-10-26，Asia/Shanghai）
+
+启动重核和当前组合批准已落实，未修改受审 launch 字节。先冻结 SHA→填入approved_launch_identity_sha256→最后启用true；原两stop保留。最新成功进程读取未发现关联执行进程，原6具名会话关闭metadata核定；随后只读完整重核成功。
+
+真实Java推进两步：plan.decision COMPLETED；contract.compile_execution COMPLETED。当前原领域状态 WAITING_FOR_HUMAN，当前gate gate-node-gate-contract_review-028 open，动作仅approve/clarify/reject。这是正常业务门等待，不是FAIL/INVALID或外部UNKNOWN，不写stop-required、不伪造恢复态。
+
+本次没有新增模型请求、原生会话或产品文件。累计用量848,242 token/10请求，活动耗时1273.832796秒；余额851,758 token/8请求/2326.167204活动秒。人门等待不计活动执行时间。预算总线与储备规则未变。
+
+待用户明确批准的当前EXECUTION epoch1：只在第八例隔离产品worktree新建 src/normalize_text.py、tests/test_normalize_text.py、README.md；不涉及Dual产品源码。
+功能：CRLF/单CR转LF，其他字符、空串、已有LF及末尾换行有无保持；仅标准库。
+验证：九类输入覆盖/幂等，计划11个unittest方法，保留实际输出及与源码对应关系；README导入和混合换行例子需实际读取/执行支持。未要求独立实测exit的既定决定保持，实际输入输出不可省略。
+禁止模型改.agent/.git、安装第三方、联网/数据库/浏览器/后台服务/机器配置。原生认证/提供方联网属于既定执行环境，不等于产品函数可联网。
+
+已读取当前合同/完整设计/完整计划及复评侧车；三项readiness环境/可行性引用的实际字节SHA与合同一致。它们仍只是OPERATOR_ATTESTED前提，不是测试成功证据。没有发现需扩大范围或重开设计评审的事项；作者/独立复评均已到原批准链。
+
+续作授权明文business_gates_delegated=false，因此不代填这道新产生的文件写批准。下一步由用户对当前gate决定：approve即只授权该三文件及既定验证，之后按原入口进入实现→自测→独立验收；最终交付门与commit仍另行保留。
+
+成熟度：同一E→两个真实Java步骤的消费本次已发生；新的实际模型客户端配置兼容性仍NOT_EXERCISED。不得据此宣布主流程PASS。
+原659源输入/2JAR不变、旧run字节不变，原66项评审清单只有预期授权文件改变。具体refs/SHA和每步原回执见同名json。无新修复、无新实验或新例。

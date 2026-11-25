@@ -1,0 +1,12 @@
+{
+  "command": "python3 -B -m unittest -v test_process_check (same suite through TextTestRunner for structured receipt)",
+  "tests": 17,
+  "failures": 0,
+  "errors": 2,
+  "skipped": 0,
+  "elapsed_seconds": 0.214,
+  "exit": 1,
+  "scope": "Complete candidate process-check test module, consumer guard fragments, original frozen_check in cold subprocess and receipt write prefixes; not full Java/provider Gate",
+  "provider_calls": 0,
+  "native_client_commands": 0
+}

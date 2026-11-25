@@ -1,0 +1,18 @@
+       ROTARY POSITIONAL EMBEDDINGS
+
+Traditional positional encodings, either fixed sinusoidal or learned,
+allow models to understand token order but fail to generalize well
+beyond their training context (for example, from 2K to 32K tokens).
+Rotary positional embeddings (RoPE)6 address this limitation by
+encoding relative position through rotation rather than addition.
+
+Instead of adding a positional vector to each token, RoPE rotates the
+query and key vectors in the attention mechanism by an angle that
+increases with token position. The dot product between two rotated
+vectors naturally reflects their relative distance, enabling the model to
+extrapolate to much longer sequences.
+
+You can think of RoPE as arranging tokens around a circle: each word
+occupies a unique angle, and their angular difference represents relative
+distance. Nearby tokens align closely, while distant ones are separated
+by larger rotations. Figure 4-4 illustrates this.

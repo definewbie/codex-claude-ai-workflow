@@ -1,0 +1,40 @@
+{
+  "schema_version": 2,
+  "gate_id": "gate-example-execution",
+  "node_instance_id": "contract-review-001",
+  "workstream_id": "EXAMPLE",
+  "action": "approved",
+  "subject": {
+    "ref": "examples/execution-contract.json",
+    "sha256": "f702e57848c9ac76366577adbaabda74d315e80a1f14437f53850cc97ac25756"
+  },
+  "event_id": "evt-000020",
+  "note": "批准精确文件及验收出口",
+  "decision_checks": [
+    {
+      "rule_id": "execution.scope.and.verification",
+      "rule_version": "2",
+      "consumer": "TaskContractProjectionVerifier",
+      "input_refs": [
+        {
+          "ref": "examples/goal-contract.json",
+          "sha256": "9228634ffafa7d603eaad06f16efa7a7f66feb07890548bfc49acfd0eec5c768"
+        },
+        {
+          "ref": "examples/execution-contract.json",
+          "sha256": "f702e57848c9ac76366577adbaabda74d315e80a1f14437f53850cc97ac25756"
+        },
+        {
+          "ref": "examples/design-decision-facts.json",
+          "sha256": "6573b9b64a04db885fdd07709ad4a95a481aaca7e43c9944cf3a035a03254555"
+        },
+        {
+          "ref": "examples/plan-decision-facts.json",
+          "sha256": "e4f2893c0593903b14d0cbb1218265566dd711ec31e5cd2407f4073f86c16509"
+        }
+      ],
+      "result": "PASSED",
+      "reason": "synthetic example only"
+    }
+  ]
+}

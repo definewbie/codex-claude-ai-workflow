@@ -1,0 +1,28 @@
+W09 operator 启动选择收敛：完整转换与失败切面
+
+目标 P0：解除父 PATH 与实际启动选择之间的双来源误拒；保留实际字节/配置漂移拒绝。不是 token 治理、沙箱、进程监督或 Relay 集成。
+业务 SoT=原 Java ledger/domain；用量 SoT=原 execution/occurrence；operator 计划表不是执行事实。Definition/Instance/Execution 均未改。
+root-cause forward fix=未来本类检查与启动消费同一 E；backward recovery=无产品兼容代码；第八例续作仅为已获离线准备许可的具名候选，不能自动解除停止或授予运行。
+
+状态/owner/顺序/下一消费者/每个失败切面：
+A. 原实例 RUNNING、implement.claude_self_test_report READY、三个历史 stop 固定。准备 owner 只读复制必要输入→新增独立候选→固定清单。写到一半无可用候选；旧包和账本均不写，不恢复旧 stop。
+B. 未来人批准：新授权默认 false。authorize 消费同 case/workstream/checkpoint/3000000/18/3600、批准材料存在、批准的 launch-identity SHA、business_gates_delegated=false。旧 true 不适用。未满足时在 step/Popen 前拒绝；没有业务授权产生。
+C. inspect：frozen_check 核源/发行/安装/配置/observer→两 stop SHA→原证据与前续作证据→一次生成 E→绝对程序 realpath/字节/选定 PATH 解析及解释器/原生 override→checkpoint/pending/domain→有链接的已确认缺席和未决 PID→命名会话关闭元数据→原 reader 全量 usage→旧时间和所有新回执。只读通过仅供下一步准入；任何失败零 step/Java/provider。本轮成功只读不证明实时无任何外部进程。
+D. pre-dispatch-recheck 消费 C 的同一结果，储备核对→新只读回执。回执写前失败不产生可用通过证明；写中断不自动视为成功；未来完整重核仍必做。只读回执计入活动时间，不重置。
+E. run-one-step 先 B 再 C→原当前节点/终态/人门/frozenRuntimeIdentity 核验→创建唯一 step 目录→写进程观察→预算（模型节点）→pre-state→Popen(绝对 rtk,proxy,绝对 Java,同一个不可变 E)。目录或准备写失败：无 Popen，未完整 step 拒再跑。目录存在不等于启动，更不等于模型执行。
+F. Popen 前实际入口消失：result(exit=null,external_start=NOT_CONFIRMED)+新 stop→拒绝继续。rtk 已启动但 Java 消失：固定非成功退出、领域保持原值、新 stop。LOW-2 两种窗口分别有完整入口测试。没有返回句柄不被夸大为“全外部绝未启动”。
+G. Popen 成功→记录 PID/argv→等待/原时间止损→固定 result→post-current/post-node→核原完成/usage。PID 写失败可能已经启动，留不完整 step，禁止重派；外部未知沿原 D06/D07。result 或观察写失败不伪造完成。非完成节点/异常退出写 stop，不将业务 READY/RUNNING 改成失败。
+H. 原 Java owner R01/R02/R03/L03/唯一 outcome→原独立验收→人交付门→原目标 Git/提交/finalize。operator 不生产新批准、不猜自然语言结果；未跑部分 NOT_RUN。
+
+E 的兄弟消费者：sys.executable 必须是固定绝对解释器；ps/rtk 用同一 E 和明确入口；Java 用同一对象 E；受审 acpx wrapper 用 E.PATH 选择已核 Node；两个顶层入口只调用同一 inspect，不各自重解析。保留 CODEX_PATH/CLAUDE_CODE_EXECUTABLE 的存在与值 SHA，避免启动 override 绕过被核程序。不保存秘密值。
+父 PATH 只供准备诊断；E 仅承诺这一受控启动路径，不隔离恶意动态库或原生内部任意子进程。
+
+重启/replay/retry/abort：不完整 step、未知外部、新 stop 均禁止自动重试；冷启动重新核固定证据与新授权，不从历史成功重建发送资格；取消/原停止仍由原 owner，不推出任意子树全停。
+旧 binary/ledger：沿原固定发行，不迁移业务协议。旧 operator 包仅作事故证据，不作为新选择的兼容入口；不得补旧 E、改旧 launch identity 或给旧失败换结论。
+
+Declared by=用户有界实施授权+受审设计及 LOW。
+Proven by=单轮 operator 全装配/真实本地替身链/写失败/冷子进程/真实只读重核/反证（详 evidence）；不是 Java/native E2E。
+Consumed by=continuation 唯一产 E；两个入口和进程读取强制消费；原预算/Java owner 继续唯一消费原事实。
+Enforced before=未授权及漂移拒绝在 step/Java 前；同一 E 到 Popen，窗口内失败留证停止。
+Failure route=UNKNOWN/PRESENT/漂移/停止/额度不足拒；外部不明无自动重派；projection 不改领域状态。
+Cannot-bypass=父 PATH 误拒、环境重拼、字节漏核、新组合批准的四项隔离删除反证，及正向/负向完整入口。

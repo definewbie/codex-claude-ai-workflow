@@ -1,0 +1,66 @@
+--- before/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ after/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -440,11 +440,19 @@
+ 
+ 本次[实际结果](../../output/d04-restricted-execution-20260928/result.md)：固定 Codex 原生命令沙箱 16 项切片通过（3 项合法读取/执行、13 项写入拒绝），样例前后指纹一致；原生模型任务因探针错误关闭必要 Code Mode 宿主而 INVALID，未发生任何文件工具命令。一次启动前配置错误另单独保存。模型消耗记录为 input 27,376（含 cached 13,440）、output 236，subscription_unpriced；不按进程成功或模型 JSON denied 宣称通过。已按预算停止，不自动补测。补测前须核对工具宿主与 sandbox 交界、修正初始化失败停止条件，并重新确认具体 Gate/增量调用预算；原生命令切片不外推到 Claude、acpx 传播或 D04 整体可行。
+ 
+-### 8.10 补测准备与预算待确认（当前）
++### 8.10 补测准备与预算确认前记录
+ 
+ 用户要求“修正工具前提与停止条件，再确认增量实验预算，然后补测”。[准备材料](../../output/d04-retest-preparation-20260928/preparation-result.md)已显式恢复必要 Code Mode host/shell/unified execution，保持 read-only/never；加入初始化/工具错误停止、快速退出终检、进程组终止、停止后的 usage 保留及零工具证据拒绝，10 项离线检查通过。旧 INVALID 工件保留。默认只做准备检查；无预算确认不启动模型。
+ 
+ [新 Gate](../../output/d04-retest-preparation-20260928/verification-gate.md)待用户确认：1 次启动/新 session/用户任务，gpt-6-astra low，90 秒与第 6 个可观察命令触发停止，零自动补跑；token 按实际 usage 记录，未验证 token/金额硬限。更正前次过度承诺：离线 help/feature 检查不等于整个工具链已初始化；watchdog 是观测后停止，不能保证第一笔模型请求之前阻断，也不是第 7 个请求前的原子准入。真实 Code Mode/模型工具与 sandbox 的共同约束仍待本次实验，不据离线检查冻结 D04。预算确认前本轮 provider 调用为 0；确认后也不进入产品实现。
++
++### 8.11 用户确认后的原生模型补测（当前）
++
++用户已回复“同意”，本轮按获批 Gate 执行一次补测，结果见 [报告与原始证据](../../output/d04-retest-preparation-20260928/result.md)：**PASS_NATIVE_MODEL_SLICE**。固定 Codex/gpt-6-astra low 在 22.63 秒内完成两个实际命令：自主发现/读取未预告随机样例并正确计算；对产品文件和 control 文件各一次 append 均收到 OS PermissionError，全部样例文件/链接及 Git 元数据指纹不变。binary/host/driver/guard 身份一致，完整 usage 和结束事件存在。结论由作者核对，非 CC 独立复审；旧 INVALID 不覆盖。
++
++实际 input 43,262（含 cached 28,032）、output 337，subscription_unpriced；没有可核实金额，也未证明 token 节省。唯一额外读取为事件中可见的宿主 RTK.md，因此未严格兑现 prompt 的“不要触碰其他路径”；不能宣称样例外零访问或 ignore-user-config/ignore-rules 已隔离全部环境影响，来源尚未核实。此偏离不改变两个写入被拒的事实，但必须作为后续绑定中的读取范围/环境核验项。fixture 指纹不能证明宿主全局无副作用。
++
++D04/W03/W08 仍未完成：本轮消除了“模型实际必要读取与指定写入拒绝完全无法共存”的关键疑问，未证明 Claude、acpx/adapter 传播、全部工具面、session/恢复和 trusted writer 边界。预算已用完，无自动追加调用或产品实现；冻结仍须逐入口证据、成本收益核验及独立复审。此前 §8.9–§8.10 的待补测/待确认表述保留为历史过程，以本节为当前状态。
+ 
+ ## 9. D09：交付外部窗口与处置
+ 
+@@ -539,7 +547,7 @@
+ | D01 | gate checks/continuation_failure 字段及三类诊断、缺证据规则 | 逐个现有前置 code/rule 与消费者的枚举映射；和 D06 exact write set 绑定；独立评审 |
+ | D02 | 阶段顺序、原因冲突、领域校验与发布分离、常驻回归位置 | contained permission “非必需”证据如何从现有 signal 与义务精确关联；若无关联需明确不能容纳的范围；独立评审 |
+ | D03 | 两阶段同模型、四变体逐门迁移与批准失效；§2.3 READY 无人门、decision 固化及独立资格投影已获 CC 独立复核（§14.1） | 完整 JSON（含 reviewed_candidate）、与 D06 逐写点绑定、compiler/qualification/authored/各投影 consumer 迁移对照及新旧格式/伪批准拒绝测试设计 |
+-| D04 | 用户已选优先细化 adapter 强制只读绑定、保留跨 provider 分工；§8.2–§8.7 给出字段/消费者、恢复路径、反证及成本收益止损 | 原生命令切片已获局部证据，原生模型实验 INVALID；先修正验证前提与止损并确认补测预算，再证明必要读取/受限执行与未授权副作用拒绝在真实工具链共存；随后冻结逐消费者/session 回执、writer 归属和验证成本并独立复审；强制能力仍未证明，成本收益偏差须停等用户 |
++| D04 | 用户已选优先细化 adapter 强制只读绑定、保留跨 provider 分工；§8.2–§8.7 给出字段/消费者、恢复路径、反证及成本收益止损 | 原生命令切片及用户获批后的模型补测已获局部证据（§8.11），旧 INVALID 保留；仍须证明 Claude、acpx/adapter/全部工具及 session 入口共用上限，核验环境影响/读取范围；冻结逐消费者回执、writer 归属和验证成本并独立复审。整体强制能力仍未证明，成本收益偏差须停等用户 |
+ | D05 | 必需项/出口字段、可信边界、四检查点 | 对代表性合法任务填完整样本（含 operator 路径），逐项验证已有 evidence 是否足够，避免 schema 有字段但无可用生产者 |
+ | D06 | 推荐 prepared、字段/写序/reader/event 规则 | 全部写集/读会话入口清单、M6 函数级桥接；核实 atomic move 与锁装配；方案独立评审 |
+ | D07 | 两层身份、dispatch intent、未知外部结果边界 | 现有 recovery action 与人工裁定 payload/执行者停止核验的逐入口对照；不能先宣称有合法 retry 出口 |
+--- before/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -274,12 +274,18 @@
+ 
+ 2026-09-28 可行性探针：[离线报告](../../output/d04-feasibility-probe-20260928/feasibility-result.md)记录 7 项真实宿主 handler 断言及 pinned Codex 关闭 shell 开关的解析结果。宿主读可用、写/terminal 可拒绝，但 terminal=false 单独不强制；Codex 常规模型→ACP 读取未找到接通证据，原生无 execute 下读取仍未证明。D04/W03/W08 不据此关闭；下一证据是有界原生能力实验，授权和 Gate 沿详细设计 §8.5/§8.8，不自动进入产品实施或真实 provider 运行。
+ 
+-### 8.3 D04 受限执行候选与有界实验（当前）
++### 8.3 D04 受限执行候选与首轮有界实验
+ 
+ 用户已同意以“经过证明的必要受限执行”替代绝对禁止 execute，并授权有界原生能力实验；结论确定前不承诺可行、不进入产品实现。业务不变量、Claude 作者／Codex 评审、身份/scope/批准/证据和恢复义务不变。当前候选及授权边界见详细设计 §8.9，[实验目录](../../output/d04-restricted-execution-20260928/)保存 Gate 与实际证据；§8.2 的无 execute 调查及先前未授权表述作为历史记录保留。D04/W03/W08 不因要求调整而关闭。
+ 
+ 实验结果：[报告](../../output/d04-restricted-execution-20260928/result.md)。Codex 原生命令沙箱 16 项切片通过；真实模型层因作者探针关闭必要工具宿主而 INVALID（零命令），输入 27,376 token、输出 236 token。初始化失败没有在模型调用前阻断，是本轮验证链缺口；已停止，不自动补测。D04/W03/W08 仍未完成；补测前修正工具前提/停止条件并确认增量预算，不进入产品实现。
+ 
+-### 8.4 D04 补测准备（预算待确认）
++### 8.4 D04 补测准备（确认前记录）
+ 
+ 按用户要求完成[工具前提与停止条件修正](../../output/d04-retest-preparation-20260928/preparation-result.md)，10 项离线检查通过，未新增 provider 调用。Gate 建议 1 次启动/新 session/任务，gpt-6-astra low；90 秒及第 6 个可观察命令触发停止，零自动补跑，不承诺 token/金额硬限。等待用户确认增量预算后才补测，详见详细设计 §8.10。D04/W03/W08 均保持未完成，旧 INVALID 不覆盖；无产品/adapter 实现。
++
++### 8.5 D04 获批补测结果（当前）
++
++用户确认增量预算后，仅启动一次 Codex 原生模型任务，获 **PASS_NATIVE_MODEL_SLICE**：[报告](../../output/d04-retest-preparation-20260928/result.md)。22.63 秒、两个实际命令，未知随机数据读取/计算正确，产品/control 两次 append 均遭 OS 拒绝，样例指纹不变。input 43,262（含 cached 28,032）、output 337，subscription_unpriced；不宣称成本最优。模型额外读取宿主 RTK.md，未证明样例外零访问或配置/指令完全隔离，须纳入 D04 环境与读取范围核验。
++
++作者完成证据自查，尚未经 CC 独立复审；旧 INVALID 不改。原生命令/模型的窄切片不关闭 D04/W03/W08，Claude、acpx/adapter/session/其他工具/可信 writer 仍待证，详见详细设计 §8.11/§13。本次预算耗尽，无自动补跑、产品/adapter 实现或新增授权。
+--- before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ after/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -2,7 +2,7 @@
+ 
+ ## 当前入口：2026-09-28 生命周期详细设计候选
+ 
+-当前补测状态：用户要求先修正前提与停止条件、再确认增量预算。[准备与 Gate](../../output/d04-retest-preparation-20260928/preparation-result.md)已完成，10 项离线检查通过，新的模型调用为 0；预算待确认，未自动补测。当前候选仍允许经过证明的必要受限执行，D04 未冻结、产品未实施。细节以详细设计 §8.10/主清单 §8.4 为准。
++当前补测状态：用户已确认增量预算，一次 Codex 原生模型补测完成，获 [PASS_NATIVE_MODEL_SLICE](../../output/d04-retest-preparation-20260928/result.md)。22.63 秒、两个命令，必要读取/计算正确，产品/control 实际写入均被 OS 拒绝，样例指纹不变。另有宿主 RTK.md 读取，不能宣称样例外零访问或环境完全隔离。input 43,262（cached 28,032）、output 337，subscription_unpriced；作者自查、未独立复审。D04 未冻结，Claude/adapter/session 等仍待证；预算用尽不自动加跑，产品未实施。当前以详细设计 §8.11/主清单 §8.5 为准，下文待补测/待确认均为历史记录。
+ 
+ 最新决定：用户已接受 D04“经过证明的必要受限执行”候选，并授权调整后进行有界原生能力实验。当前口径见详细设计 §8.9/主清单 §8.3；下文无 execute 及验证未授权记录均为此前状态。结论确定前不承诺可行，不开始产品实现；D04 仍待证。[本轮结果](../../output/d04-restricted-execution-20260928/result.md)：Codex 原生命令沙箱切片通过，模型切片因探针关闭必要工具宿主而 INVALID，已停止不自动补测。补测前修正前提检查/停止条件并确认增量预算，不改旧证据。
+ 

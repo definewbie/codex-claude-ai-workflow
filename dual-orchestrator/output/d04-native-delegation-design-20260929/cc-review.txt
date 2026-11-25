@@ -1,0 +1,9 @@
+请只读评审 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 D04 原生内部委派设计修订，遵守 AGENTS.md。
+
+入口：docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md §8.21；修订说明与 diff 在 output/d04-native-delegation-design-20260929/。R3 I3、主清单/覆盖地图和冻结条件已同步。
+
+用户同意允许原生内部委派，由 Dual 保留领域流程和授权。请独立判断调整是否保住权限、复评、批准、交付与恢复边界，剩余验证是否必要且足够，是否又换一种方式要求完全控制原生子代理。
+
+自行重建完整控制链和失败切面，检查兄弟入口；按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给分级发现、状态与未核验范围。不预设 PASS，不把设计认可当作能力已证。
+
+仅评审，不修改文件，不运行 native/provider/探针，不启动 agent，不进入实现。

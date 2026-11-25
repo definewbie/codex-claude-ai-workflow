@@ -1,0 +1,11 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 W09 fresh 第八例离线 Gate 装配做受影响范围独立评审，遵守 AGENTS.md。入口：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/assessment.md；实际 Gate：同目录 fresh-eighth-gate.md。
+
+只读，不修改材料，不创建原生会话、不联网/运行provider或模型，不启动第八例、不恢复第七例、不启动额外agent。无需重审无关历史或重跑Maven。请自行重建准备→初始实例→只读重核→未来授权/逐步执行的完整transition与失败切面，不预设作者结论。
+
+重点：
+1. 共享process_check.py是否与已受审版本字节相同，三个实际消费者是否在正确副作用前强制消费；UNKNOWN/PRESENT拒绝、完整观察缺席、PID复用、冷启动、未授权零step的证据各证明到哪层。区分完整入口行使和抽取语句测试。
+2. actual SDK identity是否来自上次真实子进程观察，是否区别个人PATH claude，二进制/package基线是否由真实frozen_check消费；是否错误把此前观察/当前字节推成未来选择、GLM业务兼容或第七例超时根因证明。
+3. 新持久隔离实例是否真由原start无--run产生、初始账本/Git身份与零run/批准是否成立；预算/储备/原生45秒及命令600秒是否保持，授权false、业务人门与commit责任是否准确。旧现场与发行是否保持。
+4. 证据计数、自查错误、未验证范围是否如实；下一步是否只剩本次真实运行批准及获准后只读重核，还是有必要且有据的缺口。不要引入无证据的SDK锁版本、额外初始化或平台建设。
+
+按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给分级发现、证据与未核验范围；区分离线装配成立、当前技术前提及真实主流程未证。评审不构成运行授权。

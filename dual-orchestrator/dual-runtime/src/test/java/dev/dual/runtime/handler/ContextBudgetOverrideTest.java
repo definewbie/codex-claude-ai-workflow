@@ -64,7 +64,7 @@ class ContextBudgetOverrideTest {
                 List.of(),
                 List.of(), Map.of(), null, null, null);
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", def, instance));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", def, instance, dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));

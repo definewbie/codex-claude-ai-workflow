@@ -1,0 +1,31 @@
+{
+  "documents_and_evidence": {
+    "batch.md": "1e5496ec0e16fe5d57114a0ca43bd655801eb98e76274da705ac057d80bae179",
+    "verification.json": "6ca8ae9edc50f80ce8c5f8e885abadf50e802aca38d4ec5be3c3f7e5808381a8",
+    "test-results.json": "14c8eae7fedefb27ab118329e94d5bd7b81886e8c0488deaf44fcda6f2c88df7",
+    "native-verification.json": "423f9e49ff106ac52be1549629cd8c9acfe7eb16cf64c2982963cbe6a24fa7b8",
+    "changed-files.json": "24fa549dabfacba786990508af0dd47a296ceb0e742d7be5e3de902d645e5640",
+    "incremental.patch": "50a047defa19f285aaab2840488f81598e76d86684863bebf997348a7e4c0302",
+    "implementation-source-index.json": "aefff3bb58d24a92f9c4b70707fea7a06b94fae6182a0b1b333c0e61c0de8e10",
+    "transitions-and-siblings.md": "50d27782f32438ad3c89218191b5667811c60b64a74afd07bcf9a513191e1e56",
+    "verification-history.md": "c22a64db72116e6ef99eb92364f6b23eeb077ad355cc51f1d7498be89453d61d",
+    "reflect-and-reanalyze.md": "b603bf3f8df06b6f1b681dc588d15a716e124e1846c14d49fe4d5992b330e5ef",
+    "review-map.md": "973092ec52657b694c692822c3e04298af19988904e99c6fa6c173eb7ae34a6c",
+    "cc-review-prompt.md": "fd5158d01dc90022cdaf7ff3fba2d782991c2c2fbec036799b2ec90428c6d7be",
+    "final-before-source-sha256.json": "71a08966b3fc7230156818cc1f3de78a7505af8a8f640eb45b93d258e890455f",
+    "final-after-source-sha256.json": "71a08966b3fc7230156818cc1f3de78a7505af8a8f640eb45b93d258e890455f",
+    "final-report-sha256.json": "fee30c5a67bfbed4c0eb652629a0e6f38bc0f6966690ee15c423f9c110119299",
+    "patch-replay.json": "f23d8d50bb4dfa28850cc9addb3beeea6b250990d2ce0abb60a31e409fc427cf",
+    "built-acpx-identity.json": "89dc174c368c949ed6a83c6f6e51bf74d781cdc91291cd0649248d46ab90f800",
+    "counterproof/result.json": "85699a4875c8120af15ee76fddc3acb81ad834caec7f153f603e80612ab4e234",
+    "recovery-counterproof/result.json": "2934bd0af07f7a555ded177af7a0aa0bdb7ab8f2161cf99ed1a99afcb224ea33"
+  },
+  "worklist": {
+    "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "sha256": "35a2592a945776f7ea50ab9c535be99f2429618f188649e43fe8fa21f7dfda4f"
+  },
+  "tested_inputs_current": true,
+  "incremental_files_current": true,
+  "raw_suite_reports": 204,
+  "status": "AWAITING_CC; self-check only"
+}

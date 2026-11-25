@@ -1,0 +1,57 @@
+✔ concurrent asks retain exact per-request allow/deny decisions; repeats never send twice (1.307ms)
+✔ wrong owner/prompt/session/RPC/hash/deadline/choice does not poison a legal ask (0.153792ms)
+✔ cancel/turn replacement/owner restart never restore an old callback from a commit (0.124417ms)
+✔ deadline and request publication failure cancel instead of falling through (42.658541ms)
+✔ wire rejects absent/changed generations, unbounded asks and prompt retry (0.443916ms)
+✖ live IPC replies bypass queued prompts and never recreate consumed callbacks (4.014042ms)
+✖ lost or silent IPC receipt makes one attempt and no owner recovery or resend (2.114708ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 5
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 94.956
+
+✖ failing tests:
+
+test at dist-test/test/permission-replies.test.js:127:1
+✖ live IPC replies bypass queued prompts and never recreate consumed callbacks (4.014042ms)
+  Error: listen EPERM: operation not permitted /tmp/acpx-116644d7d3/ccde393f0727c398e4894a11.sock
+      at Server.setupListenHandle [as _listen2] (node:net:2145:21)
+      at listenInCluster (node:net:2224:12)
+      at Server.listen (node:net:2361:5)
+      at file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/src/cli/queue/ipc-server.js:81:20
+      at new Promise (<anonymous>)
+      at SessionQueueOwner.start (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/src/cli/queue/ipc-server.js:70:15)
+      at file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/permission-replies.test.js:139:47
+      at async withTempHome (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/queue-test-helpers.js:19:9)
+      at async TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/permission-replies.test.js:128:5)
+      at async Test.run (node:internal/test_runner/test:1389:7) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '/tmp/acpx-116644d7d3/ccde393f0727c398e4894a11.sock',
+    port: -1
+  }
+
+test at dist-test/test/permission-replies.test.js:171:1
+✖ lost or silent IPC receipt makes one attempt and no owner recovery or resend (2.114708ms)
+  Error: listen EPERM: operation not permitted /tmp/acpx-5000efd4f5/c9de911cc2796d80609566b9.sock
+      at Server.setupListenHandle [as _listen2] (node:net:2145:21)
+      at listenInCluster (node:net:2224:12)
+      at Server.listen (node:net:2361:5)
+      at file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/queue-test-helpers.js:77:16
+      at new Promise (<anonymous>)
+      at listenServer (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/queue-test-helpers.js:72:11)
+      at async file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/permission-replies.test.js:183:13
+      at async withTempHome (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/queue-test-helpers.js:19:9)
+      at async TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/permission-replies.test.js:173:9)
+      at async Test.run (node:internal/test_runner/test:1389:7) {
+    code: 'EPERM',
+    errno: -1,
+    syscall: 'listen',
+    address: '/tmp/acpx-5000efd4f5/c9de911cc2796d80609566b9.sock',
+    port: -1
+  }

@@ -1,0 +1,15 @@
+{
+  "observed_at": "2026-10-23T11:03:16.293702+08:00",
+  "scope": "Read-only identity investigation after required process guard PRESENT; no retry or dispatch",
+  "pid": 83976,
+  "historical_records": [
+    {
+      "pid": 83976,
+      "absent": true
+    }
+  ],
+  "table_exit": 0,
+  "table_stderr": "",
+  "matching_rows": [],
+  "full_table_success": true
+}

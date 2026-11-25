@@ -1,0 +1,8 @@
+{
+  "type": "function_call",
+  "id": "observe_before",
+  "call_id": "observe_before",
+  "namespace": "collaboration",
+  "name": "list_agents",
+  "arguments": "{}"
+}

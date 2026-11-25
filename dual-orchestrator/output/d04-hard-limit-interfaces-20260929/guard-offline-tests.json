@@ -1,0 +1,26 @@
+[
+  {
+    "name": "final",
+    "pass": true
+  },
+  {
+    "name": "tool",
+    "pass": true
+  },
+  {
+    "name": "custom_tool",
+    "pass": true
+  },
+  {
+    "name": "extra_field",
+    "pass": true
+  },
+  {
+    "name": "unknown_content",
+    "pass": true
+  },
+  {
+    "name": "request_limit",
+    "pass": true
+  }
+]

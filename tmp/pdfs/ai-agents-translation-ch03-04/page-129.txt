@@ -1,0 +1,47 @@
+        rmax = max(raw) if raw else 0.0
+        span = (rmax - rmin) if (rmax > rmin) else 1.0
+
+        for t in g.trajectories:
+            if t.metrics is None:
+                t.metrics = {}
+            if t.metadata is None:
+                t.metadata = {}
+
+            gate = float(t.metrics.get("correct", 0.0) or 0.0)
+            gate = 1.0 if gate >= 0.5 else 0.0
+
+            try:
+                ruler_raw = float(t.reward)
+            except Exception:
+                ruler_raw = 0.0
+            ruler_norm = (ruler_raw - rmin) / span
+            ruler_norm = max(0.0, min(1.0,
+                         ruler_norm)) if ruler_norm == ruler_norm else
+0.0
+
+            final_reward = gate * (alpha + beta * ruler_norm)
+            final_reward = max(0.0, min(1.0, final_reward))
+
+            t.metadata["ruler_score_raw"] = float(ruler_raw)
+            t.metrics["ruler_norm"] = float(ruler_norm)
+            t.metrics["final_reward"] = float(final_reward)
+            t.reward = float(final_reward)
+    return groups
+
+hybrid_groups = _combine(ruler_groups, alpha=alpha, beta=beta)
+
+   Weight of correctness versus quality; adjust for your own task.
+
+   Use judged rewards as the quality signal.
+
+   Robust group-wise normalization (avoids divide-by-zero).
+
+   Binary gate from deterministic judge ensures precision first.
+
+   Clip and NaN-guard.
+
+   Simple, interpretable shaping formula.
+
+   Keep both raw and normalized scores.
+
+   Overwrite trajectory reward with the hybrid reward used for training.

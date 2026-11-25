@@ -1,0 +1,19 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "read_reuse_contract",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "plan",
+  "nodeInstanceId" : "node-plan-codex_plan_review-025",
+  "nodeDefinitionId" : "plan.codex_plan_review",
+  "targetNodeDefinitionId" : "plan.codex_plan_review",
+  "iterationId" : "iter-003",
+  "preferExistingEvidence" : true,
+  "avoidRepeatingReads" : [ ],
+  "reusableReadFiles" : [ ],
+  "invalidatedReadFiles" : [ ],
+  "allowedRereadFiles" : [ ],
+  "reuseSource" : "run_history",
+  "requireReasonWhenRereading" : false,
+  "reasonField" : "",
+  "generatedAt" : "2026-10-23T03:01:31.742500Z"
+}

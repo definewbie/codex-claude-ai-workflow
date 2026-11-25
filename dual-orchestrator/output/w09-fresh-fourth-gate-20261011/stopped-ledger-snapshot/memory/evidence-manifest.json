@@ -1,0 +1,45 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261011T044656Z-BMDJ",
+  "updatedAt" : "2026-10-11T06:48:43.554664Z",
+  "items" : [ {
+    "id" : "requirement_resolution:784bfcb0",
+    "type" : "requirement_resolution",
+    "stageId" : "",
+    "iterationId" : "",
+    "nodeInstanceId" : "",
+    "nodeExecutionId" : "",
+    "sourceRef" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/contract-resolution.json",
+    "summary" : "requirement_resolution: APPROVE",
+    "claims" : [ "Decision: APPROVE" ],
+    "files" : [ ],
+    "riskTags" : [ ],
+    "status" : "available"
+  }, {
+    "id" : "task_contract:1c5c553d",
+    "type" : "task_contract",
+    "stageId" : "",
+    "iterationId" : "",
+    "nodeInstanceId" : "",
+    "nodeExecutionId" : "",
+    "sourceRef" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/task-contract.json",
+    "summary" : "提供纯 Python 标准库实现的 normalize_newlines(text: str) -> str：把 CRLF(\\r\\n) 与单独 CR(\\r) 转换为 LF(\\n)，其余字符、空串、已有 LF 以及末尾有/无换行的形态一律原样保留，并以 unittest 测试与 README 用法示例验证该行为。",
+    "claims" : [ "{id=AC-1, text=tests/test_normalize_text.py 覆盖至少八类输入并写明精确期望输出：空串、纯 LF、CRLF、单独 CR、混合换行、Unicode 内容、末尾有换行与末尾无换行、连续空行；并对每个用例断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)，即重复规范化保持相同结果。}", "{id=AC-2, text=实际执行 unittest 测试并保留真实执行证据：记录实际执行的命令与完整实际输出（stdout/stderr），输出明确显示运行的测试数量（如 Ran N tests）且 failures=0、errors=0（结果为 OK），N 与测试源码中的用例数一致；同时提供代表性用例的实际输入字符串、测试源码中写明的期望输出（断言值）与实际执行结果三者的对应证据，可逐例与测试源码核对。测试完成状态或文字结论不能替代上述实际输入、实际输出与测试结果证据；本任务不要求工具提供独立测量的真实退出码。}", "{id=AC-3, text=README.md 的示例与 src/normalize_text.py 实际行为一致：包含导入语句（如 from normalize_text import normalize_newlines 或等效导入方式）以及典型混合换行输入及其输出的示例；该一致性结论须以实际读取源码与 README 或实际执行示例为依据。}", "Decision: READY_FOR_REVIEW" ],
+    "files" : [ ],
+    "riskTags" : [ "仓库当前无任何跟踪文件（repo-map 显示 inventoryPathCount=0），src/ 与 tests/ 目录及导入机制需在执行阶段新建并实测；若 unittest 发现机制确需额外 __init__.py，须按流程以 typed scope-addition 单独批准。", "换行为不可见字符，README 示例应以显式转义形式（\\r\\n、\\r、\\n）呈现输入与输出，避免读者误读并保证 AC-3 可核对。", "连续空行、混合换行等用例的期望值需在测试源码中写成精确字符串，并与 README 示例保持一致，防止断言与文档脱节。" ],
+    "status" : "available"
+  }, {
+    "id" : "human_decision:57c0d17b",
+    "type" : "human_decision",
+    "stageId" : "stage-gate",
+    "iterationId" : "iter-002",
+    "nodeInstanceId" : "node-gate-human_requirement_review-011",
+    "nodeExecutionId" : "",
+    "sourceRef" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/nodes/node-gate-human_requirement_review-011.json",
+    "summary" : "Human action: approved",
+    "claims" : [ "用户在当前 GOAL 材料展示后明确批准目标、验收和排除范围；不批准精确实施范围或最终交付。" ],
+    "files" : [ ],
+    "riskTags" : [ ],
+    "status" : "available"
+  } ]
+}

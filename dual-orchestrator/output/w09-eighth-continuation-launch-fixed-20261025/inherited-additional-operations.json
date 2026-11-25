@@ -1,0 +1,18 @@
+[
+  {
+    "elapsed_seconds": 0.589332875,
+    "kind": "failed-readonly-recheck-tool-wall",
+    "source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/evidence/authorized-startup-recheck-failure-20261024.json",
+    "source_sha256": "9cc5daabaaac2517b2418beb51dd1863ca0eb43980b2bb39849d2cb7eeb9e453",
+    "source_field": "time_note",
+    "scope": "Recorded execution-tool wall time; not provider/run duration"
+  },
+  {
+    "elapsed_seconds": 0.7740464168600738,
+    "kind": "prior-diagnostic-recording",
+    "source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/evidence/authorized-startup-recheck-failure-20261024.json",
+    "source_sha256": "9cc5daabaaac2517b2418beb51dd1863ca0eb43980b2bb39849d2cb7eeb9e453",
+    "source_field": "diagnostic_recording_elapsed_seconds",
+    "scope": "Already recorded local diagnostic operation"
+  }
+]

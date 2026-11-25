@@ -1,0 +1,50 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261010T124812Z-XCZL",
+    "workflowInstanceId": "wf-ws-20261010T124812Z-XCZL",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-contract-compile-012"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000012",
+    "updatedAt": "2026-10-10T14:12:15.538474Z",
+    "commitSequence": 42
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-contract-compile-012",
+    "nodeDefinitionId": "contract.compile",
+    "kind": "TASK",
+    "handlerType": "contract.compile",
+    "status": "READY",
+    "stageId": "stage-contract",
+    "iterationId": "iter-002",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json"
+    ],
+    "inputTransition": {
+      "condition": "unconditional",
+      "transition_type": "normal",
+      "required": true,
+      "source_node_instance_id": "node-gate-human_requirement_review-011",
+      "source_node_sha256": "14a5192c0b6458214ad080e1874589dc5d9a9b8e6922eb3afeecbc43e460a862",
+      "purpose": "Seed the first Claude intake run with repo-scope context."
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 356.78999999999996,
+  "prior_run_count": 4
+}

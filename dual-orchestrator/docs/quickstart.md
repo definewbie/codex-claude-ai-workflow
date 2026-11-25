@@ -85,10 +85,10 @@ If `doctor`, acpx, or a later Agent run fails, use
 From `dual-orchestrator`:
 
 ```bash
-./scripts/smoke-test.sh --case lifecycle --cleanup
+rtk proxy mvn -q clean test
 ```
 
-This is the quickest sanity check for the CLI/workflow path.
+This runs the offline module suite, including workflow sequences with program observations. The legacy smoke is retired; green offline tests do not prove native clients or target Git delivery.
 
 ## 5. Run A Real Lifecycle Case
 
@@ -364,8 +364,11 @@ The ledger lives under:
 
 ## 11. Known P0 Limits
 
-The MVP main lifecycle is closed as `Done with known limits`; see
+The historical 2026-06-19 MVP conclusion was `Done with known limits`; see
 [testing/p0-closure-report.md](testing/p0-closure-report.md).
+The current lifecycle convergence is B03 `IN_PROGRESS`, with real runs `NO-GO`;
+use the [main worklist](plans/20260927-dual-lifecycle-worklist.zh-CN.md) for current readiness.
+The historical smoke is not current admission evidence or authorization for P1 work.
 
 Accepted limits after P0:
 
@@ -376,3 +379,7 @@ Accepted limits after P0:
   under P1;
 - delivery merge is explicit and conservative; the tool applies a reviewed
   patch to the target index but does not commit or merge automatically.
+
+### Delivery interruption / 交付中断
+
+正常顺序是批准候选 → `delivery merge` → 人检查目标暂存内容并实际 commit → `delivery finalize`。UNKNOWN 时先查看 `status`/`summary` 的停止依据与下一步，不盲目再次应用；使用当前裁定模板经 `delivery resolve --decision <decision.json>` 显式关闭再次应用，或核实旧操作停止后授权一次新尝试。已知活动不得被人工声明覆盖；声明不等于测量退出码。详见 [reference](reference.md) 的交付裁定入口。

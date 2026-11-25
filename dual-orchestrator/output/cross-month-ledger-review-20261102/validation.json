@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "errors": [],
+  "rawFilesHashChecked": 5073,
+  "testedSourceFilesHashChecked": 403,
+  "reportLinksChecked": 105,
+  "tests": 197,
+  "generatedArtifactHashes": {
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/collection.log": "937bea19116b942971f497f8ce45b454c04a42857674919462940a7d512d46f0",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/additional-boundary-tests.log": "daddaf798adda7c66aba68c91dda174eb75c25134bca79a64af4fac1385cdc72",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/collect.py": "4f11b942b4cfa83fcc5b1e3a725dfa94c1264f3263101b09618b7229c16c4f99",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/evidence-index.md": "6a6875246c40cf43c17d3a59240e7989bd04768a48cea4d74d7acf3e26a53ea6",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/create_report.py": "83903a53d9a2eceaed379e06e205bb0ddc050d6b883578921822fec0da2ba8f1",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/evidence-index.json": "ffb66946cae0a45465086e410e4035c338550529fd7c76ba9cd6cfc2b5a33cd3",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/source-sha256.json": "99160a414b8d14d19e4faad692a918c0b57883777f6356ebf8818d4c8ba65e17",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/assemble_review.py": "83786f04da17cbdad594d4394e89d23c7c75f3fe1c67fee70fef186ffca29b75",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/git-b197ce90.patch": "8b4d638032ccdf15ba94a0759f2b783ba3dea8624b02bab0fa0cb6c398038f63",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/inspect_io.py": "fbaf92ad2f621d41967708ebfd8c54343a5039fd0db1f85313176fc6cd75b241",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/validate_review.py": "98a065f70385f4f1fb9d173a8581333b1d69088122ec1f6a0674edc86632820d",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/current-verification.json": "687d3bd099e0c1baa4c9730382598d0cad745822b8ebecd4c60d2aeafd6de001",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/git-a1a70d9d.patch": "e5af5780c4429594fa72d6bec47eca298ef608963430bfe5c96b506e9183266a",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/review.zh-CN.md": "ae11c3c8896ad1eed468445257f70c5f411a836d83a8b7e20ea6b006394e190e",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/inventory.json": "4ec6c88af6c179f20ed2cc626710fe1c8bdbe8541c3216e03381a7e6cc7706bb",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/io-forensics.json": "867ce0ef66d8fdc2ea4357109b09c80b948d7bb31a1036971c03556e7a35322e",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/current-boundary-tests.log": "daddaf798adda7c66aba68c91dda174eb75c25134bca79a64af4fac1385cdc72",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/git-evolution.json": "446c6539258d65d766e0fc41dd9844e46b3521a799b972b973d5ebb3a73eb35f"
+  },
+  "scope": "evidence integrity and accounting conservation; not external product grading"
+}

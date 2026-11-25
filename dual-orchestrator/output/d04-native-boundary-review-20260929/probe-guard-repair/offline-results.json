@@ -1,0 +1,32 @@
+{
+  "status": "PASS_OFFLINE_FAIL_FAST",
+  "checks": [
+    {
+      "name": "all refused",
+      "calls": 3,
+      "status": "PASS"
+    },
+    {
+      "name": "first success",
+      "calls": 1,
+      "status": "PASS"
+    },
+    {
+      "name": "later success",
+      "calls": 2,
+      "status": "PASS"
+    },
+    {
+      "name": "pending outcome",
+      "calls": 1,
+      "status": "PASS"
+    },
+    {
+      "name": "transport exception",
+      "calls": 1,
+      "status": "PASS"
+    }
+  ],
+  "nativeSessions": 0,
+  "doesNotRetroactivelyValidatePastGate": true
+}

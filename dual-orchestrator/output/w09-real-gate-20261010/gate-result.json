@@ -1,0 +1,17 @@
+{
+  "gate_result": "FAIL",
+  "reason": "fresh intended mainline stopped by producer-optional / consumer-required session-identity conflict",
+  "classification_boundary": "not a model-quality failure; frozen inputs/config matched, so no blanket INVALID classification solely because failure was pre-prompt",
+  "workflow_status": "WAITING_FOR_RECOVERY",
+  "execution_outcome": "RECOVERABLE_ADAPTER_FAILURE",
+  "primary_reason": "adapter_incompatible",
+  "prompt_dispatches": 0,
+  "workflow_agent_attempts": 1,
+  "conservative_call_pool_charge": 1,
+  "tokens": "UNAVAILABLE, not measured zero",
+  "native_session_closed": true,
+  "full_native_subtree_stop": "NOT_PROVEN",
+  "business_acceptance_and_delivery": "NOT_REACHED",
+  "source_modified": false,
+  "next_action": "independent read-only affected-boundary review, then authorize bounded root-cause fix and refreeze; no live retry"
+}

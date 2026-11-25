@@ -1,0 +1,26 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-context-intake_claude_brainstorm-001",
+  "nodeDefinitionId" : "context.intake_claude_brainstorm",
+  "kind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "COMPLETED",
+  "stageId" : "stage-context",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ],
+  "inputTransition" : { },
+  "outputRefs" : [ ".agent/workstreams/ws-20261010T085617Z-8SVF/context/node-context-intake_claude_brainstorm-001.md" ],
+  "result" : {
+    "context_package" : ".agent/workstreams/ws-20261010T085617Z-8SVF/context/node-context-intake_claude_brainstorm-001.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20261010T085617Z-8SVF/context/node-context-intake_claude_brainstorm-001.json",
+    "target_node" : "intake.claude_brainstorm",
+    "profile" : "intake",
+    "sections" : [ "task_contract", "ledger_pointers" ],
+    "input_ref_count" : 0,
+    "generated_at" : "2026-10-10T08:57:37.717086Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1791622657668-d4e50ad9",
+  "startedAt" : "2026-10-10T08:57:37.678964Z",
+  "finishedAt" : "2026-10-10T08:57:37.732714Z"
+}

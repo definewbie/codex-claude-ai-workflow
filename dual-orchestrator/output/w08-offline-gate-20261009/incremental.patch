@@ -1,0 +1,127 @@
+--- before/dual-server/src/test/java/dev/dual/server/DeliveryViewServiceTest.java
++++ after/dual-server/src/test/java/dev/dual/server/DeliveryViewServiceTest.java
+@@ -93,6 +93,51 @@
+         assertEquals("DELIVERY_INVALID",facade.resolve(f.source(),f.workstreamId(),commandBytes).get("reasonCode"));
+     }
+ 
++    @Test
++    void statusAndOverviewObserveBeforeLedgerLockAndComposeWithinTheSameSnapshot() throws Exception {
++        var paths = new WorkstreamPaths(tempDir, new DualId("ws-query-lock-order"));
++        var ledger = ServerLedgerFactory.create();
++        var node = new dev.dual.core.workflow.NodeDefinition(
++                "work", dev.dual.core.workflow.NodeKind.TASK, "noop.task", java.util.Map.of());
++        ServerTestLedger.initialize(ledger, paths, "wf-query-lock-order",
++                new dev.dual.core.workflow.WorkflowDefinition("query", 1, "work", List.of(node), List.of()));
++        var observed = new java.util.concurrent.atomic.AtomicInteger();
++        var composed = new java.util.concurrent.atomic.AtomicInteger();
++        var facade = new DeliveryViewService(objectMapper) {
++            @Override
++            public dev.dual.runtime.delivery.DeliveryApplicationService.View observe(Path root, String id) {
++                try (var outside = ledger.readSession(paths)) {
++                    observed.incrementAndGet();
++                } catch (Exception held) {
++                    throw new AssertionError("target observation must precede the ledger read lock", held);
++                }
++                return super.observe(root, id);
++            }
++
++            @Override
++            public java.util.Map<String, Object> inSnapshot(
++                    Path root, String id, dev.dual.runtime.delivery.DeliveryApplicationService.View sample,
++                    dev.dual.ledger.file.WorkflowFileLedger scoped) throws java.io.IOException {
++                org.junit.jupiter.api.Assertions.assertThrows(dev.dual.ledger.file.WorkstreamLockedException.class,
++                        () -> {
++                            try (var unexpected = ledger.readSession(paths)) {
++                                throw new AssertionError("composition must use the already-held ledger snapshot");
++                            }
++                        });
++                composed.incrementAndGet();
++                return super.inSnapshot(root, id, sample, scoped);
++            }
++        };
++        var query = new WorkstreamQueryService(objectMapper, facade);
++
++        assertEquals("RUNNING", query.status(tempDir, paths.workstreamId().value()).get("status"));
++        var overview = query.overview(tempDir, paths.workstreamId().value());
++        assertFalse(overview.isEmpty());
++        assertEquals(2, observed.get(), "both current query entrances must observe outside L");
++        assertEquals(2, composed.get(), "both projections must compose within L");
++        assertFalse(Files.exists(paths.deliveryMergePlanJson()), "observation must not create a delivery intent");
++    }
++
+     private Fixture createDeliveryFixture(String workstreamId, String decision) throws Exception {
+         var targetRepo = tempDir.resolve(workstreamId + "-target-repo");
+         var sourceWorktree = tempDir.resolve(workstreamId + "-source");
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -5,6 +5,8 @@
+ 本文是唯一跨批次工作索引，不重新定义验收。唯一设计依据为 [R3 设计](20260923-dual-lifecycle-reliability-design.zh-CN.md) §0/§3–§7.1；证据层次和状态沿用该文 §5 与 [engineering-checklist](../engineering-checklist.md)。后续更新本文，不再按日期复制一份新主清单。§3 的文件处置都是建议，不授权删除、还原或提交既有改动。
+ 
+ 2026-10-09 当前补记：B01–B04 以各批末记录为准；B05 首版 C 已获用户带回的 CC 批末独立 PASS，按合同资格单族收口（CLOSED / PASS），见 §21.2–§21.3。时钟判别尚未常驻的 LOW 已登记。B06 W06/D09 具体接线已获 CC 合并设计 PASS，并获用户明确授权；实施与离线验证完成，随后用户带回 CC 批末独立 PASS，本批 CLOSED / PASS（离线范围），见 §22.4。两设计 LOW 的理由和常驻反证已落实；原预检/候选/授权前状态作为历史保留。未覆盖族 UNKNOWN，D01/I1.a/W01 与其他 W 项、真实 NO-GO 均不因此关闭，不自动启动下一批。
++
++2026-10-09 W08 当前补记：用户授权离线对账与真实 Gate 草案；本轮材料完成，作者自查 WARN / 技术 NO-GO。查询锁序 LOW 已常驻并有隔离反证；W07 确认设计提示要求复制已批精确 scope 与 GOAL 分期冲突，尚未纠正。见 §23。真实 Gate、预算、安装/提交未授权；历史待办须以本次对账重新解释，不能据 B01–B06 PASS 自动开跑。
+ 
+ ## 1. 当前结论、工作区身份和核验范围
+ 
+@@ -31,15 +33,15 @@
+ | ID / 完整用户流程 | 契约依据 / 领域 owner | 现有事实与证据 | 剩余工作与必要设计决策 | 依赖 / 状态 |
+ |---|---|---|---|---|
+ | W00 对账与建立完整覆盖地图 | R3 §7.1；文档索引不持有运行 authority | 本文 §3 覆盖所有相关 dirty 文件；§4 映射测试与缺口；冻结身份可复核；CC 材料层 PASS | 2 LOW 处置及限制见 §8；后续材料实质变化重核受影响结论，不以本次抽样代替产品证明 | 材料任务收口；独立评审与作者修订核验分列，不是产品能力完成 |
+-| W01 人工决定→作者修订→复评→重新批准；失败原因→合法补足后续作 | I1/I1.a，§4 人工决定行；core 动作、RoutingEngine、revision/lineage resolver、RecoveryAssessment | A01–A04/A09；T01/T02/T15；READY/BLOCKED 续作与非法身份有现成序列 | D01 首版依用户 C 决定做单合同资格族完整配对/四分类/合法续作，其余 UNKNOWN；具体接线已获独立设计认可，LOW-1 枚举守卫已纳入，见 §21.1；其余族完整诊断保留未完成。修订额度耗尽出口及 W05 本地提交边界不因 C 削减 | W00；准备失败依赖 W02，耐久续作依赖 W05；部分 Implemented；原 D01 语义已冻结，C 首版具体接线已审，本族实施/证明进行中，不关闭 W01 |
+-| W02 输入准备→provider 执行→候选验证→发布→node/run/recovery | I2；adapter、execution resolver、validator/finalizer、统一恢复 read model | A05–A08/A10；T03–T06；前置失败已封闭建模，旧反例 E02 已在 B01 常驻并先复现；本批结果见 §10 | 落实已冻结 D02 的阶段事实和冲突优先级，修复执行原因被后处理改写；counterproof 必须常驻；保留成功/警告对照和 CLI/API/worker 同源消费，不能只修一个 outcome 分支 | W00；与 W01 共享事实、与 W05 共享发布窗口；部分 Implemented；B01 阶段保真实施/离线验证通过，CC PASS 已收口；permission 证明及 W05 依赖未关闭 |
+-| W03 目标批准→只读设计/计划/复评→精确范围与必要权限批准→首次实现 | I3、I1；proposal/TaskContract/qualification、四种 definition、adapter/transport | A11–A13；T07/T08；现有严格批准和 scope 可复用，阶段顺序仍是旧合同先行 | 落实已冻结 D03 的分期批准表示、compile/qualification/逐门迁移及旧批准失效；D04 按 §8.25/§8.27 实施已冻结的原生配置、权限请求/批准/拒绝/续作与阶段检查接入；D05 同批绑定 W04 的验证出口，防止互相要求对方先完成 | W00；W01/W02 安全网；与 W04 联合实施/验收；设计已冻结，产品未完成 |
+-| W04 必需验证可行→实现→自测→独立验收；仅缺材料时补证据→再自测/验收 | I4、I1、I2；plan/contract、EvidenceCollection、ExternalVerificationEvidence、自测与验收 | A10–A13；T08/T09；工具/上下文缺口改走现有人门，补证据和代码返修已有区别 | 落实已冻结 D05 的必需验收项与方法/环境/权限/责任/证据绑定及检查时点；环境失效必须保留原因与解决动作；不可把上传声明当机器执行证明 | W03 联合；W02 失败事实；W05 部分写恢复；部分 Implemented；D05 已冻结，验证出口待实施 |
+-| W05 进程中断→核对冻结身份/耐久事实→本地幂等续作；外部未知→人工裁定；终态不重开 | I5、I1；ledger writers/readers、runtime/worker、kernel | T02/T10/T11/T15；已有拒绝孤立后继与终态保护；R1 测试直接断言重放缺口 | 落实 D06 已选 prepared mutation、本地提交/reader/event 幂等协议；覆盖 queue/task/execution/run/node 桥接；落实已冻结 D07 的运行身份和 provider 未知窗口；D08 证明默认 LiteFlow 临时隔离或完成等效保障 | W00；与 W01/W02 写序协同，与 W06 外部窗口协同；D06/D07/D08 已冻结；B02 holder 互斥实施/离线验证通过、CC PASS 已收口；构造/读会话与耐久协议仍待联合实施 |
++| W01 人工决定→作者修订→复评→重新批准；失败原因→合法补足后续作 | I1/I1.a；core/ledger/revision/recovery | B03 合法续作与返修/重批，B05 C 单族独立 PASS，最新受控序列见 §23 | 其余诊断族 UNKNOWN，按用户 C/真实反复阻塞触发，不自动第二族；单族及合法离线流程不外推 I1.a 全体 | 本族 CLOSED/PASS；完整 W01 未关闭，真实能力按 Gate |
++| W02 输入准备→provider→验证→发布→node/run/recovery | I2；adapter、唯一 outcome/finalizer、恢复 read model | B01/B03/B04 离线与独立 PASS；E02 常驻、权限双通道/固定完成/失败保真，见 §23 | 真实 native/工具能力待 Gate；首版全量声明已接受，具体运行中补声明入口未证，真实反复阻塞才重评 | 实施/具名离线链有据；总体真实能力未证 |
++| W03 目标批准→只读设计/计划/复评→精确执行批准→首次实现 | I3/I1；TaskContract/proposal/qualification/adapter | B03 分期合同、B04 原生 C/X 接线与独立 PASS，见 §23 | W07 提示词与 GOAL 文件提案冲突 G01 必须纠正；实际选定 native 装配/合法请求续作按 Gate 核验 | 编译/控制链离线有据；G01 未修、真实 NO-GO |
++| W04 必需验证可行→实现→自测→独立验收；缺材料补证据 | I4/I1/I2；D05、EvidenceCollection、ExternalVerificationEvidence | B03 D05 程序/模型/人工分立、实际退出码按批准条款、漂移与合法复用、返修/补证据离线有据，见 §23 | fresh 各验收项绑定实际方法/环境/权限/责任/证据出口，未知工具不假装可用，不默认通用环境认证 | D05 接线离线有据；具体 fresh 出口 Gate 前核齐 |
++| W05 同冻结身份中断恢复；外部未知人工裁定；终态不重开 | I5/I1；D06/D07 ledger/runtime/worker/kernel | B02 holder、B03 本地协议/构造与身份、B04/B05/B06 写点/冷 JVM 独立 PASS，见 §23 | kernel 内部 I/O 专项与部署拓扑未全证，保留；首 Gate 限单 JVM 路由/ClassLoader，实际身份/停止核验不能以测试 JVM 代替 | 具名协议离线有据；I5 全故障/部署普适性未关闭 |
+ | W06 验收满足→候选批准→目标 Git 应用→实际提交→交付确认/中断处置 | I6，§4 交付行；candidate、DeliveryApplicationService、Git、query | T12；B06 四变体×inline/worker 受控完整批准链接临时真实 Git apply/人工实际 commit/finalize；写点、冷 JVM、拒绝/续作与同源投影证据见 §22.3；CC 批末独立 PASS 见 §22.4 | 本批实施/离线接线范围收口；LOW-1 查询锁序常驻化已登记，现有一次性反证仍有效；真实目标 Git、浏览器视觉与真实客户端未证，归组合准入/Gate；不自动 commit 或盲目重 apply | W04 验收/批准；W05 本地边界；B06/W06/D09 批次 CLOSED / PASS（离线范围）；真实交付证明未关闭，NO-GO 保持 |
+-| W07 机器身份与语义义务分离，修订能回应真实意见且不丢约束 | I1/I2 的 GCTW 承接；既有 context/contract owner、有限 correction | T13 与 E04；程序示例生成 fixture 已暴露此类测试不能证明模型复制负担 | D10 逐字段列机器绑定与模型语义，核实现有有限 correction 足够否；需要改动时选已有 context/validator 最小增量，保留错身份/漏义务拒绝；不提前承诺 token 节省 | W00；关联 W01–W04；D10 已冻结，待实施验证；不自动升级为成本优化平台 |
+-| W08 四变体、两种执行入口与各投影组合回归→冻结可审查运行 Gate | §4/§5/§6；以上全部消费者，CLI/API/UI/report | T06/T14；部分组合有受控断言，small 不是第三个 bundled；脚本 fixture 有独立局限 | 验证 W01–W07 所声明的必经合法/拒绝/中断路径；补遗漏而非追求测试数量；核验 UI/report 与 CLI/API 对状态、资格、原因和真实下一步同源消费，不各自推导 authority；确认实际 JVM 拓扑、kernel、工件/配置、预算监测与停止方式；清单/地图纳入同次独立评审 | 前项所需能力与证据，未达成；技术 NO-GO 与未授权分列 |
+-| W09 fresh 合法任务真实研发→测试/验收→批准交付→按声明级别确认结果 | §0、§6；批准的需求、真实 evidence、candidate、目标 Git | E04 历史调查与旧 Gate 仅作输入，当前组合真实产品交付 NOT PROVEN | 当具体 Gate 技术前提满足且取得授权后，执行有效 fresh case；FAIL/INVALID 止损不拼接样本；自然分支未触发记 NOT EXERCISED；不恢复旧样本、不以一次成功证明所有场景 | W08；预算/目标/外部权限依 Gate 决定；本轮不运行 |
++| W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | 单一示例/typed 去重/受限 correction 已有；本轮逐字段案头表完成，见 §23 | G01：GOAL 设计提案与模板已批准精确路径要求冲突，先受影响核验后纠正；不删严格 wire identity，不承诺 token 节省 | 案头审计完成、G01 未实施；真实回应负担 NOT PROVEN |
++| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 对账已有 B01–B06 证据；本轮查询 LOW 常驻 6/0 与隔离 1 expected failure；离线 package/JAR help/三个定义 validate，未冒称新全模块 | G01–G05/P01–P08 尚未齐；完整 browser/真实 worker 未证；草案首个 CLI/INLINE 范围不关闭整体 W08 | 材料完成、自查 WARN / 技术 NO-GO；待 CC 受影响评审与实际前提核齐 |
++| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh 小型 Python 需求与 Gate 仅为草案，不授执行/写权 | CC 核对 W08 必要缺口、纠正 G01、当次前提/需求/目标/预算明确批准后才运行；自然未触发分支 NOT EXERCISED、不恢复旧样本 | NOT RUN / NOT AUTHORIZED；真实 NO-GO 保持 |
+ 
+ ### 2.1 次序、依赖与独立评审触发
+ 
+@@ -219,6 +221,8 @@
+ 
+ ## 6. 当前到真实交付 Gate 的距离
+ 
++本节保留原材料形成时的评估快照；B01–B06 后的当前距离以 §23 为准，不将本节旧“待实施”当作重新开工指令。
++
+ 按 R3 §6 逐项记录。本轮推进的是“明确阻塞与证据”，没有把未实现功能写成技术 GO，也没有把未授权变成技术问题。
+ 
+ | Gate 项 | 本次变化 | 剩余阻塞 / 对应工作 |
+@@ -709,3 +713,17 @@
+ 真实客户端、浏览器视觉、真实目标交付、整体 P0/W08/W09 和其他 W 项不随本批通过；真实 NO-GO、未授权提交/安装/真实运行状态保持。评审末段“W08/W09 都需真实运行”须按原 W08 定义理解：W08 仍先做离线/案头组合对账、投影与工件/拓扑/预算/停止前提核验，不能跳过直接启动 W09。
+ 
+ **下一步建议：W08 准入前离线对账与 Gate 草案**。按已有 B01–B06 证据区分已证/待证/明确延期/仅真实 Gate 能证，核对 W07 与主流程必需出口，给出必要工作及有界 fresh Gate/预算/止损；不以全部理论分支完备为准入门槛，也不把单轮全绿当全部准入。本次仅接收并记录评审，未启动下一批或真实运行。
++
++## 23. W08 离线对账与真实 Gate 草案（2026-10-09）
++
++用户明确请求本轮离线对账与 Gate 草案；不授权真实 provider/native、installer、真实目标交付、项目提交或额外 agent。P0 材料与一个既有 LOW 的常驻化完成，当前 **OFFLINE_RECONCILED / AUTHOR_WARN / TECHNICAL_NO_GO / AWAITING_CC**。入口：[assessment](../../output/w08-offline-gate-20261009/assessment.md)，含 W01–W09/必要缺口/六维与链表、逐字段 W07、fresh 候选和 Gate。
++
++B01–B06 历史 PASS/具名序列可复用，不从早期表中“未完成”重做已落地代码；主清单 §2 已按最新证据更新，未统一关闭所有 W 项。D01 其他族/首版声明限制/非驻留时钟/内核 I/O/全部浏览器与真实 worker 能力等有界残余分别登记，未被新 Gate 偷偷移除。
++
++B06 LOW-1 已纳入既有 DeliveryViewServiceTest：实际 status/overview 观察在 L 外、组合同代 view 在 L 内，6 项聚焦回归 PASS；隔离副本把观察移到 L 内，新增常驻用例按预期 1 assertion failure / 0 error，未改主工作区生产类。仅这一测试文件为源码增量；普通必要离线 package 与新 CLI help/三定义 validate PASS，发行内嵌模块字节一致。1752/206/0 仍是 B06 单轮历史数字，本轮不拼成新全模块凭证，不重复已充分通过的生产回归。
++
++**G01 确认缺口**：DesignScopeValidator 在 GOAL 允许 planned_files 提案、GOAL 不授实现 scope，但 design-claude 模板要求复制已批准精确路径/操作；真实模型可能被引向旧顺序。已列入 W07 必需纠正及同族 sweep，本轮未改生产代码/模板。G02–G05 为当次实际 native 装配、证据出口、发行/拓扑、需求/目标/预算批准；静态 audit 与当前生成源码/dist 的 patch 身份不一致不是运行结论，不默认要求重新安装或新增客户端版本锁。
++
++[Gate 草案](../../output/w08-offline-gate-20261009/verification-gate-draft.md) 提案为一 fresh 标准库 Python 小任务、terminal-delivery/INLINE、最多18顶层调用、600s/命令、累计运行60min、可见实际token160000止损；均未获用户预算批准，也不是原生内部绝对调用/token/子树取消保证。关键和最终人批准保持，真实能力未证不能被合成 fixture 填PASS。
++
++下一步：[CC 受影响范围评审](../../output/w08-offline-gate-20261009/cc-review-prompt.txt) 合并核查对账、G01分类和 Gate 可执行性/ROI，避免为两处材料补记另开轮次。之后处理 G01 和当次前提，具体 Gate 齐备再交用户批准；不自动实施、安装或启动真实运行。
+--- before/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ after/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -1000,6 +1000,8 @@
+ 
+ 此处没有证据支持另改 wire schema 或保证 token 降幅，所以推荐不做这项改造。D10 的最终设计关闭仍须完成 prompt/context/acquirer 的重复字段与 correction 原因盘点：列出每项来源、消费者、保留/删除理由，并对 GCTW 的真实负担明确结论；当前仅完成候选处置，不能因“保留”就宣布减负完成。
+ 
++2026-10-09 W08 对账补记：[逐字段案头表](../../output/w08-offline-gate-20261009/w07-field-audit.md) 已形成，单一schema/当前typed引用/受限correction与真实负担未证分别登记。确认 design-claude 精确scope复制指令与GOAL文件提案时序冲突 G01，需要在现有 prompt/template owner 内纠正并扫同族；本轮未改生产模板、不以材料形成宣布减负完成。整体 Gate 与下一步见主清单 §23，真实 NO-GO 保持。
++
+ ## 11. 整链 transition 与失败组合
+ 
+ 以下是目标序列，所有本地多写点均展开为 §6 的每个前缀；包含外部行为的行再叠加 §7/§9，不能用统一模板跳过外部窗口。角色许可沿现有 operator/agent 边界；模型不得代作人决定。

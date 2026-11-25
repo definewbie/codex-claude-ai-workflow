@@ -1,0 +1,15 @@
+test_observer_byte_drift_rejects (test_fresh_assembly.FreshAssemblyTest.test_observer_byte_drift_rejects) ... FAIL
+
+======================================================================
+FAIL: test_observer_byte_drift_rejects (test_fresh_assembly.FreshAssemblyTest.test_observer_byte_drift_rejects)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmpv5bb3wic/test_fresh_assembly.py", line 91, in test_observer_byte_drift_rejects
+    with self.assertRaisesRegex(AssertionError,'Observer/Gate'):a.inspect()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: AssertionError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.854s
+
+FAILED (failures=1)

@@ -1,0 +1,38 @@
+        tools=[exa_search_tool],
+        prompt=EXA_PROMPT,
+    ),
+    dict(
+        name="patent_research",
+        tools=[patent_search],
+        prompt=PATENT_PROMPT,
+    ),
+]
+
+nodes = {s["name"]: make_react_worker_node(llm=llm, **s) for s in
+specs}
+
+search_node = nodes["search"]
+web_scraper_node = nodes["web_scraper"]
+exa_search_node = nodes["exa_search"]
+patent_research_node = nodes["patent_research"]
+
+   Define each worker with its tools and role.
+
+   Use the helper to instantiate all workers without repeating boilerplate.
+
+To complete the supervisor architecture, we need to set up a supervisor that
+can coordinate across all four research agents. This ensures that the
+workflow doesn’t stall and that each agent contributes at the right time. See
+Example 2-26 for the implementation.
+
+Example 2-26. Create research supervisor node
+research_supervisor_node = make_supervisor_node(
+    llm, ["search", "web_scraper", "exa_search", "patent_research"]
+)
+
+   Create a supervisor that coordinates across all four research agents.
+
+Finally, we need to build the actual graph by registering nodes and
+connecting the edges that define how control flows between them. This
+results in a fully functioning research team graph, as shown in Example 2-
+27.

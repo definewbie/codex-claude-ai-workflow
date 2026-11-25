@@ -24,7 +24,7 @@ public final class DeliveryFinalizeCommand implements Callable<Integer> {
     private final DeliveryApplicationService delivery;
 
     public DeliveryFinalizeCommand() {
-        this(new DeliveryApplicationService());
+        this(new DeliveryApplicationService(CliLedgerFactory.create()));
     }
 
     DeliveryFinalizeCommand(DeliveryApplicationService delivery) {

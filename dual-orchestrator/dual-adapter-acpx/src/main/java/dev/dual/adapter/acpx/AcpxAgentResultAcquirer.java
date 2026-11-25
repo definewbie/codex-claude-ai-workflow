@@ -247,7 +247,8 @@ final class AcpxAgentResultAcquirer {
         if (reason == CorrectionReason.PARSE_FAILURE) {
             return """
                     Typed correction reason: %s
-                    Syntax diagnostic:
+                    Contract parse diagnostic:
+                    - code: %s
                     %s
 
                     %s
@@ -257,6 +258,7 @@ final class AcpxAgentResultAcquirer {
                     %s
                     """.formatted(
                     reason,
+                    parsed.errorCode(),
                     renderParseDiagnostic(parsed.diagnostic()),
                     parseCorrectionInstruction(parsed.diagnostic()),
                     correctionPolicy,
@@ -293,10 +295,25 @@ final class AcpxAgentResultAcquirer {
         var location = diagnostic.line() > 0 && diagnostic.column() > 0
                 ? "\n- line: " + diagnostic.line() + "\n- column: " + diagnostic.column()
                 : "";
-        return "- kind: " + diagnostic.kind() + location;
+        var field = diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.UNKNOWN_FIELD
+                ? "\n- unknown field: " + jsonDiagnostic(diagnostic.fieldName())
+                    + "\n- allowed fields in this object: " + jsonDiagnostic(diagnostic.allowedFields())
+                : "";
+        var enumValue = diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.INVALID_ENUM_VALUE
+                ? "\n- field path: " + jsonDiagnostic(diagnostic.fieldPath())
+                    + "\n- actual value: " + jsonDiagnostic(diagnostic.actualValue())
+                    + "\n- allowed values: " + jsonDiagnostic(diagnostic.allowedValues())
+                : "";
+        return "- kind: " + diagnostic.kind() + location + field + enumValue;
     }
 
     private static String parseCorrectionInstruction(AgentResultEnvelopeParser.ParseDiagnostic diagnostic) {
+        if (diagnostic != null && diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.INVALID_ENUM_VALUE) {
+            return "Correct the identified enum field using a factual value from its allowed values. "
+                    + "The node contract below may restrict those values further and remains authoritative. "
+                    + "Do not change the semantic decision or invent evidence or approvals. "
+                    + "Re-emit the complete AgentResultEnvelope; do not copy the diagnostic into it.";
+        }
         if (diagnostic != null
                 && diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.UNEXPECTED_END_OF_INPUT) {
             return """
@@ -304,7 +321,19 @@ final class AcpxAgentResultAcquirer {
                     Re-emit the complete AgentResultEnvelope and verify that every object and array is closed before ending the response.
                     """.stripTrailing();
         }
+        if (diagnostic != null && diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.UNKNOWN_FIELD) {
+            return "Remove the identified unsupported field. Use only the listed fields in that object; "
+                    + "preserve factual content in supported fields. Re-emit the complete AgentResultEnvelope.";
+        }
         return "Re-emit the complete AgentResultEnvelope as one strictly valid JSON object.";
+    }
+
+    private static String jsonDiagnostic(Object value) {
+        try {
+            return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(value);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException impossible) {
+            throw new IllegalArgumentException("Cannot render typed parse diagnostic", impossible);
+        }
     }
 
     enum CorrectionReason {

@@ -1,0 +1,7 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 W09 离线核对与完整主流程新 Gate 做独立受影响评审，遵守 AGENTS.md。
+
+入口：output/w09-mainline-budget-audit-20261011/assessment.md、full-mainline-gate.md；证据索引与预算对照在同目录。
+
+请自行判断：配置与输入结论是否有据；预算是否区分实测和假设、具有合理ROI；主流程及合法返修能否在所列入口执行，储备/修正/实际请求计数与停止规则是否可检验。沿批准→执行→真实证据→独立验收→交付及失败恢复重建控制链，检查写入失败与兄弟路径；用六维（Declared/Proven/Consumed/Enforced before/Failure route/Cannot-bypass）说明缺口，给分级发现和未核验范围。
+
+只读，不调用客户端/provider、运行探针、修改文件或启动额外agent；不恢复旧例、不启动第四例。区分材料成立、Gate可执行与真实运行授权，不预设通过结论。无需重审无关历史。

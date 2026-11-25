@@ -1,0 +1,11 @@
+{
+  "explicit_child_environment": {
+    "DUAL_ACPX_EXECUTABLE": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+    "DUAL_ACPX_COMMAND_TIMEOUT_SECONDS": "600",
+    "DUAL_FLOW_KERNEL": "liteflow",
+    "DUAL_OPERATOR_REGISTRY": "/private/tmp/dual-w09-newlines-20261010/operator-workspaces.json"
+  },
+  "persistent_shell_environment_changed": false,
+  "registry_is_projection_only": true,
+  "real_calls_enabled": false
+}

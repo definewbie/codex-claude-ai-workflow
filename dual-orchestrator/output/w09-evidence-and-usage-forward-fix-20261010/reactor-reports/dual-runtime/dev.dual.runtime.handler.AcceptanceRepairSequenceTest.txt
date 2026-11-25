@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.runtime.handler.AcceptanceRepairSequenceTest
+-------------------------------------------------------------------------------
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 35.56 s -- in dev.dual.runtime.handler.AcceptanceRepairSequenceTest

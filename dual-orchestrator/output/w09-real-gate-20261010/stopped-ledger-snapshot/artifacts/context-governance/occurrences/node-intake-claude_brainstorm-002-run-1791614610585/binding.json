@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261010T055644Z-6QCS",
+  "node_instance_id" : "node-intake-claude_brainstorm-002",
+  "run_id" : "run-1791614610585",
+  "inventory_head" : "6081fc1888db9a6a61291a7d0822537d8a0f89ff",
+  "inventory_sha256" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/stage-scope-policy.json",
+      "sha256" : "cd70d568c5110fa62ff54e7ff67b4b39b92c5150b64f1c11f5f2522d0ed85b4e"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/file-summaries.json",
+      "sha256" : "21d26acd644655d68274dd874d55a731def2a677b5a02ceb083faa3b99ecb27d"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/repo-map.json",
+      "sha256" : "4ea875e9186761628852073916ba330bc12a60e0727be57f3ff24199196843eb"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/planned-report.json",
+      "sha256" : "c9ea7873f89550bb271f19ed7dd18b176f48c13f3900777623528e02514ef7cb"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/agent-capability-catalog.json",
+      "sha256" : "c1e4c786eda11c336d2a3e90f3fb371a3488348d672d677d1cd615a63a4dafa7"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/read-reuse-contract.json",
+      "sha256" : "96169fff6e9de60f38ae7441273658051c1136a3767d3b390fcc7d9f465916db"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/working-set.json",
+      "sha256" : "cd6c26e829730c28a9862eecc36741ec239c1b3ff51a89ca70f58f868efeedbc"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261010T055644Z-6QCS/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791614610585/file-relevance-plan.json",
+      "sha256" : "2683a3287a435a8ed7e6bd7c8fd0a6d7bbc2e399db7c828c7b7dc14fc10f5254"
+    }
+  }
+}

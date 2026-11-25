@@ -1,0 +1,39 @@
+          COMMAND IN LANGGRAPH
+
+    Command in LangGraph combines control flow (edges) and state updates (nodes). It
+       facilitates multiactor (or multi-agent) communication. For example, a node can update
+        its state and decide the next node to visit. LangGraph enables this by returning a
+    Command object from node functions.
+
+
+Use approve or reject when you want to gate a side-effecting step like an
+HTTP call.
+
+Example 2-14 asks the LLM to produce a request plan and stores it in
+proposed_​req⁠ue⁠st.
+
+Example 2-14. Propose request with LLM
+def b_propose(state: BState) -> BState:
+    prompt = "Return only JSON with keys url and params for GET to
+              https://httpbin.org/get using q and limit."
+    text = LLM.invoke(prompt).content
+    m = re.search(r"\{.*\}", text, re.S)
+    data = {"url": "https://httpbin.org/get", "params":
+           {"q": "fallback", "limit": 1}}
+    if m:
+        try:
+            data = json.loads(m.group(0))
+        except Exception:
+            pass
+    return {"proposed_request": data}
+
+   Ask the LLM to generate a structured plan.
+
+   Fallback default request if parsing fails.
+
+   Try to parse JSON out of the model’s output.
+
+    Store result in state under proposed_request.
+
+Example 2-15 calls interrupt(...) to pause and request human
+approval or a revision.

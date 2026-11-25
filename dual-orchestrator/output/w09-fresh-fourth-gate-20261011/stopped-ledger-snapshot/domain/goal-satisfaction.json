@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261011T044656Z-BMDJ",
+  "workflowInstanceId" : "wf-ws-20261011T044656Z-BMDJ",
+  "nodeInstanceId" : "node-design-decision-016",
+  "nodeDefinitionId" : "design.decision",
+  "iterationId" : "iter-002",
+  "outcome" : "NEEDS_REVISION",
+  "domainOutcome" : "NEEDS_REDESIGN",
+  "reason" : "三文件设计与算法符合目标，但实际返回值的展示仍是可选步骤，未完整落实 AC-2 的强制证据要求。",
+  "evidenceRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700195359/outputs/design-codex-review.stderr.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700195359/outputs/design-codex-review.transcript.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700195359/outputs/design-codex-review.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-015-run-1791700195359/binding.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700195359/outputs/design-codex-review.contract.json" ],
+  "sourceResult" : {
+    "decision" : "NEEDS_REVISION",
+    "source" : "contract-sidecar",
+    "summary" : "三文件设计与算法符合目标，但实际返回值的展示仍是可选步骤，未完整落实 AC-2 的强制证据要求。"
+  },
+  "generatedAt" : "2026-10-11T06:30:53.138489Z"
+}

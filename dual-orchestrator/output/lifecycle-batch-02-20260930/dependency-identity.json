@@ -1,0 +1,6 @@
+{
+  "liteflow_version": "2.16.0",
+  "jar": "/Users/kriswang/.m2/repository/com/yomahub/liteflow-core/2.16.0/liteflow-core-2.16.0.jar",
+  "sha256": "3270cbc648a1c302d99801c9da1d838ea54447e06c4250fe044a3ddc912a45e5",
+  "topology_evidence": "test system-out in final XML; not production deployment attestation"
+}

@@ -1,0 +1,29 @@
+{
+  "status": "EXACT_BINDING_REFS_AND_REQUIREMENTS_MATCH",
+  "plan_ref": ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.plan.json",
+  "plan_sha256": "11929b48abf4680186d98d228eb9f0a6468a27c03b9c364ec9736cad49a68890",
+  "bindings": [
+    {
+      "criterion": "AC-1",
+      "environment_matches": true,
+      "feasibility_matches": true
+    },
+    {
+      "criterion": "AC-2",
+      "environment_matches": true,
+      "feasibility_matches": true
+    },
+    {
+      "criterion": "AC-3",
+      "environment_matches": true,
+      "feasibility_matches": true
+    }
+  ],
+  "all_changed_top_level_fields": [
+    "human_review_checklist",
+    "verification_bindings"
+  ],
+  "files_unchanged": true,
+  "requirements_and_methods_unchanged": true,
+  "not_independent_review": true
+}

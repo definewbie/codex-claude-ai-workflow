@@ -1,0 +1,6 @@
+{
+  "started_at_epoch": 1790765417.7120929,
+  "command": "rtk proxy mvn -o test",
+  "execution_sandbox": "outside to allow test-owned subprocess enumeration",
+  "live_provider_runs": 0
+}

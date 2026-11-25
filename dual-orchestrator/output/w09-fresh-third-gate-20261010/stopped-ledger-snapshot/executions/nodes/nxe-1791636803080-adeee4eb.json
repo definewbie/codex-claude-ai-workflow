@@ -1,0 +1,82 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1791636803080-adeee4eb",
+  "agentTaskId" : "agt-1791636803076-b34e0ad4",
+  "workflowExecutionId" : "wfe-1791636803005-525dc499",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-006",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "pid" : 49404,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/intake-claude-brainstorm.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/intake-claude-brainstorm.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/intake-claude-brainstorm.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791636803114/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/intake-claude-brainstorm.contract.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/task-contract-proposals/node-intake-claude_brainstorm-006-320e15b65a9c523b.ref.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-10T12:53:21.795Z",
+      "input_identity" : "eb5315ce502202a83c3311e697151af1ba0e7d535320d5ebff7b95188d0b5b07",
+      "executor_pid" : 49404
+    },
+    "prepared_run" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/nxe-1791636803080-adeee4eb-prepared.json",
+      "sha256" : "28d2392529d25ae4bb8191bd45fe2adc426e7443ec859c6ab771205a42ff2a6b"
+    },
+    "adapter_signals" : [ ],
+    "agent" : "claude",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "task_contract_revision_patch",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "READY_FOR_PRODUCT_REVIEW",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/intake-claude-brainstorm.contract.json",
+    "contract_sidecar_sha256" : "320e15b65a9c523bd0b2f33ba01b5b296e3f4c23b04e82f74d128b161867fefe",
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791636803114/binding.json",
+    "repository_fact_binding_sha256" : "d3a219c17371d7658f71b5998c786b75bd6231e27e189598bbf0180a2d11b44d",
+    "run_id" : "run-1791636803114",
+    "run_metadata" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/run.json",
+    "session" : "claude-main-ws-20261010T124812Z-XCZL-run-1791636803114",
+    "summary" : "已按 CO-1 修订 C-4 并新增 AC-5，将三个建议文件明确为候选范围，绑定实现前单独批准精确路径与 CREATE/MODIFY、仅以获批 EXECUTION scope.included 为穷尽授权。",
+    "task_contract_proposal_id" : "node-intake-claude_brainstorm-006:320e15b65a9c523b",
+    "task_contract_proposal_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/task-contract-proposals/node-intake-claude_brainstorm-006-320e15b65a9c523b.ref.json",
+    "transcript_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/intake-claude-brainstorm.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/nxe-1791636803080-adeee4eb-completion.json",
+    "completion_sha256" : "fecc20302aed764b46b897bcb0e21457f3bd8fee1c08baca983cf706bd505a95",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "run-1791636803114",
+  "agentRunRef" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/run.json",
+  "agent" : "claude",
+  "session" : "claude-main-ws-20261010T124812Z-XCZL-run-1791636803114",
+  "exitCode" : 0,
+  "startedAt" : "2026-10-10T12:53:23.080687Z",
+  "finishedAt" : "2026-10-10T12:56:21.770312Z",
+  "durationMs" : 178689
+}

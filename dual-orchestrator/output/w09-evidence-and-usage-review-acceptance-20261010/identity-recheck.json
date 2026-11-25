@@ -1,0 +1,60 @@
+{
+  "source_count": 654,
+  "source_diff": [],
+  "reviewed_material_count": 1526,
+  "material_diff": [],
+  "jars": [
+    {
+      "application": "dual-cli",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+      "expected": "4c31221df0d58ab6d7d1de4b338fdb5cb4077ff7fb4378711d7b9ed7aa190bde",
+      "actual": "4c31221df0d58ab6d7d1de4b338fdb5cb4077ff7fb4378711d7b9ed7aa190bde"
+    },
+    {
+      "application": "dual-server",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/target/dual-server-0.1.0-SNAPSHOT.jar",
+      "expected": "6113d9244dbdf425f82d84cc49d48c891b0f12a8ba7e6678f67be3a5c148d48d",
+      "actual": "6113d9244dbdf425f82d84cc49d48c891b0f12a8ba7e6678f67be3a5c148d48d"
+    }
+  ],
+  "native_config": [
+    {
+      "kind": "wrapper",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "expected": "0aa69b6f1ff164f7282d6a58c83ffb902db5d417609ebb1d5827857f5db1abd9",
+      "actual": "0aa69b6f1ff164f7282d6a58c83ffb902db5d417609ebb1d5827857f5db1abd9"
+    },
+    {
+      "kind": "dist",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist/cli.js",
+      "expected": "e6c7915a4b46eec6fe338c7f71efdb28658d64d3f43d38907e4919e84bc17854",
+      "actual": "e6c7915a4b46eec6fe338c7f71efdb28658d64d3f43d38907e4919e84bc17854"
+    },
+    {
+      "kind": "global",
+      "path": "/Users/kriswang/.acpx/config.json",
+      "expected": "6213952d843458bda48342d9d132587177dc6279f1f5f63799bde1e81185f6d6",
+      "actual": "6213952d843458bda48342d9d132587177dc6279f1f5f63799bde1e81185f6d6",
+      "expected_exists": true,
+      "actual_exists": true
+    },
+    {
+      "kind": "project",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.acpxrc.json",
+      "expected": null,
+      "actual": null,
+      "expected_exists": false,
+      "actual_exists": false
+    },
+    {
+      "kind": "gate_env",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w08-preparation-20261010/gate-launch-env.sh",
+      "expected": "3382f9cab668cd10c15c59f4f7777d84f46ca21a139e8e4f047ef631c0a330da",
+      "actual": "3382f9cab668cd10c15c59f4f7777d84f46ca21a139e8e4f047ef631c0a330da"
+    }
+  ],
+  "fresh_third_target_exists": false,
+  "native_provider_calls": 0,
+  "tests_rerun": 0,
+  "head": "3362eb421514e75fdc4332f570df5bf274b3725e"
+}

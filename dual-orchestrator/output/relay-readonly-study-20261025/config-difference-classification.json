@@ -1,0 +1,7 @@
+{
+  "helper_source": "dual-orchestrator/output/w09-eighth-continuation-gate-20261024/gate_support.py",
+  "helper_scope": "isolated existing pure function; no Gate entry point imported or executed",
+  "raw_bytes_equal": false,
+  "approved_fixture_registration_exception_matches": false,
+  "config_content_not_exported": true
+}

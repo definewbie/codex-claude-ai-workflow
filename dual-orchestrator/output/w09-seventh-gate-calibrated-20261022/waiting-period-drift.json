@@ -1,0 +1,33 @@
+{
+  "config_installed_changes": [
+    {
+      "path": "/Users/kriswang/.codex/config.toml",
+      "before_sha256": "dc96cc338225c169b6331e8da9949dd7810d73388fbfdbbcb9d3a3d8dd30e788",
+      "current_sha256": "61caf49514401ce6ffb089620de56ecdc9f1a22db4d6a0900cc276f234752452",
+      "meaning": "Fingerprint changed; compatibility not proven or disproven by checksum"
+    },
+    {
+      "path": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "before_sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+      "current_sha256": "9394a943e3fce54f998ecc150eb0b7d6e22ce0da48e5063c59b4883e80aeaecd",
+      "meaning": "Fingerprint changed; compatibility not proven or disproven by checksum"
+    }
+  ],
+  "audited_oct11_cost_settings": {
+    "model": "gpt-6-astra",
+    "model_reasoning_effort": "high",
+    "model_context_window": 272000,
+    "model_auto_compact_token_limit": 240000
+  },
+  "current_same_settings": {
+    "model": "gpt-6-astra",
+    "model_reasoning_effort": "high",
+    "model_context_window": 272000,
+    "model_auto_compact_token_limit": 240000
+  },
+  "selected_settings_match": true,
+  "whole_config_semantic_equivalence": "NOT_PROVEN; old whole-file bytes unavailable",
+  "original_offline_fixture_initial_files_missing": true,
+  "offline_fixture_replacement": "new original-owner start without --run; original case identity not restored",
+  "native_probe_calls": 0
+}

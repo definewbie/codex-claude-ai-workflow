@@ -1,9 +1,7 @@
 package dev.dual.cli;
 
 import dev.dual.core.id.DualId;
-import dev.dual.ledger.file.LockOwner;
 import dev.dual.ledger.file.WorkflowFileLedger;
-import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -29,10 +27,8 @@ public class ReviewCompleteCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "review complete"))) {
-            var ledger = CliLedgerFactory.create();
-            ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), "complete", note);
-        }
+        var ledger = CliLedgerFactory.create();
+        dev.dual.runtime.handler.ReviewGateActions.resolve(ledger, paths, "complete", note);
         System.out.println("Human gate completed");
         System.out.println("Workstream: " + workstreamId);
         System.out.println("Status: workflow completed");

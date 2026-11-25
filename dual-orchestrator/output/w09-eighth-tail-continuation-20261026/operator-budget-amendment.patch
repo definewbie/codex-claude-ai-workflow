@@ -1,0 +1,109 @@
+--- /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/continuation.py
++++ /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/continuation.py
+@@ -90,11 +90,11 @@
+     assert spec['case'] == 'EIGHTH_CONTINUATION_LAUNCH_RECONCILED' and spec['preserve_original_stop'] is True
+     budget = gate.read(gate.OUT / 'budget.json')
+     assert (spec['token_limit'], spec['call_limit'], spec['active_seconds_limit']) == (
+-        budget['total_stop'], budget['top_level_calls'], budget['active_seconds']) == (1700000, 18, 3600)
++        budget['total_stop'], budget['top_level_calls'], budget['active_seconds']) == (3000000, 18, 3600)
+     original = Path(spec['original_package'])
+     assert gate.sha(original / 'stop-required.json') == spec['original_stop_sha256'], 'Original stop changed'
+-    assert len(spec['prior_stops']) == 2, 'Both historical stops are required'
+-    assert len({r['ref'] for r in spec['prior_stops']}) == 2, 'Duplicate historical stop'
++    assert len(spec['prior_stops']) == 3, 'Both historical stops are required'
++    assert len({r['ref'] for r in spec['prior_stops']}) == 3, 'Duplicate historical stop'
+     for row in spec['prior_stops']:
+         assert gate.sha(row['ref']) == row['sha256'], 'Historical stop changed'
+     assert not (gate.OUT / 'stop-required.json').exists(), 'Continuation Gate stopped; no automatic replay'
+--- /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/run-one-step.py
++++ /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/run-one-step.py
+@@ -97,7 +97,7 @@
+ try:
+     measured = measure(workspace, ledger)
+     write(OUT / 'current-observation-proof.json', measured)
+-    assert measured['actual_tokens'] < 1700000 and measured['completed_calls'] <= 18, 'Observed budget stop'
++    assert measured['actual_tokens'] < 3000000 and measured['completed_calls'] <= 18, 'Observed budget stop'
+ except Exception as e:
+     write(OUT / 'stop-required.json', {'reason': str(e), 'next_dispatch': 'FORBIDDEN_PENDING_ASSESSMENT'})
+     raise
+--- /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/check_budget.py
++++ /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/check_budget.py
+@@ -61,18 +61,18 @@
+         ("actual third post-design budget alone permits remaining stages", state(235366, 5, 557.255, nodes[3:]), "ALLOW_BUDGET_ONLY"),
+         ("nine runs need not imply eighteen consumed prompts", state(450000, 9, 800, nodes[6:]), "ALLOW_BUDGET_ONLY"),
+         ("mainline plus readiness and one semantic loop", state(0, 0, 0, nodes, nodes[4:6] + nodes[:2]), "ALLOW_BUDGET_ONLY"),
+-        ("whole unfinished tail protected, not just next small call", state(1250000, 8, 900, nodes[6:]), "STOP"),
+-        ("format correction cannot be hidden in one run", state(1550000, 10, 900, nodes[-1:]), "STOP"),
++        ("whole unfinished tail protected, not just next small call", state(P['total_stop'] - 450000, 8, 900, nodes[6:]), "STOP"),
++        ("format correction cannot be hidden in one run", state(P['total_stop'] - 150000, 10, 900, nodes[-1:]), "STOP"),
+         ("actual top-level call pool exhausted", state(700000, 17, 700, nodes[-1:]), "STOP"),
+         ("unknown usage is never zero", state(None, 5, 500, nodes[3:], complete=False), "STOP"),
+         ("native pending result blocks admission", state(200000, 5, 500, nodes[3:], pending=True), "STOP"),
+         ("active time cannot reserve next two-call block", state(200000, 5, 2500, nodes[3:]), "STOP"),
+         ("unknown path is not silently cheap", state(200000, 5, 500, ["new.unknown.stage"]), "STOP"),
+-        ("observed total at stop is still a stop", state(1700000, 5, 500, nodes[3:]), "STOP"),
++        ("observed total at stop is still a stop", state(P['total_stop'], 5, 500, nodes[3:]), "STOP"),
+         ("calibrated readiness plus design loop", state(0, 0, 0, nodes, nodes[4:6] + nodes[2:4]), "ALLOW_BUDGET_ONLY"),
+         ("calibrated readiness plus both semantic loops", state(0, 0, 0, nodes, nodes[4:6] + nodes[:4]), "ALLOW_BUDGET_ONLY"),
+-        ("exact token reserve boundary allows", state(1450000, 10, 900, nodes[-1:]), "ALLOW_BUDGET_ONLY"),
+-        ("one token below necessary tail reserve stops", state(1450001, 10, 900, nodes[-1:]), "STOP"),
++        ("exact token reserve boundary allows", state(P['total_stop'] - 250000, 10, 900, nodes[-1:]), "ALLOW_BUDGET_ONLY"),
++        ("one token below necessary tail reserve stops", state(P['total_stop'] - 249999, 10, 900, nodes[-1:]), "STOP"),
+         ("exact call reserve boundary allows", state(1000000, 16, 900, nodes[-1:]), "ALLOW_BUDGET_ONLY"),
+         ("exact active time reserve boundary allows", state(1000000, 10, 2100, nodes[-1:]), "ALLOW_BUDGET_ONLY"),
+         ("one second below time reserve stops", state(1000000, 10, 2101, nodes[-1:]), "STOP"),
+@@ -86,7 +86,7 @@
+     assert sum(RESERVES.values()) == P["illustrative_path"]["nominal_mainline_tokens"]
+     assert sum(RESERVES.values()) == 955000
+     assert 955000 + 175000 + 240000 + 150000 == 1520000
+-    assert P["total_stop"] - 1520000 == 180000
++    assert P["total_stop"] - 1520000 == P['illustrative_path']['unallocated_margin']
+     assert 955000 + 175000 + 90000 + 240000 + 150000 == 1610000
+     for scenario in P['calibrated_scenarios'].values():
+         assert scenario['tokens'] <= P['total_stop'] and scenario['requests'] <= P['top_level_calls']
+--- /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/pre-dispatch-recheck.py
++++ /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/pre-dispatch-recheck.py
+@@ -13,8 +13,14 @@
+ if not list((gate.OUT / 'steps').glob('*')):
+     assert len(current['activeNodeInstanceIds']) == 1 and not current['openGateIds']
+     node = gate.read(ledger / 'nodes' / (current['activeNodeInstanceIds'][0] + '.json'))
+-    assert node['nodeDefinitionId'] == 'plan.decision' and node['status'] == 'READY'
+-state = gate.planning('implement.claude_implement', measured, active + time.monotonic() - start)
++    assert node['status'] == 'READY'
++node = gate.read(ledger / 'nodes' / (current['activeNodeInstanceIds'][0] + '.json'))
++stages = [s['node'] for s in gate.read(gate.OUT / 'budget.json')['stages']]
++seen = {r['node_id'] for r in measured['completed_runs']}
++remaining = [s for s in stages if s not in seen]
++assert remaining, 'No unfinished model work for this readonly admission'
++expected = node['nodeDefinitionId'] if node['nodeDefinitionId'] in stages else remaining[0]
++state = gate.planning(expected, measured, active + time.monotonic() - start)
+ admission = check(state)
+ assert admission['result'] == 'ALLOW_BUDGET_ONLY', admission
+ receipt = gate.OUT / 'preflight-receipts' / str(time.time_ns())
+--- /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/test_continuation.py
++++ /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/test_continuation.py
+@@ -62,12 +62,13 @@
+         self.write(self.ledger/'runs/historical/run.json', {'fixed':'old immutable execution'})
+         self.write(self.out/'checkpoint-ledger-sha256.json', {str(f.relative_to(self.ledger)):g.sha(f) for f in self.ledger.rglob('*') if f.is_file()})
+         previous_stop=self.original/'previous-stop.json';self.write(previous_stop,{'reason':'PATH_DRIFT'})
++        third_stop=self.original/'budget-stop.json';self.write(third_stop,{'reason':'Observed budget stop'})
+         self.write(self.out/'prior-continuation-package-sha256.json',{str(previous_stop):g.sha(previous_stop)})
+         spec={'case':'EIGHTH_CONTINUATION_LAUNCH_RECONCILED','original_package':str(self.original),'workstream':'ws',
+               'checkpoint_sha256':g.sha(self.out/'checkpoint-ledger-sha256.json'),
+               'original_stop_sha256':g.sha(self.original/'stop-required.json'),'preserve_original_stop':True,
+-              'token_limit':1700000,'call_limit':18,'active_seconds_limit':3600,
+-              'prior_stops':[{'ref':str(f),'sha256':g.sha(f)} for f in [self.original/'stop-required.json',previous_stop]]}
++              'token_limit':3000000,'call_limit':18,'active_seconds_limit':3600,
++              'prior_stops':[{'ref':str(f),'sha256':g.sha(f)} for f in [self.original/'stop-required.json',previous_stop,third_stop]]}
+         self.write(self.out/'continuation-spec.json', spec)
+         self.auth={k:spec[k] for k in ['case','workstream','checkpoint_sha256','token_limit','call_limit','active_seconds_limit']}
+         self.auth.update(continuation_run_authorized=False,approval_ref=None,business_gates_delegated=False)
+@@ -228,7 +229,7 @@
+             self.measured[k]=before
+ 
+     def test_budget_and_time_tail_remain_protected(self):
+-        for tokens,calls,seconds,expected in [(848242,10,1263.444,'ALLOW_BUDGET_ONLY'),(1250000,10,1263.444,'STOP'),(848242,17,1263.444,'STOP'),(848242,10,2101,'STOP')]:
++        for tokens,calls,seconds,expected in [(848242,10,1263.444,'ALLOW_BUDGET_ONLY'),(2600000,10,1263.444,'STOP'),(848242,17,1263.444,'STOP'),(848242,10,2101,'STOP')]:
+             state=g.planning('implement.claude_implement',self.measured,seconds)
+             state.update(actual_tokens=tokens,completed_calls=calls)
+             self.assertEqual(expected,check(state)['result'])

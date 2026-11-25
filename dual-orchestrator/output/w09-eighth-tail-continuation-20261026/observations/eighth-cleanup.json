@@ -1,0 +1,31 @@
+{
+  "exit": 0,
+  "stderr": "",
+  "successful_complete_table": true,
+  "known_step_parent_pids": [
+    71094,
+    71137,
+    71381,
+    71438,
+    74104,
+    75364,
+    75432,
+    76070,
+    76120,
+    76321,
+    76365,
+    77037,
+    77077,
+    77255,
+    77300,
+    78169,
+    78227,
+    78406,
+    82058,
+    82930,
+    83023,
+    83976
+  ],
+  "matching_rows": [],
+  "scope": "Only these listed PIDs in this snapshot, not arbitrary child trees or remote state"
+}

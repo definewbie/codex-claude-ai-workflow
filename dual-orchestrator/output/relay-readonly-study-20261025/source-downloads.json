@@ -1,0 +1,68 @@
+[
+  {
+    "path": "packages/connect/README.md",
+    "url": "https://raw.githubusercontent.com/AgentWorkforce/relay/c3a92d9c179972963756ebce3fcd106679302934/packages/connect/README.md",
+    "commit": "c3a92d9c179972963756ebce3fcd106679302934",
+    "sha256": "703388611685ff9cebdbbda66c5de5b895f161b8b87ba7204aabef3fbf86fa38"
+  },
+  {
+    "path": "packages/connect/src/index.js",
+    "url": "https://raw.githubusercontent.com/AgentWorkforce/relay/c3a92d9c179972963756ebce3fcd106679302934/packages/connect/src/index.js",
+    "commit": "c3a92d9c179972963756ebce3fcd106679302934",
+    "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+  },
+  {
+    "path": "packages/connect/src/cli.js",
+    "url": "https://raw.githubusercontent.com/AgentWorkforce/relay/c3a92d9c179972963756ebce3fcd106679302934/packages/connect/src/cli.js",
+    "commit": "c3a92d9c179972963756ebce3fcd106679302934",
+    "sha256": "b9b92f1c17959f0a1baeb280231d1a1e24a3ad4a39969ad2f5052477990405b1"
+  },
+  {
+    "path": "packages/connect/src/install.js",
+    "url": "https://raw.githubusercontent.com/AgentWorkforce/relay/c3a92d9c179972963756ebce3fcd106679302934/packages/connect/src/install.js",
+    "commit": "c3a92d9c179972963756ebce3fcd106679302934",
+    "sha256": "1d0b502aa0f4b489056def4dac8f45b2fe82d340c4f275ed5e8aca80d5f681d7"
+  },
+  {
+    "path": "packages/connect/tests/connect.test.ts",
+    "url": "https://raw.githubusercontent.com/AgentWorkforce/relay/c3a92d9c179972963756ebce3fcd106679302934/packages/connect/tests/connect.test.ts",
+    "commit": "c3a92d9c179972963756ebce3fcd106679302934",
+    "sha256": "4a969d0af96ec46e186dc077ad42603df7745335aba4a34b6b147e1749c80bf0"
+  },
+  {
+    "path": "packages/session/src/client.ts",
+    "url": "https://raw.githubusercontent.com/AgentWorkforce/relay/c3a92d9c179972963756ebce3fcd106679302934/packages/session/src/client.ts",
+    "commit": "c3a92d9c179972963756ebce3fcd106679302934",
+    "sha256": "05e376de46db081fbb9fa8042a7f4d539b81ed7bbfc3cd643232db9b3670e85a"
+  },
+  {
+    "path": "packages/session/src/types.ts",
+    "url": "https://raw.githubusercontent.com/AgentWorkforce/relay/c3a92d9c179972963756ebce3fcd106679302934/packages/session/src/types.ts",
+    "commit": "c3a92d9c179972963756ebce3fcd106679302934",
+    "sha256": "399e07737fff9fc1311c33133e64d1be63483878b8feac5dffb6ad0a29dfb0f2"
+  },
+  {
+    "path": "packages/sdk/src/delivery/runner.ts",
+    "url": "https://raw.githubusercontent.com/AgentWorkforce/relay/c3a92d9c179972963756ebce3fcd106679302934/packages/sdk/src/delivery/runner.ts",
+    "commit": "c3a92d9c179972963756ebce3fcd106679302934",
+    "sha256": "25e2c785de7bb336ae73c046933d189d27a02f8b6dd4cfea6ab034f96bf60d3b"
+  },
+  {
+    "path": "packages/sdk/src/delivery/types.ts",
+    "url": "https://raw.githubusercontent.com/AgentWorkforce/relay/c3a92d9c179972963756ebce3fcd106679302934/packages/sdk/src/delivery/types.ts",
+    "commit": "c3a92d9c179972963756ebce3fcd106679302934",
+    "sha256": "fb8db7cb2eda03ada6e9f0226bb6818d77064b05a5882055a4106d64feb9bdac"
+  },
+  {
+    "path": "packages/sdk/src/__tests__/delivery-actions.test.ts",
+    "url": "https://raw.githubusercontent.com/AgentWorkforce/relay/c3a92d9c179972963756ebce3fcd106679302934/packages/sdk/src/__tests__/delivery-actions.test.ts",
+    "commit": "c3a92d9c179972963756ebce3fcd106679302934",
+    "sha256": "84e3438a525d25ff08e8311134b4063c3dab9c04e84b54fa0522d43627644795"
+  },
+  {
+    "path": "packages/sdk/src/session/types.ts",
+    "url": "https://raw.githubusercontent.com/AgentWorkforce/relay/c3a92d9c179972963756ebce3fcd106679302934/packages/sdk/src/session/types.ts",
+    "commit": "c3a92d9c179972963756ebce3fcd106679302934",
+    "sha256": "6b0b38220b375ae1fc7a98824a625f2951559db2641b9fd8a2048a21ca2a8b6f"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/usr/local/bin/docker",
+    "version",
+    "--format",
+    "{{json .}}"
+  ],
+  "exit_code": 1,
+  "stdout": "{\"Client\":{\"Version\":\"29.4.1\",\"ApiVersion\":\"1.54\",\"DefaultAPIVersion\":\"1.54\",\"GitCommit\":\"055a478\",\"GoVersion\":\"go1.26.2\",\"Os\":\"darwin\",\"Arch\":\"arm64\",\"BuildTime\":\"Mon Apr 20 16:31:59 2026\",\"Context\":\"desktop-linux\"},\"Server\":null}\n",
+  "stderr": "permission denied while trying to connect to the docker API at unix:///Users/kriswang/.docker/run/docker.sock\n",
+  "elapsed_seconds": 0.8005271251313388
+}

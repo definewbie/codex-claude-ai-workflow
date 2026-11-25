@@ -54,7 +54,8 @@ public record AgentOutputContractDocument(
         PlanArtifactDocument planArtifact,
         AgentResultEnvelope.Design design,
         List<AgentResultEnvelope.AuthoredRevisionResponse> authoredRevisionResponses,
-        AuthoredExecutionContext.Reference authoredContext
+        AuthoredExecutionContext.Reference authoredContext,
+        List<AgentResultEnvelope.VerificationCheck> verificationChecks
 ) {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
@@ -103,7 +104,8 @@ public record AgentOutputContractDocument(
                 planArtifact(objectMap(document.get("plan_artifact"))),
                 design(objectMap(document.get("design"))),
                 authoredResponses(document.get("revision_responses")),
-                authoredReference(document.get("authored_context"))
+                authoredReference(document.get("authored_context")),
+                verificationChecks(document.get("verification_checks"))
         );
     }
 
@@ -112,6 +114,7 @@ public record AgentOutputContractDocument(
             String baseProposalId,
             String baseProposalSha256,
             TaskContractProposalReference baseProposalReference,
+            // Historical field name: authored revision raw output, including goal_reproposal.
             String patchSourceOutputRef
     ) {
         static ProposalDerivation from(Map<String, Object> document) {
@@ -128,7 +131,7 @@ public record AgentOutputContractDocument(
         }
 
         boolean validFor(TaskContractProposalReference reference, String sourceOutputRef) {
-            return "revision_patch_merge".equals(kind)
+            return ("revision_patch_merge".equals(kind) || "goal_reproposal".equals(kind))
                     && reference != null
                     && reference.proposalId().equals(baseProposalId)
                     && reference.sha256().equals(baseProposalSha256)
@@ -197,7 +200,7 @@ public record AgentOutputContractDocument(
         }
         return planArtifact != null
                 && "plan_artifact".equals(planArtifact.artifactType())
-                && planArtifact.schemaVersion() == 1
+                && planArtifact.schemaVersion() == 2
                 && planArtifact.missingRequiredField().isEmpty();
     }
 
@@ -208,6 +211,11 @@ public record AgentOutputContractDocument(
     private static AuthoredExecutionContext.Reference authoredReference(Object value) {
         if (value == null) return null;
         return AuthoredExecutionContext.JSON.convertValue(value, AuthoredExecutionContext.Reference.class);
+    }
+
+    private static List<AgentResultEnvelope.VerificationCheck> verificationChecks(Object value) {
+        if (value == null) return List.of();
+        return AuthoredExecutionContext.JSON.convertValue(value, new TypeReference<List<AgentResultEnvelope.VerificationCheck>>() {});
     }
 
     private static List<AgentResultEnvelope.AuthoredRevisionResponse> authoredResponses(Object value) {

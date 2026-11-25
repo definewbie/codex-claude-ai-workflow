@@ -1,0 +1,86 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261011T044656Z-BMDJ",
+  "gateNodeInstanceId" : "node-gate-human_requirement_review-011",
+  "gateNodeDefinitionId" : "gate.human_requirement_review",
+  "stageId" : "stage-gate",
+  "iterationId" : "iter-002",
+  "sourceOutcome" : "READY_FOR_PRODUCT_REVIEW",
+  "runtimeDisposition" : { },
+  "actionRequests" : [ ],
+  "allowedActions" : [ "approve", "revise" ],
+  "inputRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791694645369/binding.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.contract.json" ],
+  "inputArtifacts" : [ {
+    "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.stderr.log",
+    "status" : "available",
+    "kind" : "stderr_log"
+  }, {
+    "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.transcript.log",
+    "status" : "available",
+    "kind" : "file"
+  }, {
+    "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.json",
+    "status" : "available",
+    "kind" : "json",
+    "sidecar" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.contract.json",
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "summary" : "修订提案已解决前轮两项契约问题，完整保留用户要求，可进入后续设计与计划。",
+    "mustFix" : [ ],
+    "openRisks" : [ ]
+  }, {
+    "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791694645369/binding.json",
+    "status" : "available",
+    "kind" : "json"
+  }, {
+    "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.contract.json",
+    "status" : "available",
+    "kind" : "contract_sidecar",
+    "sidecar" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.contract.json",
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "summary" : "修订提案已解决前轮两项契约问题，完整保留用户要求，可进入后续设计与计划。",
+    "mustFix" : [ ],
+    "openRisks" : [ ]
+  } ],
+  "reviewPacketPath" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/reviews/node-gate-human_requirement_review-011.md",
+  "taskContract" : { },
+  "requirementResolution" : { },
+  "latestAgentDecision" : {
+    "nodeId" : "intake.codex_product_review",
+    "stageOutcome" : "READY",
+    "lifecycleStatus" : "READY",
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "summary" : "修订提案已解决前轮两项契约问题，完整保留用户要求，可进入后续设计与计划。",
+    "blocking" : false,
+    "mustFix" : [ ],
+    "missingEvidence" : [ ],
+    "openRisks" : [ ],
+    "changedFiles" : [ ],
+    "verificationSummary" : "依据所提供的完整修订提案完成需求覆盖、证据要求及授权边界复核；未执行测试或修改文件。",
+    "evidenceState" : {
+      "blocking" : false,
+      "evidence_count" : 5,
+      "missing_evidence_count" : 0,
+      "must_fix_count" : 0,
+      "acceptance_note_count" : 3,
+      "open_risk_count" : 0
+    },
+    "sidecarPath" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.contract.json"
+  },
+  "reviewSubject" : {
+    "artifact_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694532578/outputs/intake-claude-brainstorm.contract.json",
+    "schema_version" : 1,
+    "workstream_id" : "ws-20261011T044656Z-BMDJ",
+    "proposal_id" : "node-intake-claude_brainstorm-006:4945d1a44ce37787",
+    "sha256" : "4945d1a44ce37787501c93d662282c8d46ff5ddc6dab15179b673b891559fd8d",
+    "producer_node_instance_id" : "node-intake-claude_brainstorm-006",
+    "producer_node_id" : "intake.claude_brainstorm"
+  },
+  "gitEvidence" : { },
+  "delivery" : { },
+  "operatorGuidance" : {
+    "recommendedAction" : "approve",
+    "reason" : "The latest agent decision is positive. Approve only after checking the packet evidence.",
+    "suggestedChecks" : [ "Confirm the TaskContract objective, scope, non-goals, and acceptance criteria still match the task." ]
+  },
+  "createdAt" : "2026-10-11T04:58:21.817366Z"
+}

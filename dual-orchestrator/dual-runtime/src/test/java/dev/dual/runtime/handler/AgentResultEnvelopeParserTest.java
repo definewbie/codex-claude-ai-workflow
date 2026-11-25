@@ -21,6 +21,69 @@ class AgentResultEnvelopeParserTest {
     );
 
     @Test
+    void invalidEnumCarriesTypedValuePathAndDefinitionAllowlistWithoutAcceptingIt() {
+        var parsed = parser.parse(acceptanceRejectEnvelope("REVISE_PROPOSAL"));
+        assertFalse(parsed.valid());
+        assertEquals("AGENT_RESULT_PARSE_FAILED", parsed.errorCode());
+        assertEquals(AgentResultEnvelopeParser.ParseFailureKind.INVALID_ENUM_VALUE, parsed.diagnostic().kind());
+        assertEquals("/result/failure/verification_remediation", parsed.diagnostic().fieldPath());
+        assertEquals("REVISE_PROPOSAL", parsed.diagnostic().actualValue());
+        assertEquals(java.util.List.of("NONE", "EVIDENCE_COLLECTION", "TEST_CODE_CHANGE"),
+                parsed.diagnostic().allowedValues());
+        assertTrue(parsed.diagnostic().line() > 0);
+        assertTrue(parsed.diagnostic().column() > 0);
+        for (var value : parsed.diagnostic().allowedValues()) {
+            assertTrue(parser.parse(acceptanceRejectEnvelope(value)).valid());
+        }
+    }
+
+    @Test
+    void siblingEnumsKeepNestedArrayPathsAndTheirOwnAllowlists() {
+        var cases = java.util.List.of(
+                new EnumCase("design_result", "\"design\":{\"planned_files\":[{\"operation\":\"INVALID\"}]}",
+                        "/result/design/planned_files/0/operation", java.util.List.of("MODIFY", "CREATE")),
+                new EnumCase("design_result", "\"revision_responses\":[{\"disposition\":\"INVALID\"}]",
+                        "/result/revision_responses/0/disposition", java.util.List.of("ADDRESSED", "NOT_ADDRESSED")),
+                new EnumCase("task_contract_revision_patch", "\"obligation_patches\":[{\"clause_changes\":[{\"operation\":\"INVALID\"}]}]",
+                        "/result/obligation_patches/0/clause_changes/0/operation", java.util.List.of("ADD", "REPLACE")),
+                new EnumCase("task_contract_revision_patch", "\"obligation_patches\":[{\"clause_changes\":[{\"section\":\"INVALID\"}]}]",
+                        "/result/obligation_patches/0/clause_changes/0/section",
+                        java.util.List.of("ACCEPTANCE_CRITERIA", "TEST_REQUIREMENTS", "CONSTRAINTS", "NON_GOALS", "RISK_AREAS")));
+        for (var test : cases) {
+            var json = "{\"result\":{\"artifact_type\":\"" + test.artifact() + "\"," + test.fields() + "}}";
+            var parsed = parser.parse(json);
+            assertFalse(parsed.valid(), json);
+            assertEquals(AgentResultEnvelopeParser.ParseFailureKind.INVALID_ENUM_VALUE, parsed.diagnostic().kind(), json);
+            assertEquals(test.path(), parsed.diagnostic().fieldPath());
+            assertEquals("INVALID", parsed.diagnostic().actualValue());
+            assertEquals(test.allowed(), parsed.diagnostic().allowedValues());
+            assertTrue(parser.parse(json.replace("INVALID", test.allowed().getFirst())).valid());
+        }
+    }
+
+    @Test
+    void nonEnumTypeFailureDoesNotAcquireAnEnumAllowlist() {
+        var parsed = parser.parse(validEnvelope().replace("\"schema_version\": 1", "\"schema_version\": \"invalid\""));
+        assertFalse(parsed.valid());
+        assertEquals(AgentResultEnvelopeParser.ParseFailureKind.INVALID_JSON, parsed.diagnostic().kind());
+        assertTrue(parsed.diagnostic().allowedValues().isEmpty());
+    }
+
+    private record EnumCase(String artifact, String fields, String path, java.util.List<String> allowed) {}
+
+    @Test
+    void unknownFieldIsDiagnosedWithoutRelaxingTheClosedGrammar() {
+        var parsed = new AgentResultEnvelopeParser().parse(validEnvelope().replace(
+                "\"summary\": \"ready\"", "\"summary\": \"ready\", \"response\": \"extra\""));
+        assertFalse(parsed.valid());
+        assertEquals("UNKNOWN_FIELD", parsed.diagnostic().kind().name());
+        assertEquals("response", parsed.diagnostic().fieldName());
+        assertTrue(parsed.diagnostic().allowedFields().contains("summary"));
+        assertFalse(parsed.diagnostic().allowedFields().contains("response"));
+        assertEquals("AGENT_RESULT_PARSE_FAILED", parsed.errorCode());
+    }
+
+    @Test
     void parsesAndValidatesStrictTypedEnvelope() {
         var parsed = parser.parse(validEnvelope());
 
@@ -233,6 +296,7 @@ class AgentResultEnvelopeParserTest {
                     "open_risks": [],
                     "changed_files": ["backend/tests/test_chemo.py"],
                     "verification_summary": "A test source change is required.",
+                    "verification_checks": [],
                     "failure": {
                       "category_hint": "IMPLEMENTATION_BUG",
                       "verification_remediation": "%s",

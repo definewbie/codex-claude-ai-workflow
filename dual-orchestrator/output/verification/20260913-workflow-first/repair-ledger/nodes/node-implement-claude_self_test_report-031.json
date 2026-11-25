@@ -1,0 +1,64 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-implement-claude_self_test_report-031",
+  "nodeDefinitionId" : "implement.claude_self_test_report",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-implement",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315585267/outputs/implement-claude.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315585267/outputs/implement-claude.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315585267/outputs/implement-claude.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-implement-claude_implement-030-run-1789315585267/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315585267/outputs/implement-claude.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315595719/outputs/implement-claude-self-test.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315595719/outputs/implement-claude-self-test.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315595719/outputs/implement-claude-self-test.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1789315595719/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315595719/outputs/implement-claude-self-test.contract.json" ],
+  "result" : {
+    "run_id" : "run-1789315595719",
+    "run_metadata" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315595719/run.json",
+    "agent" : "claude",
+    "session" : "claude-main-ws-20260913T160441Z-H55W-run-1789315595719",
+    "exit_code" : 0,
+    "transcript_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315595719/outputs/implement-claude-self-test.transcript.log",
+    "output_complete" : true,
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1789315595719/binding.json",
+    "repository_fact_binding_sha256" : "5f0a8414461ff5bc067effc56e1534d7c2f6a897f17aac511fabaddafec88ab0",
+    "process_usability" : "EXITED_ZERO",
+    "adapter_signals" : [ ],
+    "decision" : "SELF_TEST_COMPLETE",
+    "summary" : "Self-test passed.",
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315595719/outputs/implement-claude-self-test.contract.json",
+    "contract_sidecar_sha256" : "f6753073501cd35ef49bc5b4f7ed92a6085633aafd997f3a1eb01f58b3182f77",
+    "agent_execution_result_contract" : {
+      "present" : true,
+      "valid" : true,
+      "decision" : "SELF_TEST_COMPLETE",
+      "summary" : "",
+      "validationError" : ""
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "self_test_report",
+      "required" : true,
+      "present" : true,
+      "valid" : true,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "agent_execution_outcome" : {
+      "status" : "SUCCESS",
+      "primaryReason" : "completed",
+      "nodeMaySucceed" : true,
+      "retryPolicy" : "NONE",
+      "recoveryCategory" : "NONE",
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315595699-768d6cec",
+  "startedAt" : "2026-09-13T16:06:35.711969Z",
+  "finishedAt" : "2026-09-13T16:06:46.149157Z"
+}

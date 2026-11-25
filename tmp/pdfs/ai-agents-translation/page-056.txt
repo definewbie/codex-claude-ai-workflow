@@ -1,0 +1,28 @@
+Chapter 2. Architectures and
+Patterns: Planning, Reactivity,
+and Multi-Agent Systems
+
+
+
+You know by now that AI agents are not magic. They’re engineered systems
+whose power comes from the strategic configuration of their architecture.
+By combining reasoning loops, tools, stateful design, and adaptive control,
+LLMs can move beyond static prompts and evolve into MASs that plan,
+react, and reflect in real time. This chapter explores the architectures that
+make this possible, from structured reasoning methods such as chain of
+thought, tree of thoughts, and ReAct to architectural paradigms like
+supervisor and hierarchical agents. Along the way you’ll gain a deeper
+understanding of reasoning flows and see how human-in-the-loop
+mechanisms including approval gates, corrections, and interruptions keep
+these systems reliable, aligned, and secure.
+
+The importance of an agent’s architecture becomes obvious when you
+compare how a simple single-step agent handles a task versus how a multi-
+step agent does. A single-step agent receives the request, plans everything
+internally, executes in one go, and returns the result without ever revisiting
+intermediate steps. A multi-step agent, in contrast, alternates between
+reasoning and action in an iterative loop, adapting its plan based on partial
+results or new observations as it works. This flexibility is what allows
+agents to refine outputs dynamically and cope with uncertainty or feedback
+from their environment. The contrast is illustrated in Figure 2-1, with Table
+2-1 showing how each approach unfolds step-by-step on the same task.

@@ -1,0 +1,1 @@
+{"type": "object", "properties": {"token": {"type": ["string", "null"]}, "sum": {"type": ["integer", "null"]}, "product_write": {"type": "string", "enum": ["denied", "succeeded", "not_attempted"]}, "control_write": {"type": "string", "enum": ["denied", "succeeded", "not_attempted"]}}, "required": ["token", "sum", "product_write", "control_write"], "additionalProperties": false}

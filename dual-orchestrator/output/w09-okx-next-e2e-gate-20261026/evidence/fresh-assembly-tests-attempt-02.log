@@ -1,0 +1,34 @@
+{"step": "s1", "pid": 67881, "node": "intake.claude_brainstorm", "started": true}
+{"step": "s1", "exit": 0, "elapsed_seconds": 0.153, "actual_tokens": 32, "completed_calls": 1, "workflow_status": "RUNNING", "active_nodes": ["n"], "open_gates": []}
+{"step": "s1", "pid": 67890, "node": "intake.claude_brainstorm", "started": true}
+test_cold_authorization_rejects_without_side_effects (test_fresh_assembly.FreshAssemblyTest.test_cold_authorization_rejects_without_side_effects) ... ok
+test_false_auth_blocks_before_instance_or_step (test_fresh_assembly.FreshAssemblyTest.test_false_auth_blocks_before_instance_or_step) ... ok
+test_fixed_input_drift_rejects (test_fresh_assembly.FreshAssemblyTest.test_fixed_input_drift_rejects) ... ok
+test_ledger_checkpoint_and_terminal_reject (test_fresh_assembly.FreshAssemblyTest.test_ledger_checkpoint_and_terminal_reject) ... ok
+test_missing_selected_program_rejects (test_fresh_assembly.FreshAssemblyTest.test_missing_selected_program_rejects) ... ok
+test_new_stop_rejects (test_fresh_assembly.FreshAssemblyTest.test_new_stop_rejects) ... ok
+test_observer_byte_drift_rejects (test_fresh_assembly.FreshAssemblyTest.test_observer_byte_drift_rejects) ... ok
+test_partial_step_and_process_without_result_reject (test_fresh_assembly.FreshAssemblyTest.test_partial_step_and_process_without_result_reject) ... ok
+test_pending_write_rejects (test_fresh_assembly.FreshAssemblyTest.test_pending_write_rejects) ... ok
+test_positive_whole_runner_same_environment (test_fresh_assembly.FreshAssemblyTest.test_positive_whole_runner_same_environment) ... ok
+test_selected_program_disappears_after_inspection_leaves_stop (test_fresh_assembly.FreshAssemblyTest.test_selected_program_disappears_after_inspection_leaves_stop) ... ok
+test_time_accumulates_and_failed_or_missing_time_rejects (test_fresh_assembly.FreshAssemblyTest.test_time_accumulates_and_failed_or_missing_time_rejects) ... ok
+test_unknown_usage_blocks_before_launch (test_fresh_assembly.FreshAssemblyTest.test_unknown_usage_blocks_before_launch) ... ok
+test_wrong_subject_budget_launch_and_delegation (test_fresh_assembly.FreshAssemblyTest.test_wrong_subject_budget_launch_and_delegation) ... ok
+test_bad_current_cannot_be_washed_by_complete_history (test_gate_observer.ObserverTest.test_bad_current_cannot_be_washed_by_complete_history) ... ok
+test_delayed_shared_result_is_strict_fallback_only (test_gate_observer.ObserverTest.test_delayed_shared_result_is_strict_fallback_only) ... ok
+test_main_and_correction_count_as_two_owned_occurrences (test_gate_observer.ObserverTest.test_main_and_correction_count_as_two_owned_occurrences) ... ok
+test_mismatched_fixed_amount_and_unfinished_run_stop (test_gate_observer.ObserverTest.test_mismatched_fixed_amount_and_unfinished_run_stop) ... ok
+test_missing_fixed_completion_and_log_drift_stop (test_gate_observer.ObserverTest.test_missing_fixed_completion_and_log_drift_stop) ... ok
+test_missing_partial_snapshot_and_negative_not_totals (test_gate_observer.ObserverTest.test_missing_partial_snapshot_and_negative_not_totals) ... ok
+test_one_transcript_cannot_supply_two_calls (test_gate_observer.ObserverTest.test_one_transcript_cannot_supply_two_calls) ... ok
+test_parsed_invalid_rpc_frame_cannot_borrow_valid_completion (test_gate_observer.ObserverTest.test_parsed_invalid_rpc_frame_cannot_borrow_valid_completion) ... ok
+test_plain_model_json_without_rpc_identity_is_not_a_frame (test_gate_observer.ObserverTest.test_plain_model_json_without_rpc_identity_is_not_a_frame) ... ok
+test_readable_json_body_and_matching_completion_or_delayed_stream (test_gate_observer.ObserverTest.test_readable_json_body_and_matching_completion_or_delayed_stream) ... ok
+test_same_rpc_id_after_reinitialize_is_two_calls_and_history_append_stays_valid (test_gate_observer.ObserverTest.test_same_rpc_id_after_reinitialize_is_two_calls_and_history_append_stays_valid) ... ok
+test_wrong_request_session_stop_and_duplicate_are_rejected (test_gate_observer.ObserverTest.test_wrong_request_session_stop_and_duplicate_are_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 9.394s
+
+OK

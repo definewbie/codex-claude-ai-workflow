@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "requestId": "okx-ac-availability-20261027-01",
+  "subject": "node-gate-human_plan_approval-021",
+  "goal": {
+    "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/task-contract.json",
+    "sha256": "41f643f07f822573dfa2a13e8f5ede75aa2efd83fdca3efa20130ca0ae2bf04f"
+  },
+  "epoch": 1,
+  "criterionIds": [
+    "AC-1",
+    "AC-2",
+    "AC-3",
+    "AC-4",
+    "AC-5"
+  ],
+  "method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。",
+  "executor": "AGENT",
+  "evidenceKind": "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+  "environment": {
+    "workspace": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree",
+    "identity": "6812930430b5d9f79961ff96be00a671aa7c1e8d429384ec8f724fb86ea661a1",
+    "owner": "Gate operator under user-approved preparation scope",
+    "dependencies": [
+      {
+        "path": "/Users/kriswang/work/opensource/maven/bin/mvn",
+        "sha256": "f9381d0cb98abaaf9592dae421eddc497e84ed9bfb723b84c111d1350863c3a2",
+        "absent": false
+      },
+      {
+        "path": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin/java",
+        "sha256": "35c0e7afcaeb977100d0b90725cc52ee73123c9286cdf3b423fe53d7f0ea0491",
+        "absent": false
+      },
+      {
+        "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-budget-continuation-20261026/operations/readiness-environment-recheck/result.json",
+        "sha256": "dce9d077a812a466c45a2e2e50763739fdc222c7823bb2ceb84c7ca5a3d0dc7e",
+        "absent": false
+      }
+    ]
+  },
+  "statement": "已只读核对宿主 JDK/Maven、Docker 服务及缓存 MySQL/ryuk 镜像。此为实际前提可用性的 operator 声明候选，不证明原生客户端已执行测试、提供实际退出码或实现已通过；GOAL 未统一要求 actual_exit。当前计划的TR编号/空environment_refs/提示词feasibility_refs及额外actual_exit要求尚待按原计划门返修，本声明不替其批准或消除这些限制。",
+  "detailOwner": "implement.claude_self_test_report",
+  "lifetime": "AUTHORIZATION_EPOCH",
+  "expiresAt": null,
+  "action": "RECORD",
+  "supersedes": null
+}

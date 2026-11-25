@@ -1,0 +1,17 @@
+
+> acpx@0.13.2 check /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source
+> pnpm run format:check && pnpm run typecheck && pnpm run lint && pnpm run build && pnpm run viewer:typecheck && pnpm run viewer:build && pnpm run test:coverage
+
+
+> acpx@0.13.2 format:check /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source
+> oxfmt --check
+
+Checking formatting...
+
+src/cli/command-registration.ts (0ms)
+test/spawn-options.test.ts (0ms)
+
+Format issues found in above 2 files. Run without `--check` to fix.
+Finished in 494ms on 384 files using 16 threads.
+ ELIFECYCLE  Command failed with exit code 1.
+ ELIFECYCLE  Command failed with exit code 1.

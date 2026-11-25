@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-context-intake_codex_product_review-003",
+  "nodeDefinitionId": "context.intake_codex_product_review",
+  "kind": "TASK",
+  "handlerType": "context.build_package",
+  "status": "COMPLETED",
+  "stageId": "stage-context",
+  "iterationId": "iter-001",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1793026771764/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.contract.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-a3f1b1e0eddc1272.ref.json"
+  ],
+  "inputTransition": {
+    "required": true,
+    "transition_type": "normal",
+    "condition": "unconditional",
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256": "606b2368fd559125de2686b15812759a451332a9c3071ba7ef90a7080d62874f",
+    "source_node_instance_id": "node-intake-claude_brainstorm-002"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/context/node-context-intake_codex_product_review-003.md",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-a3f1b1e0eddc1272.ref.json"
+  ],
+  "result": {
+    "context_package": ".agent/workstreams/ws-20261026T142203Z-7SNA/context/node-context-intake_codex_product_review-003.md",
+    "context_package_metadata": ".agent/workstreams/ws-20261026T142203Z-7SNA/context/node-context-intake_codex_product_review-003.json",
+    "target_node": "intake.codex_product_review",
+    "profile": "product_review",
+    "sections": [
+      "input_artifacts",
+      "review_evidence",
+      "recent_agent_outputs",
+      "ledger_pointers"
+    ],
+    "input_ref_count": 6,
+    "generated_at": "2026-10-26T15:03:13.911965Z"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1793026993796-24504278",
+  "startedAt": "2026-10-26T15:03:13.806332Z",
+  "finishedAt": "2026-10-26T15:03:13.930416Z"
+}

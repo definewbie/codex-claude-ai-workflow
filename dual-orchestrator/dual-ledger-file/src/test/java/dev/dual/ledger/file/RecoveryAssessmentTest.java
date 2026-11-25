@@ -313,6 +313,20 @@ class RecoveryAssessmentTest {
     }
 
     @Test
+    void interfaceMismatchPreservesItsReasonAndRequiresManualCompatibilityRepair() {
+        var assessment = RecoveryAssessment.from(failedAcpxNode(Map.of(
+                "agent_execution_outcome", Map.of("status", "RECOVERABLE_ADAPTER_FAILURE",
+                        "primaryReason", "adapter_incompatible", "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
+                        "retryPolicy", "MANUAL_ONLY", "operatorMessage", "required ACP protocol version 1 is unavailable")
+        )), tempDir, "ws-recovery");
+        assertEquals("agent_interface_incompatible", assessment.classification());
+        assertEquals("FIX_AGENT_INTERFACE_THEN_RETRY", assessment.retryReadiness());
+        assertFalse(assessment.retrySafe());
+        assertTrue(assessment.suggestedCommand().contains("never resend an unknown call"));
+        assertFalse(assessment.suggestedCommand().contains("sessions new"));
+    }
+
+    @Test
     void sessionBootstrapFailureIsGenericFailClosedSessionRecovery() {
         var assessment = RecoveryAssessment.from(failedAcpxNode(Map.of(
                 "agent", "codex",
@@ -340,21 +354,37 @@ class RecoveryAssessmentTest {
     }
 
     @Test
-    void agentOutputIncompleteHasExplicitProjectionAndIsNotRetrySafe() {
-        var assessment = RecoveryAssessment.from(failedAcpxNode(Map.of(
-                "agent_execution_outcome", Map.of(
-                        "status", "OUTPUT_INCOMPLETE",
-                        "primaryReason", "process_output_incomplete",
-                        "recoveryCategory", "OUTPUT_INCOMPLETE",
-                        "retryPolicy", "MANUAL_ONLY",
-                        "operatorMessage", "The agent output stopped before a valid boundary."
-                )
-        )), tempDir, "ws-recovery");
+    void incompleteProcessAndMissingEnvelopeRequireDifferentManualChecks() {
+        var cases = Map.of("process_output_incomplete", "RETRY_AFTER_EXTERNAL_FIX",
+                "agent_result_missing_or_invalid", "RETRY_AFTER_OUTPUT_CONTRACT_FIX");
+        for (var entry : cases.entrySet()) {
+            var assessment = RecoveryAssessment.from(failedAcpxNode(Map.of(
+                    "agent_execution_outcome", Map.of(
+                            "status", "OUTPUT_INCOMPLETE",
+                            "primaryReason", entry.getKey(),
+                            "recoveryCategory", "OUTPUT_INCOMPLETE",
+                            "retryPolicy", "MANUAL_ONLY",
+                            "operatorMessage", "The recorded boundary did not complete."
+                    )
+            )), tempDir, "ws-recovery");
+            assertEquals("agent_output_incomplete", assessment.classification());
+            assertEquals(entry.getValue(), assessment.retryReadiness());
+            assertFalse(assessment.retrySafe(), "neither failure permits blind retry");
+        }
+    }
 
-        assertEquals("agent_output_incomplete", assessment.classification());
-        assertEquals("RETRY_AFTER_OUTPUT_CONTRACT_FIX", assessment.retryReadiness());
-        assertFalse(assessment.retrySafe(),
-                "output-incomplete is not blindly retry-safe; the output contract must be inspected first");
+    @Test
+    void unknownPermissionReceiptRequiresExternalReconciliationInsteadOfJsonRepairOrAutomaticRetry() {
+        var outcome=new dev.dual.core.execution.AgentExecutionOutcomeResolver().resolve(new dev.dual.core.execution.AgentExecutionEvidence(
+                dev.dual.core.execution.ProcessResult.nonZeroIncomplete(5), dev.dual.core.execution.AgentResultContractResult.missing(), List.of(),
+                List.of(dev.dual.core.execution.AdapterSignal.of(dev.dual.core.execution.AdapterSignalType.NATIVE_PERMISSION_INTERRUPTED))));
+        var facts=new com.fasterxml.jackson.databind.ObjectMapper().convertValue(outcome,new com.fasterxml.jackson.core.type.TypeReference<Map<String,Object>>(){});
+        var assessment=RecoveryAssessment.from(failedAcpxNode(Map.of("agent","codex","session","original", "agent_execution_outcome",facts)),tempDir,"ws-recovery");
+        assertEquals("native_permission_requires_external_reconciliation",assessment.classification());
+        assertEquals("VERIFY_EXTERNAL_STATE_BEFORE_NEW_ATTEMPT",assessment.retryReadiness());
+        assertFalse(assessment.retrySafe());
+        assertFalse(assessment.suggestedCommand().contains("sessions new"));
+        assertTrue(assessment.suggestedCommand().contains("do not resend"));
     }
 
     private static NodeInstanceDocument failedAcpxNode(Map<String, Object> result) {

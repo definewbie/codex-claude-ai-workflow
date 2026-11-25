@@ -1,0 +1,74 @@
+{
+  "tests": 1813,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": 210,
+  "exit": 0,
+  "single_clean_reactor": true,
+  "source_before_after_equal": true,
+  "source_inputs": 659,
+  "modules": {
+    "dual-cli": {
+      "tests": 96,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 27
+    },
+    "dual-server": {
+      "tests": 82,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 14
+    },
+    "dual-flow-liteflow": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 4
+    },
+    "dual-ledger-file": {
+      "tests": 161,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 23
+    },
+    "dual-adapter-acpx": {
+      "tests": 508,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 39
+    },
+    "dual-runtime": {
+      "tests": 814,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 85
+    },
+    "dual-adapter-git": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 2
+    },
+    "dual-core": {
+      "tests": 126,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 16
+    }
+  },
+  "live_provider_runs": 0,
+  "real_native_clients": 0,
+  "extra_agents": 0,
+  "seventh_case_started": false,
+  "sixth_case_recovered": false
+}

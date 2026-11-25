@@ -58,11 +58,28 @@ public record TaskContractProposalReference(
             AgentOutputContractDocument document,
             ObjectMapper objectMapper
     ) throws Exception {
-        if (!"task_contract_revision_patch".equals(document.sourceArtifactType())
+        if ((!"task_contract_revision_patch".equals(document.sourceArtifactType())
+                && !"task_contract_proposal".equals(document.sourceArtifactType()))
                 || document.proposalDerivation() == null) {
             throw new IllegalArgumentException("revision-derived task-contract proposal lineage is required");
         }
         return publishVerified(workspaceRoot, workstreamId, sidecarPath, document, objectMapper);
+    }
+
+    static Published preparePublication(Path workspaceRoot, String workstreamId, Path sidecarPath,
+                                         AgentOutputContractDocument document, byte[] bytes, ObjectMapper mapper) throws Exception {
+        var root = workspaceRoot.toAbsolutePath().normalize();
+        var sidecar = sidecarPath.toAbsolutePath().normalize();
+        if (!sidecar.startsWith(root) || !document.hasValidatedLineage(workstreamId, root, sidecar)
+                || !"intake.claude_brainstorm".equals(document.nodeId()) || document.taskContractProposal() == null
+                || !validProposalSource(root, workstreamId, document, mapper))
+            throw new IllegalArgumentException("validated proposal lineage required before publication");
+        var digest = TaskContractArtifactWriter.sha256(bytes);
+        var reference = new TaskContractProposalReference(SCHEMA_VERSION, document.nodeInstanceId() + ":" + digest.substring(0, 16),
+                workstreamId, document.nodeId(), document.nodeInstanceId(), root.relativize(sidecar).toString(), digest);
+        var path = root.resolve(".agent/workstreams").resolve(workstreamId).resolve("artifacts/task-contract-proposals")
+                .resolve(safeFileName(document.nodeInstanceId()) + "-" + digest.substring(0, 16) + ".ref.json");
+        return new Published(reference, root.relativize(path).toString());
     }
 
     private static Published publishVerified(
@@ -119,23 +136,7 @@ public record TaskContractProposalReference(
                         objectMapper).valid()) {
             return false;
         }
-        if ("task_contract_proposal".equals(document.sourceArtifactType())) {
-            return document.proposalDerivation() == null;
-        }
-        if (!"task_contract_revision_patch".equals(document.sourceArtifactType())) {
-            return false;
-        }
-        var derivation = document.proposalDerivation();
-        if (derivation == null
-                || !derivation.validFor(derivation.baseProposalReference(), document.sourceOutputRef())) {
-            return false;
-        }
-        try {
-            return derivation.baseProposalReference()
-                    .resolveArtifact(root, workstreamId, objectMapper).isPresent();
-        } catch (RuntimeException ignored) {
-            return false;
-        }
+        return ContractRevisionBinding.validSource(root,workstreamId,document);
     }
 
     static Optional<TaskContractProposalReference> readVerified(
@@ -175,7 +176,7 @@ public record TaskContractProposalReference(
             if (candidate.isEmpty()) {
                 continue;
             }
-            if (resolved != null && !resolved.reference().proposalId().equals(candidate.get().proposalId())) {
+            if (resolved != null && !resolved.reference().equals(candidate.get())) {
                 return Optional.empty();
             }
             resolved = new Resolved(candidate.get(), ref);

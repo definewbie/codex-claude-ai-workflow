@@ -1,0 +1,16 @@
+{
+  "source_inputs_match": 654,
+  "jars_and_native_release": "unchanged",
+  "codex_config": "only exact redundant same-trust current fixture registration; see config-drift-attribution/fixture-registration-review",
+  "observer_inputs": {
+    "gate_support.py": "44345946fb045467467c0997ee362f5c90e8dffe50f41204a540386cc5333452",
+    "run-one-step.py": "f8c661d6fca4814613add40b26bae9e058a2a29bf81fe0b648b7e3579b25bab3",
+    "check_budget.py": "cb9fb511afb86e21f3efbe3aadd258d7be5a86644ecac04926ee1b60b9f2c579",
+    "check-budget-offline.py": "cb9fb511afb86e21f3efbe3aadd258d7be5a86644ecac04926ee1b60b9f2c579",
+    "budget.json": "b02560888b636dad16a7e67d8f2df5ffdb4af878f13c2177930177fe59ba5126",
+    "task-requirement.md": "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+    "authorization.json": "04935d54d92a01882328d9bc55a149cc83f9c52fe564b9b50397bcfcc2bfdae1"
+  },
+  "native_model_calls": 4,
+  "no_product_scope_granted": true
+}

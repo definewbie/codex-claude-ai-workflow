@@ -1,0 +1,18 @@
+{
+  "schema_version" : 1,
+  "artifact_type" : "contract_failure_diagnostic",
+  "generated_at" : "2026-10-14T23:45:06.455039Z",
+  "workstream_id" : "ws-20261014T234009Z-RN9X",
+  "node_instance_id" : "node-intake-claude_brainstorm-006",
+  "node_id" : "intake.claude_brainstorm",
+  "handler_type" : "acpx.agent_run",
+  "category" : "malformed_agent_result",
+  "reason" : "AGENT_RESULT_PARSE_FAILED",
+  "message" : "Unrecognized field \"response\" (class dev.dual.runtime.handler.AgentResultEnvelope$RevisionResponse), not marked as ignorable (2 known properties: \"resolved_by_clause_ids\", \"review_obligation_id\"])\n at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 56, column: 22] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope[\"result\"]->dev.dual.runtime.handler.AgentResultEnvelope$TaskContractProposalResult[\"revision_responses\"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$RevisionResponse[\"response\"])",
+  "source_output_ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/outputs/intake-claude-brainstorm.json",
+  "required_keys" : [ "summary", "decision" ],
+  "allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW" ],
+  "details" : { },
+  "recovery_hint" : "Repair the final AgentResultEnvelope JSON so it matches the node contract and contains no Markdown or trailing prose.",
+  "recommended_owner" : "agent_or_prompt"
+}

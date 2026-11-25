@@ -3,6 +3,8 @@
 Use this checklist before changing workflow, recovery, artifact contract, human
 gate, delivery, or observability code.
 
+For failure handling, apply [Failure Severity Triage](../../AGENTS.md#failure-severity-triage) first; qualifying `TRANSIENT` failures do not enter the full boundary-review process. Regression scope follows [Regression Scope Proportionality](../../AGENTS.md#regression-scope-proportionality), with the `BOUNDARY` tier taking precedence. Documentation-only changes do not require a Verification Gate.
+
 For boundary-sensitive changes, first apply the stricter engineering discipline
 in `docs/design/boundary-first-engineering-discipline.zh-CN.md`. The checklist
 below is not enough by itself when the issue involves lifecycle semantics,
@@ -69,6 +71,8 @@ Do not use "tests green", "implemented locally", "measure_only", "warning
 visible", or "ran one case" as promotion evidence. Promotion evidence must name
 the source of truth, the command or replay/calibration used, and the PASS /
 FAIL / INVALID criteria.
+
+Failures must first follow [AGENTS.md — Failure Severity Triage](../../AGENTS.md#failure-severity-triage). `TRANSIENT` failures follow that section's bounded retry and ledger-recording rules and do not enter this checklist's process; failures classified or escalated as `BOUNDARY` retain the full checklist requirements.
 
 The executable gate in `scripts/lib/mainline-decision-gate.sh` must reject any
 current `Target phase` outside P0/P0.5. If the script and this checklist
@@ -286,18 +290,14 @@ source-of-truth model, projection behavior, and regression tests to agree.
 
 ## Technical Debt
 
-- Default to fixing technical debt when it affects the main lifecycle,
-  correctness, stability, domain boundaries, artifact contracts, tests, or future
-  development speed.
-- Keep debt only when there is a clear reason:
-  - future direction is genuinely uncertain;
-  - fixing now would distract from the main lifecycle;
-  - current cost is clearly disproportionate to near-term value;
-  - the debt is isolated behind a named boundary.
-- Every accepted debt item must document:
-  - why it is being kept;
-  - why it does not block the main workflow;
-  - what signal should trigger revisiting it.
+- Apply [AGENTS.md — Technical Debt Principle](../../AGENTS.md#technical-debt-principle).
+- Category 1 affects source of truth, state consistency, artifact contracts, or
+  permission boundaries: fix it; recording it does not authorize deferral.
+- Category 2 affects only observation, reports, documentation wording, or
+  projection text, without affecting control flow: record it and resolve it in
+  the next batch touching that module. Do not create a separate batch or block
+  delivery or real runs for it.
+- Every debt record must state its category; unclassified debt is Category 1.
 - Do not keep compatibility code that preserves an unsafe or deprecated path
   unless it is required for real users and guarded by explicit tests.
 

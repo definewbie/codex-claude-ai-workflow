@@ -1,0 +1,225 @@
+{
+  "ThreadStartParams": {
+    "path": "dual-orchestrator/output/d04-readonly-binding-design-20260928/protocol/ThreadStartParams.json",
+    "sha256": "25f490368ec6df52a2a3b82a5469d2413307eb93439121b309f415b5648eee7a",
+    "properties": [
+      "allowProviderModelFallback",
+      "approvalPolicy",
+      "approvalsReviewer",
+      "baseInstructions",
+      "config",
+      "cwd",
+      "developerInstructions",
+      "dynamicTools",
+      "environments",
+      "ephemeral",
+      "experimentalRawEvents",
+      "historyMode",
+      "mockExperimentalField",
+      "model",
+      "modelProvider",
+      "multiAgentMode",
+      "permissions",
+      "personality",
+      "projectId",
+      "runtimeWorkspaceRoots",
+      "sandbox",
+      "selectedCapabilityRoots",
+      "serviceName",
+      "serviceTier",
+      "sessionStartSource",
+      "threadSource"
+    ],
+    "relevant": {
+      "approvalPolicy": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/AskForApproval"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "approvalsReviewer": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/ApprovalsReviewer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Override where approval requests are routed for review on this thread and subsequent turns."
+      },
+      "config": {
+        "additionalProperties": true,
+        "type": [
+          "object",
+          "null"
+        ]
+      },
+      "dynamicTools": {
+        "default": null,
+        "items": {
+          "$ref": "#/definitions/DynamicToolSpec"
+        },
+        "type": [
+          "array",
+          "null"
+        ]
+      },
+      "permissions": {
+        "description": "Named profile id for this thread. Cannot be combined with `sandbox`.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "sandbox": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/SandboxMode"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "multiAgentMode": {
+      "field": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/MultiAgentMode"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "@deprecated Ignored. Use Ultra reasoning effort for proactive multi-agent behavior."
+      },
+      "definition": {
+        "description": "Controls the effective multi-agent delegation instructions for a turn. `custom` means the configured mode hint defines the policy instead of a built-in policy.",
+        "oneOf": [
+          {
+            "enum": [
+              "explicitRequestOnly",
+              "proactive"
+            ],
+            "type": "string"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "custom": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "custom"
+            ],
+            "title": "CustomMultiAgentMode",
+            "type": "object"
+          }
+        ]
+      }
+    }
+  },
+  "TurnStartParams": {
+    "path": "dual-orchestrator/output/d04-readonly-binding-design-20260928/protocol/TurnStartParams.json",
+    "sha256": "b36fb37326b1cf69f75c8b306f1f886d53a57c4b1b985e08e298e2407ea2ad02",
+    "properties": [
+      "additionalContext",
+      "approvalPolicy",
+      "approvalsReviewer",
+      "clientUserMessageId",
+      "collaborationMode",
+      "cwd",
+      "cyberAccessProgram",
+      "effort",
+      "environments",
+      "input",
+      "model",
+      "multiAgentMode",
+      "outputSchema",
+      "permissions",
+      "personality",
+      "responsesapiClientMetadata",
+      "runtimeWorkspaceRoots",
+      "sandboxPolicy",
+      "serviceTier",
+      "serviceTierForTurn",
+      "summary",
+      "threadId",
+      "toolOutput",
+      "turnTrigger"
+    ],
+    "relevant": {
+      "approvalPolicy": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/AskForApproval"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Override the approval policy for this turn and subsequent turns."
+      },
+      "approvalsReviewer": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/ApprovalsReviewer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Override where approval requests are routed for review on this turn and subsequent turns."
+      },
+      "permissions": {
+        "description": "Select a named permissions profile id for this turn and subsequent turns. Cannot be combined with `sandboxPolicy`.",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "sandboxPolicy": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/SandboxPolicy"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Override the sandbox policy for this turn and subsequent turns."
+      },
+      "toolOutput": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/TurnToolOutput"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    }
+  },
+  "ConfigReadResponse": {
+    "path": "dual-orchestrator/output/d04-readonly-binding-design-20260928/protocol/ConfigReadResponse.json",
+    "sha256": "96a04a3f7fff2dc7fafc9f831e8bcd422e021d697dd2c14c801f098a9f21396d",
+    "properties": [
+      "config",
+      "layers",
+      "origins"
+    ],
+    "relevant": {
+      "config": {
+        "$ref": "#/definitions/Config"
+      }
+    }
+  }
+}

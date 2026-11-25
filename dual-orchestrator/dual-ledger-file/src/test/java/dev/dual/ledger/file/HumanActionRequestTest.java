@@ -17,15 +17,17 @@ class HumanActionRequestTest {
 
     @Test void requestIsIdempotentNonResolvingAndPreservedByLaterHumanDecision() throws Exception {
         var paths = waiting();
-        var ledger = new WorkflowFileLedger();
+        var ledger = LedgerTestFixture.ledger();
         var current = ledger.loadCurrent(paths);
         var gate = current.activeNodeInstanceIds().getFirst();
         var request = request(gate, "device-1", "Obtain device evidence");
         var recorded = ledger.requestAction(paths, request);
         var events = Files.readString(paths.eventsJsonl());
-        assertEquals(recorded, new WorkflowFileLedger().requestAction(paths, request));
+        var afterRegistration = ledger.loadCurrent(paths);
+        assertEquals(recorded, LedgerTestFixture.ledger().requestAction(paths, request));
         assertEquals(events, Files.readString(paths.eventsJsonl()));
-        assertEquals(current, ledger.loadCurrent(paths));
+        assertEquals(afterRegistration, ledger.loadCurrent(paths), "repeat request must not advance the snapshot");
+        assertWaitingUnchanged(current, afterRegistration);
         assertEquals("open", ledger.loadOpenGateForNode(paths, gate).status());
         assertThrows(java.io.IOException.class, () -> ledger.requestAction(paths, request(gate, "device-1", "Different")));
         assertThrows(java.io.IOException.class, () -> ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), "request_action", "note"));
@@ -37,7 +39,7 @@ class HumanActionRequestTest {
 
     @Test void staleGateOrSourceIsRejectedBeforeAnyWrite() throws Exception {
         var paths = waiting();
-        var ledger = new WorkflowFileLedger();
+        var ledger = LedgerTestFixture.ledger();
         var current = ledger.loadCurrent(paths);
         var gate = current.activeNodeInstanceIds().getFirst();
         var before = Files.readString(paths.nodeJson(gate));
@@ -50,9 +52,9 @@ class HumanActionRequestTest {
         assertEquals(current, ledger.loadCurrent(paths));
     }
 
-    @Test void auditAppendFailureDoesNotLoseOrRepeatDurableRequest() throws Exception {
+    @Test void invalidAuditTargetRejectsBeforeRegistrationAndLegalRetryRecordsExactlyOnce() throws Exception {
         var paths = waiting();
-        var ledger = new WorkflowFileLedger();
+        var ledger = LedgerTestFixture.ledger();
         var current = ledger.loadCurrent(paths);
         var gate = current.activeNodeInstanceIds().getFirst();
         var backup = root.resolve("events-backup");
@@ -60,13 +62,25 @@ class HumanActionRequestTest {
         Files.createDirectory(paths.eventsJsonl());
         var request = request(gate, "r", "Need offline verification");
         assertThrows(java.io.IOException.class, () -> ledger.requestAction(paths, request));
-        assertEquals(1, ((List<?>) ledger.loadNode(paths, gate).result().get("action_requests")).size());
+        assertFalse(ledger.loadNode(paths, gate).result().containsKey("action_requests"));
         Files.delete(paths.eventsJsonl());
         Files.move(backup, paths.eventsJsonl());
         var before = Files.readString(paths.eventsJsonl());
-        new WorkflowFileLedger().requestAction(paths, request);
-        assertEquals(before, Files.readString(paths.eventsJsonl()));
-        assertEquals(current, ledger.loadCurrent(paths));
+        LedgerTestFixture.ledger().requestAction(paths, request);
+        var after = Files.readString(paths.eventsJsonl());
+        assertNotEquals(before, after);
+        assertEquals(1, ((List<?>) ledger.loadNode(paths, gate).result().get("action_requests")).size());
+        LedgerTestFixture.ledger().requestAction(paths, request);
+        assertEquals(after, Files.readString(paths.eventsJsonl()));
+        assertWaitingUnchanged(current, ledger.loadCurrent(paths));
+    }
+
+    private static void assertWaitingUnchanged(WorkflowCurrentDocument before, WorkflowCurrentDocument after) {
+        assertEquals(before.status(), after.status());
+        assertEquals(before.activeNodeInstanceIds(), after.activeNodeInstanceIds());
+        assertEquals(before.openGateIds(), after.openGateIds());
+        assertEquals(before.lastEventId(), after.lastEventId());
+        assertEquals(before.commitSequence() + 1, after.commitSequence(), "new request is a new snapshot, not a gate decision");
     }
 
     private HumanActionRequest request(String gate, String id, String result) {
@@ -81,8 +95,8 @@ class HumanActionRequestTest {
                         "gate_purpose", "implementation_repair", "allowed_actions", List.of("revise", "request_action"))),
                 new NodeDefinition("after", NodeKind.TASK, "noop.task", Map.of())), List.of(
                 new EdgeDefinition("start", "completed", "repair"), new EdgeDefinition("repair", "revise", "after")));
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-request", definition);
+        var ledger = LedgerTestFixture.ledger();
+        LedgerTestFixture.initialize(ledger, paths, "wf-request", definition);
         ledger.completeAndRoute(paths, definition, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst(),
                 NodeStatus.COMPLETED, "completed", List.of("self-test.json"), Map.of());
         return paths;

@@ -1,0 +1,16 @@
+src/cli/queue/permission-replies.ts:129:8: error eslint(complexity): method `reply` has a complexity of 13. Maximum allowed is 8.
+test/claude-execution-policy.test.ts:24:21: error eslint(no-unsafe-optional-chaining): Unsafe usage of optional chaining help: If this short-circuits with 'undefined' the evaluation will throw TypeError
+test/claude-execution-policy.test.ts:111:21: error eslint(no-unsafe-optional-chaining): Unsafe usage of optional chaining help: If this short-circuits with 'undefined' the evaluation will throw TypeError
+test/permission-replies.test.ts:231:22: error eslint(curly): Expected { after 'if' condition. help: Replace `socket.destroy();` with `{socket.destroy();}`.
+src/permissions.ts:369:8: error eslint(complexity): function `resolveAutomaticPermissionRequest` has a complexity of 12. Maximum allowed is 8.
+src/cli/queue/messages.ts:495:8: error eslint(complexity): function `parseNativePermissionReply` has a complexity of 12. Maximum allowed is 8.
+src/cli/queue/messages.ts:549:1: error eslint(complexity): function `parseSubmitRequest` has a complexity of 13. Maximum allowed is 8.
+src/cli/command-handlers.ts:319:8: error eslint(complexity): async function `handlePrompt` has a complexity of 10. Maximum allowed is 8.
+src/acp/client.ts:899:46: error eslint(complexity): private method `resolveClaudeExecutionPolicyBinding` has a complexity of 10. Maximum allowed is 8.
+src/acp/client.ts:2034:45: error eslint(complexity): private async method `handleExactPermissionRequest` has a complexity of 11. Maximum allowed is 8.
+src/acp/client.ts:2071:35: error eslint(complexity): private async method `askExactPermission` has a complexity of 10. Maximum allowed is 8.
+test/client.test.ts:99:13: error typescript(no-redundant-type-constituents): 'NodeJS.Signals' is an 'error' type that acts as 'any' and overrides all other types in this union type.
+test/client.test.ts:128:17: error typescript(no-redundant-type-constituents): 'NodeJS.Signals' is an 'error' type that acts as 'any' and overrides all other types in this union type.
+test/client.test.ts:129:12: error typescript(no-redundant-type-constituents): 'PassThrough' is an 'error' type that acts as 'any' and overrides all other types in this intersection type.
+test/client.test.ts:130:13: error typescript(no-redundant-type-constituents): 'PassThrough' is an 'error' type that acts as 'any' and overrides all other types in this intersection type.
+test/client.test.ts:131:13: error typescript(no-redundant-type-constituents): 'PassThrough' is an 'error' type that acts as 'any' and overrides all other types in this intersection type.

@@ -1,0 +1,17 @@
+{
+  "output/d04-native-boundary-review-20260929/restricted/events.jsonl": {
+    "sha256": "96e396984e6e4c3fb61fb2c10bdb50cd3ef4479923878831c3eb35bbe07845b1"
+  },
+  "output/d04-freeze-gate-20260930/run/read_only/launch.json": {
+    "sha256": "11c4e6b2a940f51711e80998679b86d79e926ba30efbf93f225e72a1e5c4112a"
+  },
+  "output/d04-control-carveout-gate-20260930/run/claude/settings.json": {
+    "sha256": "3617a09c03c298dc3234f06fd5de9634c629f1b17e6bdd51b31a4a9bf6ac04b7"
+  },
+  "output/d04-control-carveout-gate-20260930/run/claude/events.jsonl": {
+    "sha256": "7c8483963170272e59b72623ef7628f2c49a49f7aa4a128f4caf6c35f7c73dfa"
+  },
+  "output/d04-control-carveout-gate-20260930/summary.json": {
+    "sha256": "57b70e2e405a5ed9b11f504a12e13e7acf5ff267e917b216fc5d1e5f435197e6"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "checks": [
+    {
+      "bundle": "design",
+      "manifest": "output/w09-revision-wiring-design-20261014/material-sha256.json",
+      "entries": 15,
+      "mismatches": [],
+      "unchanged": true
+    },
+    {
+      "bundle": "fifth",
+      "manifest": "output/w09-fresh-fifth-gate-20261011/stopped-material-sha256.json",
+      "entries": 326,
+      "mismatches": [],
+      "unchanged": true
+    },
+    {
+      "bundle": "A",
+      "manifest": "output/w09-current-transcript-forward-fix-20261011/material-sha256.json",
+      "entries": 398,
+      "mismatches": [],
+      "unchanged": true
+    }
+  ],
+  "old_gate_states_unchanged": true,
+  "no_old_output_stamp_or_recovery": true,
+  "old_target_jars": "authorized rebuild directory; not asserted unchanged"
+}

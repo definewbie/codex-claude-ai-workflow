@@ -1,0 +1,20 @@
+{
+  "files": {
+    "assessment.md": "550da36c64566b28345374994d545c60dab2ef0dd2e65c79669acfae6ffb5a1e",
+    "baseline/20260927-dual-lifecycle-worklist.zh-CN.md": "0419204b33cfaee339b61bf0f0f17af3b45c61aeeaa07c279692ea210c94d979",
+    "baseline/20260928-dual-lifecycle-detailed-design.zh-CN.md": "3c37e1c462f394e4a7f1ab7bcd2c2355f52d076e0b77c0073407a3d6c55d1996",
+    "before-identity.json": "5acb13a448cb1c04159664bb9e5e765efe9d6acafc3415338e2f9ebed565ccca",
+    "cc-review-prompt.txt": "5c562601f2773d1f73522b1d2bfd937ff0f40298e36e608f680075980ceb9e86",
+    "changed-documents.json": "042cdb8600fa321a6ec201a80a2b51bfda70a87800c0573e2922cbcf5e802207",
+    "documentation.diff": "865659c7f3b63b7f53b7539e9e7113e0f73aa9aa1b1b3078c6e6de48a3565dd7",
+    "examples.json": "bd32b760168920f4288c535751684a4f410a9e4721bcee6f3822b90e4eb377a9",
+    "head-before.txt": "dcac7ceefc5f454dd37fb51d6d72e98336ade4974fd22f368e13013954ef205d",
+    "material-verification.json": "6aeb0c199a6caf416880e38e36f4ab37fb537eee1f34bb6a7a8a81a04763b961",
+    "self-review.md": "1777bf2bc226817885c1c04f25d0133839809d73a2e6402b88027aa113f892c8",
+    "source-excerpts.txt": "96a69d1dcf7823c97231a6ab9fe6c094bfdd6e994a7f7a9b76c548117ad83c64",
+    "source-index.json": "9960e96587cfb1f8b4d17ff4c5593677ac74c406c0dc9bbc7337556ddaadccd6",
+    "verification-plan.md": "d5dc05f218433817dac7e163f6e3028d8851e62707144341f75995fddf4c9124",
+    "workspace-before.txt": "376c50de307367c30ccd0257adc03ce809afefe78fc81f99d72dfe83ad4a4b53"
+  },
+  "note": "This design bundle is immutable after submission. Current two planning documents are outside this manifest; their before/after identities are in changed-documents.json."
+}

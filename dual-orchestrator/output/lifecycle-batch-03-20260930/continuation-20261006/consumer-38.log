@@ -1,0 +1,995 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/7]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/7]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/7]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/7]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/7]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/7]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 88 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- jar:3.4.2:test-jar (shared-lifecycle-test-fixtures) @ dual-runtime ---
+[INFO] Building jar: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/dual-runtime-0.1.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.runtime.handler.ContractRevisionDisplayTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 32.39 s -- in dev.dual.runtime.handler.ContractRevisionDisplayTest
+[INFO] Running dev.dual.runtime.handler.WorkflowIntegrationTest
+[ERROR] Tests run: 10, Failures: 5, Errors: 0, Skipped: 0, Time elapsed: 1.305 s <<< FAILURE! -- in dev.dual.runtime.handler.WorkflowIntegrationTest
+[ERROR] dev.dual.runtime.handler.WorkflowIntegrationTest.chain5_needsRevisionLoopWithContextCarryover -- Time elapsed: 0.024 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Requirement must be present ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.runtime.handler.WorkflowIntegrationTest.chain5_needsRevisionLoopWithContextCarryover(WorkflowIntegrationTest.java:414)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.WorkflowIntegrationTest.chain1_contextBuildToDecision -- Time elapsed: 0.023 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at dev.dual.runtime.handler.WorkflowIntegrationTest.chain1_contextBuildToDecision(WorkflowIntegrationTest.java:76)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.WorkflowIntegrationTest.chain3_activeProfileBudgetExcludesDuplicateRequirement -- Time elapsed: 0.533 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.WorkflowIntegrationTest.chain3_activeProfileBudgetExcludesDuplicateRequirement(WorkflowIntegrationTest.java:270)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.WorkflowIntegrationTest.chain4_explicitFullProfileCompressesOversizedRequirement -- Time elapsed: 0.522 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.WorkflowIntegrationTest.chain4_explicitFullProfileCompressesOversizedRequirement(WorkflowIntegrationTest.java:305)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.WorkflowIntegrationTest.chain7_multiProfileGovernance -- Time elapsed: 0.104 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-005, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-design, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-int/artifacts/contracts/node-contract-compile-003/task-contract.json, .agent/workstreams/ws-int/artifacts/contracts/node-contract-compile-003/contract-resolution.json], inputTransition={condition=unconditional, source_node_sha256=3222c48e2ceaf2e202931134f4b3fe80f5e73cb5efcc5614f8531c46b8adc971, source_node_instance_id=node-gate-plan-004, transition_type=normal, required=true}, outputRefs=[.agent/workstreams/ws-int/runs/setup-run-1/outputs/result.json, .agent/workstreams/ws-int/artifacts/contract-failures/node-design-claude_design-005.json, .agent/workstreams/ws-int/artifacts/contract-failures/node-design-claude_design-005.md], result={agent_execution_artifact_contract_results=[{contractType=design_result, errorCode=AGENT_RESULT_PARSE_FAILED, errorMessage=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 512] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 512] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-int/artifacts/contract-failures/node-design-claude_design-005.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-int/artifacts/contract-failures/node-design-claude_design-005.json, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], exit_code=0, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 512] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), parse_error={code=AGENT_RESULT_PARSE_FAILED, details={}, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 512] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-1, run_metadata=.agent/workstreams/ws-int/runs/setup-run-1/run.json, completion_ref=.agent/workstreams/ws-int/runs/setup-run-1/outputs/nxe-1791287491404-ddbec90c-completion.json, completion_sha256=54cdcc95667403d3fa2ce5a2a945b840e8b2d7051ad0d208bff6e35d57e38ed9}, runRef=null, latestExecutionId=nxe-1791287491404-ddbec90c, startedAt=2026-10-06T11:51:31.405784Z, finishedAt=2026-10-06T11:51:31.427304Z] ==> expected: <RUNNING> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.before(AuthoredStageSequenceTest.java:446)
+	at dev.dual.runtime.handler.TaskContractProjectionFixture.seedCompileBinding(TaskContractProjectionFixture.java:39)
+	at dev.dual.runtime.handler.WorkflowIntegrationTest.chain7_multiProfileGovernance(WorkflowIntegrationTest.java:540)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.ContextBuildPackageHandlerTest
+[ERROR] Tests run: 61, Failures: 7, Errors: 8, Skipped: 0, Time elapsed: 1.660 s <<< FAILURE! -- in dev.dual.runtime.handler.ContextBuildPackageHandlerTest
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceProfileRendersReviewEvidenceBriefWithChangedFiles -- Time elapsed: 0.093 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-005, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-design, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/task-contract.json, .agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/contract-resolution.json], inputTransition={condition=unconditional, source_node_sha256=61dce7ea5ae74981cd4be8de13106de150468c59b4040499a9c9a27869749a7e, source_node_instance_id=node-gate-plan-004, transition_type=normal, required=true}, outputRefs=[.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/result.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md], result={agent_execution_artifact_contract_results=[{contractType=design_result, errorCode=AGENT_RESULT_PARSE_FAILED, errorMessage=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 511] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 511] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], exit_code=0, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 511] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), parse_error={code=AGENT_RESULT_PARSE_FAILED, details={}, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 511] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-1, run_metadata=.agent/workstreams/ws-ctx/runs/setup-run-1/run.json, completion_ref=.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/nxe-1791287491511-061f5824-completion.json, completion_sha256=6cc1373246ba073918d5411b4dc659f05342395c4206da1908e030829a80867c}, runRef=null, latestExecutionId=nxe-1791287491511-061f5824, startedAt=2026-10-06T11:51:31.512368Z, finishedAt=2026-10-06T11:51:31.532631Z] ==> expected: <RUNNING> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.before(AuthoredStageSequenceTest.java:446)
+	at dev.dual.runtime.handler.TaskContractProjectionFixture.seedCompileBinding(TaskContractProjectionFixture.java:39)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceProfileRendersReviewEvidenceBriefWithChangedFiles(ContextBuildPackageHandlerTest.java:535)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.governedPackageWritesRepoScopeGovernanceArtifacts -- Time elapsed: 0.007 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.governedPackageWritesRepoScopeGovernanceArtifacts(ContextBuildPackageHandlerTest.java:1908)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceAlsoPreservesFeedbackAfterEnoughTrimming -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalArgumentException: required_contract_phase is missing: ctx.test
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:66)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.assertMinimalBudgetTrimming(ContextBuildPackageHandlerTest.java:1317)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceAlsoPreservesFeedbackAfterEnoughTrimming(ContextBuildPackageHandlerTest.java:1302)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.planReviewRendersTypedPlanFromValidatedAgentEvidence -- Time elapsed: 0.239 s <<< ERROR!
+java.lang.IllegalStateException: routed agent evidence sidecar is unreadable: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-17244043330996853892/.agent/workstreams/ws-ctx/runs/run-plan/outputs/plan-claude.contract.json
+	at dev.dual.runtime.handler.AgentEvidenceIndex.readEntry(AgentEvidenceIndex.java:186)
+	at dev.dual.runtime.handler.AgentEvidenceIndex.lambda$fromRefs$1(AgentEvidenceIndex.java:40)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.DistinctOps$1$2.accept(DistinctOps.java:174)
+	at java.base/java.util.stream.Streams$StreamBuilderImpl.forEachRemaining(Streams.java:411)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:803)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.AbstractList$RandomAccessSpliterator.forEachRemaining(AbstractList.java:722)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:635)
+	at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:291)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:652)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:658)
+	at java.base/java.util.stream.ReferencePipeline.toList(ReferencePipeline.java:663)
+	at dev.dual.runtime.handler.AgentEvidenceIndex.fromRefs(AgentEvidenceIndex.java:43)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.missingRequiredAgentEvidence(ContextBuildPackageHandler.java:1026)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:105)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.planReviewRendersTypedPlanFromValidatedAgentEvidence(ContextBuildPackageHandlerTest.java:275)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceDoesNotAcceptMatchingDecisionFromWrongProducer -- Time elapsed: 0.016 s <<< ERROR!
+java.lang.IllegalArgumentException: required_contract_phase is missing: ctx.acceptance
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:66)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceDoesNotAcceptMatchingDecisionFromWrongProducer(ContextBuildPackageHandlerTest.java:227)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.inputArtifactAgentOutputUsesSidecarSummaryInsteadOfRawBody -- Time elapsed: 0.016 s <<< ERROR!
+java.io.IOException: ledger already initialized
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:75)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:277)
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:286)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:168)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:337)
+	at dev.dual.runtime.handler.TaskContractProjectionFixture.seedCompileBinding(TaskContractProjectionFixture.java:27)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.inputArtifactAgentOutputUsesSidecarSummaryInsteadOfRawBody(ContextBuildPackageHandlerTest.java:943)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.implementTargetDoesNotReceiveTypedSourceRereadAllowance -- Time elapsed: 0.509 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.implementTargetDoesNotReceiveTypedSourceRereadAllowance(ContextBuildPackageHandlerTest.java:2276)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceRendersCompletedSelfTestEvidenceFromRoutedSidecar -- Time elapsed: 0.016 s <<< ERROR!
+java.lang.IllegalArgumentException: required_contract_phase is missing: ctx.acceptance
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:66)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceRendersCompletedSelfTestEvidenceFromRoutedSidecar(ContextBuildPackageHandlerTest.java:190)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.observedAndHeuristicFilesCannotExpandCanonicalChangeBoundary -- Time elapsed: 0.005 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <[src/allowed.java, docs/API contract.md]> but was: <[]>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.observedAndHeuristicFilesCannotExpandCanonicalChangeBoundary(ContextBuildPackageHandlerTest.java:2145)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.governedStageGuidanceContainsNoReadAuthority -- Time elapsed: 0.008 s <<< ERROR!
+java.lang.IllegalArgumentException: required_contract_phase is missing: ctx.test
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:66)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.governedStageGuidanceContainsNoReadAuthority(ContextBuildPackageHandlerTest.java:2023)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.taskContractSectionIncludesContractResolution -- Time elapsed: 0.093 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-005, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-design, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/task-contract.json, .agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/contract-resolution.json], inputTransition={condition=unconditional, source_node_sha256=32140e039af682ded6b5ff5000b77373a176814b4edbc6bd0c86364b084de988, source_node_instance_id=node-gate-plan-004, transition_type=normal, required=true}, outputRefs=[.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/result.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md], result={agent_execution_artifact_contract_results=[{contractType=design_result, errorCode=AGENT_RESULT_PARSE_FAILED, errorMessage=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 520] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 520] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], exit_code=0, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 520] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), parse_error={code=AGENT_RESULT_PARSE_FAILED, details={}, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 520] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-1, run_metadata=.agent/workstreams/ws-ctx/runs/setup-run-1/run.json, completion_ref=.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/nxe-1791287492670-e41f42bd-completion.json, completion_sha256=6aff2b1a15329e47594f421511df4450c00d2fc5ed8f61f147b6dc20b231a3ef}, runRef=null, latestExecutionId=nxe-1791287492670-e41f42bd, startedAt=2026-10-06T11:51:32.671799Z, finishedAt=2026-10-06T11:51:32.691828Z] ==> expected: <RUNNING> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.before(AuthoredStageSequenceTest.java:446)
+	at dev.dual.runtime.handler.TaskContractProjectionFixture.seedCompileBinding(TaskContractProjectionFixture.java:39)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.taskContractSectionIncludesContractResolution(ContextBuildPackageHandlerTest.java:1479)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptancePreservesQualifiedContractBeyondSoftBudgetAndRecordsWarning -- Time elapsed: 0.093 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-005, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-design, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/task-contract.json, .agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/contract-resolution.json], inputTransition={condition=unconditional, source_node_sha256=5a3b7e5fd616b656e0cfc9a364cc045978a7d5cb4debf0b1ffc6b8c4218fe791, source_node_instance_id=node-gate-plan-004, transition_type=normal, required=true}, outputRefs=[.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/result.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md], result={agent_execution_artifact_contract_results=[{contractType=design_result, errorCode=AGENT_RESULT_PARSE_FAILED, errorMessage=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 513] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 513] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], exit_code=0, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 513] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), parse_error={code=AGENT_RESULT_PARSE_FAILED, details={}, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 513] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-1, run_metadata=.agent/workstreams/ws-ctx/runs/setup-run-1/run.json, completion_ref=.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/nxe-1791287492827-71d7d68a-completion.json, completion_sha256=845c2256286dc29af4099258fb14b4d717ea4e8cb393542d68897aebb4272e02}, runRef=null, latestExecutionId=nxe-1791287492827-71d7d68a, startedAt=2026-10-06T11:51:32.827867Z, finishedAt=2026-10-06T11:51:32.847622Z] ==> expected: <RUNNING> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.before(AuthoredStageSequenceTest.java:446)
+	at dev.dual.runtime.handler.TaskContractProjectionFixture.seedCompileBinding(TaskContractProjectionFixture.java:39)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptancePreservesQualifiedContractBeyondSoftBudgetAndRecordsWarning(ContextBuildPackageHandlerTest.java:2337)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.architectureReviewSubjectKeepsLargeValidatedChecksAndEvidenceOutsideSummaryBudget -- Time elapsed: 0.056 s <<< ERROR!
+java.lang.IllegalStateException: routed agent evidence lineage is invalid: sidecar source is not published by the ledger node occurrence
+	at dev.dual.runtime.handler.AgentEvidenceIndex.readEntry(AgentEvidenceIndex.java:186)
+	at dev.dual.runtime.handler.AgentEvidenceIndex.lambda$fromRefs$1(AgentEvidenceIndex.java:40)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.DistinctOps$1$2.accept(DistinctOps.java:174)
+	at java.base/java.util.stream.Streams$StreamBuilderImpl.forEachRemaining(Streams.java:411)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:803)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.AbstractList$RandomAccessSpliterator.forEachRemaining(AbstractList.java:722)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:635)
+	at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:291)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:652)
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:658)
+	at java.base/java.util.stream.ReferencePipeline.toList(ReferencePipeline.java:663)
+	at dev.dual.runtime.handler.AgentEvidenceIndex.fromRefs(AgentEvidenceIndex.java:43)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.resolveRequiredArchitectureReviewSubject(ContextBuildPackageHandler.java:951)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:86)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.architectureReviewSubjectKeepsLargeValidatedChecksAndEvidenceOutsideSummaryBudget(ContextBuildPackageHandlerTest.java:700)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.canonicalScopeIsNotTruncatedByRecommendationLimit -- Time elapsed: 0.004 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: canonical contract scope must not inherit the 24-file recommendation limit ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.canonicalScopeIsNotTruncatedByRecommendationLimit(ContextBuildPackageHandlerTest.java:2189)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceRequiresCompletedSelfTestEvidenceBeforeReviewerStarts -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalArgumentException: required_contract_phase is missing: ctx.acceptance
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+	at dev.dual.runtime.handler.ContextBuildPackageHandler.execute(ContextBuildPackageHandler.java:66)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.acceptanceRequiresCompletedSelfTestEvidenceBeforeReviewerStarts(ContextBuildPackageHandlerTest.java:148)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.LegacyContractConsumerRejectionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.724 s -- in dev.dual.runtime.handler.LegacyContractConsumerRejectionTest
+[INFO] Running dev.dual.runtime.WorkflowRuntimeTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.758 s -- in dev.dual.runtime.WorkflowRuntimeTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   ContextBuildPackageHandlerTest.acceptancePreservesQualifiedContractBeyondSoftBudgetAndRecordsWarning:2337 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-005, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-design, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/task-contract.json, .agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/contract-resolution.json], inputTransition={condition=unconditional, source_node_sha256=5a3b7e5fd616b656e0cfc9a364cc045978a7d5cb4debf0b1ffc6b8c4218fe791, source_node_instance_id=node-gate-plan-004, transition_type=normal, required=true}, outputRefs=[.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/result.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md], result={agent_execution_artifact_contract_results=[{contractType=design_result, errorCode=AGENT_RESULT_PARSE_FAILED, errorMessage=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 513] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 513] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], exit_code=0, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 513] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), parse_error={code=AGENT_RESULT_PARSE_FAILED, details={}, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 513] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-1, run_metadata=.agent/workstreams/ws-ctx/runs/setup-run-1/run.json, completion_ref=.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/nxe-1791287492827-71d7d68a-completion.json, completion_sha256=845c2256286dc29af4099258fb14b4d717ea4e8cb393542d68897aebb4272e02}, runRef=null, latestExecutionId=nxe-1791287492827-71d7d68a, startedAt=2026-10-06T11:51:32.827867Z, finishedAt=2026-10-06T11:51:32.847622Z] ==> expected: <RUNNING> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   ContextBuildPackageHandlerTest.acceptanceProfileRendersReviewEvidenceBriefWithChangedFiles:535 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-005, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-design, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/task-contract.json, .agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/contract-resolution.json], inputTransition={condition=unconditional, source_node_sha256=61dce7ea5ae74981cd4be8de13106de150468c59b4040499a9c9a27869749a7e, source_node_instance_id=node-gate-plan-004, transition_type=normal, required=true}, outputRefs=[.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/result.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md], result={agent_execution_artifact_contract_results=[{contractType=design_result, errorCode=AGENT_RESULT_PARSE_FAILED, errorMessage=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 511] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 511] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], exit_code=0, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 511] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), parse_error={code=AGENT_RESULT_PARSE_FAILED, details={}, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 511] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-1, run_metadata=.agent/workstreams/ws-ctx/runs/setup-run-1/run.json, completion_ref=.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/nxe-1791287491511-061f5824-completion.json, completion_sha256=6cc1373246ba073918d5411b4dc659f05342395c4206da1908e030829a80867c}, runRef=null, latestExecutionId=nxe-1791287491511-061f5824, startedAt=2026-10-06T11:51:31.512368Z, finishedAt=2026-10-06T11:51:31.532631Z] ==> expected: <RUNNING> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   ContextBuildPackageHandlerTest.canonicalScopeIsNotTruncatedByRecommendationLimit:2189 canonical contract scope must not inherit the 24-file recommendation limit ==> expected: <true> but was: <false>
+[ERROR]   ContextBuildPackageHandlerTest.governedPackageWritesRepoScopeGovernanceArtifacts:1908 expected: <true> but was: <false>
+[ERROR]   ContextBuildPackageHandlerTest.implementTargetDoesNotReceiveTypedSourceRereadAllowance:2276 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   ContextBuildPackageHandlerTest.observedAndHeuristicFilesCannotExpandCanonicalChangeBoundary:2145 expected: <[src/allowed.java, docs/API contract.md]> but was: <[]>
+[ERROR]   ContextBuildPackageHandlerTest.taskContractSectionIncludesContractResolution:1479 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-005, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-design, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/task-contract.json, .agent/workstreams/ws-ctx/artifacts/contracts/node-contract-compile-003/contract-resolution.json], inputTransition={condition=unconditional, source_node_sha256=32140e039af682ded6b5ff5000b77373a176814b4edbc6bd0c86364b084de988, source_node_instance_id=node-gate-plan-004, transition_type=normal, required=true}, outputRefs=[.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/result.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, .agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md], result={agent_execution_artifact_contract_results=[{contractType=design_result, errorCode=AGENT_RESULT_PARSE_FAILED, errorMessage=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 520] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 520] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-ctx/artifacts/contract-failures/node-design-claude_design-005.json, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], exit_code=0, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 520] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), parse_error={code=AGENT_RESULT_PARSE_FAILED, details={}, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 520] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-1, run_metadata=.agent/workstreams/ws-ctx/runs/setup-run-1/run.json, completion_ref=.agent/workstreams/ws-ctx/runs/setup-run-1/outputs/nxe-1791287492670-e41f42bd-completion.json, completion_sha256=6aff2b1a15329e47594f421511df4450c00d2fc5ed8f61f147b6dc20b231a3ef}, runRef=null, latestExecutionId=nxe-1791287492670-e41f42bd, startedAt=2026-10-06T11:51:32.671799Z, finishedAt=2026-10-06T11:51:32.691828Z] ==> expected: <RUNNING> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   WorkflowIntegrationTest.chain1_contextBuildToDecision:76 expected: <true> but was: <false>
+[ERROR]   WorkflowIntegrationTest.chain3_activeProfileBudgetExcludesDuplicateRequirement:270 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   WorkflowIntegrationTest.chain4_explicitFullProfileCompressesOversizedRequirement:305 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   WorkflowIntegrationTest.chain5_needsRevisionLoopWithContextCarryover:414 Requirement must be present ==> expected: <true> but was: <false>
+[ERROR]   WorkflowIntegrationTest.chain7_multiProfileGovernance:540 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-005, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-design, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-int/artifacts/contracts/node-contract-compile-003/task-contract.json, .agent/workstreams/ws-int/artifacts/contracts/node-contract-compile-003/contract-resolution.json], inputTransition={condition=unconditional, source_node_sha256=3222c48e2ceaf2e202931134f4b3fe80f5e73cb5efcc5614f8531c46b8adc971, source_node_instance_id=node-gate-plan-004, transition_type=normal, required=true}, outputRefs=[.agent/workstreams/ws-int/runs/setup-run-1/outputs/result.json, .agent/workstreams/ws-int/artifacts/contract-failures/node-design-claude_design-005.json, .agent/workstreams/ws-int/artifacts/contract-failures/node-design-claude_design-005.md], result={agent_execution_artifact_contract_results=[{contractType=design_result, errorCode=AGENT_RESULT_PARSE_FAILED, errorMessage=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 512] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 512] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-int/artifacts/contract-failures/node-design-claude_design-005.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-int/artifacts/contract-failures/node-design-claude_design-005.json, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], exit_code=0, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 512] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"]), parse_error={code=AGENT_RESULT_PARSE_FAILED, details={}, message=Unrecognized field "change" (class dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile), not marked as ignorable (3 known properties: "path", "responsibility", "operation"])
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 512] (through reference chain: dev.dual.runtime.handler.AgentResultEnvelope["result"]->dev.dual.runtime.handler.AgentResultEnvelope$DesignResult["design"]->dev.dual.runtime.handler.AgentResultEnvelope$Design["planned_files"]->java.util.ArrayList[0]->dev.dual.runtime.handler.AgentResultEnvelope$PlannedFile["change"])}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-1, run_metadata=.agent/workstreams/ws-int/runs/setup-run-1/run.json, completion_ref=.agent/workstreams/ws-int/runs/setup-run-1/outputs/nxe-1791287491404-ddbec90c-completion.json, completion_sha256=54cdcc95667403d3fa2ce5a2a945b840e8b2d7051ad0d208bff6e35d57e38ed9}, runRef=null, latestExecutionId=nxe-1791287491404-ddbec90c, startedAt=2026-10-06T11:51:31.405784Z, finishedAt=2026-10-06T11:51:31.427304Z] ==> expected: <RUNNING> but was: <WAITING_FOR_RECOVERY>
+[ERROR] Errors: 
+[ERROR]   ContextBuildPackageHandlerTest.acceptanceAlsoPreservesFeedbackAfterEnoughTrimming:1302->assertMinimalBudgetTrimming:1317 » IllegalArgument required_contract_phase is missing: ctx.test
+[ERROR]   ContextBuildPackageHandlerTest.acceptanceDoesNotAcceptMatchingDecisionFromWrongProducer:227 » IllegalArgument required_contract_phase is missing: ctx.acceptance
+[ERROR]   ContextBuildPackageHandlerTest.acceptanceRendersCompletedSelfTestEvidenceFromRoutedSidecar:190 » IllegalArgument required_contract_phase is missing: ctx.acceptance
+[ERROR]   ContextBuildPackageHandlerTest.acceptanceRequiresCompletedSelfTestEvidenceBeforeReviewerStarts:148 » IllegalArgument required_contract_phase is missing: ctx.acceptance
+[ERROR]   ContextBuildPackageHandlerTest.architectureReviewSubjectKeepsLargeValidatedChecksAndEvidenceOutsideSummaryBudget:700 » IllegalState routed agent evidence lineage is invalid: sidecar source is not published by the ledger node occurrence
+[ERROR]   ContextBuildPackageHandlerTest.governedStageGuidanceContainsNoReadAuthority:2023 » IllegalArgument required_contract_phase is missing: ctx.test
+[ERROR]   ContextBuildPackageHandlerTest.inputArtifactAgentOutputUsesSidecarSummaryInsteadOfRawBody:943 » IO ledger already initialized
+[ERROR]   ContextBuildPackageHandlerTest.planReviewRendersTypedPlanFromValidatedAgentEvidence:275 » IllegalState routed agent evidence sidecar is unreadable: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-17244043330996853892/.agent/workstreams/ws-ctx/runs/run-plan/outputs/plan-claude.contract.json
+[INFO] 
+[ERROR] Tests run: 90, Failures: 12, Errors: 8, Skipped: 0
+[INFO] 
+[ERROR] There are test failures.
+
+See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/surefire-reports for the individual test results.
+See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-acpx >---------------------
+[INFO] Building dual-adapter-acpx 0.1.0-SNAPSHOT                          [7/7]
+[INFO]   from dual-adapter-acpx/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-acpx ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 11 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-acpx ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-acpx ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-acpx ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 37 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-acpx ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.30 s -- in dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest
+[INFO] Running dev.dual.adapter.acpx.AuthoredManifestDispatchTest
+[ERROR] Tests run: 11, Failures: 1, Errors: 8, Skipped: 0, Time elapsed: 0.662 s <<< FAILURE! -- in dev.dual.adapter.acpx.AuthoredManifestDispatchTest
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(boolean)[1] -- Time elapsed: 0.061 s <<< ERROR!
+java.io.IOException: INVALID_LEDGER_SCHEMA: automatic migration is not supported
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:426)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(AuthoredManifestDispatchTest.java:33)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(boolean)[2] -- Time elapsed: 0.058 s <<< ERROR!
+java.io.IOException: INVALID_LEDGER_SCHEMA: automatic migration is not supported
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:426)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(AuthoredManifestDispatchTest.java:33)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider(boolean)[1] -- Time elapsed: 0.060 s <<< ERROR!
+java.io.IOException: INVALID_LEDGER_SCHEMA: automatic migration is not supported
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:426)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider(AuthoredManifestDispatchTest.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider(boolean)[2] -- Time elapsed: 0.056 s <<< ERROR!
+java.io.IOException: INVALID_LEDGER_SCHEMA: automatic migration is not supported
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:426)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider(AuthoredManifestDispatchTest.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.prepareOnlyWritesAndReadsTheSameManifestWithoutProvider -- Time elapsed: 0.066 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: {errors=[INVALID_LEDGER_SCHEMA: automatic migration is not supported], reason=REQUIRED_AGENT_EVIDENCE_MISSING, input_preparation_failure={details=[INVALID_LEDGER_SCHEMA: automatic migration is not supported], providerInvoked=false, retryPolicy=MANUAL_ONLY, code=AUTHORED_CONTEXT_INVALID, reason=REQUIRED_AGENT_EVIDENCE_MISSING}, failure_code=AUTHORED_CONTEXT_INVALID} ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.prepareOnlyWritesAndReadsTheSameManifestWithoutProvider(AuthoredManifestDispatchTest.java:84)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider(boolean)[1] -- Time elapsed: 0.061 s <<< ERROR!
+java.io.IOException: INVALID_LEDGER_SCHEMA: automatic migration is not supported
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:426)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertWriteFailure(AuthoredManifestDispatchTest.java:72)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider(AuthoredManifestDispatchTest.java:48)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider(boolean)[2] -- Time elapsed: 0.056 s <<< ERROR!
+java.io.IOException: INVALID_LEDGER_SCHEMA: automatic migration is not supported
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:426)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertWriteFailure(AuthoredManifestDispatchTest.java:72)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider(AuthoredManifestDispatchTest.java:48)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(boolean)[1] -- Time elapsed: 0.058 s <<< ERROR!
+java.io.IOException: INVALID_LEDGER_SCHEMA: automatic migration is not supported
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:426)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(AuthoredManifestDispatchTest.java:38)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(boolean)[2] -- Time elapsed: 0.055 s <<< ERROR!
+java.io.IOException: INVALID_LEDGER_SCHEMA: automatic migration is not supported
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:426)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(AuthoredManifestDispatchTest.java:38)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   AuthoredManifestDispatchTest.prepareOnlyWritesAndReadsTheSameManifestWithoutProvider:84 {errors=[INVALID_LEDGER_SCHEMA: automatic migration is not supported], reason=REQUIRED_AGENT_EVIDENCE_MISSING, input_preparation_failure={details=[INVALID_LEDGER_SCHEMA: automatic migration is not supported], providerInvoked=false, retryPolicy=MANUAL_ONLY, code=AUTHORED_CONTEXT_INVALID, reason=REQUIRED_AGENT_EVIDENCE_MISSING}, failure_code=AUTHORED_CONTEXT_INVALID} ==> expected: <COMPLETED> but was: <FAILED>
+[ERROR] Errors: 
+[ERROR]   AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider:33->assertRejected:116->execute:129 » IO INVALID_LEDGER_SCHEMA: automatic migration is not supported
+[ERROR]   AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider:33->assertRejected:116->execute:129 » IO INVALID_LEDGER_SCHEMA: automatic migration is not supported
+[ERROR]   AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider:48->assertWriteFailure:72->execute:129 » IO INVALID_LEDGER_SCHEMA: automatic migration is not supported
+[ERROR]   AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider:48->assertWriteFailure:72->execute:129 » IO INVALID_LEDGER_SCHEMA: automatic migration is not supported
+[ERROR]   AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider:43->assertRejected:116->execute:129 » IO INVALID_LEDGER_SCHEMA: automatic migration is not supported
+[ERROR]   AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider:43->assertRejected:116->execute:129 » IO INVALID_LEDGER_SCHEMA: automatic migration is not supported
+[ERROR]   AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider:38->assertRejected:116->execute:129 » IO INVALID_LEDGER_SCHEMA: automatic migration is not supported
+[ERROR]   AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider:38->assertRejected:116->execute:129 » IO INVALID_LEDGER_SCHEMA: automatic migration is not supported
+[INFO] 
+[ERROR] Tests run: 21, Failures: 1, Errors: 8, Skipped: 0
+[INFO] 
+[ERROR] There are test failures.
+
+See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target/surefire-reports for the individual test results.
+See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.228 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  0.027 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  0.051 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  0.014 s]
+[INFO] dual-runtime ....................................... SUCCESS [ 38.951 s]
+[INFO] dual-adapter-acpx .................................. SUCCESS [ 14.658 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  54.081 s
+[INFO] Finished at: 2026-10-06T19:51:49+08:00
+[INFO] ------------------------------------------------------------------------

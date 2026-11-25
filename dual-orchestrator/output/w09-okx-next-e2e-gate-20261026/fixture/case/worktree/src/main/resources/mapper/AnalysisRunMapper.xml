@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="app.cryptoincome.run.infrastructure.mybatis.AnalysisRunMapper">
+    <insert id="insertOrGetId" parameterType="app.cryptoincome.run.infrastructure.mybatis.AnalysisRunEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO analysis_run (idempotency_key, run_type, mode)
+        VALUES (#{idempotencyKey}, #{runType}, #{mode})
+        ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)
+    </insert>
+
+    <insert id="insertNew" parameterType="app.cryptoincome.run.infrastructure.mybatis.AnalysisRunEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO analysis_run (
+            sync_request_id, attempt_no, idempotency_key, run_type, mode
+        ) VALUES (
+            #{syncRequestId}, #{attemptNo}, #{idempotencyKey}, #{runType}, #{mode}
+        )
+    </insert>
+
+    <insert id="insertBackfillRun" parameterType="app.cryptoincome.run.infrastructure.mybatis.AnalysisRunEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO analysis_run (
+            backfill_request_id, attempt_no, idempotency_key, run_type, mode
+        ) VALUES (
+            #{backfillRequestId}, #{attemptNo}, #{idempotencyKey}, #{runType}, #{mode}
+        )
+    </insert>
+
+    <select id="selectById" resultType="app.cryptoincome.run.infrastructure.mybatis.AnalysisRunEntity">
+        SELECT * FROM analysis_run WHERE id = #{id}
+    </select>
+
+    <select id="selectBySyncRequestAndAttempt"
+            resultType="app.cryptoincome.run.infrastructure.mybatis.AnalysisRunEntity">
+        SELECT * FROM analysis_run
+        WHERE sync_request_id = #{syncRequestId} AND attempt_no = #{attemptNo}
+    </select>
+
+    <select id="selectByBackfillRequestAndAttempt"
+            resultType="app.cryptoincome.run.infrastructure.mybatis.AnalysisRunEntity">
+        SELECT * FROM analysis_run
+        WHERE backfill_request_id = #{backfillRequestId} AND attempt_no = #{attemptNo}
+    </select>
+
+    <select id="selectLastByBackfillRequest"
+            resultType="app.cryptoincome.run.infrastructure.mybatis.AnalysisRunEntity">
+        SELECT * FROM analysis_run
+        WHERE backfill_request_id = #{backfillRequestId}
+        ORDER BY attempt_no DESC LIMIT 1
+    </select>
+
+    <select id="selectByIdempotencyKey"
+            resultType="app.cryptoincome.run.infrastructure.mybatis.AnalysisRunEntity">
+        SELECT * FROM analysis_run WHERE idempotency_key = #{idempotencyKey}
+    </select>
+
+    <update id="transitionToRunning">
+        UPDATE analysis_run
+        SET status = 'RUNNING', started_at = CURRENT_TIMESTAMP(6)
+        WHERE id = #{id} AND status = 'CREATED'
+    </update>
+
+    <update id="transitionToSucceeded">
+        UPDATE analysis_run
+        SET status = 'SUCCEEDED', completed_at = CURRENT_TIMESTAMP(6)
+        WHERE id = #{id} AND status = 'RUNNING'
+    </update>
+
+    <update id="transitionToFailed">
+        UPDATE analysis_run
+        SET status = 'FAILED',
+            completed_at = CURRENT_TIMESTAMP(6),
+            failure_code = #{failureCode},
+            failure_detail = #{failureDetail}
+        WHERE id = #{id} AND status = 'RUNNING'
+    </update>
+
+    <update id="failStaleIfOlderThan">
+        UPDATE analysis_run
+        SET status = 'FAILED',
+            completed_at = CURRENT_TIMESTAMP(6),
+            failure_code = #{failureCode},
+            failure_detail = #{failureDetail}
+        WHERE id = #{id} AND status = 'RUNNING'
+          AND started_at &lt; CURRENT_TIMESTAMP(6) - INTERVAL #{micros} MICROSECOND
+    </update>
+</mapper>

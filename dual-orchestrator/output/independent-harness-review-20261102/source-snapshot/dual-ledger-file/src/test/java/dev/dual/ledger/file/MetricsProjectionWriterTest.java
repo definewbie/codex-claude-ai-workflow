@@ -1,0 +1,1234 @@
+package dev.dual.ledger.file;
+
+import dev.dual.core.id.DualId;
+import dev.dual.core.workflow.NodeKind;
+import dev.dual.core.workflow.NodeStatus;
+import dev.dual.core.workflow.WorkflowStatus;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class MetricsProjectionWriterTest {
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void projectsTokenUsageByRunAgentAndNode() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-token"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1,
+                "ws-token",
+                "wf-instance",
+                "agent-lifecycle",
+                1,
+                WorkflowStatus.RUNNING,
+                List.of("node-intake-001"),
+                List.of(),
+                "evt-1",
+                Instant.parse("2026-06-19T00:00:00Z")
+        ));
+        jsonWriter.write(paths.nodeJson("node-intake-001"), node("node-intake-001", "intake.claude_brainstorm"));
+        jsonWriter.write(paths.nodeJson("node-review-002"), node("node-review-002", "design.codex_review"));
+        writeRun(paths, "run-1", "claude", "intake.claude_brainstorm", 100, 20, 10, 0, 130, "USD", "0.13");
+        writeRun(paths, "run-2", "codex", "design.codex_review", 80, 30, 0, 5, 115, "USD", "0.11");
+        writeRun(paths, "run-snapshot", "codex", "acceptance.codex_review", Map.of(
+                "inputTokens", 0,
+                "outputTokens", 0,
+                "cachedReadTokens", 0,
+                "cachedWriteTokens", 0,
+                "totalTokens", 0,
+                "contextUsedTokens", 50000,
+                "source", "acpx_usage_update",
+                "measurementType", "SESSION_USED_SNAPSHOT",
+                "cumulative", true
+        ));
+        writeRun(paths, "run-unavailable", "claude", "implement.claude_implement", Map.of(
+                "inputTokens", 0,
+                "outputTokens", 0,
+                "cachedReadTokens", 0,
+                "cachedWriteTokens", 0,
+                "totalTokens", 0,
+                "source", "not_available",
+                "measurementType", "UNAVAILABLE",
+                "unavailableReason", "AGENT_RECONNECT_REQUIRED"
+        ));
+        writeArtifactMetadata(paths, mapper, "run-2", "promptMetadataPath", "prompt.json", 900);
+        writeArtifactMetadata(paths, mapper, "run-2", "outputMetadataPath", "output.json", 40);
+        writeContextPackageMetadata(paths, mapper, "context-design-review.json", "design.codex_review");
+        writeRunWithoutUsage(paths, "run-3", "claude", "plan.claude_plan");
+        writeArtifactMetadata(paths, mapper, "run-3", "promptMetadataPath", "prompt.json", 1000);
+        writeArtifactMetadata(paths, mapper, "run-3", "outputMetadataPath", "output.json", 200);
+        writeArtifactMetadata(paths, mapper, "run-3", "transcriptMetadataPath", "transcript.json", 5000);
+        appendToolUsage(paths, mapper, "run-1", 3, 2, 0, 1, List.of("README.md", "src/main.js"), List.of("git status --short"));
+        appendToolUsage(paths, mapper, "run-2", 2, 2, 0, 0, List.of("README.md", "docs/spec.md"), List.of());
+        appendExecutionTimeline(paths, mapper, "run-1");
+        writeEvidenceManifest(paths, mapper, List.of("README.md", "docs/spec.md"));
+        writeReadReuseContract(paths, mapper, List.of("README.md"));
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var tokenMetrics = map(metrics.get("tokenMetrics"));
+        assertEquals(5, number(tokenMetrics.get("runCount")));
+        assertEquals(2, number(tokenMetrics.get("measuredRunCount")));
+        assertEquals(1, number(tokenMetrics.get("sessionSnapshotRunCount")));
+        assertEquals(1, number(tokenMetrics.get("estimatedRunCount")));
+
+        var total = map(tokenMetrics.get("total"));
+        assertEquals(180, number(total.get("inputTokens")));
+        assertEquals(50, number(total.get("outputTokens")));
+        assertEquals(10, number(total.get("cachedReadTokens")));
+        assertEquals(5, number(total.get("cachedWriteTokens")));
+        assertEquals(245, number(total.get("totalTokens")));
+        assertEquals("0.24", map(total.get("costByCurrency")).get("USD").toString());
+
+        var estimatedTotal = map(tokenMetrics.get("estimatedTotal"));
+        assertEquals(1200, number(estimatedTotal.get("totalTokens")));
+
+        var byNode = map(tokenMetrics.get("byNode"));
+        assertEquals(130, number(map(byNode.get("intake.claude_brainstorm")).get("totalTokens")));
+        assertEquals(115, number(map(byNode.get("design.codex_review")).get("totalTokens")));
+        assertTrue(!byNode.containsKey("plan.claude_plan"));
+
+        var runs = list(tokenMetrics.get("runs"));
+        var snapshotRun = runs.stream()
+                .filter(run -> "acceptance.codex_review".equals(run.get("nodeId")))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(false, snapshotRun.get("aggregated"));
+        assertEquals("SESSION_USED_SNAPSHOT", map(snapshotRun.get("usage")).get("measurementType"));
+        assertEquals(50000, number(map(snapshotRun.get("usage")).get("contextUsedTokens")));
+        var unavailableRun = runs.stream()
+                .filter(run -> "implement.claude_implement".equals(run.get("nodeId")))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(false, unavailableRun.get("aggregated"));
+        assertEquals("UNAVAILABLE", map(unavailableRun.get("usage")).get("measurementType"));
+        assertEquals("AGENT_RECONNECT_REQUIRED", map(unavailableRun.get("usage")).get("unavailableReason"));
+        var codexRun = runs.stream()
+                .filter(run -> "design.codex_review".equals(run.get("nodeId")))
+                .findFirst()
+                .orElseThrow();
+        var breakdown = map(codexRun.get("breakdown"));
+        assertEquals(900, number(breakdown.get("promptTokens")));
+        assertEquals(600, number(breakdown.get("contextTokens")));
+        assertEquals(300, number(breakdown.get("promptOverheadTokens")));
+        assertEquals(0, number(breakdown.get("adapterOverheadTokens")));
+        assertEquals(40, number(breakdown.get("outputArtifactTokens")));
+        assertEquals("review", breakdown.get("contextProfile"));
+        var topSections = list(breakdown.get("topSections"));
+        assertEquals("recent_agent_outputs", topSections.get(0).get("section"));
+        assertEquals(420, number(topSections.get(0).get("renderedTokens")));
+
+        var globalTopSections = list(tokenMetrics.get("topContextSections"));
+        assertEquals("design.codex_review", globalTopSections.get(0).get("targetNode"));
+        assertEquals("recent_agent_outputs", globalTopSections.get(0).get("section"));
+
+        var toolMetrics = map(metrics.get("toolMetrics"));
+        assertEquals(5, number(toolMetrics.get("toolCallCount")));
+        assertEquals(4, number(toolMetrics.get("readCount")));
+        assertEquals(1, number(toolMetrics.get("bashCount")));
+        var repeatedReads = list(toolMetrics.get("repeatedReadFiles"));
+        assertEquals("README.md", repeatedReads.get(0).get("path"));
+        assertEquals(2, number(repeatedReads.get(0).get("count")));
+        assertEquals(true, repeatedReads.get(0).get("evidenceKnown"));
+        assertEquals(true, repeatedReads.get(0).get("rereadReasonRequired"));
+        assertEquals("missing", repeatedReads.get(0).get("rereadReasonStatus"));
+        assertEquals(1, number(toolMetrics.get("repeatedReadReasonRequiredCount")));
+        assertEquals(1, number(toolMetrics.get("missingRereadReasonCount")));
+        assertFalse(toolMetrics.containsKey("explorationPolicy"));
+
+        var attribution = map(metrics.get("tokenAttribution"));
+        var attributedRuns = list(attribution.get("perRun"));
+        var intakeAttribution = attributedRuns.stream()
+                .filter(run -> "run-1".equals(run.get("runId")))
+                .findFirst()
+                .orElseThrow();
+        var latency = map(intakeAttribution.get("executionLatency"));
+        assertEquals(1000, number(latency.get("totalDurationMs")));
+        assertEquals(100, number(latency.get("terminalDetectedMs")));
+        assertEquals(200, number(latency.get("processWaitCompletedMs")));
+        assertEquals(90, number(latency.get("processBeforeTerminalMs")));
+        assertEquals(700, number(latency.get("artifactExtractedMs")));
+        assertEquals(900, number(latency.get("contractValidatedMs")));
+        assertEquals(100, number(latency.get("terminalToProcessWaitMs")));
+        assertEquals(800, number(latency.get("terminalToContractMs")));
+        assertEquals("post_process", latency.get("dominantPhase"));
+        var executionLatency = map(attribution.get("executionLatency"));
+        var topExecutionRuns = list(executionLatency.get("topRuns"));
+        assertEquals("run-1", topExecutionRuns.get(0).get("runId"));
+        assertEquals("post_process", topExecutionRuns.get(0).get("dominantPhase"));
+
+        var visibility = map(map(metrics.get("tokenAttribution")).get("usageVisibility"));
+        assertEquals(1, number(map(visibility.get("byVisibility")).get("unavailable")));
+        var gaps = list(visibility.get("gaps"));
+        assertTrue(gaps.stream().anyMatch(gap ->
+                "implement.claude_implement".equals(gap.get("nodeId"))
+                        && "AGENT_RECONNECT_REQUIRED".equals(gap.get("reason"))));
+
+        var markdown = Files.readString(paths.workstreamMetricsMarkdown());
+        assertTrue(markdown.contains("## Token Metrics"));
+        assertTrue(markdown.contains("- Estimated Runs: 1"));
+        assertTrue(markdown.contains("- Session Snapshots: 1"));
+        assertTrue(markdown.contains("| intake.claude_brainstorm | claude | completed | - | acpx_stream | 100 | 20 | 0 | 0 | 0 | 100 | 130 |"));
+        assertTrue(markdown.contains("| design.codex_review | codex | completed | - | acpx_stream | 80 | 30 | 0 | 600 | 300 | 0 | 115 |"));
+        assertTrue(markdown.contains("| plan.claude_plan | claude | completed | - | artifact_estimate | 1000 | 200 | 5000 | 0 | 1000 | 0 | 1200 |"));
+        assertTrue(markdown.contains("### Top Context Sections"));
+        assertTrue(markdown.contains("| design.codex_review | review | recent_agent_outputs | 420 | 900 | true | false |"));
+        assertTrue(markdown.contains("## Tool Metrics"));
+        assertFalse(markdown.contains("Exploration Policy"));
+        assertTrue(markdown.contains("| README.md | 2 | claude, codex | intake.claude_brainstorm, design.codex_review | true | missing |"));
+    }
+
+    @Test
+    void repeatedReadWithMatchingRereadReasonIsRecorded() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reread"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        setupRereadFixture(paths, jsonWriter, mapper, List.of(Map.of(
+                "path", "README.md",
+                "reason", "exact current content is needed before editing")));
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var repeated = list(map(metrics.get("toolMetrics")).get("repeatedReadFiles"));
+        assertEquals("README.md", repeated.get(0).get("path"));
+        assertEquals("recorded", repeated.get(0).get("rereadReasonStatus"));
+    }
+
+    @Test
+    void repeatedReadWithoutRereadReasonIsMissing() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reread-missing"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        setupRereadFixture(paths, jsonWriter, mapper, null);
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var repeated = list(map(metrics.get("toolMetrics")).get("repeatedReadFiles"));
+        assertEquals("missing", repeated.get(0).get("rereadReasonStatus"));
+    }
+
+    @Test
+    void repeatedReadWithNonMatchingPathReasonIsMissing() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reread-other"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        setupRereadFixture(paths, jsonWriter, mapper, List.of(Map.of(
+                "path", "src/other.js",
+                "reason", "exact current content is needed before editing")));
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var repeated = list(map(metrics.get("toolMetrics")).get("repeatedReadFiles"));
+        assertEquals("README.md", repeated.get(0).get("path"));
+        assertEquals("missing", repeated.get(0).get("rereadReasonStatus"));
+    }
+
+    @Test
+    void canonicalPlanReferenceFileCannotExcuseMissingRereadReason() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reread-plan"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        setupRereadFixture(paths, jsonWriter, mapper, null);
+        Files.createDirectories(paths.workstreamDir().resolve("artifacts/plan"));
+        jsonWriter.write(paths.workstreamDir().resolve("artifacts/plan/plan_artifact.json"), Map.of(
+                "schemaVersion", 1,
+                "canonical_source", "plan.claude_plan",
+                "edit_files", List.of(),
+                "reference_files", List.of("README.md")
+        ));
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var toolMetrics = map(metrics.get("toolMetrics"));
+        var repeated = list(toolMetrics.get("repeatedReadFiles"));
+
+        assertEquals("README.md", repeated.get(0).get("path"));
+        assertEquals("missing", repeated.get(0).get("rereadReasonStatus"));
+        assertEquals(1, number(toolMetrics.get("missingRereadReasonCount")));
+        assertFalse(repeated.get(0).containsKey("planAuthorized"));
+    }
+
+    @Test
+    void canonicalPlanEditFileCannotExcuseMissingRereadReason() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reread-plan-edit"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        setupRereadFixture(paths, jsonWriter, mapper, null);
+        Files.createDirectories(paths.workstreamDir().resolve("artifacts/plan"));
+        jsonWriter.write(paths.workstreamDir().resolve("artifacts/plan/plan_artifact.json"), Map.of(
+                "schemaVersion", 1,
+                "canonical_source", "plan.claude_plan",
+                "edit_files", List.of("README.md"),
+                "reference_files", List.of()
+        ));
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var toolMetrics = map(metrics.get("toolMetrics"));
+        var repeated = list(toolMetrics.get("repeatedReadFiles"));
+
+        assertEquals("missing", repeated.get(0).get("rereadReasonStatus"));
+        assertEquals(1, number(toolMetrics.get("missingRereadReasonCount")));
+        assertFalse(repeated.get(0).containsKey("planAuthorized"));
+    }
+
+    @Test
+    void repeatedReadNotAuthorizedByCanonicalPlanRemainsMissing() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-reread-plan-control"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        setupRereadFixture(paths, jsonWriter, mapper, null);
+        Files.createDirectories(paths.workstreamDir().resolve("artifacts/plan"));
+        jsonWriter.write(paths.workstreamDir().resolve("artifacts/plan/plan_artifact.json"), Map.of(
+                "schemaVersion", 1,
+                "canonical_source", "plan.claude_plan",
+                "edit_files", List.of("src/other.js"),
+                "reference_files", List.of()
+        ));
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var toolMetrics = map(metrics.get("toolMetrics"));
+        var repeated = list(toolMetrics.get("repeatedReadFiles"));
+
+        assertEquals("missing", repeated.get(0).get("rereadReasonStatus"));
+        assertEquals(1, number(toolMetrics.get("missingRereadReasonCount")));
+    }
+
+    @Test
+    void stablePlanBytesCannotAffectRecordedMissingOrNotRequiredReadFacts() throws Exception {
+        for (var expected : List.of("missing", "recorded", "not_required")) {
+            var paths = new WorkstreamPaths(tempDir.resolve(expected), new DualId("ws-stable-plan"));
+            var writer = new AtomicJsonWriter();
+            var mapper = writer.objectMapper();
+            setupRereadFixture(paths, writer, mapper, expected.equals("recorded")
+                    ? List.of(Map.of("path", "README.md", "reason", "check current bytes")) : null);
+            if (expected.equals("not_required")) writeReadReuseContract(paths, mapper, List.of());
+            var projection = new MetricsProjectionWriter(writer, mapper);
+            projection.write(paths);
+            var baseline = map(mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class).get("toolMetrics"));
+            var repeated = list(baseline.get("repeatedReadFiles"));
+            assertEquals(expected, repeated.getFirst().get("rereadReasonStatus"));
+            assertFalse(repeated.getFirst().containsKey("planAuthorized"));
+            var stable = paths.workstreamDir().resolve("artifacts/plan/plan_artifact.json");
+            Files.createDirectories(stable.getParent());
+            for (var bytes : List.of("{\"edit_files\":[\"README.md\"]}",
+                    "{\"reference_files\":[\"README.md\"]}", "{", "{\"edit_files\":[\"unrelated\"]}")) {
+                Files.writeString(stable, bytes);
+                projection.write(paths);
+                var actual = map(mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class).get("toolMetrics"));
+                assertEquals(baseline, actual, "unapproved or damaged stable candidates must not change telemetry");
+            }
+            Files.delete(stable);
+            projection.write(paths);
+            assertEquals(baseline, map(mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class).get("toolMetrics")));
+        }
+    }
+
+    private void setupRereadFixture(
+            WorkstreamPaths paths,
+            AtomicJsonWriter jsonWriter,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            List<Map<String, Object>> secondRunRereadReasons
+    ) throws Exception {
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, paths.workstreamId().value(), "wf-instance", "agent-lifecycle", 1,
+                WorkflowStatus.RUNNING, List.of("n1", "n2"), List.of(), "evt-1",
+                Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "intake.claude_brainstorm"));
+        jsonWriter.write(paths.nodeJson("n2"), node("n2", "implement.claude_implement"));
+        writeRun(paths, "run-1", "claude", "intake.claude_brainstorm", null);
+        appendToolUsage(paths, mapper, "run-1", 1, 1, 0, 0, List.of("README.md"), List.of());
+        writeRun(paths, "run-2", "claude", "implement.claude_implement", null);
+        appendToolUsage(paths, mapper, "run-2", 1, 1, 0, 0, List.of("README.md"), List.of());
+        if (secondRunRereadReasons != null) {
+            writeRereadReasons(paths, mapper, "run-2", secondRunRereadReasons);
+        }
+        writeReadReuseContract(paths, mapper, List.of("README.md"));
+    }
+
+    private void writeRereadReasons(
+            WorkstreamPaths paths,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            String runId,
+            List<Map<String, Object>> reasons
+    ) throws Exception {
+        var runJson = paths.runsDir().resolve(runId).resolve("run.json");
+        var run = new java.util.LinkedHashMap<>(mapper.readValue(runJson.toFile(), Map.class));
+        run.put("reread_reasons", reasons);
+        new AtomicJsonWriter().write(runJson, run);
+    }
+
+    @Test
+    void tokenAttributionJoinsTokensToolsTranscriptAndFileCost() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-attr"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-attr", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1", "n2"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "intake.claude_brainstorm"));
+        jsonWriter.write(paths.nodeJson("n2"), node("n2", "implement.claude_implement"));
+
+        Files.writeString(tempDir.resolve("README.md"), "R".repeat(400));
+        Files.createDirectories(tempDir.resolve("src"));
+        Files.writeString(tempDir.resolve("src/a.js"), "export function a() {}\n");
+        Files.createDirectories(tempDir.resolve("transcripts"));
+        Files.writeString(tempDir.resolve("transcripts/run-1.log"), "x".repeat(4000));
+        Files.writeString(tempDir.resolve("transcripts/run-2.log"), "x".repeat(12000));
+
+        writeAttributionRun(paths, "run-1", "claude", "intake.claude_brainstorm", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage(100, 20, 500, "0.10"),
+                "transcripts/run-1.log", 1, List.of("README.md"));
+        writeAttributionRun(paths, "run-2", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:01:00Z"), usage(200, 40, 5000, "0.20"),
+                "transcripts/run-2.log", 2, List.of("README.md", "src/a.js"));
+        writeAttributionRun(paths, "run-codex", "codex", "acceptance.codex_verifier_review", "seg-2",
+                Instant.parse("2026-06-19T00:02:00Z"), snapshotUsage(64000),
+                "", 0, List.of());
+        writeReadReuseContract(paths, mapper, List.of("README.md"));
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        assertEquals(1, number(attr.get("schemaVersion")));
+
+        var perRun = list(attr.get("perRun"));
+        assertEquals(3, perRun.size());
+        var r2 = map(perRun.stream().filter(r -> "run-2".equals(map(r).get("runId"))).findFirst().orElseThrow());
+        assertEquals(200, number(r2.get("inputTokens")));
+        assertEquals(5000, number(r2.get("cachedReadTokens")));
+        assertEquals(2, number(r2.get("reads")));
+        assertEquals(12000, number(r2.get("transcriptBytes")));
+        assertEquals("seg-1", r2.get("sessionSegmentKey"));
+        assertEquals("provider_run_usage", r2.get("providerUsageVisibility"));
+
+        var codex = map(perRun.stream().filter(r -> "run-codex".equals(map(r).get("runId"))).findFirst().orElseThrow());
+        assertEquals("session_snapshot_only", codex.get("providerUsageVisibility"));
+        assertEquals(64000, number(codex.get("contextUsedTokens")));
+        assertTrue(String.valueOf(codex.get("providerUsageUnavailableReason")).contains("usage_update"));
+
+        var visibility = map(attr.get("usageVisibility"));
+        assertEquals(2, number(map(visibility.get("byVisibility")).get("provider_run_usage")));
+        assertEquals(1, number(map(visibility.get("byVisibility")).get("session_snapshot_only")));
+        var codexVisibility = map(map(visibility.get("byAgent")).get("codex"));
+        assertEquals(1, number(codexVisibility.get("session_snapshot_only")));
+        assertEquals(1, list(visibility.get("gaps")).size());
+
+        var hotspots = list(attr.get("nodeHotspots"));
+        var impl = map(hotspots.stream()
+                .filter(n -> "implement.claude_implement".equals(map(n).get("nodeId"))).findFirst().orElseThrow());
+        assertEquals(5000, number(impl.get("cachedReadTokens")));
+        assertTrue(((List<?>) impl.get("heavy")).toString().toLowerCase().contains("cachedread"),
+                "implement node should be cachedRead-heavy: " + impl.get("heavy"));
+
+        var files = list(attr.get("fileReadCost"));
+        var readme = map(files.stream()
+                .filter(f -> "README.md".equals(map(f).get("path"))).findFirst().orElseThrow());
+        assertEquals(2, number(readme.get("readCount")));
+        assertEquals(400, number(readme.get("fileBytes")));
+        assertTrue(number(readme.get("estimatedReadTokens")) > 0);
+        assertEquals(true, readme.get("reusable"));
+        assertEquals("missing", readme.get("rereadReasonStatus"));
+
+        var sessions = list(attr.get("sessionSnowball"));
+        assertEquals(2, sessions.size());
+        var seg = map(sessions.stream()
+                .filter(s -> "seg-1".equals(map(s).get("sessionSegmentKey")))
+                .findFirst()
+                .orElseThrow());
+        assertEquals("seg-1", seg.get("sessionSegmentKey"));
+        assertEquals("run-2", seg.get("maxTranscriptGrowthRun"));
+        assertEquals(2, list(seg.get("runs")).size());
+    }
+
+    @Test
+    void tokenAttributionMarksExecutionAttemptOutcomeConflicts() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-conflict"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-conflict", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "design.codex_arch_review"));
+        writeAttributionRun(paths, "run-conflict", "codex", "design.codex_arch_review", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage(100, 20, 0, "0.10"),
+                "", 0, List.of());
+        var runPath = paths.runsDir().resolve("run-conflict/run.json");
+        var run = mapper.readValue(runPath.toFile(), Map.class);
+        run.put("executionAttempt", Map.of(
+                "status", "RECOVERABLE_FAILED",
+                "processStatus", "RECONNECT_REQUIRED",
+                "failureSignal", "AGENT_RECONNECT_REQUIRED"
+        ));
+        run.put("executionOutcome", Map.of(
+                "status", "SUCCESS",
+                "primaryReason", "completed",
+                "nodeMaySucceed", true
+        ));
+        jsonWriter.write(runPath, run);
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var tokenRun = map(list(map(metrics.get("tokenMetrics")).get("runs")).get(0));
+        assertEquals("attempt_outcome_conflict", tokenRun.get("executionConsistency"));
+        var attrRun = map(list(map(metrics.get("tokenAttribution")).get("perRun")).get(0));
+        assertEquals("attempt_outcome_conflict", attrRun.get("executionConsistency"));
+        var provider = map(metrics.get("providerMetrics"));
+        assertEquals(1, number(map(provider.get("executionConsistencyCounts")).get("attempt_outcome_conflict")));
+    }
+
+    @Test
+    void tokenAttributionMarksStaleLegacyRunningAfterTerminalAttempt() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-stale-running"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-stale-running", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+        writeAttributionRun(paths, "run-stale", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage(100, 20, 0, "0.10"),
+                "", 0, List.of());
+        var runPath = paths.runsDir().resolve("run-stale/run.json");
+        var run = mapper.readValue(runPath.toFile(), Map.class);
+        run.put("status", "running");
+        run.put("executionAttempt", Map.of(
+                "status", "STALLED",
+                "processStatus", "PROCESS_STALLED",
+                "failureSignal", "AGENT_PROCESS_STALLED"
+        ));
+        run.put("executionOutcome", Map.of(
+                "status", "RUNTIME_FAILED",
+                "primaryReason", "AGENT_PROCESS_STALLED",
+                "nodeMaySucceed", false
+        ));
+        jsonWriter.write(runPath, run);
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var tokenRun = map(list(map(metrics.get("tokenMetrics")).get("runs")).get(0));
+        assertEquals("stale_legacy_running", tokenRun.get("executionConsistency"));
+        var attrRun = map(list(map(metrics.get("tokenAttribution")).get("perRun")).get(0));
+        assertEquals("stale_legacy_running", attrRun.get("executionConsistency"));
+        var provider = map(metrics.get("providerMetrics"));
+        assertEquals(1, number(map(provider.get("executionConsistencyCounts")).get("stale_legacy_running")));
+    }
+
+    @Test
+    void providerMetricsMarksHistoricalActiveNodeWithDeadPidAsStaleLegacyRunning() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-historical-stale"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-historical-stale", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), new NodeInstanceDocument(
+                1,
+                "n1",
+                "implement.claude_self_test_report",
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.RUNNING,
+                "main",
+                "iter-001",
+                List.of(),
+                Map.of(),
+                List.of(),
+                Map.of("running_pid", 999_999_999L),
+                null,
+                "",
+                Instant.parse("2026-06-19T00:00:00Z"),
+                null
+        ));
+        writeAttributionRun(paths, "run-old", "claude", "implement.claude_self_test_report", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage(100, 20, 0, "0.10"),
+                "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var provider = map(metrics.get("providerMetrics"));
+        var counts = map(provider.get("executionConsistencyCounts"));
+
+        assertEquals(1, number(counts.get("missing_attempt_and_outcome")));
+        assertEquals(1, number(counts.get("stale_legacy_running")));
+        assertEquals(1, number(metrics.get("runningCount")));
+        var tokenRun = map(list(map(metrics.get("tokenMetrics")).get("runs")).get(0));
+        assertEquals("missing_attempt_and_outcome", tokenRun.get("executionConsistency"),
+                "run-level classification must not invent active-node state");
+    }
+
+    @Test
+    void executionLatencyFallsBackToObservedAtWhenElapsedIsMissing() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-latency-observed-at"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-latency-observed-at", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "intake.claude_brainstorm"));
+        writeAttributionRun(paths, "run-observed", "claude", "intake.claude_brainstorm", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage(100, 20, 0, "0.10"),
+                "", 0, List.of());
+        var runJson = paths.runsDir().resolve("run-observed/run.json");
+        var run = new java.util.LinkedHashMap<>(mapper.readValue(runJson.toFile(), Map.class));
+        run.put("durationMs", 1000);
+        run.put("executionTimeline", List.of(
+                Map.of("kind", "process_started", "elapsedMs", 7, "observedAt", "2026-06-19T00:00:00.007Z"),
+                Map.of("kind", "process_wait_completed", "elapsedMs", 500, "observedAt", "2026-06-19T00:00:00.500Z"),
+                Map.of("kind", "artifact_extracted", "elapsedMs", 540, "observedAt", "2026-06-19T00:00:00.540Z"),
+                Map.of("kind", "contract_validated", "elapsedMs", 0, "observedAt", "2026-06-19T00:00:00.575Z")
+        ));
+        jsonWriter.write(runJson, run);
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attrRun = map(list(map(metrics.get("tokenAttribution")).get("perRun")).get(0));
+        var latency = map(attrRun.get("executionLatency"));
+
+        assertEquals(575, number(latency.get("contractValidatedMs")));
+        assertEquals(500, number(latency.get("processBeforeTerminalMs")));
+        assertEquals(0, number(latency.get("terminalToProcessWaitMs")));
+        assertEquals(75, number(latency.get("postProcessMs")));
+        assertEquals("process_wait", latency.get("dominantPhase"));
+    }
+
+    @Test
+    void executionLatencyClassifiesLongWaitAfterTerminalSeparately() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-latency-terminal-wait"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-latency-terminal-wait", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+        writeAttributionRun(paths, "run-terminal-wait", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage(100, 20, 0, "0.10"),
+                "", 0, List.of());
+        var runJson = paths.runsDir().resolve("run-terminal-wait/run.json");
+        var run = new java.util.LinkedHashMap<>(mapper.readValue(runJson.toFile(), Map.class));
+        run.put("durationMs", 400_000);
+        run.put("executionTimeline", List.of(
+                Map.of("kind", "process_started", "elapsedMs", 10),
+                Map.of("kind", "terminal_control_detected", "elapsedMs", 1_000),
+                Map.of("kind", "process_wait_completed", "elapsedMs", 381_000),
+                Map.of("kind", "artifact_extracted", "elapsedMs", 381_050),
+                Map.of("kind", "contract_validated", "elapsedMs", 381_100)
+        ));
+        jsonWriter.write(runJson, run);
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attrRun = map(list(map(metrics.get("tokenAttribution")).get("perRun")).get(0));
+        var latency = map(attrRun.get("executionLatency"));
+
+        assertEquals(990, number(latency.get("processBeforeTerminalMs")));
+        assertEquals(380_000, number(latency.get("terminalToProcessWaitMs")));
+        assertEquals(100, number(latency.get("postProcessMs")));
+        assertEquals("terminal_to_process_wait", latency.get("dominantPhase"));
+    }
+
+    @Test
+    void tokenAttributionCalculatesProviderCacheAwareCost() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-cost"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        Files.createDirectories(tempDir.resolve(".agent"));
+        jsonWriter.write(tempDir.resolve(".agent/provider-pricing.json"), Map.of(
+                "schemaVersion", 1,
+                "models", List.of(Map.of(
+                        "providerId", "deepseek",
+                        "model", "deepseek-test",
+                        "currency", "USD",
+                        "inputCacheHitPer1M", "0.10",
+                        "inputCacheMissPer1M", "1.00",
+                        "outputPer1M", "2.00"
+                ))
+        ));
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-cost", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(2000, 3000, 1000, "0.0081");
+        usage.put("providerId", "deepseek");
+        usage.put("model", "deepseek-test");
+        writeAttributionRun(paths, "run-cost", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var perRun = list(attr.get("perRun"));
+        var cost = map(perRun.get(0).get("costEconomics"));
+
+        assertEquals("deepseek", cost.get("providerId"));
+        assertEquals("deepseek-test", cost.get("model"));
+        assertEquals("provider_cache_tokens_reported", cost.get("cacheSignalReliability"));
+        assertEquals("official_pricing", cost.get("costEstimateReliability"));
+        assertEquals(0, new BigDecimal("0.008100").compareTo(new BigDecimal(cost.get("officialCalculatedCost").toString())));
+        assertEquals(0, BigDecimal.ZERO.compareTo(new BigDecimal(cost.get("clientCostDriftRatio").toString())));
+        assertEquals("matches_official_pricing", cost.get("clientCostConsistency"));
+        assertEquals(1000, number(cost.get("inputCacheHitTokens")));
+        assertEquals(2000, number(cost.get("inputCacheMissTokens")));
+        assertEquals("preserve_session", cost.get("providerCacheDecision"));
+        assertEquals("0.100000", cost.get("cacheHitToMissRatio"));
+
+        var summary = map(attr.get("costEconomics"));
+        assertEquals(1, number(map(summary.get("byReliability")).get("provider_cache_tokens_reported")));
+        assertEquals(1, number(map(summary.get("byCostEstimateReliability")).get("official_pricing")));
+        assertEquals(1, number(map(summary.get("byDecision")).get("preserve_session")));
+        assertEquals(0, new BigDecimal("0.008100")
+                .compareTo(new BigDecimal(map(summary.get("officialCalculatedCostByCurrency")).get("USD").toString())));
+    }
+
+    @Test
+    void tokenAttributionDoesNotTreatClientCostDriftAsCacheSignalContradiction() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-deepseek-cn"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        Files.createDirectories(tempDir.resolve(".agent"));
+        jsonWriter.write(tempDir.resolve(".agent/provider-pricing.json"), Map.of(
+                "schemaVersion", 1,
+                "models", List.of(Map.of(
+                        "providerId", "deepseek",
+                        "model", "deepseek-pro-v4",
+                        "currency", "CNY",
+                        "inputCacheHitPer1M", "0.025",
+                        "inputCacheMissPer1M", "3.00",
+                        "outputPer1M", "6.00"
+                ))
+        ));
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-deepseek-cn", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(85606, 24774, 728704, "1.433452");
+        usage.put("providerId", "deepseek");
+        usage.put("model", "deepseek-pro-v4");
+        writeAttributionRun(paths, "run-cost", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var cost = map(list(attr.get("perRun")).get(0)).get("costEconomics");
+        var costMap = map(cost);
+
+        assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
+        assertEquals("official_pricing", costMap.get("costEstimateReliability"));
+        assertEquals("differs_from_official_pricing", costMap.get("clientCostConsistency"));
+        assertEquals(0, new BigDecimal("0.423680")
+                .compareTo(new BigDecimal(costMap.get("officialCalculatedCost").toString())));
+        assertEquals("preserve_session", costMap.get("providerCacheDecision"));
+    }
+
+    @Test
+    void tokenAttributionMarksSubscriptionModelsAsTokenOnly() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-token-only"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        Files.createDirectories(tempDir.resolve(".agent"));
+        jsonWriter.write(tempDir.resolve(".agent/provider-pricing.json"), Map.of(
+                "schemaVersion", 1,
+                "models", List.of(Map.of(
+                        "providerId", "zhipu",
+                        "model", "glm-*",
+                        "currency", "TOKENS_ONLY",
+                        "inputCacheHitPer1M", "0",
+                        "inputCacheMissPer1M", "0",
+                        "outputPer1M", "0"
+                ))
+        ));
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-token-only", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(83685, 36025, 861568, "1.749834");
+        usage.put("providerId", "zhipu");
+        usage.put("model", "glm-5.2");
+        writeAttributionRun(paths, "run-glm", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var cost = map(list(attr.get("perRun")).get(0)).get("costEconomics");
+        var costMap = map(cost);
+
+        assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
+        assertEquals("token_only", costMap.get("costEstimateReliability"));
+        assertEquals("token_policy_active", costMap.get("providerCacheDecision"));
+        assertEquals(
+                "provider/model and cache token signal are known; amount is token-only",
+                costMap.get("providerCacheDecisionReason"));
+        assertEquals("TOKENS_ONLY", costMap.get("officialCalculatedCurrency"));
+        assertEquals(0, BigDecimal.ZERO.compareTo(new BigDecimal(costMap.get("officialCalculatedCost").toString())));
+    }
+
+    @Test
+    void tokenAttributionUsesPackagedTokenOnlyPricingWhenWorkspacePricingFileIsAbsent() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-glm-subscription"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-glm-subscription", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(83685, 36025, 861568, "0");
+        usage.put("providerId", "zhipu");
+        usage.put("model", "glm-5.2");
+        usage.put("billingMode", "subscription_tokens");
+        usage.put("providerMetadataSource", "acpx_session_json");
+        writeAttributionRun(paths, "run-glm-subscription", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var perRun = map(list(attr.get("perRun")).get(0));
+        var costMap = map(perRun.get("costEconomics"));
+
+        assertEquals("zhipu", perRun.get("providerId"));
+        assertEquals("glm-5.2", perRun.get("model"));
+        assertEquals("subscription_token_only", perRun.get("billingMode"));
+        assertEquals("acpx_session_json", perRun.get("providerMetadataSource"));
+        var identity = map(perRun.get("providerModelIdentity"));
+        assertEquals("zhipu", identity.get("provider"));
+        assertEquals("glm-5.2", identity.get("model"));
+        assertEquals("subscription_token_only", identity.get("billingMode"));
+        assertEquals(981278, number(perRun.get("totalTokens")));
+        assertEquals(861568, number(perRun.get("cachedReadTokens")));
+        var costAttribution = map(perRun.get("costAttribution"));
+        assertEquals(861568, number(costAttribution.get("inputCacheHitTokens")));
+        assertEquals(83685, number(costAttribution.get("inputCacheMissTokens")));
+        assertEquals("subscription_token_only", costAttribution.get("billingMode"));
+        assertEquals("token_only", costAttribution.get("reliability"));
+        assertEquals("provider_reported", costAttribution.get("cacheSignalSource"));
+        var providerCachePolicy = map(perRun.get("providerCachePolicy"));
+        assertEquals("token_policy_active", providerCachePolicy.get("mode"));
+        assertEquals(true, providerCachePolicy.get("inputsComplete"));
+        assertTrue(String.valueOf(providerCachePolicy.get("reason")).contains("not metered"));
+        assertEquals("zhipu", costMap.get("providerId"));
+        assertEquals("glm-5.2", costMap.get("model"));
+        assertEquals("subscription_token_only", costMap.get("billingMode"));
+        assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
+        assertEquals("token_only", costMap.get("costEstimateReliability"));
+        assertEquals("token_policy_active", costMap.get("providerCacheDecision"));
+        assertEquals(
+                "provider/model and cache token signal are known; amount is token-only",
+                costMap.get("providerCacheDecisionReason"));
+    }
+
+    @Test
+    void tokenAttributionUsesPackagedAnthropicCachePricingWhenWorkspacePricingFileIsAbsent() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-anthropic-pricing"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-anthropic-pricing", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(1000, 200, 3000, "0");
+        usage.put("cachedWriteTokens", 400);
+        usage.put("providerId", "anthropic");
+        usage.put("model", "claude-sonnet-4.5");
+        writeAttributionRun(paths, "run-anthropic", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var perRun = map(list(attr.get("perRun")).get(0));
+        var costMap = map(perRun.get("costEconomics"));
+
+        assertEquals("anthropic", perRun.get("providerId"));
+        assertEquals("claude-sonnet-4.5", perRun.get("model"));
+        assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
+        assertEquals("official_pricing", costMap.get("costEstimateReliability"));
+        assertEquals("USD", costMap.get("officialCalculatedCurrency"));
+        assertEquals(0, new BigDecimal("0.008400")
+                .compareTo(new BigDecimal(costMap.get("officialCalculatedCost").toString())));
+        assertEquals(3000, number(costMap.get("inputCacheHitTokens")));
+        assertEquals(1000, number(costMap.get("inputCacheMissTokens")));
+        assertEquals(400, number(costMap.get("cacheWriteTokens")));
+    }
+
+    @Test
+    void tokenAttributionUsesPackagedOpenAiTokenOnlyPricingWhenWorkspacePricingFileIsAbsent() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-openai-token-only"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-openai-token-only", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "acceptance.codex_verifier_review"));
+
+        var usage = usage(1200, 300, 800, "0");
+        usage.put("providerId", "openai");
+        usage.put("model", "chatgpt");
+        usage.put("billingMode", "subscription_tokens");
+        writeAttributionRun(paths, "run-openai", "codex", "acceptance.codex_verifier_review", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var perRun = map(list(attr.get("perRun")).get(0));
+        var costMap = map(perRun.get("costEconomics"));
+
+        assertEquals("openai", perRun.get("providerId"));
+        assertEquals("chatgpt", perRun.get("model"));
+        assertEquals("subscription_token_only", perRun.get("billingMode"));
+        assertEquals("provider_cache_tokens_reported", costMap.get("cacheSignalReliability"));
+        assertEquals("token_only", costMap.get("costEstimateReliability"));
+        assertEquals("TOKENS_ONLY", costMap.get("officialCalculatedCurrency"));
+        assertEquals(0, BigDecimal.ZERO.compareTo(new BigDecimal(costMap.get("officialCalculatedCost").toString())));
+        assertEquals("token_policy_active", costMap.get("providerCacheDecision"));
+    }
+
+    @Test
+    void tokenAttributionPreservesProviderRunTokensWhenProviderModelPricingIsUnknown() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-pricing-unknown"));
+        var jsonWriter = new AtomicJsonWriter();
+        var mapper = jsonWriter.objectMapper();
+        jsonWriter.write(paths.workflowCurrentJson(), new WorkflowCurrentDocument(
+                1, "ws-pricing-unknown", "wf", "agent-lifecycle", 1, WorkflowStatus.RUNNING,
+                List.of("n1"), List.of(), "e1", Instant.parse("2026-06-19T00:00:00Z")));
+        jsonWriter.write(paths.nodeJson("n1"), node("n1", "implement.claude_implement"));
+
+        var usage = usage(1234, 567, 8901, "0");
+        writeAttributionRun(paths, "run-unknown-pricing", "claude", "implement.claude_implement", "seg-1",
+                Instant.parse("2026-06-19T00:00:00Z"), usage, "", 0, List.of());
+
+        new MetricsProjectionWriter(jsonWriter, mapper).write(paths);
+        var metrics = mapper.readValue(paths.workstreamMetricsJson().toFile(), Map.class);
+        var attr = map(metrics.get("tokenAttribution"));
+        var perRun = map(list(attr.get("perRun")).get(0));
+        var costAttribution = map(perRun.get("costAttribution"));
+        var providerCachePolicy = map(perRun.get("providerCachePolicy"));
+        var costMap = map(perRun.get("costEconomics"));
+
+        assertEquals("provider_run_usage", perRun.get("providerUsageVisibility"));
+        assertEquals(1234, number(perRun.get("inputTokens")));
+        assertEquals(567, number(perRun.get("outputTokens")));
+        assertEquals(8901, number(perRun.get("cachedReadTokens")));
+        assertEquals(10702, number(perRun.get("totalTokens")));
+        assertEquals(1234, number(costAttribution.get("inputCacheMissTokens")));
+        assertEquals(8901, number(costAttribution.get("inputCacheHitTokens")));
+        assertEquals(567, number(costAttribution.get("outputTokens")));
+        assertEquals("pricing_unknown", costAttribution.get("reliability"));
+        assertEquals("unavailable", costAttribution.get("cacheSignalSource"));
+        assertEquals(false, providerCachePolicy.get("inputsComplete"));
+        assertEquals("measure_only", providerCachePolicy.get("mode"));
+        assertEquals("provider/model missing", costMap.get("reason"));
+    }
+
+    private void writeAttributionRun(WorkstreamPaths paths, String runId, String agent, String nodeId,
+                                     String sessionSegmentKey, Instant startedAt, Map<String, Object> usageMap,
+                                     String transcriptPath, int toolCalls, List<String> readFiles) throws Exception {
+        var run = new java.util.LinkedHashMap<String, Object>();
+        run.put("schemaVersion", 1);
+        run.put("runId", runId);
+        run.put("workstreamId", paths.workstreamId().value());
+        run.put("nodeId", nodeId);
+        run.put("agent", agent);
+        run.put("status", "completed");
+        run.put("stage", nodeId.split("\\.")[0]);
+        run.put("sessionScope", "workstream");
+        run.put("sessionSegmentKey", sessionSegmentKey);
+        run.put("startedAt", startedAt.toString());
+        run.put("durationMs", 1000);
+        run.put("usage", usageMap);
+        run.put("transcriptPath", transcriptPath);
+        run.put("toolUsage", Map.of(
+                "schemaVersion", 1, "toolCallCount", toolCalls, "readCount", readFiles.size(),
+                "writeCount", 0, "bashCount", 0, "otherCount", 0,
+                "readFiles", readFiles, "writeFiles", List.of(), "bashCommands", List.of()));
+        var runDir = paths.runsDir().resolve(runId);
+        Files.createDirectories(runDir);
+        new AtomicJsonWriter().write(runDir.resolve("run.json"), run);
+    }
+
+    private Map<String, Object> usage(long input, long output, long cachedRead, String cost) {
+        var m = new java.util.LinkedHashMap<String, Object>();
+        m.put("inputTokens", input);
+        m.put("outputTokens", output);
+        m.put("cachedReadTokens", cachedRead);
+        m.put("cachedWriteTokens", 0);
+        m.put("totalTokens", input + output + cachedRead);
+        m.put("costAmount", new BigDecimal(cost));
+        m.put("costCurrency", "USD");
+        m.put("source", "acpx_stream");
+        m.put("measurementType", "PROVIDER_RUN_USAGE");
+        m.put("attribution", "LATEST_PROMPT_IN_SESSION");
+        m.put("cumulative", false);
+        return m;
+    }
+
+    private Map<String, Object> snapshotUsage(long contextUsed) {
+        var m = new java.util.LinkedHashMap<String, Object>();
+        m.put("inputTokens", 0);
+        m.put("outputTokens", 0);
+        m.put("cachedReadTokens", 0);
+        m.put("cachedWriteTokens", 0);
+        m.put("totalTokens", 0);
+        m.put("contextUsedTokens", contextUsed);
+        m.put("source", "acpx_usage_update");
+        m.put("measurementType", "SESSION_USED_SNAPSHOT");
+        m.put("attribution", "SESSION_USAGE_UPDATE");
+        m.put("cumulative", true);
+        return m;
+    }
+
+    private NodeInstanceDocument node(String instanceId, String definitionId) {
+        return new NodeInstanceDocument(
+                1,
+                instanceId,
+                definitionId,
+                NodeKind.TASK,
+                "acpx.agent_run",
+                NodeStatus.COMPLETED,
+                "main",
+                "iter-001",
+                List.of(),
+                Map.of(),
+                List.of(),
+                Map.of(),
+                "",
+                "",
+                Instant.parse("2026-06-19T00:00:00Z"),
+                Instant.parse("2026-06-19T00:00:01Z")
+        );
+    }
+
+    private void writeRun(
+            WorkstreamPaths paths,
+            String runId,
+            String agent,
+            String nodeId,
+            long inputTokens,
+            long outputTokens,
+            long cachedReadTokens,
+            long cachedWriteTokens,
+            long totalTokens,
+            String currency,
+            String cost
+    ) throws Exception {
+        writeRun(paths, runId, agent, nodeId, Map.of(
+                "inputTokens", inputTokens,
+                "outputTokens", outputTokens,
+                "cachedReadTokens", cachedReadTokens,
+                "cachedWriteTokens", cachedWriteTokens,
+                "totalTokens", totalTokens,
+                "costCurrency", currency,
+                "costAmount", new BigDecimal(cost),
+                "source", "acpx_stream",
+                "measurementType", "PROVIDER_RUN_USAGE",
+                "cumulative", false
+        ));
+    }
+
+    private void writeRunWithoutUsage(WorkstreamPaths paths, String runId, String agent, String nodeId) throws Exception {
+        writeRun(paths, runId, agent, nodeId, null);
+    }
+
+    private void writeRun(WorkstreamPaths paths, String runId, String agent, String nodeId, Map<String, Object> usage) throws Exception {
+        var run = new java.util.LinkedHashMap<String, Object>();
+        run.put("schemaVersion", 1);
+        run.put("runId", runId);
+        run.put("workstreamId", paths.workstreamId().value());
+        run.put("nodeId", nodeId);
+        run.put("agent", agent);
+        run.put("status", "completed");
+        run.put("durationMs", 1000);
+        if (usage != null) {
+            run.put("usage", usage);
+        }
+        var runDir = paths.runsDir().resolve(runId);
+        Files.createDirectories(runDir);
+        new AtomicJsonWriter().write(runDir.resolve("run.json"), run);
+    }
+
+    private void appendToolUsage(
+            WorkstreamPaths paths,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            String runId,
+            long toolCallCount,
+            long readCount,
+            long writeCount,
+            long bashCount,
+            List<String> readFiles,
+            List<String> bashCommands
+    ) throws Exception {
+        var runJson = paths.runsDir().resolve(runId).resolve("run.json");
+        var run = new java.util.LinkedHashMap<>(mapper.readValue(runJson.toFile(), Map.class));
+        run.put("toolUsage", Map.of(
+                "schemaVersion", 1,
+                "toolCallCount", toolCallCount,
+                "readCount", readCount,
+                "writeCount", writeCount,
+                "bashCount", bashCount,
+                "otherCount", Math.max(0, toolCallCount - readCount - writeCount - bashCount),
+                "readFiles", readFiles,
+                "writeFiles", List.of(),
+                "bashCommands", bashCommands
+        ));
+        new AtomicJsonWriter().write(runJson, run);
+    }
+
+    private void appendExecutionTimeline(
+            WorkstreamPaths paths,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            String runId
+    ) throws Exception {
+        var runJson = paths.runsDir().resolve(runId).resolve("run.json");
+        var run = new java.util.LinkedHashMap<>(mapper.readValue(runJson.toFile(), Map.class));
+        run.put("executionTimeline", List.of(
+                Map.of("kind", "process_started", "elapsedMs", 10),
+                Map.of("kind", "terminal_control_detected", "elapsedMs", 100),
+                Map.of("kind", "process_wait_completed", "elapsedMs", 200),
+                Map.of("kind", "artifact_extracted", "elapsedMs", 700),
+                Map.of("kind", "contract_validated", "elapsedMs", 900)
+        ));
+        new AtomicJsonWriter().write(runJson, run);
+    }
+
+    private void writeEvidenceManifest(
+            WorkstreamPaths paths,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            List<String> files
+    ) throws Exception {
+        var memoryDir = paths.workstreamDir().resolve("memory");
+        Files.createDirectories(memoryDir);
+        var item = new java.util.LinkedHashMap<String, Object>();
+        item.put("id", "task_contract:1");
+        item.put("type", "task_contract");
+        item.put("files", files);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(memoryDir.resolve("evidence-manifest.json").toFile(), Map.of(
+                "schemaVersion", 1,
+                "artifactType", "evidence_manifest",
+                "items", List.of(item)
+        ));
+    }
+
+    private void writeReadReuseContract(
+            WorkstreamPaths paths,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            List<String> files
+    ) throws Exception {
+        var memoryDir = paths.workstreamDir().resolve("memory");
+        Files.createDirectories(memoryDir);
+        var reusable = new java.util.ArrayList<Map<String, Object>>();
+        for (var file : files) {
+            reusable.add(Map.of(
+                    "path", file,
+                    "recommendation", "reuse_existing_summary"
+            ));
+        }
+        mapper.writerWithDefaultPrettyPrinter().writeValue(memoryDir.resolve("read-reuse-contract.json").toFile(), Map.of(
+                "schemaVersion", 1,
+                "artifactType", "read_reuse_contract",
+                "requireReasonWhenRereading", true,
+                "allowedRepeatedReadReasons", List.of(
+                        "file changed after prior read",
+                        "exact current content is needed before editing",
+                        "previous evidence does not cover the selected stage"
+                ),
+                "reusableReadFiles", reusable
+        ));
+    }
+
+    private void writeArtifactMetadata(
+            WorkstreamPaths paths,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            String runId,
+            String metadataField,
+            String metadataFilename,
+            long estimatedTokens
+    ) throws Exception {
+        var runJson = paths.runsDir().resolve(runId).resolve("run.json");
+        var run = new java.util.LinkedHashMap<>(mapper.readValue(runJson.toFile(), Map.class));
+        var metadataPath = paths.runsDir().resolve(runId).resolve("metadata").resolve(metadataFilename);
+        Files.createDirectories(metadataPath.getParent());
+        new AtomicJsonWriter().write(metadataPath, Map.of("estimatedTokens", estimatedTokens));
+        run.put(metadataField, paths.workspaceRoot().relativize(metadataPath).toString());
+        new AtomicJsonWriter().write(runJson, run);
+    }
+
+    private void writeContextPackageMetadata(
+            WorkstreamPaths paths,
+            com.fasterxml.jackson.databind.ObjectMapper mapper,
+            String filename,
+            String targetNode
+    ) throws Exception {
+        var contextDir = paths.workstreamDir().resolve("context");
+        Files.createDirectories(contextDir);
+        var metadata = new java.util.LinkedHashMap<String, Object>();
+        metadata.put("schemaVersion", 1);
+        metadata.put("workstreamId", paths.workstreamId().value());
+        metadata.put("builderNode", "context.design_codex_review");
+        metadata.put("targetNode", targetNode);
+        metadata.put("profile", "review");
+        metadata.put("contextPackage", ".agent/workstreams/ws-token/context/context-design-review.md");
+        metadata.put("estimatedTokens", 600);
+        metadata.put("tokenBudget", 1200);
+        metadata.put("withinBudget", true);
+        metadata.put("sections", List.of(
+                section("recent_agent_outputs", 420, 900, 500, true, false),
+                section("task_contract", 120, 120, 200, false, false),
+                section("git_evidence", 60, 60, 200, false, false)
+        ));
+        mapper.writerWithDefaultPrettyPrinter().writeValue(contextDir.resolve(filename).toFile(), metadata);
+    }
+
+    private Map<String, Object> section(String name, long rendered, long original, long softBudget, boolean degraded, boolean dropped) {
+        return Map.of(
+                "name", name,
+                "renderedTokens", rendered,
+                "originalTokens", original,
+                "softBudgetTokens", softBudget,
+                "degraded", degraded,
+                "dropped", dropped
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> map(Object value) {
+        return (Map<String, Object>) value;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> list(Object value) {
+        return (List<Map<String, Object>>) value;
+    }
+
+    private long number(Object value) {
+        return ((Number) value).longValue();
+    }
+}

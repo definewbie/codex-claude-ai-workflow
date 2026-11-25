@@ -1,0 +1,11 @@
+{
+  "status": "INVALID_OR_INCOMPLETE",
+  "cases": [
+    {
+      "label": "restricted",
+      "status": "INVALID_OR_INCOMPLETE"
+    }
+  ],
+  "realProviderCalls": 0,
+  "modelTokens": 0
+}

@@ -26,7 +26,8 @@ Run from `dual-orchestrator` unless noted otherwise:
 mvn -pl dual-cli,dual-server -am test
 node --check dual-server/src/main/resources/static/app.js
 bash -n scripts/*.sh scripts/lib/*.sh
-./scripts/smoke-test.sh --case lifecycle --cleanup
+rtk proxy mvn -q clean test
+# Only after Verification Gate approval / 仅在 Gate 批准后：
 ./scripts/run-public-benchmark.sh
 ./scripts/real-case-benchmark-summary.sh
 ```

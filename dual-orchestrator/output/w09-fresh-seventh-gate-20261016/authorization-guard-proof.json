@@ -1,0 +1,8 @@
+{
+  "status": "PASS_EXPECTED_REJECTION",
+  "authorization": false,
+  "exit": 1,
+  "steps_created": false,
+  "target_created": false,
+  "provider_calls": 0
+}

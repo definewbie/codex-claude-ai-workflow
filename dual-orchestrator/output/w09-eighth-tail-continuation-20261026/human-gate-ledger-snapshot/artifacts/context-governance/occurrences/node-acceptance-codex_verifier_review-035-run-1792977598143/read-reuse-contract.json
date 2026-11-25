@@ -1,0 +1,74 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "read_reuse_contract",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "acceptance",
+  "nodeInstanceId" : "node-acceptance-codex_verifier_review-035",
+  "nodeDefinitionId" : "acceptance.codex_verifier_review",
+  "targetNodeDefinitionId" : "acceptance.codex_verifier_review",
+  "iterationId" : "iter-003",
+  "preferExistingEvidence" : true,
+  "avoidRepeatingReads" : [ {
+    "path" : "src/normalize_text.py",
+    "previousCount" : 1,
+    "inReadScope" : true,
+    "evidenceKnown" : false,
+    "guidance" : "This file was already inspected; re-read only with a stage-specific reason."
+  }, {
+    "path" : "tests/test_normalize_text.py",
+    "previousCount" : 1,
+    "inReadScope" : true,
+    "evidenceKnown" : false,
+    "guidance" : "This file was already inspected; re-read only with a stage-specific reason."
+  }, {
+    "path" : "README.md",
+    "previousCount" : 1,
+    "inReadScope" : true,
+    "evidenceKnown" : false,
+    "guidance" : "This file was already inspected; re-read only with a stage-specific reason."
+  } ],
+  "reusableReadFiles" : [ {
+    "path" : "README.md",
+    "sha" : "0af74daeacfdd946a47e88d3b3f28d41ef125285084fd5f1c8735859e5caaae5",
+    "summary" : "headings: normalize_newlines —— 换行规范化函数; 语义规则; 导入方式; 用法示例; 运行测试 | relevant: 本仓库提供纯函数 `normalize_newlines(text: str) -> str`：把 CRLF（`\\r\\n`）与孤立 CR（`\\r`）统一转换为 LF（`\\n`），其余内容原样保留。仅使用 Python 标准库，不引入任何第…; 实现位于 `src/normalize_text.py`（src 布局）。导入前需把 `src` 加入模块搜索路径，两种等价做法：; 2. 在代码中把 `src/` 目录插入 `sys.path`（`tests/test_normalize_text.py` 顶部采用的就是这种做法：用 `pathlib` 定位仓库 `src/`，且仅在 `sys.path` 不含该路径…; 以下示例为 doctes…",
+    "evidenceRole" : "documentation",
+    "readRunId" : "run-1792977352552",
+    "lastSeenStage" : "stage-implement",
+    "invalidationReason" : "",
+    "recommendation" : "reuse_existing_summary"
+  }, {
+    "path" : "src/normalize_text.py",
+    "sha" : "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c",
+    "summary" : "defs: normalize_newlines",
+    "evidenceRole" : "source",
+    "readRunId" : "run-1792977352552",
+    "lastSeenStage" : "stage-implement",
+    "invalidationReason" : "",
+    "recommendation" : "reuse_existing_summary"
+  }, {
+    "path" : "tests/test_normalize_text.py",
+    "sha" : "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be",
+    "summary" : "defs/tests: TestNormalizeNewlines; test_empty_string_returns_empty; test_pure_lf_unchanged; test_crlf_becomes_single_lf; test_lone_cr_becomes_lf; test_mixed_newlines_normalized; test_unicode_and_line_separators_preserved; test_trailing_newline_present_kept; test_trailing_newline_absent_kept; test_consecutive_blank_lines_normalized; test_no_cr_left_in_output; test_idempotent_across_all_cases",
+    "evidenceRole" : "source",
+    "readRunId" : "run-1792977352552",
+    "lastSeenStage" : "stage-implement",
+    "invalidationReason" : "",
+    "recommendation" : "reuse_existing_summary"
+  } ],
+  "invalidatedReadFiles" : [ ],
+  "allowedRereadFiles" : [ {
+    "path" : "src/normalize_text.py",
+    "reason" : "previous evidence does not cover the selected stage",
+    "source" : "workstream_memory.readFiles",
+    "evidenceRole" : "source"
+  }, {
+    "path" : "tests/test_normalize_text.py",
+    "reason" : "previous evidence does not cover the selected stage",
+    "source" : "workstream_memory.readFiles",
+    "evidenceRole" : "source"
+  } ],
+  "reuseSource" : "workstream_memory.readFiles",
+  "requireReasonWhenRereading" : false,
+  "reasonField" : "",
+  "generatedAt" : "2026-10-26T01:19:58.424335Z"
+}

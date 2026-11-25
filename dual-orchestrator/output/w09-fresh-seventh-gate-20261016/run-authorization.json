@@ -1,0 +1,14 @@
+{
+  "case": "FRESH_SEVENTH",
+  "offline_preparation_authorized": true,
+  "fresh_run_authorized": false,
+  "user_request": "先离线准备第七例Gate并完成启动前核验，材料齐备后交我批准，暂不启动真实运行",
+  "proposed_budget": {
+    "total_tokens": 1700000,
+    "top_level_requests": 18,
+    "active_seconds": 3600
+  },
+  "budget_plan_confirmed": true,
+  "business_gate_approvals": false,
+  "previous_balance_inherited": false
+}

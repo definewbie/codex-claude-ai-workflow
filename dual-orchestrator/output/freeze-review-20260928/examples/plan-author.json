@@ -1,0 +1,67 @@
+{
+  "schema_version": 2,
+  "workstream_id": "EXAMPLE",
+  "node_instance_id": "plan-author-001",
+  "artifact_type": "plan_result",
+  "decision": "PLAN_COMPLETE",
+  "reviewed_design": {
+    "ref": "examples/design-decision-facts.json",
+    "sha256": "6573b9b64a04db885fdd07709ad4a95a481aaca7e43c9944cf3a035a03254555"
+  },
+  "steps": [
+    "实现转换与输入校验",
+    "添加 A1/A2 对应断言并运行"
+  ],
+  "files": [
+    {
+      "path": "src/convert.py",
+      "operation": "CREATE"
+    },
+    {
+      "path": "tests/test_convert.py",
+      "operation": "CREATE"
+    }
+  ],
+  "verification_bindings": [
+    {
+      "criterion_id": "A1",
+      "method": "在固定输入下核对输出与错误",
+      "executor": "AGENT",
+      "environment_refs": [
+        {
+          "ref": "examples/environment-example.json",
+          "sha256": "db38e2f4338f3bcce8d73bc0d531b75589223d93004eabd4ce42702a11262c03"
+        }
+      ],
+      "authority_refs": [],
+      "evidence_kind": "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+      "feasibility_refs": [
+        {
+          "ref": "examples/environment-example.json",
+          "sha256": "db38e2f4338f3bcce8d73bc0d531b75589223d93004eabd4ce42702a11262c03"
+        }
+      ],
+      "detail_owner": "implement.claude_self_test_report"
+    },
+    {
+      "criterion_id": "A2",
+      "method": "在固定输入下核对输出与错误",
+      "executor": "AGENT",
+      "environment_refs": [
+        {
+          "ref": "examples/environment-example.json",
+          "sha256": "db38e2f4338f3bcce8d73bc0d531b75589223d93004eabd4ce42702a11262c03"
+        }
+      ],
+      "authority_refs": [],
+      "evidence_kind": "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+      "feasibility_refs": [
+        {
+          "ref": "examples/environment-example.json",
+          "sha256": "db38e2f4338f3bcce8d73bc0d531b75589223d93004eabd4ce42702a11262c03"
+        }
+      ],
+      "detail_owner": "implement.claude_self_test_report"
+    }
+  ]
+}

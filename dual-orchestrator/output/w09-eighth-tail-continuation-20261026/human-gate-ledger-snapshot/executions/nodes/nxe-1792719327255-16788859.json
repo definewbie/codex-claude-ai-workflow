@@ -1,0 +1,81 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792719327255-16788859",
+  "agentTaskId" : "agt-1792719327250-c7ce0c49",
+  "workflowExecutionId" : "wfe-1792719327166-3a8f691e",
+  "nodeInstanceId" : "node-plan-codex_plan_review-019",
+  "nodeDefinitionId" : "plan.codex_plan_review",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "pid" : 78229,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_pid" : 78229,
+      "input_identity" : "f6db027449a52cf29082440338cc0eed4f7009e04a8b0afee1e739c7dedd0d45",
+      "executor_started_at" : "2026-10-23T01:35:26.097Z"
+    },
+    "prepared_run" : {
+      "sha256" : "4a8a0d91cd0adf6443095641c7a6bb1b9abcf8baa22fcadcb63b64cb165b5b71",
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/nxe-1792719327255-16788859-prepared.json"
+    },
+    "adapter_signals" : [ ],
+    "agent" : "codex",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "agent_output_contract",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "READY_TO_IMPLEMENT",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json",
+    "contract_sidecar_sha256" : "6e96fdcba384c87642aecf835d96584f82a29119bce0c2fed976644d4c09bd3a",
+    "decision" : "READY_TO_IMPLEMENT",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/binding.json",
+    "repository_fact_binding_sha256" : "427d7ea25323b23de7b9d33e6983e2e92efc88971e51978cb3e9ba3059798c25",
+    "reread_reasons" : [ ],
+    "run_id" : "run-1792719327299",
+    "run_metadata" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/run.json",
+    "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+    "summary" : "计划与已审设计一致，实施步骤和验收取证完整，可提交精确 EXECUTION 范围审批后实施。",
+    "transcript_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/nxe-1792719327255-16788859-completion.json",
+    "completion_sha256" : "087662eb85b5fea69f82ef811ce7b01dbb854f2e5ff42f6592cce3354aab69ac",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "run-1792719327299",
+  "agentRunRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/run.json",
+  "agent" : "codex",
+  "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+  "exitCode" : 0,
+  "startedAt" : "2026-10-23T01:35:27.255221Z",
+  "finishedAt" : "2026-10-23T01:35:59.015508Z",
+  "durationMs" : 31760
+}

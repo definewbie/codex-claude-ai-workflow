@@ -1,0 +1,353 @@
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -994,3 +994,13 @@
+ 另：修正stdout为可读多行JSON，reader将单独“{”判坏协议帧，固定usage不可归因。4请求，已固定部分51231；原生stream只读案头70801不回填/不作budget authority，完整总量UNAVAILABLE不计0。3具名会话closed/已知PID缺席，191账本文件快照、659输入/1929实施材料及发行不变；产品树空，无进一步派发/现场修复/提交。
+ 
+ **下一步动作**：交[合并CC受影响只读提示](../../output/w09-fresh-sixth-gate-20261015/cc-review-prompt.txt)，判断两条错配与最小owner内前向修复/成对回归。第六例不恢复，余14调用不沿用；修复与后续fresh运行分别办理，W08/W09不关闭。
++
++### 23.27 W09 第六例前向修复有界实施（2026-10-15）
++
++用户带回第六例 CC，批准 F1/F2 有界修复、成对回归、旧材料只读对照和重冻发行，明确不恢复第六例、不启动第七例、成本收益偏差即停。入口[本批 assessment](../../output/w09-sixth-forward-fix-20261015/assessment.md)、[接收与校准](../../output/w09-sixth-forward-fix-20261015/cc-disposition.md)。不采纳“剩余仅两处未知”或未核算的累计 token 数；真实后半主链仍未证。
++
++实施落点仅五个原生产类：full 返修投影复用 record 封闭字段枚举；unknown-field typed 诊断保留键与该对象合法字段集；一次原 deny-all 修正消费具体诊断，不改 raw、不代模型删键。wire 在 mixed stdout 区分正文与已解析 RPC 形状（模型条款 id 不算 RPC），真坏帧仍拒；reader 保留身份/重复/部分量守卫与严格共享出口。原 validator/R01/L/R/批准权限零放宽。observer 同型缺口只复制到未来候选，旧脚本不改。
++
++第六例四次历史响应只读分析可精确归因，含 response 的两份 raw 仍严格拒绝；70801仅新案头诊断，旧51231部分量/UNAVAILABLE与FAIL不回填、不产生继续资格。旧材料首次重放抓到候选对{id,text}的误分类，补成对后重新clean；初次全回归中断，不作收口凭证。最终单轮clean 1813/210/0失败/0错误/0跳过，659输入前后/打包后相等；108聚焦与12观察器分列。CLI/server冻结及内嵌模块/14资源/6只读CLI核验完成；见本包test-results/release-identity，不沿用1805旧绿灯。另一次自查修正数字协议版本强转，第二中断轮也不作凭证。
++
++**下一步动作**：最终回归及重冻后交[合并 CC 只读复审](../../output/w09-sixth-forward-fix-20261015/cc-review-prompt.txt)，判断有界实施、离线证据、发行候选及未证边界。通过后再由用户决定 fresh 第七例 Gate/预算/运行；当前无第七例、旧余额不继承，无提交，不关闭整体 W07/W08/W09。
+--- before/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -1045,6 +1045,14 @@
+ 
+ [第六例具体Gate](../../output/w09-revision-review-acceptance-20261015/fresh-sixth-gate.md)沿用完整主流程/储备/验收，提议170万token/18请求/60min；只换新发行、659输入和新样本，无新机制/配置实验。下一步由用户批准当次Gate/预算/隔离准备/真实运行，获准后核齐当前装配/出口/observer才开始。当前第六例未创建/未运行，旧例不恢复，三道人门及用户commit分别办理，无代码提交授权。
+ 
++### 10.5 W09 第六例 F1/F2 有界前向纠偏（2026-10-15）
++
++第六例 CC 确认两处真实错配；用户批准本批实施、回归、旧材料只读对照、重冻及合并复审，不批准恢复第六例或启动第七例。[边界/transition](../../output/w09-sixth-forward-fix-20261015/implementation-boundaries.md)与[唯一消费者](../../output/w09-sixth-forward-fix-20261015/consumer-and-transition-map.md)。
++
++Definition 封闭结构不变：允许 full 的返修分支投影 RevisionResponse 两字段枚举；parser 继续拒未知键并保留 UNKNOWN_FIELD(fieldName,allowedFields)，acquirer 在原唯一一次 deny-all 修正传递具体诊断。没有宽松 parser/代修 raw/新增节点。mixed stdout 中不可解析正文碎片、普通{id,text}条款不算 RPC；成功解析的 RPC 形状结构坏则 INVALID_CURRENT_TRANSCRIPT，错身份/重复/部分量继续拒，只有无当前完成才保留既有严格共享出口。原严格 session NDJSON 入口与权限/工具投影不迁移。
++
++只读重放只证明新诊断/归因面对旧字节成立，不证明新模型会服从提示；旧第六例FAIL及固定UNAVAILABLE保持。R01基准、R03/L03、D06/D07写序和批准权威不改；真实full发布/谱系/新复评/GOAL及后半主链仍未证。未来observer候选同型修复，不创造生产authority。最终单轮clean 1813/210/0失败/0错误/0跳过、659源码输入前后/打包后相等，发行候选已冻结；完整身份以[本包结果](../../output/w09-sixth-forward-fix-20261015/assessment.md)为准，独立CC尚待。无新schema/锁/服务/纠错平台，成本扩围即按用户止损。
++
+ ## 11. 整链 transition 与失败组合
+ 
+ 以下是目标序列，所有本地多写点均展开为 §6 的每个前缀；包含外部行为的行再叠加 §7/§9，不能用统一模板跳过外部窗口。角色许可沿现有 operator/agent 边界；模型不得代作人决定。
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java
++++ dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java
+@@ -293,7 +293,11 @@
+         var location = diagnostic.line() > 0 && diagnostic.column() > 0
+                 ? "\n- line: " + diagnostic.line() + "\n- column: " + diagnostic.column()
+                 : "";
+-        return "- kind: " + diagnostic.kind() + location;
++        var field = diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.UNKNOWN_FIELD
++                ? "\n- unknown field: " + jsonDiagnostic(diagnostic.fieldName())
++                    + "\n- allowed fields in this object: " + jsonDiagnostic(diagnostic.allowedFields())
++                : "";
++        return "- kind: " + diagnostic.kind() + location + field;
+     }
+ 
+     private static String parseCorrectionInstruction(AgentResultEnvelopeParser.ParseDiagnostic diagnostic) {
+@@ -304,7 +308,19 @@
+                     Re-emit the complete AgentResultEnvelope and verify that every object and array is closed before ending the response.
+                     """.stripTrailing();
+         }
++        if (diagnostic != null && diagnostic.kind() == AgentResultEnvelopeParser.ParseFailureKind.UNKNOWN_FIELD) {
++            return "Remove the identified unsupported field. Use only the listed fields in that object; "
++                    + "preserve factual content in supported fields. Re-emit the complete AgentResultEnvelope.";
++        }
+         return "Re-emit the complete AgentResultEnvelope as one strictly valid JSON object.";
++    }
++
++    private static String jsonDiagnostic(Object value) {
++        try {
++            return new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(value);
++        } catch (com.fasterxml.jackson.core.JsonProcessingException impossible) {
++            throw new IllegalArgumentException("Cannot render typed parse diagnostic", impossible);
++        }
+     }
+ 
+     enum CorrectionReason {
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java
++++ dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java
+@@ -129,6 +129,43 @@
+             return malformed();
+         }
+ 
++        return fromNode(node, trimmed);
++    }
++
++    /**
++     * Human-readable stdout mixes pretty-printed model text with complete RPC lines.
++     * Only successfully parsed RPC-shaped objects are frames here; the strict
++     * session NDJSON entry point above retains its existing MALFORMED semantics.
++     */
++    static java.util.Optional<AcpxStreamWireLine> transcriptFrame(String line) {
++        if (line == null || !line.stripLeading().startsWith("{")) return java.util.Optional.empty();
++        JsonNode node;
++        try {
++            node = MAPPER.reader().with(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
++                    .readTree(line);
++        } catch (Exception readableFragment) {
++            return java.util.Optional.empty();
++        }
++        if (node == null || !node.isObject()
++                || !(node.has("jsonrpc") || node.has("method")
++                    || (node.has("id") && (node.has("result") || node.has("error")))
++                    || isTypedFailure(text(node.get("type")), "", node.get("error"))))
++            return java.util.Optional.empty();
++        // A recognized frame with invalid structure must not disappear into text
++        // or let a complete historical response wash it into success.
++        if ((node.has("jsonrpc") && (!node.get("jsonrpc").isTextual() || !"2.0".equals(node.get("jsonrpc").asText())))
++                || (node.has("id") && !(node.get("id").isIntegralNumber()
++                    || (node.get("id").isTextual() && !node.get("id").asText().isBlank())))
++                || (node.has("method") && (!node.get("method").isTextual() || node.get("method").asText().isBlank()))
++                || (node.has("params") && !node.get("params").isObject())
++                || (node.has("result") && (!node.get("result").isObject() || !node.has("id")
++                    || node.has("error") || node.has("method")))
++                || (node.has("error") && (!node.get("error").isObject() || !node.has("id"))))
++            return java.util.Optional.of(malformed());
++        return java.util.Optional.of(fromNode(node, line.strip()));
++    }
++
++    private static AcpxStreamWireLine fromNode(JsonNode node, String trimmed) {
+         var requestId = id(node.get("id"));
+         var method = text(node.get("method"));
+         var errorNode = node.get("error");
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java
++++ dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java
+@@ -156,8 +156,10 @@
+         int responses = 0;
+         for (var line : Files.readAllLines(transcriptPath)) {
+             if (line.isBlank()) continue;
+-            var wire = AcpxStreamWireLine.parse(line);
+-            if (line.stripLeading().startsWith("{") && wire.kind() == AcpxStreamWireLine.Kind.MALFORMED)
++            var frame = AcpxStreamWireLine.transcriptFrame(line);
++            if (frame.isEmpty()) continue;
++            var wire = frame.get();
++            if (wire.kind() == AcpxStreamWireLine.Kind.MALFORMED)
+                 return AcpxUsage.unavailable("INVALID_CURRENT_TRANSCRIPT");
+             if (isPrompt(wire) && !matches(wire, completion))
+                 return AcpxUsage.unavailable("CURRENT_PROMPT_IDENTITY_MISMATCH");
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java
++++ dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java
+@@ -24,6 +24,49 @@
+ class AcpxAgentResultAcquirerTest {
+     @TempDir
+     Path tempDir;
++
++    @Test
++    void unknownRevisionResponseFieldReachesOnlyOneCorrectionWithExactLegalKeys() throws Exception {
++        var complete = strictEnvelope("intake.claude_brainstorm", "run-1");
++        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
++        var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(complete);
++        var response = ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.path("result"))
++                .putArray("revision_responses").addObject();
++        response.put("review_obligation_id", "CO-1");
++        response.putArray("resolved_by_clause_ids").add("AC-1");
++        response.put("response", "UNSUPPORTED_VALUE_MUST_NOT_BE_COPIED");
++        var invalid = mapper.writeValueAsString(envelope);
++        response.remove("response");
++        var valid = mapper.writeValueAsString(envelope);
++        for (var second : java.util.List.of(valid, invalid)) {
++            var transport = new ScriptedTransport(validResult("request-1", invalid, 0),
++                    validResult("request-2", second, 0));
++            var requests = requests("closed-revision-session");
++            var context = new dev.dual.runtime.handler.AgentResultPromptContract.ProposalEmissionContext(
++                    dev.dual.runtime.handler.AgentResultPromptContract.EmissionMode.REVISION_PATCH,
++                    "base", "a".repeat(64), java.util.List.of()).withGoalReproposal(true);
++            var contract = dev.dual.runtime.handler.AgentResultPromptContract.render(
++                    "ws-test", "run-1", "intake.claude_brainstorm", "READY_FOR_PRODUCT_REVIEW",
++                    java.util.Set.of("READY_FOR_PRODUCT_REVIEW"), context);
++            var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
++                    "claude", requests.initial(), requests.correction(), contract,
++                    "ws-test", "run-1", ContractRegistry.forNode("intake.claude_brainstorm"));
++            assertFalse(acquisition.initialParse().valid());
++            assertEquals("response", acquisition.initialParse().diagnostic().fieldName());
++            assertEquals(java.util.List.of("resolved_by_clause_ids", "review_obligation_id"),
++                    acquisition.initialParse().diagnostic().allowedFields());
++            assertEquals(second.equals(valid), acquisition.finalParse().valid());
++            assertEquals(2, transport.calls, "a second unknown key cannot buy another correction");
++            var prompt = Files.readString(requests.correction().promptPath());
++            assertTrue(prompt.contains("kind: UNKNOWN_FIELD"));
++            assertTrue(prompt.contains("unknown field: \"response\""));
++            assertTrue(prompt.contains("allowed fields in this object: [\"resolved_by_clause_ids\",\"review_obligation_id\"]"));
++            assertTrue(prompt.contains("result.revision_responses` item is a closed object"));
++            assertFalse(prompt.contains("UNSUPPORTED_VALUE_MUST_NOT_BE_COPIED"));
++            assertEquals(dev.dual.runtime.handler.AgentResultEnvelopeParser.ParseFailureKind.UNKNOWN_FIELD,
++                    acquisition.initialParse().diagnostic().kind());
++        }
++    }
+ 
+     @Test
+     void validFirstResultDoesNotStartCorrection() throws Exception {
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCurrentTranscriptUsageTest.java
++++ dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCurrentTranscriptUsageTest.java
+@@ -26,6 +26,50 @@
+                 new AcpxPromptCompletion("3", "end_turn", "answer", "s"),
+                 dir.resolve("current.log"), dir.resolve("stderr.log")).orElseThrow();
+     }
++    @Test void readableMultilineModelJsonIsNotABrokenProtocolFrame() throws Exception {
++        var body = "[agent]\n{\n  \"result\": {\n    \"text\": \"model body\"\n  }\n}\n";
++        for (var agent : new String[]{"claude", "codex"}) {
++            var usage = read(agent, body + result("3", "", "end_turn", TOKENS), "");
++            assertEquals(AcpxUsage.PROVIDER_RUN_USAGE, usage.measurementType());
++            assertEquals(32, usage.totalTokens());
++        }
++    }
++    @Test void malformedRpcShapesNeverBorrowCurrentOrHistoricalSuccess() throws Exception {
++        var good = result("3", "", "end_turn", TOKENS);
++        var history = prompt("s") + good;
++        for (var agent : new String[]{"claude", "codex"}) {
++            for (var bad : new String[]{"{\"jsonrpc\":\"2.0\",\"id\":3,\"result\":42}",
++                    "{\"jsonrpc\":\"1.0\",\"id\":3,\"result\":{}}",
++                    "{\"jsonrpc\":2.0,\"id\":3,\"result\":{}}",
++                    "{\"id\":{},\"result\":{}}", "{\"id\":3,\"error\":false}",
++                    "{\"id\":3,\"result\":{},\"error\":{}}", "{\"jsonrpc\":\"2.0\"}"}) {
++                var usage = read(agent, bad + "\n" + good, history);
++                assertEquals(AcpxUsage.UNAVAILABLE, usage.measurementType(), bad);
++                assertEquals("INVALID_CURRENT_TRANSCRIPT", usage.unavailableReason(), bad);
++            }
++        }
++    }
++    @Test void modelJsonObjectWithoutProtocolIdentityIsReadableText() throws Exception {
++        assertEquals(32, read("claude", "{\"result\":{\"summary\":\"model body\"}}\n"
++                + result("3", "", "end_turn", TOKENS), "").totalTokens());
++    }
++
++    @Test void modelClauseIdsAreNotRpcIdentityInReadableStdout() throws Exception {
++        var body = "[agent]\n{\n  \"clauses\": [\n"
++                + "    {\"id\":\"AC-3\",\"text\":\"a real model clause\"}\n  ]\n}\n";
++        var good = result("3", "", "end_turn", TOKENS);
++        for (var agent : new String[]{"claude", "codex"}) {
++            assertEquals(32, read(agent, body + good, "").totalTokens());
++            assertEquals(32, read(agent, body, prompt("s") + good).totalTokens());
++        }
++    }
++
++    @Test void readableBodyKeepsTheStrictSharedExitReachable() throws Exception {
++        var history = prompt("s") + result("3", "", "end_turn", TOKENS);
++        assertEquals(32, read("claude", "[agent]\n{\n}\n", history).totalTokens());
++        assertEquals(AcpxUsage.UNAVAILABLE, read("claude", "[agent]\n{\n}\n", history + history).measurementType());
++    }
++
+     @Test void legalMissingResultSessionAndOptionalCacheFieldsWorkForBothClients() throws Exception {
+         for (var agent : new String[]{"claude", "codex"}) {
+             var usage = read(agent, result("3", "", "end_turn", TOKENS), "");
+@@ -64,7 +108,7 @@
+         var history = prompt("s") + good;
+         for (var current : new String[]{good + good,
+                 "{\"id\":3,\"error\":{\"message\":\"failed\"}}\n" + good,
+-                "{broken\n" + good}) {
++                "{\"jsonrpc\":\"2.0\",\"id\":3,\"result\":42}\n" + good}) {
+             assertEquals(AcpxUsage.UNAVAILABLE, read("codex", current, history).measurementType());
+         }
+     }
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java
++++ dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java
+@@ -8,6 +8,8 @@
+ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+ import com.fasterxml.jackson.databind.MapperFeature;
+ import com.fasterxml.jackson.databind.json.JsonMapper;
++import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
++import java.util.List;
+ 
+ /** The only JSON grammar owner for final agent workflow results. */
+ public final class AgentResultEnvelopeParser {
+@@ -36,6 +38,11 @@
+                     failure.getMessage(),
+                     ParseDiagnostic.at(ParseFailureKind.UNEXPECTED_END_OF_INPUT, failure.getLocation())
+             );
++        } catch (UnrecognizedPropertyException failure) {
++            var known = failure.getKnownPropertyIds();
++            return ParseResult.failed("AGENT_RESULT_PARSE_FAILED", failure.getMessage(),
++                    ParseDiagnostic.unknownField(failure.getLocation(), failure.getPropertyName(),
++                            known == null ? List.of() : known.stream().map(Object::toString).sorted().toList()));
+         } catch (Exception failure) {
+             return ParseResult.failed(
+                     "AGENT_RESULT_PARSE_FAILED",
+@@ -47,16 +54,27 @@
+ 
+     public enum ParseFailureKind {
+         UNEXPECTED_END_OF_INPUT,
++        UNKNOWN_FIELD,
+         INVALID_JSON
+     }
+ 
+-    public record ParseDiagnostic(ParseFailureKind kind, long offset, int line, int column) {
++    public record ParseDiagnostic(ParseFailureKind kind, long offset, int line, int column,
++                                  String fieldName, List<String> allowedFields) {
++        public ParseDiagnostic {
++            fieldName = fieldName == null ? "" : fieldName;
++            allowedFields = allowedFields == null ? List.of() : List.copyOf(allowedFields);
++        }
++        private static ParseDiagnostic unknownField(JsonLocation location, String field, List<String> allowed) {
++            var at = at(ParseFailureKind.UNKNOWN_FIELD, location);
++            return new ParseDiagnostic(at.kind(), at.offset(), at.line(), at.column(), field, allowed);
++        }
+         private static ParseDiagnostic at(ParseFailureKind kind, JsonLocation location) {
+             return new ParseDiagnostic(
+                     kind,
+                     location == null ? -1L : location.getCharOffset(),
+                     location == null ? -1 : location.getLineNr(),
+-                    location == null ? -1 : location.getColumnNr()
++                    location == null ? -1 : location.getColumnNr(),
++                    "", List.of()
+             );
+         }
+     }
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
++++ dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
+@@ -154,7 +154,11 @@
+                                         AgentResultEnvelope.ClauseChangeOperation.REPLACE,
+                                         AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+                                         "AC-1", "replacement text")),
+-                                List.of(), List.of()));
++                                List.of(), List.of()))
++                        + (context.goalReproposalAllowed()
++                            ? closedItemFields("result.revision_responses",
++                                new AgentResultEnvelope.RevisionResponse("CO-1", List.of("AC-1")))
++                            : "");
+             }
+             return "Intake `result.scope.included` contains candidate paths, not write authorization. "
+                     + "GOAL approval fixes objective, acceptance and exclusions; exact implementation scope is approved in EXECUTION after design and plan review. "
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeParserTest.java
++++ dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeParserTest.java
+@@ -19,6 +19,18 @@
+             Set.of(),
+             Set.of("agent_output_contract")
+     );
++
++    @Test
++    void unknownFieldIsDiagnosedWithoutRelaxingTheClosedGrammar() {
++        var parsed = new AgentResultEnvelopeParser().parse(validEnvelope().replace(
++                "\"summary\": \"ready\"", "\"summary\": \"ready\", \"response\": \"extra\""));
++        assertFalse(parsed.valid());
++        assertEquals("UNKNOWN_FIELD", parsed.diagnostic().kind().name());
++        assertEquals("response", parsed.diagnostic().fieldName());
++        assertTrue(parsed.diagnostic().allowedFields().contains("summary"));
++        assertFalse(parsed.diagnostic().allowedFields().contains("response"));
++        assertEquals("AGENT_RESULT_PARSE_FAILED", parsed.errorCode());
++    }
+ 
+     @Test
+     void parsesAndValidatesStrictTypedEnvelope() {
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java
++++ dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java
+@@ -11,6 +11,18 @@
+ class AgentResultPromptContractTest {
+     private final AgentResultEnvelopeParser parser = new AgentResultEnvelopeParser();
+     private final AgentResultEnvelopeValidator validator = new AgentResultEnvelopeValidator();
++
++    @Test
++    void fullRevisionEnumeratesTheSameClosedResponseFieldsAsInitialIntake() {
++        var context = new AgentResultPromptContract.ProposalEmissionContext(
++                AgentResultPromptContract.EmissionMode.REVISION_PATCH, "base", "a".repeat(64),
++                java.util.List.of()).withGoalReproposal(true);
++        var prompt = AgentResultPromptContract.render("ws", "run", "intake.claude_brainstorm",
++                "READY_FOR_PRODUCT_REVIEW", java.util.Set.of("READY_FOR_PRODUCT_REVIEW"), context);
++        assertTrue(prompt.contains("result.revision_responses` item is a closed object with exactly these fields: "
++                + "[review_obligation_id, resolved_by_clause_ids]"));
++        assertTrue(prompt.contains("result.obligation_patches` item is a closed object"));
++    }
+ 
+     @Test
+     void initialAndRevisionContractsShareProductEvidenceRuleIncludingCorrectionInput() {

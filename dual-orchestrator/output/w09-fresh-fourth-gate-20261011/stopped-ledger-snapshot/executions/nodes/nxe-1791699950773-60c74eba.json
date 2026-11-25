@@ -1,0 +1,43 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1791699950773-60c74eba",
+  "agentTaskId" : "agt-1791699950768-9cfee49f",
+  "workflowExecutionId" : "wfe-1791699950690-fdfbe5d2",
+  "nodeInstanceId" : "node-contract-compile-012",
+  "nodeDefinitionId" : "contract.compile",
+  "handlerType" : "contract.compile",
+  "status" : "SUCCEEDED",
+  "pid" : 78866,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/task-contract.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/task-contract.md", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/contract-resolution.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/contract-resolution.md" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-11T06:25:49.482Z",
+      "executor_pid" : 78866,
+      "input_identity" : "4a6e2687719b6fa017918898459ca5e08d15ea4c6d6866b2b7372bcffa5dbdaa"
+    },
+    "contract_id" : "tc-ws-20261011T044656Z-BMDJ-node-contract-compile-012",
+    "contract_status" : "READY_FOR_REVIEW",
+    "contract_version" : 1,
+    "contract_phase" : "GOAL",
+    "contract_epoch" : 1,
+    "task_contract_sha256" : "a2d79a4285314ee4e8f07cb02808afa19d012ba415234a025b6907777cd1891c",
+    "contract_resolution_sha256" : "31444dd3b28dca99f2d3a47411c9bdda6b5473a4b2ac5f3af6604d878f72cb53",
+    "compilation_pass" : 1,
+    "artifacts" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/task-contract.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/task-contract.md", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/contract-resolution.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/contract-resolution.md" ],
+    "generated_at" : "2026-10-11T06:25:50.849773Z",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-11T06:25:50.773032Z",
+  "finishedAt" : "2026-10-11T06:25:50.855367Z",
+  "durationMs" : 82
+}

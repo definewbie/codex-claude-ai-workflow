@@ -1,0 +1,39 @@
+        return f"{role}: tool_calls -> {tnames}"
+    if isinstance(msg, ToolMessage):
+        return f"{role}({msg.name}): {text}"
+    return f"{role}: {text}"
+
+    Include tool name or function call info when available.
+
+Example 1-8 prints a concise view of messages and routing hints. Together
+they let you verify that tool outputs are attached correctly and that state
+transitions behave as intended.
+
+Example 1-8. Print the current state snapshot
+def print_state_snapshot(app, config, title: str):
+    """Print current graph state and memory for a given thread."""
+    snap = app.get_state(config)
+    values = snap.values or {}
+    msgs: List[BaseMessage] = values.get("messages", [])
+    print(f"\n=== {title} | state snapshot ===")
+    print(f"messages: {len(msgs)} total")
+    for i, m in enumerate(msgs[-5:], start=max(0, len(msgs)-5) +
+1):
+        print(f"  {i:>3}: {_short(m)}")
+
+    nxt = getattr(snap, "next", None)
+    tasks = getattr(snap, "tasks", None)
+    if nxt:
+        print(f"next nodes: {list(nxt)}")
+    if tasks:
+        print(f"queued tasks: {tasks}")
+    print("memory: in-memory checkpoint present for this thread")
+
+   Read the latest state for a thread.
+
+    Print a concise tail of messages to keep logs readable.
+
+   Show routing info and queued tasks if present.
+
+Example 1-9 streams node updates, so you can see each step the graph
+takes.

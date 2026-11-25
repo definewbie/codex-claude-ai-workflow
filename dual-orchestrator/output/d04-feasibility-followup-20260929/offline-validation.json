@@ -1,0 +1,115 @@
+{
+  "status": "PASS_DIAGNOSTIC_SEQUENCE",
+  "checks": [
+    {
+      "name": "real previous auth stream stops at FIRST retry",
+      "result": "PASS",
+      "eventsConsumed": 2,
+      "closed": 1
+    },
+    {
+      "name": "non-auth API retry cannot silently consume retry budget",
+      "result": "PASS",
+      "eventsConsumed": 2,
+      "closed": 1
+    },
+    {
+      "name": "assistant auth error",
+      "result": "PASS",
+      "eventsConsumed": 2,
+      "closed": 1
+    },
+    {
+      "name": "success subtype cannot hide result error",
+      "result": "PASS",
+      "eventsConsumed": 2,
+      "closed": 1
+    },
+    {
+      "name": "SDK failure",
+      "result": "PASS",
+      "eventsConsumed": 2,
+      "closed": 1
+    },
+    {
+      "name": "ordinary model error",
+      "result": "PASS",
+      "eventsConsumed": 2,
+      "closed": 1
+    },
+    {
+      "name": "extra tool",
+      "result": "PASS",
+      "eventsConsumed": 1,
+      "closed": 1
+    },
+    {
+      "name": "MCP surfaced",
+      "result": "PASS",
+      "eventsConsumed": 1,
+      "closed": 1
+    },
+    {
+      "name": "plugins surfaced",
+      "result": "PASS",
+      "eventsConsumed": 1,
+      "closed": 1
+    },
+    {
+      "name": "unknown skill list",
+      "result": "PASS",
+      "eventsConsumed": 1,
+      "closed": 1
+    },
+    {
+      "name": "wrong model",
+      "result": "PASS",
+      "eventsConsumed": 1,
+      "closed": 1
+    },
+    {
+      "name": "wrong permission mode",
+      "result": "PASS",
+      "eventsConsumed": 1,
+      "closed": 1
+    },
+    {
+      "name": "unexpected attempted write",
+      "result": "PASS",
+      "eventsConsumed": 2,
+      "closed": 1
+    },
+    {
+      "name": "call before init",
+      "result": "PASS",
+      "eventsConsumed": 1,
+      "closed": 1
+    },
+    {
+      "name": "read error",
+      "result": "PASS",
+      "eventsConsumed": 2,
+      "closed": 1
+    },
+    {
+      "name": "sixth distinct call stops",
+      "result": "PASS",
+      "eventsConsumed": 7,
+      "closed": 1
+    },
+    {
+      "name": "legal read sequence and error-looking data remain valid",
+      "result": "PASS",
+      "eventsConsumed": 5,
+      "closed": 1
+    },
+    {
+      "name": "same tool event repeated is not six separate calls",
+      "result": "PASS",
+      "eventsConsumed": 9,
+      "closed": 1
+    }
+  ],
+  "providerTasks": 0,
+  "scope": "Shared SDK event consumer; no claim of live engine timing, authentication recovery or native capability proof"
+}

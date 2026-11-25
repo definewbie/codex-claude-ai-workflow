@@ -1,0 +1,64 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-implement-claude_self_test_report-021",
+  "nodeDefinitionId" : "implement.claude_self_test_report",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-implement",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315494720/outputs/implement-claude.stderr.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315494720/outputs/implement-claude.transcript.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315494720/outputs/implement-claude.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-implement-claude_implement-020-run-1789315494720/binding.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315494720/outputs/implement-claude.contract.json" ],
+  "inputTransition" : {
+    "required" : true,
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "transition_type" : "normal",
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315505296/outputs/implement-claude-self-test.stderr.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315505296/outputs/implement-claude-self-test.transcript.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315505296/outputs/implement-claude-self-test.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-021-run-1789315505296/binding.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315505296/outputs/implement-claude-self-test.contract.json" ],
+  "result" : {
+    "run_id" : "run-1789315505296",
+    "run_metadata" : ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315505296/run.json",
+    "agent" : "claude",
+    "session" : "claude-main-ws-20260913T160342Z-TVXE-run-1789315505296",
+    "exit_code" : 0,
+    "transcript_ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315505296/outputs/implement-claude-self-test.transcript.log",
+    "output_complete" : true,
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-021-run-1789315505296/binding.json",
+    "repository_fact_binding_sha256" : "38e32cd3972ee73d9bb0d38a8c2b99cc48a5c383ea1bbb5b8c5e6f9dfdff3931",
+    "process_usability" : "EXITED_ZERO",
+    "adapter_signals" : [ ],
+    "decision" : "SELF_TEST_COMPLETE",
+    "summary" : "Self-test passed.",
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315505296/outputs/implement-claude-self-test.contract.json",
+    "contract_sidecar_sha256" : "0684d9b2556f3aed0ddd36e7ea6d21484c5cae382dd4f522386fae0133251b83",
+    "agent_execution_result_contract" : {
+      "present" : true,
+      "valid" : true,
+      "decision" : "SELF_TEST_COMPLETE",
+      "summary" : "",
+      "validationError" : ""
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "self_test_report",
+      "required" : true,
+      "present" : true,
+      "valid" : true,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "agent_execution_outcome" : {
+      "status" : "SUCCESS",
+      "primaryReason" : "completed",
+      "nodeMaySucceed" : true,
+      "retryPolicy" : "NONE",
+      "recoveryCategory" : "NONE",
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315505276-3d12a1d5",
+  "startedAt" : "2026-09-13T16:05:05.291660Z",
+  "finishedAt" : "2026-09-13T16:05:15.799434Z"
+}

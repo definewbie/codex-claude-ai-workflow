@@ -1,0 +1,38 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1792724474529-ef803876",
+  "workflowExecutionId" : "wfe-1792724474439-807f3013",
+  "nodeInstanceId" : "node-context-plan_codex_plan_review-024",
+  "nodeDefinitionId" : "context.plan_codex_plan_review",
+  "nodeKind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "SUCCEEDED",
+  "agent" : "",
+  "session" : "",
+  "promptTemplate" : "",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "context.build_package",
+    "agent" : "",
+    "session" : "",
+    "prompt_template" : "",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "target_node" : "plan.codex_plan_review",
+      "profile" : "plan_review",
+      "purpose" : "Package Claude plan and design context for Codex plan review.",
+      "required_contract_phase" : "GOAL"
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 1
+  },
+  "nodeExecutionId" : "nxe-1792724474535-8135aac7",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-23T03:01:14.529512Z",
+  "claimedAt" : "2026-10-23T03:01:14.543595Z",
+  "completedAt" : "2026-10-23T03:01:14.728087Z"
+}

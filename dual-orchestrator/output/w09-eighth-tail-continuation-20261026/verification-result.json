@@ -1,0 +1,25 @@
+{
+  "assembly_observer_tests": {
+    "command": "python3.13 -B -m unittest -v test_continuation test_gate_observer",
+    "count": 38,
+    "exit": 0,
+    "tool_session": 4916,
+    "tool_completion_chunk": "62e0ae",
+    "elapsed_seconds": 3.702,
+    "scope": "Operator scripts with Java/native stand-ins and synthetic usage seam; not real E2E"
+  },
+  "budget_self_check": {
+    "count": 21,
+    "exit": 0,
+    "ref": "budget-dry-run.json"
+  },
+  "current_checkpoint_arithmetic": {
+    "count": 6,
+    "ref": "tail-budget-proof.json"
+  },
+  "actual_unauthorized_denial": {
+    "ref": "false-authorization-proof.json"
+  },
+  "no_new_Java_or_acpx_changes": true,
+  "no_native_model_calls": true
+}

@@ -1,0 +1,13 @@
+{
+  "case": "FRESH_FIFTH",
+  "fresh_run_authorized": true,
+  "human_instruction": "批准，按170万token、18次请求、60分钟启动第五例，先完成启动前核验，以跑完主流程为目标。",
+  "recorded_at": "2026-10-11T14:16:07.343197+00:00",
+  "total_tokens": 1700000,
+  "top_level_calls": 18,
+  "active_seconds": 3600,
+  "goal": "complete mainline",
+  "business_gates": "not preapproved; each current subject requires human decision",
+  "product_commit": "human responsibility",
+  "no_old_balance_or_ledger_reuse": true
+}

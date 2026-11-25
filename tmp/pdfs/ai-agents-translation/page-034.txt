@@ -1,0 +1,37 @@
+      def reflect_node(state: State) -> State:
+          ai = AIMessage(content="Reflect on result")
+          return {"messages": [ai], "working_last": "reflect"}
+
+      checkpointer = MemorySaver()
+      app = parent.compile(checkpointer=checkpointer)
+
+      cfg = {"configurable": {"thread_id": "session-1"}}
+      app.invoke({"messages": [HumanMessage(content="start")],
+                              "working_last": None}, config=cfg)
+
+       Substates set working_last on exit.
+
+      Compile with checkpointing.
+
+     Run in a thread. MemorySaver restores last completed node on
+       resume.
+
+FSMs give you a way to structure tasks into stable, recoverable steps.
+HSMs extend this by reducing duplication and centralizing policy when
+workflows grow more complex. Both patterns prepare you for the next step:
+turning static LLM predictions into dynamic, stateful agents.
+
+Foundations: From Static Models to Dynamic
+Agents
+
+As you saw in the previous section, adding states and control flows is
+essential for automation. The same principle applies to agents. To move
+from static LLM usage to agentic systems, you need explicit state and
+control flow. State turns one-off tool calls into a stateful process where prior
+actions, tool results, and routing decisions can be preserved across steps.
+Control flow adds guards and transitions that govern when to plan, when to
+act, and when to stop.
+
+The reason to add this to LLMs is simple: LLMs are static predictors. They
+generate the next token given a prompt, drawing only on patterns encoded
+in their training data. This makes them powerful reasoners but leaves them

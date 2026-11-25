@@ -1,0 +1,29 @@
+{
+  "observed_at": "2026-10-14T23:46:01.689116+00:00",
+  "operations": [
+    {
+      "name": "claude-main-ws-20261014T234009Z-RN9X-run-1792021247531",
+      "record_id": "6f351661-60a7-47db-8059-0e743e0e6689",
+      "agent": "claude",
+      "closed_observed": true,
+      "proof": "stop-session-operations/6f351661-60a7-47db-8059-0e743e0e6689"
+    },
+    {
+      "name": "claude-main-ws-20261014T234009Z-RN9X-run-1792021385197",
+      "record_id": "fe3ee258-ed11-483c-9d00-70276dd5aee0",
+      "agent": "claude",
+      "closed_observed": true,
+      "proof": "stop-session-operations/fe3ee258-ed11-483c-9d00-70276dd5aee0"
+    },
+    {
+      "name": "codex-reviewer-ws-20261014T234009Z-RN9X",
+      "record_id": "01a13ccb-4cae-7d12-9174-9788eb3c00fe",
+      "agent": "codex",
+      "closed_observed": true,
+      "proof": "stop-session-operations/01a13ccb-4cae-7d12-9174-9788eb3c00fe"
+    }
+  ],
+  "all_prompt_results_completed": true,
+  "scope": "These named sessions only; arbitrary descendant termination NOT_PROVEN",
+  "new_attempt_authority": false
+}

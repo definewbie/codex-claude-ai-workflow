@@ -1,0 +1,13 @@
+{
+  "schemaVersion" : 1,
+  "iterationId" : "iter-002",
+  "parentIterationId" : "iter-001",
+  "number" : 2,
+  "stageId" : "stage-intake",
+  "status" : "active",
+  "triggerNodeInstanceId" : "node-intake-decision-005",
+  "triggerAction" : "NEEDS_REVISION",
+  "targetNodeDefinitionId" : "intake.claude_brainstorm",
+  "reason" : "功能与验收要求覆盖充分，但 C-4 将建议文件固化为产品约束，未保留用户要求的设计、计划确认及实现前单独批准边界。",
+  "createdAt" : "2026-10-10T12:52:46.436655Z"
+}

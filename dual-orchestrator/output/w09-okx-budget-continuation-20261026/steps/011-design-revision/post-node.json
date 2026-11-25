@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-design-claude_design-012",
+  "nodeDefinitionId": "design.claude_design",
+  "kind": "TASK",
+  "handlerType": "acpx.agent_run",
+  "status": "COMPLETED",
+  "stageId": "stage-design",
+  "iterationId": "iter-002",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-design-codex_arch_review-010-run-1793029770286/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.contract.json"
+  ],
+  "inputTransition": {
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256": "8968e29f273e9cd868336d97e79752f9eb350189364156884e18ab366b4c180b",
+    "source_node_instance_id": "node-design-decision-011",
+    "required": true,
+    "transition_type": "normal",
+    "condition": "unconditional"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029979831/outputs/design-claude.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029979831/outputs/design-claude.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029979831/outputs/design-claude.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1793029979831/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029979831/outputs/design-claude.contract.json"
+  ],
+  "result": {
+    "adapter_signals": [],
+    "agent": "claude",
+    "agent_execution_artifact_contract_results": [
+      {
+        "contractType": "design_result",
+        "errorCode": "",
+        "errorMessage": "",
+        "path": "",
+        "present": true,
+        "required": true,
+        "valid": true
+      }
+    ],
+    "agent_execution_outcome": {
+      "nodeMaySucceed": true,
+      "operatorMessage": "The agent produced valid result and artifact evidence.",
+      "primaryReason": "completed",
+      "recoveryCategory": "NONE",
+      "retryPolicy": "NONE",
+      "secondarySignals": [],
+      "status": "SUCCESS"
+    },
+    "agent_execution_result_contract": {
+      "decision": "READY_FOR_ARCH_REVIEW",
+      "present": true,
+      "summary": "",
+      "valid": true,
+      "validationError": ""
+    },
+    "contract_sidecar_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029979831/outputs/design-claude.contract.json",
+    "contract_sidecar_sha256": "2c20a9e9f7c590f0fc105dff400b165756d369728b58ffeee4d02c9ffecaa3b8",
+    "decision": "READY_FOR_ARCH_REVIEW",
+    "exit_code": 0,
+    "output_complete": true,
+    "permission_assessments": [],
+    "process_usability": "EXITED_ZERO",
+    "repository_fact_binding_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1793029979831/binding.json",
+    "repository_fact_binding_sha256": "f2947568c6c450e746914959fecb5ff83dde1864666c1ae332179c615044f367",
+    "run_id": "run-1793029979831",
+    "run_metadata": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029979831/run.json",
+    "session": "claude-main-ws-20261026T142203Z-7SNA-run-1793029979831",
+    "summary": "替换版完整设计：沿用已获认可的六文件骨架，服务测试改为直接断言 DECIMAL128 原值，并新增展示舍入不改变建议的防绕过成对测试。",
+    "transcript_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029979831/outputs/design-claude.transcript.log",
+    "completion_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029979831/outputs/nxe-1793029979789-e304e400-completion.json",
+    "completion_sha256": "3c5a6e64d22ded7ffde1a6b729fabf69661830717ccea5ca976c373f0283b3ff"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1793029979789-e304e400",
+  "startedAt": "2026-10-26T15:52:59.799779Z",
+  "finishedAt": "2026-10-26T15:59:37.623258Z"
+}

@@ -1,0 +1,30 @@
+{
+  "checks": [
+    {
+      "command": [
+        "/usr/local/bin/docker",
+        "info",
+        "--format",
+        "{{json .ServerVersion}}"
+      ],
+      "exit_code": 1,
+      "stdout": "\"\"\n",
+      "stderr": "Cannot connect to the Docker daemon at unix:///Users/kriswang/.docker/run/docker.sock. Is the docker daemon running?\n"
+    },
+    {
+      "command": [
+        "/usr/local/bin/docker",
+        "image",
+        "inspect",
+        "mysql:8.4",
+        "--format",
+        "{{.Id}}"
+      ],
+      "exit_code": 1,
+      "stdout": "\n",
+      "stderr": "Cannot connect to the Docker daemon at unix:///Users/kriswang/.docker/run/docker.sock. Is the docker daemon running?\n"
+    }
+  ],
+  "elapsed_seconds": 7.110094833886251,
+  "scope": "local daemon and cached image only; no pull, app or model"
+}

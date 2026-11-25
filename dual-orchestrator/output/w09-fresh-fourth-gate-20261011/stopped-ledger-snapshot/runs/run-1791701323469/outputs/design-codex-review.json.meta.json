@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "output",
+  "runId" : "run-1791701323469",
+  "workstreamId" : "ws-20261011T044656Z-BMDJ",
+  "nodeId" : "design.codex_arch_review",
+  "agent" : "codex",
+  "session" : "codex-reviewer-ws-20261011T044656Z-BMDJ",
+  "promptTemplate" : "design-codex-review",
+  "workdir" : "/private/tmp/dual-w09-newlines-20261011-fresh-04/worktree",
+  "artifactPath" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791701323469/outputs/design-codex-review.json",
+  "contentType" : "application/json",
+  "byteSize" : 3191,
+  "estimatedTokens" : 798,
+  "lineCount" : 50,
+  "sha256" : "78f35c0fde216d9ab4840920ff378036fe66a80fa849f1e26d453ccbb2a17574",
+  "generatedAt" : "2026-10-11T06:49:09.555465Z"
+}

@@ -1,0 +1,2 @@
+token in the sequence. Figure 4-2 illustrates an abstracted encoder-only
+architecture.

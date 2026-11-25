@@ -1,0 +1,7 @@
+{
+  ".tools/acpx-e1/source/src/cli/config.ts": "766aabaa37a9f06be434c2eca7e3b7b33eeac3bee2c45654d4a5a9e89d211aee",
+  ".tools/acpx-e1/source/src/cli/config-command.ts": "347864a6a8c275f42cf50249df28cd19f30ad2fd9e32f99f6875f67b10b25294",
+  ".tools/acpx-e1/source/src/agent-registry.ts": "ddc69460b85ca6af098ea1f7fc5467e808e85b207dde47639a15026ca7323f7d",
+  "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ReviewedAcpxBuildIdentity.java": "74cf3bbf7bcc6f2c8e557c83fc692b52d9488b4b7fad7df0db5ec0b23fcdf96b",
+  "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java": "b8280a08f9301c6b8ad5ba0fb9982ab24c65d88598f54337b2136cf2e981f0f4"
+}

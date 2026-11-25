@@ -1,0 +1,48 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261011T044656Z-BMDJ",
+    "workflowInstanceId": "wf-ws-20261011T044656Z-BMDJ",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-design-claude_design-013"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000013",
+    "updatedAt": "2026-10-11T06:25:51.080134Z",
+    "commitSequence": 46
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-design-claude_design-013",
+    "nodeDefinitionId": "design.claude_design",
+    "kind": "TASK",
+    "handlerType": "acpx.agent_run",
+    "status": "READY",
+    "stageId": "stage-design",
+    "iterationId": "iter-002",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/task-contract.json",
+      ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/task-contract.md",
+      ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/contract-resolution.json",
+      ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/contract-resolution.md"
+    ],
+    "inputTransition": {
+      "condition": "unconditional",
+      "purpose": "Seed the first Claude intake run with repo-scope context.",
+      "source_node_sha256": "91436b26f566e8951319c980650af7fb07dec0a524fdbf0c3ba5556b0c83ccab",
+      "source_node_instance_id": "node-contract-compile-012",
+      "required": true,
+      "transition_type": "normal"
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 276.89
+}

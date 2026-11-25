@@ -45,6 +45,7 @@ final class MetricsProjectionWriter {
         var iterations = readIterations(paths);
         var metrics = new LinkedHashMap<String, Object>();
         metrics.put("schemaVersion", 1);
+        metrics.put("commitSequence", current.commitSequence());
         metrics.put("workstreamId", current.workstreamId());
         metrics.put("workflowInstanceId", current.workflowInstanceId());
         metrics.put("workflowId", current.workflowId());

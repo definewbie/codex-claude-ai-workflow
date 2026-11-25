@@ -1,0 +1,27 @@
+Usage: acpx claude [options] [command] [prompt...]
+
+Use claude agent
+
+Arguments:
+  prompt                        Prompt text
+
+Options:
+  -s, --session <name>          Use named session instead of cwd default
+  --no-wait                     Queue prompt and return immediately when another
+                                prompt is already running
+  -f, --file <path>             Read prompt text from file path (use - for
+                                stdin)
+  -h, --help                    display help for command
+
+Commands:
+  prompt [options] [prompt...]  Prompt using persistent session
+  exec [options] [prompt...]    One-shot prompt without saved session
+  permission-reply [options]    Reply once to an exact live permission request;
+                                never retries
+  cancel [options]              Cooperatively cancel current in-flight prompt
+  set-mode [options] <mode>     Set session mode
+  set [options] <key> <value>   Set session config option
+  status [options]              Show local status of current session agent
+                                process
+  sessions [options]            List, ensure, create, or close sessions for this
+                                agent

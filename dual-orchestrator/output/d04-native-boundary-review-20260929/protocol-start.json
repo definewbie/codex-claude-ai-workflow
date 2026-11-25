@@ -1,0 +1,13 @@
+{
+  "identities": {
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs": "cae60ea6827d5f9b113c88b911388983fe96e7d565a382bf25904df78ab9d0fc",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts": "65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/manifest.json": "1dc57b96dca95ccee8e050734a61fad689ca7a29de718e49e1b227e755d2d645",
+    "/opt/homebrew/Caskroom/claude-code/2.1.277/claude": "73d6a2a55c46907e49bd8bb7608e134333bd71173351ee16ddce7d7db9914b9c"
+  },
+  "driverSha256": "d8bef7bd9d4b466f725979ff5e9867cf7a9106c170ca03154e5b81c521186646",
+  "workerSha256": "28c7c2414a70bdc4b7d9e041ac8f49aad6d5907743296536084f394f784fc513",
+  "gateSha256": "50efe9502332966e2ea40d2199f717104e57c6e08689c2e8689d9000e4db1a44",
+  "realProviderCalls": 0,
+  "modelTokens": 0
+}

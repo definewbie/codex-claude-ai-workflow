@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "comparedFields": [
+    "objective",
+    "scope",
+    "non_goals",
+    "acceptance_criteria",
+    "test_requirements",
+    "constraints"
+  ],
+  "compileStatus": "COMPLETED",
+  "contractSha": "01f70334d97f222aab949d493e3475e47b17d5780610817228ff85edbd627890",
+  "resolutionSha": "a66b782b539227fefb00e00d4f30d73c29a13dfd88d264ca38d9e9edd6223628",
+  "checkedAt": "2026-09-12T08:34:38.134Z"
+}

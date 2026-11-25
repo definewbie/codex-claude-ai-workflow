@@ -1,0 +1,15 @@
+{
+  "status": "AUTHOR_REVIEW_DISPOSITION_NOT_D04_FREEZE",
+  "files": {
+    "dual-orchestrator/output/d04-native-boundary-review-20260929-r2/material-verification.json": "c2a824d784c53f25af0865a71da8ada1c4fc34a3268a1ab62a177454a857a3c6",
+    "dual-orchestrator/output/d04-native-boundary-review-20260929-r2/documentation.diff": "d06515d251145868c94410f557ab7ec111503da6c5b4ba52d3825a9ccf5e7c80",
+    "dual-orchestrator/output/d04-native-boundary-review-20260929-r2/prior-manifest-resolution.json": "f95dafa430187db2b3fdc2635e85bdce356f1493b71fd0926bff8c52bc133e88",
+    "dual-orchestrator/output/d04-native-boundary-review-20260929-r2/review-disposition.md": "336507a9e3d46e42797c6a53ddf6da88f91cbb18365be1b280894f04a3250887",
+    "dual-orchestrator/output/d04-native-boundary-review-20260929-r2/baseline.json": "e481a134eb03b974efdc48fd2ea67c29fa17fba0974b5b52f7eac9aa16b66c01",
+    "dual-orchestrator/output/d04-native-boundary-review-20260929-r2/cc-review.txt": "c270c83b4b0b09053e8792459287e45451ae39771d0ea1de9cc342314e38263e",
+    "dual-orchestrator/output/d04-native-boundary-review-20260929-r2/source-checks.json": "d43df578230996df4017fe11a9fcba4868922374ebc050c095bfde3d1b30f5f7",
+    "dual-orchestrator/output/d04-native-boundary-review-20260929-r2/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "02ca17276bc002b15f65021315878b232bb5ab79c2d48f1f385b885b9aa663ea",
+    "dual-orchestrator/output/d04-native-boundary-review-20260929-r2/before/20260927-dual-lifecycle-worklist.zh-CN.md": "31108f170cc10d48da36347b2ae0dfcf8787592a8061e15d050f4080a20ba1c3",
+    "dual-orchestrator/output/d04-native-boundary-review-20260929-r2/before/20260928-dual-lifecycle-detailed-design.zh-CN.md": "beeef94007a0944c59f813b1163816d382de5ef7bed86aac1e0c8d8a4602d281"
+  }
+}

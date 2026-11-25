@@ -1,0 +1,36 @@
+Table 4-5. Agent team at a glance
+
+                           Concrete     Primary
+ Role          Architecture  model        task          Tool
+
+ Semantic       Decoder-only   Qwen3 32B     Neural search   Exter
+ research          fast                            with            ch_an
+                                                      highlights
+
+ Patent          Decoder-only   Qwen3 32B     Past year      Goog
+ research          fast                               patent hits
+
+ Analyst        Hybrid         Reasoning      Semantic       seman
+                   controller plus   controller         filtering and
+                 encoder       Qwen3 235B    extractive
+                                 Thinking,      summary with
+                              Encoder         layered
+                          ModernBERT   reasoning then
+                                 base            encoder
+                                                   scoring
+
+ Notetaker       Decoder-only   Qwen3 32B     Outline         creat
+                     fast                               creation        ument
+
+
+ Writer          Decoder-only   Qwen3 32B     Draft and edits  write
+                     fast                                                             c⁠ume⁠n
+
+
+ Supervisor      Deliberate     GPT 4.1        Routing and    Agen
+           LLM                               finish
+
+
+
+Together, these specialized agents form a coordinated research and writing
+pipeline. The supervisor oversees the entire process, routing tasks between

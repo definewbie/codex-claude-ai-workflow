@@ -1,0 +1,309 @@
+--- before/dual-ledger-file/src/main/java/dev/dual/ledger/file/FailureSummaryWriter.java
++++ after/dual-ledger-file/src/main/java/dev/dual/ledger/file/FailureSummaryWriter.java
+@@ -24,8 +24,14 @@
+ 
+     String render(WorkstreamPaths paths, WorkflowCurrentDocument current, NodeInstanceDocument node) {
+         var result = node.result() == null ? Map.<String, Object>of() : node.result();
++        var hasExecutionOutcome = result.containsKey("agent_execution_outcome");
++        var executionOutcome = result.get("agent_execution_outcome") instanceof Map<?, ?> map ? map : Map.of();
+         var outputRefs = node.outputRefs() == null ? List.<String>of() : node.outputRefs();
+-        var reason = text(firstNonBlank(
++        // The finalized outcome owns agent failures; acquisition diagnostics cannot override it.
++        var reason = hasExecutionOutcome
++                ? executionOutcome.get("primaryReason") instanceof String primary && !primary.isBlank()
++                        ? primary : "INVALID_AGENT_EXECUTION_OUTCOME"
++                : text(firstNonBlank(
+                 result.get("acpx_failure.reason"),
+                 result.get("reason"),
+                 result.get("error"),
+@@ -48,14 +54,20 @@
+         line(content, "Node Status", node.status().name());
+         line(content, "Handler", node.handlerType());
+         line(content, "Reason", reason);
+-        line(content, "Recoverable", recoverable);
++        if (hasExecutionOutcome) {
++            line(content, "Recovery Category", text(executionOutcome.get("recoveryCategory")));
++            line(content, "Retry Policy", text(executionOutcome.get("retryPolicy")));
++        } else {
++            line(content, "Recoverable", recoverable);
++        }
+         line(content, "Exit Code", exitCode);
+         line(content, "Run ID", runId);
+         line(content, "Agent", agent);
+         line(content, "Session", session);
+         line(content, "Attention Category", attention.category().name());
+         line(content, "Retry Safe", String.valueOf(attention.retrySafe()));
+-        appendContractFailureDiagnostic(content, result);
++        appendContractFailureDiagnostic(content, result, hasExecutionOutcome
++                && !"ARTIFACT_CONTRACT_FAILURE".equals(executionOutcome.get("recoveryCategory")));
+         content.append("\n## Evidence\n\n");
+         if (outputRefs.isEmpty()) {
+             content.append("- Output refs: N/A\n");
+@@ -74,13 +86,14 @@
+     }
+ 
+     @SuppressWarnings("unchecked")
+-    private static void appendContractFailureDiagnostic(StringBuilder content, Map<String, Object> result) {
++    private static void appendContractFailureDiagnostic(StringBuilder content, Map<String, Object> result, boolean secondary) {
+         var diagnosticJson = text(result.get("contract_failure_diagnostic_ref"));
+         var diagnosticMarkdown = text(result.get("contract_failure_diagnostic_markdown_ref"));
+         if (diagnosticJson.isBlank() && diagnosticMarkdown.isBlank() && !result.containsKey("parse_error")) {
+             return;
+         }
+-        content.append("\n## Contract Failure Diagnostic\n\n");
++        content.append(secondary ? "\n## Secondary Contract Diagnostic\n\n" : "\n## Contract Failure Diagnostic\n\n");
++        if (secondary) content.append("These acquisition diagnostics do not replace the execution outcome's primary reason.\n\n");
+         line(content, "Diagnostic JSON", diagnosticJson);
+         line(content, "Diagnostic Markdown", diagnosticMarkdown);
+         if (result.get("parse_error") instanceof Map<?, ?> parseError) {
+--- before/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkstreamAttentionEvaluatorTest.java
++++ after/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkstreamAttentionEvaluatorTest.java
+@@ -21,6 +21,51 @@
+ class WorkstreamAttentionEvaluatorTest {
+     @TempDir
+     Path tempDir;
++
++    @org.junit.jupiter.params.ParameterizedTest
++    @org.junit.jupiter.params.provider.ValueSource(strings = {"not_a_map", "missing_primary", "blank_primary", "nontext_primary"})
++    void malformedTypedPrimaryCannotFallBackToAnAcquisitionReason(String fault) throws Exception {
++        var paths = new WorkstreamPaths(tempDir, new DualId("ws-invalid-summary"));
++        var ledger = LedgerTestFixture.ledger();
++        var definition = singleNodeDefinition();
++        LedgerTestFixture.initialize(ledger, paths, "wf-invalid-summary", definition);
++        var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
++        Object outcome = switch (fault) {
++            case "not_a_map" -> "invalid";
++            case "missing_primary" -> Map.of("status", "OUTPUT_INCOMPLETE");
++            case "blank_primary" -> Map.of("primaryReason", " ");
++            default -> Map.of("primaryReason", 7);
++        };
++        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
++                "AGENT_OUTPUT_CONTRACT_VIOLATION", List.of(),
++                Map.of("reason", "AGENT_OUTPUT_CONTRACT_VIOLATION", "agent_execution_outcome", outcome));
++        var summary = ledger.failureSummarySnapshot(paths);
++        assertTrue(summary.contains("- Reason: INVALID_AGENT_EXECUTION_OUTCOME\n"), summary);
++        assertFalse(summary.contains("- Reason: AGENT_OUTPUT_CONTRACT_VIOLATION\n"));
++    }
++
++    @Test
++    void genuineTypedArtifactFailureRetainsItsPrimaryDiagnostic() throws Exception {
++        var paths = new WorkstreamPaths(tempDir, new DualId("ws-contract-summary"));
++        var ledger = LedgerTestFixture.ledger();
++        var definition = singleNodeDefinition();
++        LedgerTestFixture.initialize(ledger, paths, "wf-contract-summary", definition);
++        var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
++        var outcome = new dev.dual.core.execution.AgentExecutionOutcome(
++                dev.dual.core.execution.AgentExecutionOutcomeStatus.CONTRACT_FAILED,
++                "required_artifact_contract_failed", List.of(), false,
++                dev.dual.core.execution.AgentExecutionRetryPolicy.MANUAL_ONLY,
++                dev.dual.core.execution.RecoveryCategory.ARTIFACT_CONTRACT_FAILURE, "Required artifact invalid");
++        var map = new com.fasterxml.jackson.databind.ObjectMapper().convertValue(outcome, Map.class);
++        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
++                "AGENT_OUTPUT_CONTRACT_VIOLATION", List.of(), Map.of("agent_execution_outcome", map,
++                        "parse_error", Map.of("code", "ARTIFACT_INVALID", "message", "invalid schema")));
++        var summary = ledger.failureSummarySnapshot(paths);
++        assertTrue(summary.contains("- Reason: required_artifact_contract_failed\n"));
++        assertTrue(summary.contains("## Contract Failure Diagnostic"));
++        assertFalse(summary.contains("## Secondary Contract Diagnostic"));
++        assertTrue(summary.contains("- Retry Policy: MANUAL_ONLY\n"));
++    }
+ 
+     @Test
+     void recoverableRuntimeFailureIsRetrySafe() throws Exception {
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java
+@@ -8,6 +8,7 @@
+ /** Last recorded ACP handshake, not proof of current engine bytes or arbitrary tool capability. */
+ final class AcpxSessionCompatibility {
+     private static final ObjectMapper JSON = new ObjectMapper();
++    private enum AgentSessionIdStatus { PROVIDED, NOT_PROVIDED, INVALID }
+     record Assessment(boolean compatible, Map<String, Object> observation) {}
+ 
+     static Assessment assess(String output, Path cwd, String session) {
+@@ -18,10 +19,16 @@
+         try {
+             var doc = JSON.readTree(output);
+             if (doc == null || !doc.isObject()) throw new IllegalArgumentException(failure);
+-            for (var key : List.of("schema", "acpxRecordId", "acpSessionId", "agentSessionId", "cwd", "name")) {
++            for (var key : List.of("schema", "acpxRecordId", "acpSessionId", "cwd", "name")) {
+                 var field = doc.path(key);
+                 if (field.isTextual()) fact.put(key, field.asText());
+             }
++            var engineId = doc.path("agentSessionId");
++            var engineIdStatus = engineId.isMissingNode() || engineId.isNull() ? AgentSessionIdStatus.NOT_PROVIDED
++                    : engineId.isTextual() && !engineId.asText().isBlank() ? AgentSessionIdStatus.PROVIDED
++                    : AgentSessionIdStatus.INVALID;
++            fact.put("agent_session_id_status", engineIdStatus.name());
++            if (engineIdStatus == AgentSessionIdStatus.PROVIDED) fact.put("agentSessionId", engineId.asText());
+             if (doc.path("protocolVersion").isIntegralNumber()) fact.put("protocolVersion", doc.path("protocolVersion").intValue());
+             fact.put("closed", doc.path("closed").asBoolean(false));
+             var version = doc.path("agentInfo").path("version");
+@@ -47,8 +54,12 @@
+ 
+     private static String failure(JsonNode doc, Path cwd, String session) throws Exception {
+         if (!"acpx.session.v1".equals(doc.path("schema").asText())) return "unsupported acpx session metadata schema";
+-        for (var key : List.of("acpxRecordId", "acpSessionId", "agentSessionId"))
++        for (var key : List.of("acpxRecordId", "acpSessionId"))
+             if (!doc.path(key).isTextual() || doc.path(key).asText().isBlank()) return "missing session identity: " + key;
++        // ACP routing and acpx persistence identities are required; the engine's internal ID is optional.
++        var engineId = doc.path("agentSessionId");
++        if (!engineId.isMissingNode() && !engineId.isNull()
++                && (!engineId.isTextual() || engineId.asText().isBlank())) return "invalid optional agent session identity";
+         if (!session.equals(doc.path("name").asText())) return "session name differs from invocation";
+         if (!doc.path("cwd").isTextual() || !Path.of(doc.path("cwd").asText()).toRealPath().equals(cwd.toRealPath()))
+             return "session workspace differs from invocation";
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java
+@@ -65,7 +65,32 @@
+         assertFalse(mapper.writeValueAsString(observed.stream().map(AcpxExecutionEvent::details).toList()).contains("do-not-save"));
+     }
+ 
+-    @ParameterizedTest @ValueSource(strings = {"protocol_missing", "protocol_unsupported", "session", "cwd", "closed", "record_id"})
++    @ParameterizedTest @ValueSource(strings = {"claude", "codex"})
++    void optionalEngineIdentityDoesNotBlockPrimaryOrCorrectionOrInventAnIdentity(String agent) throws Exception {
++        var events = new ArrayList<AcpxExecutionEvent>();
++        var transport = transport();
++        for (var shape : List.of("absent", "null", "provided")) {
++            // The actual W09 sessions-show shape omits agentSessionId, while both routing IDs exist.
++            var metadata = metadata();
++            metadata.remove("agentSessionId");
++            if (shape.equals("null")) metadata.put("agentSessionId", null);
++            if (shape.equals("provided")) metadata.put("agentSessionId", "engine-internal-one");
++            write(metadata);
++            var assessment = AcpxSessionCompatibility.assess(mapper.writeValueAsString(metadata), root, "exact-session");
++            assertTrue(assessment.compatible(), assessment.observation().toString());
++            assertEquals(shape.equals("provided") ? "PROVIDED" : "NOT_PROVIDED",
++                    assessment.observation().get("agent_session_id_status"));
++            assertEquals(shape.equals("provided") ? "engine-internal-one" : null,
++                    assessment.observation().get("agentSessionId"));
++            run(transport, agent, request(events::add));
++            transport.runAgentResultCorrection(agent, request(events::add));
++        }
++        assertEquals(6, Files.readAllLines(root.resolve("prompts")).size());
++        assertEquals(6, events.stream().filter(e -> e.kind() == AgentExecutionTimelineEventKind.COMMAND_RESULT
++                && "session_compatibility".equals(e.details().get("purpose"))).count());
++    }
++
++    @ParameterizedTest @ValueSource(strings = {"protocol_missing", "protocol_unsupported", "session", "cwd", "closed", "record_id", "acp_id", "schema", "engine_blank", "engine_type"})
+     void incompatibleSessionBlocksBothPromptEntrypointsBeforeTheirSideEffects(String fault) throws Exception {
+         var metadata = metadata();
+         switch (fault) {
+@@ -75,6 +100,10 @@
+             case "cwd" -> metadata.put("cwd", root.resolve("another-workstream").toString());
+             case "closed" -> metadata.put("closed", true);
+             case "record_id" -> metadata.remove("acpxRecordId");
++            case "acp_id" -> metadata.remove("acpSessionId");
++            case "schema" -> metadata.put("schema", "acpx.session.v999");
++            case "engine_blank" -> metadata.put("agentSessionId", " ");
++            case "engine_type" -> metadata.put("agentSessionId", 7);
+         }
+         write(metadata);
+         var transport = transport();
+@@ -101,7 +130,7 @@
+ 
+     private Map<String, Object> metadata() {
+         return new LinkedHashMap<>(Map.of("schema", "acpx.session.v1", "acpxRecordId", "record-one",
+-                "acpSessionId", "native-one", "agentSessionId", "native-one", "cwd", root.toString(),
++                "acpSessionId", "native-one", "agentSessionId", "engine-internal-one", "cwd", root.toString(),
+                 "name", "exact-session", "closed", false, "protocolVersion", 1, "agentCapabilities", Map.of()));
+     }
+     private void write(Map<String, Object> metadata) throws Exception { mapper.writeValue(root.resolve("session.json").toFile(), metadata); }
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java
+@@ -329,6 +329,7 @@
+         String recommendation = "READY_FOR_PRODUCT_REVIEW";
+         String acceptanceFailure = "";
+         boolean providerDenied;
++        boolean interfaceIncompatible;
+         ProcessResult process = ProcessResult.exitedZero();
+         String completedCandidateNode;
+         String permissionChoice;
+@@ -368,6 +369,14 @@
+                 var runId = request.promptPath().getParent().getParent().getFileName().toString();
+                 var id = node.nodeDefinitionId();
+                 calls.add(id); prompts.add(Files.readString(request.promptPath()));
++                if (interfaceIncompatible) {
++                    // Synthetic adapter failure; no model output, used to exercise the real durable consumers.
++                    Files.writeString(request.stdoutPath(), ""); Files.writeString(request.stderrPath(), "");
++                    var now = Instant.now();
++                    return new AcpxRunResult(now, now, List.of("offline-fixture"), List.of(), null, null,
++                            ProcessResult.nonZeroIncomplete(1), List.of(new dev.dual.core.execution.AdapterSignal(
++                            dev.dual.core.execution.AdapterSignalType.ADAPTER_INCOMPATIBLE, "fixture incompatible protocol", 1)));
++                }
+                 if (id.equals("implement.claude_implement") && permissionChoice != null && !nativeChoice(request)) {
+                     Files.writeString(request.stdoutPath(), "offline exact native denial"); Files.writeString(request.stderrPath(), "");
+                     var now = Instant.now();
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/SessionMetadataFixture.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/SessionMetadataFixture.java
+@@ -9,7 +9,7 @@
+             case " $* " in
+               *' sessions show '*)
+                 for arg in "$@"; do session="$arg"; done
+-                printf '{"schema":"acpx.session.v1","acpxRecordId":"fixture-record","acpSessionId":"fixture-native","agentSessionId":"fixture-native","cwd":"%s","name":"%s","closed":false,"protocolVersion":1,"agentCapabilities":{}}\\n' "$PWD" "$session"
++                printf '{"schema":"acpx.session.v1","acpxRecordId":"fixture-record","acpSessionId":"fixture-native","cwd":"%s","name":"%s","closed":false,"protocolVersion":1,"agentCapabilities":{}}\\n' "$PWD" "$session"
+                 exit 0;;
+             esac
+             """;
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionTransportSequenceTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionTransportSequenceTest.java
+@@ -31,7 +31,7 @@
+         var nativeRequest = Map.<String,Object>of("schema", "dual.native.permission.request.v1", "requestKey", key, "sessionId", "native-one", "promptId", "prompt-one", "ownerGeneration", 4,
+                 "rpcId", "rpc-A", "rawJson", raw, "rawSha256", java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(raw.getBytes(java.nio.charset.StandardCharsets.UTF_8))), "deadlineMs", System.currentTimeMillis()+10000);
+         json.writeValue(root.resolve("ask.json").toFile(), nativeRequest);
+-        json.writeValue(root.resolve("session.json").toFile(), Map.of("schema", "acpx.session.v1", "acpxRecordId", "record", "acpSessionId", "native-one", "agentSessionId", "native-one", "cwd", root.toString(), "name", "exact-session", "closed", false, "protocolVersion", 1, "agentCapabilities", Map.of()));
++        json.writeValue(root.resolve("session.json").toFile(), Map.of("schema", "acpx.session.v1", "acpxRecordId", "record", "acpSessionId", "native-one", "cwd", root.toString(), "name", "exact-session", "closed", false, "protocolVersion", 1, "agentCapabilities", Map.of()));
+         Files.writeString(root.resolve("scenario"), scenario);
+         var events = new ArrayList<AcpxExecutionEvent>();
+         var announced = new java.util.concurrent.CountDownLatch(1);
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java
+@@ -48,8 +48,49 @@
+         assertEquals("agent_output_incomplete", recovery.classification());
+         assertEquals("RETRY_AFTER_EXTERNAL_FIX", recovery.retryReadiness());
+         assertFalse(recovery.retrySafe());
++        assertTrue(java.nio.file.Files.readString(f.paths.currentFailureMarkdown())
++                .contains("- Reason: process_output_incomplete\n"));
+         try (var files = java.nio.file.Files.walk(f.paths.workstreamDir().resolve("runs"))) {
+             assertTrue(files.noneMatch(path -> path.toString().endsWith(".contract.json")));
++        }
++    }
++
++    @ParameterizedTest @ValueSource(booleans = {false, true})
++    void interfaceFailureKeepsRunNodeRecoveryAndSummaryConsistentAcrossColdRead(boolean queued) throws Exception {
++        var f = new HumanRequirementContinuationSequenceTest.Fixture(root, queued);
++        f.transport.interfaceIncompatible = true;
++        f.untilGate();
++        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.ledger.loadCurrent(f.paths).status());
++        var node = f.active();
++        assertEquals("adapter_incompatible", ((Map<?, ?>) node.result().get("agent_execution_outcome")).get("primaryReason"));
++        var run = HumanRequirementContinuationSequenceTest.JSON.readTree(root.resolve(node.result().get("run_metadata").toString()).toFile());
++        assertEquals("adapter_incompatible", run.at("/executionOutcome/primaryReason").asText());
++        var summary = java.nio.file.Files.readString(f.paths.currentFailureMarkdown());
++        assertTrue(summary.contains("- Reason: adapter_incompatible\n"), summary);
++        assertFalse(summary.contains("- Reason: AGENT_OUTPUT_CONTRACT_VIOLATION\n"));
++        assertTrue(summary.contains("## Secondary Contract Diagnostic"), summary);
++        assertFalse(summary.contains("## Contract Failure Diagnostic"));
++        assertEquals("agent_interface_incompatible", dev.dual.ledger.file.RecoveryAssessment.from(node, root, f.ws).classification());
++        assertTrue(node.outputRefs().stream().noneMatch(ref -> ref.endsWith(".contract.json")));
++        var child = new ProcessBuilder(Path.of(System.getProperty("java.home"), "bin/java").toString(), "-cp",
++                System.getProperty("java.class.path"), FailureColdReader.class.getName(), root.toString(), f.ws).start();
++        assertTrue(child.waitFor(30, java.util.concurrent.TimeUnit.SECONDS));
++        assertEquals(0, child.exitValue(), new String(child.getErrorStream().readAllBytes()));
++        assertEquals("adapter_incompatible/agent_interface_incompatible/true",
++                new String(child.getInputStream().readAllBytes()));
++    }
++
++    public static class FailureColdReader {
++        public static void main(String[] args) throws Exception {
++            var root = Path.of(args[0]);
++            var paths = new dev.dual.ledger.file.WorkstreamPaths(root, new dev.dual.core.id.DualId(args[1]));
++            var ledger = AcpxTestLedger.ledger();
++            var current = ledger.loadCurrent(paths);
++            var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
++            var reason = ((Map<?, ?>) node.result().get("agent_execution_outcome")).get("primaryReason");
++            var recovery = dev.dual.ledger.file.RecoveryAssessment.from(node, root, args[1]);
++            System.out.print(reason + "/" + recovery.classification() + "/" +
++                    java.nio.file.Files.readString(paths.currentFailureMarkdown()).contains("- Reason: " + reason + "\n"));
+         }
+     }
+ 

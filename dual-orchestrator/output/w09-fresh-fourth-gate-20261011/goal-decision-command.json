@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "rtk",
+    "proxy",
+    "java",
+    "-jar",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+    "review",
+    "decide",
+    "--workdir=/private/tmp/dual-w09-newlines-20261011-fresh-04/worktree",
+    "--action",
+    "approve",
+    "--note",
+    "用户在当前 GOAL 材料展示后明确批准目标、验收和排除范围；不批准精确实施范围或最终交付。",
+    "ws-20261011T044656Z-BMDJ"
+  ],
+  "exit": 0
+}

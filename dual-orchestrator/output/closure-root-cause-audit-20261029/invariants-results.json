@@ -1,0 +1,71 @@
+[
+  {
+    "name": "dev.dual.ledger.file.ExecutionClaimSequenceTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.089",
+    "timestamp": null
+  },
+  {
+    "name": "dev.dual.ledger.file.WorkflowCommitSequenceTest",
+    "tests": "5",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.717",
+    "timestamp": null
+  },
+  {
+    "name": "dev.dual.runtime.handler.ContractQualificationSequenceTest",
+    "tests": "29",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "36.105",
+    "timestamp": null
+  },
+  {
+    "name": "dev.dual.runtime.handler.AgentRunCommitProtocolTest",
+    "tests": "19",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.731",
+    "timestamp": null
+  },
+  {
+    "name": "dev.dual.runtime.handler.VerificationReadinessTest",
+    "tests": "8",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.446",
+    "timestamp": null
+  },
+  {
+    "name": "dev.dual.adapter.acpx.AcpxUsageWireCompletenessTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.002"
+  },
+  {
+    "name": "dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest",
+    "tests": "10",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "13.789"
+  },
+  {
+    "name": "dev.dual.runtime.handler.RevisionIdentityWireTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.161"
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "version": "2.1.236 (Claude Code)",
+  "argv": [
+    "/opt/homebrew/bin/claude",
+    "-p",
+    "--safe-mode",
+    "--no-session-persistence",
+    "--no-chrome",
+    "--strict-mcp-config",
+    "--mcp-config",
+    "{\"mcpServers\":{}}",
+    "--tools",
+    "Read,Glob,Grep",
+    "--allowedTools",
+    "Read,Glob,Grep",
+    "--permission-mode",
+    "dontAsk",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--add-dir",
+    "/Users/kriswang/work/projects/ai"
+  ],
+  "designHashes": {
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md": "125560f4fdc9c13ff8c71cc62734d0bf4fad22e4026bf5dfb246f75140d25505",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/docs/plans/20260913-workflow-first-convergence-redesign.zh-CN.md": "124b578f0effb7dff50db913208d7e19099f9dc6811981670fc9b24f007b2b2f",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "8f5b939aa993e4d8896036755dc8253e1c1f04e021010d34fdd15bb2a41c8979"
+  },
+  "startedAt": 1790173043.551008,
+  "purpose": "read-only-design-review",
+  "timeoutSeconds": 900,
+  "maxAssistantMessages": 50,
+  "exitCode": -15,
+  "stopReason": "",
+  "finishedAt": 1790173149.825556,
+  "unchanged": true
+}

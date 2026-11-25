@@ -1,0 +1,69 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-design-claude_design-013",
+  "nodeDefinitionId" : "design.claude_design",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-design",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/task-contract.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/task-contract.md", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/contract-resolution.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/contract-resolution.md" ],
+  "inputTransition" : {
+    "required" : true,
+    "source_node_instance_id" : "node-contract-compile-012",
+    "source_node_sha256" : "d83d40f7df67dca020a2e57bb3a5e6f7ae9bef43603a029f393c1825cd0a39b4",
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "condition" : "unconditional",
+    "transition_type" : "normal"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/design-claude.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/design-claude.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/design-claude.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/design-claude.contract.json" ],
+  "result" : {
+    "adapter_signals" : [ ],
+    "agent" : "claude",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "design_result",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "READY_FOR_ARCH_REVIEW",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/design-claude.contract.json",
+    "contract_sidecar_sha256" : "29d50d8bd19e6722aad972108e98325f80cf0a066df07ea78dd56219c158c164",
+    "decision" : "READY_FOR_ARCH_REVIEW",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/binding.json",
+    "repository_fact_binding_sha256" : "0056f297e367f98f98f2d0fd1756cd84b09c3baf4bd2c4b84d9b08591cf2ca10",
+    "run_id" : "run-1791641578962",
+    "run_metadata" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/run.json",
+    "session" : "claude-main-ws-20261010T124812Z-XCZL-run-1791641578962",
+    "summary" : "最小设计：新建 src/normalize_text.py、tests/test_normalize_text.py 与 README.md 三个文件，以两步 replace 的纯函数实现 CRLF 与单独 CR 到 LF 的规范化，并给出满足 AC-1 至 AC-5 的测试与证据方案。",
+    "transcript_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/design-claude.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/nxe-1791641578925-ee92193a-completion.json",
+    "completion_sha256" : "dcd5dbbcad1595e4bb304d83d0da74a95d2e37f7a26d885e187ee9adc0be5f9c"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1791641578925-ee92193a",
+  "startedAt" : "2026-10-10T14:12:58.934428Z",
+  "finishedAt" : "2026-10-10T14:16:16.107909Z"
+}

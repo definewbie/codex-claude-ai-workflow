@@ -1,0 +1,16 @@
+[
+  {
+    "mutant": "recheck-confirmed-history",
+    "test": "test_process_check.HistoricalAbsenceTest.test_confirmed_history_is_not_a_current_absence_claim",
+    "exit": 1,
+    "expected_assertion_failure_observed": true,
+    "scope": "One selected targeted test; not full suite"
+  },
+  {
+    "mutant": "skip-unresolved-reader",
+    "test": "test_process_check.HistoricalAbsenceTest.test_unresolved_present_or_failed_observation_still_stops",
+    "exit": 1,
+    "expected_assertion_failure_observed": true,
+    "scope": "One selected targeted test; not full suite"
+  }
+]

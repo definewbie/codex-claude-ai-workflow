@@ -39,8 +39,8 @@ Use this path when evaluating the project from a fresh clone:
 
 1. Read the root `README.md`.
 2. Follow `quickstart.md`.
-3. Run `./scripts/smoke-test.sh --case lifecycle --cleanup`.
-4. Run `./scripts/run-public-benchmark.sh` when real `acpx` Claude/Codex are available.
+3. Run `rtk proxy mvn -q clean test` for offline regression; the legacy smoke is retired.
+4. Run `./scripts/run-public-benchmark.sh` only after its Verification Gate is approved; available clients alone do not authorize a run.
 5. Use `dualctl trace --workdir <effective_workdir> <workstream_id>` to inspect the result.
 
 This path avoids private project details and uses the reusable sample app under

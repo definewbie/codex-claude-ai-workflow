@@ -27,31 +27,28 @@ public final class RecoveryShowCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-        var summaryPath = paths.currentFailureMarkdown();
-        if (!Files.exists(summaryPath)) {
-            System.err.println("No current failure summary found: " + workspaceRoot.relativize(summaryPath));
-            return 1;
-        }
-
-        System.out.println("Current Failure");
-        System.out.println("Path: " + workspaceRoot.relativize(summaryPath));
-        System.out.println();
-        printAssessment(workspaceRoot, paths, workstreamId);
-        System.out.print(Files.readString(summaryPath, StandardCharsets.UTF_8));
-        return 0;
-    }
-
-    private void printAssessment(Path workspaceRoot, WorkstreamPaths paths, String workstreamId) {
-        try {
-            var ledger = CliLedgerFactory.create();
-            var current = ledger.loadCurrent(paths);
-            if (current.activeNodeInstanceIds().isEmpty()) {
-                return;
-            }
-            var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
+        var ledger = CliLedgerFactory.create();
+        try (var read = ledger.readSession(paths)) {
+            var current = read.ledger().loadCurrent(paths);
+            System.out.println("Recovery snapshot: " + current.status() + " / commit " + current.commitSequence());
+            if (current.activeNodeInstanceIds().isEmpty()) return 0;
+            var node = read.ledger().loadNode(paths, current.activeNodeInstanceIds().getFirst());
             printAssessment(RecoveryAssessment.from(node, workspaceRoot, workstreamId));
-        } catch (Exception ignored) {
-            // The raw recovery summary below is still useful if structured assessment fails.
+            var decision = dev.dual.runtime.handler.ExecutionRecoveryAdjudication.describe(read.ledger(), paths);
+            if (!decision.isEmpty()) System.out.println(new dev.dual.ledger.file.AtomicJsonWriter().objectMapper().writeValueAsString(decision));
+            var summary = paths.currentFailureMarkdown();
+            var markdown = read.ledger().failureSummarySnapshot(paths);
+            if (!markdown.isBlank()) {
+                System.out.println("Failure report: " + summary);
+                System.out.print(markdown);
+            }
+            return 0;
+        } catch (dev.dual.ledger.file.WorkstreamLockedException busy) {
+            System.err.println("BUSY: " + busy.getMessage()); return 2;
+        } catch (dev.dual.ledger.file.LedgerSession.PendingCommitException pending) {
+            System.err.println("PENDING: " + pending.getMessage()); return 2;
+        } catch (java.io.IOException invalid) {
+            System.err.println("INVALID: " + invalid.getMessage()); return 2;
         }
     }
 

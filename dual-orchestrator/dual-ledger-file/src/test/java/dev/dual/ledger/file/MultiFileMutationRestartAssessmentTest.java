@@ -1,286 +1,111 @@
 package dev.dual.ledger.file;
 
+import dev.dual.core.flow.BuiltInFlowOrchestrationKernel;
 import dev.dual.core.id.DualId;
-import dev.dual.core.workflow.EdgeDefinition;
-import dev.dual.core.workflow.NodeDefinition;
-import dev.dual.core.workflow.NodeKind;
-import dev.dual.core.workflow.NodeStatus;
-import dev.dual.core.workflow.WorkflowDefinition;
-import dev.dual.core.workflow.WorkflowStatus;
+import dev.dual.core.workflow.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+/** Legal local continuations after every durable-write interruption, not historical partial-state rescue. */
 class MultiFileMutationRestartAssessmentTest {
-    @TempDir
-    Path tempDir;
+    @TempDir Path root;
+    private enum Operation { INITIALIZE, ROUTE, DECIDE, RECOVER }
+    private static final WorkflowDefinition DEFINITION = new WorkflowDefinition("restart", 1, "first", List.of(
+            new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
+            new NodeDefinition("review", NodeKind.GATE, "human.review", Map.of()),
+            new NodeDefinition("after", NodeKind.TASK, "noop.task", Map.of())), List.of(
+            new EdgeDefinition("first", "done", "review"), new EdgeDefinition("review", "approved", "after")));
 
-    @Test
-    void initializePrefixesCannotBeReplayedOrLoadedAsOneConsistentGeneration() throws Exception {
-        var eventOnly = paths("initialize-event-only");
-        blockAtomicWrite(eventOnly.workflowDefinitionJson(), () -> new WorkflowFileLedger().initialize(
-                eventOnly, "wf-initialize-event-only", singleTaskDefinition()));
+    @Test void initializationPrefixesRecoverOneConsistentGeneration() throws Exception { verify(Operation.INITIALIZE); }
+    @Test void routingPrefixesDoNotDuplicateEventsOrExposeMixedGenerations() throws Exception { verify(Operation.ROUTE); }
+    @Test void decisionPrefixesFinishWithoutReplayingAHumanDecision() throws Exception { verify(Operation.DECIDE); }
+    @Test void staleRecoveryPrefixesFinishWithoutRepeatingRecovery() throws Exception { verify(Operation.RECOVER); }
 
-        var eventOnlyRestart = new WorkflowFileLedger();
-        assertThrows(IOException.class, () -> eventOnlyRestart.loadDefinition(eventOnly));
-        assertThrows(IOException.class, () -> eventOnlyRestart.initialize(
-                eventOnly, "wf-initialize-event-only", singleTaskDefinition()));
-
-        var currentWithoutEntry = paths("initialize-current-without-entry");
-        var entryNodeId = LedgerUtils.nodeInstanceId("first", 1);
-        blockAtomicWrite(currentWithoutEntry.nodeJson(entryNodeId), () -> new WorkflowFileLedger().initialize(
-                currentWithoutEntry, "wf-initialize-current-without-entry", singleTaskDefinition()));
-
-        var missingEntryRestart = new WorkflowFileLedger();
-        assertEquals(List.of(entryNodeId), missingEntryRestart.loadCurrent(currentWithoutEntry).activeNodeInstanceIds());
-        assertThrows(IOException.class, () -> missingEntryRestart.loadNode(currentWithoutEntry, entryNodeId));
-        assertThrows(IOException.class, () -> missingEntryRestart.initialize(
-                currentWithoutEntry, "wf-initialize-current-without-entry", singleTaskDefinition()));
+    private void verify(Operation operation) throws Exception {
+        var observed = new ArrayList<String>();
+        var baseline = prepare(operation, "baseline-" + operation);
+        execute(ledger((point, target) -> observed.add(point)), baseline, operation);
+        assertTrue(observed.size() > 5);
+        for (int prefix = 0; prefix < observed.size(); prefix++) {
+            var paths = prepare(operation, operation + "-" + prefix);
+            var calls = new AtomicInteger();
+            int failAt = prefix;
+            var failing = ledger((point, target) -> {
+                if (calls.getAndIncrement() == failAt) throw new IOException("stop at " + point);
+            });
+            assertThrows(IOException.class, () -> execute(failing, paths, operation));
+            var cold = LedgerTestFixture.ledger();
+            if (prefix == 0) {
+                // No durable intent: only an explicit repeat of the original operation may create it.
+                execute(cold, paths, operation);
+            } else {
+                // A reader may not combine the partially applied before/after generation.
+                if (hasPending(paths)) assertThrows(LedgerSession.PendingCommitException.class, () -> cold.loadCurrent(paths));
+                try (var completion = cold.writeSession(paths, "complete fixed local write set", "recovery")) {
+                    completion.commit();
+                }
+            }
+            assertPostState(cold, paths, operation);
+            var events = Files.readAllBytes(paths.eventsJsonl());
+            try (var noop = cold.writeSession(paths, "repeat local completion", "recovery-again")) { noop.commit(); }
+            assertArrayEquals(events, Files.readAllBytes(paths.eventsJsonl()));
+            if (operation == Operation.DECIDE || operation == Operation.RECOVER)
+                assertThrows(IOException.class, () -> execute(cold, paths, operation));
+        }
     }
 
-    @Test
-    void resolvedGatePrefixesLoseReplayEligibilityBeforeTheTransitionCommits() throws Exception {
-        var resolvedOnly = gateFixture("gate-resolved-only");
-        var gateNodeId = resolvedOnly.ledger().loadCurrent(resolvedOnly.paths()).activeNodeInstanceIds().getFirst();
-        blockAtomicWrite(resolvedOnly.paths().nodeJson(gateNodeId), () -> resolve(resolvedOnly));
-        assertGateReplayRejected(resolvedOnly);
-
-        var nodeCompleted = gateFixture("gate-node-completed");
-        blockAtomicWrite(nodeCompleted.paths().nodeJson(LedgerUtils.nodeInstanceId("after", 3)),
-                () -> resolve(nodeCompleted));
-        assertGateReplayRejected(nodeCompleted);
-
-        var successorWritten = gateFixture("gate-successor-written");
-        blockEventAppend(successorWritten.paths(), () -> resolve(successorWritten));
-        assertTrue(Files.isRegularFile(successorWritten.paths().nodeJson(LedgerUtils.nodeInstanceId("after", 3))));
-        assertGateReplayRejected(successorWritten);
-
-        var currentCommitted = gateFixture("gate-current-without-instance");
-        var beforeInstance = readInstance(currentCommitted.paths());
-        blockAtomicWrite(currentCommitted.paths().workflowInstanceJson(), () -> resolve(currentCommitted));
-        var restart = new WorkflowFileLedger();
-        var current = restart.loadCurrent(currentCommitted.paths());
-        var instance = readInstance(currentCommitted.paths());
-        assertEquals("after", restart.loadNode(currentCommitted.paths(), current.activeNodeInstanceIds().getFirst()).nodeDefinitionId());
-        assertEquals(beforeInstance.lastEventId(), instance.lastEventId());
-        assertNotEquals(current.lastEventId(), instance.lastEventId());
-        assertThrows(IOException.class, () -> resolve(new GateFixture(restart, currentCommitted.paths(), currentCommitted.definition())));
-    }
-
-    @Test
-    void staleRecoveryPrefixesLoseReplayEligibilityWhenTheNodeWriteWins() throws Exception {
-        var failedOnly = staleFixture("stale-failed-only");
-        blockAtomicWrite(failedOnly.paths().gateJson("recovery-" + failedOnly.nodeId()), () -> recover(failedOnly));
-        assertStaleReplayRejected(failedOnly);
-
-        var gateWritten = staleFixture("stale-gate-written");
-        blockEventAppend(gateWritten.paths(), () -> recover(gateWritten));
-        assertTrue(Files.isRegularFile(gateWritten.paths().gateJson("recovery-" + gateWritten.nodeId())));
-        assertStaleReplayRejected(gateWritten);
-
-        var eventWritten = staleFixture("stale-event-written");
-        blockAtomicWrite(eventWritten.paths().workflowCurrentJson(), () -> recover(eventWritten));
-        assertTrue(Files.readString(eventWritten.paths().eventsJsonl()).contains("node_stale_running_recovered"));
-        assertStaleReplayRejected(eventWritten);
-
-        var currentCommitted = staleFixture("stale-current-without-instance");
-        var beforeInstance = readInstance(currentCommitted.paths());
-        blockAtomicWrite(currentCommitted.paths().workflowInstanceJson(), () -> recover(currentCommitted));
-        var restart = new WorkflowFileLedger();
-        var current = restart.loadCurrent(currentCommitted.paths());
-        var instance = readInstance(currentCommitted.paths());
-        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, current.status());
-        assertEquals(beforeInstance.lastEventId(), instance.lastEventId());
-        assertNotEquals(current.lastEventId(), instance.lastEventId());
-        assertThrows(IOException.class, () -> restart.recoverStaleRunningNode(currentCommitted.paths(), "stale"));
-    }
-
-    @Test
-    void normalRoutingRecoversEarlyPrefixesButDuplicatesAnAlreadyAppendedEvent() throws Exception {
-        var terminalOnly = routingFixture("route-terminal-only");
-        blockAtomicWrite(terminalOnly.paths().nodeJson(LedgerUtils.nodeInstanceId("review", 2)),
-                () -> route(terminalOnly));
-        route(new RestartFixture(new WorkflowFileLedger(), terminalOnly.paths(), terminalOnly.definition()));
-        assertConsistentGateState(terminalOnly.paths());
-
-        var successorWritten = routingFixture("route-successor-written");
-        blockEventAppend(successorWritten.paths(), () -> route(successorWritten));
-        route(new RestartFixture(new WorkflowFileLedger(), successorWritten.paths(), successorWritten.definition()));
-        assertConsistentGateState(successorWritten.paths());
-
-        var eventWritten = routingFixture("route-event-written");
-        blockAtomicWrite(eventWritten.paths().workflowCurrentJson(), () -> route(eventWritten));
-        route(new RestartFixture(new WorkflowFileLedger(), eventWritten.paths(), eventWritten.definition()));
-        assertEquals(2, eventCount(eventWritten.paths(), "evt-000002"));
-
-        var currentCommitted = routingFixture("route-current-without-instance");
-        var beforeInstance = readInstance(currentCommitted.paths());
-        blockAtomicWrite(currentCommitted.paths().workflowInstanceJson(), () -> route(currentCommitted));
-        var restart = new WorkflowFileLedger();
-        var current = restart.loadCurrent(currentCommitted.paths());
-        var instance = readInstance(currentCommitted.paths());
-        assertNotEquals(current.lastEventId(), instance.lastEventId());
-        assertEquals(beforeInstance.lastEventId(), instance.lastEventId());
-        assertThrows(IOException.class, () -> route(
-                new RestartFixture(restart, currentCommitted.paths(), currentCommitted.definition())));
-    }
-
-    private void assertGateReplayRejected(GateFixture fixture) throws Exception {
-        var restart = new WorkflowFileLedger();
-        var current = restart.loadCurrent(fixture.paths());
-        assertEquals("review", restart.loadNode(fixture.paths(), current.activeNodeInstanceIds().getFirst()).nodeDefinitionId());
-        assertThrows(IOException.class, () -> resolve(new GateFixture(restart, fixture.paths(), fixture.definition())));
-    }
-
-    private void assertStaleReplayRejected(StaleFixture fixture) throws Exception {
-        var restart = new WorkflowFileLedger();
-        assertEquals(NodeStatus.FAILED, restart.loadNode(fixture.paths(), fixture.nodeId()).status());
-        assertThrows(IOException.class, () -> restart.recoverStaleRunningNode(fixture.paths(), "stale"));
-    }
-
-    private void assertConsistentGateState(WorkstreamPaths paths) throws Exception {
-        var restart = new WorkflowFileLedger();
-        var current = restart.loadCurrent(paths);
-        var active = restart.loadNode(paths, current.activeNodeInstanceIds().getFirst());
-        var instance = readInstance(paths);
-        assertEquals("review", active.nodeDefinitionId());
-        assertEquals(current.lastEventId(), instance.lastEventId());
-        assertEquals(current.activeNodeInstanceIds(), instance.activeNodeInstanceIds());
-        assertEquals("open", restart.loadOpenGateForNode(paths, active.nodeInstanceId()).status());
-        assertEquals(1, eventCount(paths, "evt-000002"));
-    }
-
-    private void resolve(GateFixture fixture) throws IOException {
-        fixture.ledger().resolveOpenGate(fixture.paths(), fixture.definition(), "approve", "ok");
-    }
-
-    private void recover(StaleFixture fixture) throws IOException {
-        fixture.ledger().recoverStaleRunningNode(fixture.paths(), "stale");
-    }
-
-    private void route(RestartFixture fixture) throws IOException {
-        fixture.ledger().completeAndRoute(fixture.paths(), fixture.definition(), LedgerUtils.nodeInstanceId("first", 1),
-                NodeStatus.COMPLETED, "done", List.of(), Map.of());
-    }
-
-    private GateFixture gateFixture(String id) throws Exception {
-        var paths = paths(id);
-        var definition = new WorkflowDefinition(
-                "assessment-gate", 1, "first",
-                List.of(
-                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
-                        new NodeDefinition("review", NodeKind.GATE, "human.review", Map.of()),
-                        new NodeDefinition("after", NodeKind.TASK, "noop.task", Map.of())
-                ),
-                List.of(
-                        new EdgeDefinition("first", "done", "review"),
-                        new EdgeDefinition("review", "approved", "after")
-                )
-        );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-" + id, definition);
-        ledger.completeAndRoute(paths, definition, LedgerUtils.nodeInstanceId("first", 1),
-                NodeStatus.COMPLETED, "done", List.of(), Map.of());
-        return new GateFixture(ledger, paths, definition);
-    }
-
-    private StaleFixture staleFixture(String id) throws Exception {
-        var paths = paths(id);
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-" + id, singleTaskDefinition());
-        var nodeId = LedgerUtils.nodeInstanceId("first", 1);
-        ledger.markRunning(paths, nodeId, Long.MAX_VALUE);
-        return new StaleFixture(ledger, paths, nodeId);
-    }
-
-    private RestartFixture routingFixture(String id) throws Exception {
-        var paths = paths(id);
-        var definition = new WorkflowDefinition(
-                "assessment-routing", 1, "first",
-                List.of(
-                        new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of()),
-                        new NodeDefinition("review", NodeKind.GATE, "human.review", Map.of())
-                ),
-                List.of(new EdgeDefinition("first", "done", "review"))
-        );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-" + id, definition);
-        return new RestartFixture(ledger, paths, definition);
-    }
-
-    private WorkflowDefinition singleTaskDefinition() {
-        return new WorkflowDefinition(
-                "assessment-single", 1, "first",
-                List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
-                List.of()
-        );
-    }
-
-    private WorkstreamPaths paths(String id) throws IOException {
-        var paths = new WorkstreamPaths(tempDir, new DualId("ws-" + id));
-        Files.createDirectories(paths.workstreamDir());
+    private WorkstreamPaths prepare(Operation operation, String name) throws Exception {
+        var paths = new WorkstreamPaths(root.resolve(name), new DualId("ws-" + name));
+        var ledger = LedgerTestFixture.ledger();
+        if (operation != Operation.INITIALIZE) LedgerTestFixture.initialize(ledger, paths, "wf-" + name, DEFINITION);
+        if (operation == Operation.DECIDE) execute(ledger, paths, Operation.ROUTE);
+        if (operation == Operation.RECOVER) ledger.markRunning(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst(), Long.MAX_VALUE);
         return paths;
     }
 
-    private void blockAtomicWrite(Path target, IoAction action) throws Exception {
-        var tempTarget = target.resolveSibling(target.getFileName() + ".tmp");
-        Files.createDirectories(tempTarget);
-        try {
-            assertThrows(IOException.class, action::run);
-        } finally {
-            Files.deleteIfExists(tempTarget);
+    private void execute(WorkflowFileLedger ledger, WorkstreamPaths paths, Operation operation) throws Exception {
+        switch (operation) {
+            case INITIALIZE -> LedgerTestFixture.initialize(ledger, paths, "wf-" + paths.workstreamId().value(), DEFINITION);
+            case ROUTE -> ledger.completeAndRoute(paths, DEFINITION, LedgerUtils.nodeInstanceId("first", 1),
+                    NodeStatus.COMPLETED, "done", List.of(), Map.of());
+            case DECIDE -> ledger.resolveOpenGate(paths, DEFINITION, "approved", "Continue with this reviewed result");
+            case RECOVER -> ledger.recoverStaleRunningNode(paths, "previous process is no longer alive");
         }
     }
 
-    private void blockEventAppend(WorkstreamPaths paths, IoAction action) throws Exception {
-        var eventBytes = Files.readAllBytes(paths.eventsJsonl());
-        Files.delete(paths.eventsJsonl());
-        Files.createDirectory(paths.eventsJsonl());
-        try {
-            assertThrows(IOException.class, action::run);
-        } finally {
-            Files.deleteIfExists(paths.eventsJsonl());
-            Files.write(paths.eventsJsonl(), eventBytes);
-        }
-    }
-
-    private WorkflowInstanceDocument readInstance(WorkstreamPaths paths) throws IOException {
-        return new AtomicJsonWriter().objectMapper().readValue(
-                paths.workflowInstanceJson().toFile(), WorkflowInstanceDocument.class);
-    }
-
-    private int eventCount(WorkstreamPaths paths, String eventId) throws IOException {
-        var mapper = new AtomicJsonWriter().objectMapper();
-        var count = 0;
-        for (var line : Files.readAllLines(paths.eventsJsonl())) {
-            if (eventId.equals(mapper.readTree(line).path("event_id").asText())) {
-                count++;
+    private void assertPostState(WorkflowFileLedger ledger, WorkstreamPaths paths, Operation operation) throws Exception {
+        try (var read = ledger.readSession(paths)) {
+            var current = read.ledger().loadCurrent(paths);
+            var instance = read.files().read(paths.workflowInstanceJson(), WorkflowInstanceDocument.class);
+            assertEquals(current.status(), instance.status());
+            assertEquals(current.lastEventId(), instance.lastEventId());
+            assertEquals(current.activeNodeInstanceIds(), instance.activeNodeInstanceIds());
+            var node = read.ledger().loadNode(paths, current.activeNodeInstanceIds().getFirst());
+            switch (operation) {
+                case INITIALIZE -> { assertEquals("first", node.nodeDefinitionId()); assertEquals(NodeStatus.READY, node.status()); }
+                case ROUTE -> { assertEquals("review", node.nodeDefinitionId()); assertEquals("open", read.ledger().loadOpenGateForNode(paths, node.nodeInstanceId()).status()); }
+                case DECIDE -> { assertEquals("after", node.nodeDefinitionId()); assertEquals(NodeStatus.READY, node.status()); }
+                case RECOVER -> { assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, current.status()); assertEquals(NodeStatus.FAILED, node.status()); }
             }
+            var ids = new HashSet<String>();
+            for (var line : read.files().readLines(paths.eventsJsonl()))
+                assertTrue(ids.add(new AtomicJsonWriter().objectMapper().readTree(line).path("event_id").asText()), "duplicate event");
         }
-        return count;
     }
 
-    @FunctionalInterface
-    private interface IoAction {
-        void run() throws Exception;
+    private boolean hasPending(WorkstreamPaths paths) throws IOException {
+        var directory = paths.workstreamDir().resolve("pending");
+        if (!Files.isDirectory(directory)) return false;
+        try (var children = Files.list(directory)) { return children.anyMatch(p -> p.toString().endsWith(".json")); }
     }
 
-    private record RestartFixture(WorkflowFileLedger ledger, WorkstreamPaths paths, WorkflowDefinition definition) {
-    }
-
-    private record GateFixture(WorkflowFileLedger ledger, WorkstreamPaths paths, WorkflowDefinition definition) {
-    }
-
-    private record StaleFixture(WorkflowFileLedger ledger, WorkstreamPaths paths, String nodeId) {
+    private WorkflowFileLedger ledger(LedgerSession.FaultPoint point) {
+        return new WorkflowFileLedger(new BuiltInFlowOrchestrationKernel(), LedgerTestFixture.IDENTITY, point);
     }
 }

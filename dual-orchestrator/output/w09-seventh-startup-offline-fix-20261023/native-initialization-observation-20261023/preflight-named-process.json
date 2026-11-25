@@ -1,0 +1,6 @@
+{
+  "status": "ABSENT",
+  "matches": [],
+  "scope": "named workspace and diagnostic session only; not arbitrary descendants",
+  "checked_at": "2026-10-22T23:19:25.977646+00:00"
+}

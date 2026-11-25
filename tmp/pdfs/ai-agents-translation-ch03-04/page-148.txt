@@ -1,0 +1,31 @@
+you understand their strengths and how they can collaborate, you can assign
+the right tasks and unlock the full potential of your system.
+
+However, it’s important to know that this chapter isn’t meant as an
+introduction to the transformer architectures or to parameter-efficient fine-
+tuning (PEFT) methods. I assume you’ve seen those before. What I want to
+do here is refresh that knowledge and line it up with the agentic mindset, so
+it becomes obvious why model choice, context strategy, and lightweight
+specialization (Low-Rank Adaptation [LoRA], adapters, quantized bases)
+matter in the context of orchestrating multiple agents.
+
+To understand this better, you’ll examine different architectures under this
+light, and compare open-weight and closed API models. In addition, you’ll
+map context window trade-offs to deployment strategies, and understand
+when specialization through fine-tuning or adapters pays off. By the end,
+you’ll know how to staff your team, assign the right tasks, and optimize for
+both performance and spend. Let’s meet the candidates, understand their
+strengths, and hire well.
+
+The Big Picture: Choosing the Right
+Architecture
+
+Modern transformer variants are designed to handle particular workloads
+and deployment needs. The right choice depends on your objective, how
+information flows through the system, and the constraints you face in
+serving or scaling your models. Each architecture (encoder-only, decoder-
+only, encoder–decoder, or even MoE) has a unique role to play. Selecting
+the right mix means aligning each model’s strengths with your goals,
+computational budget, and serving constraints to achieve the best balance
+between capability and efficiency. Table 4-1 gives you a high-level
+understanding of each architecture and capability.

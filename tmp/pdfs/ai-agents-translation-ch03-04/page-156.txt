@@ -1,0 +1,32 @@
+Table 4-3. vLLM cache management features
+
+ Mechanism    Description             Benefit
+
+ Paged attention   Splits the KV cache into    Enables efficient reuse,
+                    fixed-size memory blocks   prevents fragmentation,
+               managed by a free_block   and supports long-
+                   _queue; the scheduler       running sessions
+                    allocates and reclaims
+                   these blocks dynamically
+
+ Prefix caching   Hashes repeated token      Eliminates redundant
+                    prefixes and reuses their      prefill computation for
+                 cached KV pairs for new    shared prompts or
+                   requests with identical      templates
+                    prefixes
+
+ Chunked prefill   Splits long prompt prefills   Prevents a single long
+                    into smaller chunks that    prompt from
+                    are processed              monopolizing cache
+                   incrementally              blocks and improves
+                                            concurrency
+
+ Continuous      Schedules prefill and        Increases throughput
+ batching         decode together based on    while keeping cache state
+                    real-time cache              consistent
+                     availability
+
+ Hash-based      Compares stored token-     Ensures cache integrity
+ verification      block hashes with            after context changes and
+                 incoming ones before       avoids reusing stale or
+                   reusing a cache entry       mismatched KV blocks

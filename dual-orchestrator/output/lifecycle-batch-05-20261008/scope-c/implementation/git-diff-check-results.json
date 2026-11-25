@@ -1,0 +1,6 @@
+{
+  "exit_code": 2,
+  "batch_source_trailing_whitespace_fixed": true,
+  "residual": "pre-existing acpx transport patch context whitespace; outside B05 changes",
+  "not_modified_by_batch": true
+}

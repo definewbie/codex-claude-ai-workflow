@@ -1,0 +1,426 @@
+{
+  "actual_tokens": 1767028,
+  "completed_calls": 11,
+  "active_seconds": 1798.4491589584516,
+  "time_items": [
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/01-context/result.json",
+      "sha256": "f240eab7f232f77927290e9c4675f9b8ed5f676b819f669f1ff45d0ca07002fb",
+      "elapsed_seconds": 1.65,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/02-intake-author/result.json",
+      "sha256": "b1f1023d4794a64611a2d326650fb4c0588737b82b9a901997090f99da87d5d1",
+      "elapsed_seconds": 94.489,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/03-review-context/result.json",
+      "sha256": "db48e9f2b57e59e54349406b76130af5a5175e6dc066d9cab45be4722daddf5a",
+      "elapsed_seconds": 1.613,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/04-product-review/result.json",
+      "sha256": "7d4e899c145a1288d61ee40e93d47f5e9a210d7f1196e5773e81d7658278a482",
+      "elapsed_seconds": 45.238,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/05-intake-decision/result.json",
+      "sha256": "df318f2d41a179571fad1a9715fd1f3405ea9e13916a8c8312a411a8c9575a69",
+      "elapsed_seconds": 1.718,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/06-goal-compile/result.json",
+      "sha256": "3ac1383e2162ebaadcc8f7abe5e0e0279fe40e7782c48639034042b156464373",
+      "elapsed_seconds": 1.526,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/07-design-author/result.json",
+      "sha256": "76129639919004067b1bc3daf4c70b6593d68bd3f3c04c410c4b0cf6231f7dce",
+      "elapsed_seconds": 210.704,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/08-architecture-review-context/result.json",
+      "sha256": "a273dbbc9f04fb2c291930c86f9732433c5b905a14d35ff6b73a5cd97601ab56",
+      "elapsed_seconds": 1.67,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/09-architecture-review/result.json",
+      "sha256": "90175071a42c24668a35bd27ab11847210681bad0dd28b304d5402fcc694fbb1",
+      "elapsed_seconds": 46.368,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/10-design-decision/result.json",
+      "sha256": "877c8c63c7101b89934caa2d8c6a421ecb705727a15e96e65d602fefd9ed28f5",
+      "elapsed_seconds": 1.545,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/11-design-revision/result.json",
+      "sha256": "4202b3579d077a509a3b65947afc838b49e7c78a2df6a321078806448724582f",
+      "elapsed_seconds": 204.064,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/12-revision-review-context/result.json",
+      "sha256": "e6362c71bbf8f3c0e6232fd06a0cdbf633da43b22dbb4cc2867a536f667f6bcc",
+      "elapsed_seconds": 1.602,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/13-architecture-rereview/result.json",
+      "sha256": "8ea3181ddce85f65558a18df14d3ecd78b06a8fa8bc1999eecbc23c16626f96a",
+      "elapsed_seconds": 36.467,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/14-design-decision/result.json",
+      "sha256": "849bc931e854810871f5eb1aa9cd6d7f408781d241907ffb98c551f1a50f5ad5",
+      "elapsed_seconds": 1.651,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/15-plan-author/result.json",
+      "sha256": "6b548a0169494f0f9885c8fcf73d102295defed98559a5caf8d386617f9b8646",
+      "elapsed_seconds": 226.551,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/16-plan-review-context/result.json",
+      "sha256": "c6f2b0f4f18af1a94ab881e52eab1187129560d173ae28eecb2160f92fe1cc49",
+      "elapsed_seconds": 1.72,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/17-plan-review/result.json",
+      "sha256": "17ce88320e4c7dd3f1047ea0e0023ecf09aef0338f474f507cae14e858ba310e",
+      "elapsed_seconds": 33.264,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/18-plan-decision/result.json",
+      "sha256": "17b271b347b9aab8d5c5609890b309631004e561a1a9dad9772b570e9a6f918c",
+      "elapsed_seconds": 1.828,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/19-plan-readiness-revision/result.json",
+      "sha256": "563cb676bfb7a8ef592987ea766ffea92a2cad092bc2cdbe737d1d4d7863158b",
+      "elapsed_seconds": 287.742,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/20-readiness-review-context/result.json",
+      "sha256": "cf43b3eb599eca8b546d7dc77d16012c3caa24437ed7630886d40f32f545949a",
+      "elapsed_seconds": 1.766,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/21-readiness-plan-review/result.json",
+      "sha256": "9e03535c17cd471c4e720f4f1d0ad7dd6185ac397028e259a58ee98c696dcdca",
+      "elapsed_seconds": 50.24,
+      "kind": "steps"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/human-decisions/01-requirement/result.json",
+      "sha256": "c99dc106d8e7ce2653bc9a0c1c9e9c48d7f49746a6b685dd9dfaf5d4d7ae2969",
+      "elapsed_seconds": 1.453,
+      "kind": "human-decisions"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/human-decisions/02-readiness/AC-1.result.json",
+      "sha256": "6cd4bc35bea7b78262f214f2f86d3f422fef312e76700a9c2c0b706e26d1c23b",
+      "elapsed_seconds": 1.318,
+      "kind": "human-decisions"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/human-decisions/02-readiness/AC-2.result.json",
+      "sha256": "0b1e02d5c4e94b64920bfec90facd8800f96b0900d40a5056f7e071b4ec087b8",
+      "elapsed_seconds": 1.215,
+      "kind": "human-decisions"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/human-decisions/02-readiness/AC-3.result.json",
+      "sha256": "31138f790f294479c7f1511ddba8506d62c9f3ae5dc9fac9db689875b9b6f659",
+      "elapsed_seconds": 1.146,
+      "kind": "human-decisions"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/human-decisions/02-readiness/revise.result.json",
+      "sha256": "90ab37e7f15a95213b324358956c8b4b3341112b4b06c665a403f6737f020ae4",
+      "elapsed_seconds": 1.273,
+      "kind": "human-decisions"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/01/close.result.json",
+      "sha256": "8688662feb67ac1e9cc675844f7a15bd391b6220e238935e7723062350673158",
+      "elapsed_seconds": 0.152,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/01/show.result.json",
+      "sha256": "94c8fff562f8786e0679b8087d2ae84e067dda122f16b37494ecf4ff22b69cfd",
+      "elapsed_seconds": 0.151,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/02/close.result.json",
+      "sha256": "b9831ee3db3a51f2909ea44cfdec7e504491791125c2f8e3177ac8ff411f6b90",
+      "elapsed_seconds": 0.314,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/02/show.result.json",
+      "sha256": "7ee1f11a91748d11bb4763763a01e1ead97be7b5e9947658ac99924ca6652f45",
+      "elapsed_seconds": 0.143,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/03/close.result.json",
+      "sha256": "f3a83b10017e7368b4379a3709bf87506f2731e4fa1732cd84d8a21113d0b754",
+      "elapsed_seconds": 0.141,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/03/show.result.json",
+      "sha256": "1f3f5d51100c6e3b60efda7bd9d3f2fa4767be5cd59d5a51d05d6438715cc0cc",
+      "elapsed_seconds": 0.137,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/04/close.result.json",
+      "sha256": "fc3792a9670fae72a5da205b9ea3ec9fe6a0799c0571cce1a5cf6d1746366ab8",
+      "elapsed_seconds": 0.14,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/04/show.result.json",
+      "sha256": "7ee1f11a91748d11bb4763763a01e1ead97be7b5e9947658ac99924ca6652f45",
+      "elapsed_seconds": 0.143,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/05/close.result.json",
+      "sha256": "62f90002bdaa6ecd094fd927f764185e2cbc0efc703fca1b24daebcb506f0255",
+      "elapsed_seconds": 0.148,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/05/show.result.json",
+      "sha256": "94c8fff562f8786e0679b8087d2ae84e067dda122f16b37494ecf4ff22b69cfd",
+      "elapsed_seconds": 0.151,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/06/close.result.json",
+      "sha256": "1c8d686c9f0ee443cf67f46c5be792678d631286dbeab080e7740ee42c0e14fa",
+      "elapsed_seconds": 0.205,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/process-stop-cleanup/06/show.result.json",
+      "sha256": "94c8fff562f8786e0679b8087d2ae84e067dda122f16b37494ecf4ff22b69cfd",
+      "elapsed_seconds": 0.151,
+      "kind": "process-stop-cleanup"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 0,
+      "elapsed_seconds": 0.047,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 1,
+      "elapsed_seconds": 0.014,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 2,
+      "elapsed_seconds": 0.015,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 3,
+      "elapsed_seconds": 1.486,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 4,
+      "elapsed_seconds": 0.009,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 5,
+      "elapsed_seconds": 0.008,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 6,
+      "elapsed_seconds": 0.008,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 7,
+      "elapsed_seconds": 0.009,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 8,
+      "elapsed_seconds": 0.008,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 9,
+      "elapsed_seconds": 0.01,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 10,
+      "elapsed_seconds": 0.008,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 11,
+      "elapsed_seconds": 0.008,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 12,
+      "elapsed_seconds": 0.009,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/local-operations.json",
+      "sha256": "185d7c8c6aef11fc702fa2550febbf6a66e847e910c98e959d29079a8f4b088b",
+      "index": 13,
+      "elapsed_seconds": 0.008,
+      "kind": "initial-local-operations"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/preflight-receipts/1792839998984659000/result.json",
+      "sha256": "f7eb9ca4bac95789bff7bd92ddf0cff1405f049292456d6a6873afa00e728e3e",
+      "elapsed_seconds": 0.8023934999946505,
+      "kind": "prior-continuation-readonly-preflight"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/preflight-receipts/1792840483210567000/result.json",
+      "sha256": "aa91d53aacca5b51778cbf025c207f462a706a1b4997669ab5c77f9fe8468c8f",
+      "elapsed_seconds": 0.8580286249052733,
+      "kind": "prior-continuation-readonly-preflight"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/inherited-additional-operations.json",
+      "sha256": "0f52932e97dc8e1a05b912f5e0d0149125ca371b1ce46d49a6bf5ae00aff58f3",
+      "index": 0,
+      "elapsed_seconds": 0.589332875,
+      "kind": "failed-readonly-recheck-tool-wall"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/inherited-additional-operations.json",
+      "sha256": "0f52932e97dc8e1a05b912f5e0d0149125ca371b1ce46d49a6bf5ae00aff58f3",
+      "index": 1,
+      "elapsed_seconds": 0.7740464168600738,
+      "kind": "prior-diagnostic-recording"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/steps/01-plan-decision/result.json",
+      "sha256": "76ffacb7fe6c647c08d81b931614b9837cd2fcf696a7ef4d548a7ac9d44e1840",
+      "elapsed_seconds": 1.78
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/steps/02-compile-execution/result.json",
+      "sha256": "2116d05b74becee188622ecb6ab3b2c64e9a580055da06a568e043dd96be7237",
+      "elapsed_seconds": 1.768
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/steps/03-implement-context/result.json",
+      "sha256": "69be965df52c46632e8581ef3fe011be0347e1f6ac2c50a4df5e879d60a2d684",
+      "elapsed_seconds": 1.879
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/steps/04-implement/result.json",
+      "sha256": "6270eede068217528cf586878f6ed3f9a7d8273d6ae53997982fb27ab7e227fc",
+      "elapsed_seconds": 520.486
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/human-decisions/03-execution-approval/result.json",
+      "sha256": "9820178d0003d62298f4da7af57eea9de9e7dd039453c8e4b3ed81f878a187fb",
+      "elapsed_seconds": 1.7996347912121564
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/operations/approved-external-recheck-20261026/result.json",
+      "sha256": "35d89566345b168f80a8827b17c187cdaeb1bd183c2cbd839fcc3649c4ae6362",
+      "elapsed_seconds": 0.8153183341491967
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/operations/post-step-process-check-20261026/result.json",
+      "sha256": "6d4cac2c573f7783f716c7ad85705597bdbb90d4977ae4f08247529d67d7e8ca",
+      "elapsed_seconds": 0.7919352499302477
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/operations/stop-cleanup-20261026/close.result.json",
+      "sha256": "c07d17ecbdfb299529c61e42845fb4003854aaee773a097759d8ea9e3f7e07f5",
+      "elapsed_seconds": 0.2504129579756409
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/operations/stop-cleanup-20261026/process-table.result.json",
+      "sha256": "522e48cd3f4acb0be5a14db7871307873ec10bf58d4d474601a34dc62439b783",
+      "elapsed_seconds": 0.04705220786854625
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/operations/stop-cleanup-20261026/product-status.result.json",
+      "sha256": "757dbcacbb5f432082486184f849e257a60b665d16a42e6819e9f0e04b0bde31",
+      "elapsed_seconds": 0.012013708939775825
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/operations/stop-cleanup-20261026/show.result.json",
+      "sha256": "ce54c03e0f6c814ba18dc8a0ebb12cbb71baf3c8fea1b68b18ad198fe35bef7c",
+      "elapsed_seconds": 0.14224924985319376
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/preflight-receipts/1792941049524758000/result.json",
+      "sha256": "8cf05c860234d711e8cd8a3dd339c21963d7437eceaa26927756ae7c6b88e37c",
+      "elapsed_seconds": 1.1462497918400913
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/preflight-receipts/1792966940490718000/result.json",
+      "sha256": "7506931a9370451de4b72f42512b22b26ffd19213605305adb1fc15d7b0f1dd6",
+      "elapsed_seconds": 1.063491249922663
+    }
+  ],
+  "time_scope": "Recorded program operation elapsed seconds; human waits and offline development/review excluded. Future Gate operations continue accumulating.",
+  "inheritance_note": "All prior approved receipts plus all completed operations of launch-fixed package. Budget increased by explicit human decision; no usage or time reset."
+}

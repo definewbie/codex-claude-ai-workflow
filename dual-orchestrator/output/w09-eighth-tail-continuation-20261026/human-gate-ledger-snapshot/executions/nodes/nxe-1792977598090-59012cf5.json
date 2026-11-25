@@ -1,0 +1,84 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792977598090-59012cf5",
+  "agentTaskId" : "agt-1792977598084-f6014b6a",
+  "workflowExecutionId" : "wfe-1792977597985-24a059cd",
+  "nodeInstanceId" : "node-acceptance-codex_verifier_review-035",
+  "nodeDefinitionId" : "acceptance.codex_verifier_review",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "pid" : 42121,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/verification-observations.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "input_identity" : "7b8ee3d4020dc0e807551015ad80ecdef2b8caa2b7160ec8c0177145df84788b",
+      "executor_pid" : 42121,
+      "executor_started_at" : "2026-10-26T01:19:56.897Z"
+    },
+    "prepared_run" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/nxe-1792977598090-59012cf5-prepared.json",
+      "sha256" : "13a56ad0b9d76fe13f2777a082badb16cc5fc72135d889d0f0bd9f2584803985"
+    },
+    "adapter_signals" : [ ],
+    "agent" : "codex",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "acceptance_review",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "ACCEPT",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.contract.json",
+    "contract_sidecar_sha256" : "d9aac768db576cf1ced878ab1d4c0c21b66e29fd1b95d9ede1d9b427f8c4ca71",
+    "decision" : "ACCEPT",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/binding.json",
+    "repository_fact_binding_sha256" : "33ed7f2dc21800c447c33db7278c2f4cc093d09e64941df361fc51e2d987e0cf",
+    "run_id" : "run-1792977598143",
+    "run_metadata" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/run.json",
+    "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+    "summary" : "三个获批文件满足 AC-1～AC-3，独立执行测试与文档示例全部通过。",
+    "transcript_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.transcript.log",
+    "verification_observations" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/verification-observations.json",
+      "sha256" : "9659150664963d0ddcc78aa5033e25a88a0f031dbe374ae107fbbd340c3aa74e"
+    },
+    "completion_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/nxe-1792977598090-59012cf5-completion.json",
+    "completion_sha256" : "6cb271bddd40f9f567ff2883abd216e1064279c2de0ad4fb57bf42c638b76fde",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "run-1792977598143",
+  "agentRunRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/run.json",
+  "agent" : "codex",
+  "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+  "exitCode" : 0,
+  "startedAt" : "2026-10-26T01:19:58.090603Z",
+  "finishedAt" : "2026-10-26T01:21:00.255861Z",
+  "durationMs" : 62165
+}

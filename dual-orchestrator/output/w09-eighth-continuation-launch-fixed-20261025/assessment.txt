@@ -1,0 +1,38 @@
+W09 启动选择收敛：有界实施与装配自评
+
+结论：离线实施与装配证明成立；当前是待 CC 合并受影响复审、待用户批准新组合和具名续作的候选。真实 Java/原生/模型续作 NOT_RUN。自查不冒充独立评审。
+
+本轮必要工作与 ROI
+推进 P0 主流程：解决 operator 核对父 PATH、实际启动却使用另一环境的双来源冲突。不是扩 Relay、不做环境认证/进程监督，也不再加模型实验。原有四个 operator 脚本接线变更（pre-dispatch 仅增加接收共享结果），一个测试族更新；check_budget/gate_support/observer 测试字节不变。Java/acpx/业务 schema/reader/预算表均未改；未触发成本收益止损条件。
+
+顶尖实践所需的额外检查已在授权范围落实：不是仅改路径比较，而是查真实消费者（解释器、ps/rtk、Java、wrapper Node、两个入口），并检查核验与使用间程序消失、每个持久写入失败及冷启动。原始依据是旧执行记录/固定观察/完整旧新配置与程序字节/真实脚本；外部可复核依据为原 ledger、SHA 清单、独立 suite/反证及未来 CC 自行重建链。完整转换见 transition-and-consumers.txt，不用整理结论代替原始证据。
+
+实施结果
+1. continuation 一次生成不可变 E。绝对程序入口、选定 PATH 的 realpath/字节、实际 sys.executable、原生程序 override 的存在/值 SHA 核验统一进行。父 PATH 只作诊断。run-one-step 将同一对象传 Popen；ps/rtk 同样消费 E；wrapper 的 Node 在该 PATH 中核定。
+2. 旧 source/JAR/配置/观察/checkpoint/预算/stop 检查保留。新授权额外精确绑定候选 launch-identity SHA；旧 true 不能借给新组合。private-candidate 仅固定快照，不修改用户配置、历史 R01 或 frozenRuntimeIdentity。
+3. LOW-1 已写 config-impact-map.txt：三处未豁免配置变化的能力影响及未来首次必要使用观察点；静态相同不声称兼容。LOW-2 两类窗口常驻：rtk 本身消失时 Popen 留证停止；Java 在 wrapper 启动前消失时固定原退出并停止。均无自动重试、不改业务 READY/RUNNING。
+
+证据分层（不可相加）
+- 原生产先红2项：旧父 PATH 硬比较与裸程序启动参数，evidence/red-*；是旧实现行为，不是测试作者错误。
+- 最终单轮38项：26 operator 完整入口测试 +12 observer 协议测试；evidence/final-suite.json/log。输入前后 SHA 相等，绝对受审 Python 运行。真实本地替身链覆盖 rtk→Java替身→acpx替身→Node替身；usage seam 为合成，绝非 Java/native/provider E2E。
+- 21项原储备算术独立重跑，内容与复制的原 dry-run 相等；evidence/budget-rerun.json。不报成59项 suite。
+- 4项隔离反证：恢复父 PATH 准入/重拼启动环境/删除程序字节核验/删除新组合批准，均出现指定 assertion FAIL；evidence/counterproof-results.json。不能计入38绿灯。
+- 实际新包运行授权false的拒绝已行使，发生在 step/Popen 前；evidence/actual-unauthorized.json。无 steps 目录，无新授权材料。
+- 实际只读完整重核成功：发行、旧清单、checkpoint、83条观察链接、原 fixed usage、储备及候选 E。它不创建会话、不运行 Java；evidence/actual-readonly.json 与 preflight-receipts 的原始回执。
+- 旧候选17项、历史 Java1813/210、Relay研究只作各自范围背景；未再次运行或计入本轮，也未重建 Java。
+
+累计账
+848242 token是已用；851758是剩余，不是另一总量。已用10/剩余8；总线1700000/18/3600不变。尾链450000+一次修正150000=600000/4，保留后机动251758/4。旧1263.444秒 +前续作两次成功重核 +既有失败重核/诊断 =1266.46780141676秒（56条有ref/SHA的条目）。本包实际只读回执继续累加后，当前活动秒数=1267.614051209，剩余=2332.385948791。以后每次完整核账与新回执继续累加，绝不重新计60分钟。
+旧失败的0.589332875来自原执行工具的 wall time文字记录，规范化项明确标记，不冒充 provider/run duration；0.7740464168600738来自原 typed 诊断字段。原源证据亦在前续作52文件固定清单中；没有用估算补充执行事实。
+
+保全
+原包402、前续作52、停止 ledger541文件 SHA全部一致；659源输入/2 JAR以及原wrapper/dist通过；83个确认号码逐条观察链接不变。两个历史stop永久保留，新包自身stop仍会拒绝。无新模型请求、会话、产品执行或真实 Git 交付。私有候选目录0700/文件0600。
+
+过程错误边界
+evidence/author-errors.json记录：一次编辑缩进导致 discovery 未运行；一次第四反证被通用mock的JSON TypeError干扰、不能计有效反证，改成明确 unauthorized-launch sentinel后四项重新隔离执行；原错误日志保留。rtk read 的定位命令不适用后改只读读取，无产品失败声明。中间25/36/38轮不拼接；只消费 final-suite 单轮。
+
+成熟度与剩余
+本 operator 同一E强制消费达离线装配 PROVEN（替身/真实只读边界）；实际 Java/native 启动、当前Codex组合真实接口、独立验收与交付未证明；不能据此宣布产品主流程或 W09完成。真实可用性仍须未来授权后既有兼容检查和正常调用观察。
+没有新技术债掩盖安全缺口；动态库/恶意文件替换隔离继续是明确产品范围外，进程观察不作任意子树声明。原已登记 F2/F3等非本批项目不冒领完成。
+
+下一步最小动作：用 cc-review-prompt.txt 做一次只读合并受影响复审；确认后由用户批准当前程序/config组合及具名第八例续作。获得批准后先重跑只读重核和最新实际外部状态核对，再从原 plan.decision 单步入口继续。本轮不运行。

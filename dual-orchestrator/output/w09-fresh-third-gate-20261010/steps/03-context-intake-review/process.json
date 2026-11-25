@@ -1,0 +1,20 @@
+{
+  "pid": 46715,
+  "started_at": "2026-10-10T20:51:16.389846+08:00",
+  "argv": [
+    "rtk",
+    "proxy",
+    "java",
+    "-Xlog:class+load=debug:file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-third-gate-20261010/steps/03-context-intake-review/classloading.log:uptime,level,tags",
+    "-jar",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+    "run",
+    "--workdir=/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+    "--max-steps",
+    "1",
+    "--dispatch-mode",
+    "INLINE",
+    "ws-20261010T124812Z-XCZL"
+  ],
+  "expected_node": "context.intake_codex_product_review"
+}

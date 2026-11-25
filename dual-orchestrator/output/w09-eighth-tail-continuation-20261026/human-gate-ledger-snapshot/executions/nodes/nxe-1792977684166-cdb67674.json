@@ -1,0 +1,36 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792977684166-cdb67674",
+  "agentTaskId" : "agt-1792977684160-851a684e",
+  "workflowExecutionId" : "wfe-1792977684054-c668df9a",
+  "nodeInstanceId" : "node-acceptance-decision-036",
+  "nodeDefinitionId" : "acceptance.decision",
+  "handlerType" : "review.decision",
+  "status" : "SUCCEEDED",
+  "pid" : 45029,
+  "outcome" : "ACCEPT",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/verification-observations.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-26T01:21:22.924Z",
+      "executor_pid" : 45029,
+      "input_identity" : "d757df2eb1aa395c80df4af321e021af06d6b91bf5994d33079137b2c2ebd987"
+    },
+    "summary" : "三个获批文件满足 AC-1～AC-3，独立执行测试与文档示例全部通过。",
+    "source" : "contract-sidecar",
+    "decision" : "ACCEPT",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-26T01:21:24.166402Z",
+  "finishedAt" : "2026-10-26T01:21:24.422181Z",
+  "durationMs" : 255
+}

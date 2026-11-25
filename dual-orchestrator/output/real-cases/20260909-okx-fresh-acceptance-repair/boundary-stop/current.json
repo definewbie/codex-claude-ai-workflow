@@ -1,0 +1,12 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20260908T170320Z-6KVE",
+  "workflowInstanceId" : "wf-ws-20260908T170320Z-6KVE",
+  "workflowId" : "agent-lifecycle-small-plan-human-review-experiment",
+  "definitionVersion" : 1,
+  "status" : "WAITING_FOR_HUMAN",
+  "activeNodeInstanceIds" : [ "node-gate-human_requirement_review-011" ],
+  "openGateIds" : [ "gate-node-gate-human_requirement_review-011" ],
+  "lastEventId" : "evt-000011",
+  "updatedAt" : "2026-09-08T17:12:57.467646Z"
+}

@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261011T044656Z-BMDJ",
+  "node_instance_id" : "node-intake-codex_product_review-004",
+  "run_id" : "run-1791694259389",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/planned-report.json",
+      "sha256" : "f144acdc369309b7179a5b4e12739ebb2c9de4d85f2441c984e4c5baa8558936"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/repo-map.json",
+      "sha256" : "81455f719a8dc9330d0be8e5e6c106cce79e38a38e8ffbd97aa0d6c153c8af3f"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/file-summaries.json",
+      "sha256" : "4938fbedbd1b327be1d022cba2e52d47f51e450fe8eeebdee15dc8bf800daad8"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/stage-scope-policy.json",
+      "sha256" : "d8f83e21e3b3a18fe6c69ba5fa24d188bc62d4a30baac4e84a2b8d758844b451"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/file-relevance-plan.json",
+      "sha256" : "581c6b269c8183a32f516fdfd2a7b5bcf54b99c042ee1a48afc8d716514b8623"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/working-set.json",
+      "sha256" : "b5a3668acb8bad0fe19e755368e52ecd51e2c1a73719f335488cccbf3fca6fbf"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/read-reuse-contract.json",
+      "sha256" : "94c2134ea5da9bb797a809ca87a33ab0a2c05e8a5ce91e25182799c81ac4dc56"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/agent-capability-catalog.json",
+      "sha256" : "8120c3cefde54a04b5c34a63c32624bd42668406751de191ffc6b32bba24ed33"
+    }
+  }
+}

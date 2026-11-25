@@ -1,0 +1,146 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261011T044656Z-BMDJ",
+  "runId" : "run-1791700195359",
+  "nodeId" : "design.codex_arch_review",
+  "agent" : "codex",
+  "promptTemplate" : "design-codex-review",
+  "promptPath" : "/private/tmp/dual-w09-newlines-20261011-fresh-04/worktree/.agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700195359/prompts/design-codex-review.md",
+  "totalBytes" : 43283,
+  "totalEstimatedTokens" : 10821,
+  "sections" : [ {
+    "name" : "workspace_guard",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "workspace-guard",
+    "bytes" : 402,
+    "estimatedTokens" : 101,
+    "sha256" : "afbf48b57f260ea457d595be781fd1f933801859b633d7071f807f3a800d43f9",
+    "includedReason" : "execution safety boundary",
+    "required" : true
+  }, {
+    "name" : "language_policy",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "language-policy",
+    "bytes" : 244,
+    "estimatedTokens" : 61,
+    "sha256" : "d20252d3644a0521308cb5b24f421c899463b6078aece0141858ed2ed32f50d5",
+    "includedReason" : "output language policy",
+    "required" : true
+  }, {
+    "name" : "structured_artifact_field_semantics",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "structured-artifact-field-semantics",
+    "bytes" : 479,
+    "estimatedTokens" : 120,
+    "sha256" : "b10bbd95cfd4baa41640817adc3618561f7e9e879d9527fd355fac978992158d",
+    "includedReason" : "structured artifact field semantics",
+    "required" : true
+  }, {
+    "name" : "template_static_frame",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "dev/dual/adapter/acpx/prompts/design-codex-review.md",
+    "bytes" : 2613,
+    "estimatedTokens" : 654,
+    "sha256" : "8cb8077c4af6bd95d3a525eba039618e80cf756cd43bcd9abd3dc01d62adb3a7",
+    "includedReason" : "prompt skeleton instructions",
+    "required" : true
+  }, {
+    "name" : "requirement",
+    "sourceType" : "requirement",
+    "sourceRef" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/requirement.md",
+    "bytes" : 1190,
+    "estimatedTokens" : 298,
+    "sha256" : "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+    "includedReason" : "task requirement",
+    "required" : true
+  }, {
+    "name" : "context_package",
+    "sourceType" : "context_package",
+    "sourceRef" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-design_codex_arch_review-014.md,.agent/workstreams/ws-20261011T044656Z-BMDJ/context/agent-governance-node-design-codex_arch_review-015-run-1791700195359.md",
+    "bytes" : 27106,
+    "estimatedTokens" : 6777,
+    "sha256" : "029e5eb57190b6962ed7d7d5487f0c5ae7067465296f08dc9d356c52b4c141a0",
+    "includedReason" : "prior artifacts / assembled context",
+    "required" : true
+  }, {
+    "name" : "read_reuse_contract",
+    "sourceType" : "read_reuse_contract",
+    "sourceRef" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-design_codex_arch_review-014.md,.agent/workstreams/ws-20261011T044656Z-BMDJ/context/agent-governance-node-design-codex_arch_review-015-run-1791700195359.md",
+    "bytes" : 1049,
+    "estimatedTokens" : 263,
+    "sha256" : "29eeac2ba7baf4c7585f154f9c782892360f5b2cdbecc475d1cc012fea87658f",
+    "includedReason" : "typed memory read-reuse projection",
+    "required" : true
+  }, {
+    "name" : "contract_review_principles",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "contract-review-principles.md",
+    "bytes" : 1996,
+    "estimatedTokens" : 499,
+    "sha256" : "255a1af39f7d8cc79006c28508b0833b7f25c8a60ef50ec52fbd956a5947a5f8",
+    "includedReason" : "review principles",
+    "required" : true
+  }, {
+    "name" : "prompt_contract",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "ContractRegistry:design.codex_arch_review",
+    "bytes" : 1726,
+    "estimatedTokens" : 432,
+    "sha256" : "7269848ca2bd7b0269195628ee2fd17e7500c03fbca5c3b93f57f978a2754bf1",
+    "includedReason" : "strict agent result envelope",
+    "required" : true
+  }, {
+    "name" : "external_research_discipline",
+    "sourceType" : "permission_policy_projection",
+    "sourceRef" : "review",
+    "bytes" : 521,
+    "estimatedTokens" : 131,
+    "sha256" : "518335f6aed4ae3d471ead53c2a92286330b234a02bc3fd4cbdd7a5b3cf27867",
+    "includedReason" : "guide provider behavior without replacing adapter enforcement",
+    "required" : true
+  }, {
+    "name" : "authored-context",
+    "sourceType" : "typed_authored_context",
+    "sourceRef" : "node-design-codex_arch_review-015",
+    "bytes" : 8882,
+    "estimatedTokens" : 2221,
+    "sha256" : "3b57062263ab71d27470b03959ae39ed1bf066817bc1d82b35ed1c11aaef42c3",
+    "includedReason" : "required approved and revision inputs",
+    "required" : true
+  } ],
+  "authoredContext" : {
+    "workstreamId" : "ws-20261011T044656Z-BMDJ",
+    "nodeInstanceId" : "node-design-codex_arch_review-015",
+    "nodeId" : "design.codex_arch_review",
+    "runId" : "run-1791700195359",
+    "historyThrough" : 15,
+    "contract" : {
+      "compileNodeInstanceId" : "node-contract-compile-012",
+      "approvalGateRef" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/gates/gate-node-gate-human_requirement_review-011.json",
+      "approvalEventId" : "evt-000012",
+      "contract" : {
+        "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/task-contract.json",
+        "sha256" : "a2d79a4285314ee4e8f07cb02808afa19d012ba415234a025b6907777cd1891c"
+      },
+      "resolution" : {
+        "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/contracts/node-contract-compile-012/contract-resolution.json",
+        "sha256" : "31444dd3b28dca99f2d3a47411c9bdda6b5473a4b2ac5f3af6604d878f72cb53"
+      }
+    },
+    "reviewedDesign" : null,
+    "reviewedPlan" : null,
+    "parent" : null,
+    "subject" : {
+      "sidecar" : {
+        "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791699968740/outputs/design-claude.contract.json",
+        "sha256" : "e36eb96ce8f6506ef62317d6ba3ad95f3a04de2bdc0df6f8db657e2e7e463c11"
+      },
+      "nodeInstanceId" : "node-design-claude_design-013",
+      "nodeId" : "design.claude_design",
+      "runId" : "run-1791699968740",
+      "artifactType" : "design_result"
+    },
+    "trigger" : null,
+    "obligations" : [ ]
+  }
+}

@@ -28,19 +28,13 @@ final class LedgerEventLog {
         event.put("payload", payload == null ? Map.of() : payload);
         Files.createDirectories(paths.workstreamDir());
         var line = jsonlMapper.writeValueAsString(event);
-        Files.writeString(
-                paths.eventsJsonl(),
-                line + System.lineSeparator(),
-                StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.APPEND
-        );
+        jsonWriter.appendEvents(paths.eventsJsonl(), (line + "\n").getBytes(StandardCharsets.UTF_8));
     }
 
     void writeInstanceFromCurrent(WorkstreamPaths paths, WorkflowCurrentDocument current, Instant updatedAt)
             throws IOException {
         var objectMapper = jsonWriter.objectMapper();
-        var existing = objectMapper.readValue(paths.workflowInstanceJson().toFile(), WorkflowInstanceDocument.class);
+        var existing = jsonWriter.read(paths.workflowInstanceJson(), WorkflowInstanceDocument.class);
         jsonWriter.write(paths.workflowInstanceJson(), new WorkflowInstanceDocument(
                 existing.schemaVersion(),
                 existing.workflowInstanceId(),

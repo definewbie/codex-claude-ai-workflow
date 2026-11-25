@@ -1,0 +1,46 @@
+package dev.dual.cli;
+
+import dev.dual.ledger.file.WorkflowFileLedger;
+import dev.dual.ledger.file.WorkstreamPaths;
+import org.springframework.stereotype.Component;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
+
+import java.nio.file.Path;
+import java.util.concurrent.Callable;
+
+@Component
+@Command(name = "approve", description = "Approve the current human review gate.", mixinStandardHelpOptions = true)
+public class ReviewApproveCommand implements Callable<Integer> {
+    @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
+    Path workdir = Path.of(".");
+
+    @Option(names = "--run", description = "After approval, immediately run until the next gate, recovery, failure, or completion.")
+    boolean runImmediately;
+
+    @Option(names = "--max-steps", description = "Maximum workflow nodes to execute when --run is used. Defaults to ${DEFAULT-VALUE}.")
+    int maxSteps = 20;
+
+    @Option(names = "--note", description = "Decision note. Required when the reviewed outcome is BLOCKED.")
+    String note = "";
+
+    @Parameters(index = "0")
+    String workstreamId;
+
+    @Override
+    public Integer call() throws Exception {
+        var workspaceRoot = workdir.toAbsolutePath().normalize();
+        var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
+        var ledger = CliLedgerFactory.create();
+        dev.dual.runtime.handler.ReviewGateActions.resolve(ledger, paths, "approve", note);
+        System.out.println("Human gate approved");
+        System.out.println("Workstream: " + workstreamId);
+        if (!runImmediately) {
+            System.out.println("Resume: dualctl resume --workdir " + workspaceRoot + " " + workstreamId);
+            return 0;
+        }
+        System.out.println("Running workflow until next gate...");
+        return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
+    }
+}

@@ -1,0 +1,95 @@
+{
+  "commit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "identityBasis": "../d04-native-source-audit-20260929/assessment.md section 2; same release identity limitations apply",
+  "scope": "Partial source snapshot, not entire tree. Only blobVerified files are evidence. Cross-file definitions outside snapshot remain unverified.",
+  "files": {
+    "codex-rs/hooks/src/lib.rs": {
+      "path": "codex-rs/hooks/src/lib.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/lib.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [],
+      "bytes": 4201,
+      "gitBlobSha": "6abc173535b23b5ee6bd057fd3f49d9b82ea7fe0",
+      "sha256": "df594069f8ed09e14bece62ec5f1404c8fa9df88c9131d513d382b895a52a5f4",
+      "blobVerified": true
+    },
+    "codex-rs/hooks/src/events/pre_tool_use.rs": {
+      "path": "codex-rs/hooks/src/events/pre_tool_use.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/events/pre_tool_use.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [
+        "IncompleteRead(39064 bytes read, 1437 more expected)"
+      ],
+      "bytes": 28591,
+      "gitBlobSha": "c1baebd4f01fd1906f461fe84cb2bf0d73058bfc",
+      "sha256": "11a421933eac6f78749470b221c4b30eeb71e5cd75e8f091f06067da7c1652e6",
+      "blobVerified": true
+    },
+    "codex-rs/hooks/src/engine/dispatcher.rs": {
+      "path": "codex-rs/hooks/src/engine/dispatcher.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/engine/dispatcher.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [],
+      "bytes": 21384,
+      "gitBlobSha": "c5ee0d2ce1da03ec07b08f9ba692088142673e99",
+      "sha256": "47db17f4eaab89841947d9e7887fbefa6bc40fb41d08e70caab10fd4c1fd0e42",
+      "blobVerified": true
+    },
+    "codex-rs/hooks/src/engine/command_runner.rs": {
+      "path": "codex-rs/hooks/src/engine/command_runner.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/engine/command_runner.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [],
+      "bytes": 14546,
+      "gitBlobSha": "b68474f0cfa9c4e5a208bfd0de4ae9fddd5821b6",
+      "sha256": "c3913ff8ee6f449f07ce3c69bb2f194ad8aef2ce13b83e693165d74329ca3e14",
+      "blobVerified": true
+    },
+    "codex-rs/hooks/src/registry.rs": {
+      "path": "codex-rs/hooks/src/registry.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/registry.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [
+        "IncompleteRead(12474 bytes read, 3801 more expected)"
+      ],
+      "bytes": 11060,
+      "gitBlobSha": "b322da55d807157532f9b4490f0811a67805834d",
+      "sha256": "4c9e29f146fd409a515d198ae86c46d1852e8e84d4a0f3bcd73c45548311c160",
+      "blobVerified": true
+    },
+    "codex-rs/hooks/src/engine/mod.rs": {
+      "path": "codex-rs/hooks/src/engine/mod.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/engine/mod.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [
+        "IncompleteRead(23546 bytes read, 1528 more expected)"
+      ],
+      "bytes": 17440,
+      "gitBlobSha": "deaf29679a8ce5b35af474d4309b52a8a3a72ff7",
+      "sha256": "fbee148f9c3287798ecdd641066d56a69d8b4263be727c62615843244c4a6791",
+      "blobVerified": true
+    },
+    "codex-rs/hooks/src/schema.rs": {
+      "path": "codex-rs/hooks/src/schema.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/schema.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [
+        "IncompleteRead(61698 bytes read, 3217 more expected)"
+      ],
+      "bytes": 46372,
+      "gitBlobSha": "5558b6665bf4a05d622f7d814b984c885e98db74",
+      "sha256": "7b5c817c279709bc5092f8b6e6147788ff369e90818ce5debee93eb25ce5de89",
+      "blobVerified": true
+    },
+    "codex-rs/hooks/src/engine/discovery.rs": {
+      "path": "codex-rs/hooks/src/engine/discovery.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/engine/discovery.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [],
+      "bytes": 62713,
+      "gitBlobSha": "5003dbd24f081d1bc56a2f897fa51ef557a8caab",
+      "sha256": "fd05ee932079df2b5128f170beaf0d8e5c8630a56eadbcf9de9f25806e772b04",
+      "blobVerified": true
+    },
+    "codex-rs/core/src/hook_runtime.rs": {
+      "path": "codex-rs/core/src/hook_runtime.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/hook_runtime.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "bytes": 48837,
+      "gitBlobSha": "4964905418c40bc792e316535110937a28fda32d",
+      "sha256": "87b678af0f9ea87e0de6041fe82f9f90315b0b18c10524731deba9b7f9841f1e",
+      "blobVerified": true
+    }
+  }
+}

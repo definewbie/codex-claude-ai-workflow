@@ -1,0 +1,38 @@
+{
+  "codex": {
+    "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "sha256": "b973d440acac501fd2594a43e7ca9ce41e0a65b9dfb28d0d7a7837c99e1261e3"
+  },
+  "codex_host": {
+    "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex-code-mode-host",
+    "sha256": "d8a2222e017342718d16a5dbe092921c628961f812f62f42036b8d960e1ffe56"
+  },
+  "claude": {
+    "path": "/opt/homebrew/Caskroom/claude-code/2.1.277/claude",
+    "sha256": "73d6a2a55c46907e49bd8bb7608e134333bd71173351ee16ddce7d7db9914b9c"
+  },
+  "sdk": {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs",
+    "sha256": "cae60ea6827d5f9b113c88b911388983fe96e7d565a382bf25904df78ab9d0fc"
+  },
+  "sdk_types": {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts",
+    "sha256": "65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7"
+  },
+  "sdk_tools": {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk-tools.d.ts",
+    "sha256": "8060faab6c27ba4e08b7057cb46ce13805728fd286d12a249d85e8929dfd9241"
+  },
+  "node": {
+    "path": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/node",
+    "sha256": "64bcb939f5f8c921d104b02d0eb960781c13b49b9133d1d71a768eadd62da401"
+  },
+  "protocol_helper": {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-freeze-gate-20260930/probe.py",
+    "sha256": "f597aa01f86023d0ab5a63cecfee0589005af69f0b1d8943d6a22b19f5b55883"
+  },
+  "tool_contract": {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-freeze-gate-20260930/tool-contract.json",
+    "sha256": "1b23107c3a73894f97bc1d17400299d6fca10a86948797ba6876fb74f1ff2da2"
+  }
+}

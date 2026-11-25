@@ -1,0 +1,41 @@
+{
+  "classification": "FAIL",
+  "reason": "INSUFFICIENT_MAINLINE_AND_CORRECTION_RESERVE",
+  "domain_status": "RUNNING",
+  "domain_status_rewritten": false,
+  "completed": [
+    "intake author",
+    "independent product review READY",
+    "user GOAL approval",
+    "GOAL compile",
+    "design author SUCCESS / READY_FOR_ARCH_REVIEW"
+  ],
+  "not_completed": [
+    "design independent review",
+    "plan and independent review",
+    "EXECUTION approval",
+    "implementation",
+    "self-test",
+    "independent acceptance",
+    "target apply / commit / finalize"
+  ],
+  "actual_tokens": 986830,
+  "completed_requests": 3,
+  "active_seconds_including_cleanup": 687.5472866639196,
+  "token_ceiling_approved": 3000000,
+  "request_ceiling_approved": 18,
+  "active_seconds_ceiling_approved": 3600,
+  "remaining_tokens": 2013170,
+  "required_tail_plus_correction_reserve": 2125000,
+  "reserve_shortfall": 111830,
+  "minimum_cumulative_ceiling_at_current_allowances": 3111830,
+  "proposed_cumulative_ceiling_not_authorized": 3500000,
+  "proposed_headroom_over_current_reserve": 388170,
+  "request_and_time_limits_proposed_unchanged": true,
+  "continuation_authorized": false,
+  "next_dispatch_forbidden": true,
+  "no_new_case_proposed": true,
+  "preservation_ref": "evidence/budget-stop-preservation.json",
+  "measurement_ref": "evidence/budget-stop-measurement.json",
+  "checkpoint_ref": "budget-stop-ledger-checkpoint.json"
+}

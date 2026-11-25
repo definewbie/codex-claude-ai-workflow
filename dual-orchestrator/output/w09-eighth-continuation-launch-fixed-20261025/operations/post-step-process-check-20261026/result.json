@@ -1,0 +1,16 @@
+{
+  "elapsed_seconds": 0.7919352499302477,
+  "exit": 0,
+  "observation": {
+    "status": "ABSENT",
+    "checked_pids": [
+      34026,
+      34070
+    ],
+    "observed_processes": 914,
+    "ps_exit": 0,
+    "scope": "This snapshot and these PIDs only; not arbitrary descendants or remote state"
+  },
+  "scope": "Only two completed Java step PIDs; not arbitrary descendants or remote state",
+  "native_model_calls": 0
+}

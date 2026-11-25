@@ -1,0 +1,65 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-intake-codex_product_review-004",
+  "nodeDefinitionId" : "intake.codex_product_review",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-intake",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-intake_codex_product_review-003.md", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-239228e6e789729a.ref.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315492433/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315492433/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315492433/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1789315492433/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315492433/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "run_id" : "run-1789315492433",
+    "run_metadata" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315492433/run.json",
+    "agent" : "codex",
+    "session" : "codex-reviewer-ws-20260913T160441Z-H55W",
+    "exit_code" : 0,
+    "transcript_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315492433/outputs/intake-codex-product-review.transcript.log",
+    "output_complete" : true,
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1789315492433/binding.json",
+    "repository_fact_binding_sha256" : "a8133e921294730aa8e0c49933a6e87e87ea38df40682ed5df7c2427ac35468a",
+    "process_usability" : "EXITED_ZERO",
+    "adapter_signals" : [ ],
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "summary" : "Product review passed for controlled smoke.",
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315492433/outputs/intake-codex-product-review.contract.json",
+    "contract_sidecar_sha256" : "52fa4e9e299730744861027d58a9031cf3a051c182d989f3be586a6e50c29593",
+    "agent_execution_result_contract" : {
+      "present" : true,
+      "valid" : true,
+      "decision" : "READY_FOR_PRODUCT_REVIEW",
+      "summary" : "",
+      "validationError" : ""
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "agent_output_contract",
+      "required" : true,
+      "present" : true,
+      "valid" : true,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "reread_reasons" : [ ],
+    "agent_execution_outcome" : {
+      "status" : "SUCCESS",
+      "primaryReason" : "completed",
+      "nodeMaySucceed" : true,
+      "retryPolicy" : "NONE",
+      "recoveryCategory" : "NONE",
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315492425-d04c7bc1",
+  "startedAt" : "2026-09-13T16:04:52.430632Z",
+  "finishedAt" : "2026-09-13T16:05:02.846546Z"
+}

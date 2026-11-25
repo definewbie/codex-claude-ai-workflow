@@ -48,11 +48,7 @@ class RepoScopeGovernanceContractDiscoveryTest {
                 NodeKind.TASK,
                 "acpx.agent_run",
                 Map.of("permission_profile", "contract_discovery"));
-        var context = new TaskHandler.TaskContext(
-                root,
-                "ws-cold",
-                definition,
-                new NodeInstance(
+        var context = new TaskHandler.TaskContext(root, "ws-cold", definition, new NodeInstance(
                         "node-intake",
                         definition.id(),
                         definition.kind(),
@@ -65,7 +61,7 @@ class RepoScopeGovernanceContractDiscoveryTest {
                         Map.of(),
                         null,
                         null,
-                        null));
+                        null), dev.dual.runtime.RuntimeTestLedger.ledger());
 
         var documents = RepoScopeGovernance.build(
                 root,
@@ -117,11 +113,7 @@ class RepoScopeGovernanceContractDiscoveryTest {
                 NodeKind.TASK,
                 "acpx.agent_run",
                 Map.of("permission_profile", "contract_discovery"));
-        var context = new TaskHandler.TaskContext(
-                root,
-                "ws-cold",
-                definition,
-                new NodeInstance(
+        var context = new TaskHandler.TaskContext(root, "ws-cold", definition, new NodeInstance(
                         "node-intake",
                         definition.id(),
                         definition.kind(),
@@ -134,7 +126,7 @@ class RepoScopeGovernanceContractDiscoveryTest {
                         Map.of(),
                         null,
                         null,
-                        null));
+                        null), dev.dual.runtime.RuntimeTestLedger.ledger());
 
         var first = RepoScopeGovernance.build(root, workstreamDir, context, mapper, java.util.Optional.empty(), "run-1");
         var firstBindingBytes = Files.readAllBytes(first.repositoryFactBinding().path());

@@ -1,0 +1,5 @@
+ WARN  Unsupported engine: wanted: {"node":">=22.13.0"} (current: {"node":"v22.11.0","pnpm":"10.34.5"})
+
+> acpx@0.13.2 build:test /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source
+> node -e "require('node:fs').rmSync('dist-test',{recursive:true,force:true})" && tsc -p tsconfig.test.json
+

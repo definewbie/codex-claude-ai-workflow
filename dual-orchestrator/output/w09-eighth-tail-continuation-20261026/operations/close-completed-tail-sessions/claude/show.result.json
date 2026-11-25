@@ -1,0 +1,8 @@
+{
+  "exit": 0,
+  "timed_out": false,
+  "elapsed_seconds": 0.14787325006909668,
+  "pid": 45185,
+  "stdout_sha256": "a0537d0cd80f64305ff69ad8ba50e97507ef0ba9e6ad5f79221359c7bf8d998e",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

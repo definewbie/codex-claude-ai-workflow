@@ -1,0 +1,40 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1791694206220-0dbf42b9",
+  "agentTaskId" : "agt-1791694206216-205835b8",
+  "workflowExecutionId" : "wfe-1791694206147-5087908e",
+  "nodeInstanceId" : "node-context-intake_codex_product_review-003",
+  "nodeDefinitionId" : "context.intake_codex_product_review",
+  "handlerType" : "context.build_package",
+  "status" : "SUCCEEDED",
+  "pid" : 73612,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-intake_codex_product_review-003.md", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-1f75f26fa1061e48.ref.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-11T04:50:04.944Z",
+      "input_identity" : "309977e7864cae26299d5a642ede86216501ef66244973bb8850fc862eb5f21c",
+      "executor_pid" : 73612
+    },
+    "context_package" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-intake_codex_product_review-003.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-intake_codex_product_review-003.json",
+    "target_node" : "intake.codex_product_review",
+    "profile" : "product_review",
+    "sections" : [ "input_artifacts", "review_evidence", "recent_agent_outputs", "ledger_pointers" ],
+    "input_ref_count" : 6,
+    "generated_at" : "2026-10-11T04:50:06.308033Z",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-11T04:50:06.219928Z",
+  "finishedAt" : "2026-10-11T04:50:06.319416Z",
+  "durationMs" : 99
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-gate-human_acceptance-039",
+  "nodeDefinitionId" : "gate.human_acceptance",
+  "kind" : "GATE",
+  "handlerType" : "human.review",
+  "status" : "COMPLETED",
+  "stageId" : "stage-gate",
+  "iterationId" : "iter-003",
+  "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/commit-message.txt", ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/pr-body.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/candidate-5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb.json" ],
+  "inputTransition" : {
+    "transition_type" : "normal",
+    "condition" : "unconditional",
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "source_node_sha256" : "dc0990f66c69045f20c80b418d8b822f1a5b7d487f21a5a29e6b08d82e6c19b2",
+    "source_node_instance_id" : "node-delivery-prepare_pr-038",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/commit-message.txt", ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/pr-body.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/candidate-5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb.json" ],
+  "result" : {
+    "decision_checks" : {
+      "schemaVersion" : 1,
+      "family" : "TaskContractProjectionVerifier",
+      "familyCoverage" : "NOT_INVOKED",
+      "gateNodeInstanceId" : "node-gate-human_acceptance-039",
+      "sourceNodeInstanceId" : "node-delivery-prepare_pr-038",
+      "subjectRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/commit-message.txt", ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/pr-body.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/candidate-5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb.json" ],
+      "runtimeIdentitySha256" : "4b8226f4d961c4003741f72ea7b4f53da8b4677ad50b9ab140f7785eaea496d6",
+      "checks" : [ ]
+    },
+    "human_action" : "approve",
+    "note" : "用户批准当前三文件最终交付候选 5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb；允许原交付入口应用到既有第八例隔离target；commit仍由用户执行。累计300万token、18请求、3600活动秒及储备规则不变，历史停止记录保留。",
+    "requested_action" : "approve",
+    "source_node_instance_id" : "node-delivery-prepare_pr-038"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "",
+  "startedAt" : null,
+  "finishedAt" : "2026-10-26T01:28:06.118209Z"
+}

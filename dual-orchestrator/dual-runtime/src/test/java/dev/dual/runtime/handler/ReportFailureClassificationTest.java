@@ -27,9 +27,7 @@ class ReportFailureClassificationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        fixture = new TestLedgerFixture(tempDir, "ws-rfc");
-        fixture.init();
-        lineage = CompletionEvidenceLineageFixture.prepare(tempDir, "ws-rfc");
+        lineage = CompletionEvidenceLineageFixture.prepareApproved(tempDir, "ws-rfc");
     }
 
     @Test
@@ -55,11 +53,7 @@ class ReportFailureClassificationTest {
         // But for report handler alone, it's not strictly required since it just checks file existence
 
         var handler = new ReportGenerateFinalHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rfc",
-                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                lineage.reportNode()
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-rfc", new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of("required_contract_phase", "EXECUTION")), lineage.reportNode(), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var reportPath = (String) result.result().get("report_path");
         var report = Files.readString(tempDir.resolve(reportPath), StandardCharsets.UTF_8);
@@ -77,11 +71,7 @@ class ReportFailureClassificationTest {
     void reportHandlesAbsentClassification() throws Exception {
         // No failure-classification.json written
         var handler = new ReportGenerateFinalHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rfc",
-                new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of()),
-                lineage.reportNode()
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-rfc", new NodeDefinition("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of("required_contract_phase", "EXECUTION")), lineage.reportNode(), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var reportPath = (String) result.result().get("report_path");
         var report = Files.readString(tempDir.resolve(reportPath), StandardCharsets.UTF_8);

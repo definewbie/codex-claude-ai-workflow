@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "checked_existing_files": 869,
+  "changed_existing_files": [],
+  "tests_run": false,
+  "native_provider_runs": 0,
+  "meaning": "Existing baseline file contents unchanged; new B05 output material is not product implementation. No regression or execution claim."
+}

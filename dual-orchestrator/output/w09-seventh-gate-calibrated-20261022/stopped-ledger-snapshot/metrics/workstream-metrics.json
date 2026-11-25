@@ -1,0 +1,412 @@
+{
+  "schemaVersion" : 1,
+  "commitSequence" : 10,
+  "workstreamId" : "ws-20261022T150557Z-Y2KB",
+  "workflowInstanceId" : "wf-ws-20261022T150557Z-Y2KB",
+  "workflowId" : "agent-lifecycle-terminal-delivery",
+  "definitionVersion" : 5,
+  "workflowStatus" : "WAITING_FOR_RECOVERY",
+  "generatedAt" : "2026-10-22T15:20:40.186824Z",
+  "updatedAt" : "2026-10-22T15:20:40.159128Z",
+  "nodeCount" : 2,
+  "nodeStatusCounts" : {
+    "COMPLETED" : 1,
+    "FAILED" : 1
+  },
+  "nodeKindCounts" : {
+    "TASK" : 2
+  },
+  "agentRunCount" : 1,
+  "gateCount" : 0,
+  "decisionCount" : 0,
+  "iterationCount" : 1,
+  "revisionCount" : 0,
+  "completedCount" : 1,
+  "failedCount" : 1,
+  "blockedCount" : 0,
+  "waitingCount" : 0,
+  "runningCount" : 0,
+  "totalNodeDurationMs" : 45389,
+  "longestNodes" : [ {
+    "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+    "nodeDefinitionId" : "intake.claude_brainstorm",
+    "kind" : "TASK",
+    "status" : "FAILED",
+    "iterationId" : "iter-001",
+    "durationMs" : 45337
+  }, {
+    "nodeInstanceId" : "node-context-intake_claude_brainstorm-001",
+    "nodeDefinitionId" : "context.intake_claude_brainstorm",
+    "kind" : "TASK",
+    "status" : "COMPLETED",
+    "iterationId" : "iter-001",
+    "durationMs" : 52
+  } ],
+  "providerMetrics" : {
+    "claude" : {
+      "runCount" : 1,
+      "completedCount" : 0,
+      "failedCount" : 1,
+      "preparedCount" : 0,
+      "recoverableFailureCount" : 1,
+      "totalDurationMs" : 45025,
+      "averageDurationMs" : 45025
+    },
+    "outcomeStatusCounts" : {
+      "RECOVERABLE_ADAPTER_FAILURE" : 1
+    },
+    "executionConsistencyCounts" : {
+      "consistent" : 1
+    }
+  },
+  "tokenMetrics" : {
+    "runCount" : 1,
+    "measuredRunCount" : 0,
+    "estimatedRunCount" : 0,
+    "sessionSnapshotRunCount" : 0,
+    "total" : {
+      "inputTokens" : 0,
+      "outputTokens" : 0,
+      "cachedReadTokens" : 0,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 0,
+      "contextUsedTokens" : 0,
+      "costByCurrency" : { }
+    },
+    "estimatedTotal" : {
+      "inputTokens" : 0,
+      "outputTokens" : 0,
+      "cachedReadTokens" : 0,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 0,
+      "contextUsedTokens" : 0,
+      "costByCurrency" : { }
+    },
+    "byAgent" : { },
+    "byNode" : { },
+    "runs" : [ {
+      "runId" : "run-1792682394836",
+      "nodeId" : "intake.claude_brainstorm",
+      "agent" : "claude",
+      "sessionScope" : "run",
+      "sessionSegmentKey" : "ws:ws-20261022T150557Z-Y2KB/run:run-1792682394836",
+      "sessionScopeReason" : "execution-policy:occurrence-bound",
+      "stage" : "stage-intake",
+      "semanticIteration" : "iter-001",
+      "status" : "failed",
+      "attemptStatus" : "TIMED_OUT",
+      "attemptProcessStatus" : "TIMED_OUT",
+      "attemptFailureSignal" : "SESSION_BOOTSTRAP_FAILED",
+      "outcomeStatus" : "RECOVERABLE_ADAPTER_FAILURE",
+      "outcomePrimaryReason" : "session_bootstrap_failed",
+      "outcomeNodeMaySucceed" : false,
+      "executionConsistency" : "consistent",
+      "durationMs" : 45025,
+      "measured" : true,
+      "estimated" : false,
+      "aggregated" : false,
+      "usage" : {
+        "inputTokens" : 0,
+        "outputTokens" : 0,
+        "cachedReadTokens" : 0,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 0,
+        "contextUsedTokens" : 0,
+        "costByCurrency" : { },
+        "source" : "not_available",
+        "measurementType" : "UNAVAILABLE",
+        "attribution" : "",
+        "cumulative" : false,
+        "providerId" : "zhipu",
+        "model" : "glm-5.3",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "claude_settings_env",
+        "unavailableReason" : "SESSION_BOOTSTRAP_FAILED",
+        "costAmount" : null,
+        "costCurrency" : ""
+      },
+      "providerModelIdentity" : {
+        "confidence" : "high",
+        "source" : "claude_settings_env",
+        "provider" : "zhipu",
+        "billingMode" : "subscription_token_only",
+        "model" : "glm-5.3"
+      },
+      "breakdown" : {
+        "promptTokens" : 4330,
+        "contextTokens" : 987,
+        "promptOverheadTokens" : 3343,
+        "adapterOverheadTokens" : 0,
+        "outputArtifactTokens" : 0,
+        "transcriptTokens" : 0,
+        "contextPackage" : ".agent/workstreams/ws-20261022T150557Z-Y2KB/context/node-context-intake_claude_brainstorm-001.md",
+        "contextPackageMetadata" : ".agent/workstreams/ws-20261022T150557Z-Y2KB/context/node-context-intake_claude_brainstorm-001.json",
+        "contextProfile" : "intake",
+        "contextBudget" : 3000,
+        "contextWithinBudget" : true,
+        "topSections" : [ {
+          "section" : "ledger_pointers",
+          "renderedTokens" : 154,
+          "originalTokens" : 141,
+          "softBudgetTokens" : 125,
+          "degraded" : true,
+          "dropped" : false
+        }, {
+          "section" : "task_contract",
+          "renderedTokens" : 0,
+          "originalTokens" : 0,
+          "softBudgetTokens" : 500,
+          "degraded" : false,
+          "dropped" : false
+        } ]
+      }
+    } ],
+    "contextPackages" : [ {
+      "targetNode" : "intake.claude_brainstorm",
+      "builderNode" : "context.intake_claude_brainstorm",
+      "profile" : "intake",
+      "estimatedTokens" : 987,
+      "tokenBudget" : 3000,
+      "withinBudget" : true,
+      "metadataPath" : ".agent/workstreams/ws-20261022T150557Z-Y2KB/context/node-context-intake_claude_brainstorm-001.json",
+      "topSections" : [ {
+        "section" : "ledger_pointers",
+        "renderedTokens" : 154,
+        "originalTokens" : 141,
+        "softBudgetTokens" : 125,
+        "degraded" : true,
+        "dropped" : false
+      }, {
+        "section" : "task_contract",
+        "renderedTokens" : 0,
+        "originalTokens" : 0,
+        "softBudgetTokens" : 500,
+        "degraded" : false,
+        "dropped" : false
+      } ]
+    } ],
+    "topContextSections" : [ {
+      "targetNode" : "intake.claude_brainstorm",
+      "builderNode" : "context.intake_claude_brainstorm",
+      "profile" : "intake",
+      "section" : "ledger_pointers",
+      "renderedTokens" : 154,
+      "originalTokens" : 141,
+      "degraded" : true,
+      "dropped" : false
+    }, {
+      "targetNode" : "intake.claude_brainstorm",
+      "builderNode" : "context.intake_claude_brainstorm",
+      "profile" : "intake",
+      "section" : "task_contract",
+      "renderedTokens" : 0,
+      "originalTokens" : 0,
+      "degraded" : false,
+      "dropped" : false
+    } ]
+  },
+  "toolMetrics" : {
+    "runCount" : 1,
+    "toolCallCount" : 0,
+    "readCount" : 0,
+    "writeCount" : 0,
+    "bashCount" : 0,
+    "otherCount" : 0,
+    "repeatedReadFiles" : [ ],
+    "repeatedReadReasonRequiredCount" : 0,
+    "missingRereadReasonCount" : 0,
+    "allowedRepeatedReadReasons" : [ ],
+    "topReadFiles" : [ ],
+    "evidenceFileCount" : 0,
+    "runs" : [ {
+      "runId" : "run-1792682394836",
+      "nodeId" : "intake.claude_brainstorm",
+      "agent" : "claude",
+      "status" : "failed",
+      "toolUsage" : {
+        "toolCallCount" : 0,
+        "readCount" : 0,
+        "writeCount" : 0,
+        "bashCount" : 0,
+        "otherCount" : 0
+      },
+      "readFiles" : [ ]
+    } ]
+  },
+  "tokenAttribution" : {
+    "schemaVersion" : 1,
+    "perRun" : [ {
+      "runId" : "run-1792682394836",
+      "nodeId" : "intake.claude_brainstorm",
+      "agent" : "claude",
+      "stage" : "stage-intake",
+      "sessionSegmentKey" : "ws:ws-20261022T150557Z-Y2KB/run:run-1792682394836",
+      "sessionScope" : "run",
+      "attemptStatus" : "TIMED_OUT",
+      "attemptProcessStatus" : "TIMED_OUT",
+      "outcomeStatus" : "RECOVERABLE_ADAPTER_FAILURE",
+      "executionConsistency" : "consistent",
+      "promptTokens" : 4330,
+      "contextPackageTokens" : 987,
+      "inputTokens" : 0,
+      "outputTokens" : 0,
+      "cachedReadTokens" : 0,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 0,
+      "measurementType" : "UNAVAILABLE",
+      "usageSource" : "not_available",
+      "usageAttribution" : "",
+      "contextUsedTokens" : 0,
+      "providerId" : "zhipu",
+      "model" : "glm-5.3",
+      "billingMode" : "subscription_token_only",
+      "providerMetadataSource" : "claude_settings_env",
+      "providerModelIdentity" : {
+        "confidence" : "high",
+        "source" : "claude_settings_env",
+        "provider" : "zhipu",
+        "billingMode" : "subscription_token_only",
+        "model" : "glm-5.3"
+      },
+      "providerUsageVisibility" : "unavailable",
+      "providerUsageUnavailableReason" : "SESSION_BOOTSTRAP_FAILED",
+      "cost" : null,
+      "costEconomics" : {
+        "providerId" : "zhipu",
+        "model" : "glm-5.3",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "claude_settings_env",
+        "inputCacheHitTokens" : 0,
+        "inputCacheMissTokens" : 0,
+        "outputTokens" : 0,
+        "cacheWriteTokens" : 0,
+        "clientReportedCost" : 0,
+        "clientReportedCurrency" : "",
+        "cacheSignalReliability" : "not_applicable",
+        "costEstimateReliability" : "not_applicable",
+        "providerCacheDecision" : "not_applicable",
+        "reason" : "not provider run usage"
+      },
+      "costAttribution" : {
+        "inputCacheMissTokens" : 0,
+        "inputCacheHitTokens" : 0,
+        "outputTokens" : 0,
+        "cachedWriteTokens" : 0,
+        "billingMode" : "subscription_token_only",
+        "clientReportedCost" : 0,
+        "clientReportedCurrency" : "",
+        "officialCalculatedCost" : null,
+        "officialCalculatedCurrency" : "",
+        "reliability" : "not_applicable",
+        "cacheSignalSource" : "not_applicable"
+      },
+      "providerCachePolicy" : {
+        "cacheSignalReliability" : "not_applicable",
+        "mode" : "not_applicable",
+        "reason" : "not provider run usage",
+        "inputsComplete" : true,
+        "costEstimateReliability" : "not_applicable"
+      },
+      "transcriptTokens" : 0,
+      "transcriptBytes" : 0,
+      "executionLatency" : {
+        "schemaVersion" : 1,
+        "totalDurationMs" : 45025,
+        "processStartedMs" : 0,
+        "processWaitCompletedMs" : 0,
+        "processBeforeTerminalMs" : 0,
+        "terminalDetectedMs" : 0,
+        "terminalGraceElapsedMs" : 0,
+        "terminalGraceMs" : 0,
+        "terminalToProcessWaitMs" : 0,
+        "artifactExtractedMs" : 0,
+        "contractValidatedMs" : 45070,
+        "postProcessMs" : 0,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "execution_total"
+      },
+      "toolCalls" : 0,
+      "reads" : 0,
+      "bash" : 0,
+      "writes" : 0,
+      "startedAt" : "2026-10-22T15:19:55.064517Z"
+    } ],
+    "usageVisibility" : {
+      "byVisibility" : {
+        "unavailable" : 1
+      },
+      "byAgent" : {
+        "claude" : {
+          "unavailable" : 1
+        }
+      },
+      "gaps" : [ {
+        "reason" : "SESSION_BOOTSTRAP_FAILED",
+        "runId" : "run-1792682394836",
+        "visibility" : "unavailable",
+        "agent" : "claude",
+        "nodeId" : "intake.claude_brainstorm"
+      } ]
+    },
+    "costEconomics" : {
+      "byReliability" : {
+        "not_applicable" : 1
+      },
+      "byCostEstimateReliability" : {
+        "not_applicable" : 1
+      },
+      "byDecision" : {
+        "not_applicable" : 1
+      },
+      "clientReportedCostByCurrency" : { },
+      "officialCalculatedCostByCurrency" : { },
+      "providerReportedCostByCurrency" : { },
+      "dualCalculatedCostByCurrency" : { }
+    },
+    "nodeHotspots" : [ {
+      "nodeId" : "intake.claude_brainstorm",
+      "agent" : "claude",
+      "runCount" : 1,
+      "promptTokens" : 4330,
+      "contextPackageTokens" : 987,
+      "inputTokens" : 0,
+      "outputTokens" : 0,
+      "cachedReadTokens" : 0,
+      "totalTokens" : 0,
+      "transcriptBytes" : 0,
+      "toolCalls" : 0,
+      "reads" : 0,
+      "bash" : 0,
+      "writes" : 0,
+      "heavy" : [ "promptOverhead" ]
+    } ],
+    "fileReadCost" : [ ],
+    "sessionSnowball" : [ {
+      "sessionSegmentKey" : "ws:ws-20261022T150557Z-Y2KB/run:run-1792682394836",
+      "runs" : [ {
+        "runId" : "run-1792682394836",
+        "nodeId" : "intake.claude_brainstorm",
+        "seq" : 1,
+        "cachedReadTokens" : 0,
+        "transcriptBytes" : 0,
+        "deltaTranscriptBytes" : 0
+      } ],
+      "maxTranscriptGrowthRun" : "run-1792682394836"
+    } ],
+    "executionLatency" : {
+      "topRuns" : [ {
+        "runId" : "run-1792682394836",
+        "nodeId" : "intake.claude_brainstorm",
+        "agent" : "claude",
+        "totalDurationMs" : 45025,
+        "terminalDetectedMs" : 0,
+        "processWaitCompletedMs" : 0,
+        "artifactExtractedMs" : 0,
+        "contractValidatedMs" : 45070,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "execution_total"
+      } ],
+      "schemaVersion" : 1
+    }
+  }
+}

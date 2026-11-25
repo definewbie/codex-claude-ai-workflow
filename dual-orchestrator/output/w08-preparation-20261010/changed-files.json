@@ -1,0 +1,91 @@
+{
+  "basis": "Measured pre-edit dirty workspace, not HEAD",
+  "files": [
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentPromptRenderer.java",
+      "before_sha256": "62c6b25d7ca4b95a173bb5d1afa867c830577533cb6f83e7fed300790a58251f",
+      "after_sha256": "24060fed17ed381478af5ced0e566c409e24d44ecd48171dc7a09919ba843e77",
+      "kind": "prompt-production"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/implement-claude.md",
+      "before_sha256": "5894694d0a716bdf687f42687feb6f8af180afbfece407a0638c420422901175",
+      "after_sha256": "03d6be97b1d7aa94a210ec73b058f53e2770e71623f006c5de59caaa218f28e6",
+      "kind": "prompt-production"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/design-codex-review.md",
+      "before_sha256": "5c3a3ef3884b29828eeaaeaa524456be4fe4afebe98e434c61cdcc2a3dfdff3d",
+      "after_sha256": "373469b95e19d190312789ded882c8bf99f6dfa0b1d81151df5e357f68236007",
+      "kind": "prompt-production"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/plan-codex-review.md",
+      "before_sha256": "4690ddcd004b9a7f9cabd36845be9ac5bd6e7d34bb4f0fc5f5abd7640e612cab",
+      "after_sha256": "b5f1bcb676e78bdd5a0df3a959eaea9d29d426524ed6109a1c21a41eb7817022",
+      "kind": "prompt-production"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/plan-claude.md",
+      "before_sha256": "fb30149023a8d7e73a3f97f58e20eb3986c1dcdff2e8a4d02dd2472835a04429",
+      "after_sha256": "95b8714b94385f5871ff1b98f401ec528aba2004c187f5aba1db3924098f146b",
+      "kind": "prompt-production"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/design-claude.md",
+      "before_sha256": "b0cdeb5b64c374022598256fc930c32a3e0859ceb6d9d018596aa7f080b5deab",
+      "after_sha256": "3a10471458b9f5b0bbb224c8279e0fc4d89272784c982b519a9184ada99aa0ec",
+      "kind": "prompt-production"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/intake-claude-brainstorm.md",
+      "before_sha256": "1d46caaf3edcc87d3984516031cb5acc8d340b5909b41eeabe408cf04d9414e4",
+      "after_sha256": "8f2894381d2fb1ece56852a625ee737fabe54d29cc3a03445c0f9d795bb4adf9",
+      "kind": "prompt-production"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/templates/contract-review-principles.md",
+      "before_sha256": "8d02ec121cc00d43ec7aa4c0eb03bbba6f598d904875726f54749889937f1678",
+      "after_sha256": "ca273a6a8b8db90fd3714b13820dfd008ca3829b6f2e5f4c0d19152186085b70",
+      "kind": "prompt-production"
+    },
+    {
+      "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentPromptRendererTest.java",
+      "before_sha256": "962ff9b2495e451f03047056afe7be3c75062950568ac47bac1f3b499c221333",
+      "after_sha256": "6ddf239bc53cf1600f8a7df7d1514b8511b2de5d7482c27e1150f1b44dd51024",
+      "kind": "test"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+      "before_sha256": "7c06370e8a6c3426224bb173d07b2027192d5325f3e7d6a3d286177e69841557",
+      "after_sha256": "42d93bbf1ab066eb7b820177c57228f01ca4cea32f4e239a90d2094133593a33",
+      "kind": "prompt-production"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/RepoScopeGovernance.java",
+      "before_sha256": "842830e76819ceb38326d44d1ab5c5c3dbc08e9ba291353a416dde8c4bb56b41",
+      "after_sha256": "f3fdc3fa0e5fd18cf2cdda7c2feb9be21fd8c3d67dab90e6c3c91b61eead4e22",
+      "kind": "prompt-production"
+    },
+    {
+      "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java",
+      "before_sha256": "5ce500f60215a1a092990b50e09f42d1d025135490874463668134a00b61fa6b",
+      "after_sha256": "d4335b8ae74bc015e5d5ba2d8c86ff756a428ef93caf446b214f4e2ccdd6553b",
+      "kind": "test"
+    },
+    {
+      "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "before_sha256": "1fda64de54e02d7f848cbf9d1c75791de4f8e9b201a5661d81b130a8bd8763a8",
+      "after_sha256": "2ab12dc5e7518335234e34e435a2cc2963ccdca4e998f98f66f7049dcfd259f6",
+      "kind": "documentation"
+    },
+    {
+      "path": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "before_sha256": "bc0aaac3be94ccb973a6809ef1be8213029f5518e28d41f66daf69ebe91dd9b8",
+      "after_sha256": "15667d968e1b340afca067c1a43d5e984fb12b3fa1b455055e734b5c4c09a5d5",
+      "kind": "documentation"
+    }
+  ],
+  "source_resource_test_files": 12,
+  "documentation_files": 2
+}

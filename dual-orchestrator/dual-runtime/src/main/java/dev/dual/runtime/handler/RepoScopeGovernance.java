@@ -211,7 +211,7 @@ final class RepoScopeGovernance {
         appendPathList(builder, "Forbidden scope", textList(documents.policy().get("forbiddenScope")), 8);
         appendPathList(builder, "Already inspected files", textList(documents.plan().get("previouslyReadFiles")), 8);
         appendReadAvoidanceRules(builder, documents);
-        builder.append("Read recommendations are context only. Declared edits must match TaskContract.scope and are verified from Git evidence.\n\n");
+        builder.append("Read recommendations are context only. GOAL design/plan files are proposals; edits require approved EXECUTION scope and Git evidence.\n\n");
     }
 
     private static void appendCompactMarkdownGuidance(StringBuilder builder, Documents documents, Path workspaceRoot) {
@@ -655,12 +655,7 @@ final class RepoScopeGovernance {
         if (qualifiedContract.isPresent()) {
             return contractScopePaths(qualifiedContract.get().contract());
         }
-        return TaskContractProjectionVerifier.readLegacyProjection(
-                        workspaceRoot, workstreamDir.getFileName().toString())
-                .projection()
-                .map(TaskContractProjectionVerifier.LegacyProjection::contract)
-                .map(RepoScopeGovernance::contractScopePaths)
-                .orElseGet(List::of);
+        return List.of();
     }
 
     private static List<String> contractScopePaths(TaskContract contract) {

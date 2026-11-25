@@ -1,0 +1,8 @@
+Step 1: intake.claude_brainstorm -> WAITING_FOR_RECOVERY (workflow stopped at FAILED)
+
+Next actions:
+  1. Inspect the recovery summary:
+     dualctl recovery show --workdir /private/tmp/dual-w09-newlines-20261022-offline-07/worktree ws-20261022T150557Z-Y2KB
+     summary: /private/tmp/dual-w09-newlines-20261022-offline-07/worktree/.agent/workstreams/ws-20261022T150557Z-Y2KB/recovery/current-failure.md
+  2. Inspect the session bootstrap failure before retrying the same active node.
+     dualctl retry --workdir /private/tmp/dual-w09-newlines-20261022-offline-07/worktree ws-20261022T150557Z-Y2KB  # only after inspecting the session bootstrap failure

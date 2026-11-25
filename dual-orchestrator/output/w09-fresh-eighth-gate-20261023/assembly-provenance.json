@@ -1,0 +1,56 @@
+{
+  "byte_identical": {
+    "gate_support.py": {
+      "source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/gate_support.py",
+      "sha256": "22b709c9e5fa22abd7fdc9059ad9a988a8b8923d1600aa477f91f3f191ec09d5",
+      "change": "BYTE_IDENTICAL"
+    },
+    "check_budget.py": {
+      "source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/check_budget.py",
+      "sha256": "ec44b480ce3fad03aad83a808a717f41461a465e778ad6cc9054738e5d6c72d0",
+      "change": "BYTE_IDENTICAL"
+    },
+    "budget.json": {
+      "source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/budget.json",
+      "sha256": "9c326c7191d9f7a60ef768e16cb712507de653183a7b4dd7cb72f06e87873ea5",
+      "change": "BYTE_IDENTICAL"
+    },
+    "test_gate_observer.py": {
+      "source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/test_gate_observer.py",
+      "sha256": "5d6a067af41aa8944b4dbd482dac43e9c017920376223d1fe662f2d03e580232",
+      "change": "BYTE_IDENTICAL"
+    },
+    "task-requirement.md": {
+      "source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/task-requirement.md",
+      "sha256": "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+      "change": "BYTE_IDENTICAL"
+    },
+    "host-environment-identity.json": {
+      "source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/host-environment-identity.json",
+      "sha256": "6826157086e28201de554a633ed50b6259c82a4782e66ebd19e56e85055e07b0",
+      "change": "BYTE_IDENTICAL"
+    },
+    "selected-release.json": {
+      "source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/selected-release.json",
+      "sha256": "721be0fe743ad021f7b0004a94f45ecdf77021a9a938ece6ff157fc6b46acdee",
+      "change": "BYTE_IDENTICAL"
+    },
+    "process_check.py": {
+      "source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-startup-offline-fix-20261023/process_check.py",
+      "sha256": "bc4096a74380601004831fb8e0b0fbc19fc4e5a0081f62f07ee5070ddc47266f",
+      "change": "BYTE_IDENTICAL_REVIEWED_GUARD"
+    }
+  },
+  "adapted_from": {
+    "prepare-offline.py": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-startup-offline-fix-20261023/prepare-offline.py.candidate",
+    "pre-dispatch-recheck.py": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-startup-offline-fix-20261023/pre-dispatch-recheck.py.candidate",
+    "run-one-step.py": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/run-one-step.py"
+  },
+  "scope": "case/path relocation; shared guard consumption; measured SDK byte baseline; no product changes or new native calls",
+  "final_adapted_sha256": {
+    "prepare-offline.py": "29d0652af9baf2beef61cc52da1cce18a4d69d23154577cdd88d0907580b4cc7",
+    "pre-dispatch-recheck.py": "a7f4c9fae26bdbacb95ea02e2a807e9ad751e4b781d93ba70513ac7eb7144b58",
+    "run-one-step.py": "aed6cfa44e26e13489ab9ebbb144303dc140203bf1cf4418be4df0a93c61d52c"
+  },
+  "offline_assembly_completed": true
+}

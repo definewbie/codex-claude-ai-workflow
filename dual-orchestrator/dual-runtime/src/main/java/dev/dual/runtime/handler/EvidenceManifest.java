@@ -43,12 +43,13 @@ final class EvidenceManifest {
         return new EvidenceManifest(workstreamId, Instant.now().toString(), List.of());
     }
 
-    static EvidenceManifest rebuild(Path workspaceRoot, Path workstreamDir, String workstreamId,
+    static EvidenceManifest rebuild(dev.dual.ledger.file.WorkflowFileLedger ledger, Path workspaceRoot, Path workstreamDir, String workstreamId,
                                     List<String> routedRefs, ObjectMapper objectMapper) throws IOException {
-        return rebuild(workspaceRoot, workstreamDir, workstreamId, routedRefs, objectMapper, Optional.empty());
+        return rebuild(ledger, workspaceRoot, workstreamDir, workstreamId, routedRefs, objectMapper, Optional.empty());
     }
 
     static EvidenceManifest rebuild(
+            dev.dual.ledger.file.WorkflowFileLedger ledger,
             Path workspaceRoot,
             Path workstreamDir,
             String workstreamId,
@@ -58,7 +59,7 @@ final class EvidenceManifest {
     ) throws IOException {
         var items = new ArrayList<EvidenceItem>();
         addFixedArtifacts(workspaceRoot, workstreamDir, objectMapper, items, qualifiedContract);
-        addRoutedAgentContracts(workspaceRoot, workstreamDir, workstreamId, routedRefs, objectMapper, items);
+        addRoutedAgentContracts(ledger, workspaceRoot, workstreamDir, workstreamId, routedRefs, objectMapper, items);
         addHumanDecisions(workspaceRoot, workstreamDir, objectMapper, items);
         items.sort(Comparator
                 .comparing(EvidenceItem::stageId)
@@ -135,21 +136,6 @@ final class EvidenceManifest {
                     workspaceRoot.resolve(qualifiedContract.get().resolutionRef()),
                     "requirement_resolution",
                     qualifiedContract.get().resolutionDocument()));
-        } else {
-            var legacy = TaskContractProjectionVerifier.readLegacyProjection(
-                    workspaceRoot, workstreamDir.getFileName().toString()).projection();
-            if (legacy.isPresent()) {
-                if (legacy.get().contract() != null) {
-                    items.add(itemFromJson(
-                            workspaceRoot, workstreamDir, workspaceRoot.resolve(legacy.get().contractRef()),
-                            "task_contract", legacy.get().document()));
-                }
-                if (!legacy.get().resolutionDocument().isEmpty()) {
-                    items.add(itemFromJson(
-                            workspaceRoot, workstreamDir, workspaceRoot.resolve(legacy.get().resolutionRef()),
-                            "requirement_resolution", legacy.get().resolutionDocument()));
-                }
-            }
         }
         addJsonArtifact(workspaceRoot, workstreamDir, objectMapper, items,
                 workstreamDir.resolve("artifacts/next-stage/handoff.json"), "stage_handoff");
@@ -163,6 +149,7 @@ final class EvidenceManifest {
     }
 
     private static void addRoutedAgentContracts(
+            dev.dual.ledger.file.WorkflowFileLedger ledger,
             Path workspaceRoot,
             Path workstreamDir,
             String workstreamId,
@@ -171,7 +158,7 @@ final class EvidenceManifest {
             List<EvidenceItem> items
     ) {
         for (var entry : AgentEvidenceIndex.fromRefs(
-                workspaceRoot, workstreamId, routedRefs, objectMapper).recent(Integer.MAX_VALUE)) {
+                ledger, workspaceRoot, workstreamId, routedRefs, objectMapper).recent(Integer.MAX_VALUE)) {
             var document = entry.document();
             var type = switch (document.sourceArtifactType()) {
                 case "design_result" -> "design_result";

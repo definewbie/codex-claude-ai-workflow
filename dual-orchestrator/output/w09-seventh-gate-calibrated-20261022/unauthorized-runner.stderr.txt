@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/run-one-step.py", line 13, in <module>
+    assert authorization.get('fresh_run_authorized') is True and authorization.get('case') == 'FRESH_SEVENTH', 'Fresh seventh requires new human authorization'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Fresh seventh requires new human authorization

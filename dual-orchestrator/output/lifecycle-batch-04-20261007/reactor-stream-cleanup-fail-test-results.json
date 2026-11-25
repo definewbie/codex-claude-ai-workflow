@@ -1,0 +1,83 @@
+{
+  "status": "FAIL",
+  "command": [
+    "mvn",
+    "clean",
+    "test"
+  ],
+  "exit_code": 1,
+  "started_at": "2026-10-07T21:45:32.511478+08:00",
+  "finished_at": "2026-10-07T22:01:24.485923+08:00",
+  "single_clean_reactor": true,
+  "source_fingerprints_unchanged": true,
+  "source_file_count": 945,
+  "suites": 204,
+  "summary": {
+    "tests": 1699,
+    "failures": 0,
+    "errors": 1,
+    "skipped": 0
+  },
+  "modules": {
+    "dual-cli": {
+      "tests": 95,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 27
+    },
+    "dual-server": {
+      "tests": 79,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "suites": 14
+    },
+    "dual-flow-liteflow": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 4
+    },
+    "dual-ledger-file": {
+      "tests": 155,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 23
+    },
+    "dual-adapter-acpx": {
+      "tests": 460,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 37
+    },
+    "dual-runtime": {
+      "tests": 760,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 81
+    },
+    "dual-adapter-git": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 2
+    },
+    "dual-core": {
+      "tests": 126,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 16
+    }
+  },
+  "live_provider_runs": 0,
+  "native_client_runs": 0,
+  "agents_spawned": 0,
+  "note": "Local child processes and simulated ACP peers only. Actual native/provider and browser runtime remain NOT RUN."
+}

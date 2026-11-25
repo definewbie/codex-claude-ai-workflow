@@ -1,0 +1,14 @@
+{
+  "reason": "STOP_REQUIRED_PROCESS_PRESENT",
+  "pid": 83976,
+  "trigger": "Shared reviewed process guard returned PRESENT before step directory or Java start",
+  "failed_step": "22-readiness-plan-decision",
+  "failed_step_created": false,
+  "next_dispatch": "FORBIDDEN_PENDING_HUMAN_REVIEW",
+  "domain_status_unchanged": true,
+  "actual_tokens": 848242,
+  "completed_calls": 10,
+  "later_snapshot_note": "Successful read-only table no longer showed pid; trigger-time start/command not captured, do not invent identity or silently exempt reuse",
+  "experiment_classification": "INVALID_CONTINUATION_PRECONDITION",
+  "at": "2026-10-23T11:05:19.112390+08:00"
+}

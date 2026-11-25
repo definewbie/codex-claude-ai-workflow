@@ -1,0 +1,10 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "file_summaries",
+  "workstreamId" : "ws-20261011T141651Z-MBC2",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-context-intake_codex_product_review-003",
+  "iterationId" : "iter-001",
+  "files" : [ ],
+  "generatedAt" : "2026-10-11T14:20:28.828924Z"
+}

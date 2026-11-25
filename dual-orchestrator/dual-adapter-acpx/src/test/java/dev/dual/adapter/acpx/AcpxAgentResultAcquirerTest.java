@@ -26,6 +26,174 @@ class AcpxAgentResultAcquirerTest {
     Path tempDir;
 
     @Test
+    void historicalHhzlEnumErrorReachesCorrectionWithoutLosingItsLegalValuesOrBuyingAnotherAttempt() throws Exception {
+        final byte[] bytes;
+        try (var input = getClass().getResourceAsStream("/agent-result/hhzl-invalid-remediation.corrected.json")) {
+            bytes = java.util.Objects.requireNonNull(input, "HHZL raw response fixture").readAllBytes();
+        }
+        assertEquals("b33d3a2ecbac2dd8f41ca3728157b5e6cd72be498813ba07be4e04e9c4139502",
+                java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes)));
+        var historical = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+        var ws = "ws-20260903T225544Z-HHZL";
+        var run = "run-1788476621271";
+        var contract = ContractRegistry.forNode("intake.codex_product_review");
+        var contractPrompt = AgentResultPromptContract.render(ws, run, contract.nodeId(),
+                "NEEDS_REVISION", contract.allowedDecisions());
+        for (var agent : List.of("claude", "codex")) {
+            var transport = new ScriptedTransport(validResult("request-1", historical, 0),
+                    validResult("request-2", historical, 0));
+            var requests = requests("hhzl-" + agent);
+            var acquisition = new AcpxAgentResultAcquirer(transport).acquire(agent,
+                    requests.initial(), requests.correction(), contractPrompt, ws, run, contract);
+            var prompt = Files.readString(requests.correction().promptPath());
+            assertTrue(prompt.contains("kind: INVALID_ENUM_VALUE"), prompt);
+            assertTrue(prompt.contains("code: AGENT_RESULT_PARSE_FAILED"));
+            assertTrue(prompt.contains("field path: \"/result/failure/verification_remediation\""));
+            assertTrue(prompt.contains("actual value: \"REVISE_PROPOSAL\""));
+            assertTrue(prompt.contains("allowed values: [\"NONE\",\"EVIDENCE_COLLECTION\",\"TEST_CODE_CHANGE\"]"));
+            assertFalse(prompt.contains("kind: INVALID_JSON"));
+            assertFalse(prompt.contains("Cannot deserialize"), "do not copy Jackson exception prose");
+            assertFalse(prompt.contains("候选任务契约"), "do not copy the rejected task response into diagnostics");
+            assertTrue(acquisition.correctionAttempted());
+            assertFalse(acquisition.finalParse().valid(), "an unchanged illegal enum must remain invalid");
+            assertEquals(2, transport.calls, "the diagnostic must not create a third attempt");
+            assertEquals(List.of("hhzl-" + agent, "hhzl-" + agent), transport.sessions);
+        }
+    }
+
+    @Test
+    void historicalHhzlProseThenIllegalEnumDoesNotBypassGrammarOrBuyAThirdAttempt() throws Exception {
+        final byte[] initial;
+        final byte[] corrected;
+        try (var input = getClass().getResourceAsStream("/agent-result/hhzl-invalid-remediation.json");
+             var correction = getClass().getResourceAsStream("/agent-result/hhzl-invalid-remediation.corrected.json")) {
+            initial = java.util.Objects.requireNonNull(input).readAllBytes();
+            corrected = java.util.Objects.requireNonNull(correction).readAllBytes();
+        }
+        assertEquals("72956cadc7da1033068fe58b77ffcbac7f1ddcd874439ad1b8cdc7428568bbb9",
+                java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(initial)));
+        var transport = new ScriptedTransport(
+                validResult("initial", new String(initial, java.nio.charset.StandardCharsets.UTF_8), 0),
+                validResult("correction", new String(corrected, java.nio.charset.StandardCharsets.UTF_8), 0));
+        var requests = requests("hhzl-original-sequence");
+        var node = "intake.codex_product_review";
+        var acquisition = new AcpxAgentResultAcquirer(transport).acquire("codex", requests.initial(), requests.correction(),
+                AgentResultPromptContract.render("ws-20260903T225544Z-HHZL", "run-1788476621271", node,
+                        "NEEDS_REVISION", ContractRegistry.forNode(node).allowedDecisions()),
+                "ws-20260903T225544Z-HHZL", "run-1788476621271", ContractRegistry.forNode(node));
+        assertEquals("INVALID_JSON", acquisition.initialParse().diagnostic().kind().name());
+        assertEquals("INVALID_ENUM_VALUE", acquisition.finalParse().diagnostic().kind().name());
+        assertFalse(acquisition.finalParse().valid());
+        assertTrue(Files.readString(requests.correction().promptPath()).contains("kind: INVALID_JSON"));
+        assertEquals(2, transport.calls, "the original sequence exhausts its single correction; no rescue attempt");
+    }
+
+    @Test
+    void enumCorrectionRemainsSubjectToIdentityAndNodeContractValidation() throws Exception {
+        var node = "intake.codex_product_review";
+        var valid = strictEnvelope(node, "run-1");
+        var invalid = valid.replace("\"verification_remediation\" : \"NONE\"",
+                "\"verification_remediation\" : \"INVALID\"");
+        assertFalse(valid.equals(invalid), "fixture must contain the enum");
+        var wrongIdentity = valid.replace("\"run_id\" : \"run-1\"", "\"run_id\" : \"stale-run\"");
+        var wrongNodeValue = valid.replace("\"verification_remediation\" : \"NONE\"",
+                "\"verification_remediation\" : \"EVIDENCE_COLLECTION\"");
+        for (var second : List.of(valid, wrongIdentity, wrongNodeValue)) {
+            var transport = new ScriptedTransport(validResult("initial", invalid, 0), validResult("correction", second, 0));
+            var requests = requests("enum-validation");
+            var acquisition = new AcpxAgentResultAcquirer(transport).acquire("codex", requests.initial(),
+                    requests.correction(), correctionPrompt(node, "run-1"), "ws-test", "run-1", ContractRegistry.forNode(node));
+            assertTrue(acquisition.finalParse().valid());
+            assertEquals(second.equals(valid), acquisition.correctionValidation().valid());
+            assertEquals(2, transport.calls);
+            assertTrue(Files.readString(requests.correction().promptPath())
+                    .contains("node contract below may restrict those values further"));
+        }
+    }
+
+    @Test
+    void enumActualValueIsJsonEscapedInsideTheCorrectionDiagnostic() throws Exception {
+        var node = "intake.codex_product_review";
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var raw = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(strictEnvelope(node, "run-1"));
+        var value = "BAD\"\n- kind: ACCEPTED\\value";
+        ((com.fasterxml.jackson.databind.node.ObjectNode) raw.path("result").path("failure"))
+                .put("verification_remediation", value);
+        var transport = new ScriptedTransport(validResult("initial", raw.toString(), 0), validResult("correction", raw.toString(), 0));
+        var requests = requests("enum-escaping");
+        new AcpxAgentResultAcquirer(transport).acquire("codex", requests.initial(), requests.correction(),
+                correctionPrompt(node, "run-1"), "ws-test", "run-1", ContractRegistry.forNode(node));
+        var prompt = Files.readString(requests.correction().promptPath());
+        assertTrue(prompt.contains("actual value: " + mapper.writeValueAsString(value)));
+        assertFalse(prompt.contains("\n- kind: ACCEPTED"));
+        assertEquals(2, transport.calls);
+    }
+
+    @Test
+    void planCorrectionRetainsFixedMethodAndDetailResponsibilitiesWithoutExtraAttempts() throws Exception {
+        var valid = strictEnvelope("plan.claude_plan", "run-1");
+        var malformed = "NON_JSON_PREFIX " + valid;
+        for (var second : List.of(valid, malformed)) {
+            var transport = new ScriptedTransport(validResult("request-1", malformed, 0),
+                    validResult("request-2", second, 0));
+            var requests = requests("plan-method-correction");
+            var acquisition = new AcpxAgentResultAcquirer(transport).acquire("claude",
+                    requests.initial(), requests.correction(), correctionPrompt("plan.claude_plan", "run-1"),
+                    "ws-test", "run-1", ContractRegistry.forNode("plan.claude_plan"));
+            var prompt = Files.readString(requests.correction().promptPath());
+            assertTrue(prompt.contains("copy its `method` exactly as the decoded JSON string"));
+            assertTrue(prompt.contains("in `plan.validation_plan`, labeled with approved criterion IDs"));
+            assertTrue(prompt.contains("never weaken a required exit check"));
+            assertTrue(prompt.contains("This is the only contract-correction attempt"));
+            assertEquals(second.equals(valid), acquisition.finalParse().valid());
+            assertEquals(2, transport.calls);
+        }
+    }
+
+    @Test
+    void unknownRevisionResponseFieldReachesOnlyOneCorrectionWithExactLegalKeys() throws Exception {
+        var complete = strictEnvelope("intake.claude_brainstorm", "run-1");
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(complete);
+        var response = ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.path("result"))
+                .putArray("revision_responses").addObject();
+        response.put("review_obligation_id", "CO-1");
+        response.putArray("resolved_by_clause_ids").add("AC-1");
+        response.put("response", "UNSUPPORTED_VALUE_MUST_NOT_BE_COPIED");
+        var invalid = mapper.writeValueAsString(envelope);
+        response.remove("response");
+        var valid = mapper.writeValueAsString(envelope);
+        for (var second : java.util.List.of(valid, invalid)) {
+            var transport = new ScriptedTransport(validResult("request-1", invalid, 0),
+                    validResult("request-2", second, 0));
+            var requests = requests("closed-revision-session");
+            var context = new dev.dual.runtime.handler.AgentResultPromptContract.ProposalEmissionContext(
+                    dev.dual.runtime.handler.AgentResultPromptContract.EmissionMode.REVISION_PATCH,
+                    "base", "a".repeat(64), java.util.List.of()).withGoalReproposal(true);
+            var contract = dev.dual.runtime.handler.AgentResultPromptContract.render(
+                    "ws-test", "run-1", "intake.claude_brainstorm", "READY_FOR_PRODUCT_REVIEW",
+                    java.util.Set.of("READY_FOR_PRODUCT_REVIEW"), context);
+            var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
+                    "claude", requests.initial(), requests.correction(), contract,
+                    "ws-test", "run-1", ContractRegistry.forNode("intake.claude_brainstorm"));
+            assertFalse(acquisition.initialParse().valid());
+            assertEquals("response", acquisition.initialParse().diagnostic().fieldName());
+            assertEquals(java.util.List.of("resolved_by_clause_ids", "review_obligation_id"),
+                    acquisition.initialParse().diagnostic().allowedFields());
+            assertEquals(second.equals(valid), acquisition.finalParse().valid());
+            assertEquals(2, transport.calls, "a second unknown key cannot buy another correction");
+            var prompt = Files.readString(requests.correction().promptPath());
+            assertTrue(prompt.contains("kind: UNKNOWN_FIELD"));
+            assertTrue(prompt.contains("unknown field: \"response\""));
+            assertTrue(prompt.contains("allowed fields in this object: [\"resolved_by_clause_ids\",\"review_obligation_id\"]"));
+            assertTrue(prompt.contains("result.revision_responses` item is a closed object"));
+            assertFalse(prompt.contains("UNSUPPORTED_VALUE_MUST_NOT_BE_COPIED"));
+            assertEquals(dev.dual.runtime.handler.AgentResultEnvelopeParser.ParseFailureKind.UNKNOWN_FIELD,
+                    acquisition.initialParse().diagnostic().kind());
+        }
+    }
+
+    @Test
     void validFirstResultDoesNotStartCorrection() throws Exception {
         var transport = new ScriptedTransport(validResult("request-1", strictEnvelope("run-1"), 0));
         var requests = requests("same-session");
@@ -751,7 +919,8 @@ class AcpxAgentResultAcquirerTest {
             var transport = new ScriptedTransport(validResult("request-1", candidate.toString(), 0));
             var requests = requests("plan-shape");
             var contract = correctionPrompt("plan.claude_plan", "run-1");
-            assertTrue(contract.contains("edit_files must contain unique canonical paths within the approved TaskContract scope"));
+            assertTrue(contract.contains("later EXECUTION approval"), "plan proposes files before exact execution approval");
+            assertFalse(contract.contains("within the approved TaskContract scope"), "GOAL is not prior file authorization");
             var acquisition = new AcpxAgentResultAcquirer(transport).acquire(
                     "claude", requests.initial(), requests.correction(), contract,
                     "ws-test", "run-1", ContractRegistry.forNode("plan.claude_plan"));
@@ -949,6 +1118,11 @@ class AcpxAgentResultAcquirerTest {
 
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+            return next(request);
+        }
+
+        @Override
+        public AcpxRunResult runCodexDesignReview(AcpxRunRequest request) throws java.io.IOException {
             return next(request);
         }
 

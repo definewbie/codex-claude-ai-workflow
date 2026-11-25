@@ -1,0 +1,1146 @@
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -556,3 +556,13 @@
+ **W03 仍未完成，B03 IN_PROGRESS / 真实运行 NO-GO。** 要在第一次外部调用前固定实际内容，需决定受支持装配。推荐固定本地安装并沿现有 installer/configure/acpx launch owner 接线，保留 Claude Code/GLM 作者与 Codex 评审；候选改变运行时的动态启动支持，未默认获批。若保留任意动态/custom 路径且维持完整保证，成本将超出原先“复用现有 resolver 输出”的预期，按既有成本止损停在决定前。没有修改生产代码、patch、安装包或用户配置，没有 native/provider 或额外 agent。
+ 
+ 候选完整工作包、transition/失败切面/兄弟入口与验证义务见报告 §4–§6。当前仅材料与具名缺口证据，不是 producer/consumer 已 ENFORCED；用户决定前不以“未知即相同”或“默认合法路径全部拒绝”完成 W03。不新增 Java 包解析器、引擎或权限平台；C/X 仍批外。后续产品改动通过当前版本单轮回归后才交 B03 合并批末评审，既有 1,631 项不证明新接线。
++
++## 16. W03 原生兼容接线与 B03 合并判断（2026-10-07）
++
++用户已明确达成共识并授权继续：环境变量/既有启动入口可用，兼容升级不因 Claude Code/Codex 版本不同或未知阻断；确有接口不兼容再处理。详设 §7.4 是当前补记，覆盖 §15 未实施的固定安装/完整原生字节冻结建议；不是无条件兼容保证，不形成版本区间白名单。Dual 自身代码/定义/批准/证据身份与受审 acpx policy 接口仍严格。两客户端分工及现有 GLM 作者不变。
++
++接线已实施：R01 固定选定入口、agent/session/canonical cwd、PATH/该角色原生路径变量及 primary/correction 请求配置；每命令启动前唯一 R owner 强制核对，released/finished/其他 executor 不获新的发送资格。transport 在首次、重建及 correction prompt 前读既有 session metadata 并固定白名单摘要；会话记录 schema/身份/open/必需协议不合格阻止 prompt，形成具名 adapter_incompatible，版本未知明确保留且不拒绝。**metadata 是上次握手，不证明当前 live queue、实际启动包字节或所有未来版本兼容**；具体接口运行失败及逐项 D05 证据继续强制消费。
++
++已补正常与拒绝配对、配置环境变量的独立 JVM 观察、记录失败切面、错误身份/权限配置、释放后发送拒绝、政策失效后的合法 cancel/close；真实 handler→R01/R02→typed outcome→R03/恢复的离线序列证明原因为 adapter_incompatible、零 prompt、冷恢复零新命令。自查修复两项兄弟缺陷：完成写入覆盖 native command 诊断、pre-prompt 失败引用不存在的 transcript。完整 transition/增量/验证与局限见 [当前检查点](../../output/lifecycle-batch-03-20260930/compatibility-20261007/checkpoint.md)，以其 verification.json 为最终单轮结果，不借旧绿灯。
++
++B03 仍 IN_PROGRESS，已实施部分交合并批末独立判断；W03/W04/W05/W08 等不随本切片关闭。真实 provider/原生能力、完整 D04 C/X、目标 Git 交付及最终 Gate 仍未证明或属批外，真实 NO-GO 不变。没有原生/client/provider 运行、提交或额外 agent。原生字节/任意配置全量测量已随用户决定撤出当前义务，不作为隐性收口前置；新发现真实不兼容再定位，成本收益偏离仍先止损。
+--- before/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ after/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -325,6 +325,18 @@
+ 
+ 在完整并发反证通过前沿用 R3 临时约束：同 JVM 只允许一个可推进 workstream，路由与 close 串行；不能仅在 Gate 写一句。若实际装配包含另一个直接访问 holder 的使用者/独立 classloader，局部 static lock 不足，需拒绝该部署拓扑或另行比较方案。当前未实测拓扑，不宣布约束已 ENFORCED。保留默认 LiteFlow，不以切 builtin 掩盖缺陷；同一信号的两 kernel 路由等价及异常清理必须有对照。
+ 
++### 7.4 2026-10-07 用户决定：原生兼容性与 Dual 冻结身份分开
++
++用户同意继续沿环境变量/既有 acpx 入口使用 Claude Code（现有 GLM 后端）与 Codex，不要求永久固定原生版本；兼容升级不因版本标签或安装内容变化拒绝。该决定覆盖此前“必须在任何调用前证明完整原生安装字节”的未实施要求与主清单 §15 的固定安装建议。Dual binary/definition/schema、业务批准/epoch/材料 SHA 仍严格，受审 acpx policy 接口声明与实际 build-info 核验不因此取消。不宣称任何具体版本区间已获运行证明。
++
++接线复用 R01/每命令 intent/result/R03：transport 程序生成 invocation（acpx 入口、agent、canonical cwd、session、PATH 及该角色的原生路径环境变量），R01 固定 invocation 和 primary/correction 的请求配置。每个命令 intent 由既有 R owner 核对后落盘，再允许命令启动；入口选择从冻结 Dual runtimeBehavior 移到该执行准备，不放入全局版本白名单。新准备可用新入口，旧 UNKNOWN 不借新入口自动重发。已释放/已结束/别的 executor 不获新的普通发送资格；精确 cancel/close 仍可记录，但不授 prompt 权限。
++
++首次 prompt、重建后 prompt、correction 前，transport 读取既有 `--format json <agent> sessions show <name>`。只固定白名单摘要，核对当前 schema、会话/工作区及 open 状态、record/session identity 和必需 ACP 协议1；可选能力未声明不推定支持，也不无条件全部要求。版本有程序来源才记录，否则明确 UNKNOWN；版本未知或不同本身不拒绝。该摘要是最近持久化的握手，**不是 live queue 或升级后实际引擎内容证明**，具体运行失败和逐项 D05 证据继续由原消费者判断。
++
++元数据命令失败是 session bootstrap failure；结构化不兼容是 `ADAPTER_INCOMPATIBLE`，由唯一 outcome/RecoveryAssessment 保留原因，不改写成模型无 JSON。记录写失败不启动后继命令；预 prompt 失败仅引用实际存在的诊断文件，不虚构 transcript。已确认 R03 只补本地，不重新探测/provider 调用；停止旧执行核对 R01 原入口/会话，不明仍走原 D07 裁定。
++
++完整写序、失败切面与合法/拒绝/冷恢复义务见 [本次 transition 计划](../../output/lifecycle-batch-03-20260930/compatibility-20261007/transition-plan.md)。不新增包解析器、installer、配置注册表或兼容性矩阵。C/X 完整桥接仍批外；此补记与 B03 合并评审，不额外开材料轮次。原生协议模拟不等于真实客户端兼容证明，零 native/provider 的边界不变。
++
+ ## 8. D04：复用原生权限与可靠接通审批、拒绝和续作
+ 
+ **当前规范以 §8.25 为准。** 用户确认 Dual 应专注研发编排，继续扩展成安全沙箱 ROI 过低。§8.1–§8.24 保留历史方案、来源及实验事实；其中“原生不可绕过/模型绝对不可写 control”证明和继续硬链接实验的要求已撤出当前冻结前置，不得凭旧表重新加回。§8.21 的内部委派责任、已有审批与恢复义务继续按 §8.25 保留。
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+@@ -26,6 +26,7 @@
+ public final class AcpxAgentTaskHandler implements TaskHandler {
+     private final AcpxAgentResultAcquirer resultAcquirer;
+     private final boolean prepareOnly;
++    private final AcpxAgentTransport transport;
+     private final AgentRunMetadataWriter metadataWriter;
+     private final AcpxUsageReader usageReader;
+     // Closes a started execution that never reached the completion finalizer. This is the same
+@@ -51,6 +52,7 @@
+             throw new IllegalArgumentException("usageReader is required");
+         }
+         this.resultAcquirer = new AcpxAgentResultAcquirer(transport);
++        this.transport = transport;
+         this.prepareOnly = prepareOnly;
+         this.metadataWriter = new AgentRunMetadataWriter();
+         this.usageReader = usageReader;
+@@ -337,11 +339,16 @@
+             preparedBinding.put("run", new com.fasterxml.jackson.databind.ObjectMapper().readTree(runDir.resolve("run.json").toFile()));
+             preparedBinding.put("contract_ref", governanceContext.taskContractRef());
+             preparedBinding.put("contract_sha256", governanceContext.taskContractSha256());
++            preparedBinding.put("native_invocation", transport.invocationInputs(agent, context.workspaceRoot(), session));
++            preparedBinding.put("allowed_request_options", List.of(
++                    transport.requestOptions(agent, context.workspaceRoot(), effectivePermissionProfile, executionPolicy),
++                    transport.requestOptions(agent, context.workspaceRoot(), AcpxPermissionProfile.contractCorrection(), executionPolicy)));
+             if (verificationSource != null) preparedBinding.put("verification_source", verificationSource);
+             var preparedRun = dev.dual.runtime.handler.AgentRunCommitProtocol.prepare(context, runDir,
+                     List.of(promptPath, PromptManifestWriter.manifestPathFor(promptPath),
+                             context.workspaceRoot().resolve(governanceContext.repositoryFactBinding().ref())),
+                     preparedBinding);
++            var commandEvents = new ArrayList<AcpxExecutionEvent>();
+             var request = new AcpxRunRequest(
+                     context.workspaceRoot(),
+                     session,
+@@ -352,6 +359,8 @@
+                     event -> {
+                         try { dev.dual.runtime.handler.AgentRunCommitProtocol.commandEvent(context, preparedRun, event.kind().wireName(), event.details()); }
+                         catch (java.io.IOException failure) { throw new java.io.UncheckedIOException(failure); }
++                        if (event.kind() == dev.dual.core.execution.AgentExecutionTimelineEventKind.COMMAND_INTENT
++                                || event.kind() == dev.dual.core.execution.AgentExecutionTimelineEventKind.COMMAND_RESULT) commandEvents.add(event);
+                         metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event);
+                     },
+                     executionPolicy
+@@ -366,6 +375,8 @@
+                     event -> {
+                         try { dev.dual.runtime.handler.AgentRunCommitProtocol.commandEvent(context, preparedRun, event.kind().wireName(), event.details()); }
+                         catch (java.io.IOException failure) { throw new java.io.UncheckedIOException(failure); }
++                        if (event.kind() == dev.dual.core.execution.AgentExecutionTimelineEventKind.COMMAND_INTENT
++                                || event.kind() == dev.dual.core.execution.AgentExecutionTimelineEventKind.COMMAND_RESULT) commandEvents.add(event);
+                         metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event);
+                     },
+                     executionPolicy
+@@ -396,6 +407,8 @@
+                 );
+                 var finalResult = acquisition.finalResult();
+                 var runTimeline = new ArrayList<>(acquisition.executionTimeline());
++                runTimeline.addAll(commandEvents);
++                runTimeline.sort(java.util.Comparator.comparing(AcpxExecutionEvent::observedAt));
+                 var initialUsage = usageFor(agent, acquisition.initialResult(), promptPath, stderrPath);
+                 var correctionUsage = acquisition.correctionAttempted()
+                         ? usageFor(agent, acquisition.correctionResult(), correctionPromptPath, correctionStderrPath)
+@@ -747,8 +760,9 @@
+             String repositoryFactBindingRef
+     ) {
+         var refs = new java.util.ArrayList<String>();
+-        refs.add(context.workspaceRoot().relativize(stderrPath).toString());
+-        refs.add(context.workspaceRoot().relativize(transcriptPath).toString());
++        // A session/compatibility failure can precede the prompt process. Do not invent transcript evidence.
++        if (Files.isRegularFile(stderrPath)) refs.add(context.workspaceRoot().relativize(stderrPath).toString());
++        if (Files.isRegularFile(transcriptPath)) refs.add(context.workspaceRoot().relativize(transcriptPath).toString());
+         if (Files.exists(outputPath)) {
+             refs.add(context.workspaceRoot().relativize(outputPath).toString());
+         }
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java
+@@ -219,7 +219,7 @@
+             return null;
+         }
+         var command = List.of(acpxExecutable, "build-info", "--json");
+-        var result = observedSessionCommand(request, command, "build_identity", false, false, sessionCommandTimeout);
++        var result = observedSessionCommand(agent, request, command, "build_identity", false, false, sessionCommandTimeout);
+         if (!result.success()) {
+             return result.withOutput("NETWORK_AUTHORITY_NOT_CONFIGURED: patched acpx build-info is unavailable"
+                     + (result.output().isBlank() ? "" : " - " + result.output()));
+@@ -243,29 +243,76 @@
+     }
+ 
+     private AcpxRunResult run(String agent, AcpxRunRequest request) throws IOException, InterruptedException {
++        var compatibilityFailure = sessionCompatibilityFailure(agent, request);
++        if (compatibilityFailure != null) return compatibilityFailure;
+         var command = new ArrayList<String>();
+         command.add(acpxExecutable);
+         if (!commandTimeout.isZero()) { command.add("--timeout"); command.add(Long.toString(commandTimeout.toSeconds())); }
+         command.add("--ttl"); command.add(Long.toString(queueTtl.toSeconds()));
+         addPermissionArguments(command, request); addExecutionPolicyArguments(command, agent, request);
+         command.addAll(List.of(agent, "-s", request.sessionName(), "-f", request.promptPath().toString()));
+-        var intent = commandIntent(request, command, "prompt", false);
++        var intent = commandIntent(agent, request, command, "prompt", false);
+         var result = runPrompt(agent, request, command);
+         commandResult(request, intent, Map.of("exit_code", result.exitCode(), "process", result.processResult(),
+                 "prompt_completion", result.promptCompletion()));
+         return result;
+     }
+ 
++    /** Fix configured inputs, without interpreting npm/config or pinning native versions. */
++    Map<String, Object> invocationInputs(String agent, Path workdir, String session) throws IOException {
++        var environment = new java.util.TreeMap<String, String>();
++        for (var key : List.of("PATH", agent.equals("claude") ? "CLAUDE_CODE_EXECUTABLE" : "CODEX_PATH"))
++            environment.put(key, System.getenv(key) == null ? "" : System.getenv(key));
++        return Map.of("schema", "dual.acpx.invocation.v1", "executable", acpxExecutable,
++                "agent", agent, "cwd", workdir.toRealPath().toString(), "session", session,
++                "launch_environment", environment);
++    }
++
++    private List<String> requestOptions(String agent, AcpxRunRequest request) throws IOException {
++        var args = new ArrayList<String>();
++        addPermissionArguments(args, request); addExecutionPolicyArguments(args, agent, request);
++        return List.copyOf(args);
++    }
++
++    List<String> requestOptions(String agent, Path workdir, AcpxPermissionProfile profile, ClaudeExecutionPolicy.Binding policy) throws IOException {
++        return requestOptions(agent, new AcpxRunRequest(workdir, "unused", Path.of("unused"),
++                Path.of("unused"), Path.of("unused"), profile, null, policy));
++    }
++
++    private AcpxRunResult sessionCompatibilityFailure(String agent, AcpxRunRequest request) throws IOException, InterruptedException {
++        var command = List.of(acpxExecutable, "--format", "json", agent, "sessions", "show", request.sessionName());
++        var intent = commandIntent(agent, request, command, "session_compatibility", false);
++        var result = runSessionCommand(command, request.workdir(), false, sessionCommandTimeout);
++        if (!result.success()) {
++            var summary = Map.<String, Object>of("available", false, "source", "acpx.sessions.show");
++            commandResult(request, intent, Map.of("success", false, "timed_out", result.timedOut(),
++                    "exit_code", result.exitCode(), "session_metadata", summary));
++            var failure = result.withOutput("session metadata command failed; inspect the recorded command status");
++            appendSessionCommandFailure(request.stderrPath(), "compatibility", agent, request.sessionName(), failure);
++            return failure.toRunResult();
++        }
++        var assessment = AcpxSessionCompatibility.assess(result.output(), request.workdir(), request.sessionName());
++        commandResult(request, intent, Map.of("success", true, "timed_out", false, "exit_code", 0,
++                "session_metadata", assessment.observation()));
++        if (assessment.compatible()) return null;
++        var failure = result.asFailure(OBJECT_MAPPER.writeValueAsString(assessment.observation()));
++        appendSessionCommandFailure(request.stderrPath(), "compatibility", agent, request.sessionName(), failure);
++        return failure.toRunResult(AdapterSignalType.ADAPTER_INCOMPATIBLE);
++    }
++
+     private static String contentHash(byte[] bytes) {
+         try { return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes)); }
+         catch (java.security.NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
+     }
+ 
+-    private Map<String, Object> commandIntent(AcpxRunRequest request, List<String> command, String purpose, boolean cleanup) throws IOException {
++    private Map<String, Object> commandIntent(String agent, AcpxRunRequest request, List<String> command, String purpose, boolean cleanup) throws IOException {
+         var details = new java.util.LinkedHashMap<String, Object>();
+         details.put("command_id", java.util.UUID.randomUUID().toString());
+         details.put("purpose", purpose); details.put("cleanup", cleanup);
+         details.put("command", List.copyOf(command)); details.put("session", request.sessionName());
++        details.put("invocation", invocationInputs(agent, request.workdir(), request.sessionName()));
++        // Cancelling the original session grants no execution authority. Invalidated policy must not prevent cleanup.
++        details.put("request_options", cleanup ? List.of() : requestOptions(agent, request));
+         if (purpose.equals("prompt")) {
+             details.put("prompt", request.promptPath().toString());
+             details.put("prompt_sha256", contentHash(Files.readAllBytes(request.promptPath())));
+@@ -281,10 +328,10 @@
+                 "adapter", 0, Instant.now(), details));
+     }
+ 
+-    private SessionCommandResult observedSessionCommand(AcpxRunRequest request, List<String> command, String purpose,
++    private SessionCommandResult observedSessionCommand(String agent, AcpxRunRequest request, List<String> command, String purpose,
+                                                         boolean cleanup, boolean simple, Duration timeout) throws InterruptedException {
+         final Map<String, Object> intent;
+-        try { intent = commandIntent(request, command, purpose, cleanup); }
++        try { intent = commandIntent(agent, request, command, purpose, cleanup); }
+         catch (IOException failure) { throw new java.io.UncheckedIOException(failure); }
+         var result = runSessionCommand(command, request.workdir(), simple, timeout);
+         commandResult(request, intent, Map.of("success", result.success(), "timed_out", result.timedOut(),
+@@ -617,7 +664,7 @@
+         command.add(request.permissionProfile().requiresFreshSession() ? "new" : "ensure");
+         command.add("--name");
+         command.add(request.sessionName());
+-        var result = observedSessionCommand(request, command, "session_ensure", false, request.permissionProfile().simpleClaudeCode(), sessionCommandTimeout);
++        var result = observedSessionCommand(agent, request, command, "session_ensure", false, request.permissionProfile().simpleClaudeCode(), sessionCommandTimeout);
+         if (result.success()) {
+             return result;
+         }
+@@ -640,7 +687,7 @@
+ 
+     private SessionCommandResult closeSession(String agent, AcpxRunRequest request) throws InterruptedException {
+         var command = List.of(acpxExecutable, agent, "sessions", "close", request.sessionName());
+-        var result = observedSessionCommand(request, command, "session_close", true, false, sessionCommandTimeout);
++        var result = observedSessionCommand(agent, request, command, "session_close", true, false, sessionCommandTimeout);
+         if (!result.success()) {
+             appendSessionCommandFailure(
+                     request.stderrPath(),
+@@ -957,13 +1004,13 @@
+     }
+ 
+     private SessionClosureResult quiesceSession(String agent, AcpxRunRequest request) throws InterruptedException {
+-        var cancel = observedSessionCommand(request,
++        var cancel = observedSessionCommand(agent, request,
+                 List.of(acpxExecutable, agent, "cancel", "-s", request.sessionName()),
+                 "session_cancel", true, false, closureCommandTimeout());
+         if (cancel.success()) {
+             return new SessionClosureResult(SessionClosureDisposition.CANCELLED, cancel, null);
+         }
+-        var close = observedSessionCommand(request,
++        var close = observedSessionCommand(agent, request,
+                 List.of(acpxExecutable, agent, "sessions", "close", request.sessionName()),
+                 "session_close", true, false, closureCommandTimeout());
+         return new SessionClosureResult(
+@@ -1195,8 +1242,12 @@
+         }
+ 
+         AcpxRunResult toRunResult() {
++            return toRunResult(AdapterSignalType.SESSION_BOOTSTRAP_FAILED);
++        }
++
++        AcpxRunResult toRunResult(AdapterSignalType type) {
+             var signal = new AdapterSignal(
+-                    AdapterSignalType.SESSION_BOOTSTRAP_FAILED,
++                    type,
+                     output,
+                     0,
+                     "session_command",
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java
+@@ -0,0 +1,60 @@
++package dev.dual.adapter.acpx;
++
++import com.fasterxml.jackson.databind.JsonNode;
++import com.fasterxml.jackson.databind.ObjectMapper;
++import java.nio.file.Path;
++import java.util.*;
++
++/** Last recorded ACP handshake, not proof of current engine bytes or arbitrary tool capability. */
++final class AcpxSessionCompatibility {
++    private static final ObjectMapper JSON = new ObjectMapper();
++    record Assessment(boolean compatible, Map<String, Object> observation) {}
++
++    static Assessment assess(String output, Path cwd, String session) {
++        var fact = new LinkedHashMap<String, Object>();
++        fact.put("source", "acpx.sessions.show");
++        fact.put("native_version", "UNKNOWN");
++        String failure = "invalid session metadata";
++        try {
++            var doc = JSON.readTree(output);
++            if (doc == null || !doc.isObject()) throw new IllegalArgumentException(failure);
++            for (var key : List.of("schema", "acpxRecordId", "acpSessionId", "agentSessionId", "cwd", "name")) {
++                var field = doc.path(key);
++                if (field.isTextual()) fact.put(key, field.asText());
++            }
++            if (doc.path("protocolVersion").isIntegralNumber()) fact.put("protocolVersion", doc.path("protocolVersion").intValue());
++            fact.put("closed", doc.path("closed").asBoolean(false));
++            var version = doc.path("agentInfo").path("version");
++            if (version.isTextual() && !version.asText().isBlank() && version.asText().length() <= 120)
++                fact.put("native_version", version.asText());
++            var capabilities = new LinkedHashMap<String, Object>();
++            var caps = doc.path("agentCapabilities");
++            if (caps.path("loadSession").isBoolean()) capabilities.put("loadSession", caps.path("loadSession").booleanValue());
++            var prompt = new LinkedHashMap<String, Object>();
++            for (var key : List.of("image", "audio", "embeddedContext"))
++                if (caps.path("promptCapabilities").path(key).isBoolean())
++                    prompt.put(key, caps.path("promptCapabilities").path(key).booleanValue());
++            capabilities.put("promptCapabilities", prompt);
++            fact.put("agentCapabilities", capabilities);
++            failure = failure(doc, cwd, session);
++        } catch (Exception invalid) {
++            // Never retain the full record: it may contain chat history, config or credentials.
++        }
++        fact.put("compatible", failure == null);
++        if (failure != null) fact.put("failure", failure);
++        return new Assessment(failure == null, Collections.unmodifiableMap(fact));
++    }
++
++    private static String failure(JsonNode doc, Path cwd, String session) throws Exception {
++        if (!"acpx.session.v1".equals(doc.path("schema").asText())) return "unsupported acpx session metadata schema";
++        for (var key : List.of("acpxRecordId", "acpSessionId", "agentSessionId"))
++            if (!doc.path(key).isTextual() || doc.path(key).asText().isBlank()) return "missing session identity: " + key;
++        if (!session.equals(doc.path("name").asText())) return "session name differs from invocation";
++        if (!doc.path("cwd").isTextual() || !Path.of(doc.path("cwd").asText()).toRealPath().equals(cwd.toRealPath()))
++            return "session workspace differs from invocation";
++        if (!doc.path("closed").isBoolean() || doc.path("closed").booleanValue()) return "session is closed or has unknown open state";
++        if (!doc.path("protocolVersion").isIntegralNumber() || doc.path("protocolVersion").intValue() != 1)
++            return "required ACP protocol version 1 is unavailable";
++        return null;
++    }
++}
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ReviewedAcpxBuildIdentity.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ReviewedAcpxBuildIdentity.java
+@@ -25,7 +25,8 @@
+         values.put("acpx.upstream", UPSTREAM_COMMIT);
+         values.put("acpx.patch", PATCH_SHA256);
+         values.put("policy.schema", POLICY_SCHEMA);
+-        for (var key : java.util.List.of("DUAL_ACPX_EXECUTABLE", "DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS",
++        // The executable selector belongs to each R01 invocation, not the frozen Dual binary.
++        for (var key : java.util.List.of("DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS",
+                 "DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS", "DUAL_ACPX_QUEUE_TTL_SECONDS",
+                 "DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS", "DUAL_ACPX_COMMAND_TIMEOUT_SECONDS", "API_TIMEOUT_MS",
+                 "DUAL_SESSION_COMPACTION_EXPERIMENT",
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
+@@ -40,6 +40,68 @@
+ 
+ class AcpxAgentTaskHandlerTest {
+     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
++
++    @org.junit.jupiter.params.ParameterizedTest
++    @org.junit.jupiter.params.provider.ValueSource(strings = {"protocol", "session_show", "session_ensure"})
++    void incompatibleNativeInterfacePersistsItsFactsAndRecoversWithoutSendingAProviderPrompt(String fault) throws Exception {
++        var ws = "ws-interface";
++        var workstream = tempDir.resolve(".agent/workstreams/" + ws);
++        Files.createDirectories(workstream);
++        Files.writeString(workstream.resolve("requirement.md"), "Clarify a small task.\n");
++        var executable = tempDir.resolve("interface-fixture.sh");
++        var build = OBJECT_MAPPER.writeValueAsString(Map.of("upstream_commit", ReviewedAcpxBuildIdentity.UPSTREAM_COMMIT,
++                "patch_sha256", ReviewedAcpxBuildIdentity.PATCH_SHA256, "policy_schema", ReviewedAcpxBuildIdentity.POLICY_SCHEMA));
++        Files.writeString(executable, "#!/bin/sh\nprintf 'command\\n' >> commands\n"
++                + "if [ \"$1\" = build-info ]; then printf '%s\\n' '" + build + "'; exit 0; fi\n"
++                + (fault.equals("session_show") ? "case \" $* \" in *' sessions show '*) exit 1;; esac\n" : fault.equals("session_ensure") ? "case \" $* \" in *' sessions ensure '*|*' sessions new '*) exit 1;; esac\n" : "")
++                + SessionMetadataFixture.RESPONSE.replace("\"protocolVersion\":1", "\"protocolVersion\":99")
++                + "case \" $* \" in *' -f '*) printf prompt >> provider-prompts;; esac\nprintf '[done] end_turn\\n'\n");
++        assertTrue(executable.toFile().setExecutable(true));
++        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
++                "agent", "claude", "session", "claude-main", "prompt_template", "intake-claude-brainstorm"));
++        var context = taskContext(tempDir, ws, definition, readyInstance(definition.id()));
++        var candidate = new AcpxAgentTaskHandler(new AcpxAgentTransport(executable.toString()), false).execute(context);
++        var commands = Files.readAllBytes(tempDir.resolve("commands"));
++        var finished = finishAndRoute(context, candidate);
++        assertEquals(NodeStatus.FAILED, finished.status());
++        var facts = OBJECT_MAPPER.valueToTree(finished.result());
++        var expectedReason = fault.equals("protocol") ? "adapter_incompatible" : "session_bootstrap_failed";
++        assertEquals(expectedReason, facts.path("agent_execution_outcome").path("primaryReason").asText());
++        assertFalse(Files.exists(tempDir.resolve("provider-prompts")));
++        assertFalse(finished.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.md")
++                || ref.endsWith(".transcript.log")), "pre-prompt failure has diagnostics, not a transcript or model candidate");
++        var run = OBJECT_MAPPER.readTree(tempDir.resolve(facts.path("run_metadata").asText()).toFile());
++        assertEquals(!fault.equals("session_ensure"), run.path("executionTimeline").toString().contains("session_compatibility"));
++        if (fault.equals("protocol")) assertTrue(run.path("executionTimeline").toString().contains("UNKNOWN"));
++        var paths = new dev.dual.ledger.file.WorkstreamPaths(tempDir, new dev.dual.core.id.DualId(ws));
++        assertEquals(dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY, context.ledger().loadCurrent(paths).status());
++        var assessment = dev.dual.ledger.file.RecoveryAssessment.from(context.ledger().loadNode(paths,
++                context.instance().nodeInstanceId()), tempDir, ws);
++        assertEquals(fault.equals("protocol") ? "agent_interface_incompatible" : "agent_session_recovery", assessment.classification());
++        assertFalse(assessment.retrySafe());
++        var child = new ProcessBuilder(Path.of(System.getProperty("java.home"), "bin/java").toString(), "-cp",
++                System.getProperty("java.class.path"), ReadNativeFailureMain.class.getName(), tempDir.toString(), ws).redirectErrorStream(true);
++        child.environment().put("DUAL_ACPX_EXECUTABLE", "/not-launched/upgraded-entry");
++        child.environment().put("CLAUDE_CODE_EXECUTABLE", "/not-launched/upgraded-native");
++        var process = child.start();
++        assertTrue(process.waitFor(30, java.util.concurrent.TimeUnit.SECONDS));
++        var observed = new String(process.getInputStream().readAllBytes());
++        assertEquals(0, process.exitValue(), observed);
++        assertEquals(expectedReason, observed.trim());
++        assertTrue(java.util.Arrays.equals(commands, Files.readAllBytes(tempDir.resolve("commands"))));
++    }
++
++    public static class ReadNativeFailureMain {
++        public static void main(String[] args) throws Exception {
++            var paths = new dev.dual.ledger.file.WorkstreamPaths(Path.of(args[0]), new dev.dual.core.id.DualId(args[1]));
++            var ledger = AcpxTestLedger.ledger();
++            var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
++            var execution = ledger.latestNodeExecution(paths, node).orElseThrow();
++            var fixed = dev.dual.runtime.handler.AgentRunCommitProtocol.readCompletion(paths, execution);
++            dev.dual.runtime.RecordedExecutionRecovery.recover(ledger, paths, execution);
++            System.out.print(new ObjectMapper().valueToTree(fixed.result()).path("agent_execution_outcome").path("primaryReason").asText());
++        }
++    }
+ 
+     @Test
+     void invalidRevisionContextStopsBeforeProviderDispatch() throws Exception {
+@@ -2074,6 +2136,7 @@
+                 .replace("__TEST_HOME__", sessionsDir.getParent().getParent().toString())
+                 .replace("__WORKDIR__", sessionsDir.getParent().getParent().toString())
+                 .replace("__STRICT_FIXTURE__", strictResultFixture.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+     }
+ 
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTransportTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTransportTest.java
+@@ -104,6 +104,7 @@
+                 if printf '%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                 exit 0
+                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("codex-prompt.md");
+@@ -132,6 +133,7 @@
+                 echo "$@" >> "__LOG__"
+                 exit 0
+                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("observe-prompt.md");
+@@ -166,6 +168,7 @@
+                 echo "$@" >> "__LOG__"
+                 exit 0
+                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("implement-prompt.md");
+@@ -201,6 +204,7 @@
+                 echo "$@" >> "__LOG__"
+                 exit 0
+                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("correction.md");
+@@ -243,6 +247,7 @@
+                 exit 0
+                 """.replace("__LOG__", invocationLog.toString())
+                         .replace("__PATCH_SHA__", ReviewedAcpxBuildIdentity.PATCH_SHA256), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
+         var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+@@ -285,6 +290,7 @@
+                 fi
+                 exit 0
+                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-unreviewed"));
+         var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-unreviewed", runDir);
+@@ -312,6 +318,7 @@
+                 echo '{"upstream_commit":"wrong","patch_sha256":"wrong","policy_schema":"wrong"}'
+                 exit 0
+                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-correction"));
+         var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-correction", runDir);
+@@ -339,6 +346,7 @@
+                 echo "$@" >> "__LOG__"
+                 exit 0
+                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var prompt = tempDir.resolve("deadline-prompt.md");
+         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+@@ -371,6 +379,7 @@
+                 done
+                 echo "ACPX_DONE"
+                 """);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var prompt = tempDir.resolve("active-prompt.md");
+         Files.writeString(prompt, "# Prompt\n");
+@@ -401,6 +410,7 @@
+                 sleep 20
+                 echo "MUST_NOT_COMPLETE"
+                 """);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var prompt = tempDir.resolve("silent-prompt.md");
+         Files.writeString(prompt, "# Prompt\n");
+@@ -422,6 +432,7 @@
+                 echo "$@" >> "__LOG__"
+                 exit 0
+                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
+         var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+@@ -470,6 +481,7 @@
+                 sleep 3
+                 exit 0
+                 """, StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -512,6 +524,7 @@
+                 sleep 20
+                 exit 0
+                 """, StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -562,6 +575,7 @@
+                 """
+                 .replace("__SESSION_ID__", sessionId)
+                 .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -618,6 +632,7 @@
+                 """
+                 .replace("__SESSION_ID__", sessionId)
+                 .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("body-words-prompt.md");
+@@ -680,6 +695,7 @@
+                 """
+                 .replace("__SESSION_ID__", sessionId)
+                 .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt-completion.md");
+@@ -724,6 +740,7 @@
+                 if printf '%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                 sleep 30
+                 """, StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var prompt = tempDir.resolve("event-failure-prompt.md");
+         var stdout = tempDir.resolve("event-failure.stdout");
+@@ -802,6 +819,7 @@
+                 .replace("__SESSION_ID__", sessionId)
+                 .replace("__STREAM__", stream.toString())
+                 .replace("__SENTINEL__", exactResponseWritten.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt-occurrence.md");
+@@ -863,6 +881,7 @@
+                 """
+                 .replace("__SESSION_ID__", sessionId)
+                 .replace("__STREAM__", stream.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var prompt = tempDir.resolve("stale-only-prompt.md");
+         var stdout = tempDir.resolve("stale-only.stdout");
+@@ -921,6 +940,7 @@
+                 .replace("__SESSION_ID__", sessionId)
+                 .replace("__SECOND_HALF_WRITTEN__", secondHalfWritten.toString())
+                 .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("typed-429-prompt.md");
+@@ -984,6 +1004,7 @@
+                 """
+                 .replace("__SESSION_ID__", sessionId)
+                 .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1056,6 +1077,7 @@
+                 """
+                 .replace("__ARGS_LOG__", argsLog.toString())
+                 .replace("__STATE__", state.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1102,6 +1124,7 @@
+                 echo "No acpx session found" >&2
+                 exit 4
+                 """.replace("__STATE__", state.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1168,6 +1191,7 @@
+                 echo "ACPX_AFTER_THINKING_RECONNECT"
+                 exit 0
+                 """.replace("__STATE__", state.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1202,6 +1226,7 @@
+                 echo "ACPX_PROBE_OK"
+                 exit 0
+                 """, StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1238,6 +1263,7 @@
+                 echo "ACPX_DONE"
+                 exit 0
+                 """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1287,6 +1313,7 @@
+                 echo '```'
+                 exit 0
+                 """.replace("__ACPX_LOG__", acpxLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1336,6 +1363,7 @@
+                 echo "ACPX_DONE"
+                 exit 0
+                 """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1372,6 +1400,7 @@
+                 echo "ACPX_DONE"
+                 exit 0
+                 """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1414,6 +1443,7 @@
+                 echo "ACPX_DONE"
+                 exit 0
+                 """, StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1462,6 +1492,7 @@
+                 sleep 3
+                 exit 0
+                 """, StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1509,6 +1540,7 @@
+                 sleep 3
+                 exit 0
+                 """, StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1549,6 +1581,7 @@
+                 done
+                 exit 0
+                 """, StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("prompt.md");
+@@ -1586,6 +1619,7 @@
+                 printf '%s\n' '{"incomplete":"candidate"}'
+                 exit 5
+                 """, StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+ 
+         var prompt = tempDir.resolve("permission-prompt.md");
+@@ -1632,6 +1666,7 @@
+                 echo "connected (%s)" >&2
+                 exit 5
+                 """.formatted(recordId), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var prompt = tempDir.resolve("historical-permission-prompt.md");
+         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+@@ -1674,6 +1709,7 @@
+                 echo "connected (%s)" >&2
+                 exit 5
+                 """.formatted(recordId), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var prompt = tempDir.resolve("missing-session-index-prompt.md");
+         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+@@ -1724,6 +1760,7 @@
+                 EOF
+                 exit 5
+                 """.formatted(commandLog, recordId, sessions.resolve(recordId + ".stream.ndjson")), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var prompt = tempDir.resolve("current-permission-prompt.md");
+         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+@@ -1781,6 +1818,7 @@
+                 echo $! > '%s'
+                 exit 5
+                 """.formatted(ownerPid, marker, ownerPid), StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var prompt = tempDir.resolve("persistent-turn-prompt.md");
+         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+@@ -1815,6 +1853,7 @@
+                   *) exit 5 ;;
+                 esac
+                 """, StandardCharsets.UTF_8);
++        SessionMetadataFixture.install(fakeAcpx);
+         assertTrue(fakeAcpx.toFile().setExecutable(true));
+         var prompt = tempDir.resolve("closure-fails-prompt.md");
+         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java
+@@ -0,0 +1,121 @@
++package dev.dual.adapter.acpx;
++
++import com.fasterxml.jackson.databind.ObjectMapper;
++import dev.dual.core.execution.AgentExecutionTimelineEventKind;
++import org.junit.jupiter.api.io.TempDir;
++import org.junit.jupiter.params.ParameterizedTest;
++import org.junit.jupiter.params.provider.ValueSource;
++import java.nio.file.*;
++import java.util.*;
++import static org.junit.jupiter.api.Assertions.*;
++
++/** Local protocol fixture, no acpx/native/provider executable is launched. */
++class AcpxCompatibilitySequenceTest {
++    @TempDir Path root;
++    private final ObjectMapper mapper = new ObjectMapper();
++
++    @org.junit.jupiter.api.Test
++    void configuredEntrypointsBelongToTheNewInvocationRatherThanTheFrozenDualBinary() throws Exception {
++        var first = configuredIdentity("/not-launched/first", "/not-launched/codex-first");
++        var next = configuredIdentity("/not-launched/next", "/not-launched/codex-next");
++        assertEquals(first.path("runtime"), next.path("runtime"));
++        assertNotEquals(first.path("invocation"), next.path("invocation"));
++        assertEquals("/not-launched/next", next.path("invocation").path("executable").asText());
++        assertEquals("/not-launched/codex-next", next.path("invocation").path("launch_environment").path("CODEX_PATH").asText());
++        assertFalse(next.path("invocation").path("launch_environment").has("CLAUDE_CODE_EXECUTABLE"));
++    }
++
++    private com.fasterxml.jackson.databind.JsonNode configuredIdentity(String executable, String nativePath) throws Exception {
++        var command = new ProcessBuilder(Path.of(System.getProperty("java.home"), "bin/java").toString(),
++                "-cp", System.getProperty("java.class.path"), IdentityMain.class.getName(), root.toString());
++        command.environment().put("DUAL_ACPX_EXECUTABLE", executable);
++        command.environment().put("CODEX_PATH", nativePath);
++        var process = command.start();
++        assertTrue(process.waitFor(30, java.util.concurrent.TimeUnit.SECONDS));
++        assertEquals(0, process.exitValue(), new String(process.getErrorStream().readAllBytes()));
++        return mapper.readTree(process.getInputStream().readAllBytes());
++    }
++
++    public static class IdentityMain {
++        public static void main(String[] args) throws Exception {
++            System.out.print(new ObjectMapper().writeValueAsString(Map.of("runtime", ReviewedAcpxBuildIdentity.runtimeBehavior(),
++                    "invocation", new AcpxAgentTransport().invocationInputs("codex", Path.of(args[0]), "same-session"))));
++        }
++    }
++
++    @ParameterizedTest @ValueSource(strings = {"claude", "codex"})
++    void compatibleUpgradeAndUnknownVersionKeepPrimaryAndCorrectionReachable(String agent) throws Exception {
++        var events = new ArrayList<AcpxExecutionEvent>();
++        var transport = transport();
++        for (var version : List.of("old-release", "future-release", "UNKNOWN")) {
++            var metadata = metadata();
++            if (!version.equals("UNKNOWN")) metadata.put("agentInfo", Map.of("version", version));
++            metadata.put("messages", List.of("secret-history"));
++            metadata.put("acpx", Map.of("env", Map.of("TOKEN", "do-not-save")));
++            write(metadata);
++            var request = request(events::add);
++            run(transport, agent, request);
++            transport.runAgentResultCorrection(agent, request);
++        }
++        assertEquals(6, Files.readAllLines(root.resolve("prompts")).size());
++        var observed = events.stream().filter(e -> e.kind() == AgentExecutionTimelineEventKind.COMMAND_RESULT
++                && e.details().get("purpose").equals("session_compatibility")).toList();
++        assertEquals(6, observed.size());
++        assertFalse(mapper.writeValueAsString(observed.stream().map(AcpxExecutionEvent::details).toList()).contains("secret-history"));
++        assertFalse(mapper.writeValueAsString(observed.stream().map(AcpxExecutionEvent::details).toList()).contains("do-not-save"));
++    }
++
++    @ParameterizedTest @ValueSource(strings = {"protocol_missing", "protocol_unsupported", "session", "cwd", "closed", "record_id"})
++    void incompatibleSessionBlocksBothPromptEntrypointsBeforeTheirSideEffects(String fault) throws Exception {
++        var metadata = metadata();
++        switch (fault) {
++            case "protocol_missing" -> metadata.remove("protocolVersion");
++            case "protocol_unsupported" -> metadata.put("protocolVersion", 99);
++            case "session" -> metadata.put("name", "another-session");
++            case "cwd" -> metadata.put("cwd", root.resolve("another-workstream").toString());
++            case "closed" -> metadata.put("closed", true);
++            case "record_id" -> metadata.remove("acpxRecordId");
++        }
++        write(metadata);
++        var transport = transport();
++        var first = run(transport, "codex", request(event -> {}));
++        var correction = transport.runAgentResultCorrection("codex", request(event -> {}));
++        for (var result : List.of(first, correction))
++            assertTrue(result.adapterSignals().stream().anyMatch(s -> s.type().name().equals("ADAPTER_INCOMPATIBLE")));
++        assertFalse(Files.exists(root.resolve("prompts")));
++    }
++
++    @ParameterizedTest @ValueSource(strings = {"intent", "result"})
++    void compatibilityRecordWriteFailureNeverAdvancesToPrompt(String cut) throws Exception {
++        write(metadata());
++        var transport = transport();
++        var request = request(event -> {
++            if (event.details().get("purpose").equals("session_compatibility")
++                    && event.kind() == (cut.equals("intent") ? AgentExecutionTimelineEventKind.COMMAND_INTENT
++                    : AgentExecutionTimelineEventKind.COMMAND_RESULT)) throw new IllegalStateException("persistence cut");
++        });
++        assertThrows(RuntimeException.class, () -> run(transport, "claude", request));
++        assertFalse(Files.exists(root.resolve("prompts")));
++        assertEquals(!cut.equals("intent"), Files.exists(root.resolve("reads")));
++    }
++
++    private Map<String, Object> metadata() {
++        return new LinkedHashMap<>(Map.of("schema", "acpx.session.v1", "acpxRecordId", "record-one",
++                "acpSessionId", "native-one", "agentSessionId", "native-one", "cwd", root.toString(),
++                "name", "exact-session", "closed", false, "protocolVersion", 1, "agentCapabilities", Map.of()));
++    }
++    private void write(Map<String, Object> metadata) throws Exception { mapper.writeValue(root.resolve("session.json").toFile(), metadata); }
++    private AcpxRunRequest request(AcpxExecutionEventSink sink) throws Exception {
++        var prompt = root.resolve("prompt.md"); Files.writeString(prompt, "fixture prompt");
++        return new AcpxRunRequest(root, "exact-session", prompt, root.resolve("stdout"), root.resolve("stderr"), AcpxPermissionProfile.implement(), sink);
++    }
++    private AcpxRunResult run(AcpxAgentTransport transport, String agent, AcpxRunRequest request) throws Exception {
++        return agent.equals("claude") ? transport.runClaudeDesign(request) : transport.runCodexDesignReview(request);
++    }
++    private AcpxAgentTransport transport() throws Exception {
++        var executable = root.resolve("fixture.sh");
++        Files.writeString(executable, "#!/bin/sh\ncase \" $* \" in\n*' sessions show '*) printf read >> reads; cat session.json; exit 0;;\n*' -f '*) printf 'prompt\\n' >> prompts;;\nesac\nprintf '[done] end_turn\\n'\n");
++        assertTrue(executable.toFile().setExecutable(true));
++        return new AcpxAgentTransport(executable.toString());
++    }
++}
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxNativeCommandSequenceTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxNativeCommandSequenceTest.java
+@@ -28,7 +28,7 @@
+         assertTrue(transport.stopRecordedSession(agent, request));
+         var intents = events.stream().filter(e -> e.kind() == AgentExecutionTimelineEventKind.COMMAND_INTENT).toList();
+         var results = events.stream().filter(e -> e.kind() == AgentExecutionTimelineEventKind.COMMAND_RESULT).toList();
+-        assertEquals(List.of("session_ensure", "prompt", "session_cancel", "session_close", "session_cancel", "session_close"),
++        assertEquals(List.of("session_ensure", "session_compatibility", "prompt", "session_cancel", "session_close", "session_cancel", "session_close"),
+                 intents.stream().map(e -> e.details().get("purpose")).toList());
+         assertEquals(intents.size(), results.size());
+         assertEquals(intents.stream().map(e -> e.details().get("command_id")).toList(), Files.readAllLines(root.resolve("executed")));
+@@ -62,9 +62,31 @@
+         var prompt = root.resolve("prompt.md"); Files.writeString(prompt, "Fixture prompt");
+         return new AcpxRunRequest(root, "exact-session", prompt, root.resolve("stdout"), root.resolve("stderr"), AcpxPermissionProfile.implement(), sink);
+     }
++
++    @ParameterizedTest @ValueSource(booleans = {false, true})
++    void revokingPolicyStopsProgressButDoesNotBlockExactSessionCleanup(boolean corrupted) throws Exception {
++        var policy = ClaudeExecutionPolicy.write(root, "ws", "node", "run", Files.createDirectories(root.resolve("run")));
++        if (corrupted) Files.writeString(root.resolve(policy.ref()), "revoked policy");
++        var events = new ArrayList<AcpxExecutionEvent>();
++        var initial = request(event -> {
++            events.add(event);
++            if (event.kind() == AgentExecutionTimelineEventKind.COMMAND_INTENT) {
++                try { Files.writeString(root.resolve("intent"), String.valueOf(event.details().get("command_id"))); }
++                catch (java.io.IOException failure) { throw new java.io.UncheckedIOException(failure); }
++            }
++        });
++        var bound = new AcpxRunRequest(root, initial.sessionName(), initial.promptPath(), initial.stdoutPath(), initial.stderrPath(),
++                initial.permissionProfile(), initial.executionEventSink(), policy);
++        assertTrue(new AcpxAgentTransport(executable().toString()).stopRecordedSession("claude", bound));
++        assertEquals(List.of("session_cancel", "session_close"), events.stream()
++                .filter(e -> e.kind() == AgentExecutionTimelineEventKind.COMMAND_INTENT).map(e -> e.details().get("purpose")).toList());
++        assertTrue(events.stream().allMatch(e -> Boolean.TRUE.equals(e.details().get("cleanup"))
++                && List.of().equals(e.details().get("request_options"))));
++    }
+     private Path executable() throws Exception {
+         var script = root.resolve("fixture.sh");
+         Files.writeString(script, "#!/bin/sh\n[ -s intent ] || exit 93\ncat intent >> executed\nprintf '\\n' >> executed\nrm intent\nfor arg in \"$@\"; do [ \"$arg\" = cancel ] && exit 1; done\nprintf '[done] end_turn\\n'\nexit 0\n");
++        Files.writeString(script, Files.readString(script).replace("for arg in", SessionMetadataFixture.RESPONSE + "for arg in"));
+         assertTrue(script.toFile().setExecutable(true)); return script;
+     }
+ }
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/SessionMetadataFixture.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/SessionMetadataFixture.java
+@@ -0,0 +1,22 @@
++package dev.dual.adapter.acpx;
++
++import java.nio.file.Files;
++import java.nio.file.Path;
++
++/** Explicit synthetic sessions-show response for legacy shell fixtures; not native capability proof. */
++final class SessionMetadataFixture {
++    static final String RESPONSE = """
++            case " $* " in
++              *' sessions show '*)
++                for arg in "$@"; do session="$arg"; done
++                printf '{"schema":"acpx.session.v1","acpxRecordId":"fixture-record","acpSessionId":"fixture-native","agentSessionId":"fixture-native","cwd":"%s","name":"%s","closed":false,"protocolVersion":1,"agentCapabilities":{}}\\n' "$PWD" "$session"
++                exit 0;;
++            esac
++            """;
++
++    static void install(Path executable) throws Exception {
++        var script = Files.readString(executable);
++        int firstLine = script.indexOf('\n') + 1;
++        Files.writeString(executable, script.substring(0, firstLine) + RESPONSE + script.substring(firstLine));
++    }
++}
+--- before/dual-core/src/main/java/dev/dual/core/execution/AdapterSignalType.java
++++ after/dual-core/src/main/java/dev/dual/core/execution/AdapterSignalType.java
+@@ -4,6 +4,7 @@
+     AGENT_RECONNECT_REQUIRED(AdapterSignalSeverity.RECOVERABLE),
+     MODEL_MISMATCH(AdapterSignalSeverity.RECOVERABLE),
+     SESSION_BOOTSTRAP_FAILED(AdapterSignalSeverity.RECOVERABLE),
++    ADAPTER_INCOMPATIBLE(AdapterSignalSeverity.BLOCKING),
+     SESSION_RESUME_FAILED(AdapterSignalSeverity.RECOVERABLE),
+     SESSION_RECREATED(AdapterSignalSeverity.INFO),
+     AUTH_FAILED(AdapterSignalSeverity.BLOCKING),
+--- before/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java
++++ after/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java
+@@ -387,6 +387,7 @@
+ 
+     private static String adapterClassification(String primaryReason) {
+         return switch (primaryReason) {
++            case "adapter_incompatible" -> "agent_interface_incompatible";
+             case "auth_failed" -> "agent_auth_failed";
+             case "permission_blocked" -> "agent_permission_blocked";
+             case "provider_connection_failed" -> "provider_connection_failed";
+@@ -399,6 +400,7 @@
+ 
+     private static String adapterRetryReadiness(String primaryReason) {
+         return switch (primaryReason) {
++            case "adapter_incompatible" -> "FIX_AGENT_INTERFACE_THEN_RETRY";
+             case "auth_failed" -> "FIX_AGENT_AUTH_THEN_RETRY";
+             case "rate_limited" -> "WAIT_THEN_RETRY";
+             case "provider_connection_failed" -> "WAIT_OR_FIX_PROVIDER_CONNECTION_THEN_RETRY";
+@@ -432,6 +434,7 @@
+             String retry
+     ) {
+         return switch (primaryReason) {
++            case "adapter_incompatible" -> retry + "  # only after fixing the recorded protocol/session mismatch; never resend an unknown call";
+             case "agent_reconnect_required" ->
+                     "acpx " + agent + " sessions close " + session
+                             + " && acpx " + agent + " sessions new --name " + session
+--- before/dual-ledger-file/src/test/java/dev/dual/ledger/file/RecoveryAssessmentTest.java
++++ after/dual-ledger-file/src/test/java/dev/dual/ledger/file/RecoveryAssessmentTest.java
+@@ -313,6 +313,20 @@
+     }
+ 
+     @Test
++    void interfaceMismatchPreservesItsReasonAndRequiresManualCompatibilityRepair() {
++        var assessment = RecoveryAssessment.from(failedAcpxNode(Map.of(
++                "agent_execution_outcome", Map.of("status", "RECOVERABLE_ADAPTER_FAILURE",
++                        "primaryReason", "adapter_incompatible", "recoveryCategory", "RECOVERABLE_ADAPTER_FAILURE",
++                        "retryPolicy", "MANUAL_ONLY", "operatorMessage", "required ACP protocol version 1 is unavailable")
++        )), tempDir, "ws-recovery");
++        assertEquals("agent_interface_incompatible", assessment.classification());
++        assertEquals("FIX_AGENT_INTERFACE_THEN_RETRY", assessment.retryReadiness());
++        assertFalse(assessment.retrySafe());
++        assertTrue(assessment.suggestedCommand().contains("never resend an unknown call"));
++        assertFalse(assessment.suggestedCommand().contains("sessions new"));
++    }
++
++    @Test
+     void sessionBootstrapFailureIsGenericFailClosedSessionRecovery() {
+         var assessment = RecoveryAssessment.from(failedAcpxNode(Map.of(
+                 "agent", "codex",
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java
+@@ -141,6 +141,19 @@
+         try (var ignored = lock(run, context.workstreamId())) {
+             if (!hash(Files.readAllBytes(prepared.path())).equals(prepared.reference().get("sha256")))
+                 throw new IOException("prepared bytes changed before native command");
++            if (kind.equals("command_intent")) {
++                var fixed = WRITER.readTree(prepared.path());
++                verifyNativeCommand(fixed.path("binding"), details);
++                if (!cleanup) {
++                    var process = ProcessHandle.current();
++                    var owner = fixed.path("claim");
++                    if (Files.exists(releasePath(prepared.path())) || Files.exists(completionPath(prepared.path()))
++                            || Files.exists(prepared.path().getParent().resolve("execution-outcome.json"))
++                            || process.pid() != owner.path("executor_pid").asLong()
++                            || !process.info().startInstant().orElseThrow().toString().equals(owner.path("executor_started_at").asText()))
++                        throw new IOException("recorded external intent does not grant a new executor send authority");
++                }
++            }
+             if (!Files.isRegularFile(intentPath(prepared.path()))) throw new IOException("native command lacks attempt intent");
+             var prefix = prepared.execution().nodeExecutionId() + "-command-" + id;
+             var intent = run.resolve("outputs").resolve(prefix + "-intent.json");
+@@ -166,6 +179,34 @@
+         }
+     }
+ 
++    private static void verifyNativeCommand(JsonNode binding, Map<String, Object> details) throws IOException {
++        var expected = binding.path("native_invocation");
++        var actual = WRITER.objectMapper().valueToTree(details.get("invocation"));
++        if (!expected.isObject() || !expected.path("schema").asText().equals("dual.acpx.invocation.v1")
++                || !expected.equals(actual) || !expected.path("session").asText().equals(details.get("session")))
++            throw new IOException("native invocation differs from R01; do not borrow the old session or retry an unknown call");
++        var command = WRITER.objectMapper().valueToTree(details.get("command"));
++        if (!command.isArray() || command.isEmpty() || !command.path(0).equals(expected.path("executable")))
++            throw new IOException("native command executable differs from R01");
++        if (Boolean.TRUE.equals(details.get("cleanup"))) {
++            var executable = expected.path("executable").asText();
++            var agent = expected.path("agent").asText();
++            var session = expected.path("session").asText();
++            var allowed = switch (String.valueOf(details.get("purpose"))) {
++                case "session_cancel" -> List.of(executable, agent, "cancel", "-s", session);
++                case "session_close" -> List.of(executable, agent, "sessions", "close", session);
++                default -> List.of();
++            };
++            if (allowed.isEmpty() || !WRITER.objectMapper().valueToTree(allowed).equals(command))
++                throw new IOException("cleanup cannot grant native prompt authority");
++        } else {
++            var options = WRITER.objectMapper().valueToTree(details.get("request_options"));
++            var allowed = binding.path("allowed_request_options");
++            if (!options.isArray() || !allowed.isArray() || java.util.stream.StreamSupport.stream(allowed.spliterator(), false)
++                    .noneMatch(options::equals)) throw new IOException("native permission configuration differs from R01");
++        }
++    }
++
+     /** A stopped Java invocation is distinct from native session quiescence. It only releases its local claim. */
+     public static void releaseExecutor(WorkflowFileLedger ledger, WorkstreamPaths paths, NodeExecutionDocument expected) throws IOException {
+         NodeExecutionDocument actual;
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentRunCommitProtocolTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentRunCommitProtocolTest.java
+@@ -123,7 +123,7 @@
+     void preGoalUnknownHasExplicitRetryAndAbortWithoutInventingAnApprovedContract(boolean abort) throws Exception {
+         var f = fixture();
+         var prepared = AgentRunCommitProtocol.prepare(f.context(), f.run(), List.of(f.prompt()),
+-                Map.of("run", Map.of("runId", "one", "session", "original-session")));
++                Map.of("run", Map.of("runId", "one", "session", "original-session"), "native_invocation", nativeInvocation(), "allowed_request_options", List.of(List.of("--deny-all"))));
+         AgentRunCommitProtocol.beginExternalCall(f.context(), prepared);
+         AgentRunCommitProtocol.releaseExecutor(f.ledger(), f.paths(), current(f));
+         dev.dual.runtime.RecordedExecutionRecovery.recover(f.ledger(), f.paths(), current(f));
+@@ -138,7 +138,7 @@
+                 json.treeToValue(request, ExecutionRecoveryAdjudication.Request.class)));
+         var id = UUID.randomUUID().toString();
+         var details = new LinkedHashMap<String, Object>(Map.of("command_id", id, "cleanup", true,
+-                "purpose", "session_close", "session", "original-session", "command", List.of("fixture", "close")));
++                "purpose", "session_close", "session", "original-session", "invocation", nativeInvocation(), "command", List.of("fixture", "codex", "sessions", "close", "original-session")));
+         AgentRunCommitProtocol.commandEvent(f.context(), prepared, "command_intent", details);
+         details.put("observation", Map.of("success", true, "timed_out", false, "exit_code", 0));
+         AgentRunCommitProtocol.commandEvent(f.context(), prepared, "command_result", details);
+@@ -165,7 +165,7 @@
+     void explicitlyAdoptingOriginalLateCompletionIsAtomicAndNeverReopensDispatch(String interruption) throws Exception {
+         var f = fixture();
+         var prepared = AgentRunCommitProtocol.prepare(f.context(), f.run(), List.of(f.prompt()),
+-                Map.of("run", Map.of("runId", "one", "session", "original-session")));
++                Map.of("run", Map.of("runId", "one", "session", "original-session"), "native_invocation", nativeInvocation(), "allowed_request_options", List.of(List.of("--deny-all"))));
+         AgentRunCommitProtocol.beginExternalCall(f.context(), prepared);
+         AgentRunCommitProtocol.releaseExecutor(f.ledger(), f.paths(), current(f));
+         dev.dual.runtime.RecordedExecutionRecovery.recover(f.ledger(), f.paths(), current(f));
+@@ -213,6 +213,40 @@
+         public static void main(String[] args) throws Exception { System.in.read(); }
+     }
+ 
++    private Map<String, Object> nativeInvocation() {
++        return Map.of("schema", "dual.acpx.invocation.v1", "executable", "fixture", "agent", "codex",
++                "cwd", root.toString(), "session", "original-session", "launch_environment", Map.of());
++    }
++
++    @org.junit.jupiter.params.ParameterizedTest
++    @org.junit.jupiter.params.provider.ValueSource(strings = {"allowed", "correction", "session", "executable", "options", "missing", "cleanup_prompt", "released"})
++    void commandDispatchConsumesPreparedInvocationAndCannotBorrowAnotherAuthority(String scenario) throws Exception {
++        var f = fixture();
++        var binding = scenario.equals("missing") ? Map.<String, Object>of() : Map.<String, Object>of(
++                "native_invocation", nativeInvocation(), "allowed_request_options", List.of(List.of("--implement"), List.of("--deny-all")));
++        var prepared = AgentRunCommitProtocol.prepare(f.context(), f.run(), List.of(f.prompt()), binding);
++        AgentRunCommitProtocol.beginExternalCall(f.context(), prepared);
++        if (scenario.equals("released")) AgentRunCommitProtocol.releaseExecutor(f.ledger(), f.paths(), current(f));
++        var invocation = new LinkedHashMap<>(nativeInvocation());
++        if (scenario.equals("session")) invocation.put("session", "foreign-session");
++        var details = new LinkedHashMap<String, Object>(Map.of("command_id", UUID.randomUUID().toString(),
++                "purpose", "prompt", "cleanup", scenario.equals("cleanup_prompt"), "session", "original-session",
++                "invocation", invocation, "command", List.of(scenario.equals("executable") ? "foreign" : "fixture", "codex", "-f", f.prompt().toString()),
++                "request_options", List.of(scenario.equals("options") ? "--approve-all" : scenario.equals("correction") ? "--deny-all" : "--implement")));
++        if (scenario.equals("allowed") || scenario.equals("correction")) {
++            AgentRunCommitProtocol.commandEvent(f.context(), prepared, "command_intent", details);
++            details.put("observation", Map.of("exit_code", 0));
++            AgentRunCommitProtocol.commandEvent(f.context(), prepared, "command_result", details);
++            // A new reader consumes these fixed command identities, not mutable run.json.
++            assertTrue(new AtomicJsonWriter().readTree(prepared.path().getParent().resolve(prepared.execution().nodeExecutionId()
++                    + "-command-" + details.get("command_id") + "-result.json")).path("details").path("invocation").isObject());
++        } else {
++            assertThrows(java.io.IOException.class, () -> AgentRunCommitProtocol.commandEvent(f.context(), prepared, "command_intent", details));
++            assertFalse(Files.exists(prepared.path().getParent().resolve(prepared.execution().nodeExecutionId()
++                    + "-command-" + details.get("command_id") + "-intent.json")));
++        }
++    }
++
+     private NodeExecutionDocument current(Fixture f) throws Exception {
+         var node = f.ledger().loadNode(f.paths(), f.context().instance().nodeInstanceId());
+         return f.ledger().latestNodeExecution(f.paths(), node).orElseThrow();
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java
+@@ -203,7 +203,7 @@
+                 JSON.treeToValue(template, ExecutionRecoveryAdjudication.Request.class)));
+         var commandId = java.util.UUID.randomUUID().toString();
+         var details = new LinkedHashMap<String, Object>(Map.of("command_id", commandId, "cleanup", true,
+-                "purpose", "session_cancel", "session", "fixture-session", "command", List.of("fixture", "cancel")));
++                "purpose", "session_cancel", "session", "fixture-session", "invocation", JSON.readTree(f.lastPrepared.path().toFile()).path("binding").path("native_invocation"), "command", List.of("fixture", "fixture", "cancel", "-s", "fixture-session")));
+         AgentRunCommitProtocol.commandEvent(f.lastContext, f.lastPrepared, "command_intent", details);
+         details.put("observation", Map.of("success", true, "timed_out", false, "exit_code", 0));
+         AgentRunCommitProtocol.commandEvent(f.lastContext, f.lastPrepared, "command_result", details);
+@@ -339,7 +339,9 @@
+             JSON.writeValue(dir.resolve("run.json").toFile(), Map.of("schemaVersion", 3, "runId", runId, "workstreamId", base.ws,
+                     "nodeId", context.definition().id(), "agent", "fixture", "session", "fixture-session", "status", "prepared", "promptManifestPath", manifest.toString()));
+             var prepared = AgentRunCommitProtocol.prepare(context, dir, List.of(prompt, manifest),
+-                    Map.of("contract_ref", snapshot.contract().contract().ref(), "contract_sha256", snapshot.contract().contract().sha256(), "run", JSON.readTree(dir.resolve("run.json").toFile())));
++                    Map.of("contract_ref", snapshot.contract().contract().ref(), "contract_sha256", snapshot.contract().contract().sha256(), "run", JSON.readTree(dir.resolve("run.json").toFile()),
++                            "native_invocation", Map.of("schema", "dual.acpx.invocation.v1", "executable", "fixture", "agent", "fixture", "cwd", base.root.toString(), "session", "fixture-session", "launch_environment", Map.of()),
++                            "allowed_request_options", List.of(List.of("--deny-all"))));
+             AgentRunCommitProtocol.qualifyDispatch(context, prepared);
+             AgentRunCommitProtocol.beginExternalCall(context, prepared);
+             lastContext = context; lastPrepared = prepared;
+--- before/output/lifecycle-batch-03-20260930/progress-and-decision.md
++++ after/output/lifecycle-batch-03-20260930/progress-and-decision.md
+@@ -86,3 +86,13 @@
+ B03 仍 IN_PROGRESS。停止受影响实现并交具体取舍：推荐固定本地安装和直接启动，保留现有 GLM 环境加载及客户端分工；支持范围与成本尚需用户确认。若保留全部动态启动，则要么显式收窄同版保证，要么承担额外解析/握手成本，不能擅自选。完整候选生产/绑定/dispatch/活连接/恢复/投影/回归工作包在报告中，未称为可开工字段规格。
+ 
+ 真实运行 NO-GO；当前不是 B03 合并收口评审材料，旧测试绿灯不挪用。无须单独重审两项已完成文档 LOW，也不把本次检查点变为 D04 底层安全实验。
++
++## 2026-10-07 当前：用户确认按兼容接口继续，W03 接线已实施
++
++用户已同意环境变量及既有入口使用，客户端版本变化不单独阻断，具体不兼容发生后处理。这一决定替代上节固定安装/完整 native 字节保证的未实施候选；Dual 自身代码/批准/scope/证据/UNKNOWN 禁止重发继续严格。当前规范为详设 §7.4、主清单 §16。
++
++已将程序选择的 invocation 接到 R01、命令启动前核对与精确 stop 消费；原生会话上次握手通过既有 sessions show 返回，白名单事实随每命令结果固定，版本缺失明确 UNKNOWN，不假测量。首轮、rebuild、correction 均核对记录身份/schema/open/协议，错误形成 adapter_incompatible 到唯一判定与 RecoveryAssessment。上次握手不是 live 实际引擎/包内容证明，未来实际接口不兼容仍须定位；D05 明确 exit 要求不降低。
++
++离线合法/拒绝/记录失败与恢复序列已过；普通发送拒绝 released 执行者，合法 cleanup 在 policy 失效后仍可达。整链测试同时发现并修复完成写入丢 native 诊断与 pre-prompt 失败虚构 transcript 引用。首次全模块运行因兄弟自查发现 cleanup 错误而主动终止，登记 INVALID、不作为测试总数；其真实 fixture 迁移失败也单列，不挪用残留 XML。最终新源码单轮回归与独立判断见 [本轮检查点](compatibility-20261007/checkpoint.md) 及 [B03 合并评审索引](b03-review-index.md)。
++
++B03 保持 IN_PROGRESS 待合并独立判断，原 W 项和真实 NO-GO 不自动关闭；零 native/provider/额外 agent、无提交。完整 C/X/真实客户端/浏览器/目标 Git 交付不扩入本批。不为本补记再开材料评审，不恢复历史样本。

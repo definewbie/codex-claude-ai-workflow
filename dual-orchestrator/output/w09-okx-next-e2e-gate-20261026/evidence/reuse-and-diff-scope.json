@@ -1,0 +1,37 @@
+{
+  "byte_identical_reuse": [
+    {
+      "new": "gate_support.py",
+      "source": "dual-orchestrator/output/w09-eighth-tail-continuation-20261026/gate_support.py",
+      "byte_identical": true,
+      "sha256": "22b709c9e5fa22abd7fdc9059ad9a988a8b8923d1600aa477f91f3f191ec09d5"
+    },
+    {
+      "new": "test_gate_observer.py",
+      "source": "dual-orchestrator/output/w09-eighth-tail-continuation-20261026/test_gate_observer.py",
+      "byte_identical": true,
+      "sha256": "5d6a067af41aa8944b4dbd482dac43e9c017920376223d1fe662f2d03e580232"
+    },
+    {
+      "new": "selected-release.json",
+      "source": "dual-orchestrator/output/w09-eighth-tail-continuation-20261026/selected-release.json",
+      "byte_identical": true,
+      "sha256": "721be0fe743ad021f7b0004a94f45ecdf77021a9a938ece6ff157fc6b46acdee"
+    },
+    {
+      "new": "observed-sdk-identity.json",
+      "source": "dual-orchestrator/output/w09-eighth-tail-continuation-20261026/observed-sdk-identity.json",
+      "byte_identical": true,
+      "sha256": "3e1094819af908747b2b931bf7d8a2b1c19923f221e8852da0cac1a7d6fb2596"
+    }
+  ],
+  "selected_environment_function_source_identical": true,
+  "budget_check_function_source_identical": true,
+  "fresh_adaptation": [
+    "new authority subject replaces inherited checkpoint/stops/balance",
+    "fresh active time from own operation receipts only",
+    "process helper standalone import points to admission; inspection functions unchanged",
+    "run-one-step imports fresh admission; launch/wait/failure sequence retained"
+  ],
+  "not_product_change": true
+}

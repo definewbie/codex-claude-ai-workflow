@@ -1,0 +1,112 @@
+{
+  "method": "offline read of immutable evidence; no native session",
+  "source": "dual-orchestrator/output/d04-native-boundary-review-20260929/codex-protocol/config-probe.json",
+  "sourceSha256": "4a9b76ef214cd63004bb74efd0cdcd8d67e3b948dd7e41a0b6514bfcfda8147f",
+  "exactCommandEntries": [
+    "web_search=\"disabled\"",
+    "features.multi_agent=false",
+    "features.multi_agent_v2=false"
+  ],
+  "requests": [
+    {
+      "requestIndex": 0,
+      "namespaces": [
+        {
+          "namespace": "functions",
+          "tools": [
+            "exec",
+            "wait",
+            "request_user_input",
+            "request_user_input_async"
+          ]
+        },
+        {
+          "namespace": "clock",
+          "tools": [
+            "sleep"
+          ]
+        },
+        {
+          "namespace": "collaboration",
+          "tools": [
+            "followup_task",
+            "interrupt_agent",
+            "list_agents",
+            "send_message",
+            "spawn_agent",
+            "wait_agent"
+          ]
+        }
+      ],
+      "execNestedDeclarations": [
+        "apply_patch",
+        "exec_command",
+        "view_image",
+        "write_stdin",
+        "clock__curr_time"
+      ]
+    },
+    {
+      "requestIndex": 1,
+      "namespaces": [
+        {
+          "namespace": "functions",
+          "tools": [
+            "exec",
+            "wait",
+            "request_user_input",
+            "request_user_input_async"
+          ]
+        },
+        {
+          "namespace": "clock",
+          "tools": [
+            "sleep"
+          ]
+        },
+        {
+          "namespace": "collaboration",
+          "tools": [
+            "followup_task",
+            "interrupt_agent",
+            "list_agents",
+            "send_message",
+            "spawn_agent",
+            "wait_agent"
+          ]
+        }
+      ],
+      "execNestedDeclarations": [
+        "apply_patch",
+        "exec_command",
+        "view_image",
+        "write_stdin",
+        "clock__curr_time"
+      ]
+    }
+  ],
+  "schema": {
+    "path": "dual-orchestrator/output/d04-readonly-binding-design-20260928/protocol/ConfigReadResponse.json",
+    "sha256": "96a04a3f7fff2dc7fafc9f831e8bcd422e021d697dd2c14c801f098a9f21396d",
+    "ToolsV2": {
+      "properties": {
+        "web_search": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/WebSearchToolConfig"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "guardSource": {
+    "path": "dual-orchestrator/output/d04-native-boundary-review-20260929/probe-guard-repair/write-guard.mjs",
+    "sha256": "58a7c158dd42d7f262b9224a29bdcbf179319357e5fc700e1a8dea2d2b540081",
+    "scope": "exec_command exit_code; not a generic collaboration/network guard"
+  }
+}

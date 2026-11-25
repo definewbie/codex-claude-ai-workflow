@@ -1,0 +1,8 @@
+{
+  "wiring-design.zh-CN.txt": "e7be0d9a30ab782432325f83803facb3355428ff649a96cd8d5fa0b6b14d1d20",
+  "candidate-snapshot-receipt.json": "2d5461a0c8c392651ce052653067dcf4e0e4651079eab11a1507834e3613375f",
+  "cc-review-prompt.txt": "f860ad2afd8a19956da5d26f39602ba2391af88366aa5bc86279ed54853a4f33",
+  "config-diff.redacted.json": "f235e5eaceaf3dd46a8a340df75a2eb61809d0a1fc1c19a2935dc35db9069d53",
+  "review-and-preservation.json": "00509f3741f11faebf4e9b6612dba96ef006305279d7b002510cb30fb4849528",
+  "private-candidate/config.toml": "d6e48e362ced42a8a61e3615be4c9fefc6bc3979132fd33b735a6aa0eb9faab6"
+}

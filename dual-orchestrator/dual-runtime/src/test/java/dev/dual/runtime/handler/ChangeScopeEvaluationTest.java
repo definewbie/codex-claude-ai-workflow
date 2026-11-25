@@ -112,23 +112,29 @@ class ChangeScopeEvaluationTest {
     }
 
     private static TaskContract contract(TaskContract.ScopeEntry... entries) {
-        return new TaskContract(
+        return new TaskContract(2,
+                dev.dual.core.contract.TaskContract.Phase.EXECUTION,
+                1,
                 "task-ws",
                 1,
                 java.time.Instant.parse("2026-07-26T00:00:00Z"),
                 "Validate implementation changes",
                 new TaskContract.Scope(List.of(entries), List.of()),
-                List.of("AC1", "AC2"),
-                List.of("Run tests"),
+                dev.dual.runtime.RuntimeTestLedger.clauses("AC-", List.of("AC1", "AC2")),
+                dev.dual.runtime.RuntimeTestLedger.clauses("TR-", List.of("Run tests")),
                 List.of("Keep scope bounded"),
                 List.of(),
                 List.of(),
+                java.util.List.of(),
                 List.of(),
                 List.of(),
                 dev.dual.core.contract.ContractStatus.READY_FOR_REVIEW,
                 1,
-                new TaskContract.Source("requirement.md", "test")
-        );
+                new TaskContract.Source("requirement.md", "test", null, null),
+                null,
+                java.util.List.of(),
+                java.util.List.of(),
+                java.util.List.of());
     }
 
     private static TaskContract.ScopeEntry entry(String path, TaskContract.ScopeOperation operation) {

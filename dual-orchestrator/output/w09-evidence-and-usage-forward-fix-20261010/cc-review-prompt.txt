@@ -1,0 +1,7 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 本批 F03/F04 前向修复、新发行及 fresh 第三次 Gate 候选做独立受影响复审，遵守 AGENTS.md。
+
+入口：output/w09-evidence-and-usage-forward-fix-20261010/assessment.md。增量、回归、反证、发行身份和 fresh-third-gate.md 均在同目录。
+
+请自行重建产品证据引用→proposal校验→采纳/拒绝，以及活请求completion→逐请求用量→持久化/聚合→预算核对的控制链；检查合法续作、非法放行/误拒、写入失败切面和兄弟入口。重点判断修复是否有据、严格边界是否保留、用量是否仍可能错归属或将部分量/快照当总量。
+
+按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给分级发现、证据和未核验范围，区分修复认可、发行有效、真实运行授权。只读，不调用native/provider、不启动额外agent、不修改或恢复旧样本；PASS不自动授权第三例。

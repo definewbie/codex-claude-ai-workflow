@@ -41,7 +41,7 @@ final class ContextStateEvidenceBoundaryRenderer {
 
         appendTrustedFacts(builder, workstreamDir, objectMapper, qualifiedContract);
         var routedEvidence = AgentEvidenceIndex.fromRefs(
-                context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper);
+                context.ledger(), context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), objectMapper);
         appendCurrentRepairObjective(builder, workstreamDir, objectMapper, routedEvidence);
         appendHumanDecisions(builder, qualifiedContract);
         appendAgentProposedStates(builder, routedEvidence);

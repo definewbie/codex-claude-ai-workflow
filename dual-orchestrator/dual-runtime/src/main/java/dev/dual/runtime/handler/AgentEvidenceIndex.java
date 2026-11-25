@@ -26,6 +26,7 @@ public final class AgentEvidenceIndex {
     }
 
     static AgentEvidenceIndex fromRefs(
+            dev.dual.ledger.file.WorkflowFileLedger ledger,
             Path workspaceRoot,
             String workstreamId,
             List<String> refs,
@@ -36,7 +37,7 @@ public final class AgentEvidenceIndex {
                 .map(ref -> sidecarPathForRef(root, ref))
                 .flatMap(Optional::stream)
                 .distinct()
-                .map(path -> readEntry(root, workstreamId, path, objectMapper))
+                .map(path -> readEntry(ledger, root, workstreamId, path, objectMapper))
                 .flatMap(Optional::stream)
                 .sorted(Entry.ORDER.reversed())
                 .toList();
@@ -44,6 +45,7 @@ public final class AgentEvidenceIndex {
     }
 
     static Optional<Entry> latestFromRefs(
+            dev.dual.ledger.file.WorkflowFileLedger ledger,
             Path workspaceRoot,
             String workstreamId,
             List<String> refs,
@@ -53,13 +55,14 @@ public final class AgentEvidenceIndex {
         return refs.stream()
                 .map(ref -> sidecarPathForRef(root, ref))
                 .flatMap(Optional::stream)
-                .map(path -> readEntry(root, workstreamId, path, objectMapper))
+                .map(path -> readEntry(ledger, root, workstreamId, path, objectMapper))
                 .flatMap(Optional::stream)
                 .sorted(Entry.ORDER.reversed())
                 .findFirst();
     }
 
     static DecisionRead latestDecisionFromRefs(
+            dev.dual.ledger.file.WorkflowFileLedger ledger,
             Path workspaceRoot,
             String workstreamId,
             List<String> refs,
@@ -71,7 +74,7 @@ public final class AgentEvidenceIndex {
             if (path.isEmpty()) {
                 continue;
             }
-            var read = readValidatedEntry(root, workstreamId, path.get(), objectMapper);
+            var read = readValidatedEntry(ledger, root, workstreamId, path.get(), objectMapper);
             if (read.entry() == null) {
                 return DecisionRead.invalid(read.errorCode(), read.message(), path.get().toString());
             }
@@ -88,12 +91,13 @@ public final class AgentEvidenceIndex {
     }
 
     public static Optional<AgentOutputContractDocument> validatedDocument(
+            dev.dual.ledger.file.WorkflowFileLedger ledger,
             Path workspaceRoot,
             String workstreamId,
             String ref,
             ObjectMapper objectMapper
     ) {
-        var index = fromRefs(workspaceRoot, workstreamId, List.of(ref), objectMapper);
+        var index = fromRefs(ledger, workspaceRoot, workstreamId, List.of(ref), objectMapper);
         return index.entryForRef(workspaceRoot, ref).map(Entry::document);
     }
 
@@ -171,12 +175,13 @@ public final class AgentEvidenceIndex {
     }
 
     private static Optional<Entry> readEntry(
+            dev.dual.ledger.file.WorkflowFileLedger ledger,
             Path workspaceRoot,
             String workstreamId,
             Path path,
             ObjectMapper objectMapper
     ) {
-        var read = readValidatedEntry(workspaceRoot, workstreamId, path, objectMapper);
+        var read = readValidatedEntry(ledger, workspaceRoot, workstreamId, path, objectMapper);
         if (read.entry() == null) {
             throw new IllegalStateException(read.message());
         }
@@ -184,6 +189,7 @@ public final class AgentEvidenceIndex {
     }
 
     private static EntryRead readValidatedEntry(
+            dev.dual.ledger.file.WorkflowFileLedger ledger,
             Path workspaceRoot,
             String workstreamId,
             Path path,
@@ -196,7 +202,7 @@ public final class AgentEvidenceIndex {
                     "routed agent evidence sidecar is unreadable: " + path
             );
         }
-        var violation = AgentOutputLineageVerifier.violation(workspaceRoot, workstreamId, path, document.get());
+        var violation = AgentOutputLineageVerifier.violation(ledger, workspaceRoot, workstreamId, path, document.get());
         if (violation.isPresent()) {
             return EntryRead.invalid(
                     "CONTRACT_SIDECAR_LINEAGE_INVALID",

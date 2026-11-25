@@ -1,0 +1,14 @@
+{
+  "checked_at": "2026-10-10T14:42:18.857363+08:00",
+  "source_inputs_match": 654,
+  "JAR_match": true,
+  "selected_acpx_match": true,
+  "effective_config_match": true,
+  "host_dependencies_match": true,
+  "initialized_prefix_match": true,
+  "fresh_agent_executions": 0,
+  "target_and_worktree_clean": true,
+  "workstream": "ws-20261010T055644Z-6QCS",
+  "real_runtime_classloading_recheck": "each dispatch logs actual JVM code source and loader",
+  "actual_native_connection_and_usage": "verify at first necessary real call; no separate speculative probes"
+}

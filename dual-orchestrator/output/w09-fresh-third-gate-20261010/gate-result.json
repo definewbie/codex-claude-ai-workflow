@@ -1,0 +1,63 @@
+{
+  "gate_result": "FAIL",
+  "reason": "VISIBLE_ACTUAL_TOKEN_STOP_LOSS",
+  "visible_actual_tokens": 235366,
+  "authorized_token_stop": 160000,
+  "excess": 75366,
+  "top_level_prompt_calls": 5,
+  "unused_call_capacity_not_new_authority": 13,
+  "single_design_tokens": 130731,
+  "before_design_tokens": 104635,
+  "warning_only_visible_at_completion": true,
+  "actual_active_runner_seconds": 557.255,
+  "model_process_duration_ms": 521662,
+  "single_design_run_duration_ms": 192648,
+  "workflow_status": "RUNNING",
+  "next_ready_node": [
+    "node-context-design_codex_arch_review-014"
+  ],
+  "workflow_status_not_rewritten": true,
+  "new_dispatch_after_stop": 0,
+  "actual_goal_approval": true,
+  "implementation_dispatched": false,
+  "product_changes": 0,
+  "independent_design_review": "NOT_RUN",
+  "self_test_acceptance_delivery": "NOT_RUN",
+  "native_ask": "NOT_EXERCISED",
+  "named_sessions_closed": 4,
+  "arbitrary_children_physical_stop": "NOT_PROVEN",
+  "source_inputs_match": 654,
+  "reviewed_material_files_match": 1526,
+  "release_native_config_match": true,
+  "stopped_ledger_file_count": 288,
+  "old_case_bytes_preserved": [
+    {
+      "case": "w09-real-gate-20261010",
+      "files": 117,
+      "equal": true
+    },
+    {
+      "case": "w09-fresh-second-gate-20261010",
+      "files": 154,
+      "equal": true
+    }
+  ],
+  "queries": [
+    {
+      "label": "stopped-status",
+      "exit": 0
+    },
+    {
+      "label": "stopped-trace",
+      "exit": 0
+    },
+    {
+      "label": "stopped-recovery",
+      "exit": 0
+    }
+  ],
+  "tests_rerun": 0,
+  "production_changes": 0,
+  "operator_script_adjustment": "WITHDRAWN_BEFORE_EXECUTION; original bytes used for all dispatched steps",
+  "at": "2026-10-10T22:23:18.589600+08:00"
+}

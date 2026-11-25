@@ -1,0 +1,32 @@
+[
+  {
+    "path": "docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "before_sha256": "7103adc6a6f90e579d4ba23e6dcffb96f035d7979358f780e1fcdf154d1e14b1",
+    "after_sha256": "ec5603958f2663d50bdc4e96da14cbcbda4a6742cec6112f4f3ada730a9c96fd",
+    "baseline": "actual measured document snapshot before closing update"
+  },
+  {
+    "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "before_sha256": "daad21918e9ae488c033b18ca81932d9b129b31c64f62b7a9e61565f304f1259",
+    "after_sha256": "9038bdaa8fbb29fefbba731d39cdfd5c9d3eb836d1a75ac072bc7f50ccf96727",
+    "baseline": "actual measured document snapshot before closing update"
+  },
+  {
+    "path": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "before_sha256": "709aecc8685f4627cb7863b042d7a26d3ef35f1e7aa44ac1eb7bff289d354ede",
+    "after_sha256": "3e20c74bb95d7834f0267a854d396b7312d82fae0c205b958be8b6ce87a91fad",
+    "baseline": "actual measured document snapshot before closing update"
+  },
+  {
+    "path": "output/lifecycle-batch-05-20261008/scope-c/design.md",
+    "before_sha256": "8749bb0941cc35f7a69cb65f9ed4151509c45f2e05b72fc2113924ccdd22b409",
+    "after_sha256": "5435e3ee0ba3c193f09e395b82ae5efe39c032c66a50b3a5d84a78f6536916ad",
+    "baseline": "actual measured document snapshot before closing update"
+  },
+  {
+    "path": "output/lifecycle-batch-05-20261008/scope-c/implementation/cc-review-received.md",
+    "before_sha256": "f1c269dc8a678aef7553092f30fd8c7b14980884f180bc817abf284962414df5",
+    "after_sha256": "44e9d14c3054f298b9f8c01f98bae8946b3afb21392ce6170e83e983c15b1d48",
+    "baseline": "actual measured document snapshot before closing update"
+  }
+]

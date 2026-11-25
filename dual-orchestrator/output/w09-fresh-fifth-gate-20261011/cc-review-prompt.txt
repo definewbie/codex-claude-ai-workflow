@@ -1,0 +1,7 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 W09 第五例停止做一次受影响只读评审，遵守 AGENTS.md。
+
+入口：output/w09-fresh-fifth-gate-20261011/assessment.md。实际prompt/result、固定run/node和静止快照、归因与停止证据均在同目录，源码索引见stop-source-index.json。
+
+独立重建需求→复评→返修→合并/拒绝→固定失败与恢复链，检查兄弟入口及失败切面。判断FAIL分类；基础SHA错字的生产/消费边界，是否需要前向修复及最低成本做法；复评要求改objective/scope.excluded而补丁不支持时，是否存在合法有界出口。后者尚未触发第二拒绝，不预设死端或修复结论。以跑完主流程与ROI为准，保持身份/批准/证据严格，不以宽松匹配、最近记录或救样本换通过。
+
+按Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test说明成立与缺证；给分级发现、事实与推测、必要动作及未核验范围。不运行native/provider/探针、不启动额外agent、不修改代码、配置、账本或材料；无需重审无关历史。

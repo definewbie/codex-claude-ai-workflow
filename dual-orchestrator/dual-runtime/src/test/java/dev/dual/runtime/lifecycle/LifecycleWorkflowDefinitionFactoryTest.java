@@ -43,15 +43,15 @@ class LifecycleWorkflowDefinitionFactoryTest {
         assertTrue(definition.edgesFrom("intake.claude_brainstorm").stream()
                 .anyMatch(edge -> edge.to().equals("context.intake_codex_product_review")));
         assertEquals(java.util.Map.of(
-                        "READY_FOR_ARCH_REVIEW", "gate.human_design_approval",
-                        "NEEDS_REVISION", "gate.human_design_approval",
+                        "READY_FOR_ARCH_REVIEW", "plan.claude_plan",
+                        "NEEDS_REVISION", "design.claude_design",
                         "BLOCKED", "gate.human_design_approval"),
                 definition.edgesFrom("design.decision").stream()
                         .collect(java.util.stream.Collectors.toMap(edge -> edge.on(), edge -> edge.to())));
         assertTrue(definition.edgesFrom("context.intake_codex_product_review").stream()
                 .anyMatch(edge -> edge.to().equals("intake.codex_product_review")));
         assertTrue(definition.edgesFrom("acceptance.generate_final_report").stream()
-                .anyMatch(edge -> edge.to().equals("delivery.prepare_pr")));
+                .anyMatch(edge -> edge.to().equals("stage.claude_handoff")));
         assertTrue(definition.edgesFrom("implement.claude_self_test_report").stream()
                 .anyMatch(edge -> edge.to().equals("implement.self_test_decision")));
         assertTrue(definition.edgesFrom("implement.self_test_decision").stream()
@@ -75,7 +75,7 @@ class LifecycleWorkflowDefinitionFactoryTest {
     }
 
     @Test
-    void architectureReviewIsAdvisoryAcrossBundledVariants() {
+    void architectureReviewControlsAutomaticProgressAcrossBundledVariants() {
         var factory = new LifecycleWorkflowDefinitionFactory();
 
         for (var variant : java.util.List.of("full", "contract", "terminal-delivery")) {
@@ -83,8 +83,8 @@ class LifecycleWorkflowDefinitionFactoryTest {
             assertFalse(definition.node("design.decision").config().containsKey("max_revisions"), variant);
             assertEquals(3, definition.node("gate.human_design_approval").config().get("max_revisions"), variant);
             assertEquals(java.util.Map.of(
-                            "READY_FOR_ARCH_REVIEW", "gate.human_design_approval",
-                            "NEEDS_REVISION", "gate.human_design_approval",
+                            "READY_FOR_ARCH_REVIEW", "plan.claude_plan",
+                            "NEEDS_REVISION", "design.claude_design",
                             "BLOCKED", "gate.human_design_approval"),
                     definition.edgesFrom("design.decision").stream()
                             .collect(java.util.stream.Collectors.toMap(edge -> edge.on(), edge -> edge.to())),
@@ -128,16 +128,11 @@ class LifecycleWorkflowDefinitionFactoryTest {
     }
 
     @Test
-    void finalNextStageGateCompletesWithoutStartingAnotherIteration() {
+    void finalDeliveryDecisionCannotStartAnotherModelStage() {
         var definition = new LifecycleWorkflowDefinitionFactory().forVariant("full");
-
-        assertEquals(java.util.List.of("revise", "complete"),
-                definition.node("gate.human_next_stage_approval").config().get("allowed_actions"));
-        assertFalse(definition.edgesFrom("gate.human_next_stage_approval").stream()
-                .anyMatch(edge -> "approved".equals(edge.on())));
-        assertFalse(definition.edgesFrom("gate.human_next_stage_approval").stream()
-                .anyMatch(edge -> "complete".equals(edge.on())));
-        assertTrue(definition.edgesFrom("gate.human_next_stage_approval").stream()
-                .anyMatch(edge -> "revise".equals(edge.on()) && "stage.claude_handoff".equals(edge.to())));
+        assertEquals(java.util.List.of("approve", "revise"), definition.node("gate.human_acceptance").config().get("allowed_actions"));
+        assertFalse(definition.edgesFrom("gate.human_acceptance").stream().anyMatch(edge -> "approved".equals(edge.on())));
+        assertTrue(definition.edgesFrom("gate.human_acceptance").stream().anyMatch(edge -> "revise".equals(edge.on()) && "context.implement_claude".equals(edge.to())));
+        assertFalse(definition.nodes().stream().anyMatch(node -> node.id().equals("gate.human_next_stage_approval")));
     }
 }

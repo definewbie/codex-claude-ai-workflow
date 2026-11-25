@@ -38,11 +38,8 @@ public final class RecoveryApproveWebSearchCommand implements Callable<Integer> 
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
-        try (var ignored = WorkstreamLock.acquire(
-                paths.workstreamDir(),
-                LockOwner.currentProcess(workstreamId, "approve public WebSearch"))) {
-            CliLedgerFactory.create().approvePublicWebSearch(paths, note, publicRepository);
-        }
+        CliLedgerFactory.create().approvePublicWebSearch(paths, note, publicRepository);
+
         System.out.println("Public WebSearch approved for one retry");
         System.out.println("Workstream: " + workstreamId);
         System.out.println("Resume: dualctl resume --workdir " + workspaceRoot + " " + workstreamId);

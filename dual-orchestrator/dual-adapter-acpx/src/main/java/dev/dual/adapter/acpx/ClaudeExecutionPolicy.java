@@ -70,7 +70,7 @@ final class ClaudeExecutionPolicy {
         if (profile == null || claim != null && !profile.allowsLocalBinding()) {
             throw new IOException("network grant requires implement profile");
         }
-        if (claim != null) new ExecutionNetworkGrantStore().verifyClaim(
+        if (claim != null) ExecutionNetworkGrantStore.verifyClaim(
                 new WorkstreamPaths(workspaceRoot.toRealPath(), new DualId(workstreamId)), claim, nodeInstanceId, runId);
         return write(workspaceRoot, workstreamId, nodeInstanceId, runId, runDir,
                 profile.allowsLocalBinding(), profile.autoAllowsSandboxedBash(), claim);
@@ -178,7 +178,7 @@ final class ClaudeExecutionPolicy {
             requireEquals(document, "node_instance_id", nodeInstanceId);
             requireEquals(document, "run_id", runId);
             requireEquals(document, "network_transport_owner", NETWORK_TRANSPORT_OWNER);
-            if (networkGrant != null) new ExecutionNetworkGrantStore().verifyClaim(
+            if (networkGrant != null) ExecutionNetworkGrantStore.verifyClaim(
                     new WorkstreamPaths(root, new DualId(workstreamId)), networkGrant, nodeInstanceId, runId);
         }
 

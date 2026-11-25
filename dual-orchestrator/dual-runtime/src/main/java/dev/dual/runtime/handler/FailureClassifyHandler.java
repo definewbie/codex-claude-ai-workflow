@@ -41,24 +41,21 @@ public final class FailureClassifyHandler implements TaskHandler {
 
         TaskContractProjectionVerifier.QualifiedTaskContract qualified = null;
         if (AgentRunGovernanceContext.requiresApprovedTaskContract(context)) {
-            var resolution = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
+            var resolution = TaskContractProjectionVerifier.resolve(context.ledger(), context.workspaceRoot(), context.workstreamId(), TaskContractProjectionVerifier.requiredPhase(context.definition()));
             if (resolution.failure() != null || resolution.qualified().isEmpty()) {
                 var failure = resolution.failure() == null
                         ? TaskContractProjectionVerifier.Failure.of(
                                 "APPROVAL_BINDING_MISSING", "failure classification requires an approved task contract")
                         : resolution.failure();
-                return qualificationFailure(failure);
+                return qualificationFailure(context, failure);
             }
             qualified = resolution.qualified().orElseThrow();
         } else {
-            var legacy = TaskContractProjectionVerifier.readLegacyProjection(
-                    context.workspaceRoot(), context.workstreamId());
-            if (legacy.failure() != null) {
-                throw new IOException(legacy.failure().message());
-            }
+            return qualificationFailure(context, TaskContractProjectionVerifier.Failure.of(
+                    "CONTRACT_PHASE_MISSING", "failure classification requires an explicit EXECUTION phase"));
         }
 
-        var evidenceRead = AgentEvidenceIndex.latestDecisionFromRefs(context.workspaceRoot(),
+        var evidenceRead = AgentEvidenceIndex.latestDecisionFromRefs(context.ledger(), context.workspaceRoot(),
                 context.workstreamId(), context.instance().inputRefs(), objectMapper);
         if (evidenceRead.entry() == null) {
             var missing = evidenceRead.missing();
@@ -112,7 +109,7 @@ public final class FailureClassifyHandler implements TaskHandler {
         if (category == FailureCategory.CONTRACT_GAP || category == FailureCategory.CONTRACT_AMBIGUITY) {
             try {
                 if (qualified == null) throw new IOException("contract repair requires a qualified contract");
-                baseline = TaskContractRevisionContextResolver.captureAcceptanceReworkBaseline(
+                baseline = new TaskContractRevisionContextResolver(context.ledger()).captureAcceptanceReworkBaseline(
                         context.workspaceRoot(), context.workstreamId(), qualified, evidenceRead.entry());
             } catch (IOException invalid) {
                 return new NodeResult("ACCEPTANCE_REWORK_BASELINE_INVALID", NodeStatus.FAILED, List.of(),
@@ -159,16 +156,8 @@ public final class FailureClassifyHandler implements TaskHandler {
         return NodeResult.completed(outcome, outputRefs, result);
     }
 
-    private NodeResult qualificationFailure(TaskContractProjectionVerifier.Failure failure) {
-        return new NodeResult(
-                TaskContractProjectionVerifier.FAILURE_OUTCOME,
-                NodeStatus.FAILED,
-                List.of(),
-                Map.of(
-                        "failure_code", TaskContractProjectionVerifier.FAILURE_OUTCOME,
-                        "reason", failure.reason(),
-                        "error", failure.message()),
-                failure.message());
+    private NodeResult qualificationFailure(TaskContext context, TaskContractProjectionVerifier.Failure failure) {
+        return TaskContractProjectionVerifier.failureResult(context, failure, failure.message());
     }
 
     private NodeResult failedEvidence(String outcome, String message, TaskContext context,

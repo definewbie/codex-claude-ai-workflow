@@ -37,15 +37,65 @@ public class WorkstreamQueryService {
     private final FileLedgerStore legacyStore;
     private final WorkflowFileLedger workflowLedger;
     private final DeliveryViewService deliveryViewService;
+    private final boolean snapshot;
+    private final Map<String, Object> sampledDelivery;
 
+    @org.springframework.beans.factory.annotation.Autowired
     public WorkstreamQueryService(ObjectMapper objectMapper, DeliveryViewService deliveryViewService) {
+        this.snapshot = false;
+        this.sampledDelivery = Map.of();
         this.objectMapper = objectMapper;
         this.legacyStore = new FileLedgerStore();
         this.workflowLedger = ServerLedgerFactory.create();
         this.deliveryViewService = deliveryViewService;
     }
 
+    private WorkstreamQueryService(ObjectMapper mapper, WorkflowFileLedger scoped, Map<String, Object> delivery) {
+        this.sampledDelivery = delivery;
+        this.objectMapper = mapper;
+        this.workflowLedger = scoped;
+        this.legacyStore = scoped.store();
+        this.deliveryViewService = new DeliveryViewService(new dev.dual.runtime.delivery.DeliveryApplicationService(scoped));
+        this.snapshot = true;
+    }
+
+    @FunctionalInterface private interface SnapshotQuery {
+        Map<String, Object> read(WorkstreamQueryService scoped) throws IOException;
+    }
+    private Map<String, Object> snapshot(Path root, String id, SnapshotQuery query) throws IOException {
+        return snapshot(root, id, query, false);
+    }
+
+    private Map<String, Object> snapshot(Path root, String id, SnapshotQuery query, boolean includeDelivery) throws IOException {
+        // Observe target->L before entering the composed L-only read. Other queries do not spawn Git observations.
+        var observed = includeDelivery ? deliveryViewService.observe(root, id) : null;
+        var paths = new WorkstreamPaths(root.toAbsolutePath().normalize(), new DualId(id));
+        try {
+            return workflowLedger.inspect(paths, (scoped, files) -> {
+                var result = new LinkedHashMap<>(query.read(new WorkstreamQueryService(objectMapper, scoped, observed == null ? Map.of() : deliveryViewService.inSnapshot(root, id, observed, scoped))));
+                result.put("commitSequence", scoped.loadCurrent(paths).commitSequence());
+                return result;
+            });
+        } catch (dev.dual.ledger.file.WorkstreamLockedException busy) {
+            return Map.of("workstreamId", id, "status", "BUSY", "statusSource", "ledger_session", "reason", busy.getMessage());
+        } catch (dev.dual.ledger.file.LedgerSession.PendingCommitException pending) {
+            return Map.of("workstreamId", id, "status", "PENDING", "statusSource", "ledger_session", "reason", pending.getMessage());
+        }
+    }
+
+    public Map<String, Object> nativePermissions(Path root, String id) throws IOException {
+        try {
+            return dev.dual.runtime.handler.NativePermissionRequests.view(workflowLedger,
+                    new WorkstreamPaths(root.toAbsolutePath().normalize(), new DualId(id)));
+        } catch (dev.dual.ledger.file.WorkstreamLockedException busy) {
+            return Map.of("workstreamId", id, "status", "BUSY", "requests", List.of(), "reason", busy.getMessage());
+        } catch (dev.dual.ledger.file.LedgerSession.PendingCommitException pending) {
+            return Map.of("workstreamId", id, "status", "PENDING", "requests", List.of(), "reason", pending.getMessage());
+        }
+    }
+
     public Map<String, Object> status(Path workspaceRoot, String workstreamId) throws IOException {
+        if (!snapshot) return snapshot(workspaceRoot, workstreamId, scoped -> scoped.status(workspaceRoot, workstreamId), true);
         var root = workspaceRoot.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
         var legacy = legacyStore.loadStatus(root, workstreamId);
@@ -79,16 +129,16 @@ public class WorkstreamQueryService {
                     "updatedAt", current.updatedAt()
             ));
             response.put("agentTasks", agentTasks);
-            response.put("networkAuthority", new dev.dual.ledger.file.ExecutionNetworkGrantStore().view(paths));
+            response.put("networkAuthority", new dev.dual.ledger.file.ExecutionNetworkGrantStore(workflowLedger).view(paths));
         } else {
             response.put("status", legacy.workstream().status());
             response.put("statusSource", "legacy_initial");
         }
         response.put("artifactContracts", artifactContracts(root, paths));
         response.put("completionEvidence", completionEvidence(
-                paths, CompletionEvidenceLineageResolver.resolveCurrent(root, workstreamId)));
+                paths, CompletionEvidenceLineageResolver.resolveCurrent(workflowLedger, root, workstreamId)));
 
-        response.put("deliveryView", deliveryViewService.view(root, workstreamId));
+        response.put("deliveryView", sampledDelivery);
         return response;
     }
 
@@ -143,11 +193,9 @@ public class WorkstreamQueryService {
     }
 
     public Map<String, Object> timeline(Path workspaceRoot, String workstreamId) throws IOException {
+        if (!snapshot) return snapshot(workspaceRoot, workstreamId, scoped -> scoped.timeline(workspaceRoot, workstreamId));
         var root = workspaceRoot.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
-        if (!Files.exists(paths.timelineJson())) {
-            throw new IOException("timeline projection not found: " + paths.timelineJson());
-        }
         return normalizedTimeline(paths);
     }
 
@@ -159,13 +207,16 @@ public class WorkstreamQueryService {
      * models such as WorkstreamAttention. It should not invent workflow state.
      */
     public Map<String, Object> overview(Path workspaceRoot, String workstreamId) throws IOException {
+        if (!snapshot) {
+            var view = new LinkedHashMap<>(snapshot(workspaceRoot, workstreamId, scoped -> scoped.overview(workspaceRoot, workstreamId), true));
+            // Permission R is read only after the workflow snapshot releases L; its own sequence is exposed.
+            if (!"BUSY".equals(view.get("status")) && !"PENDING".equals(view.get("status"))) view.put("nativePermissions", nativePermissions(workspaceRoot, workstreamId));
+            return view;
+        }
         var root = workspaceRoot.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
-        if (!Files.exists(paths.timelineJson())) {
-            throw new IOException("timeline projection not found: " + paths.timelineJson());
-        }
         var timeline = normalizedTimeline(paths);
-        var metrics = readJson(paths.workstreamMetricsJson());
+        var metrics = workflowLedger.metricsSnapshot(paths);
         var summary = readJson(paths.workstreamDir().resolve("reports").resolve("real-case-summary.json"));
         var nodes = mapList(timeline.get("nodes"));
         var current = Files.exists(paths.workflowCurrentJson()) ? workflowLedger.loadCurrent(paths) : null;
@@ -177,7 +228,7 @@ public class WorkstreamQueryService {
         var workflowId = current == null ? text(timeline.get("workflowId")) : current.workflowId();
         var definitionVersion = current == null ? text(timeline.get("definitionVersion")) : current.definitionVersion();
         var repairActions = repairActions(paths, summary);
-        var completionResolution = CompletionEvidenceLineageResolver.resolveCurrent(root, workstreamId);
+        var completionResolution = CompletionEvidenceLineageResolver.resolveCurrent(workflowLedger, root, workstreamId);
         var completionEvidence = completionEvidence(paths, completionResolution);
         var finalAcceptance = completionResolution.status() == CompletionEvidenceLineageResolver.Status.AVAILABLE
                 ? completionResolution.acceptance().document().decision()
@@ -193,7 +244,7 @@ public class WorkstreamQueryService {
                 : (summaryConfidence.isBlank() ? "derived_from_final_acceptance" : "real_case_summary_projection");
         var artifacts = artifacts(root, paths);
         var completionAudit = completionAudit(paths);
-        var deliveryView = deliveryViewService.view(root, workstreamId);
+        var deliveryView = sampledDelivery;
         var goalSatisfaction = readJson(paths.goalSatisfactionJson());
         var currentNode = currentNode(nodes, activeNodeIds);
         var latestAgentRuns = latestAgentRuns(root, paths, 6);
@@ -240,17 +291,18 @@ public class WorkstreamQueryService {
         response.put("deliveryView", deliveryView);
         response.put("recoveryAssessment", recoveryAssessment);
         response.put("networkAuthority", current == null ? Map.of("canApprove", false, "canCancel", false)
-                : new dev.dual.ledger.file.ExecutionNetworkGrantStore().view(paths));
+                : new dev.dual.ledger.file.ExecutionNetworkGrantStore(workflowLedger).view(paths));
         return response;
     }
 
     private Map<String, Object> normalizedTimeline(WorkstreamPaths paths) throws IOException {
-        var timeline = new LinkedHashMap<>(objectMapper.readValue(paths.timelineJson().toFile(), MAP_TYPE));
+        var timeline = new LinkedHashMap<>(new dev.dual.ledger.file.AtomicJsonWriter().objectMapper().convertValue(workflowLedger.timelineSnapshot(paths), MAP_TYPE));
         timeline.put("nodes", sortedTimelineNodes(mapList(timeline.get("nodes"))));
         return timeline;
     }
 
     public Map<String, Object> currentReview(Path workspaceRoot, String workstreamId) throws IOException {
+        if (!snapshot) return snapshot(workspaceRoot, workstreamId, scoped -> scoped.currentReview(workspaceRoot, workstreamId));
         var root = workspaceRoot.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
         var current = workflowLedger.loadCurrent(paths);
@@ -265,6 +317,7 @@ public class WorkstreamQueryService {
     }
 
     public Map<String, Object> review(Path workspaceRoot, String workstreamId, String nodeInstanceId) throws IOException {
+        if (!snapshot) return snapshot(workspaceRoot, workstreamId, scoped -> scoped.review(workspaceRoot, workstreamId, nodeInstanceId));
         var root = workspaceRoot.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
         var node = workflowLedger.loadNode(paths, nodeInstanceId);
@@ -304,6 +357,7 @@ public class WorkstreamQueryService {
     }
 
     public Map<String, Object> currentRecovery(Path workspaceRoot, String workstreamId) throws IOException {
+        if (!snapshot) return snapshot(workspaceRoot, workstreamId, scoped -> scoped.currentRecovery(workspaceRoot, workstreamId));
         var root = workspaceRoot.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
         var failurePath = paths.currentFailureMarkdown();
@@ -312,7 +366,9 @@ public class WorkstreamQueryService {
         var response = new LinkedHashMap<String, Object>();
         response.put("workstreamId", workstreamId);
         response.put("recoveryPath", failureRef);
-        if (!Files.isRegularFile(failurePath)) {
+        response.put("executionRecovery", dev.dual.runtime.handler.ExecutionRecoveryAdjudication.describe(workflowLedger, paths));
+        var failureMarkdown = workflowLedger.failureSummarySnapshot(paths);
+        if (failureMarkdown.isBlank()) {
             response.put("available", false);
             response.put("message", "No current failure summary found.");
             response.put("markdown", "");
@@ -320,18 +376,27 @@ public class WorkstreamQueryService {
         }
         response.put("available", true);
         response.put("message", "Current failure summary is available.");
-        response.put("markdown", Files.readString(failurePath, StandardCharsets.UTF_8));
+        response.put("markdown", failureMarkdown);
         response.put("assessment", recoveryAssessment(root, paths, workstreamId));
         return response;
     }
 
     public Map<String, Object> recoveryAssessment(Path workspaceRoot, String workstreamId) {
+        if (!snapshot) {
+            try { return snapshot(workspaceRoot, workstreamId, scoped -> scoped.recoveryAssessment(workspaceRoot, workstreamId)); }
+            catch (IOException invalid) { return Map.of("workstreamId", workstreamId, "status", "INVALID", "reason", invalid.getMessage()); }
+        }
         var root = workspaceRoot.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
         return recoveryAssessment(root, paths, workstreamId);
     }
 
     private Map<String, Object> workstreamSummary(Path requestedRoot, Path effectiveRoot, Path dir, Path workstreamJson) throws IOException {
+        if (!snapshot) {
+            try { return snapshot(effectiveRoot, dir.getFileName().toString(),
+                    scoped -> scoped.workstreamSummary(requestedRoot, effectiveRoot, dir, workstreamJson)); }
+            catch (IOException invalid) { return Map.of("workstreamId", dir.getFileName().toString(), "status", "INVALID", "reason", invalid.getMessage()); }
+        }
         var workstream = objectMapper.readValue(workstreamJson.toFile(), MAP_TYPE);
         var item = new LinkedHashMap<String, Object>();
         item.put("workstreamId", text(workstream.get("workstreamId")));

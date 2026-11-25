@@ -1,0 +1,86 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261010T124812Z-XCZL",
+  "gateNodeInstanceId" : "node-gate-human_requirement_review-011",
+  "gateNodeDefinitionId" : "gate.human_requirement_review",
+  "stageId" : "stage-gate",
+  "iterationId" : "iter-002",
+  "sourceOutcome" : "READY_FOR_PRODUCT_REVIEW",
+  "runtimeDisposition" : { },
+  "actionRequests" : [ ],
+  "allowedActions" : [ "approve", "revise" ],
+  "inputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json" ],
+  "inputArtifacts" : [ {
+    "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log",
+    "status" : "available",
+    "kind" : "stderr_log"
+  }, {
+    "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log",
+    "status" : "available",
+    "kind" : "file"
+  }, {
+    "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json",
+    "status" : "available",
+    "kind" : "json",
+    "sidecar" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json",
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "summary" : "修订已解决文件范围授权问题，功能、限制与验收要求完整，可以继续后续流程。",
+    "mustFix" : [ ],
+    "openRisks" : [ ]
+  }, {
+    "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json",
+    "status" : "available",
+    "kind" : "json"
+  }, {
+    "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json",
+    "status" : "available",
+    "kind" : "contract_sidecar",
+    "sidecar" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json",
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "summary" : "修订已解决文件范围授权问题，功能、限制与验收要求完整，可以继续后续流程。",
+    "mustFix" : [ ],
+    "openRisks" : [ ]
+  } ],
+  "reviewPacketPath" : ".agent/workstreams/ws-20261010T124812Z-XCZL/reviews/node-gate-human_requirement_review-011.md",
+  "taskContract" : { },
+  "requirementResolution" : { },
+  "latestAgentDecision" : {
+    "nodeId" : "intake.codex_product_review",
+    "stageOutcome" : "READY",
+    "lifecycleStatus" : "READY",
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "summary" : "修订已解决文件范围授权问题，功能、限制与验收要求完整，可以继续后续流程。",
+    "blocking" : false,
+    "mustFix" : [ ],
+    "missingEvidence" : [ ],
+    "openRisks" : [ ],
+    "changedFiles" : [ ],
+    "verificationSummary" : "基于提供的上下文完成需求覆盖与修订核对；未修改文件，未执行测试，无未解决的提案阻塞项。",
+    "evidenceState" : {
+      "blocking" : false,
+      "evidence_count" : 5,
+      "missing_evidence_count" : 0,
+      "must_fix_count" : 0,
+      "acceptance_note_count" : 2,
+      "open_risk_count" : 0
+    },
+    "sidecarPath" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json"
+  },
+  "reviewSubject" : {
+    "schema_version" : 1,
+    "artifact_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/intake-claude-brainstorm.contract.json",
+    "producer_node_id" : "intake.claude_brainstorm",
+    "producer_node_instance_id" : "node-intake-claude_brainstorm-006",
+    "sha256" : "320e15b65a9c523bd0b2f33ba01b5b296e3f4c23b04e82f74d128b161867fefe",
+    "proposal_id" : "node-intake-claude_brainstorm-006:320e15b65a9c523b",
+    "workstream_id" : "ws-20261010T124812Z-XCZL"
+  },
+  "gitEvidence" : { },
+  "delivery" : { },
+  "operatorGuidance" : {
+    "recommendedAction" : "approve",
+    "reason" : "The latest agent decision is positive. Approve only after checking the packet evidence.",
+    "suggestedChecks" : [ "Confirm the TaskContract objective, scope, non-goals, and acceptance criteria still match the task." ]
+  },
+  "createdAt" : "2026-10-10T12:57:53.501804Z"
+}

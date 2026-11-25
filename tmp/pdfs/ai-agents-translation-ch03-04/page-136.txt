@@ -1,0 +1,14 @@
+                           Figure 3-8. Comparison of MCTS with AB-MCTS.
+
+AB-MCTS introduces a GEN node under every tree node; when selected, this
+node signals that the model should generate a new candidate response, effectively
+creating a new branch. Whether to generate a new path or refine an existing one is
+guided by Thompson sampling, a Bayesian strategy that balances exploration and
+exploitation based on uncertainty.
+
+There are two main variants. AB-MCTS-M (mixed model) uses a node-specific
+Bayesian model to estimate scores for both GEN and existing nodes. It draws on
+observed scores from subtrees to build posterior predictive distributions that guide
+search decisions. This allows the model to infer likely rewards even for paths that
+have not yet been explored, enabling principled decision making with limited data.
+Figure 3-9 illustrates this mechanism.

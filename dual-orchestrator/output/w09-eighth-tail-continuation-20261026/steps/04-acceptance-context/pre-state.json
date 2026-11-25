@@ -1,0 +1,57 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-context-acceptance_codex_verifier_review-034"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000034",
+    "updatedAt": "2026-10-26T01:19:21.324736Z",
+    "commitSequence": 131
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-context-acceptance_codex_verifier_review-034",
+    "nodeDefinitionId": "context.acceptance_codex_verifier_review",
+    "kind": "TASK",
+    "handlerType": "context.build_package",
+    "status": "READY",
+    "stageId": "stage-context",
+    "iterationId": "iter-003",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.contract.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/git-evidence.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/base-commit.txt",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/head-commit.txt",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/branch.txt",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/git-root.txt",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/git-status-short.txt",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/git-name-status.txt",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/diff.stat",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/diff.patch",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/changed-files.txt",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/change-scope-evaluation.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/occurrences/node-implement-artifact_validation-033/change-scope-evaluation-ec762a7ac01b7fa959068af43840bfa4125ab34d2a1d899e80a6b31c03f11a3c.json"
+    ],
+    "inputTransition": {
+      "condition": "unconditional",
+      "transition_type": "normal",
+      "required": true,
+      "source_node_instance_id": "node-implement-artifact_validation-033",
+      "source_node_sha256": "187f07a0211cc590b8eed9aeb695b6789782a2fa19af8fcbcfa7f81bea33cd5e",
+      "purpose": "Only verified complete self-test evidence may enter artifact validation."
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 1978.1339193335623
+}

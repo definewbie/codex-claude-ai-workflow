@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/node",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-control-carveout-gate-20260930/claude-worker.mjs",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-control-carveout-gate-20260930/run/claude/spec.json"
+  ],
+  "env": {
+    "PATH": "/Users/kriswang/.pyenv/versions/3.13.0/bin:/Users/kriswang/.pyenv/libexec:/Users/kriswang/.pyenv/plugins/python-build/bin:/Users/kriswang/.pyenv/plugins/pyenv-virtualenv/bin:/Users/kriswang/.pyenv/plugins/pyenv-update/bin:/Users/kriswang/.pyenv/plugins/pyenv-doctor/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/usr/local/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Users/kriswang/.codex/tmp/arg0/codex-arg0eVEjY8:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/bin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.foundry/bin",
+    "HOME": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/home",
+    "TMPDIR": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/tmp",
+    "LANG": "en_US.UTF-8",
+    "CLAUDE_CONFIG_DIR": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/config",
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:56064",
+    "ANTHROPIC_AUTH_TOKEN": "diagnostic-not-a-real-credential",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "ANTHROPIC_MAX_RETRIES": "0"
+  },
+  "endpoint": "http://127.0.0.1:56064"
+}

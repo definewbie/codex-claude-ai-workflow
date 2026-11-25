@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-intake-claude_brainstorm-002",
+  "nodeDefinitionId": "intake.claude_brainstorm",
+  "kind": "TASK",
+  "handlerType": "acpx.agent_run",
+  "status": "COMPLETED",
+  "stageId": "stage-intake",
+  "iterationId": "iter-001",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/context/node-context-intake_claude_brainstorm-001.md"
+  ],
+  "inputTransition": {
+    "source_node_sha256": "11ba7813163d706a2f036cf205e556208208b564f3c2253ddc85fa2633cfc0bd",
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "condition": "unconditional",
+    "transition_type": "normal",
+    "required": true,
+    "source_node_instance_id": "node-context-intake_claude_brainstorm-001"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1793026771764/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.contract.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-a3f1b1e0eddc1272.ref.json"
+  ],
+  "result": {
+    "adapter_signals": [],
+    "agent": "claude",
+    "agent_execution_artifact_contract_results": [
+      {
+        "contractType": "task_contract_proposal",
+        "errorCode": "",
+        "errorMessage": "",
+        "path": "",
+        "present": true,
+        "required": true,
+        "valid": true
+      }
+    ],
+    "agent_execution_outcome": {
+      "nodeMaySucceed": true,
+      "operatorMessage": "The agent produced valid result and artifact evidence.",
+      "primaryReason": "completed",
+      "recoveryCategory": "NONE",
+      "retryPolicy": "NONE",
+      "secondarySignals": [],
+      "status": "SUCCESS"
+    },
+    "agent_execution_result_contract": {
+      "decision": "READY_FOR_PRODUCT_REVIEW",
+      "present": true,
+      "summary": "",
+      "valid": true,
+      "validationError": ""
+    },
+    "contract_sidecar_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.contract.json",
+    "contract_sidecar_sha256": "a3f1b1e0eddc12720355d7db51b4b59b7c17ec61519b40009dc80154266cb772",
+    "decision": "READY_FOR_PRODUCT_REVIEW",
+    "exit_code": 0,
+    "output_complete": true,
+    "permission_assessments": [],
+    "process_usability": "EXITED_ZERO",
+    "repository_fact_binding_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1793026771764/binding.json",
+    "repository_fact_binding_sha256": "d3b2b0f8afcfdf0e984be68a0df835f42c0ca2694b74d71d1d9ecd48e5ea0dea",
+    "run_id": "run-1793026771764",
+    "run_metadata": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/run.json",
+    "session": "claude-main-ws-20261026T142203Z-7SNA-run-1793026771764",
+    "summary": "在既有 assess-income phase-one 评估中由服务层计算并 typed 输出追平简单赚币的 90 天累计资金费率阈值，CLI 只展示，配套独立样例测试与简明使用说明。",
+    "task_contract_proposal_id": "node-intake-claude_brainstorm-002:a3f1b1e0eddc1272",
+    "task_contract_proposal_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-a3f1b1e0eddc1272.ref.json",
+    "transcript_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.transcript.log",
+    "completion_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/nxe-1793026771732-f96bb466-completion.json",
+    "completion_sha256": "4d86f8b69a889cd0237eb9d3e868bbe8eb6f6e4272563a3363a97acd469e9724"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1793026771732-f96bb466",
+  "startedAt": "2026-10-26T14:59:31.743194Z",
+  "finishedAt": "2026-10-26T15:02:40.389146Z"
+}

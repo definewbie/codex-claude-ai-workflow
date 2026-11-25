@@ -1,0 +1,17 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 W09 身份减负与初次 GOAL 前目标级返修实施及新发行，做一次合并、受影响范围的独立复审。先阅读 AGENTS.md 及必需工程清单。
+
+入口：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-revision-forward-fix-20261014/assessment.md。
+覆盖索引、实际消费者、写前缀和证据上限在同目录 verification-coverage.md、consumer-and-transition-map.md。
+范围依据：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-revision-wiring-design-20261014/assessment.md 与同目录 verification-plan.md，以及 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-revision-design-review-acceptance-20261014/cc-review-receipt.md。本轮增量是相对开工前 dirty 工作区的 incremental.patch / changed-files.json / before/，不是整个未提交 diff。
+
+请自行重建：返修决定与当前基准→同一次解析/渲染/R01→claim/dispatch→模型 raw/strict contract→唯一 outcome/发布/merger→derivation/reference/R03/L03→独立复评→当前人工门→GOAL/EXECUTION 后继，并检查每个 durable-write 前缀、冷读与恢复出口，不采信作者自评。
+
+重点检查：
+1. 模型只引用 ID 后，完整 reference/SHA 是否由程序真正固定并在派发、发布/合并、lineage/compile 强制消费；错/缺 R01、同 ID 异完整引用、假 initial/kind、旧 wire 不能借旁路；合法初始/普通 patch/新 full 是否误拒。
+2. 目标级 full 的实际合法入口、历史资格、bounded delta、当前义务及新复评/人工批准；已授 GOAL/EXECUTION、pending approval、late rework、旧 READY/批准与终态是否仍不能借权。注意历史追加不能假装基准漂移。
+3. 两项 LOW 的实质落地；测试迁移是否保留原正向义务与拒绝强度；先红、作者错误、中断/INVALID、删除守卫、稳定单轮与发行证据是否分列，不能用早期 SHA 拒绝冒充新 R01 守卫证明。
+4. 生产消费者与新发行字节一致性，原第五例及历史材料是否保持；有无不必要的兼容/平台/额外状态，实际复杂度与 ROI 是否仍在受审范围。
+
+按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给出分级发现、证据和未核验范围，区分实施/离线证明、发行候选、真实运行准入，不预设结论。必要时明确哪些验证义务尚未满足。
+
+只读复审：优先核对现有源码、断言、日志/XML和字节索引，不重复全回归；不修改代码/文档/账本，不启动额外 agent，不运行 native/provider/注入探针/真实 Gate，不启动第六例，不提交。无须重审无关历史材料，也不得把本次评审当作第六例运行授权。

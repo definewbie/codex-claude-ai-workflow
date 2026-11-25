@@ -1,0 +1,22 @@
+{
+  "run_id": "run-1791636537680",
+  "execution_authority": {
+    "schema": "claude_execution_policy.v2",
+    "policyRef": ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/execution-authority/claude-execution-policy.json",
+    "transportDisposition": "POLICY_BOUND",
+    "policySha256": "8fc5f2e57d508a477b69dbd7f592ac6ed143eb8b1f77988ed397eb49d624ff6c"
+  },
+  "session": "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680",
+  "stage": "stage-intake",
+  "provider_state": "completed first author request",
+  "prompt_sha256": "206d03302895c2802e176424bf1cc8de3100a58f30be323c4da29f895c7775b5",
+  "holder_load_entries": [
+    "[88.230s][info ][class,load] com.yomahub.liteflow.core.FlowExecutorHolder source: jar:nested:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar/!BOOT-INF/lib/liteflow-core-2.16.0.jar!/"
+  ],
+  "kernel_load_entries": [
+    "[0.719s][info ][class,load] dev.dual.flow.liteflow.LiteFlowPrototypeKernel source: jar:nested:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar/!BOOT-INF/lib/dual-flow-liteflow-0.1.0-SNAPSHOT.jar!/"
+  ],
+  "router_jvm_count": 1,
+  "scope": "observed selected runner only; no all-ClassLoader deployment claim",
+  "holder_status": "observed after routing"
+}

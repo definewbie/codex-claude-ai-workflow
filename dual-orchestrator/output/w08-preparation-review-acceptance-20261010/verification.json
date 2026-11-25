@@ -1,0 +1,27 @@
+{
+  "status": "CC_PASS_RECEIVED / PREPARATION_CLOSED_OFFLINE / G05_PENDING / REAL_NO_GO",
+  "source_inputs_unchanged": 654,
+  "changed_source_files": 0,
+  "documentation_updates": [
+    {
+      "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "before_sha256": "2ab12dc5e7518335234e34e435a2cc2963ccdca4e998f98f66f7049dcfd259f6",
+      "after_sha256": "799f4bccfaa742e9cde9b0cf08e25dc9a844115ad5446939d6fb0e7d8a3a77ee"
+    },
+    {
+      "path": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "before_sha256": "15667d968e1b340afca067c1a43d5e984fb12b3fa1b455055e734b5c4c09a5d5",
+      "after_sha256": "3c37e1c462f394e4a7f1ab7bcd2c2355f52d076e0b77c0073407a3d6c55d1996"
+    }
+  ],
+  "links_checked": 229,
+  "missing_links": [],
+  "provider_runs": 0,
+  "installer_runs": 0,
+  "test_runs": 0,
+  "extra_agents": 0,
+  "target_created": false,
+  "project_commit": false,
+  "fresh_run_authorized": false,
+  "prior_review_snapshot_unchanged_except_current_index_documents": true
+}

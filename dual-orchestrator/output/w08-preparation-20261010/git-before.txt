@@ -1,0 +1,356 @@
+ M README.en.md
+ M README.md
+ M docs/README.md
+ M docs/README.zh-CN.md
+ M docs/architecture-and-execution-flow.en.md
+ M docs/architecture-and-execution-flow.md
+ M docs/design/dual-orchestrator-current-architecture.zh-CN.md
+ M docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+ M docs/quickstart.md
+ M docs/quickstart.zh-CN.md
+ M docs/reference.md
+ M docs/release-checklist.md
+ M docs/release-checklist.zh-CN.md
+ M docs/testing/llm-boundary-hardening-validation-checklist.zh-CN.md
+ M docs/testing/smoke-test-e2e.md
+ M docs/testing/verification-gates/20260909-okx-profile-aligned-fresh-e2e.md
+ M docs/troubleshooting.md
+ M docs/troubleshooting.zh-CN.md
+ M dual-adapter-acpx/pom.xml
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxExecutionEventSink.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxRunResult.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionStreamProjector.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentExecutionHealth.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentLifecycleEvent.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentLifecycleEventReader.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentPromptRenderer.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentRunMetadataWriter.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ClaudeExecutionPolicy.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ReviewedAcpxBuildIdentity.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/SessionCompactionSeedWriter.java
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/WorkstreamMemoryUpdater.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTransportTest.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxSessionStreamProjectorTest.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentExecutionHealthTest.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentPromptRendererTest.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredAdapterFixture.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredManifestDispatchTest.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredReferenceCorrectionSequenceTest.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkstreamMemoryUpdaterTest.java
+ M dual-adapter-git/src/main/java/dev/dual/adapter/git/GitPatchMergeService.java
+ M dual-adapter-git/src/test/java/dev/dual/adapter/git/GitPatchMergeServiceTest.java
+ M dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/CliLedgerFactory.java
+ M dual-cli/src/main/java/dev/dual/cli/DeliveryCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/DeliveryFinalizeCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/DeliveryMergeCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/DualCtlCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/InspectCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/ProjectionsRefreshCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/RecoveryAbortCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/RecoveryApproveWebSearchCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/RecoveryCloseMistakenIterationCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/RecoveryNetworkCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/RecoveryReplayClassificationCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/RecoveryShowCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/RecoveryStaleCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/ResumeCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/RetryCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/ReviewApproveCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/ReviewCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/ReviewCompleteCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/ReviewDecideCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/ReviewReviseCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/ReviewShowCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/RunCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/StartCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/StatusCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/SummaryCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/TimelineCommand.java
+ M dual-cli/src/main/java/dev/dual/cli/WorkerRunOnceCommand.java
+ M dual-cli/src/test/java/dev/dual/cli/CliNextActionHintsTest.java
+ M dual-cli/src/test/java/dev/dual/cli/DeliveryMergeCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/ProjectionsRefreshCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/RecoveryNetworkCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/RecoveryShowCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/RecoveryStaleCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/RetryCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/ReviewDecideCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/ReviewPacketCliHintsTest.java
+ M dual-cli/src/test/java/dev/dual/cli/ReviewRequestActionCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/ReviewShowCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/SessionsReapCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/StatusCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/SummaryCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/TimelineCommandTest.java
+ M dual-cli/src/test/java/dev/dual/cli/WatchCommandTest.java
+ M dual-core/src/main/java/dev/dual/core/contract/TaskContract.java
+ M dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java
+ M dual-core/src/main/java/dev/dual/core/execution/AdapterSignal.java
+ M dual-core/src/main/java/dev/dual/core/execution/AdapterSignalType.java
+ M dual-core/src/main/java/dev/dual/core/execution/AgentExecutionEvidence.java
+ M dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java
+ M dual-core/src/main/java/dev/dual/core/execution/AgentExecutionTimelineEventKind.java
+ M dual-core/src/main/java/dev/dual/core/workflow/HumanGateActionSemantics.java
+ M dual-core/src/test/java/dev/dual/core/contract/TaskContractTest.java
+ M dual-core/src/test/java/dev/dual/core/execution/AgentExecutionOutcomeResolverTest.java
+ M dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java
+ M dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/LiteFlowLedgerBoundaryTest.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/AgentTaskLedgerWriter.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/AtomicJsonWriter.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/CompletionAuditWriter.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryMergePlan.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryMergePlanWriter.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryMergeStatus.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/EvidenceCollectionBaseline.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionNetworkGrantStore.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/FailureSummaryWriter.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/GateDocument.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/LedgerEventLog.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/OperatorWorkspaceRegistry.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/RevisionTracker.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/TimelineEventDocument.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/TimelineProjectionWriter.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowCurrentDocument.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamAttentionEvaluator.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamDocument.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamLock.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/ConditionalEdgeRoutingTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/DeliveryMergePlanTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/ExecutionNetworkGrantStoreTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/FileLedgerStoreTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/HumanActionRequestTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/MultiFileMutationRestartAssessmentTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/ParallelFanOutTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/RecoveryAssessmentTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/RetryFailureContextTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowFileLedgerTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkstreamAttentionEvaluatorTest.java
+ M dual-runtime/pom.xml
+ M dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java
+ M dual-runtime/src/main/java/dev/dual/runtime/StaleRunningRecovery.java
+ M dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java
+ M dual-runtime/src/main/java/dev/dual/runtime/delivery/AcceptedDeliveryCandidateResolver.java
+ M dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentEvidenceIndex.java
+ D dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java
+ D dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptTimeoutPolicy.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionResultFacts.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputContractDocument.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputLineageVerifier.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultDocumentProjector.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelope.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeValidator.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunGovernanceContext.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunMetadataFinalizer.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactValidateHandler.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/ContextBuildPackageHandler.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/ContextStateEvidenceBoundaryRenderer.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/DecisionHandler.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/DesignScopeValidator.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollectionSource.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceManifest.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/FailureArbiter.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/FailureClassifyHandler.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/GateHandler.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/HumanReviewGateHandler.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/PlanArtifactDocument.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/PlanScopeValidator.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/PromptGenerateNextStageHandler.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/RepoScopeGovernance.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/ReportGenerateFinalHandler.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractArtifactWriter.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalReference.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalValidator.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/TaskHandler.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/WorkstreamMemoryProjection.java
+ M dual-runtime/src/main/java/dev/dual/runtime/lifecycle/WorkflowDefinitionLoader.java
+ M dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json
+ M dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json
+ M dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json
+ M dual-runtime/src/test/java/dev/dual/runtime/RunningStateGuardTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/StaleRunningRecoveryTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeEventTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/delivery/DeliveryApplicationServiceTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairInterruptionTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/AgentEvidenceIndexTest.java
+ D dual-runtime/src/test/java/dev/dual/runtime/handler/AgentExecutionAttemptReconcilerTest.java
+ D dual-runtime/src/test/java/dev/dual/runtime/handler/AgentExecutionAttemptTimeoutPolicyTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/AgentOutputLineageFixture.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeParserTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/AgentRunMetadataFinalizerTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractFixtureRegressionTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredInputFixture.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ChangeScopeEvaluationTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageFixture.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ContextBudgetOverrideTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ContextBuildPackageHandlerTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ContextTaskContractSectionTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ContractCompileHandlerTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ContractLifecycleLedgerTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRegistryTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ContractReviewGateTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRevisionDisplayTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ExternalVerificationEvidenceTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/FailureClassifyHandlerTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/LateContractRevisionContextTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/LateProposalScopeTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/PlanArtifactDocumentTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/PromptGenerateNextStageHandlerTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/RepoScopeGovernanceContractDiscoveryTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ReportFailureClassificationTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ReportGenerateFinalHandlerTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ReportTaskContractTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/SmallWorkflowProfileGateIntegrationTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/TaskContractArtifactWriterTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/TaskContractProjectionFixture.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/TaskContractProjectionVerifierTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/TypedDesignScopeTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/TypedPlanScopeTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/WorkflowIntegrationTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/WorkstreamMemoryProjectionTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRepairWorkflowDefinitionTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/ContractWorkflowDefinitionTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/FullWorkflowDefinitionTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/LifecycleWorkflowDefinitionFactoryTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/SmallWorkflowProfileDefinitionTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/TerminalDeliveryWorkflowDefinitionTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/WorkflowDefinitionLoaderTest.java
+ M dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json
+ M dual-server/pom.xml
+ M dual-server/src/main/java/dev/dual/server/DeliveryViewService.java
+ M dual-server/src/main/java/dev/dual/server/ServerLedgerFactory.java
+ M dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java
+ M dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java
+ M dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java
+ M dual-server/src/main/resources/static/console.js
+ M dual-server/src/main/resources/static/index.html
+ M dual-server/src/main/resources/static/mgt/app.js
+ M dual-server/src/main/resources/static/mgt/index.html
+ M dual-server/src/test/java/dev/dual/server/DeliveryViewServiceTest.java
+ M dual-server/src/test/java/dev/dual/server/SchedulerServiceTest.java
+ M dual-server/src/test/java/dev/dual/server/WorkstreamActionServiceTest.java
+ M dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java
+ M pom.xml
+ M scripts/configure-acpx.sh
+ M scripts/fixtures/emit-strict-agent-result.py
+ M scripts/semantic-boundary-smoke.sh
+ M scripts/smoke-test.sh
+ M tools/acpx-e1/manifest.json
+ M tools/acpx-e1/patches/acpx-v0.13.2-e1-policy-transport.patch
+?? ../.playwright-cli/
+?? .playwright-cli/
+?? docs/design/20260913-dual-evolution-retrospective-and-handoff.zh-CN.md
+?? docs/plans/20260910-harness-overall-convergence-review.zh-CN.md
+?? docs/plans/20260910-human-disposition-and-evidence-continuation-design-review.zh-CN.md
+?? docs/plans/20260910-workflow-continuation-and-liteflow-bounded-assessment.zh-CN.md
+?? docs/plans/20260912-dual-end-to-end-development-capability-review.zh-CN.md
+?? docs/plans/20260913-workflow-first-convergence-redesign.zh-CN.md
+?? docs/plans/20260913-workflow-first-implementation-checkpoint.zh-CN.md
+?? docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md
+?? docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+?? docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+?? docs/testing/20260929-d04-three-boundary-verification-checklist.zh-CN.md
+?? docs/testing/capability-proofs/20260907-phase-a-network-grant-effect-result/
+?? docs/testing/verification-gates/20260903-okx-s2-recovery-and-terminal-completion.md
+?? docs/testing/verification-gates/20260907-spm9-after-phase-a-readiness.md
+?? docs/testing/verification-gates/20260909-scope-deviation-disposition-policy.zh-CN.md
+?? dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxExecutionRecovery.java
+?? dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java
+?? dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxToolObservations.java
+?? dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java
+?? dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxNativeCommandSequenceTest.java
+?? dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxTestLedger.java
+?? dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxToolObservationsTest.java
+?? dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java
+?? dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionStreamTest.java
+?? dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionTransportSequenceTest.java
+?? dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/SessionMetadataFixture.java
+?? dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java
+?? dual-cli/src/main/java/dev/dual/cli/DeliveryResolveCommand.java
+?? dual-cli/src/main/java/dev/dual/cli/PermissionsCommand.java
+?? dual-cli/src/main/java/dev/dual/cli/ReviewRecordReadinessCommand.java
+?? dual-cli/src/test/java/dev/dual/cli/CliLedgerFactoryTest.java
+?? dual-cli/src/test/java/dev/dual/cli/CliTestLedger.java
+?? dual-cli/src/test/java/dev/dual/cli/NativePermissionCliTest.java
+?? dual-core/src/test/java/dev/dual/core/contract/PhasedContractTest.java
+?? dual-core/src/test/resources/
+?? dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/FlowTestLedger.java
+?? dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/LiteFlowLifecycleIsolationTest.java
+?? dual-ledger-file/src/main/java/dev/dual/ledger/file/ContractQualificationChecks.java
+?? dual-ledger-file/src/main/java/dev/dual/ledger/file/ContractQualificationRecovery.java
+?? dual-ledger-file/src/main/java/dev/dual/ledger/file/LedgerSession.java
+?? dual-ledger-file/src/test/java/dev/dual/ledger/file/ExecutionClaimSequenceTest.java
+?? dual-ledger-file/src/test/java/dev/dual/ledger/file/LedgerSessionTest.java
+?? dual-ledger-file/src/test/java/dev/dual/ledger/file/LedgerTestFixture.java
+?? dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowCommitSequenceTest.java
+?? dual-runtime/src/main/java/dev/dual/runtime/AgentExecutionCompletion.java
+?? dual-runtime/src/main/java/dev/dual/runtime/FrozenRuntimeIdentity.java
+?? dual-runtime/src/main/java/dev/dual/runtime/RecordedExecutionRecovery.java
+?? dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java
+?? dual-runtime/src/main/java/dev/dual/runtime/handler/ContractQualificationTrace.java
+?? dual-runtime/src/main/java/dev/dual/runtime/handler/ExecutionRecoveryAdjudication.java
+?? dual-runtime/src/main/java/dev/dual/runtime/handler/NativePermissionRequests.java
+?? dual-runtime/src/main/java/dev/dual/runtime/handler/PermissionEvidence.java
+?? dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewGateActions.java
+?? dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationEvidence.java
+?? dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java
+?? dual-runtime/src/test/java/dev/dual/ledger/
+?? dual-runtime/src/test/java/dev/dual/runtime/FrozenRuntimeIdentityTest.java
+?? dual-runtime/src/test/java/dev/dual/runtime/RuntimeTestLedger.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/AgentRunCommitProtocolTest.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/ApprovedExecutionTestFixture.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/ContractQualificationRejectionInventoryTest.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/ContractQualificationSequenceTest.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/LegacyContractConsumerRejectionTest.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/NativePermissionSequenceTest.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/OfflineAgentRun.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/PermissionEvidenceSequenceTest.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/ReadinessRoutingDefinitionTest.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/VerificationEvidenceSequenceTest.java
+?? dual-runtime/src/test/java/dev/dual/runtime/handler/VerificationReadinessTest.java
+?? dual-runtime/src/test/resources/contract-qualification-rejection-sites.json
+?? dual-server/src/main/resources/static/native-permissions.js
+?? dual-server/src/test/java/dev/dual/server/NativePermissionApiTest.java
+?? dual-server/src/test/java/dev/dual/server/ServerLedgerFactoryTest.java
+?? dual-server/src/test/java/dev/dual/server/ServerTestLedger.java
+?? output/
+?? ../output/

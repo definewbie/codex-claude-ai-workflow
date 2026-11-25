@@ -24,11 +24,27 @@ public final class TaskContractRevisionContextResolver {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule())
             .registerModule(new dev.dual.ledger.file.EdgeConditionModule());
 
+    private final dev.dual.ledger.file.WorkflowFileLedger ledger;
+
+    private final boolean snapshot;
+    public TaskContractRevisionContextResolver(dev.dual.ledger.file.WorkflowFileLedger ledger) { this(ledger, false); }
+    private TaskContractRevisionContextResolver(dev.dual.ledger.file.WorkflowFileLedger ledger, boolean snapshot) {
+        this.ledger = java.util.Objects.requireNonNull(ledger); this.snapshot = snapshot;
+    }
+    private dev.dual.ledger.file.WorkstreamPaths paths(Path root, String ws) {
+        return new dev.dual.ledger.file.WorkstreamPaths(root, new dev.dual.core.id.DualId(ws));
+    }
+    private Result read(Path root, String ws, java.util.function.Function<TaskContractRevisionContextResolver, Result> work) {
+        try { return ledger.inspect(paths(root, ws), (scoped, files) -> work.apply(new TaskContractRevisionContextResolver(scoped, true))); }
+        catch (IOException failure) { return failure("revision snapshot unavailable", message(failure)); }
+    }
+
     public Result resolveForNode(
             Path workspaceRoot,
             String workstreamId,
             String nodeInstanceId
     ) {
+        if (!snapshot) return read(workspaceRoot, workstreamId, r -> r.resolveForNode(workspaceRoot, workstreamId, nodeInstanceId));
         var workstreamDir = workstreamDir(workspaceRoot, workstreamId);
         try {
             var nodePath = workstreamDir.resolve("nodes").resolve(nodeInstanceId + ".json");
@@ -54,6 +70,7 @@ public final class TaskContractRevisionContextResolver {
             String workstreamId,
             String iterationId
     ) {
+        if (!snapshot) return read(workspaceRoot, workstreamId, r -> r.resolveForIteration(workspaceRoot, workstreamId, iterationId));
         var root = workspaceRoot.toAbsolutePath().normalize();
         var workstreamDir = workstreamDir(root, workstreamId);
         try {
@@ -145,12 +162,20 @@ public final class TaskContractRevisionContextResolver {
         }
         var baselines = verifiedBaselines(
                 root, workstreamId, workstreamDir, trigger.inputRefs(), iteration.parentIterationId(),
-                Set.of("BLOCKED"), false);
+                Set.of("READY_FOR_PRODUCT_REVIEW", "BLOCKED"), false);
         if (baselines.size() != 1) {
-            return failure("human requirement revision must reference exactly one verified blocked intake review",
+            return failure("human requirement revision must reference exactly one verified human-reviewable intake review",
                     "review_count=" + baselines.size());
         }
         var baseline = baselines.getFirst();
+        // The completed node is not sufficient authority: the durable human decision and its
+        // routed subject must agree, exactly as for later contract rework.
+        var reader = new LateReader(root, workstreamId);
+        var verified = reader.requirementSubject(reader.gate(trigger, "revise"),
+                Set.of("READY_FOR_PRODUCT_REVIEW", "BLOCKED"));
+        require(verified.previousReference().equals(baseline.previousReference()),
+                "human requirement revision subject mismatch");
+        reader.iterationRoute(iteration, trigger);
         return new Result(new Context(
                 iteration,
                 true,
@@ -182,51 +207,12 @@ public final class TaskContractRevisionContextResolver {
             return failure("revision trigger is not a completed contract clarification gate",
                     iteration.triggerNodeInstanceId());
         }
-        var resolutionRefs = trigger.inputRefs().stream()
-                .filter(ref -> ref != null && ref.endsWith("/artifacts/contract-resolution.json"))
-                .toList();
-        if (resolutionRefs.size() != 1) {
-            return failure("contract clarification must reference exactly one contract resolution",
-                    "resolution_count=" + resolutionRefs.size());
-        }
-        var resolutionPath = root.resolve(resolutionRefs.getFirst()).normalize();
-        if (!resolutionPath.startsWith(root) || !Files.isRegularFile(resolutionPath)) {
-            return failure("contract clarification resolution artifact is missing", resolutionRefs.getFirst());
-        }
-        var resolution = OBJECT_MAPPER.readValue(resolutionPath.toFile(), ContractResolutionDocument.class);
-        if (!"APPROVE".equals(resolution.decision())
-                || !"human_gate".equals(resolution.approvedBy())
-                || resolution.gateRef() == null || resolution.gateRef().isBlank()) {
-            return failure("contract clarification resolution is not bound to an approved requirement gate",
-                    resolutionRefs.getFirst());
-        }
-        var requirementGatePath = root.resolve(resolution.gateRef()).normalize();
-        if (!requirementGatePath.startsWith(root) || !Files.isRegularFile(requirementGatePath)) {
-            return failure("approved requirement gate referenced by contract resolution is missing",
-                    resolution.gateRef());
-        }
-        var requirementGate = OBJECT_MAPPER.readValue(requirementGatePath.toFile(), GateDocument.class);
-        var gateNodePath = workstreamDir.resolve("nodes").resolve(requirementGate.nodeInstanceId() + ".json");
-        if (!Files.isRegularFile(gateNodePath)) {
-            return failure("approved requirement gate node is missing", requirementGate.nodeInstanceId());
-        }
-        var gateNode = OBJECT_MAPPER.readValue(gateNodePath.toFile(), NodeInstanceDocument.class);
-        var gateAction = text(requirementGate.result().get("human_action"));
-        var subjectRefs = stringList(requirementGate.result().get("subject_input_refs"));
-        if (!"resolved".equals(requirementGate.status())
-                || !"approved".equals(gateAction)
-                || !"gate.human_requirement_review".equals(gateNode.nodeDefinitionId())
-                || !iteration.parentIterationId().equals(gateNode.iterationId())) {
-            return failure("contract resolution requirement gate lineage is invalid", resolution.gateRef());
-        }
-        var baselines = verifiedBaselines(
-                root, workstreamId, workstreamDir, subjectRefs, iteration.parentIterationId(),
-                Set.of("READY_FOR_PRODUCT_REVIEW", "BLOCKED"), false);
-        if (baselines.size() != 1) {
-            return failure("contract clarification must resolve exactly one verified approved proposal",
-                    "review_count=" + baselines.size());
-        }
-        var baseline = baselines.getFirst();
+        // Resolve the exact compiled occurrence. The stable contract-resolution.json is rewritten
+        // by the next compile and cannot be the authority for an earlier clarification.
+        var reader = new LateReader(root, workstreamId);
+        var gate = reader.gate(trigger, "clarify");
+        var baseline = reader.compiledBaseline(gate.source().nodeInstanceId());
+        reader.iterationRoute(iteration, trigger);
         return new Result(new Context(
                 iteration,
                 true,
@@ -252,10 +238,23 @@ public final class TaskContractRevisionContextResolver {
     }
 
     public Result resolveForProposal(Path root, String workstreamId, TaskContractProposalReference candidate) {
+        if (!snapshot) return read(root, workstreamId, r -> r.resolveForProposal(root, workstreamId, candidate));
         try {
             require(candidate != null && candidate.resolveArtifact(root, workstreamId, OBJECT_MAPPER).isPresent(),
                     "proposal reference invalid");
             var result = resolveForNode(root, workstreamId, candidate.producerNodeInstanceId());
+            if (result.valid() && result.context().revision()) {
+                var doc=AgentOutputContractDocument.read(root.resolve(candidate.artifactRef()),OBJECT_MAPPER).orElseThrow();
+                require(ContractRevisionBinding.validSource(root,workstreamId,doc),"revision R01/derivation invalid");
+                require(doc.proposalDerivation().baseProposalReference().equals(result.context().previousReference()),
+                        "revision derivation baseline differs from routed subject");
+                if (doc.proposalDerivation().kind().equals("goal_reproposal")) {
+                    require(goalReproposalAllowed(root,workstreamId,result.context(),candidate.producerNodeInstanceId()),
+                            "goal re-proposal is not an eligible initial negotiation");
+                    require(new TaskContractProposalValidator().validateGoalReproposal(result.context().previousProposal(),
+                            doc.taskContractProposal()).isEmpty(),"goal re-proposal delta invalid");
+                }
+            }
             if (result.valid() && result.context().lateRoot() != null) {
                 var reader = new LateReader(root, workstreamId);
                 reader.proposal(candidate);
@@ -267,64 +266,84 @@ public final class TaskContractRevisionContextResolver {
         }
     }
 
+    /** Derive permitted forms at this author's routed occurrence, never from a later mutable current projection. */
+    boolean goalReproposalAllowed(Path root, String ws, Context context, String authorId) throws IOException {
+        if (!context.revision() || context.lateRoot() != null) return false;
+        var item = context.iteration();
+        var dir = workstreamDir(root, ws);
+        var seen = new HashSet<String>();
+        while (!"workflow_started".equals(item.triggerAction())) {
+            require(seen.add(item.iterationId()), "revision ancestry cycle");
+            if (!Set.of("NEEDS_REVISION", "revise").contains(item.triggerAction())) return false;
+            require(!item.parentIterationId().isBlank(), "revision ancestry parent absent");
+            var parent = dir.resolve("iterations/" + item.parentIterationId() + ".json");
+            var value = OBJECT_MAPPER.readValue(parent.toFile(), WorkflowIterationDocument.class);
+            require(value.iterationId().equals(item.parentIterationId()), "revision ancestry identity mismatch");
+            item = value;
+        }
+        var reader = new LateReader(root, ws);
+        var cutoff = reader.origin(authorId).sequence();
+        // A compile routed before this author already means approval occurred, even if compile failed/pends.
+        // Later compilation of this very proposal must not invalidate its historical eligibility.
+        return reader.events.stream().noneMatch(e -> e.sequence() < cutoff
+                && (e.to().equals("contract.compile") || e.to().equals("contract.compile_execution")
+                    || e.from().equals("gate.contract_review") && e.action().equals("approved")));
+    }
+
+    public ContractRevisionBinding.Captured captureRevision(TaskHandler.TaskContext context) throws IOException {
+        if (!snapshot) return ledger.inspect(paths(context.workspaceRoot(), context.workstreamId()), (scoped, files) ->
+                new TaskContractRevisionContextResolver(scoped, true).captureRevision(context));
+        var result = resolveForNode(context.workspaceRoot(), context.workstreamId(), context.instance().nodeInstanceId());
+        require(result.valid(), "TASK_CONTRACT_REVISION_CONTEXT_INVALID: " + result.errors());
+        var resolved = result.context();
+        if (!resolved.revision()) return new ContractRevisionBinding.Captured(resolved, null, List.of());
+        var forms = goalReproposalAllowed(context.workspaceRoot(), context.workstreamId(), resolved,
+                context.instance().nodeInstanceId()) ? List.of("REVISION_PATCH", "GOAL_REPROPOSAL") : List.of("REVISION_PATCH");
+        var binding = new ContractRevisionBinding(resolved.iteration().iterationId(), resolved.previousReference(),
+                List.copyOf(resolved.obligations()), forms);
+        var inputs = new ArrayList<Path>();
+        inputs.add(context.workspaceRoot().resolve(resolved.previousReference().artifactRef()));
+        var trigger = ledger.loadNode(paths(context.workspaceRoot(), context.workstreamId()),
+                resolved.iteration().triggerNodeInstanceId());
+        new LateReader(context.workspaceRoot(),context.workstreamId()).iterationRoute(resolved.iteration(),trigger);
+        for (var ref : trigger.inputRefs()) if (ref.endsWith(".contract.json")) inputs.add(context.workspaceRoot().resolve(ref));
+        // Human decisions are immutable once resolved; route entries remain checked by the original reader.
+        if (resolved.iteration().triggerAction().equals("revise") || resolved.iteration().triggerAction().equals("clarify")) {
+            var reader = new LateReader(context.workspaceRoot(), context.workstreamId());
+            inputs.add(context.workspaceRoot().resolve(reader.gate(trigger, resolved.iteration().triggerAction()).ref()));
+        }
+        return new ContractRevisionBinding.Captured(resolved, binding, List.copyOf(inputs));
+    }
+
     public Result resolveForDisplayIteration(Path root, String workstreamId, String iterationId) {
         return resolveForIteration(root, workstreamId, iterationId);
     }
 
     public TaskContractProposalReference proposalForCompile(Path root, String workstreamId, String compileId)
             throws IOException {
+        if (!snapshot) return ledger.inspect(paths(root, workstreamId), (scoped, files) -> new TaskContractRevisionContextResolver(scoped, true).proposalForCompile(root, workstreamId, compileId));
         return new LateReader(root, workstreamId).compiledBaseline(compileId).previousReference();
     }
 
     public TaskContractProposalReference proposalForContractGate(Path root, String workstreamId, String gateNodeId)
             throws IOException {
-        var reader = new LateReader(root, workstreamId);
-        return reader.compiledBaseline(contractGateCompile(reader, gateNodeId).nodeInstanceId()).previousReference();
+        if (!snapshot) return ledger.inspect(paths(root, workstreamId), (scoped, files) -> new TaskContractRevisionContextResolver(scoped, true).proposalForContractGate(root, workstreamId, gateNodeId));
+        var candidate = contractGateCandidate(root, workstreamId, gateNodeId);
+        var goal = TaskContractProjectionVerifier.resolve(ledger, root, workstreamId,
+                dev.dual.core.contract.TaskContract.Phase.GOAL).qualified()
+                .orElseThrow(() -> new IOException("GOAL_CONTRACT_NOT_QUALIFIED"));
+        require(new dev.dual.core.contract.TaskContract.Reference(goal.contractRef(), goal.sha256())
+                .equals(candidate.contract().goalContract()), "execution candidate GOAL mismatch");
+        return proposalForCompile(root, workstreamId, goal.compileNodeInstanceId());
     }
 
-    TaskContractProjectionVerifier.LegacyProjection contractGateCandidate(Path root, String workstreamId, String gateNodeId)
+    TaskContractProjectionVerifier.CandidateProjection contractGateCandidate(Path root, String workstreamId, String gateNodeId)
             throws IOException {
-        var reader = new LateReader(root, workstreamId);
-        var compile = contractGateCompile(reader, gateNodeId);
-        reader.compiledBaseline(compile.nodeInstanceId());
-        var projection = TaskContractProjectionVerifier.readLegacyProjection(root, workstreamId).projection()
-                .orElseThrow(() -> new IOException("contract candidate artifacts are missing or invalid"));
-        reader.path(projection.contractRef());
-        reader.path(projection.resolutionRef());
-        require(compile.outputRefs().contains(projection.contractRef())
-                && compile.outputRefs().contains(projection.resolutionRef()), "contract candidate refs are not bound by compile");
-        require(TaskContractArtifactWriter.sha256(projection.rawJson().getBytes(java.nio.charset.StandardCharsets.UTF_8))
-                        .equals(text(compile.result().get("task_contract_sha256")))
-                && TaskContractArtifactWriter.sha256(projection.rawResolutionJson().getBytes(java.nio.charset.StandardCharsets.UTF_8))
-                        .equals(text(compile.result().get("contract_resolution_sha256"))),
-                "contract candidate SHA does not match source compile");
-        // Return the checked snapshot; presentation must not read the stable files a second time.
-        return projection;
-    }
-
-    private static NodeInstanceDocument contractGateCompile(LateReader reader, String gateNodeId) throws IOException {
-        var gateNode = reader.node(gateNodeId);
-        var event = reader.origin(gateNodeId);
-        var gate = OBJECT_MAPPER.readValue(reader.path(reader.relative(
-                reader.dir.resolve("gates/" + event.gateId() + ".json"))).toFile(), GateDocument.class);
-        require(gateNode.nodeDefinitionId().equals("gate.contract_review")
-                && event.to().equals(gateNode.nodeDefinitionId())
-                && gate.nodeInstanceId().equals(gateNodeId) && gate.gateId().equals(event.gateId())
-                && gateNode.inputRefs().equals(stringList(gate.result().get("subject_input_refs"))),
-                "current contract gate subject mismatch");
-        var sourceId = text(gateNode.result().get("source_node_instance_id"));
-        require(sourceId.equals(event.sourceId())
-                && sourceId.equals(text(gate.result().get("source_node_instance_id")))
-                && event.action().equals(text(gate.result().get("source_outcome"))),
-                "current contract gate source mismatch");
-        var compile = reader.node(sourceId);
-        reader.completed(compile, "contract.compile");
-        require(compile.iterationId().equals(gateNode.iterationId()), "current contract gate iteration mismatch");
-        reader.route(compile, gateNode, event.action());
-        return compile;
+        return TaskContractProjectionVerifier.executionCandidate(ledger, root, workstreamId, gateNodeId, false);
     }
 
     public Result resolveForCompile(Path root, String workstreamId, String compileId) {
+        if (!snapshot) return read(root, workstreamId, r -> r.resolveForCompile(root, workstreamId, compileId));
         try {
             return resolveForProposal(root, workstreamId, proposalForCompile(root, workstreamId, compileId));
         } catch (Exception failure) {
@@ -332,9 +351,10 @@ public final class TaskContractRevisionContextResolver {
         }
     }
 
-    static Map<String, Object> captureAcceptanceReworkBaseline(
+    Map<String, Object> captureAcceptanceReworkBaseline(
             Path root, String workstreamId, TaskContractProjectionVerifier.QualifiedTaskContract qualified,
             AgentEvidenceIndex.Entry acceptance) throws IOException {
+        if (!snapshot) return ledger.inspect(paths(root, workstreamId), (scoped, files) -> new TaskContractRevisionContextResolver(scoped, true).captureAcceptanceReworkBaseline(root, workstreamId, qualified, acceptance));
         var reader = new LateReader(root, workstreamId);
         var reviewRef = reader.relative(acceptance.path());
         var review = reader.acceptance(reviewRef, reader.sha(reviewRef));
@@ -345,9 +365,10 @@ public final class TaskContractRevisionContextResolver {
         return Map.of("acceptance_rework_baseline", Map.copyOf(values));
     }
 
-    static Map<String, Object> captureScopeReworkBaseline(
+    Map<String, Object> captureScopeReworkBaseline(
             Path root, String workstreamId, TaskContractProjectionVerifier.QualifiedTaskContract qualified,
             ChangeScopeEvaluationArtifact.Reference evaluation) throws IOException {
+        if (!snapshot) return ledger.inspect(paths(root, workstreamId), (scoped, files) -> new TaskContractRevisionContextResolver(scoped, true).captureScopeReworkBaseline(root, workstreamId, qualified, evaluation));
         var reader = new LateReader(root, workstreamId);
         var values = captureQualifiedBaseline(reader, qualified);
         values.put("evaluation_ref", evaluation.ref());
@@ -364,9 +385,8 @@ public final class TaskContractRevisionContextResolver {
         require(approval.node().nodeDefinitionId().equals("gate.contract_review")
                 && approval.source().nodeInstanceId().equals(compile.nodeInstanceId())
                 && approval.event().id().equals(qualified.approvalEventId()), "qualified contract gate mismatch");
-        var requirement = reader.requirementApproval(compile, baseline);
-        require(text(qualified.resolutionDocument().get("gate_ref")).equals(requirement.ref()),
-                "qualified resolution requirement gate mismatch");
+        var goalCompile = reader.goalCompile(compile);
+        var requirement = reader.requirementApproval(goalCompile, baseline);
         require(qualified.sha256().equals(text(compile.result().get("task_contract_sha256")))
                 && qualified.resolutionSha256().equals(text(compile.result().get("contract_resolution_sha256"))),
                 "qualified compile hashes mismatch");
@@ -376,10 +396,13 @@ public final class TaskContractRevisionContextResolver {
         var workspace = reader.workspace();
         var values = new LinkedHashMap<String, Object>();
         values.put("proposal_reference", baseline.previousReference().toMap());
-        var productReviewRef = reader.reviewRef(compile.inputRefs());
+        var productReviewRef = reader.reviewRef(goalCompile.inputRefs());
         values.put("proposal_review_ref", productReviewRef);
         values.put("proposal_review_sha256", reader.sha(productReviewRef));
         values.put("compile_node_instance_id", compile.nodeInstanceId());
+        values.put("goal_compile_node_instance_id", goalCompile.nodeInstanceId());
+        values.put("task_contract_ref", qualified.contractRef());
+        values.put("contract_resolution_ref", qualified.resolutionRef());
         values.put("task_contract_sha256", qualified.sha256());
         values.put("contract_resolution_sha256", qualified.resolutionSha256());
         values.put("contract_gate_ref", approval.ref());
@@ -425,7 +448,7 @@ public final class TaskContractRevisionContextResolver {
         if (!condition) throw new IOException(reason);
     }
 
-    private static final class LateReader {
+    private final class LateReader {
         private final Path root;
         private final String ws;
         private final Path dir;
@@ -503,7 +526,7 @@ public final class TaskContractRevisionContextResolver {
 
         AgentOutputContractDocument document(String ref) throws IOException {
             var file = path(ref);
-            var entries = AgentEvidenceIndex.fromRefs(root, ws, List.of(ref), OBJECT_MAPPER).recent(2);
+            var entries = AgentEvidenceIndex.fromRefs(ledger, root, ws, List.of(ref), OBJECT_MAPPER).recent(2);
             require(entries.size() == 1 && entries.getFirst().path().equals(file),
                     "historical sidecar publication lineage or semantics invalid");
             return entries.getFirst().document();
@@ -590,6 +613,7 @@ public final class TaskContractRevisionContextResolver {
         }
 
         Gate requirementApproval(NodeInstanceDocument compile, Baseline baseline) throws IOException {
+            compile = goalCompile(compile);
             var matches = new ArrayList<Gate>();
             try (var files = Files.list(dir.resolve("gates"))) {
                 for (var file : files.filter(p -> p.getFileName().toString().endsWith(".json")).toList()) {
@@ -614,8 +638,42 @@ public final class TaskContractRevisionContextResolver {
             return matches.getFirst();
         }
 
+        NodeInstanceDocument goalCompile(NodeInstanceDocument compile) throws IOException {
+            completed(compile, compile.nodeDefinitionId());
+            var contractRefs = compile.outputRefs().stream().filter(r -> r.endsWith("/task-contract.json")).toList();
+            require(contractRefs.size() == 1, "compile contract reference missing or ambiguous");
+            var contractRef = contractRefs.getFirst();
+            require(sha(contractRef).equals(text(compile.result().get("task_contract_sha256"))), "compile contract bytes changed");
+            var contract = TaskContractArtifactWriter.mapper().readValue(root.resolve(contractRef).toFile(), dev.dual.core.contract.TaskContract.class);
+            if (contract.phase() == dev.dual.core.contract.TaskContract.Phase.GOAL) {
+                require(compile.nodeDefinitionId().equals("contract.compile"), "GOAL compiler identity mismatch");
+                return compile;
+            }
+            require(contract.phase() == dev.dual.core.contract.TaskContract.Phase.EXECUTION
+                    && compile.nodeDefinitionId().equals("contract.compile_execution") && contract.goalContract() != null,
+                    "EXECUTION compiler has no GOAL binding");
+            var sourceId = text(compile.inputTransition().get("source_node_instance_id"));
+            var source = node(sourceId);
+            require(source.outputRefs().equals(compile.inputRefs())
+                    && sha(relative(dir.resolve("nodes/" + sourceId + ".json"))).equals(text(compile.inputTransition().get("source_node_sha256"))),
+                    "execution compiler input lineage changed");
+            route(source, compile, text(source.result().get("decision")));
+            require(sha(contract.goalContract().ref()).equals(contract.goalContract().sha256()), "original GOAL bytes changed");
+            var matches = new ArrayList<NodeInstanceDocument>();
+            try (var nodes = Files.list(dir.resolve("nodes"))) {
+                for (var path : nodes.filter(f -> f.getFileName().toString().endsWith(".json")).toList()) {
+                    var candidate = OBJECT_MAPPER.readValue(path.toFile(), NodeInstanceDocument.class);
+                    if (candidate.nodeDefinitionId().equals("contract.compile") && candidate.status() == NodeStatus.COMPLETED
+                            && candidate.outputRefs().contains(contract.goalContract().ref())
+                            && text(candidate.result().get("task_contract_sha256")).equals(contract.goalContract().sha256())) matches.add(candidate);
+                }
+            }
+            require(matches.size() == 1, "original GOAL compile occurrence missing or ambiguous");
+            return goalCompile(matches.getFirst());
+        }
+
         Baseline compiledBaseline(String id) throws IOException {
-            var compile = node(id);
+            var compile = goalCompile(node(id));
             completed(compile, "contract.compile");
             var baseline = reviewed(compile.inputRefs(), compile.iterationId(),
                     Set.of("READY_FOR_PRODUCT_REVIEW", "BLOCKED"));
@@ -718,7 +776,9 @@ public final class TaskContractRevisionContextResolver {
             var compile = node(text(binding.get("compile_node_instance_id")));
             var base = compiledBaseline(compile.nodeInstanceId());
             require(base.previousReference().equals(ref), "frozen compile proposal mismatch");
-            var productRef = reviewRef(compile.inputRefs());
+            var goalCompile = goalCompile(compile);
+            require(goalCompile.nodeInstanceId().equals(text(binding.get("goal_compile_node_instance_id"))), "frozen GOAL compile identity mismatch");
+            var productRef = reviewRef(goalCompile.inputRefs());
             require(productRef.equals(text(binding.get("proposal_review_ref")))
                     && sha(productRef).equals(text(binding.get("proposal_review_sha256")))
                     && text(compile.result().get("task_contract_sha256")).equals(text(binding.get("task_contract_sha256")))
@@ -761,6 +821,10 @@ public final class TaskContractRevisionContextResolver {
                 var event = iterationRoute(iteration, trigger);
                 require(event.sequence() > through, "late revision event order invalid");
                 through = event.sequence();
+                // A later requirement clarification may follow design/plan repair iterations.
+                // Verify their declared route, but do not reinterpret their notes as GOAL obligations.
+                if (java.util.Arrays.stream(AuthoredStageLineageResolver.Stage.values())
+                        .anyMatch(stage -> stage.author.equals(iteration.targetNodeDefinitionId()))) continue;
                 var previous = direct.previousReference();
                 if (iteration.triggerAction().equals("NEEDS_REVISION")) {
                     completed(trigger, "intake.decision");
@@ -779,7 +843,7 @@ public final class TaskContractRevisionContextResolver {
                 derivedFrom(direct.previousReference(), previous);
                 addReview(obligations, direct.review(), reviewRef(
                         iteration.triggerAction().equals("clarify")
-                                ? node(gate(trigger, "clarify").source().nodeInstanceId()).inputRefs() : trigger.inputRefs()));
+                                ? goalCompile(gate(trigger, "clarify").source()).inputRefs() : trigger.inputRefs()));
                 if (!iteration.triggerAction().equals("NEEDS_REVISION")) {
                     var note = text(trigger.result().get("note"));
                     require(!note.isBlank(), "late revision human note missing");
@@ -858,7 +922,7 @@ public final class TaskContractRevisionContextResolver {
             }
             var document = AgentOutputContractDocument.read(path, OBJECT_MAPPER);
             if (document.isEmpty()
-                    || AgentOutputLineageVerifier.violation(root, workstreamId, path, document.get()).isPresent()
+                    || AgentOutputLineageVerifier.violation(ledger, root, workstreamId, path, document.get()).isPresent()
                     || !"intake.codex_product_review".equals(document.get().nodeId())
                     || !"agent_output_contract".equals(document.get().sourceArtifactType())
                     || !allowedDecisions.contains(document.get().decision())

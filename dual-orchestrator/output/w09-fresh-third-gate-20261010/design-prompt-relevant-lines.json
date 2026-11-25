@@ -1,0 +1,30 @@
+{
+  "prompt_ref": ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/prompts/design-claude.md",
+  "total_bytes": 10334,
+  "selected_lines": [
+    {
+      "line": 50,
+      "text": "- When adding or changing state, an index, lock, transaction, queue, cache, external side effect, or compensation, cover every applicable lifecycle boundary in `checks` or `evidence`: normal completion, concurrency, timeout/provider failure, interruption/crash, restart/recovery, rollback/conflict, and a cannot-bypass test. State why a boundary is not applicable instead of inventing requirements."
+    },
+    {
+      "line": 63,
+      "text": "- AC-1：空串、纯 LF、CRLF、单 CR、混合换行、Unicode、末尾有/无换行、连续空行至少八种输入有明确期望，重复规范化保持相同结果。"
+    },
+    {
+      "line": 64,
+      "text": "- AC-2：实际执行测试，实际输出明确显示覆盖数、零 failure/error，并与测试源码中的案例相符。本任务不要求工具提供独立测量的真实退出码，但测试完成状态或文字结论本身不能替代实际输入/输出与测试结果。"
+    },
+    {
+      "line": 104,
+      "text": "- Available context capabilities: direct_file_read:Read"
+    },
+    {
+      "line": 119,
+      "text": "- If the Context Package contains a Read Reuse Contract, follow that contract exactly. Do not invent read-reuse fields when the contract does not declare them."
+    },
+    {
+      "line": 150,
+      "text": "    \"lifecycle_status\" : \"READY\","
+    }
+  ]
+}

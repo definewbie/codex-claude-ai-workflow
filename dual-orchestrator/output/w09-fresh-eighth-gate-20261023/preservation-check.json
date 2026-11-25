@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-10-23T08:59:08.616914+08:00",
+  "historical_package_files": 239,
+  "historical_package_sha_unchanged": true,
+  "old_stopped_snapshot_files": 77,
+  "old_live_ledger_same_exact_file_set": true,
+  "old_live_ledger_sha_unchanged": true,
+  "source_inputs_unchanged": 659,
+  "jars_unchanged": true,
+  "config_and_installed_files_unchanged": 31,
+  "new_initial_ledger_files": 21,
+  "new_initial_ledger_unchanged": true,
+  "new_runs": 0,
+  "new_steps": 0,
+  "new_business_approvals": 0,
+  "new_native_sessions": 0,
+  "scope": "This preparation compared the seventh case, reviewed fix and diagnostic observation captured before assembly; earlier case preservation is not newly re-audited here."
+}

@@ -62,7 +62,7 @@ class TypedPlanScopeTest {
                 List.of("C:/src/a"))) {
             var prompt = AgentResultPromptContract.render("ws", "run", "plan.claude_plan",
                     "READY_FOR_PLAN_REVIEW", Set.of("READY_FOR_PLAN_REVIEW"));
-            assertTrue(prompt.contains("edit_files must contain unique canonical paths within the approved TaskContract scope"));
+            assertTrue(prompt.contains("edit_files must contain unique canonical proposed paths respecting the approved GOAL exclusions"));
             var candidate = (ObjectNode) JSON.readTree(prompt.substring(prompt.indexOf('{')));
             var files = ((ObjectNode) candidate.at("/result/plan")).putArray("edit_files");
             edits.forEach(files::add);
@@ -88,8 +88,8 @@ class TypedPlanScopeTest {
             assertFalse(Files.exists(fixture.root.resolve(business)), "planned CREATE need not already exist");
             fixture.approve();
             assertEquals(WorkflowStatus.COMPLETED, fixture.ledger.loadCurrent(fixture.paths).status());
-            assertEquals(fixture.inputs.get("implement.claude_implement").approvedPlan(),
-                    fixture.inputs.get("implement.claude_self_test_report").approvedPlan());
+            assertEquals(fixture.inputs.get("implement.claude_implement").reviewedPlan(),
+                    fixture.inputs.get("implement.claude_self_test_report").reviewedPlan());
         }
     }
 
@@ -114,8 +114,8 @@ class TypedPlanScopeTest {
                 } finally { if (process.isAlive()) process.destroyForcibly(); }
                 f.advanceToGate();
                 assertEquals(WorkflowStatus.COMPLETED, f.ledger.loadCurrent(f.paths).status());
-                assertEquals(expected.approvedPlan(), f.inputs.get("implement.claude_implement").approvedPlan());
-                assertEquals(expected.approvedPlan(), f.inputs.get("implement.claude_self_test_report").approvedPlan());
+                assertEquals(expected.reviewedPlan(), f.inputs.get("implement.claude_implement").reviewedPlan());
+                assertEquals(expected.reviewedPlan(), f.inputs.get("implement.claude_self_test_report").reviewedPlan());
             }
         }
     }
@@ -126,26 +126,19 @@ class TypedPlanScopeTest {
         for (var business : List.of("converter/render.py", "site/home.html")) {
             for (var damage : List.of("none", "missing-contract", "missing-gate", "tampered-contract")) {
                 var f = new AuthoredStageSequenceTest.Fixture(root.resolve("case-" + sample++), business);
-                var contractPath = f.paths.workstreamDir().resolve("artifacts/task-contract.json");
-                var contract = (ObjectNode) JSON.readTree(contractPath.toFile());
-                ((com.fasterxml.jackson.databind.node.ArrayNode) contract.at("/scope/included"))
-                        .addObject().put("path", "optional/new file.txt").put("operation", "CREATE");
-                JSON.writeValue(contractPath.toFile(), contract);
-                TaskContractProjectionFixture.seedCompileBinding(f.root, f.ws);
-                var current = (ObjectNode) JSON.readTree(f.paths.workflowCurrentJson().toFile());
-                current.put("lastEventId", JSON.readTree(Files.readAllLines(f.paths.eventsJsonl()).getLast()).path("event_id").asText());
-                JSON.writeValue(f.paths.workflowCurrentJson().toFile(), current);
-                var context = f.before("plan.claude_plan");
+                var context = dev.dual.runtime.RuntimeTestLedger.claim(f.before("plan.claude_plan"));
+                var qualification = TaskContractProjectionVerifier.resolve(f.ledger, f.root, f.ws,
+                        dev.dual.core.contract.TaskContract.Phase.GOAL).qualified().orElseThrow();
+                var contractPath = f.root.resolve(qualification.contractRef());
                 f.outputMutation = result -> ((ObjectNode) result.get("plan")).putArray("reference_files").add("unscoped/reference.md");
                 var result = f.executeProvider(context);
-                var qualification = TaskContractProjectionVerifier.resolve(f.root, f.ws).qualified().orElseThrow();
                 switch (damage) {
                     case "missing-contract" -> Files.delete(contractPath);
                     case "missing-gate" -> Files.delete(f.root.resolve(qualification.approvalGateRef()));
                     case "tampered-contract" -> Files.writeString(contractPath, Files.readString(contractPath) + " ");
                     default -> { }
                 }
-                var validated = new ArtifactContractValidator().validate(f.root, f.ws, context.instance().nodeInstanceId(),
+                var validated = new ArtifactContractValidator(dev.dual.runtime.RuntimeTestLedger.ledger()).validate(f.root, f.ws, context.instance().nodeInstanceId(),
                         context.definition(), result);
                 if (damage.equals("none")) {
                     assertEquals(dev.dual.core.workflow.NodeStatus.COMPLETED, validated.status(), validated.toString());
@@ -164,11 +157,11 @@ class TypedPlanScopeTest {
         for (var business : List.of("converter/render.py", "site/home.html")) {
             for (var blockedFile : List.of("result.contract.json", "result.plan.json")) {
                 var f = new AuthoredStageSequenceTest.Fixture(root.resolve("case-" + sample++), business);
-                var context = f.before("plan.claude_plan");
+                var context = dev.dual.runtime.RuntimeTestLedger.claim(f.before("plan.claude_plan"));
                 var result = f.executeProvider(context);
                 var output = f.root.resolve(result.outputRefs().getFirst());
                 Files.createDirectory(output.getParent().resolve(blockedFile));
-                assertThrows(java.io.IOException.class, () -> new ArtifactContractValidator().validate(
+                assertThrows(java.io.IOException.class, () -> new ArtifactContractValidator(dev.dual.runtime.RuntimeTestLedger.ledger()).validate(
                         f.root, f.ws, context.instance().nodeInstanceId(), context.definition(), result));
                 assertEquals(blockedFile.equals("result.plan.json"),
                         Files.isRegularFile(AgentOutputContractSidecar.pathFor(output)));
@@ -191,7 +184,7 @@ class TypedPlanScopeTest {
     public static class ColdPublicationRead {
         public static void main(String[] args) {
             try {
-                if (AgentEvidenceIndex.validatedDocument(Path.of(args[0]), args[1], args[2], JSON).isPresent())
+                if (AgentEvidenceIndex.validatedDocument(dev.dual.runtime.RuntimeTestLedger.ledger(), Path.of(args[0]), args[1], args[2], JSON).isPresent())
                     throw new AssertionError("partial publication became usable evidence");
             } catch (IllegalStateException expected) {
                 // A physically present sidecar with no completed producer is also a rejection.
@@ -207,21 +200,21 @@ class TypedPlanScopeTest {
             git(f.root, "init"); git(f.root, "config", "user.email", "dual@example.test");
             git(f.root, "config", "user.name", "Dual Test");
             Files.writeString(f.root.resolve(".gitignore"), ".agent/\n");
-            git(f.root, "add", ".gitignore"); git(f.root, "commit", "-m", "fixture baseline");
+            git(f.root, "add", ".gitignore", "test-tool.lock"); git(f.root, "commit", "-m", "fixture baseline");
             var base = git(f.root, "rev-parse", "HEAD").trim();
-            JSON.writeValue(f.paths.workstreamJson().toFile(), Map.of("primaryWorkspaceId", "wsp-test"));
-            var workspaces = f.paths.workstreamDir().resolve("workspaces"); Files.createDirectories(workspaces);
-            JSON.writeValue(workspaces.resolve("wsp-test.json").toFile(), Map.of("baseCommit", base));
+            var workspace = f.paths.workstreamDir().resolve("workspaces/workspace-readiness.json");
+            var workspaceDoc = (ObjectNode) JSON.readTree(workspace.toFile());
+            workspaceDoc.put("baseCommit", base); JSON.writeValue(workspace.toFile(), workspaceDoc);
             f.before("implement.claude_implement");
             f.advanceToGate();
             assertEquals(WorkflowStatus.COMPLETED, f.ledger.loadCurrent(f.paths).status());
             Files.createDirectories(f.root.resolve(business).getParent());
             Files.writeString(f.root.resolve(business), "authorized output\n");
             var definition = new dev.dual.core.workflow.NodeDefinition("implement.artifact_validation",
-                    dev.dual.core.workflow.NodeKind.TASK, "artifact.validate", Map.of("requires_approved_task_contract", true));
+                    dev.dual.core.workflow.NodeKind.TASK, "artifact.validate", Map.of("required_contract_phase", "EXECUTION"));
             var instance = new dev.dual.core.workflow.NodeInstance("node-git-scope", definition.id(), definition.kind(), definition.handlerType(),
                     dev.dual.core.workflow.NodeStatus.READY, "implement", "iter-001", List.of(), List.of(), Map.of(), null, null, null);
-            var context = new TaskHandler.TaskContext(f.root, f.ws, definition, instance);
+            var context = new TaskHandler.TaskContext(f.root, f.ws, definition, instance, dev.dual.runtime.RuntimeTestLedger.ledger());
             var handler = new ArtifactValidateHandler();
             var good = handler.execute(context);
             assertEquals("PASS", good.result().get("change_scope_status"), good.toString());

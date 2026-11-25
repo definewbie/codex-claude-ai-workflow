@@ -1,0 +1,13 @@
+{
+  "schemaVersion" : 1,
+  "iterationId" : "iter-003",
+  "parentIterationId" : "iter-002",
+  "number" : 3,
+  "stageId" : "stage-intake",
+  "status" : "active",
+  "triggerNodeInstanceId" : "node-gate-human_requirement_review-011",
+  "triggerAction" : "revise",
+  "targetNodeDefinitionId" : "intake.claude_brainstorm",
+  "reason" : "本次人工复核只修正 TR-9 的范围扩张。保留已闭合的九字段映射、安全失败摘要、原技术栈、路径清单和其余条款。原需求是默认 mvn test 不依赖公开 OKX，不是实现 JVM 全局出站安全机制。删除全局 ProxySelector/Socket 拦截、全局守卫自检和 surefire 注入要求；改为使用应用实际 OKX HTTP 客户端、测试配置中的本地 stub 地址和冻结 fixture，分别覆盖启动回填与调度入口，核验客户端实际生效的目标地址及 stub 上的请求路径/参数/次数，并确保 opt-in live smoke 不进入默认测试。不得仅凭 stub 日志宣称 JVM 没有任何其他出站能力，也不要求证明 JVM 全出口安全；不新增网络框架、拦截层、文件或产品功能。按这一需求边界修订 TR-9 及对应回应，不重开其他已闭合事项。",
+  "createdAt" : "2026-09-13T01:00:22.161939Z"
+}

@@ -1,0 +1,7 @@
+[ACPX] acpx version pinned: 0.13.2
+[ACPX] E1 policy transport build identity verified
+[ACPX] wrote /Users/kriswang/.acpx/config.json
+[ACPX] agents.claude.command = /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0
+[ACPX] agents.codex.command = npx -y @agentclientprotocol/codex-acp@1.10.0
+[ACPX] acpx config is readable
+[ACPX] export DUAL_ACPX_EXECUTABLE=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx before running Dual

@@ -1,0 +1,35 @@
+{
+  "checked_at": "2026-10-16T22:26:31.972828+08:00",
+  "status": "OFFLINE_READY_AWAITING_USER_RUN_APPROVAL",
+  "real_run_authorized": false,
+  "budget_plan": {
+    "tokens": 1700000,
+    "requests": 18,
+    "active_seconds": 3600,
+    "warning_tokens": 1200000,
+    "command_timeout_seconds": 600,
+    "unchanged_reserve_semantics": true
+  },
+  "source_inputs": 659,
+  "observer_tests": 12,
+  "budget_cases": 13,
+  "authorization_negative_checks": 2,
+  "native_provider_calls": 0,
+  "native_sessions_created": 0,
+  "business_approvals": 0,
+  "seventh_offline_initialized": true,
+  "seventh_real_run_started": false,
+  "sixth_recovered": false,
+  "prior_reactor": {
+    "tests": 1813,
+    "suites": 210,
+    "current_task_reran": false
+  },
+  "location": {
+    "parent": "/private/tmp/dual-w09-newlines-20261016-fresh-07",
+    "target": "/private/tmp/dual-w09-newlines-20261016-fresh-07/target",
+    "workspace": "/private/tmp/dual-w09-newlines-20261016-fresh-07/worktree",
+    "workstream": "ws-20261016T142045Z-UDHW",
+    "ledger": "/private/tmp/dual-w09-newlines-20261016-fresh-07/worktree/.agent/workstreams/ws-20261016T142045Z-UDHW"
+  }
+}

@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>收益实验台</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/workbench.css">
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <p class="eyebrow">AI CRYPTO INCOME ASSISTANT</p>
+    <h1>收益实验台</h1>
+  </div>
+  <div class="topbar-actions">
+    <div class="safety">只读 · 不连接交易权限 · 时间 UTC+8</div>
+    <a class="scenario-lab-link" href="/scenario-lab.html">进入 AI 情景实验室 →</a>
+  </div>
+</header>
+
+<main>
+  <section class="mode-strip" aria-label="运行模式">
+    <button class="mode active" data-mode="BACKTEST"><span>回测</span><small>历史情景可用</small></button>
+    <button class="mode" data-mode="SHADOW"><span>Shadow</span><small>7–14天样本外观察</small></button>
+    <button class="mode" data-mode="LIVE"><span>实盘</span><small>等待账户事实</small></button>
+  </section>
+
+  <section id="capability-note" class="notice"></section>
+
+  <section class="market-data-panel" aria-labelledby="market-data-title">
+    <div class="market-data-heading">
+      <div><p class="eyebrow">OKX PUBLIC MARKET DATA</p><h2 id="market-data-title">BTC 实时行情与分钟 K 线</h2></div>
+      <span id="market-readiness" class="market-readiness">等待刷新</span>
+    </div>
+    <div class="market-data-grid">
+      <article><span>BTC-USDT 最新成交价</span><strong id="market-last-price">—</strong><small id="market-ticker-time">尚无 OKX ticker 事实</small></article>
+      <article><span>滚动 90 天分钟 K 线</span><strong id="market-candle-progress">—</strong><small id="market-candle-window">等待数据库覆盖度检查</small></article>
+      <article><span>同步状态</span><strong id="market-sync-state">—</strong><small id="market-sync-detail">页面打开时每分钟从 OKX 公共接口刷新</small></article>
+    </div>
+    <div class="market-data-actions">
+      <button id="market-refresh" class="secondary" type="button">立即更新 OKX 行情</button>
+      <button id="market-apply-window" class="secondary" type="button" disabled>应用最新共享窗口</button>
+    </div>
+    <p id="market-data-message" class="sync-status" role="status">只读公共行情，不需要 API Key，不连接交易权限。</p>
+  </section>
+
+  <div class="workspace">
+    <form id="grid-form" class="control-panel">
+      <div class="section-title">
+        <div><p class="eyebrow">固定现货网格</p><h2>测试参数</h2></div>
+        <span class="tag">BTC-USDT · 等差</span>
+      </div>
+
+      <fieldset class="assumption-group">
+        <legend>共同评估假设</legend>
+        <div class="two-cols">
+          <label>真实组合规划总资金（USDT）
+            <input name="portfolioCapital" type="number" min="1" step="1" value="200000" required>
+            <small class="field-help">用于下方真实组合历史回测，不会被每个产品重复使用。</small>
+          </label>
+          <label>单产品回测候选资金（USDT）
+            <input name="capital" type="number" min="1" step="1" value="20000" required>
+            <small class="field-help">分别测试每个产品；也是网格Shadow虚拟金额，不是当前实盘仓位。</small>
+          </label>
+        </div>
+        <div class="two-cols">
+          <label>90天收益观察期开始（UTC+8）
+            <input name="from" type="datetime-local" required>
+            <small class="field-help">从这个时刻开始累计历史收益。</small>
+          </label>
+          <label>90天收益观察期结束（UTC+8）
+            <input name="to" type="datetime-local" required>
+            <small class="field-help">不包含这个时刻；与开始时间必须正好相差90天。</small>
+          </label>
+        </div>
+        <label>本次分析使用的数据版本截止时间（UTC+8）
+          <input name="evaluationAsOf" type="datetime-local" required>
+          <small class="field-help">通常填运行分析的当前时间。程序只使用在此时刻之前已经观察并入库的 K 线和资金费率修订。</small>
+        </label>
+      </fieldset>
+
+      <fieldset class="portfolio-plan-group">
+        <legend>真实组合比例（可调整）</legend>
+        <p class="product-intro">四项必须合计100%。程序会按比例计算组合历史收益，同时单独提示当前实盘准入状态。</p>
+        <div class="two-cols portfolio-ratio-inputs">
+          <label>90天定期（%）<input name="portfolioFixedEarnPercent" type="number" min="0" max="100" step="1" value="80" required></label>
+          <label>活期 / 流动USDT（%）<input name="portfolioLiquidPercent" type="number" min="0" max="100" step="1" value="20" required></label>
+          <label>BTC智能套利（%）<input name="portfolioSmartPercent" type="number" min="0" max="100" step="1" value="0" required></label>
+          <label>BTC现货网格实盘（%）<input name="portfolioGridPercent" type="number" min="0" max="100" step="1" value="0" required></label>
+        </div>
+        <p id="portfolio-ratio-total" class="ratio-total">当前合计：100%</p>
+      </fieldset>
+
+      <fieldset class="product-group grid-product">
+        <legend>产品 A · BTC 固定现货网格</legend>
+        <p class="product-intro">这部分参数只影响网格回测。结果会明确列出初始买入 BTC 的 USDT 金额、BTC 数量和剩余 USDT。</p>
+        <label>人工确认的网格配置 ID<input name="configurationSnapshotId" type="number" min="1" value="1" required></label>
+        <div class="sync-tool compact-sync">
+          <div>
+            <strong>准备这段回测数据</strong>
+            <p>回测与 Shadow 共享同一份 BTC-USDT 分钟 K 线事实和覆盖状态。</p>
+          </div>
+          <button id="backtest-sync-candles" class="secondary" type="button">更新共享 K 线</button>
+          <p id="backtest-sync-status" class="sync-status" role="status">正在读取共享市场数据状态。</p>
+        </div>
+        <div class="two-cols">
+          <label>价格下限<input name="lowerPrice" type="number" min="0" step="any" value="50054.2" required></label>
+          <label>价格上限<input name="upperPrice" type="number" min="0" step="any" value="73173.56" required></label>
+        </div>
+        <label>网格数<input name="gridCount" type="number" min="2" max="500" value="30" required></label>
+        <div class="two-cols">
+          <label>止盈（可空）<input name="takeProfitPrice" type="number" min="0" step="any" placeholder="高于上限"></label>
+          <label>止损（可空）<input name="stopLossPrice" type="number" min="0" step="any" placeholder="低于下限"></label>
+        </div>
+        <div class="two-cols">
+          <label>现货挂单费率<input name="makerFeeRate" type="number" min="0" max="1" step="0.0001" value="0.0006" required></label>
+          <label>现货吃单费率<input name="takerFeeRate" type="number" min="0" max="1" step="0.0001" value="0.0007" required></label>
+          <label>退出滑点（bps）<input name="exitSlippageBps" type="number" min="0" value="10" required></label>
+          <label>最大回撤阈值<input name="maximumDrawdownRate" type="number" min="0" max="1" step="0.01" value="0.15" required></label>
+          <label>路径分歧阈值<input name="maximumPathDivergenceRate" type="number" min="0" max="1" step="0.01" value="0.02" required></label>
+          <label>期末 BTC 占比阈值<input name="maximumEndingBtcValueRatio" type="number" min="0" max="1" step="0.05" value="0.60" required></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="product-group earn-product">
+        <legend>产品 B · USDT 简单赚币</legend>
+        <p class="product-intro">活期利率由程序读取；90天定期 APR 来自你打开 OKX 确认页时看到的报价。两者均假设投入上面的共同候选资金，BTC 占比为 0。</p>
+        <div class="two-cols">
+          <label>90天定期 APR<input name="simpleEarnApr" type="number" min="0" max="1" step="0.001" value="0.035" required></label>
+          <label>你确认该定期 APR 的时间（人工证据，不自动更新）
+            <input name="simpleQuoteAsOf" type="datetime-local" value="2026-08-19T18:30" required>
+            <small class="field-help">这是产品报价时间，不是收益观察期，也不是程序运行时间。</small>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="product-group smart-product">
+        <legend>产品 C · BTC 智能套利</legend>
+        <p class="product-intro">同样单独假设投入上面的共同候选资金。下面的分配来自 OKX 策略预览，不与网格共享仓位。</p>
+        <div class="two-cols">
+          <label>现货买入金额 / 对冲名义估算（USDT）
+            <input name="hedgedNotional" type="number" min="1" step="any" value="19047.61" required>
+            <small class="field-help">第一期假设现货与永续空头名义接近；该金额用于估算资金费收入。</small>
+          </label>
+          <label>预留合约保证金（USDT）<input name="smartReservedMargin" type="number" min="0" step="any" value="952.38" required></label>
+          <label>预览中的 BTC 现货买入价（USDT）
+            <input name="smartReferenceSpotPrice" type="number" min="1" step="any" value="64150.7" required>
+            <small class="field-help">仅用于把现货买入金额换算成预计 BTC 数量。</small>
+          </label>
+          <label>你确认智能套利成本的时间（人工证据，不自动更新）
+            <input name="costAsOf" type="datetime-local" value="2026-08-19T18:30" required>
+            <small class="field-help">这是 OKX 预览页的成本快照时间。</small>
+          </label>
+          <label>开仓成本<input name="openingCost" type="number" min="0" step="any" value="36.001"></label>
+          <label>退出成本<input name="exitCost" type="number" min="0" step="any" value="20.192"></label>
+          <label>套利滑点成本<input name="slippageCost" type="number" min="0" step="any" value="10"></label>
+          <label>再平衡成本<input name="rebalanceCost" type="number" min="0" step="any" value="0"></label>
+          <label>服务/融资成本<input name="serviceCost" type="number" min="0" step="any" value="0"></label>
+        </div>
+      </fieldset>
+
+      <button class="primary" type="submit">运行只读回测并生成日报</button>
+      <p class="form-help">结果不会保存为 Shadow 或 Live，也不会修改 OKX 配置。</p>
+    </form>
+
+    <form id="shadow-form" class="control-panel hidden">
+      <div class="section-title">
+        <div><p class="eyebrow">PARALLEL SHADOW</p><h2>冻结并行观察</h2></div>
+        <span class="tag">候选30格 vs 基准50格</span>
+      </div>
+      <fieldset>
+        <legend>继续已有观察</legend>
+        <div class="resume-row">
+          <label>选择观察<select id="shadow-resume-id"><option value="">正在读取观察列表…</option></select></label>
+          <button id="shadow-load" class="secondary" type="button">读取并显示</button>
+        </div>
+        <p class="form-help left-help">选项会显示状态、已观察天数和候选/基准网格，不需要记住 ID。</p>
+        <div id="shadow-refresh-controls" class="hidden">
+          <div class="sync-tool">
+            <div>
+              <strong>同步分钟 K 线</strong>
+              <p>与回测共享同一份 K 线事实；任一入口更新后，两处状态同时更新。</p>
+            </div>
+            <button id="shadow-sync-candles" class="secondary" type="button">更新共享 K 线</button>
+            <p id="shadow-sync-status" class="sync-status" role="status">正在读取共享市场数据状态。</p>
+          </div>
+          <div class="two-cols refresh-times">
+            <label>本次日报累计收益到（UTC+8）
+              <input id="shadow-valuation-at" type="datetime-local" required>
+              <small class="field-help">只计算 Shadow 开始后、该时刻之前的分钟 K 线。</small>
+            </label>
+            <label>本次日报使用的数据版本截止（UTC+8）
+              <input id="shadow-evaluation-as-of" type="datetime-local" required>
+              <small class="field-help">应晚于左侧时间，确保最后一分钟 K 线已完成并入库。</small>
+            </label>
+          </div>
+          <button id="shadow-refresh" class="primary" type="button">刷新样本外日报</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>观察定义（创建后不可修改）</legend>
+        <label>Shadow 开始累计收益的时间（UTC+8）<input name="startAt" type="datetime-local" required></label>
+        <div class="two-cols">
+          <label>观察天数<input name="targetDays" type="number" min="7" max="14" value="7" required></label>
+          <label>确认配置 ID<input name="configurationSnapshotId" type="number" min="1" value="1" required></label>
+        </div>
+        <div class="two-cols">
+          <label>你确认候选参数的时间（人工证据，不自动更新）<input name="evidenceAsOf" type="datetime-local" value="2026-08-19T18:30" required></label>
+          <label>证据说明<input name="evidenceReference" value="OKX参数页+本地K线" maxlength="255" required></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>候选参数（80%区间 · 30格）</legend>
+        <div class="two-cols">
+          <label>价格下限<input name="candidateLowerPrice" type="number" min="0" step="any" value="50054.2" required></label>
+          <label>价格上限<input name="candidateUpperPrice" type="number" min="0" step="any" value="73173.56" required></label>
+        </div>
+        <label>网格数<input name="candidateGridCount" type="number" min="2" max="500" value="30" required></label>
+      </fieldset>
+      <fieldset>
+        <legend>共享资金、费用与门槛</legend>
+        <div class="two-cols">
+          <label>虚拟资金（USDT）<input name="capital" type="number" min="1" value="20000" required></label>
+          <label>简单赚币 APR<input name="simpleEarnApr" type="number" min="0" max="1" step="0.001" value="0.035" required></label>
+          <label>挂单费率<input name="makerFeeRate" type="number" min="0" max="1" step="0.0001" value="0.0006" required></label>
+          <label>吃单费率<input name="takerFeeRate" type="number" min="0" max="1" step="0.0001" value="0.0007" required></label>
+          <label>退出滑点（bps）<input name="exitSlippageBps" type="number" min="0" value="10" required></label>
+          <label>最大回撤<input name="maximumDrawdownRate" type="number" min="0" max="1" step="0.01" value="0.15" required></label>
+          <label>路径分歧<input name="maximumPathDivergenceRate" type="number" min="0" max="1" step="0.01" value="0.02" required></label>
+          <label>期末 BTC 占比<input name="maximumEndingBtcValueRatio" type="number" min="0" max="1" step="0.05" value="0.60" required></label>
+        </div>
+      </fieldset>
+      <button class="primary" type="submit">创建并冻结 Shadow</button>
+      <p class="form-help">50格基准从确认配置读取；创建后如需改参数，必须新建观察。</p>
+    </form>
+
+    <section class="result-panel" aria-live="polite">
+      <div id="empty-state" class="empty-state">
+        <span>01</span>
+        <h2>先运行一组情景</h2>
+        <p>页面会同时比较网格、简单赚币和 BTC 买入持有，并说明今天是否需要调整参数、仓位和产品组合。</p>
+      </div>
+
+      <div id="loading" class="loading hidden">正在读取 129,600 根分钟 K 线并计算双路径…</div>
+
+      <div id="shadow-result" class="hidden">
+        <article class="headline">
+          <p class="eyebrow">样本外日报 · 只读</p>
+          <h2 id="shadow-headline"></h2>
+          <p id="shadow-next"></p>
+        </article>
+
+        <div class="section-title product-result-title">
+          <div><p class="eyebrow">SHADOW COMPARISON</p><h2>实验对比｜不等于真实组合持仓</h2></div>
+          <span class="tag">同一笔虚拟资金</span>
+        </div>
+        <div class="metrics">
+          <article><span>候选网格（虚拟实验）</span><strong id="shadow-candidate-income">--</strong><small id="shadow-candidate-rate">等待数据</small></article>
+          <article><span>确认网格（虚拟基准）</span><strong id="shadow-baseline-income">--</strong><small id="shadow-baseline-rate">等待数据</small></article>
+          <article><span>简单赚币（比较基准）</span><strong id="shadow-simple-income">--</strong><small id="shadow-simple-rate">等待数据</small></article>
+        </div>
+        <p class="metric-note">三项都是 Shadow 对照实验，不是实际产品分配，不按真实组合比例过滤。真实组合中比例为 0% 的产品不会在组合结果中展示。Shadow 未满 7 天只显示累计收益率，不用短样本制造夸张年化。</p>
+        <article class="report-card">
+          <div class="section-title"><div><p class="eyebrow">FROZEN DEFINITION</p><h2 id="shadow-study-title">观察定义</h2></div><span id="shadow-status" class="tag"></span></div>
+          <div class="path-grid">
+            <div><span>候选</span><strong id="shadow-candidate-params"></strong><small>用户批准的80%区间方案</small></div>
+            <div><span>基准</span><strong id="shadow-baseline-params"></strong><small>从人工确认配置快照派生</small></div>
+          </div>
+        </article>
+        <article class="report-card">
+          <div class="section-title"><div><p class="eyebrow">DAILY REPORT</p><h2>今天是否需要调整？</h2></div></div>
+          <div class="decision-row"><span>参数</span><strong id="shadow-parameter-action"></strong><p id="shadow-parameter-advice"></p></div>
+          <div class="decision-row"><span>仓位</span><strong id="shadow-position-action"></strong><p id="shadow-position-advice"></p></div>
+          <div class="decision-row"><span>产品组合</span><strong id="shadow-portfolio-action"></strong><p id="shadow-portfolio-advice"></p></div>
+        </article>
+        <button id="shadow-stop" class="secondary" type="button">停止此观察</button>
+        <article class="limitations"><h3>当前边界</h3><ul id="shadow-boundaries"></ul></article>
+      </div>
+
+      <div id="result" class="hidden">
+        <article class="headline">
+          <p class="eyebrow">今日决策 · 回测证据</p>
+          <h2 id="report-headline"></h2>
+          <p id="report-next"></p>
+          <p id="backtest-result-state" class="snapshot-state"></p>
+        </article>
+
+        <div class="section-title product-result-title">
+          <div><p class="eyebrow">SINGLE PRODUCT BASELINE</p><h2 id="single-product-title">单产品独立回测</h2></div>
+          <span class="tag">不等于组合投入</span>
+        </div>
+        <div class="product-metrics">
+          <article><span>90天定期简单赚币</span><strong id="product-fixed-income"></strong><small id="product-fixed-detail"></small></article>
+          <article><span>活期简单赚币估算</span><strong id="product-flex-income"></strong><small id="product-flex-detail"></small></article>
+          <article><span>BTC 智能套利</span><strong id="product-smart-income"></strong><small id="product-smart-detail"></small></article>
+          <article><span>BTC 固定现货网格</span><strong id="product-grid-income"></strong><small id="product-grid-detail"></small></article>
+        </div>
+        <p id="single-product-note" class="metric-note"></p>
+
+        <article class="report-card portfolio-card">
+          <div class="section-title"><div><p class="eyebrow">PORTFOLIO BACKTEST</p><h2 id="portfolio-title">真实组合历史回测</h2></div><span id="portfolio-evaluation-status" class="tag"></span></div>
+          <p id="portfolio-policy" class="metric-note"></p>
+          <div class="portfolio-summary">
+            <article><span>你的组合历史净收益</span><strong id="portfolio-user-income"></strong><small id="portfolio-user-rate"></small></article>
+            <article><span>保守基线历史净收益</span><strong id="portfolio-baseline-income"></strong><small>80%定期 + 20%流动USDT</small></article>
+            <article><span>相对保守基线增量</span><strong id="portfolio-incremental"></strong><small>历史情景差额，不代表未来收益</small></article>
+          </div>
+          <div class="table-scroll">
+            <table class="allocation-table portfolio-table">
+              <thead><tr><th>产品</th><th>你的分配</th><th>该分配历史净收益</th><th>产品历史收益率</th><th>保守实盘基线（不参与本次组合计算）</th><th>状态与原因</th></tr></thead>
+              <tbody id="portfolio-allocation-body"></tbody>
+            </table>
+          </div>
+          <p id="portfolio-equation" class="portfolio-equation"></p>
+          <p id="portfolio-allocation-note" class="metric-note"></p>
+          <ul id="portfolio-boundaries" class="compact-list"></ul>
+        </article>
+
+        <article class="report-card allocation-card">
+          <div class="section-title"><div><p class="eyebrow">PRODUCT CAPITAL STRUCTURE</p><h2>单产品内部资金结构</h2></div><span class="tag">每行独立投入候选资金</span></div>
+          <p class="metric-note">这不是组合比例。它解释单独投入候选资金后，产品内部如何占用BTC、USDT和对冲仓位。</p>
+          <div class="table-scroll">
+            <table class="allocation-table">
+              <thead><tr><th>产品</th><th>初始投资模式</th><th>现货BTC</th><th>合约对冲</th><th>USDT用途</th><th>净方向敞口</th></tr></thead>
+              <tbody>
+                <tr><td>简单赚币</td><td>仅USDT</td><td>0 BTC</td><td>无</td><td id="allocation-earn-usdt"></td><td>0.00 USDT</td></tr>
+                <tr><td>BTC智能套利</td><td>现货多头 + 永续空头</td><td id="allocation-smart-btc"></td><td id="allocation-smart-hedge"></td><td id="allocation-smart-usdt"></td><td id="allocation-smart-delta"></td></tr>
+                <tr><td>BTC固定现货网格</td><td>仅USDT初始化</td><td id="allocation-grid-btc"></td><td>无</td><td id="allocation-grid-usdt"></td><td id="allocation-grid-ratio"></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p id="allocation-note" class="metric-note"></p>
+        </article>
+
+        <div class="metrics">
+          <article><span>保守网格净收益</span><strong id="metric-grid"></strong><small id="metric-grid-rate"></small></article>
+          <article><span>简单赚币基准</span><strong id="metric-simple"></strong><small id="metric-simple-rate"></small></article>
+          <article><span>BTC 持有基准</span><strong id="metric-btc"></strong><small id="metric-btc-rate"></small></article>
+        </div>
+        <p id="backtest-period" class="metric-note"></p>
+
+        <article class="report-card">
+          <div class="section-title"><div><p class="eyebrow">DAILY REPORT</p><h2>是否需要调整？</h2></div><span id="recommendation" class="tag"></span></div>
+          <div class="decision-row"><span>参数</span><strong id="parameter-action"></strong><p id="parameter-advice"></p></div>
+          <div class="decision-row"><span>仓位</span><strong id="position-action"></strong><p id="position-advice"></p></div>
+          <div class="decision-row"><span>产品组合</span><strong id="portfolio-action"></strong><p id="portfolio-advice"></p></div>
+        </article>
+
+        <article class="report-card">
+          <div class="section-title"><div><p class="eyebrow">PATH EVIDENCE</p><h2>分钟内双路径</h2></div><span id="path-divergence" class="tag"></span></div>
+          <div class="path-grid">
+            <div><span>路径 A · 开→低→高→收</span><strong id="path-a-income"></strong><small id="path-a-components"></small><small id="path-a-exit"></small></div>
+            <div><span>路径 B · 开→高→低→收</span><strong id="path-b-income"></strong><small id="path-b-components"></small><small id="path-b-exit"></small></div>
+          </div>
+        </article>
+
+        <article class="report-card">
+          <div class="section-title"><div><p class="eyebrow">SMART ARBITRAGE</p><h2>智能套利证据</h2></div><span id="smart-recommendation" class="tag"></span></div>
+          <div class="path-grid">
+            <div><span>资金费收入与成本</span><strong id="smart-funding-income"></strong><small id="smart-cost-detail"></small></div>
+            <div><span>相对90天定期</span><strong id="smart-incremental"></strong><small id="smart-settlements"></small></div>
+          </div>
+          <ul id="smart-reasons" class="compact-list"></ul>
+        </article>
+
+        <article class="report-card">
+          <div class="section-title"><div><p class="eyebrow">SENSITIVITY</p><h2>网格数扰动</h2></div><span class="tag">不是自动寻优</span></div>
+          <table><thead><tr><th>网格数</th><th>保守净收益</th></tr></thead><tbody id="sensitivity-body"></tbody></table>
+        </article>
+
+        <article class="limitations">
+          <h3>当前边界</h3>
+          <ul id="boundaries"></ul>
+        </article>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="/workbench.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "checks": [
+    {
+      "command": [
+        "/usr/local/bin/docker",
+        "info",
+        "--format",
+        "{{.ServerVersion}}"
+      ],
+      "exit_code": 0,
+      "stdout": "29.4.1\n",
+      "stderr": "",
+      "elapsed_seconds": 0.443045417079702
+    },
+    {
+      "command": [
+        "/usr/local/bin/docker",
+        "image",
+        "ls",
+        "--format",
+        "{{.Repository}}:{{.Tag}} {{.ID}}"
+      ],
+      "exit_code": 0,
+      "stdout": "mysql:8.4 b3b90af2a655\npostgres:16-alpine 4e6e670bb069\ntestcontainers/ryuk:0.14.0 7c1a8a9a47c7\ntestcontainers/ryuk:0.12.0 dd3f023a6ed7",
+      "stderr": "",
+      "elapsed_seconds": 0.07132270908914506
+    }
+  ],
+  "testcontainers_jars": [
+    "/Users/kriswang/.m2/repository/org/testcontainers/testcontainers/2.0.5/testcontainers-2.0.5.jar"
+  ],
+  "default_ryuk_images": [
+    "testcontainers/ryuk:0.14.0"
+  ],
+  "scope": "local daemon/cache only; no image pull, application or model"
+}

@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-09-12T16:17:59.286912+08:00",
+  "code_checkpoint": "10cd2fbe",
+  "head": "60725e64ffb47c5dca569ac7e4737b52b11bda2f",
+  "frozen_sha256": {
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar": "38d49979291909696b429d76f678f74db09b58388aa3ca01c332f8ce0b48b448",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json": "3ea9ea6c567608f4593bfef65f5868d7cbbd1be0925315c650abd8ec3f1896d5",
+    "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo/REQUIREMENT.md": "9ac1544b1216eca575456e1b4c639b3d716d6eb9b89693991222192a5a2ac33a",
+    "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo/scripts/verify-workspace.sh": "c9401ad2933920406ff643fc39f8c4078a3624e537a09264ba0928d00aa28f23",
+    "/Users/kriswang/.claude/settings.json": "653353244cd40a3540eaa56104a414c32c1c966bc69410aa175b6f6e1fbc5c97",
+    "/Users/kriswang/.codex/config.toml": "d7efe838f7ac0a0191eca7f6901d796d19b68f18e5deefff34d018e51586733d"
+  },
+  "health_mode": "same_day_unchanged_identity_reuse",
+  "health_and_host_evidence": {
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/real-cases/20260912-okx-external-evidence-e2e/glm-read/result.json": "2113884cb0302db099f1345df3ac2baf6b14c54c86922d725d12d35d2aab5437",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/real-cases/20260912-okx-external-evidence-e2e/glm-session.json": "f1bf2284cb6ad119ebbb24043b4c976790e70bd7c9fbe3d65ae69d987ff9a9ee",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/real-cases/20260912-okx-external-evidence-e2e/codex-health.jsonl": "17592b96cbdc95adb5dca2484ac77c141b794d38c642417ca38a487826bbb236",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/real-cases/20260912-okx-external-evidence-e2e/host-browser.png": "4a4a6d34bed194a1f275bef50f5bcc1ab27e8bfc17e90df288303caa65483297",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/real-cases/20260912-okx-external-evidence-e2e/host-playwright.log": "422b942bb22e87e3de8c9033c2f82c19f53e41e7be83c4fc1157b1202f89eeea"
+  },
+  "claude_read_calls": 1,
+  "claude_closed": true,
+  "codex_end_turn": true
+}

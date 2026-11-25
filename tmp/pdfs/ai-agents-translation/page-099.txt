@@ -1,0 +1,33 @@
+Table 2-4. Pattern summary: multi-agent coordination strategies
+
+ Architecture  When to use    Benefits        Trade-offs
+
+ Supervisor      Small teams of    Simple setup;      Central
+                  agents with clear   strong control;     bottleneck;
+                   task boundaries    avoids             single point of
+                                   deadlocks          failure
+
+ Hierarchical     Larger,           Modular;         Harder to
+                 multiteam          scalable; mirrors  debug; requires
+                workflows         organizational     careful design
+                  requiring           structures
+                    scalability
+
+ Swarm        Dynamic           Flexible; natural   Less
+                  collaboration      back-and-forth     predictable;
+                between peers     flow               requires robust
+                      (e.g., research ↔                    handoff design
+                   writer)
+
+
+This shows how each coordination pattern supports different scales and
+styles of agent collaboration. By mixing and matching them, you can shape
+agent workflows that balance control, scalability, and adaptability within
+your overall MAS design.
+
+Conclusion
+
+The big takeaway from this chapter is that an AI agent’s intelligence also
+comes from its architecture, not just from the LLM it uses. In light of this,
+you explored how architectural patterns shape the intelligence and
+reliability of AI agents. By moving beyond single-step execution, you saw

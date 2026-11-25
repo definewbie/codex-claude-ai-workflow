@@ -16,9 +16,11 @@ public interface GateHandler {
             String workstreamId,
             NodeDefinition definition,
             NodeInstance instance,
-            String sourceOutcome
+            String sourceOutcome,
+            dev.dual.ledger.file.WorkflowFileLedger ledger
     ) {
         public GateContext {
+            if (ledger == null) throw new IllegalArgumentException("assembled ledger is required");
             if (workspaceRoot == null) {
                 throw new IllegalArgumentException("workspaceRoot is required");
             }

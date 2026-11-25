@@ -345,7 +345,9 @@ final report
 
 ## 9. P0 收口状态
 
-P0 主生命周期状态是 `Done with known limits`。当前已经验证：
+2026-06-19 的历史 MVP 状态是 `Done with known limits`。当前生命周期收敛仍为
+B03 `IN_PROGRESS`、真实运行 `NO-GO`，以[主工作清单](plans/20260927-dual-lifecycle-worklist.zh-CN.md)
+为准；历史报告不能作为当前准入证明。当时已经验证：
 
 - workstream 默认在安全 worktree 中运行，原始仓库保持干净；
 - Claude/Codex 输出先进入 typed artifact，再由 orchestrator 路由；

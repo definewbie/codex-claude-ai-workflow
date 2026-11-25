@@ -23,8 +23,15 @@ import java.util.UUID;
 public final class ExecutionNetworkGrantStore {
     public static final String REF_KEY = "execution_network_grant_ref";
     private static final String SHA_KEY = "execution_network_grant_sha256";
-    private final AtomicJsonWriter writer = new AtomicJsonWriter();
-    private final WorkflowFileLedger ledger = new WorkflowFileLedger();
+    private final AtomicJsonWriter writer;
+    private final boolean scoped;
+    private final WorkflowFileLedger ledger;
+
+    public ExecutionNetworkGrantStore(WorkflowFileLedger ledger) {
+        this.ledger = java.util.Objects.requireNonNull(ledger);
+        this.scoped = ledger.hasSession();
+        this.writer = scoped ? new AtomicJsonWriter(ledger.files()) : new AtomicJsonWriter();
+    }
 
     public record Grant(int schemaVersion, String workstreamId, String sourceNodeInstanceId,
                         String targetNodeDefinitionId, String definitionSha256, List<String> domains,
@@ -43,6 +50,13 @@ public final class ExecutionNetworkGrantStore {
     }
 
     public String approve(WorkstreamPaths paths, String target, List<String> domains, String note) throws IOException {
+        if (!scoped) {
+            try (var write = ledger.writeSession(paths, "network grant approval", UUID.randomUUID().toString())) {
+                var result = new ExecutionNetworkGrantStore(write.ledger()).approve(paths, target, domains, note);
+                write.commit();
+                return result;
+            }
+        }
         var source = waitingSource(paths);
         var definition = ledger.loadDefinition(paths);
         var canonical = canonicalDomains(domains);
@@ -60,7 +74,7 @@ public final class ExecutionNetworkGrantStore {
         var path = directory(paths).resolve("grant-" + UUID.randomUUID() + ".json");
         var ref = paths.workspaceRoot().relativize(path).toString();
         var grant = new Grant(1, paths.workstreamId().value(), source.nodeInstanceId(), target,
-                sha(Files.readAllBytes(paths.workflowDefinitionJson())), canonical, note.trim(),
+                sha(writer.readBytes(paths.workflowDefinitionJson())), canonical, note.trim(),
                 Instant.now().toString(), "PENDING", "", "");
         writer.write(path, grant);
         var transition = new LinkedHashMap<>(source.inputTransition());
@@ -75,6 +89,13 @@ public final class ExecutionNetworkGrantStore {
     }
 
     public void cancel(WorkstreamPaths paths) throws IOException {
+        if (!scoped) {
+            try (var write = ledger.writeSession(paths, "network grant cancellation", UUID.randomUUID().toString())) {
+                new ExecutionNetworkGrantStore(write.ledger()).cancel(paths);
+                write.commit();
+                return;
+            }
+        }
         var source = waitingSource(paths);
         var value = source.inputTransition().get(REF_KEY);
         if (!(value instanceof String ref)) throw new IOException("no network grant on the current waiting node");
@@ -84,7 +105,7 @@ public final class ExecutionNetworkGrantStore {
     }
 
     public Map<String, Object> view(WorkstreamPaths paths) throws IOException {
-        try { return validView(paths); }
+        try { return ledger.inspect(paths, (snapshot, files) -> new ExecutionNetworkGrantStore(snapshot).validView(paths)); }
         catch (IOException invalid) {
             return Map.of("canApprove", false, "canCancel", false, "status", "INVALID", "reason", invalid.getMessage());
         }
@@ -116,12 +137,26 @@ public final class ExecutionNetworkGrantStore {
 
     /** The atomic claim deliberately burns the grant even if subsequent startup fails. */
     public Claim claimIfPresent(WorkstreamPaths paths, String nodeId, String runId) throws IOException {
-        if (!Files.isRegularFile(paths.nodeJson(nodeId))) return null;
+        if (!scoped) {
+            try (var write = ledger.writeSession(paths, "network grant optional claim", UUID.randomUUID().toString())) {
+                var result = new ExecutionNetworkGrantStore(write.ledger()).claimIfPresent(paths, nodeId, runId);
+                write.commit();
+                return result;
+            }
+        }
+        if (!writer.exists(paths.nodeJson(nodeId))) return null;
         if (!ledger.loadNode(paths, nodeId).inputTransition().containsKey(REF_KEY)) return null;
         return claim(paths, nodeId, runId);
     }
 
     public Claim claim(WorkstreamPaths paths, String nodeId, String runId) throws IOException {
+        if (!scoped) {
+            try (var write = ledger.writeSession(paths, "network grant claim", UUID.randomUUID().toString())) {
+                var result = new ExecutionNetworkGrantStore(write.ledger()).claim(paths, nodeId, runId);
+                write.commit();
+                return result;
+            }
+        }
         var current = ledger.loadCurrent(paths);
         if (current.status() != WorkflowStatus.RUNNING || !current.activeNodeInstanceIds().contains(nodeId)) {
             throw new IOException("network grant requires the current running execution");
@@ -148,16 +183,20 @@ public final class ExecutionNetworkGrantStore {
         }
         var path = resolve(paths, ref);
         writer.write(path, withState(grant, "CLAIMED", nodeId, runId));
-        return new Claim(ref, sha(Files.readAllBytes(path)), grant.domains());
+        return new Claim(ref, sha(writer.readBytes(path)), grant.domains());
     }
 
-    public static Map<String, Object> forward(WorkstreamPaths paths, NodeInstanceDocument source,
+    public static Map<String, Object> forward(AtomicJsonWriter reader, WorkstreamPaths paths, NodeInstanceDocument source,
                                                NodeDefinition next, Map<String, Object> attributes) throws IOException {
         var result = new LinkedHashMap<>(attributes);
         result.remove(REF_KEY);
         var value = source.inputTransition().get(REF_KEY);
         if (value instanceof String ref && next.kind() != NodeKind.GATE) {
-            var grant = new ExecutionNetworkGrantStore().read(paths, ref);
+            var grant = readDocument(reader, paths, ref);
+            var origin = reader.read(paths.nodeJson(grant.sourceNodeInstanceId()), NodeInstanceDocument.class);
+            var originalSha = sha(reader.objectMapper().writeValueAsBytes(withState(grant, "PENDING", "", "")));
+            if (!ref.equals(origin.inputTransition().get(REF_KEY)) || !originalSha.equals(origin.inputTransition().get(SHA_KEY)))
+                throw new IOException("network grant approval binding mismatch");
             if (grant.state().equals("PENDING") && !source.nodeDefinitionId().equals(grant.targetNodeDefinitionId())) {
                 result.put(REF_KEY, ref);
             }
@@ -165,9 +204,9 @@ public final class ExecutionNetworkGrantStore {
         return Map.copyOf(result);
     }
 
-    public void verifyClaim(WorkstreamPaths paths, Claim claim, String nodeId, String runId) throws IOException {
+    public static void verifyClaim(WorkstreamPaths paths, Claim claim, String nodeId, String runId) throws IOException {
         // Historical execution evidence is bound by its recorded SHA, not today's source pointer.
-        var grant = readDocument(paths, claim.ref());
+        var grant = readDocument(new AtomicJsonWriter(), paths, claim.ref());
         if (!grant.state().equals("CLAIMED") || !nodeId.equals(grant.claimedNodeInstanceId())
                 || !runId.equals(grant.claimedRunId()) || !claim.domains().equals(grant.domains())
                 || !claim.sha256().equals(sha(Files.readAllBytes(resolve(paths, claim.ref()))))) {
@@ -183,7 +222,7 @@ public final class ExecutionNetworkGrantStore {
         if (node.kind() == NodeKind.GATE) {
             var open = false;
             for (var gateId : current.openGateIds()) {
-                var gate = writer.objectMapper().readValue(paths.gateJson(gateId).toFile(), GateDocument.class);
+                var gate = writer.read(paths.gateJson(gateId), GateDocument.class);
                 open |= gate.nodeInstanceId().equals(node.nodeInstanceId()) && gate.status().equals("open");
             }
             if (!open) throw new IOException("network approval requires a matching open gate");
@@ -221,7 +260,7 @@ public final class ExecutionNetworkGrantStore {
     }
 
     private Grant read(WorkstreamPaths paths, String ref) throws IOException {
-        var grant = readDocument(paths, ref);
+        var grant = readDocument(writer, paths, ref);
         var source = ledger.loadNode(paths, grant.sourceNodeInstanceId());
         var originalSha = sha(writer.objectMapper().writeValueAsBytes(withState(grant, "PENDING", "", "")));
         if (!ref.equals(source.inputTransition().get(REF_KEY)) || !originalSha.equals(source.inputTransition().get(SHA_KEY))) {
@@ -230,10 +269,10 @@ public final class ExecutionNetworkGrantStore {
         return grant;
     }
 
-    private Grant readDocument(WorkstreamPaths paths, String ref) throws IOException {
-        var grant = writer.objectMapper().readValue(resolve(paths, ref).toFile(), Grant.class);
+    private static Grant readDocument(AtomicJsonWriter writer, WorkstreamPaths paths, String ref) throws IOException {
+        var grant = writer.read(resolve(paths, ref), Grant.class);
         if (grant == null || grant.schemaVersion() != 1 || !paths.workstreamId().value().equals(grant.workstreamId())
-                || !sha(Files.readAllBytes(paths.workflowDefinitionJson())).equals(grant.definitionSha256())
+                || !sha(writer.readBytes(paths.workflowDefinitionJson())).equals(grant.definitionSha256())
                 || grant.state() == null || !List.of("PENDING", "CLAIMED", "CANCELLED").contains(grant.state())
                 || grant.targetNodeDefinitionId() == null || !grant.targetNodeDefinitionId().matches("[A-Za-z0-9._-]+")
                 || grant.sourceNodeInstanceId() == null || !grant.sourceNodeInstanceId().matches("[A-Za-z0-9._-]+")

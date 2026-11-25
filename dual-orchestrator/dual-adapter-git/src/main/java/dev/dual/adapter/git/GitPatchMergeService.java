@@ -62,15 +62,49 @@ public final class GitPatchMergeService {
     }
 
     public ApplyResult apply(Path targetRepo, String patch) throws IOException, InterruptedException {
-        ensureGitRepo(targetRepo, "target repo");
-        ensureClean(targetRepo);
-        var result = gitWithStdin(
-                targetRepo,
-                Map.of(),
-                patch.getBytes(StandardCharsets.UTF_8),
-                "apply", "--index", "--whitespace=nowarn"
-        );
-        return new ApplyResult(result.exitCode(), result.stdout(), result.stderr());
+        return apply(targetRepo, patch, applicationObservation(targetRepo), new ApplyLifecycle() {});
+    }
+
+    /** Only apply has lifecycle callbacks. Persistence completes before any patch byte is supplied. */
+    public ApplyResult apply(Path targetRepo, String patch, Map<String, Object> expectedBefore, ApplyLifecycle lifecycle)
+            throws IOException, InterruptedException {
+        var before = applicationObservation(targetRepo);
+        var expected = new java.util.LinkedHashMap<>(expectedBefore);
+        var actual = new java.util.LinkedHashMap<>(before);
+        expected.remove("observed_at");
+        actual.remove("observed_at");
+        if (!Boolean.TRUE.equals(before.get("clean"))) throw new IOException("target repo is not clean");
+        if (!actual.equals(expected))
+            throw new IOException("target repository changed before Git apply start");
+        var process = new ProcessBuilder("git", "apply", "--index", "--whitespace=nowarn")
+                .directory(targetRepo.toFile()).start();
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            var stdout = executor.submit(() -> process.getInputStream().readAllBytes());
+            var stderr = executor.submit(() -> process.getErrorStream().readAllBytes());
+            try {
+                lifecycle.started(process);
+                try (var stdin = process.getOutputStream()) { stdin.write(patch.getBytes(StandardCharsets.UTF_8)); }
+                int exit = process.waitFor();
+                lifecycle.exited(process, exit);
+                try {
+                    return new ApplyResult(exit, new String(await(stdout), StandardCharsets.UTF_8),
+                            new String(await(stderr), StandardCharsets.UTF_8), "");
+                } catch (IOException outputFailure) {
+                    return new ApplyResult(exit, "", "", outputFailure.getMessage());
+                }
+            } finally {
+                // Callback/input failures clean only this actual child; never infer a process-tree stop.
+                try { process.getOutputStream().close(); } catch (IOException ignored) {}
+                if (process.isAlive()) {
+                    process.destroy();
+                    if (!process.waitFor(2, java.util.concurrent.TimeUnit.SECONDS)) {
+                        process.destroyForcibly();
+                        process.waitFor(2, java.util.concurrent.TimeUnit.SECONDS);
+                    }
+                }
+                if (process.isAlive()) { stdout.cancel(true); stderr.cancel(true); }
+            }
+        }
     }
 
     public RepositoryState repositoryState(Path repository) throws IOException, InterruptedException {
@@ -100,6 +134,41 @@ public final class GitPatchMergeService {
             throw new IOException("delivery commit must have exactly one parent: " + identity);
         }
         return new CommitState(identity, tokens[1], tree);
+    }
+
+    public Path commonDirectory(Path repository) throws IOException, InterruptedException {
+        var common = requireOutput(git(repository, "rev-parse", "--path-format=absolute", "--git-common-dir"),
+                "failed to resolve common Git directory");
+        return Path.of(common).toRealPath();
+    }
+
+    /** Observed facts, never evidence that a particular operation caused this tree. */
+    public Map<String, Object> applicationObservation(Path repository) throws IOException, InterruptedException {
+        var state = repositoryState(repository);
+        var diff = git(repository, "diff", "--quiet", "--");
+        if (diff.exitCode() != 0 && diff.exitCode() != 1) throw new IOException("cannot compare worktree and index");
+        var untracked = git(repository, "ls-files", "--others", "--exclude-standard", "-z");
+        requireSuccess(untracked, "cannot inspect untracked files");
+        var status = git(repository, "status", "--porcelain=v1", "-z", "--untracked-files=all");
+        requireSuccess(status, "cannot inspect target status");
+        var index = stagedTree(repository);
+        var end = repositoryState(repository);
+        var finalStatus = git(repository, "status", "--porcelain=v1", "-z", "--untracked-files=all");
+        requireSuccess(finalStatus, "cannot recheck target status");
+        if (!state.equals(end) || !status.stdout().equals(finalStatus.stdout()) || !index.equals(stagedTree(repository)))
+            throw new IOException("target repository observation changed while reading");
+        var result = new java.util.LinkedHashMap<String, Object>();
+        result.put("repo", repository.toRealPath().toString());
+        result.put("common_dir", commonDirectory(repository).toString());
+        result.put("head", state.headCommit()); result.put("head_tree", state.headTree());
+        result.put("clean", state.clean()); result.put("index_tree", index);
+        result.put("worktree_matches_index", diff.exitCode() == 0);
+        result.put("no_untracked", untracked.stdout().isEmpty());
+        // NUL status is kept intact, including both rename paths; sorting lines would destroy that association.
+        result.put("status_entries", java.util.Arrays.stream(status.stdout().split("\u0000", -1)).filter(s -> !s.isEmpty()).toList());
+        result.put("untracked_entries", java.util.Arrays.stream(untracked.stdout().split("\u0000", -1)).filter(s -> !s.isEmpty()).sorted().toList());
+        result.put("observed_at", java.time.Instant.now().toString());
+        return java.util.Collections.unmodifiableMap(result);
     }
 
     public String diffStat(Path targetRepo) throws IOException, InterruptedException {
@@ -259,7 +328,13 @@ public final class GitPatchMergeService {
         }
     }
 
-    public record ApplyResult(int exitCode, String stdout, String stderr) {
+    public interface ApplyLifecycle {
+        default void started(Process process) throws IOException {}
+        default void exited(Process process, int actualExitCode) throws IOException {}
+    }
+
+    public record ApplyResult(int exitCode, String stdout, String stderr, String outputFailure) {
+        public ApplyResult(int exitCode, String stdout, String stderr) { this(exitCode, stdout, stderr, ""); }
         public boolean succeeded() {
             return exitCode == 0;
         }

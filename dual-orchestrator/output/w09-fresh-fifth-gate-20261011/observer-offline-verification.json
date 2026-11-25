@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "observer_tests": 9,
+  "budget_cases": 13,
+  "same_as_reviewed_candidates": true,
+  "native_provider_calls": 0,
+  "files": {
+    "gate_support.py": "037d09b61f1316aceb46abec24e5740aa79c8efa7aa7c77206267bfbafd1dd4d",
+    "run-one-step.py": "48c29654a1a149aa409f366b9bfbb234e3f1dd2e6333fef77151a8718cad8563",
+    "check_budget.py": "1aa7b7858d122f663b9c158117a350ce5a48101226121c2b55f65831ad0f0c2c",
+    "budget.json": "b02560888b636dad16a7e67d8f2df5ffdb4af878f13c2177930177fe59ba5126",
+    "test_gate_observer.py": "75ff822258d77344600c6908ec29e7d40cbc44e275fb0a9053e56d33e5e3f0bb"
+  }
+}

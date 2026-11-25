@@ -1,0 +1,10 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "file_summaries",
+  "workstreamId" : "ws-20261014T234009Z-RN9X",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-context-intake_claude_brainstorm-001",
+  "iterationId" : "iter-001",
+  "files" : [ ],
+  "generatedAt" : "2026-10-14T23:40:27.156619Z"
+}

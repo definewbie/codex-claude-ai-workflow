@@ -21,10 +21,12 @@ final class TimelineProjectionWriter {
     }
 
     void write(WorkstreamPaths paths) throws IOException {
-        if (!Files.exists(paths.workflowCurrentJson())) {
-            return;
-        }
-        var current = objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);
+        if (!jsonWriter.exists(paths.workflowCurrentJson())) return;
+        jsonWriter.write(paths.timelineJson(), snapshot(paths));
+    }
+
+    Map<String, Object> snapshot(WorkstreamPaths paths) throws IOException {
+        var current = jsonWriter.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
         var nodes = readNodes(paths).stream()
                 .sorted(TimelineProjectionWriter::compareNodes)
                 .map(this::nodeView)
@@ -32,6 +34,7 @@ final class TimelineProjectionWriter {
 
         var projection = new LinkedHashMap<String, Object>();
         projection.put("schemaVersion", 1);
+        projection.put("commitSequence", current.commitSequence());
         projection.put("workstreamId", current.workstreamId());
         projection.put("workflowInstanceId", current.workflowInstanceId());
         projection.put("workflowId", current.workflowId());
@@ -42,20 +45,20 @@ final class TimelineProjectionWriter {
         projection.put("updatedAt", current.updatedAt());
         projection.put("nodes", nodes);
 
-        jsonWriter.write(paths.timelineJson(), projection);
+        return projection;
     }
 
     private List<NodeInstanceDocument> readNodes(WorkstreamPaths paths) throws IOException {
-        if (!Files.exists(paths.nodesDir())) {
+        if (!jsonWriter.exists(paths.nodesDir())) {
             return List.of();
         }
-        try (var stream = Files.list(paths.nodesDir())) {
+        try (var stream = jsonWriter.list(paths.nodesDir()).stream()) {
             return stream
                     .filter(path -> path.getFileName().toString().endsWith(".json"))
                     .sorted(Comparator.comparing(path -> path.getFileName().toString()))
                     .map(path -> {
                         try {
-                            return objectMapper.readValue(path.toFile(), NodeInstanceDocument.class);
+                            return jsonWriter.read(path, NodeInstanceDocument.class);
                         } catch (IOException e) {
                             throw new TimelineProjectionException(e);
                         }

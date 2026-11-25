@@ -1,0 +1,90 @@
+{
+  "status": "PASS",
+  "command": "mvn clean test, single whole reactor",
+  "exit": 0,
+  "single_run": true,
+  "source_inputs": 654,
+  "source_identity_unchanged": true,
+  "source_drift": [],
+  "suites": 206,
+  "tests": 1752,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "modules": [
+    {
+      "module": "dual-adapter-acpx",
+      "suites": 37,
+      "tests": 462,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-adapter-git",
+      "suites": 2,
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-cli",
+      "suites": 27,
+      "tests": 96,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-core",
+      "suites": 16,
+      "tests": 126,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-flow-liteflow",
+      "suites": 4,
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-ledger-file",
+      "suites": 23,
+      "tests": 156,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-runtime",
+      "suites": 83,
+      "tests": 805,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-server",
+      "suites": 14,
+      "tests": 81,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "live_native_provider_runs": 0,
+  "temporary_git_and_local_processes": true,
+  "one_off_proofs_not_in_counts": [
+    "query-lock-proof.json",
+    "apply-window-proof.json",
+    "write-target-proof.json",
+    "ui-verification.json"
+  ],
+  "counterproof_expected_failure_not_in_counts": "counterproof/results.json",
+  "system_permission": "required existing offline self-created Java child-process inspection; no assertions changed"
+}

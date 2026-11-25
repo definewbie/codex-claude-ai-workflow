@@ -1,0 +1,9 @@
+{
+  "received_user_text": "批准",
+  "scope": "G05 local preparation, task/target/budget/responsibilities",
+  "real_provider_run_authorized": false,
+  "business_gate_approvals_pregranted": false,
+  "product_commit_actor": "user",
+  "initial_empty_base_commit_authorized": true,
+  "received_at": "2026-10-10T13:56:25.711126+08:00"
+}

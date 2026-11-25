@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "workstreamId": "ws-20261026T142203Z-7SNA",
+  "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+  "workflowId": "agent-lifecycle-terminal-delivery",
+  "definitionVersion": 5,
+  "status": "RUNNING",
+  "activeNodeInstanceIds": [
+    "node-contract-compile-007"
+  ],
+  "openGateIds": [],
+  "lastEventId": "evt-000007",
+  "updatedAt": "2026-10-26T15:10:44.551772Z",
+  "commitSequence": 24
+}

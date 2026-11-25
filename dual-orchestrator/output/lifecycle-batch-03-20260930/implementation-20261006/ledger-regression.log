@@ -1,0 +1,989 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/3]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/3]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.core.contract.TaskContractTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.181 s -- in dev.dual.core.contract.TaskContractTest
+[INFO] Running dev.dual.core.contract.PhasedContractTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.033 s -- in dev.dual.core.contract.PhasedContractTest
+[INFO] Running dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Running dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Running dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Running dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Running dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Running dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Running dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Running dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Running dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Running dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Running dev.dual.core.workflow.EdgeConditionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.workflow.EdgeConditionTest
+[INFO] Running dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Running dev.dual.core.id.DualIdGeneratorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.id.DualIdGeneratorTest
+[INFO] Running dev.dual.core.domain.PromptLanguageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.core.domain.PromptLanguageTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 123, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/3]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Running dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Running dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.093 s -- in dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Running dev.dual.ledger.file.FileLedgerStoreTest
+[ERROR] Tests run: 2, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.014 s <<< FAILURE! -- in dev.dual.ledger.file.FileLedgerStoreTest
+[ERROR] dev.dual.ledger.file.FileLedgerStoreTest.initializesWorkstreamSettingsWithPromptLanguage -- Time elapsed: 0.009 s <<< ERROR!
+java.lang.IllegalStateException: initialization requires a frozen runtime identity and write session
+	at dev.dual.ledger.file.FileLedgerStore.initializeWorkstream(FileLedgerStore.java:53)
+	at dev.dual.ledger.file.FileLedgerStoreTest.initializesWorkstreamSettingsWithPromptLanguage(FileLedgerStoreTest.java:46)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.FileLedgerStoreTest.initializesAndLoadsWorkstreamLedger -- Time elapsed: 0.004 s <<< ERROR!
+java.lang.IllegalStateException: initialization requires a frozen runtime identity and write session
+	at dev.dual.ledger.file.FileLedgerStore.initializeWorkstream(FileLedgerStore.java:53)
+	at dev.dual.ledger.file.FileLedgerStore.initializeWorkstream(FileLedgerStore.java:36)
+	at dev.dual.ledger.file.FileLedgerStoreTest.initializesAndLoadsWorkstreamLedger(FileLedgerStoreTest.java:29)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.ledger.file.IterationRefTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.ledger.file.IterationRefTest
+[INFO] Running dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[ERROR] Tests run: 5, Failures: 0, Errors: 5, Skipped: 0, Time elapsed: 0.012 s <<< FAILURE! -- in dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[ERROR] dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.recoverableRuntimeFailureIsRetrySafe -- Time elapsed: 0.005 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.recoverableRuntimeFailureIsRetrySafe(WorkstreamAttentionEvaluatorTest.java:30)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.completedWorkflowNeverSuggestsGoalLoopRun -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.completedWorkflowNeverSuggestsGoalLoopRun(WorkstreamAttentionEvaluatorTest.java:137)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.currentRecoveryTakesPrecedenceOverStaleGoalOutcome -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.currentRecoveryTakesPrecedenceOverStaleGoalOutcome(WorkstreamAttentionEvaluatorTest.java:53)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.revisionLimitIsSemanticAndNotRetrySafe -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.revisionLimitIsSemanticAndNotRetrySafe(WorkstreamAttentionEvaluatorTest.java:105)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.completedWorkflowAttentionDoesNotInterpretDeliveryMergePlan -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.completedWorkflowAttentionDoesNotInterpretDeliveryMergePlan(WorkstreamAttentionEvaluatorTest.java:165)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.568 s -- in dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Running dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Running dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Running dev.dual.ledger.file.WorkflowGateResolutionTest
+[ERROR] Tests run: 5, Failures: 0, Errors: 5, Skipped: 0, Time elapsed: 0.007 s <<< FAILURE! -- in dev.dual.ledger.file.WorkflowGateResolutionTest
+[ERROR] dev.dual.ledger.file.WorkflowGateResolutionTest.advisoryRevisionWaitsForHumanAndNotedHumanRevisionMayExceedAutomaticBudget -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowGateResolutionTest.advisoryRevisionWaitsForHumanAndNotedHumanRevisionMayExceedAutomaticBudget(WorkflowGateResolutionTest.java:74)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowGateResolutionTest.humanCanApproveNegativeAdvisoryWithoutCreatingRevision -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowGateResolutionTest.humanCanApproveNegativeAdvisoryWithoutCreatingRevision(WorkflowGateResolutionTest.java:126)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowGateResolutionTest.rejectsResolutionWhenActiveNodeIsNotGate -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowGateResolutionTest.rejectsResolutionWhenActiveNodeIsNotGate(WorkflowGateResolutionTest.java:151)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowGateResolutionTest.blockedSourceCannotAdvanceWithoutHumanDecisionNote -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowGateResolutionTest.blockedSourceCannotAdvanceWithoutHumanDecisionNote(WorkflowGateResolutionTest.java:51)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowGateResolutionTest.approvingOpenGateRoutesByHumanAction -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowGateResolutionTest.approvingOpenGateRoutesByHumanAction(WorkflowGateResolutionTest.java:33)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[ERROR] Tests run: 3, Failures: 0, Errors: 3, Skipped: 0, Time elapsed: 0.005 s <<< FAILURE! -- in dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[ERROR] dev.dual.ledger.file.ConditionalEdgeRoutingTest.unconditionalEdgeMatchesAlways -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ConditionalEdgeRoutingTest.unconditionalEdgeMatchesAlways(ConditionalEdgeRoutingTest.java:71)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ConditionalEdgeRoutingTest.skipsEdgeWhenConditionFails -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ConditionalEdgeRoutingTest.skipsEdgeWhenConditionFails(ConditionalEdgeRoutingTest.java:55)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ConditionalEdgeRoutingTest.routesToMatchingConditionalEdge -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ConditionalEdgeRoutingTest.routesToMatchingConditionalEdge(ConditionalEdgeRoutingTest.java:39)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[ERROR] Tests run: 4, Failures: 1, Errors: 3, Skipped: 0, Time elapsed: 0.007 s <<< FAILURE! -- in dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[ERROR] dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.initializePrefixesCannotBeReplayedOrLoadedAsOneConsistentGeneration -- Time elapsed: 0.003 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.io.IOException> but was: <java.lang.IllegalStateException>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.blockAtomicWrite(MultiFileMutationRestartAssessmentTest.java:239)
+	at dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.initializePrefixesCannotBeReplayedOrLoadedAsOneConsistentGeneration(MultiFileMutationRestartAssessmentTest.java:31)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.lambda$initializePrefixesCannotBeReplayedOrLoadedAsOneConsistentGeneration$0(MultiFileMutationRestartAssessmentTest.java:31)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	... 7 more
+
+[ERROR] dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.staleRecoveryPrefixesLoseReplayEligibilityWhenTheNodeWriteWins -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.staleFixture(MultiFileMutationRestartAssessmentTest.java:200)
+	at dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.staleRecoveryPrefixesLoseReplayEligibilityWhenTheNodeWriteWins(MultiFileMutationRestartAssessmentTest.java:82)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.normalRoutingRecoversEarlyPrefixesButDuplicatesAnAlreadyAppendedEvent -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.routingFixture(MultiFileMutationRestartAssessmentTest.java:217)
+	at dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.normalRoutingRecoversEarlyPrefixesButDuplicatesAnAlreadyAppendedEvent(MultiFileMutationRestartAssessmentTest.java:110)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.resolvedGatePrefixesLoseReplayEligibilityBeforeTheTransitionCommits -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.gateFixture(MultiFileMutationRestartAssessmentTest.java:191)
+	at dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.resolvedGatePrefixesLoseReplayEligibilityBeforeTheTransitionCommits(MultiFileMutationRestartAssessmentTest.java:53)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.ledger.file.ParallelFanOutTest
+[ERROR] Tests run: 5, Failures: 0, Errors: 5, Skipped: 0, Time elapsed: 0.007 s <<< FAILURE! -- in dev.dual.ledger.file.ParallelFanOutTest
+[ERROR] dev.dual.ledger.file.ParallelFanOutTest.branchGroupCarriesAcrossIntermediateBranchNodesBeforeJoin -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ParallelFanOutTest.branchGroupCarriesAcrossIntermediateBranchNodesBeforeJoin(ParallelFanOutTest.java:142)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ParallelFanOutTest.parallelFanOut_allComplete_workflowCompleted -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ParallelFanOutTest.parallelFanOut_allComplete_workflowCompleted(ParallelFanOutTest.java:90)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ParallelFanOutTest.joinAllTerminalWaitsForAllBranchNodes -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ParallelFanOutTest.joinAllTerminalWaitsForAllBranchNodes(ParallelFanOutTest.java:116)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ParallelFanOutTest.parallelFanOut_activatesMultipleNodes -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ParallelFanOutTest.parallelFanOut_activatesMultipleNodes(ParallelFanOutTest.java:39)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ParallelFanOutTest.parallelFanOut_completesOneNode_otherRemainsActive -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ParallelFanOutTest.parallelFanOut_completesOneNode_otherRemainsActive(ParallelFanOutTest.java:68)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Running dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Running dev.dual.ledger.file.WorkflowFileLedgerTest
+[ERROR] Tests run: 50, Failures: 0, Errors: 47, Skipped: 0, Time elapsed: 0.073 s <<< FAILURE! -- in dev.dual.ledger.file.WorkflowFileLedgerTest
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.scopeRevisionRequestCannotResolveWrongSourceMissingNoteOrMissingRoute -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.initializedPaths(WorkflowFileLedgerTest.java:2075)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.scopeRevisionRequestCannotResolveWrongSourceMissingNoteOrMissingRoute(WorkflowFileLedgerTest.java:775)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.staleRunningRecoveryRejectsLivePid -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.staleRunningRecoveryRejectsLivePid(WorkflowFileLedgerTest.java:1887)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.allowedGateActionWithoutEdgeCompletesWorkflow -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.allowedGateActionWithoutEdgeCompletesWorkflow(WorkflowFileLedgerTest.java:1305)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.completesWorkflowWhenOutcomeHasNoEdge -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.completesWorkflowWhenOutcomeHasNoEdge(WorkflowFileLedgerTest.java:1179)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.abortRecoveryRejectsNonRecoveryWorkflow -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.abortRecoveryRejectsNonRecoveryWorkflow(WorkflowFileLedgerTest.java:1938)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.terminalAcceptanceProfileCompletesWithoutNextStageArtifacts -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.terminalAcceptanceProfileCompletesWithoutNextStageArtifacts(WorkflowFileLedgerTest.java:1230)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.ambiguousRevisionLimitBlockedRoutesFailClosed -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.initializedPaths(WorkflowFileLedgerTest.java:2075)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.ambiguousRevisionLimitBlockedRoutesFailClosed(WorkflowFileLedgerTest.java:821)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.revisionLimitBlockedGateCannotStartAnotherIteration -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.initializedPaths(WorkflowFileLedgerTest.java:2075)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.revisionLimitBlockedGateCannotStartAnotherIteration(WorkflowFileLedgerTest.java:856)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.acceptanceRejectRoutesToClassifierBeforeStartingRepairIteration -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.acceptanceRejectRoutesToClassifierBeforeStartingRepairIteration(WorkflowFileLedgerTest.java:958)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.contractClarificationStartsTypedProposalRevisionBeforeCompilerCanRun -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.contractClarificationStartsTypedProposalRevisionBeforeCompilerCanRun(WorkflowFileLedgerTest.java:281)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.finalNextStageGateRejectsApproveAndCompleteEndsWorkflow -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.finalNextStageGateRejectsApproveAndCompleteEndsWorkflow(WorkflowFileLedgerTest.java:1052)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.acceptanceWithNotesDisplaysClassifierAsNotesClassification -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.acceptanceWithNotesDisplaysClassifierAsNotesClassification(WorkflowFileLedgerTest.java:1009)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.closesMistakenIterationStartedByHistoricalFinalGateApproval -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.closesMistakenIterationStartedByHistoricalFinalGateApproval(WorkflowFileLedgerTest.java:1095)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.resolvingGatePersistsGateResolutionDocument -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.resolvingGatePersistsGateResolutionDocument(WorkflowFileLedgerTest.java:162)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.staleRunningNodeMovesToRecoveryWhenPidIsGone -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.staleRunningNodeMovesToRecoveryWhenPidIsGone(WorkflowFileLedgerTest.java:1855)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.publicWebSearchApprovalRequiresExactEscalationAndCreatesOneRetryGrant -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.publicWebSearchApprovalRequiresExactEscalationAndCreatesOneRetryGrant(WorkflowFileLedgerTest.java:1622)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.invalidControlOutputOpensControlRepairGate -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.invalidControlOutputOpensControlRepairGate(WorkflowFileLedgerTest.java:1556)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.unsupportedGateActionIsRejectedBeforeAnyLedgerWrite -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.unsupportedGateActionIsRejectedBeforeAnyLedgerWrite(WorkflowFileLedgerTest.java:236)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.gateDocumentUsesConfiguredAllowedActions -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.gateDocumentUsesConfiguredAllowedActions(WorkflowFileLedgerTest.java:1339)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.revisionOutcomeStopsAtRecoveryWhenRevisionLimitIsReached -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.revisionOutcomeStopsAtRecoveryWhenRevisionLimitIsReached(WorkflowFileLedgerTest.java:595)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.resolveOpenGateNormalizesApproveToApprovedWhenWorkflowUsesApprovedOutcome -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.resolveOpenGateNormalizesApproveToApprovedWhenWorkflowUsesApprovedOutcome(WorkflowFileLedgerTest.java:202)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.completesNodeAndActivatesNextNodeByOutcome -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.completesNodeAndActivatesNextNodeByOutcome(WorkflowFileLedgerTest.java:107)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.rejectsDuplicateInitialization -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.rejectsDuplicateInitialization(WorkflowFileLedgerTest.java:2008)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.failedNodeCurrentFailureSummaryHighlightsContractDiagnostic -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.failedNodeCurrentFailureSummaryHighlightsContractDiagnostic(WorkflowFileLedgerTest.java:1509)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.acceptanceRejectClassificationRoutesToRepairIteration -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.acceptanceRejectClassificationRoutesToRepairIteration(WorkflowFileLedgerTest.java:474)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.revisionLimitBlockedRouteToNonGateFailsClosed -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.initializedPaths(WorkflowFileLedgerTest.java:2075)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.revisionLimitBlockedRouteToNonGateFailsClosed(WorkflowFileLedgerTest.java:838)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.blockedNodeStopsWorkflowWithoutRoutingNextNode -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.blockedNodeStopsWorkflowWithoutRoutingNextNode(WorkflowFileLedgerTest.java:1980)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.publicWebSearchApprovalCannotBypassTheCurrentRecoveryAssessment -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.publicWebSearchApprovalCannotBypassTheCurrentRecoveryAssessment(WorkflowFileLedgerTest.java:1688)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.abortRecoveryMarksWorkflowFailedAndClearsActiveNodes -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.abortRecoveryMarksWorkflowFailedAndClearsActiveNodes(WorkflowFileLedgerTest.java:1910)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.selfTestDecisionRoutesCompleteIncompleteAndBlockedWithoutBypass -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.initializedPaths(WorkflowFileLedgerTest.java:2075)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.selfTestDecisionRoutesCompleteIncompleteAndBlockedWithoutBypass(WorkflowFileLedgerTest.java:662)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.writesTimelineProjectionFromWorkflowAndNodes -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.writesTimelineProjectionFromWorkflowAndNodes(WorkflowFileLedgerTest.java:323)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.loopTransitionMetadataRespectsRevisionLimit -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.loopTransitionMetadataRespectsRevisionLimit(WorkflowFileLedgerTest.java:522)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.failedNodeStopsWorkflowWithoutRoutingNextNode -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.failedNodeStopsWorkflowWithoutRoutingNextNode(WorkflowFileLedgerTest.java:1366)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.retryRejectsNonRetryableActiveNode -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.retryRejectsNonRetryableActiveNode(WorkflowFileLedgerTest.java:1957)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.reconnectFailureSummarySuggestsRebuildingAcpxSession -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.reconnectFailureSummarySuggestsRebuildingAcpxSession(WorkflowFileLedgerTest.java:1472)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.declaredChangeScopeViolationRequiresHumanNoteBeforeRepairIteration -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.initializedPaths(WorkflowFileLedgerTest.java:2075)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.declaredChangeScopeViolationRequiresHumanNoteBeforeRepairIteration(WorkflowFileLedgerTest.java:742)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.initializesWorkflowLedgerAndCurrentSnapshot -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.initializesWorkflowLedgerAndCurrentSnapshot(WorkflowFileLedgerTest.java:44)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.revisionOutcomeStartsNextWorkflowIteration -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.revisionOutcomeStartsNextWorkflowIteration(WorkflowFileLedgerTest.java:398)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.failedNodeWritesCurrentFailureSummary -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.failedNodeWritesCurrentFailureSummary(WorkflowFileLedgerTest.java:1397)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.retryActiveFailedNodeSetsItReadyAgain -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.retryActiveFailedNodeSetsItReadyAgain(WorkflowFileLedgerTest.java:1590)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.modelMismatchFailureSummarySuggestsRebuildingAcpxSession -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.modelMismatchFailureSummarySuggestsRebuildingAcpxSession(WorkflowFileLedgerTest.java:1436)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.rejectDecisionStartsNextWorkflowIteration -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.rejectDecisionStartsNextWorkflowIteration(WorkflowFileLedgerTest.java:1149)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.replayClassificationCompensatesOnlyTheLineageBoundMisroute -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.replayClassificationCompensatesOnlyTheLineageBoundMisroute(WorkflowFileLedgerTest.java:1768)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.loopTransitionMetadataStartsNextWorkflowIteration -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.loopTransitionMetadataStartsNextWorkflowIteration(WorkflowFileLedgerTest.java:436)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.loadDefinitionRejectsFrozenHiddenGateEdge -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.loadDefinitionRejectsFrozenHiddenGateEdge(WorkflowFileLedgerTest.java:79)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.definitionThatDeclaresNextStageArtifactsStillAuditsThem -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.definitionThatDeclaresNextStageArtifactsStillAuditsThem(WorkflowFileLedgerTest.java:1276)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.WorkflowFileLedgerTest.replayClassificationRejectsAnUnrelatedRecoveryFailure -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.WorkflowFileLedgerTest.replayClassificationRejectsAnUnrelatedRecoveryFailure(WorkflowFileLedgerTest.java:1824)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Running dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[ERROR] Tests run: 7, Failures: 0, Errors: 7, Skipped: 0, Time elapsed: 0.008 s <<< FAILURE! -- in dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[ERROR] dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.failedExecutionRetryBurnsGrantBeforeProviderAndNeedsNewApproval -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.fixture(ExecutionNetworkGrantStoreTest.java:172)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.failedExecutionRetryBurnsGrantBeforeProviderAndNeedsNewApproval(ExecutionNetworkGrantStoreTest.java:53)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.resolvedGatePartialWriteHasNoProjectedOrExecutableApproval -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.fixture(ExecutionNetworkGrantStoreTest.java:172)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.resolvedGatePartialWriteHasNoProjectedOrExecutableApproval(ExecutionNetworkGrantStoreTest.java:116)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.replacementPreservesHistoricalClaimWithoutReauthorizingIt -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.fixture(ExecutionNetworkGrantStoreTest.java:172)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.replacementPreservesHistoricalClaimWithoutReauthorizingIt(ExecutionNetworkGrantStoreTest.java:94)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.unusedGrantDoesNotCrossNextGateOrDefinitionChange -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.fixture(ExecutionNetworkGrantStoreTest.java:172)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.unusedGrantDoesNotCrossNextGateOrDefinitionChange(ExecutionNetworkGrantStoreTest.java:145)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.gateContextAndSiblingExecutionRouteToOneClaimWithoutResolvingTheGate -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.fixture(ExecutionNetworkGrantStoreTest.java:172)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.gateContextAndSiblingExecutionRouteToOneClaimWithoutResolvingTheGate(ExecutionNetworkGrantStoreTest.java:22)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.cancellationMissingFilesAndTamperedDomainsFailClosed -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.fixture(ExecutionNetworkGrantStoreTest.java:172)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.cancellationMissingFilesAndTamperedDomainsFailClosed(ExecutionNetworkGrantStoreTest.java:74)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.profileAndDomainBoundariesRejectWithoutMutation -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.fixture(ExecutionNetworkGrantStoreTest.java:172)
+	at dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.profileAndDomainBoundariesRejectWithoutMutation(ExecutionNetworkGrantStoreTest.java:132)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.202 s -- in dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Running dev.dual.ledger.file.HumanActionRequestTest
+[ERROR] Tests run: 3, Failures: 0, Errors: 3, Skipped: 0, Time elapsed: 0.002 s <<< FAILURE! -- in dev.dual.ledger.file.HumanActionRequestTest
+[ERROR] dev.dual.ledger.file.HumanActionRequestTest.auditAppendFailureDoesNotLoseOrRepeatDurableRequest -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.HumanActionRequestTest.waiting(HumanActionRequestTest.java:85)
+	at dev.dual.ledger.file.HumanActionRequestTest.auditAppendFailureDoesNotLoseOrRepeatDurableRequest(HumanActionRequestTest.java:54)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.HumanActionRequestTest.staleGateOrSourceIsRejectedBeforeAnyWrite -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.HumanActionRequestTest.waiting(HumanActionRequestTest.java:85)
+	at dev.dual.ledger.file.HumanActionRequestTest.staleGateOrSourceIsRejectedBeforeAnyWrite(HumanActionRequestTest.java:39)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.HumanActionRequestTest.requestIsIdempotentNonResolvingAndPreservedByLaterHumanDecision -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.HumanActionRequestTest.waiting(HumanActionRequestTest.java:85)
+	at dev.dual.ledger.file.HumanActionRequestTest.requestIsIdempotentNonResolvingAndPreservedByLaterHumanDecision(HumanActionRequestTest.java:19)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.ledger.file.LedgerSessionTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.555 s -- in dev.dual.ledger.file.LedgerSessionTest
+[INFO] Running dev.dual.ledger.file.RetryFailureContextTest
+[ERROR] Tests run: 5, Failures: 0, Errors: 5, Skipped: 0, Time elapsed: 0.004 s <<< FAILURE! -- in dev.dual.ledger.file.RetryFailureContextTest
+[ERROR] dev.dual.ledger.file.RetryFailureContextTest.autoRetryDoesNotCreateSnapshotFromAnOldFailure -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.RetryFailureContextTest.failed(RetryFailureContextTest.java:98)
+	at dev.dual.ledger.file.RetryFailureContextTest.autoRetryDoesNotCreateSnapshotFromAnOldFailure(RetryFailureContextTest.java:83)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.RetryFailureContextTest.boundedSnapshotSurvivesQueueAndRunningWithoutGrantOrNoteInjection -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.RetryFailureContextTest.failed(RetryFailureContextTest.java:98)
+	at dev.dual.ledger.file.RetryFailureContextTest.boundedSnapshotSurvivesQueueAndRunningWithoutGrantOrNoteInjection(RetryFailureContextTest.java:21)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.RetryFailureContextTest.malformedContractDiagnosticRefusesBeforeAnyWrite -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.RetryFailureContextTest.failed(RetryFailureContextTest.java:98)
+	at dev.dual.ledger.file.RetryFailureContextTest.malformedContractDiagnosticRefusesBeforeAnyWrite(RetryFailureContextTest.java:48)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.RetryFailureContextTest.externalFailuresAndNonAgentNodesDoNotAcquireDiagnosticContext -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.RetryFailureContextTest.failed(RetryFailureContextTest.java:98)
+	at dev.dual.ledger.file.RetryFailureContextTest.externalFailuresAndNonAgentNodesDoNotAcquireDiagnosticContext(RetryFailureContextTest.java:73)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.ledger.file.RetryFailureContextTest.contractRetryRejectsIncompletePrestateBeforeAnyWrite -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: initialize requires the complete application initialization session
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:206)
+	at dev.dual.ledger.file.RetryFailureContextTest.failed(RetryFailureContextTest.java:98)
+	at dev.dual.ledger.file.RetryFailureContextTest.contractRetryRejectsIncompletePrestateBeforeAnyWrite(RetryFailureContextTest.java:61)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   MultiFileMutationRestartAssessmentTest.initializePrefixesCannotBeReplayedOrLoadedAsOneConsistentGeneration:31->blockAtomicWrite:239 Unexpected exception type thrown, expected: <java.io.IOException> but was: <java.lang.IllegalStateException>
+[ERROR] Errors: 
+[ERROR]   ConditionalEdgeRoutingTest.routesToMatchingConditionalEdge:39 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ConditionalEdgeRoutingTest.skipsEdgeWhenConditionFails:55 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ConditionalEdgeRoutingTest.unconditionalEdgeMatchesAlways:71 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ExecutionNetworkGrantStoreTest.cancellationMissingFilesAndTamperedDomainsFailClosed:74->fixture:172 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ExecutionNetworkGrantStoreTest.failedExecutionRetryBurnsGrantBeforeProviderAndNeedsNewApproval:53->fixture:172 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ExecutionNetworkGrantStoreTest.gateContextAndSiblingExecutionRouteToOneClaimWithoutResolvingTheGate:22->fixture:172 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ExecutionNetworkGrantStoreTest.profileAndDomainBoundariesRejectWithoutMutation:132->fixture:172 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ExecutionNetworkGrantStoreTest.replacementPreservesHistoricalClaimWithoutReauthorizingIt:94->fixture:172 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ExecutionNetworkGrantStoreTest.resolvedGatePartialWriteHasNoProjectedOrExecutableApproval:116->fixture:172 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ExecutionNetworkGrantStoreTest.unusedGrantDoesNotCrossNextGateOrDefinitionChange:145->fixture:172 » IllegalState initialize requires the complete application initialization session
+[ERROR]   FileLedgerStoreTest.initializesAndLoadsWorkstreamLedger:29 » IllegalState initialization requires a frozen runtime identity and write session
+[ERROR]   FileLedgerStoreTest.initializesWorkstreamSettingsWithPromptLanguage:46 » IllegalState initialization requires a frozen runtime identity and write session
+[ERROR]   HumanActionRequestTest.auditAppendFailureDoesNotLoseOrRepeatDurableRequest:54->waiting:85 » IllegalState initialize requires the complete application initialization session
+[ERROR]   HumanActionRequestTest.requestIsIdempotentNonResolvingAndPreservedByLaterHumanDecision:19->waiting:85 » IllegalState initialize requires the complete application initialization session
+[ERROR]   HumanActionRequestTest.staleGateOrSourceIsRejectedBeforeAnyWrite:39->waiting:85 » IllegalState initialize requires the complete application initialization session
+[ERROR]   MultiFileMutationRestartAssessmentTest.normalRoutingRecoversEarlyPrefixesButDuplicatesAnAlreadyAppendedEvent:110->routingFixture:217 » IllegalState initialize requires the complete application initialization session
+[ERROR]   MultiFileMutationRestartAssessmentTest.resolvedGatePrefixesLoseReplayEligibilityBeforeTheTransitionCommits:53->gateFixture:191 » IllegalState initialize requires the complete application initialization session
+[ERROR]   MultiFileMutationRestartAssessmentTest.staleRecoveryPrefixesLoseReplayEligibilityWhenTheNodeWriteWins:82->staleFixture:200 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ParallelFanOutTest.branchGroupCarriesAcrossIntermediateBranchNodesBeforeJoin:142 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ParallelFanOutTest.joinAllTerminalWaitsForAllBranchNodes:116 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ParallelFanOutTest.parallelFanOut_activatesMultipleNodes:39 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ParallelFanOutTest.parallelFanOut_allComplete_workflowCompleted:90 » IllegalState initialize requires the complete application initialization session
+[ERROR]   ParallelFanOutTest.parallelFanOut_completesOneNode_otherRemainsActive:68 » IllegalState initialize requires the complete application initialization session
+[ERROR]   RetryFailureContextTest.autoRetryDoesNotCreateSnapshotFromAnOldFailure:83->failed:98 » IllegalState initialize requires the complete application initialization session
+[ERROR]   RetryFailureContextTest.boundedSnapshotSurvivesQueueAndRunningWithoutGrantOrNoteInjection:21->failed:98 » IllegalState initialize requires the complete application initialization session
+[ERROR]   RetryFailureContextTest.contractRetryRejectsIncompletePrestateBeforeAnyWrite:61->failed:98 » IllegalState initialize requires the complete application initialization session
+[ERROR]   RetryFailureContextTest.externalFailuresAndNonAgentNodesDoNotAcquireDiagnosticContext:73->failed:98 » IllegalState initialize requires the complete application initialization session
+[ERROR]   RetryFailureContextTest.malformedContractDiagnosticRefusesBeforeAnyWrite:48->failed:98 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.abortRecoveryMarksWorkflowFailedAndClearsActiveNodes:1910 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.abortRecoveryRejectsNonRecoveryWorkflow:1938 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.acceptanceRejectClassificationRoutesToRepairIteration:474 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.acceptanceRejectRoutesToClassifierBeforeStartingRepairIteration:958 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.acceptanceWithNotesDisplaysClassifierAsNotesClassification:1009 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.allowedGateActionWithoutEdgeCompletesWorkflow:1305 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.ambiguousRevisionLimitBlockedRoutesFailClosed:821->initializedPaths:2075 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.blockedNodeStopsWorkflowWithoutRoutingNextNode:1980 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.closesMistakenIterationStartedByHistoricalFinalGateApproval:1095 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.completesNodeAndActivatesNextNodeByOutcome:107 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.completesWorkflowWhenOutcomeHasNoEdge:1179 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.contractClarificationStartsTypedProposalRevisionBeforeCompilerCanRun:281 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.declaredChangeScopeViolationRequiresHumanNoteBeforeRepairIteration:742->initializedPaths:2075 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.definitionThatDeclaresNextStageArtifactsStillAuditsThem:1276 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.failedNodeCurrentFailureSummaryHighlightsContractDiagnostic:1509 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.failedNodeStopsWorkflowWithoutRoutingNextNode:1366 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.failedNodeWritesCurrentFailureSummary:1397 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.finalNextStageGateRejectsApproveAndCompleteEndsWorkflow:1052 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.gateDocumentUsesConfiguredAllowedActions:1339 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.initializesWorkflowLedgerAndCurrentSnapshot:44 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.invalidControlOutputOpensControlRepairGate:1556 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.loadDefinitionRejectsFrozenHiddenGateEdge:79 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.loopTransitionMetadataRespectsRevisionLimit:522 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.loopTransitionMetadataStartsNextWorkflowIteration:436 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.modelMismatchFailureSummarySuggestsRebuildingAcpxSession:1436 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.publicWebSearchApprovalCannotBypassTheCurrentRecoveryAssessment:1688 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.publicWebSearchApprovalRequiresExactEscalationAndCreatesOneRetryGrant:1622 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.reconnectFailureSummarySuggestsRebuildingAcpxSession:1472 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.rejectDecisionStartsNextWorkflowIteration:1149 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.rejectsDuplicateInitialization:2008 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.replayClassificationCompensatesOnlyTheLineageBoundMisroute:1768 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.replayClassificationRejectsAnUnrelatedRecoveryFailure:1824 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.resolveOpenGateNormalizesApproveToApprovedWhenWorkflowUsesApprovedOutcome:202 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.resolvingGatePersistsGateResolutionDocument:162 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.retryActiveFailedNodeSetsItReadyAgain:1590 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.retryRejectsNonRetryableActiveNode:1957 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.revisionLimitBlockedGateCannotStartAnotherIteration:856->initializedPaths:2075 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.revisionLimitBlockedRouteToNonGateFailsClosed:838->initializedPaths:2075 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.revisionOutcomeStartsNextWorkflowIteration:398 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.revisionOutcomeStopsAtRecoveryWhenRevisionLimitIsReached:595 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.scopeRevisionRequestCannotResolveWrongSourceMissingNoteOrMissingRoute:775->initializedPaths:2075 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.selfTestDecisionRoutesCompleteIncompleteAndBlockedWithoutBypass:662->initializedPaths:2075 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.staleRunningNodeMovesToRecoveryWhenPidIsGone:1855 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.staleRunningRecoveryRejectsLivePid:1887 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.terminalAcceptanceProfileCompletesWithoutNextStageArtifacts:1230 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.unsupportedGateActionIsRejectedBeforeAnyLedgerWrite:236 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowFileLedgerTest.writesTimelineProjectionFromWorkflowAndNodes:323 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowGateResolutionTest.advisoryRevisionWaitsForHumanAndNotedHumanRevisionMayExceedAutomaticBudget:74 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowGateResolutionTest.approvingOpenGateRoutesByHumanAction:33 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowGateResolutionTest.blockedSourceCannotAdvanceWithoutHumanDecisionNote:51 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowGateResolutionTest.humanCanApproveNegativeAdvisoryWithoutCreatingRevision:126 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkflowGateResolutionTest.rejectsResolutionWhenActiveNodeIsNotGate:151 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkstreamAttentionEvaluatorTest.completedWorkflowAttentionDoesNotInterpretDeliveryMergePlan:165 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkstreamAttentionEvaluatorTest.completedWorkflowNeverSuggestsGoalLoopRun:137 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkstreamAttentionEvaluatorTest.currentRecoveryTakesPrecedenceOverStaleGoalOutcome:53 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkstreamAttentionEvaluatorTest.recoverableRuntimeFailureIsRetrySafe:30 » IllegalState initialize requires the complete application initialization session
+[ERROR]   WorkstreamAttentionEvaluatorTest.revisionLimitIsSemanticAndNotRetrySafe:105 » IllegalState initialize requires the complete application initialization session
+[INFO] 
+[ERROR] Tests run: 151, Failures: 1, Errors: 85, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.834 s]
+[INFO] dual-ledger-file ................................... FAILURE [  2.903 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.882 s
+[INFO] Finished at: 2026-10-06T14:41:24+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project dual-ledger-file: There are test failures.
+[ERROR] 
+[ERROR] See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-ledger-file

@@ -1,0 +1,8 @@
+{
+  "status": "PASS_NO_AUTHORIZATION_REFUSAL_AND_SYNTAX_ONLY",
+  "exit": 1,
+  "native_provider_calls": 0,
+  "cli_started": false,
+  "fresh_case_created": false,
+  "budget_checked_before_model_subprocess": "STATIC_SOURCE_ORDER_ONLY; full runner not executed"
+}

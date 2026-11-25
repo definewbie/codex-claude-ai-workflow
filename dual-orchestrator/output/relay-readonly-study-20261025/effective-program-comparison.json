@@ -1,0 +1,108 @@
+{
+  "recorded_at": "2026-10-25T22:10:54.760109+08:00",
+  "scope": "LOCAL_READ_ONLY_OBSERVATION_NOT_RUN_ADMISSION",
+  "path_sha256": "2334ee09afb1e709a9a81f436f09a674586981b4862df76a4f05b46d43d5b9d9",
+  "reviewed_path_sha256": "beec02d1d2a5bfdeeb92f7948b616a692ccb13e305ef996aa4b85d017d14fab5",
+  "java_home": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home",
+  "selected_acpx_override": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+  "selection_metadata_sha256": "bac9edc709b3e5deedef6b83564af9bdfefedbf54ea2305e42836132408d1ec0",
+  "launch_identity_sha256": "91a8c602b244d1d8027a90d63b561a452e920d121b9a31a3d0abbf05c0ab0805",
+  "programs": [
+    {
+      "name": "java",
+      "selection_metadata_path": "/usr/bin/java",
+      "currently_resolved_path": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin/java",
+      "current_realpath": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin/java",
+      "path_equal": false,
+      "current_sha256": "35c0e7afcaeb977100d0b90725cc52ee73123c9286cdf3b423fe53d7f0ea0491",
+      "same_path_fixed_in_launch_identity": true,
+      "bytes_match_fixed_launch_identity": true,
+      "selection_metadata_realpath": "/usr/bin/java",
+      "selection_metadata_current_sha256": "9162760b99cf18b354e56105cd58159b9124f3d26b53c2b84d63aa1507edb812"
+    },
+    {
+      "name": "python3",
+      "selection_metadata_path": "/opt/homebrew/bin/python3",
+      "currently_resolved_path": "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3",
+      "current_realpath": "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13",
+      "path_equal": false,
+      "current_sha256": "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+      "same_path_fixed_in_launch_identity": true,
+      "bytes_match_fixed_launch_identity": true,
+      "selection_metadata_realpath": "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+      "selection_metadata_current_sha256": "667f456638186ffffe0bf853d6d510b0d65b523b216161a7e179a50d14445407"
+    },
+    {
+      "name": "node",
+      "selection_metadata_path": "/usr/local/bin/node",
+      "currently_resolved_path": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/node",
+      "current_realpath": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/node",
+      "path_equal": false,
+      "current_sha256": "64bcb939f5f8c921d104b02d0eb960781c13b49b9133d1d71a768eadd62da401",
+      "same_path_fixed_in_launch_identity": true,
+      "bytes_match_fixed_launch_identity": true,
+      "selection_metadata_realpath": "/usr/local/bin/node",
+      "selection_metadata_current_sha256": "7b7ffd8a081edeb6900cad6e4832a8e5162ce4f619190456b6966ad5f1a08993"
+    },
+    {
+      "name": "git",
+      "selection_metadata_path": "/opt/homebrew/bin/git",
+      "currently_resolved_path": "/opt/homebrew/bin/git",
+      "current_realpath": "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+      "path_equal": true,
+      "current_sha256": "971d6f2a523854035f836bb4a994c8e64efa87b30bcd3d799dab439e9d0d34f5",
+      "same_path_fixed_in_launch_identity": true,
+      "bytes_match_fixed_launch_identity": true,
+      "selection_metadata_realpath": "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+      "selection_metadata_current_sha256": "971d6f2a523854035f836bb4a994c8e64efa87b30bcd3d799dab439e9d0d34f5"
+    },
+    {
+      "name": "rtk",
+      "selection_metadata_path": "/opt/homebrew/bin/rtk",
+      "currently_resolved_path": "/opt/homebrew/bin/rtk",
+      "current_realpath": "/opt/homebrew/Cellar/rtk/0.42.3/bin/rtk",
+      "path_equal": true,
+      "current_sha256": "b243916c1ee1dd54efa11e8a40e72ff948efbd617e373a18e631410dee1df89e",
+      "same_path_fixed_in_launch_identity": true,
+      "bytes_match_fixed_launch_identity": true,
+      "selection_metadata_realpath": "/opt/homebrew/Cellar/rtk/0.42.3/bin/rtk",
+      "selection_metadata_current_sha256": "b243916c1ee1dd54efa11e8a40e72ff948efbd617e373a18e631410dee1df89e"
+    },
+    {
+      "name": "claude",
+      "selection_metadata_path": "/opt/homebrew/bin/claude",
+      "currently_resolved_path": "/opt/homebrew/bin/claude",
+      "current_realpath": "/opt/homebrew/Caskroom/claude-code/2.1.277/claude",
+      "path_equal": true,
+      "current_sha256": "73d6a2a55c46907e49bd8bb7608e134333bd71173351ee16ddce7d7db9914b9c",
+      "same_path_fixed_in_launch_identity": true,
+      "bytes_match_fixed_launch_identity": true,
+      "selection_metadata_realpath": "/opt/homebrew/Caskroom/claude-code/2.1.277/claude",
+      "selection_metadata_current_sha256": "73d6a2a55c46907e49bd8bb7608e134333bd71173351ee16ddce7d7db9914b9c"
+    },
+    {
+      "name": "codex",
+      "selection_metadata_path": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "currently_resolved_path": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "current_realpath": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "path_equal": true,
+      "current_sha256": "a04752e4d46a4d89e53e6f61c59c5349a638c8ce172ffbf391fd482b4d902a4e",
+      "same_path_fixed_in_launch_identity": true,
+      "bytes_match_fixed_launch_identity": false,
+      "selection_metadata_realpath": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "selection_metadata_current_sha256": "a04752e4d46a4d89e53e6f61c59c5349a638c8ce172ffbf391fd482b4d902a4e"
+    },
+    {
+      "name": "acpx",
+      "selection_metadata_path": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/acpx",
+      "currently_resolved_path": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/acpx",
+      "current_realpath": "/Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/acpx/dist/cli.js",
+      "path_equal": true,
+      "current_sha256": "85fdd3fb1e8bfec5477089430fd8b04d825083a2ab79becfb542f164375e0400",
+      "same_path_fixed_in_launch_identity": true,
+      "bytes_match_fixed_launch_identity": true,
+      "selection_metadata_realpath": "/Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/acpx/dist/cli.js",
+      "selection_metadata_current_sha256": "85fdd3fb1e8bfec5477089430fd8b04d825083a2ab79becfb542f164375e0400"
+    }
+  ]
+}

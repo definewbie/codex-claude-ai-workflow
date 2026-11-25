@@ -1,0 +1,28 @@
+{
+  "generated_at" : "2026-10-10T12:48:57.732914Z",
+  "network_transport_owner" : "claude_sandbox",
+  "node_instance_id" : "node-intake-claude_brainstorm-002",
+  "provider_subprocess_denied_env_names" : [ "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL" ],
+  "run_id" : "run-1791636537680",
+  "sandbox" : {
+    "allow_unsandboxed_commands" : false,
+    "auto_allow_sandboxed_bash" : false,
+    "enabled" : true,
+    "fail_if_unavailable" : true,
+    "filesystem" : {
+      "allow_read" : [ "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree", "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T" ],
+      "allow_write" : [ "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree", "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T" ],
+      "deny_read" : [ ],
+      "deny_write" : [ "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL/nodes", "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL/execution-authority" ]
+    },
+    "network" : {
+      "allow_local_binding" : false,
+      "allow_unix_sockets" : [ ],
+      "allowed_domains" : [ ],
+      "strict_allowlist" : true
+    }
+  },
+  "schema_version" : "claude_execution_policy.v2",
+  "setting_sources" : [ ],
+  "workstream_id" : "ws-20261010T124812Z-XCZL"
+}

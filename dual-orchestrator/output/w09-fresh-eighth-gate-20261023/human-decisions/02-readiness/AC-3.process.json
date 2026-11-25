@@ -1,0 +1,21 @@
+{
+  "pid": 82023,
+  "argv": [
+    "rtk",
+    "proxy",
+    "java",
+    "-jar",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015/release/dual-cli-0.1.0-SNAPSHOT.jar",
+    "review",
+    "record-readiness",
+    "--workdir",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+    "--subject",
+    "node-gate-human_plan_approval-021",
+    "--request-id",
+    "eighth-readiness-ac-3-20261023",
+    "--file",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/human-decisions/02-readiness/AC-3.json",
+    "ws-20261023T005431Z-9YYF"
+  ]
+}

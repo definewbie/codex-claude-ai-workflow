@@ -1,0 +1,38 @@
+experience, building on GRPO. RULER complements this approach as a general-
+purpose reward function that uses an LLM-as-judge to rank agent trajectories by
+quality, providing consistent feedback without handcrafted metrics.
+
+Together, ART and RULER help you guide your agents toward what makes a good
+output purely from the task description, without any expected outputs required.
+The result is not just an agent that performs tasks, but one that develops a deeper
+understanding of how to improve itself both in context and when collaborating
+with other agents.
+
+Beyond Isolation: Why Absolute Scoring Is Easier
+
+Reward design used to be one of the hardest parts of RL. Custom reward functions
+often broke down as tasks changed or scaled. LLM-as-judge systems were meant
+to fix that, but early attempts struggled with inconsistent scores and noisy
+calibration. RULER mitigates this by shifting from absolute scoring to relative
+comparison. In addition, as you already know, GRPO and GSPO normalize scores
+within each group, so only the relative rankings matter, not the absolute values.
+
+RULER generates several trajectories for the same task. Each trajectory records
+the agent’s reasoning, tool calls, and final outcome. Shared prefixes are removed,
+and only the unique parts are sent to an LLM-as-judge along with a simple rubric.
+The judge assigns each trajectory a score between 0 and 1 based on how well it
+satisfies the task objective. Those scores are normalized within the group and used
+directly as rewards for a GRPO update. The judge can also explain its decisions,
+which helps you trace errors and cluster low-performing runs. Figure 3-5 shows
+how this process fits together.
+
+
+
+
+
+  Figure 3-5. RULER training loop: trajectories are ranked by an LLM-as-judge, normalized by GRPO, and
+                                 used to update the policy iteratively.
+
+Let me give you a concrete coding example to understand how simple RULER
+actually is. Imagine you want to evaluate short poems about cats. You’ll start by
+preparing the messages for the LLM, as in Example 3-1.

@@ -1,0 +1,32 @@
+{
+  "source": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js",
+  "sha256": "4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268",
+  "scope": "new/resume/fork config propagation and per-turn policy; no native dispatch implementation provided in JS bundle",
+  "excerpts": [
+    {
+      "start": 28339,
+      "end": 28347,
+      "lines": "28339:   async resumeSession(request, onSubscribed) {\n28340:     const additionalDirectories = readAdditionalDirectories(request.cwd, request.additionalDirectories, request._meta);\n28341:     await this.refreshSkills(request.cwd, additionalDirectories);\n28342:     const response = await this.codexClient.threadResume({\n28343:       config: await this.createSessionConfig(request.cwd, additionalDirectories, request.mcpServers ?? []),\n28344:       cwd: request.cwd,\n28345:       modelProvider: await this.getResumeModelProvider(),\n28346:       threadId: request.sessionId\n28347:     });"
+    },
+    {
+      "start": 28360,
+      "end": 28385,
+      "lines": "28360:   }\n28361:   async forkSession(request) {\n28362:     const additionalDirectories = readAdditionalDirectories(request.cwd, request.additionalDirectories, request._meta);\n28363:     return await forkSession(request, additionalDirectories, {\n28364:       codexClient: this.codexClient,\n28365:       refreshSkills: (cwd, directories) => this.refreshSkills(cwd, directories),\n28366:       createSessionConfig: (cwd, directories, mcpServers) => this.createSessionConfig(cwd, directories, mcpServers),\n28367:       getResumeModelProvider: () => this.getResumeModelProvider(),\n28368:       fetchAvailableModels: () => this.fetchAvailableModels(),\n28369:       createCurrentModelId: (models, model, reasoningEffort) => this.createModelId(models, model, reasoningEffort).toString(),\n28370:       getCollaborationMode: (sessionId) => this.getCollaborationMode(sessionId)\n28371:     });\n28372:   }\n28373:   async loadSession(request, onSubscribed) {\n28374:     const additionalDirectories = readAdditionalDirectories(request.cwd, request.additionalDirectories, request._meta);\n28375:     await this.refreshSkills(request.cwd, additionalDirectories);\n28376:     const response = await this.codexClient.threadResume({\n28377:       config: await this.createSessionConfig(request.cwd, additionalDirectories, request.mcpServers ?? []),\n28378:       cwd: request.cwd,\n28379:       modelProvider: await this.getResumeModelProvider(),\n28380:       threadId: request.sessionId\n28381:     });\n28382:     onSubscribed?.();\n28383:     const historyResponse = await this.codexClient.threadRead({\n28384:       threadId: response.thread.id,\n28385:       includeTurns: true"
+    },
+    {
+      "start": 28406,
+      "end": 28413,
+      "lines": "28406:   async newSession(request) {\n28407:     const additionalDirectories = readAdditionalDirectories(request.cwd, request.additionalDirectories, request._meta);\n28408:     await this.refreshSkills(request.cwd, additionalDirectories);\n28409:     const response = await this.codexClient.threadStart({\n28410:       config: await this.createSessionConfig(request.cwd, additionalDirectories, request.mcpServers),\n28411:       modelProvider: this.getModelProvider(),\n28412:       cwd: request.cwd\n28413:     });"
+    },
+    {
+      "start": 28500,
+      "end": 28538,
+      "lines": "28500:   async createSessionConfig(projectPath, additionalDirectories, mcpServers) {\n28501:     const sessionRoots = [projectPath, ...additionalDirectories];\n28502:     const activeProvider = this.gatewayConfig ? {\n28503:       apiType: gatewayApiTypeFromConfig(this.gatewayConfig),\n28504:       baseUrl: this.gatewayConfig.config.base_url\n28505:     } : this.getNativeProviderConfig();\n28506:     logger.log(\"Creating session config\", {\n28507:       projectPath,\n28508:       overrideActive: this.gatewayConfig !== null,\n28509:       modelProvider: this.getModelProvider(),\n28510:       apiType: activeProvider.apiType,\n28511:       baseUrl: activeProvider.baseUrl\n28512:     });\n28513:     const mergedConfig = {\n28514:       ...mergeGatewayConfig(this.config, this.gatewayConfig),\n28515:       projects: Object.fromEntries(sessionRoots.map((root) => [root, {\n28516:         trust_level: \"trusted\"\n28517:       }]))\n28518:     };\n28519:     const configWithWorkspaceRoots = mergeSandboxWorkspaceWriteRoots(mergedConfig, additionalDirectories);\n28520:     if (mcpServers.length === 0) {\n28521:       return configWithWorkspaceRoots;\n28522:     }\n28523:     const requestedServers = mcpServers.map((mcp) => ({\n28524:       name: sanitizeMcpServerName(mcp.name),\n28525:       server: mcp\n28526:     }));\n28527:     let serversToConfigure = requestedServers;\n28528:     if (shouldDeduplicateMcpConflicts()) {\n28529:       const existingNames = await this.getConfigMcpServerNames(projectPath);\n28530:       serversToConfigure = requestedServers.filter((mcp) => !existingNames.has(mcp.name));\n28531:     }\n28532:     if (serversToConfigure.length === 0) {\n28533:       return configWithWorkspaceRoots;\n28534:     }\n28535:     return {\n28536:       ...configWithWorkspaceRoots,\n28537:       \"mcp_servers\": Object.fromEntries(serversToConfigure.map((mcp) => [mcp.name, this.createMcpSeverConfig(mcp.server)]))\n28538:     };"
+    },
+    {
+      "start": 28655,
+      "end": 28672,
+      "lines": "28655:   async sendPrompt(request, agentMode, modelId, serviceTier, disableSummary, cwd, additionalDirectories, onTurnStarted, shouldCancel) {\n28656:     const input = buildPromptItems(request.prompt);\n28657:     const effort = modelId.effort;\n28658:     await this.refreshSkills(cwd, additionalDirectories);\n28659:     if (shouldCancel?.()) {\n28660:       return null;\n28661:     }\n28662:     return await this.codexClient.runTurn({\n28663:       threadId: request.sessionId,\n28664:       input,\n28665:       approvalPolicy: agentMode.approvalPolicy,\n28666:       approvalsReviewer: agentMode.approvalsReviewer,\n28667:       sandboxPolicy: addAdditionalDirectoriesToSandboxPolicy(agentMode.sandboxPolicy, additionalDirectories),\n28668:       summary: disableSummary ? \"none\" : \"auto\",\n28669:       effort,\n28670:       model: modelId.model,\n28671:       serviceTier\n28672:     }, onTurnStarted);"
+    }
+  ]
+}

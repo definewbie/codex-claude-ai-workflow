@@ -1,0 +1,8 @@
+on the right, a multi-agent setup where different roles collaborate to
+explore, reflect, and refine, mimicking ToT.
+
+
+
+
+
+                   Figure 2-2. Control-flow diagram comparing CoT and ToT.

@@ -1,0 +1,310 @@
+[
+  {
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/archive/captcha-auth-v15-ws-20260817T141747Z-HUAX/ledger/timeline.jsonl",
+    "bytes": 324,
+    "suffix": ".jsonl",
+    "sha256": "49640a7ffe6343650aa4d84a80b05a7133331a08e8f32d88f52020dbc0e0ec9b",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "archived-ledger-event-or-projection"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/archive/captcha-auth-v15-ws-20260817T141747Z-HUAX/ledger/events.jsonl",
+    "bytes": 9639,
+    "suffix": ".jsonl",
+    "sha256": "1dd1faf4a601696411569cb02b974244f0ffc323d760c0aec84afbc86fb82f74",
+    "termLineCounts": {
+      "error": 6,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "archived-ledger-event-or-projection"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/archive/captcha-auth-v15-ws-20260817T141747Z-HUAX/acpx-sessions/01a01019-ded5-7dc2-b234-21906b2ab671.stream.ndjson",
+    "bytes": 443262,
+    "suffix": ".ndjson",
+    "sha256": "d7ea16d583657ea4892818608abc0457ad7b860ae0ca53c2c503e767c72042eb",
+    "termLineCounts": {
+      "error": 5,
+      "permission": 0,
+      "end_turn": 1,
+      "session/prompt": 1,
+      "agent_message_chunk": 1101
+    },
+    "kind": "archived-acpx-stream"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/archive/captcha-auth-v15-ws-20260817T141747Z-HUAX/acpx-sessions/381aa06f-bc69-4017-91f4-93cba6c8f251.stream.ndjson",
+    "bytes": 4107640,
+    "suffix": ".ndjson",
+    "sha256": "0221c720ac8769e159be4f23d3059a190bfa18e97cbd383bd874fccfd718cad9",
+    "termLineCounts": {
+      "error": 15,
+      "permission": 2,
+      "end_turn": 1,
+      "session/prompt": 1,
+      "agent_message_chunk": 4233
+    },
+    "kind": "archived-acpx-stream"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/archive/captcha-auth-v15-ws-20260817T141747Z-HUAX/acpx-sessions/eeac7643-2d08-4e12-8e61-4da30bdf0197.stream.ndjson",
+    "bytes": 3646791,
+    "suffix": ".ndjson",
+    "sha256": "69212068a1894cab56e2ffe42d089e3cf0aab142f486597a9a5b45664e6f3ecd",
+    "termLineCounts": {
+      "error": 7,
+      "permission": 2,
+      "end_turn": 2,
+      "session/prompt": 2,
+      "agent_message_chunk": 3044
+    },
+    "kind": "archived-acpx-stream"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/archive/captcha-auth-v14-ws-20260815T033043Z-Z95C/timeline.jsonl",
+    "bytes": 324,
+    "suffix": ".jsonl",
+    "sha256": "8c449d9467144f8d461b26441024e2e63cb75a38684dce9d8765340350e73e26",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "archived-ledger-event-or-projection"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/archive/captcha-auth-v14-ws-20260815T033043Z-Z95C/events.jsonl",
+    "bytes": 9697,
+    "suffix": ".jsonl",
+    "sha256": "63d32746f5acf76962b0ea93c210ec16c2f964b605f85e72c3c09b65396f5d67",
+    "termLineCounts": {
+      "error": 6,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "archived-ledger-event-or-projection"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-aabb06d9/adapter_artifacts/round-2-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-7384047e/adapter_artifacts/round-3-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-0ca367e9/adapter_artifacts/round-3-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-0ca367e9/adapter_artifacts/round-1-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-0ca367e9/adapter_artifacts/round-2-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-d5dd9e4c/adapter_artifacts/round-1-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-efd1ef04/adapter_artifacts/round-1-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-7b8e9660/adapter_artifacts/round-1-stderr.log",
+    "bytes": 37,
+    "suffix": ".log",
+    "sha256": "cf77b32c086d22af839db0ef4df3b0dfb208307be25df0666775f747f236f382",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-d20d0a0c/adapter_artifacts/round-2-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-3040958b/adapter_artifacts/round-3-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-3040958b/adapter_artifacts/round-1-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-84715a8a/adapter_artifacts/round-3-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-84715a8a/adapter_artifacts/round-1-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-ce27dd84/adapter_artifacts/round-1-stderr.log",
+    "bytes": 37,
+    "suffix": ".log",
+    "sha256": "cf77b32c086d22af839db0ef4df3b0dfb208307be25df0666775f747f236f382",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/darwin-skill-optimizer-agent-runs/ws-20260827T051220Z-2U4R/.darwin/runs/run-37e791e0/adapter_artifacts/round-1-stderr.log",
+    "bytes": 38,
+    "suffix": ".log",
+    "sha256": "3e2ad2de680bd8fc81820144f3759ea1006e1e4b3863e0d47df0975473c4792e",
+    "termLineCounts": {
+      "error": 0,
+      "permission": 0,
+      "end_turn": 0,
+      "session/prompt": 0,
+      "agent_message_chunk": 0
+    },
+    "kind": "target-project-fixture-log"
+  }
+]

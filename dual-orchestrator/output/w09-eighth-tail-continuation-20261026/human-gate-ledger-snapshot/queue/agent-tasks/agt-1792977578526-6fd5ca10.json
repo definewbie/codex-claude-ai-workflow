@@ -1,0 +1,43 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1792977578526-6fd5ca10",
+  "workflowExecutionId" : "wfe-1792977578425-16addb73",
+  "nodeInstanceId" : "node-context-acceptance_codex_verifier_review-034",
+  "nodeDefinitionId" : "context.acceptance_codex_verifier_review",
+  "nodeKind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "SUCCEEDED",
+  "agent" : "",
+  "session" : "",
+  "promptTemplate" : "",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "context.build_package",
+    "agent" : "",
+    "session" : "",
+    "prompt_template" : "",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "target_node" : "acceptance.codex_verifier_review",
+      "profile" : "acceptance",
+      "required_agent_evidence" : {
+        "node_id" : "implement.claude_self_test_report",
+        "source_artifact_type" : "self_test_report",
+        "decision" : "SELF_TEST_COMPLETE"
+      },
+      "purpose" : "Package implementation output, self-test report, and Git evidence for Codex acceptance.",
+      "required_contract_phase" : "EXECUTION"
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 2
+  },
+  "nodeExecutionId" : "nxe-1792977578531-0228c7d2",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-26T01:19:38.526136Z",
+  "claimedAt" : "2026-10-26T01:19:38.541441Z",
+  "completedAt" : "2026-10-26T01:19:38.938759Z"
+}

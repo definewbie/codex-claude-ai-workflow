@@ -1,0 +1,47 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792977560824-4b07cd83",
+  "agentTaskId" : "agt-1792977560818-bd4b0c2f",
+  "workflowExecutionId" : "wfe-1792977560720-19a70148",
+  "nodeInstanceId" : "node-implement-artifact_validation-033",
+  "nodeDefinitionId" : "implement.artifact_validation",
+  "handlerType" : "artifact.validate",
+  "status" : "SUCCEEDED",
+  "pid" : 42002,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/git-evidence.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/base-commit.txt", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/head-commit.txt", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/branch.txt", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/git-root.txt", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/git-status-short.txt", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/git-name-status.txt", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/diff.stat", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/diff.patch", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/changed-files.txt", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/change-scope-evaluation.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/occurrences/node-implement-artifact_validation-033/change-scope-evaluation-ec762a7ac01b7fa959068af43840bfa4125ab34d2a1d899e80a6b31c03f11a3c.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-26T01:19:19.646Z",
+      "input_identity" : "3f908fc364d8ad4dae10d4cd0b50bd178b5dfbf9bd17801b718ee8d6e71a8caa",
+      "executor_pid" : 42002
+    },
+    "validation" : "git_evidence_collected",
+    "mode" : "git-evidence",
+    "git_available" : true,
+    "has_changes" : true,
+    "changed_file_count" : 3,
+    "hygiene_warning_count" : 0,
+    "change_scope_status" : "PASS",
+    "change_scope_violation_count" : 0,
+    "change_scope_missing_declared_count" : 0,
+    "evidence_path" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/git-evidence.json",
+    "change_scope_evaluation_path" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/change-scope-evaluation.json",
+    "change_scope_evaluation_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/git-evidence/occurrences/node-implement-artifact_validation-033/change-scope-evaluation-ec762a7ac01b7fa959068af43840bfa4125ab34d2a1d899e80a6b31c03f11a3c.json",
+    "change_scope_evaluation_sha256" : "ec762a7ac01b7fa959068af43840bfa4125ab34d2a1d899e80a6b31c03f11a3c",
+    "error" : null,
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-26T01:19:20.823953Z",
+  "finishedAt" : "2026-10-26T01:19:21.136386Z",
+  "durationMs" : 312
+}

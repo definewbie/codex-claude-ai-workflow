@@ -1,0 +1,68 @@
+{
+  "artifact_type" : "agent_output_contract",
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261014T234009Z-RN9X",
+  "run_id" : "run-1792021315581",
+  "node_id" : "intake.codex_product_review",
+  "node_instance_id" : "node-intake-codex_product_review-004",
+  "handler_type" : "acpx.agent_run",
+  "decision" : "NEEDS_REVISION",
+  "summary" : "功能语义与验收要求完整，但排除项提前锁定了文件集合，与文件须经后续设计、计划和执行批准的要求冲突。",
+  "required_keys" : [ "summary", "decision" ],
+  "allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW", "NEEDS_REVISION", "BLOCKED" ],
+  "source_output_ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.json",
+  "source_artifact_type" : "agent_output_contract",
+  "generated_at" : "2026-10-14T23:42:37.635831Z",
+  "control" : {
+    "decision" : "NEEDS_REVISION",
+    "summary" : "功能语义与验收要求完整，但排除项提前锁定了文件集合，与文件须经后续设计、计划和执行批准的要求冲突。"
+  },
+  "control_source" : {
+    "kind" : "strict_agent_result_envelope"
+  },
+  "lifecycle_status" : "NEEDS_REVISION",
+  "blocking" : true,
+  "checks" : [ "先审阅 Review Evidence Brief，再依据完整的 Required Review Subject 核对候选契约。", "产品完整性：目标、标准库限制、八类输入、幂等性、实际测试证据和 README 验证均进入约束性字段。", "架构适配：纯字符串函数、unittest 和 README 的交付范围合理，无需引入外部系统。", "最终用户视角：换行转换、其他字符保留及末尾换行语义清晰。", "授权边界：C-3 保留后续文件批准，但 scope.excluded 同时禁止创建三个建议路径之外的产物，形成冲突。" ],
+  "evidence" : [ "用户明确说明三个建议文件是待设计与计划确认的提案，最终路径和 CREATE/MODIFY 在实现前单独批准。", "scope.excluded 第三项规定“不创建 src/normalize_text.py、tests/test_normalize_text.py、README.md 之外的产物文件”。", "契约审查原则明确 GOAL 批准会固定 exclusions，因此该排除项会提前限制后续设计与计划。", "AC-1 至 AC-3、TR-1 至 TR-3 和 C-1 至 C-2 覆盖用户提出的功能与验证要求。" ],
+  "missing_evidence" : [ ],
+  "must_fix" : [ "删除或改写 scope.excluded 中固定三个文件集合的排除项，使建议路径保持提案性质；保留最终 EXECUTION scope.included 必须列出所有获准变更的精确路径和操作这一要求。" ],
+  "acceptance_notes" : [ "当前审查无需实现或运行测试；实际测试输出及 README 一致性证据应在交付验证阶段提供。", "空 tracked inventory 允许 evidence_refs 为空，无需创建证据文件。", "提案无需重复编排器负责的 JSON 输出与工作流路由协议。" ],
+  "open_risks" : [ ],
+  "changed_files" : [ ],
+  "verification_summary" : "已根据提供的完整候选契约完成需求和授权边界审查；未修改文件，未执行实现测试。",
+  "failure" : {
+    "category_hint" : "",
+    "verification_remediation" : "NONE",
+    "contract_gaps" : [ "CO-1：scope.excluded 提前固定建议文件集合，与用户保留后续设计、计划及单独执行批准的要求不一致。" ],
+    "out_of_scope_files" : [ ],
+    "missing_tests" : [ ],
+    "context_gaps" : [ ],
+    "reason" : "需先消除建议路径与固定排除项之间的约束冲突，才能推进候选契约。"
+  },
+  "checks_run" : [ ],
+  "checks_skipped" : [ ],
+  "contract_obligations" : [ {
+    "id" : "CO-1",
+    "text" : "三个建议文件必须保持待设计与计划确认的提案性质，不能通过 GOAL 阶段的排除项提前固定实现文件集合；实现前须单独批准精确、穷尽的 EXECUTION scope.included，每项包含一个仓库相对路径及 CREATE 或 MODIFY，任何未声明路径均不得变更。"
+  } ],
+  "reread_reasons" : [ ],
+  "review_subject" : {
+    "artifact_ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021247531/outputs/intake-claude-brainstorm.contract.json",
+    "producer_node_id" : "intake.claude_brainstorm",
+    "producer_node_instance_id" : "node-intake-claude_brainstorm-002",
+    "sha256" : "10e582f4007c97e2d28a3cafcc999857089f1d5952029b8a7e4629406590738e",
+    "proposal_id" : "node-intake-claude_brainstorm-002:10e582f4007c97e2",
+    "workstream_id" : "ws-20261014T234009Z-RN9X",
+    "schema_version" : 1
+  },
+  "stage_outcome" : "NEEDS_REVISION",
+  "stage_outcome_source" : "invalid",
+  "evidence_state" : {
+    "blocking" : true,
+    "evidence_count" : 4,
+    "missing_evidence_count" : 0,
+    "must_fix_count" : 1,
+    "acceptance_note_count" : 3,
+    "open_risk_count" : 0
+  }
+}

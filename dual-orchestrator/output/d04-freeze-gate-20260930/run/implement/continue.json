@@ -1,0 +1,14 @@
+{
+  "resultSha256": "c4f77044ad40deea4764d4d2a5a21bf82842782e8d9bd2385afdf4f697aade8f",
+  "continueWithinGate": true,
+  "verdict": "PASS_IMPLEMENT_NATIVE_SLICE_ONLY",
+  "evidence": [
+    "request-02.json child workspace-write identity",
+    "request-05.json random read, legal write, two protected-write rejections and never escalation rejection",
+    "request-07.json native completed state"
+  ],
+  "scope": "Writable fixture root only; not Dual scope or real control-directory isolation",
+  "residualProcessObservation": [],
+  "expectedScriptError": "Final escalation negative case rejected by never policy",
+  "recordedAt": "2026-09-30T02:35:46.138466+00:00"
+}

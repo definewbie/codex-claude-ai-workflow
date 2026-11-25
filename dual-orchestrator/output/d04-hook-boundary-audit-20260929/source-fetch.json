@@ -1,0 +1,13 @@
+{
+  "commit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "files": [
+    {
+      "path": "codex-rs/core/src/hook_runtime.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/hook_runtime.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "bytes": 48837,
+      "gitBlobSha": "4964905418c40bc792e316535110937a28fda32d",
+      "sha256": "87b678af0f9ea87e0de6041fe82f9f90315b0b18c10524731deba9b7f9841f1e",
+      "blobVerified": true
+    }
+  ]
+}

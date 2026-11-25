@@ -1,0 +1,6 @@
+{
+  "control_passes": 4,
+  "expected_failures": 4,
+  "production_workspace_sources_untouched": true,
+  "scope": "old owner bytes isolated on classpath; actual regression methods, no real clients"
+}

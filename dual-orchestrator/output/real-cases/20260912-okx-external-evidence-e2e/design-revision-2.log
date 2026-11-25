@@ -1,0 +1,16 @@
+Human gate decided
+Workstream: ws-20260911T231749Z-GCTW
+Action: revise
+Running workflow until next gate...
+Step 1: context.design_codex_arch_review -> RUNNING (resumed workflow)
+Step 2: design.codex_arch_review -> RUNNING (resumed workflow)
+Step 3: design.decision -> RUNNING (resumed workflow)
+Step 4: gate.human_design_approval -> WAITING_FOR_HUMAN (resumed workflow)
+
+Next actions:
+  1. Read the current review packet:
+     dualctl review show --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260911T231749Z-GCTW ws-20260911T231749Z-GCTW
+     packet: /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260911T231749Z-GCTW/.agent/workstreams/ws-20260911T231749Z-GCTW/reviews/node-gate-human_design_approval-035.md
+  2. Choose one action after review:
+Then: dualctl approve --run --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260911T231749Z-GCTW ws-20260911T231749Z-GCTW
+Or:   dualctl revise --feedback-file feedback.md --run --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260911T231749Z-GCTW ws-20260911T231749Z-GCTW

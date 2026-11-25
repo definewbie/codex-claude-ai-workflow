@@ -1,0 +1,38 @@
+{
+  "url": "https://registry.npmjs.org/@openai%2fcodex/0.153.4",
+  "status": 200,
+  "rawSha256": "7de18c149b9749c146f8ed526475f51b4e20f53e08d006d3110f912adae67b07",
+  "metadata": {
+    "name": "@openai/codex",
+    "version": "0.153.4",
+    "gitHead": null,
+    "repository": {
+      "url": "git+https://github.com/openai/codex.git",
+      "type": "git",
+      "directory": "codex-cli"
+    },
+    "dist": {
+      "shasum": "7f0283a793e438733df5dccbe5d79ffd778ab0e8",
+      "tarball": "https://registry.npmjs.org/@openai/codex/-/codex-0.153.4.tgz",
+      "fileCount": 3,
+      "integrity": "sha512-wbHDmit7S/YvBGVX1DQmk13xtWblZ2cApeJ/pB7xDZ10Cna+DZc5ij7f0F4OxdsXN4FW1oLT48OpogUI1+8Y2w==",
+      "signatures": [
+        {
+          "sig": "MEUCIQDrXuwY3OT8C2PF7UvxVRDqzRfY9UutvmK2Vab3jszGsQIgRg3Ce+OnsxvxbApeBuEV8ReYJr2+uMbpRhjf9m5Qb+8=",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        },
+        {
+          "sig": "MEQCIDWHm0J9ezTBhN1Wa4UkCgpN2TqaN3svIsjD2uZH5rWWAiB+66HxvcLhO+lGQV2JV9+rlrE9R9xsKCAZXDnZk9hgCQ==",
+          "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+        }
+      ],
+      "attestations": {
+        "url": "https://registry.npmjs.org/-/npm/v1/attestations/@openai%2fcodex@0.153.4",
+        "provenance": {
+          "predicateType": "https://slsa.dev/provenance/v1"
+        }
+      },
+      "unpackedSize": 13206
+    }
+  }
+}

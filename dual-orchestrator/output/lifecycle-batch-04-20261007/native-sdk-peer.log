@@ -1,0 +1,65 @@
+✔ exact permission ask returns the offered option and exposes the original RPC signal (1.378458ms)
+✔ exact permission ask never falls back after callback failure or invalid choice (0.411917ms)
+✔ exact lane retains auto reads and explicit denial without asking a human (0.136ms)
+✔ exact lane refuses stale RPCs, unowned sessions and replies after cancellation (0.175958ms)
+✖ host write and terminal confirmation use exact RPC choices before their effects (1.807417ms)
+✖ actual local ACP peer receives the exact offered permission response (2.010917ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 4
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 86.257042
+
+✖ failing tests:
+
+test at dist-test/test/client.test.js:1483:1
+✖ host write and terminal confirmation use exact RPC choices before their effects (1.807417ms)
+  AssertionError [ERR_ASSERTION]: The error is expected to be an instance of "PermissionDeniedError". Received "TypeError"
+  
+  Error message:
+  
+  Cannot read properties of undefined (reading 'recordPermissionError')
+      at async TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1504:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: TypeError: Cannot read properties of undefined (reading 'recordPermissionError')
+        at handleWriteTextFile (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/src/acp/client.js:1675:18)
+        at TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1504:26)
+        at async Test.run (node:internal/test_runner/test:1389:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:960:7),
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at dist-test/test/client.test.js:1521:1
+✖ actual local ACP peer receives the exact offered permission response (2.010917ms)
+  Error [AgentSpawnError]: Failed to spawn agent command: /Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node
+      at AcpClient.spawnAgentProcess (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/src/acp/client.js:571:19)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async AcpClient.start (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/src/acp/client.js:469:23)
+      at async TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1537:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    outputCode: undefined,
+    detailCode: undefined,
+    origin: undefined,
+    retryable: undefined,
+    acp: undefined,
+    outputAlreadyEmitted: undefined,
+    agentCommand: '/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node',
+    [cause]: Error: spawn /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/mock-agent.js EACCES
+        at ChildProcess._handle.onexit (node:internal/child_process:287:19)
+        at onErrorNT (node:internal/child_process:525:16)
+        at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+      errno: -13,
+      code: 'EACCES',
+      syscall: 'spawn /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/mock-agent.js',
+      path: '/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/mock-agent.js',
+      spawnargs: []
+    }
+  }

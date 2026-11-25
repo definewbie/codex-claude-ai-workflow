@@ -1,0 +1,17 @@
+[
+  {
+    "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "before_sha256": "cfa5de82e94bf32870765ec8d02a73b68db87a3a0ee1234b191d2d91088e80e0",
+    "after_sha256": "f1ba830fea6a7468982ac2fc31422846dec6228c7d8a81faf963ccdaf23f2561"
+  },
+  {
+    "path": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "before_sha256": "1c7d7a64e7f083bd7bba1c4dd2c840e9b1198ec9687e7ff59e704036a3b1134b",
+    "after_sha256": "4968a9a72f5714973cf169b1048448f4b2b292a1ec950081b19d0cb0fef2c087"
+  },
+  {
+    "path": "output/lifecycle-batch-06-20261009/preflight.md",
+    "before_sha256": "bfabca48079f426ea400cb7419958a4f01e876f02749832e2876d41cc090676e",
+    "after_sha256": "088d7165ed80129ad48f73bb91d2e729c51a52bf9b5416a745e1f3cb17a5dac1"
+  }
+]

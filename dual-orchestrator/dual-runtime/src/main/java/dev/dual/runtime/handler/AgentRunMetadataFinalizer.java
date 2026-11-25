@@ -55,6 +55,16 @@ public final class AgentRunMetadataFinalizer {
     }
 
     public NodeResult finalizeNodeResult(Path workspaceRoot, NodeResult result) {
+        return resolveNodeResult(workspaceRoot, result, true);
+    }
+
+    /** Read the same execution facts before publication, without writing a terminal run projection. */
+    NodeResult assessPublication(Path workspaceRoot, NodeResult result) {
+        return resolveNodeResult(workspaceRoot, result, false);
+    }
+
+    private NodeResult resolveNodeResult(Path workspaceRoot, NodeResult result, boolean persist) {
+        if (AgentExecutionResultFacts.inputPreparationFailed(result)) return result;
         if (!AgentExecutionResultFacts.present(result)) {
             return result;
         }
@@ -63,7 +73,7 @@ public final class AgentRunMetadataFinalizer {
                 result,
                 AgentExecutionResultFacts.agentResultContract(result),
                 AgentExecutionResultFacts.artifactContractResults(result),
-                AgentExecutionResultFacts.rereadReasons(result)
+                AgentExecutionResultFacts.rereadReasons(result), persist
         );
         var finalized = new LinkedHashMap<String, Object>();
         finalized.putAll(result.result());
@@ -84,33 +94,25 @@ public final class AgentRunMetadataFinalizer {
             List<ArtifactContractResult> artifactContractResults,
             Object rereadReasons
     ) {
+        return finalizeRunMetadata(workspaceRoot, result, agentResultContract, artifactContractResults, rereadReasons, true);
+    }
+
+    private AgentExecutionOutcome finalizeRunMetadata(
+            Path workspaceRoot, NodeResult result, AgentResultContractResult agentResultContract,
+            List<ArtifactContractResult> artifactContractResults, Object rereadReasons, boolean persist
+    ) {
         var runMetadataRef = text(result.result().get("run_metadata"));
-        if (runMetadataRef.isBlank()) {
-            var evidence = new AgentExecutionEvidence(
-                    legacyProcessResult(result),
-                    agentResultContract,
-                    artifactContractResults,
-                    resultAdapterSignals(result)
-            );
-            return executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
-        }
+        if (runMetadataRef.isBlank()) throw new IllegalStateException("typed execution requires program-owned run metadata");
         var root = workspaceRoot.toAbsolutePath().normalize();
         var path = root.resolve(runMetadataRef).normalize();
-        if (!path.startsWith(root) || !Files.isRegularFile(path)) {
-            var evidence = new AgentExecutionEvidence(
-                    legacyProcessResult(result),
-                    agentResultContract,
-                    artifactContractResults,
-                    resultAdapterSignals(result)
-            );
-            return executionFinalizer.finalize(baseAttempt(OBJECT_MAPPER.createObjectNode(), result), evidence).outcome();
-        }
+        if (!path.startsWith(root)) throw new IllegalStateException("run metadata escapes workspace");
         try {
+            var recorded = AgentRunCommitProtocol.recordedOutcome(workspaceRoot, path, result);
+            if (recorded != null) return recorded;
+            if (!Files.isRegularFile(path)) throw new java.io.IOException("typed run metadata is missing");
             var json = (ObjectNode) OBJECT_MAPPER.readTree(path.toFile());
             var process = processResultFromRunMetadata(json);
-            if (process == null) {
-                process = legacyProcessResult(result);
-            }
+            if (process == null) throw new java.io.IOException("typed process evidence is missing; no legacy success inference");
             var signals = json.path("adapterSignals").isMissingNode()
                     ? resultAdapterSignals(result)
                     : adapterSignalsFromRunMetadata(json);
@@ -118,10 +120,11 @@ public final class AgentRunMetadataFinalizer {
                     process,
                     agentResultContract,
                     artifactContractResults,
-                    signals
+                    signals, permissionAssessments(result)
             );
             var processResult = mergedProcessResult(json, process);
             var finalized = executionFinalizer.finalize(baseAttempt(json, result), evidence);
+            if (!persist) return finalized.outcome();
             json.put("schemaVersion", Math.max(json.path("schemaVersion").asInt(0), 3));
             json.put("status", finalized.legacyStatus());
             json.put("failureReason", finalized.legacyFailureReason());
@@ -130,6 +133,7 @@ public final class AgentRunMetadataFinalizer {
             json.set("adapterSignals", OBJECT_MAPPER.valueToTree(signals.stream()
                     .map(AgentRunMetadataFinalizer::adapterSignalToMap)
                     .toList()));
+            json.set("permissionAssessments", OBJECT_MAPPER.valueToTree(evidence.permissionAssessments()));
             json.set("agentResultContract", OBJECT_MAPPER.valueToTree(
                     AgentExecutionResultFacts.agentResultContractToMap(agentResultContract)));
             json.set("artifactContractResults", OBJECT_MAPPER.valueToTree(artifactContractResults.stream()
@@ -141,18 +145,26 @@ public final class AgentRunMetadataFinalizer {
             appendTimelineEvent(json, AgentExecutionTimelineEventKind.CONTRACT_VALIDATED);
             json.set("executionAttempt", OBJECT_MAPPER.valueToTree(executionAttemptToMap(finalized.attempt())));
             json.set("executionOutcome", OBJECT_MAPPER.valueToTree(outcomeToMap(finalized.outcome())));
-            OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), json);
+            AgentRunCommitProtocol.recordOutcome(workspaceRoot, path, result, finalized.outcome(), json);
+            new dev.dual.ledger.file.AtomicJsonWriter().write(path, json);
             return finalized.outcome();
         } catch (Exception failure) {
             throw new IllegalStateException("failed to finalize typed agent run metadata", failure);
         }
     }
 
-    private static List<AdapterSignal> resultAdapterSignals(NodeResult result) {
+    static List<AdapterSignal> resultAdapterSignals(NodeResult result) {
         if (result.result().containsKey("adapter_signals")) {
             return adapterSignalsFromValue(result.result().get("adapter_signals"));
         }
         return legacyAdapterSignals(result);
+    }
+
+    private static List<AgentExecutionEvidence.PermissionAssessment> permissionAssessments(NodeResult result) {
+        var raw = result.result().get(PermissionEvidence.FACT);
+        if (raw == null) return List.of();
+        if (!(raw instanceof List<?> items)) throw new IllegalArgumentException("permission assessments must be an array");
+        return items.stream().map(item -> OBJECT_MAPPER.convertValue(item, AgentExecutionEvidence.PermissionAssessment.class)).toList();
     }
 
     private static List<AdapterSignal> legacyAdapterSignals(NodeResult result) {
@@ -197,7 +209,8 @@ public final class AgentRunMetadataFinalizer {
                     item.path("observedSequence").isNumber() ? Math.max(0L, item.path("observedSequence").asLong()) : 0L,
                     item.path("source").asText(""),
                     item.path("sessionId").asText(""),
-                    item.path("superseded").isBoolean() && item.path("superseded").asBoolean()
+                    item.path("superseded").isBoolean() && item.path("superseded").asBoolean(),
+                    item.hasNonNull("operationRef") ? OBJECT_MAPPER.convertValue(item.get("operationRef"), AdapterSignal.OperationRef.class) : null
             ));
         }
         return List.copyOf(signals);
@@ -225,7 +238,8 @@ public final class AgentRunMetadataFinalizer {
                     sequence,
                     text(map.get("source")),
                     text(map.get("sessionId")),
-                    Boolean.TRUE.equals(map.get("superseded"))
+                    Boolean.TRUE.equals(map.get("superseded")),
+                    map.get("operationRef") == null ? null : OBJECT_MAPPER.convertValue(map.get("operationRef"), AdapterSignal.OperationRef.class)
             ));
         }
         return List.copyOf(signals);
@@ -254,50 +268,8 @@ public final class AgentRunMetadataFinalizer {
         map.put("source", signal.source());
         map.put("sessionId", signal.sessionId());
         map.put("superseded", signal.superseded());
+            if (signal.operationRef() != null) map.put("operationRef", signal.operationRef());
         return map;
-    }
-
-    private static ProcessResult legacyProcessResult(NodeResult result) {
-        var usability = processUsability(result);
-        var exitCode = result.result().get("exit_code");
-        if (exitCode instanceof Number number && number.intValue() != 0) {
-            if (usability == ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT) {
-                return ProcessResult.nonZeroComplete(number.intValue());
-            }
-            if (usability == ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL) {
-                return ProcessResult.killedAfterRecoverableSignal();
-            }
-            return ProcessResult.nonZeroIncomplete(number.intValue());
-        }
-        if (usability == ProcessUsability.INTERRUPTED) {
-            return ProcessResult.interruptedProcess();
-        }
-        if (usability == ProcessUsability.TIMED_OUT || usability == ProcessUsability.STALLED) {
-            return ProcessResult.timedOutProcess();
-        }
-        return ProcessResult.exitedZero();
-    }
-
-    private static ProcessUsability processUsability(NodeResult result) {
-        var explicit = text(result.result().get("process_usability"));
-        if (!explicit.isBlank()) {
-            try {
-                return ProcessUsability.valueOf(explicit);
-            } catch (IllegalArgumentException ignored) {
-                // Fall back to legacy inference below for historical ledgers.
-            }
-        }
-        var reason = text(result.result().get("acpx_failure.reason"));
-        if ("RECOVERABLE_AGENT_OUTPUT_INTERRUPTED".equals(reason)) {
-            return ProcessUsability.INTERRUPTED;
-        }
-        var exitCode = result.result().get("exit_code");
-        if (exitCode instanceof Number number && number.intValue() != 0) {
-            return result.status() == dev.dual.core.workflow.NodeStatus.COMPLETED
-                    ? ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
-                    : ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT;
-        }
-        return ProcessUsability.EXITED_ZERO;
     }
 
     private static Map<String, Object> processResultToMap(ProcessResult process) {
@@ -415,6 +387,7 @@ public final class AgentRunMetadataFinalizer {
         map.put("sessionId", signal.sessionId());
         map.put("observedSequence", signal.observedSequence());
         map.put("superseded", signal.superseded());
+            if (signal.operationRef() != null) map.put("operationRef", signal.operationRef());
         return map;
     }
 

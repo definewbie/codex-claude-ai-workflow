@@ -1,0 +1,42 @@
+{
+  "json_valid": [
+    "failed-case-preservation.json",
+    "changed-source-files.json",
+    "w09-real-gate-20261010-before.json",
+    "test-results.json",
+    "red-results.json",
+    "unchanged-owner-guards.json",
+    "artifact-verification.json",
+    "selected-native-bytes-recheck.json",
+    "native-proof-inputs-unchanged.json",
+    "release-identity.json",
+    "reactor-after-source-sha256.json",
+    "reactor-before-source-sha256.json",
+    "before-source-sha256.json",
+    "offline-proof-results.json",
+    "w09-fresh-second-gate-20261010-before.json",
+    "focused-results.json"
+  ],
+  "source_count": 654,
+  "release_source_and_jars_equal": true,
+  "single_reactor_exit": 0,
+  "case_preservation": [
+    {
+      "case": "w09-real-gate-20261010",
+      "files": 117,
+      "all_file_bytes_equal": true,
+      "added_or_removed_files": 0,
+      "no_ledger_recovery": true
+    },
+    {
+      "case": "w09-fresh-second-gate-20261010",
+      "files": 154,
+      "all_file_bytes_equal": true,
+      "added_or_removed_files": 0,
+      "no_ledger_recovery": true
+    }
+  ],
+  "fresh_third_target_exists": false,
+  "native_provider_calls_in_repair": 0,
+  "status": "AWAITING_CC_AND_NEW_FRESH_AUTHORIZATION"
+}

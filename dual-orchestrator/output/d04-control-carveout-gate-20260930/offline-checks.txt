@@ -1,0 +1,17 @@
+test_approval_required (__main__.GuardTests.test_approval_required) ... ok
+test_child_has_positive_and_denial_without_recursion (__main__.GuardTests.test_child_has_positive_and_denial_without_recursion) ... ok
+test_claude_family_and_sequential_budget (__main__.GuardTests.test_claude_family_and_sequential_budget) ... ok
+test_forbidden_success_stops (__main__.GuardTests.test_forbidden_success_stops) ... ok
+test_generic_error_does_not_prove_denial (__main__.GuardTests.test_generic_error_does_not_prove_denial) ... ok
+test_guarded_tree_detects_alias_write_and_new_file (__main__.GuardTests.test_guarded_tree_detects_alias_write_and_new_file) ... ok
+test_legitimate_refusal_stops (__main__.GuardTests.test_legitimate_refusal_stops) ... ok
+test_legitimate_result_with_optional_error_field (__main__.GuardTests.test_legitimate_result_with_optional_error_field) ... ok
+test_missing_result_is_not_success (__main__.GuardTests.test_missing_result_is_not_success) ... ok
+test_named_profile_has_no_legacy_sandbox_override (__main__.GuardTests.test_named_profile_has_no_legacy_sandbox_override) ... ok
+test_native_payload_fail_fast_with_fake_tools (__main__.GuardTests.test_native_payload_fail_fast_with_fake_tools) ... ok
+test_sse_is_input_only (__main__.GuardTests.test_sse_is_input_only) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.028s
+
+OK

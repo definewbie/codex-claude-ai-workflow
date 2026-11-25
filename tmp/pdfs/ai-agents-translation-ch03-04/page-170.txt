@@ -1,0 +1,38 @@
+    top_p=0.8,
+    presence_penalty=1.5,
+    extra_body={
+        "top_k": 20,
+        "chat_template_kwargs": {"enable_thinking": False},
+    },
+)
+
+  {"enable_thinking": False} to disable thinking mode
+
+However, you can also “just tell” the model to not use thinking in the
+prompt. Even when thinking is disabled, many models keep an internal
+structure for the hidden trace, which preserves format consistency and
+allows you to toggle thinking without changing downstream code.
+
+Use these switches to align latency and quality with the task. Enable
+thinking for planning, decomposition, tool selection, and verification.
+Disable thinking for short, low-risk turns, or for steps where you already
+validated the plan.
+
+Thinking budget
+
+Reasoning tokens are not free. Many models expose a thinking budget that
+caps the number of tokens allocated to the internal trace. When the budget
+is exhausted mid-inference, the model can truncate its reasoning and
+continue the response gracefully. This can include a short handoff phrase
+that signals the budget boundary, as illustrated in Example 4-3. Here,
+thinking_budget controls how many generated tokens the workflow
+allows for the reasoning phase before forcing the model toward an answer.
+max_new_tokens is the overall generation cap. Reasoning tokens may
+be hidden from the final answer, but they’re still generated tokens, so they
+consume part of the available budget and affect latency and cost.
+
+Example 4-3. Set thinking budget
+thinking_budget = 1024
+max_new_tokens = 32768
+
+# Rest of code is omitted for brevity

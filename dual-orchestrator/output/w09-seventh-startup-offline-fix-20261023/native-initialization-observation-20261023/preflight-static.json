@@ -1,0 +1,274 @@
+{
+  "checked_at": "2026-10-22T23:19:00.884066+00:00",
+  "identity_checks": [
+    {
+      "path": "/Users/kriswang/.acpx/config.json",
+      "expected": "6213952d843458bda48342d9d132587177dc6279f1f5f63799bde1e81185f6d6",
+      "actual": "6213952d843458bda48342d9d132587177dc6279f1f5f63799bde1e81185f6d6",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.claude/settings.json",
+      "expected": "653353244cd40a3540eaa56104a414c32c1c966bc69410aa175b6f6e1fbc5c97",
+      "actual": "653353244cd40a3540eaa56104a414c32c1c966bc69410aa175b6f6e1fbc5c97",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.claude/settings.local.json",
+      "expected": "2666cddb5efd27f97cebdffab9f3878d6910a49dcc6eb2b92dc2bf5a30977a5a",
+      "actual": "2666cddb5efd27f97cebdffab9f3878d6910a49dcc6eb2b92dc2bf5a30977a5a",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.codex/config.toml",
+      "expected": "61caf49514401ce6ffb089620de56ecdc9f1a22db4d6a0900cc276f234752452",
+      "actual": "61caf49514401ce6ffb089620de56ecdc9f1a22db4d6a0900cc276f234752452",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh",
+      "expected": "cfd47f649d0f940f3d5c4fb4a8808b34264dbd017f58cd4a5ada4fec07eb6c9f",
+      "actual": "cfd47f649d0f940f3d5c4fb4a8808b34264dbd017f58cd4a5ada4fec07eb6c9f",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/agent-command.ts",
+      "expected": "ccaaf63f555803452ff27a3c8fabb1ea5ec9fefe72d59876b5b0111446a8d91d",
+      "actual": "ccaaf63f555803452ff27a3c8fabb1ea5ec9fefe72d59876b5b0111446a8d91d",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/claude-execution-policy.ts",
+      "expected": "aa33163a96b7edcdb843d8e870f57df07c9ef7bfdae2d662a9ade0e8b050887b",
+      "actual": "aa33163a96b7edcdb843d8e870f57df07c9ef7bfdae2d662a9ade0e8b050887b",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts",
+      "expected": "3f4204143fd1de4d160d74f4b74a966ffa6e5a12b9b682bb5a594a9309c443b5",
+      "actual": "3f4204143fd1de4d160d74f4b74a966ffa6e5a12b9b682bb5a594a9309c443b5",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/runtime/engine/session-options.ts",
+      "expected": "35c82adba710abba47d026c21109197fd9b1452c7e3ff1ca02282c40443c2fd9",
+      "actual": "35c82adba710abba47d026c21109197fd9b1452c7e3ff1ca02282c40443c2fd9",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/flags.ts",
+      "expected": "d1da4ef7f21567e8e541f97d5d9f13d8215bea2b0e0b17cf1bc4a5ef8dd77d06",
+      "actual": "d1da4ef7f21567e8e541f97d5d9f13d8215bea2b0e0b17cf1bc4a5ef8dd77d06",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/command-handlers.ts",
+      "expected": "f5043c98f9f3b2312baed8d48ed0ffb4e2d40b14583e42a580abb3119b629ff4",
+      "actual": "f5043c98f9f3b2312baed8d48ed0ffb4e2d40b14583e42a580abb3119b629ff4",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/command-registration.ts",
+      "expected": "da85215e7b28d0416ac7d1c659bdbfb908be97882e048a509737b6533599f89a",
+      "actual": "da85215e7b28d0416ac7d1c659bdbfb908be97882e048a509737b6533599f89a",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json",
+      "expected": "d9cdcf71b8974d1ed023150dc1c2146d79769d6ac6aea994b0305d2d6b895fa2",
+      "actual": "d9cdcf71b8974d1ed023150dc1c2146d79769d6ac6aea994b0305d2d6b895fa2",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js",
+      "expected": "f0cbbe408bb758cc4bacdae9a244bcac6efbdb6413f680195d017648abc6d816",
+      "actual": "f0cbbe408bb758cc4bacdae9a244bcac6efbdb6413f680195d017648abc6d816",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/settings.js",
+      "expected": "629348525ddd007ace9c06a16a19af6877af2a090b58255dd7f5974a6bdf2932",
+      "actual": "629348525ddd007ace9c06a16a19af6877af2a090b58255dd7f5974a6bdf2932",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts",
+      "expected": "65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7",
+      "actual": "65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js",
+      "expected": "4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268",
+      "actual": "4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/package.json",
+      "expected": "dc85a06d256602b6ad40429b69bc7920ee4297839136b0e722199e4c7daf8567",
+      "actual": "dc85a06d256602b6ad40429b69bc7920ee4297839136b0e722199e4c7daf8567",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/package.json",
+      "expected": "7f06dfa738cd0e505aa6fb8fd4f038e37629fce6d67906adfdc64655a095285c",
+      "actual": "7f06dfa738cd0e505aa6fb8fd4f038e37629fce6d67906adfdc64655a095285c",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/package.json",
+      "expected": "7addfe1ad54d5a39a6961dd9918b9256fcc22c5a1dbdd4c83f91a41dda182965",
+      "actual": "7addfe1ad54d5a39a6961dd9918b9256fcc22c5a1dbdd4c83f91a41dda182965",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs",
+      "expected": "cae60ea6827d5f9b113c88b911388983fe96e7d565a382bf25904df78ab9d0fc",
+      "actual": "cae60ea6827d5f9b113c88b911388983fe96e7d565a382bf25904df78ab9d0fc",
+      "matches": true
+    },
+    {
+      "path": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin/java",
+      "expected": "35c0e7afcaeb977100d0b90725cc52ee73123c9286cdf3b423fe53d7f0ea0491",
+      "actual": "35c0e7afcaeb977100d0b90725cc52ee73123c9286cdf3b423fe53d7f0ea0491",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13",
+      "expected": "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+      "actual": "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/node",
+      "expected": "64bcb939f5f8c921d104b02d0eb960781c13b49b9133d1d71a768eadd62da401",
+      "actual": "64bcb939f5f8c921d104b02d0eb960781c13b49b9133d1d71a768eadd62da401",
+      "matches": true
+    },
+    {
+      "path": "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+      "expected": "971d6f2a523854035f836bb4a994c8e64efa87b30bcd3d799dab439e9d0d34f5",
+      "actual": "971d6f2a523854035f836bb4a994c8e64efa87b30bcd3d799dab439e9d0d34f5",
+      "matches": true
+    },
+    {
+      "path": "/opt/homebrew/Cellar/rtk/0.42.3/bin/rtk",
+      "expected": "b243916c1ee1dd54efa11e8a40e72ff948efbd617e373a18e631410dee1df89e",
+      "actual": "b243916c1ee1dd54efa11e8a40e72ff948efbd617e373a18e631410dee1df89e",
+      "matches": true
+    },
+    {
+      "path": "/opt/homebrew/Caskroom/claude-code/2.1.277/claude",
+      "expected": "73d6a2a55c46907e49bd8bb7608e134333bd71173351ee16ddce7d7db9914b9c",
+      "actual": "73d6a2a55c46907e49bd8bb7608e134333bd71173351ee16ddce7d7db9914b9c",
+      "matches": true
+    },
+    {
+      "path": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "expected": "9394a943e3fce54f998ecc150eb0b7d6e22ce0da48e5063c59b4883e80aeaecd",
+      "actual": "9394a943e3fce54f998ecc150eb0b7d6e22ce0da48e5063c59b4883e80aeaecd",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/acpx/dist/cli.js",
+      "expected": "85fdd3fb1e8bfec5477089430fd8b04d825083a2ab79becfb542f164375e0400",
+      "actual": "85fdd3fb1e8bfec5477089430fd8b04d825083a2ab79becfb542f164375e0400",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "expected": "0aa69b6f1ff164f7282d6a58c83ffb902db5d417609ebb1d5827857f5db1abd9",
+      "actual": "0aa69b6f1ff164f7282d6a58c83ffb902db5d417609ebb1d5827857f5db1abd9",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist/cli.js",
+      "expected": "e6c7915a4b46eec6fe338c7f71efdb28658d64d3f43d38907e4919e84bc17854",
+      "actual": "e6c7915a4b46eec6fe338c7f71efdb28658d64d3f43d38907e4919e84bc17854",
+      "matches": true
+    },
+    {
+      "path": "/private/tmp/dual-w09-newlines-20261022-offline-07/worktree/.agent/workstreams/ws-20261022T150557Z-Y2KB/runs/run-1792682394836/execution-authority/claude-execution-policy.json",
+      "expected": "ca7ed0e1f716667cdbc3f0890171c49b4f349dca38dffd458e29dc0eba31d2c2",
+      "actual": "ca7ed0e1f716667cdbc3f0890171c49b4f349dca38dffd458e29dc0eba31d2c2",
+      "matches": true
+    }
+  ],
+  "identity_drift": [],
+  "cwd_exists": true,
+  "history_snapshot_files_verified": 77,
+  "original_ledger_differences": [],
+  "stop_required_preserved": true,
+  "diagnostic_session_conflicts": [],
+  "known_pids": [
+    41973,
+    42010,
+    42057,
+    42059,
+    42454,
+    42491,
+    43211,
+    43215,
+    44904,
+    44995,
+    45036,
+    45038,
+    45722,
+    45900,
+    45942,
+    46715,
+    46753,
+    47523,
+    49255,
+    49403,
+    49443,
+    50095,
+    50119,
+    50127,
+    50391,
+    53236,
+    53420,
+    53509,
+    73133,
+    73405,
+    73611,
+    73655,
+    76216,
+    76277,
+    76464,
+    76502,
+    76608,
+    78865,
+    78991,
+    79347,
+    79387,
+    80269,
+    80462,
+    80971,
+    81017,
+    83976,
+    84188,
+    84245,
+    84247,
+    84542,
+    84667,
+    85401,
+    85411,
+    87256,
+    87378,
+    87438,
+    87440,
+    87597,
+    43505,
+    43532
+  ],
+  "command_candidate_sha256": "c449f5ed3eb08ba04b49aa8d57d01ae7a22dde760901d8e82445483d8f9f4983",
+  "actual_resolution": {
+    "rtk": "/opt/homebrew/bin/rtk",
+    "node": "/usr/local/bin/node",
+    "npx": "/usr/local/bin/npx",
+    "claude": "/opt/homebrew/bin/claude"
+  },
+  "process_check": "PENDING_READABLE_TABLE",
+  "native_calls": 0
+}

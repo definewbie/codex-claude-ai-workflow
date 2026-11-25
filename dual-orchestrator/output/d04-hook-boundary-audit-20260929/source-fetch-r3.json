@@ -1,0 +1,143 @@
+{
+  "commit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "files": [
+    {
+      "path": "codex-rs/hooks/src/lib.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/lib.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [],
+      "bytes": 4201,
+      "gitBlobSha": "6abc173535b23b5ee6bd057fd3f49d9b82ea7fe0",
+      "sha256": "df594069f8ed09e14bece62ec5f1404c8fa9df88c9131d513d382b895a52a5f4",
+      "blobVerified": true
+    },
+    {
+      "path": "codex-rs/hooks/src/engine",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/engine?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [],
+      "entries": [
+        {
+          "name": "command_runner.rs",
+          "path": "codex-rs/hooks/src/engine/command_runner.rs",
+          "type": "file"
+        },
+        {
+          "name": "command_runner_tests.rs",
+          "path": "codex-rs/hooks/src/engine/command_runner_tests.rs",
+          "type": "file"
+        },
+        {
+          "name": "discovery.rs",
+          "path": "codex-rs/hooks/src/engine/discovery.rs",
+          "type": "file"
+        },
+        {
+          "name": "dispatcher.rs",
+          "path": "codex-rs/hooks/src/engine/dispatcher.rs",
+          "type": "file"
+        },
+        {
+          "name": "mcp_runner.rs",
+          "path": "codex-rs/hooks/src/engine/mcp_runner.rs",
+          "type": "file"
+        },
+        {
+          "name": "mcp_runner_tests.rs",
+          "path": "codex-rs/hooks/src/engine/mcp_runner_tests.rs",
+          "type": "file"
+        },
+        {
+          "name": "mod.rs",
+          "path": "codex-rs/hooks/src/engine/mod.rs",
+          "type": "file"
+        },
+        {
+          "name": "mod_tests.rs",
+          "path": "codex-rs/hooks/src/engine/mod_tests.rs",
+          "type": "file"
+        },
+        {
+          "name": "output_parser.rs",
+          "path": "codex-rs/hooks/src/engine/output_parser.rs",
+          "type": "file"
+        },
+        {
+          "name": "schema_loader.rs",
+          "path": "codex-rs/hooks/src/engine/schema_loader.rs",
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/hooks/src/events",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/events?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [],
+      "entries": [
+        {
+          "name": "common.rs",
+          "path": "codex-rs/hooks/src/events/common.rs",
+          "type": "file"
+        },
+        {
+          "name": "compact.rs",
+          "path": "codex-rs/hooks/src/events/compact.rs",
+          "type": "file"
+        },
+        {
+          "name": "interrupt.rs",
+          "path": "codex-rs/hooks/src/events/interrupt.rs",
+          "type": "file"
+        },
+        {
+          "name": "interrupt_tests.rs",
+          "path": "codex-rs/hooks/src/events/interrupt_tests.rs",
+          "type": "file"
+        },
+        {
+          "name": "mod.rs",
+          "path": "codex-rs/hooks/src/events/mod.rs",
+          "type": "file"
+        },
+        {
+          "name": "permission_request.rs",
+          "path": "codex-rs/hooks/src/events/permission_request.rs",
+          "type": "file"
+        },
+        {
+          "name": "post_tool_use.rs",
+          "path": "codex-rs/hooks/src/events/post_tool_use.rs",
+          "type": "file"
+        },
+        {
+          "name": "pre_tool_use.rs",
+          "path": "codex-rs/hooks/src/events/pre_tool_use.rs",
+          "type": "file"
+        },
+        {
+          "name": "session_end.rs",
+          "path": "codex-rs/hooks/src/events/session_end.rs",
+          "type": "file"
+        },
+        {
+          "name": "session_end_tests.rs",
+          "path": "codex-rs/hooks/src/events/session_end_tests.rs",
+          "type": "file"
+        },
+        {
+          "name": "session_start.rs",
+          "path": "codex-rs/hooks/src/events/session_start.rs",
+          "type": "file"
+        },
+        {
+          "name": "stop.rs",
+          "path": "codex-rs/hooks/src/events/stop.rs",
+          "type": "file"
+        },
+        {
+          "name": "user_prompt_submit.rs",
+          "path": "codex-rs/hooks/src/events/user_prompt_submit.rs",
+          "type": "file"
+        }
+      ]
+    }
+  ]
+}

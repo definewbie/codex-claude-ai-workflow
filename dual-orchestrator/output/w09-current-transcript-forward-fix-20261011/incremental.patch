@@ -1,0 +1,494 @@
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+@@ -422,9 +422,9 @@
+                 var runTimeline = new ArrayList<>(acquisition.executionTimeline());
+                 runTimeline.addAll(commandEvents);
+                 runTimeline.sort(java.util.Comparator.comparing(AcpxExecutionEvent::observedAt));
+-                var initialUsage = usageFor(agent, acquisition.initialResult(), stderrPath);
++                var initialUsage = usageFor(agent, acquisition.initialResult(), transcriptPath, stderrPath);
+                 var correctionUsage = acquisition.correctionAttempted()
+-                        ? usageFor(agent, acquisition.correctionResult(), correctionStderrPath)
++                        ? usageFor(agent, acquisition.correctionResult(), correctionTranscriptPath, correctionStderrPath)
+                         : null;
+                 var usage = acquisition.correctionAttempted()
+                         ? AcpxUsage.aggregatePromptOccurrences(initialUsage, correctionUsage)
+@@ -619,10 +619,10 @@
+         }
+     }
+ 
+-    private AcpxUsage usageFor(String agent, AcpxRunResult result, java.nio.file.Path stderrPath) {
++    private AcpxUsage usageFor(String agent, AcpxRunResult result, java.nio.file.Path transcriptPath, java.nio.file.Path stderrPath) {
+         return result.usage() != null
+                 ? result.usage()
+-                : usageReader.read(agent, result.promptCompletion(), stderrPath).orElse(null);
++                : usageReader.read(agent, result.promptCompletion(), transcriptPath, stderrPath).orElse(null);
+     }
+ 
+     private static String agentResultContractPrompt(
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java
+@@ -260,13 +260,17 @@
+         if (usage == null || !usage.isObject()) {
+             return null;
+         }
+-        return new Usage(
+-                number(usage.get("inputTokens")),
+-                number(usage.get("outputTokens")),
+-                number(usage.get("cachedReadTokens")),
+-                number(usage.get("cachedWriteTokens")),
+-                number(usage.get("totalTokens"))
+-        );
++        if (!validToken(usage.get("inputTokens")) || !validToken(usage.get("outputTokens"))
++                || !validToken(usage.get("totalTokens"))
++                || (usage.has("cachedReadTokens") && !validToken(usage.get("cachedReadTokens")))
++                || (usage.has("cachedWriteTokens") && !validToken(usage.get("cachedWriteTokens")))) return null;
++        return new Usage(number(usage.get("inputTokens")), number(usage.get("outputTokens")),
++                number(usage.get("cachedReadTokens")), number(usage.get("cachedWriteTokens")),
++                number(usage.get("totalTokens")));
++    }
++
++    private static boolean validToken(JsonNode value) {
++        return value != null && value.isIntegralNumber() && value.canConvertToLong() && value.longValue() >= 0;
+     }
+ 
+     private static UsageUpdate usageUpdate(String updateKind, JsonNode update) {
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java
+@@ -7,7 +7,7 @@
+ import java.util.Optional;
+ import java.util.regex.Pattern;
+ 
+-/** Adapter-local usage observation, scoped by the live completion's session/request identity.
++/** Adapter-local usage observation, scoped first by the current invocation transcript and live completion identity.
+  * No prompt-text or latest-request fallback. Session snapshots are not request totals.
+  * Async stream writes retain the existing bounded wait; ambiguous identity fails attribution.
+  */
+@@ -78,7 +78,7 @@
+         }
+     }
+ 
+-    Optional<AcpxUsage> read(String agent, AcpxPromptCompletion completion, Path stderrPath) {
++    Optional<AcpxUsage> read(String agent, AcpxPromptCompletion completion, Path transcriptPath, Path stderrPath) {
+         try {
+             var stderr = Files.exists(stderrPath) ? Files.readString(stderrPath) : "";
+             var sessionId = sessionIdFrom(stderr);
+@@ -93,10 +93,7 @@
+             if (completion == null || completion.requestId().isBlank() || completion.sessionId().isBlank()) {
+                 return Optional.of(AcpxUsage.unavailable("NO_PROMPT_COMPLETION_IDENTITY", metadata));
+             }
+-            if (!Files.isRegularFile(streamPath)) {
+-                return Optional.of(AcpxUsage.unavailable("NO_ACPX_USAGE_STREAM", metadata));
+-            }
+-            return readMatchingUsageWithRetry(streamPath, completion, metadata);
++            return readMatchingUsageWithRetry(transcriptPath, streamPath, completion, metadata);
+         } catch (IOException ignored) {
+             return Optional.empty();
+         }
+@@ -113,12 +110,34 @@
+     }
+ 
+     private Optional<AcpxUsage> readMatchingUsageWithRetry(
++            Path transcriptPath,
+             Path streamPath,
+             AcpxPromptCompletion completion,
+             AcpxProviderMetadata metadata
+     ) throws IOException {
+         for (var attempt = 0; attempt < retryAttempts; attempt++) {
+-            var match = readMatchingUsage(streamPath, completion);
++            var current = readCurrentUsage(transcriptPath, completion);
++            if (current != null) {
++                // Shared history may enrich money only; it cannot revoke current tokens.
++                if (AcpxUsage.PROVIDER_RUN_USAGE.equals(current.measurementType()) && Files.isRegularFile(streamPath)) {
++                    try {
++                        var history = readMatchingUsage(streamPath, completion);
++                        if (!history.ambiguous() && sameTokens(current, history.exact())) {
++                            var exact = history.exact();
++                            current = new AcpxUsage(current.inputTokens(), current.outputTokens(),
++                                    current.cachedReadTokens(), current.cachedWriteTokens(), current.totalTokens(),
++                                    exact.costAmount(), exact.costCurrency(), current.source(), current.measurementType(),
++                                    current.attribution(), false, 0, exact.sessionCostAmount(), exact.sessionCostCurrency(),
++                                    "", "", "", "", "");
++                        }
++                    } catch (IOException ignored) {
++                        // Optional monetary context is not the token source of truth.
++                    }
++                }
++                return Optional.of(current.withProviderMetadata(metadata));
++            }
++            var match = Files.isRegularFile(streamPath) ? readMatchingUsage(streamPath, completion)
++                    : new Match(null, null, false);
+             if (match.exact() != null || match.ambiguous() || attempt == retryAttempts - 1) {
+                 var best = match.best();
+                 return best == null ? Optional.empty() : Optional.of(best.withProviderMetadata(metadata));
+@@ -126,6 +145,55 @@
+             sleepBeforeRetry();
+         }
+         return Optional.empty();
++    }
++
++    /** Null means no prompt response yet; an invalid/partial response never falls back. */
++    private AcpxUsage readCurrentUsage(Path transcriptPath, AcpxPromptCompletion completion) throws IOException {
++        if (!Files.isRegularFile(transcriptPath)) return null;
++        AcpxStreamWireLine.Result result = null;
++        BigDecimal sessionCost = null;
++        String currency = "";
++        int responses = 0;
++        for (var line : Files.readAllLines(transcriptPath)) {
++            if (line.isBlank()) continue;
++            var wire = AcpxStreamWireLine.parse(line);
++            if (line.stripLeading().startsWith("{") && wire.kind() == AcpxStreamWireLine.Kind.MALFORMED)
++                return AcpxUsage.unavailable("INVALID_CURRENT_TRANSCRIPT");
++            if (isPrompt(wire) && !matches(wire, completion))
++                return AcpxUsage.unavailable("CURRENT_PROMPT_IDENTITY_MISMATCH");
++            if (isUsageUpdate(wire) && completion.sessionId().equals(wire.notification().sessionId())) {
++                var update = wire.notification().usageUpdate();
++                if (update.costAmount() != null) {
++                    sessionCost = update.costAmount();
++                    currency = update.costCurrency();
++                }
++            }
++            if (wire.kind() == AcpxStreamWireLine.Kind.JSONRPC_ERROR
++                    && completion.requestId().equals(wire.requestId()))
++                return AcpxUsage.unavailable("CURRENT_PROMPT_ERROR");
++            if (wire.kind() != AcpxStreamWireLine.Kind.JSONRPC_OK || wire.result() == null) continue;
++            var candidate = wire.result();
++            if (candidate.stopReason().isBlank() && candidate.usage() == null
++                    && !completion.requestId().equals(wire.requestId())) continue;
++            if (!completion.requestId().equals(wire.requestId())
++                    || !completion.stopReason().equals(candidate.stopReason())
++                    || (!candidate.sessionId().isBlank() && !completion.sessionId().equals(candidate.sessionId())))
++                return AcpxUsage.unavailable("CURRENT_PROMPT_IDENTITY_MISMATCH");
++            if (++responses > 1) return AcpxUsage.unavailable("AMBIGUOUS_CURRENT_PROMPT_RESULT");
++            result = candidate;
++        }
++        if (result == null) return null;
++        if (result.usage() == null) return AcpxUsage.unavailable("CURRENT_PROMPT_USAGE_INCOMPLETE");
++        return usageFrom(result.usage(), null, sessionCost, currency,
++                AcpxUsage.ATTR_EXACT_REQUEST_MATCH, "acpx_current_transcript");
++    }
++
++    private boolean sameTokens(AcpxUsage left, AcpxUsage right) {
++        return right != null && left.inputTokens() == right.inputTokens()
++                && left.outputTokens() == right.outputTokens()
++                && left.cachedReadTokens() == right.cachedReadTokens()
++                && left.cachedWriteTokens() == right.cachedWriteTokens()
++                && left.totalTokens() == right.totalTokens();
+     }
+ 
+     record Match(AcpxUsage exact, AcpxUsage snapshot, boolean ambiguous) {
+@@ -190,7 +258,7 @@
+                             && wire.result().usage() != null) {
+                         exact = usageFrom(wire.result().usage(), startingCost,
+                                 costs.get(completion.sessionId()), currencies.getOrDefault(completion.sessionId(), ""),
+-                                AcpxUsage.ATTR_EXACT_REQUEST_MATCH);
++                                AcpxUsage.ATTR_EXACT_REQUEST_MATCH, "acpx_stream");
+                     }
+                 }
+             }
+@@ -221,7 +289,8 @@
+             BigDecimal startingCostAmount,
+             BigDecimal sessionCostAmount,
+             String sessionCostCurrency,
+-            String attribution
++            String attribution,
++            String source
+     ) {
+         var runCostAmount = costDelta(startingCostAmount, sessionCostAmount);
+         return new AcpxUsage(
+@@ -232,7 +301,7 @@
+                 usage.totalTokens(),
+                 runCostAmount,
+                 sessionCostCurrency,
+-                "acpx_stream",
++                source,
+                 AcpxUsage.PROVIDER_RUN_USAGE,
+                 attribution,
+                 false,
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
+@@ -1045,6 +1045,54 @@
+         assertEquals("3", occurrences.get(0).path("requestId").asText());
+         assertEquals(36945, occurrences.get(0).path("usage").path("totalTokens").asLong());
+         assertEquals("4", occurrences.get(1).path("requestId").asText());
++        assertEquals(26548, occurrences.get(1).path("usage").path("totalTokens").asLong());
++        assertEquals(63493, persisted.path("usage").path("totalTokens").asLong());
++        assertEquals("MULTI_PROMPT_SUM", persisted.path("usage").path("attribution").asText());
++    }
++
++    @Test
++    void reinitializedConnectionAndCorrectionKeepCurrentTranscriptUsage() throws Exception {
++        var dir = tempDir.resolve(".agent/workstreams/ws-reused-usage");
++        Files.createDirectories(dir);
++        Files.writeString(dir.resolve("requirement.md"), "Create a small product.");
++        var sessions = tempDir.resolve("reused-sessions");
++        Files.createDirectories(sessions);
++        var record = "33333333-3333-4333-8333-333333333333";
++        var stream = sessions.resolve(record + ".stream.ndjson");
++        var transport = new AcpxAgentTransport() {
++            private AcpxRunResult response(AcpxRunRequest request, String id, long total, boolean correction) throws java.io.IOException {
++                Files.createDirectories(request.stdoutPath().getParent());
++                
++                Files.writeString(request.stderrPath(), "[acpx] session paired (" + record + ")\n");
++                var frame = "{\"jsonrpc\":\"2.0\",\"id\":\"" + id + "\",\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"native-pair\",\"prompt\":[{\"type\":\"text\",\"text\":\"trimmed wire\"}]}}\n"
++                        + "{\"jsonrpc\":\"2.0\",\"id\":\"" + id + "\",\"result\":{\"stopReason\":\"end_turn\",\"usage\":{\"inputTokens\":" + total + ",\"outputTokens\":0,\"totalTokens\":" + total + "}}}\n";
++                Files.writeString(request.stdoutPath(), frame.substring(frame.indexOf("\n") + 1));
++                Files.writeString(stream, frame, java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
++                var answer = completionJson(request, "READY_FOR_PRODUCT_REVIEW");
++                if (!correction) answer = "Explanation before JSON\n" + answer;
++                return fixtureResult(0, Instant.parse("2026-10-10T00:00:00Z"), Instant.parse("2026-10-10T00:00:01Z"),
++                        List.of("local-fixture"), List.of(), null, new AcpxPromptCompletion(id, "end_turn", answer, "native-pair"));
++            }
++            @Override public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
++                return response(request, "3", 36945, false);
++            }
++            @Override AcpxRunResult runAgentResultCorrection(String agent, AcpxRunRequest request) throws java.io.IOException {
++                assertTrue(Files.readString(request.promptPath()).contains("Never copy .agent/ or .git/ references into evidence_refs"));
++                return response(request, "3", 26548, true);
++            }
++        };
++        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
++                "agent", "claude", "session", "claude-main", "prompt_template", "intake-claude-brainstorm"));
++        var result = new AcpxAgentTaskHandler(transport, false, new AcpxUsageReader(sessions, 1, 0))
++                .execute(taskContext(tempDir, "ws-reused-usage", definition, readyInstance(definition.id())));
++        assertEquals(NodeStatus.COMPLETED, result.status());
++        var path = tempDir.resolve((String) result.result().get("run_metadata"));
++        var persisted = OBJECT_MAPPER.readTree(path.toFile());
++        var occurrences = persisted.path("agentResultAcquisition").path("occurrences");
++        assertEquals(2, occurrences.size());
++        assertEquals("3", occurrences.get(0).path("requestId").asText());
++        assertEquals(36945, occurrences.get(0).path("usage").path("totalTokens").asLong());
++        assertEquals("3", occurrences.get(1).path("requestId").asText());
+         assertEquals(26548, occurrences.get(1).path("usage").path("totalTokens").asLong());
+         assertEquals(63493, persisted.path("usage").path("totalTokens").asLong());
+         assertEquals("MULTI_PROMPT_SUM", persisted.path("usage").path("attribution").asText());
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCurrentTranscriptUsageTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCurrentTranscriptUsageTest.java
+@@ -0,0 +1,120 @@
++package dev.dual.adapter.acpx;
++
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.io.TempDir;
++import java.nio.file.*;
++import static org.junit.jupiter.api.Assertions.*;
++
++class AcpxCurrentTranscriptUsageTest {
++    @TempDir Path dir;
++    private static final String RECORD = "44444444-4444-4444-8444-444444444444";
++    private static final String TOKENS = "{\"inputTokens\":10,\"outputTokens\":2,\"cachedReadTokens\":20,\"totalTokens\":32}";
++    private String result(String id, String session, String stop, String usage) {
++        return "{\"jsonrpc\":\"2.0\",\"id\":\"" + id + "\",\"result\":{\"sessionId\":\"" + session + "\",\"stopReason\":\"" + stop + "\",\"usage\":" + usage + "}}\n";
++    }
++    private String prompt(String session) {
++        return "{\"id\":3,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"" + session + "\"}}\n";
++    }
++    private AcpxUsage read(String agent, String current, String history) throws Exception {
++        Files.createDirectories(dir.resolve("sessions"));
++        Files.writeString(dir.resolve("sessions/" + RECORD + ".json"),
++                "{\"current_model_id\":\"" + (agent.equals("claude") ? "glm-5.3" : "gpt-5") + "\"}");
++        Files.writeString(dir.resolve("sessions/" + RECORD + ".stream.ndjson"), history);
++        Files.writeString(dir.resolve("current.log"), current);
++        Files.writeString(dir.resolve("stderr.log"), "[acpx] session current (" + RECORD + ")");
++        return new AcpxUsageReader(dir.resolve("sessions"), 1, 0).read(agent,
++                new AcpxPromptCompletion("3", "end_turn", "answer", "s"),
++                dir.resolve("current.log"), dir.resolve("stderr.log")).orElseThrow();
++    }
++    @Test void legalMissingResultSessionAndOptionalCacheFieldsWorkForBothClients() throws Exception {
++        for (var agent : new String[]{"claude", "codex"}) {
++            var usage = read(agent, result("3", "", "end_turn", TOKENS), "");
++            assertEquals(32, usage.totalTokens());
++            assertEquals("acpx_current_transcript", usage.source());
++            assertEquals(AcpxUsage.PROVIDER_RUN_USAGE, usage.measurementType());
++            assertEquals(AcpxUsage.ATTR_EXACT_REQUEST_MATCH, usage.attribution());
++            assertEquals(0, usage.cachedWriteTokens());
++            assertFalse(usage.cumulative());
++            assertNull(usage.costAmount());
++            assertEquals(agent.equals("claude") ? "zhipu" : "openai", usage.providerId());
++        }
++    }
++    @Test void appendAndReinitializeCannotRevokeEarlierCurrentUsage() throws Exception {
++        var current = result("3", "", "end_turn", TOKENS);
++        var old = prompt("s") + current;
++        var first = read("codex", current, old);
++        var extended = old + "{\"id\":0,\"method\":\"initialize\",\"params\":{}}\n"
++                + prompt("s") + result("3", "", "end_turn", "{\"inputTokens\":90,\"outputTokens\":10,\"totalTokens\":100}");
++        var reread = read("codex", current, extended);
++        assertEquals(first, reread);
++        assertEquals(32, reread.totalTokens());
++        var next = read("codex", result("3", "", "end_turn", "{\"inputTokens\":90,\"outputTokens\":10,\"totalTokens\":100}"), extended);
++        assertEquals(100, next.totalTokens());
++    }
++    @Test void wrongRequestSessionAndStopNeverBorrowValidHistory() throws Exception {
++        var history = prompt("s") + result("3", "", "end_turn", TOKENS);
++        for (var current : new String[]{result("4", "", "end_turn", TOKENS),
++                result("3", "wrong", "end_turn", TOKENS), result("3", "", "cancelled", TOKENS),
++                prompt("wrong") + result("3", "", "end_turn", TOKENS)}) {
++            assertEquals(AcpxUsage.UNAVAILABLE, read("codex", current, history).measurementType());
++        }
++    }
++    @Test void duplicateAndErrorResultsNeverBorrowHistory() throws Exception {
++        var good = result("3", "", "end_turn", TOKENS);
++        var history = prompt("s") + good;
++        for (var current : new String[]{good + good,
++                "{\"id\":3,\"error\":{\"message\":\"failed\"}}\n" + good,
++                "{broken\n" + good}) {
++            assertEquals(AcpxUsage.UNAVAILABLE, read("codex", current, history).measurementType());
++        }
++    }
++    @Test void partialMalformedAndNegativeTokensRemainUnmeasured() throws Exception {
++        for (var tokens : new String[]{"{}", "null", "{\"totalTokens\":32}",
++                "{\"inputTokens\":10,\"outputTokens\":2.5,\"totalTokens\":32}",
++                "{\"inputTokens\":10,\"outputTokens\":2,\"totalTokens\":-32}",
++                "{\"inputTokens\":10,\"outputTokens\":2,\"totalTokens\":9223372036854775808}",
++                "{\"inputTokens\":10,\"outputTokens\":2,\"cachedReadTokens\":null,\"totalTokens\":32}"}) {
++            assertEquals(AcpxUsage.UNAVAILABLE, read("claude", result("3", "", "end_turn", tokens),
++                    prompt("s") + result("3", "", "end_turn", TOKENS)).measurementType());
++        }
++    }
++    @Test void sessionSnapshotIsNotCurrentRequestTotal() throws Exception {
++        var update = "{\"method\":\"session/update\",\"params\":{\"sessionId\":\"s\",\"update\":{\"sessionUpdate\":\"usage_update\",\"used\":500,\"cost\":{\"amount\":1.2,\"currency\":\"USD\"}}}}\n";
++        var usage = read("claude", update + result("3", "", "end_turn", TOKENS), "");
++        assertEquals(32, usage.totalTokens());
++        assertEquals(0, usage.contextUsedTokens());
++        assertEquals(new java.math.BigDecimal("1.2"), usage.sessionCostAmount());
++        assertNull(usage.costAmount());
++        assertEquals(AcpxUsage.PROVIDER_RUN_USAGE, usage.measurementType());
++    }
++    @Test void delayedCurrentResultIsReadWithinExistingBoundedWait() throws Exception {
++        read("codex", "", "");
++        var writer = new Thread(() -> {
++            try {
++                Thread.sleep(60);
++                Files.writeString(dir.resolve("current.log"), result("3", "", "end_turn", TOKENS));
++            } catch (Exception failure) { throw new AssertionError(failure); }
++        });
++        writer.start();
++        try {
++            var usage = new AcpxUsageReader(dir.resolve("sessions"), 20, 20).read("codex",
++                    new AcpxPromptCompletion("3", "end_turn", "answer", "s"),
++                    dir.resolve("current.log"), dir.resolve("stderr.log")).orElseThrow();
++            assertEquals(32, usage.totalTokens());
++            assertEquals("acpx_current_transcript", usage.source());
++        } finally { writer.join(); }
++    }
++    @Test void monetaryEnrichmentRequiresSameTokensAndUnambiguousHistory() throws Exception {
++        var current = result("3", "", "end_turn", TOKENS);
++        var update = "{\"method\":\"session/update\",\"params\":{\"sessionId\":\"s\",\"update\":{\"sessionUpdate\":\"usage_update\",\"used\":500,\"cost\":{\"amount\":1.2,\"currency\":\"USD\"}}}}\n";
++        var history = prompt("s") + update + current;
++        assertEquals(new java.math.BigDecimal("1.2"), read("claude", current, history).costAmount());
++        assertNull(read("claude", current, history + history).costAmount());
++        assertNull(read("claude", current, history.replace("\"totalTokens\":32", "\"totalTokens\":33")).costAmount());
++    }
++    @Test void emptyCurrentTranscriptKeepsStrictDelayedStreamExit() throws Exception {
++        var history = prompt("s") + result("3", "", "end_turn", TOKENS);
++        assertEquals(32, read("claude", "", history).totalTokens());
++        assertEquals(AcpxUsage.UNAVAILABLE, read("claude", "", history + history).measurementType());
++    }
++}
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageReaderTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageReaderTest.java
+@@ -33,9 +33,9 @@
+                 {"jsonrpc":"2.0","id":4,"result":{"stopReason":"end_turn","usage":{"inputTokens":3950,"outputTokens":4806,"cachedReadTokens":17792,"totalTokens":26548}}}
+                 """);
+         var reader = new AcpxUsageReader(sessions, 1, 0);
+-        var usage = reader.read("claude", new AcpxPromptCompletion("3", "end_turn", "answer", "native-session"), stderr).orElseThrow();
++        var usage = reader.read("claude", new AcpxPromptCompletion("3", "end_turn", "answer", "native-session"), tempDir.resolve("no-current-transcript.log"), stderr).orElseThrow();
+         assertEquals(36945, usage.totalTokens(), "the primary occurrence owns request 3, never request 4");
+-        var correction = reader.read("claude", new AcpxPromptCompletion("4", "end_turn", "answer", "native-session"), stderr).orElseThrow();
++        var correction = reader.read("claude", new AcpxPromptCompletion("4", "end_turn", "answer", "native-session"), tempDir.resolve("no-current-transcript.log"), stderr).orElseThrow();
+         assertEquals(26548, correction.totalTokens());
+         assertEquals(63493, AcpxUsage.aggregatePromptOccurrences(usage, correction).totalTokens());
+         assertNull(usage.costAmount(), "tokens do not manufacture a monetary observation");
+@@ -62,7 +62,7 @@
+                 {"jsonrpc":"2.0","id":2,"result":{"usage":{"inputTokens":100,"outputTokens":5,"cachedReadTokens":1000,"cachedWriteTokens":2,"totalTokens":1107}}}
+                 """);
+ 
+-        var usage = new AcpxUsageReader(sessionsDir).read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), stderrPath);
++        var usage = new AcpxUsageReader(sessionsDir).read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), tempDir.resolve("no-current-transcript.log"), stderrPath);
+ 
+         assertTrue(usage.isPresent());
+         assertEquals(100, usage.get().inputTokens());
+@@ -101,7 +101,7 @@
+                 {"jsonrpc":"2.0","id":2,"result":{"usage":{"inputTokens":6799,"outputTokens":2653,"cachedReadTokens":242880,"cachedWriteTokens":0,"totalTokens":252332}}}
+                 """);
+ 
+-        var usage = new AcpxUsageReader(sessionsDir).read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), stderrPath);
++        var usage = new AcpxUsageReader(sessionsDir).read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), tempDir.resolve("no-current-transcript.log"), stderrPath);
+ 
+         assertTrue(usage.isPresent());
+         assertEquals(6799, usage.get().inputTokens());
+@@ -132,7 +132,7 @@
+                 {"jsonrpc":"2.0","id":2,"result":{"usage":{"inputTokens":6799,"outputTokens":2653,"cachedReadTokens":242880,"cachedWriteTokens":0,"totalTokens":252332}}}
+                 """);
+ 
+-        var usage = new AcpxUsageReader(sessionsDir).read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), stderrPath);
++        var usage = new AcpxUsageReader(sessionsDir).read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), tempDir.resolve("no-current-transcript.log"), stderrPath);
+ 
+         assertTrue(usage.isPresent());
+         assertNull(usage.get().costAmount());
+@@ -155,7 +155,7 @@
+                 {"jsonrpc":"2.0","id":2,"result":{"usage":{"inputTokens":6799,"outputTokens":2653,"cachedReadTokens":242880,"cachedWriteTokens":0,"totalTokens":252332}}}
+                 """);
+ 
+-        var usage = new AcpxUsageReader(sessionsDir, 1, 0).read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), stderrPath);
++        var usage = new AcpxUsageReader(sessionsDir, 1, 0).read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), tempDir.resolve("no-current-transcript.log"), stderrPath);
+ 
+         assertTrue(usage.isPresent());
+         // 有 result.usage 就必须用 provider run usage，不能被 usage_update snapshot 短路。
+@@ -191,7 +191,7 @@
+         });
+         appender.start();
+         // 10 attempts × 30ms = 300ms 窗口，足以等到 60ms 后才落盘的 result.usage。
+-        var usage = new AcpxUsageReader(sessionsDir, 10, 30).read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), stderrPath);
++        var usage = new AcpxUsageReader(sessionsDir, 10, 30).read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), tempDir.resolve("no-current-transcript.log"), stderrPath);
+         appender.join();
+ 
+         assertTrue(usage.isPresent());
+@@ -216,7 +216,7 @@
+                 """);
+ 
+         // 单次重试即可：fixture 里没有 provider result.usage 可等，应直接回落到 session snapshot。
+-        var usage = new AcpxUsageReader(sessionsDir, 1, 0).read("codex", new AcpxPromptCompletion("1", "end_turn", "answer", "acp-test"), stderrPath);
++        var usage = new AcpxUsageReader(sessionsDir, 1, 0).read("codex", new AcpxPromptCompletion("1", "end_turn", "answer", "acp-test"), tempDir.resolve("no-current-transcript.log"), stderrPath);
+ 
+         assertTrue(usage.isPresent());
+         assertEquals(0, usage.get().inputTokens());
+@@ -243,7 +243,7 @@
+         );
+ 
+         var usage = new AcpxUsageReader(tempDir.resolve("sessions-direct"), 1, 0, metadata)
+-                .read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), stderrPath);
++                .read("claude", new AcpxPromptCompletion("2", "end_turn", "answer", "acp-test"), tempDir.resolve("no-current-transcript.log"), stderrPath);
+ 
+         assertTrue(usage.isPresent());
+         assertEquals(AcpxUsage.UNAVAILABLE, usage.get().measurementType());
+@@ -265,7 +265,7 @@
+         // When no current-agent session metadata exists, the result stays absent (unknown)
+         // rather than being projected through AcpxProviderMetadata.runtimeDefault().
+         var usage = new AcpxUsageReader(tempDir.resolve("sessions-codex-identity"), 1, 0)
+-                .read("codex", new AcpxPromptCompletion("1", "end_turn", "answer", "acp-test"), stderrPath);
++                .read("codex", new AcpxPromptCompletion("1", "end_turn", "answer", "acp-test"), tempDir.resolve("no-current-transcript.log"), stderrPath);
+ 
+         assertFalse(usage.isPresent(),
+                 "Codex without current-agent session metadata must stay unknown identity");
+@@ -328,7 +328,7 @@
+         var stderr = tempDir.resolve("boundary.stderr");
+         Files.writeString(stderr, "[acpx] session boundary (" + id + ")\n");
+         Files.writeString(sessions.resolve(id + ".stream.ndjson"), stream);
+-        return new AcpxUsageReader(sessions, 1, 0).read("codex", completion, stderr).orElseThrow();
++        return new AcpxUsageReader(sessions, 1, 0).read("codex", completion, tempDir.resolve("no-current-transcript.log"), stderr).orElseThrow();
+     }
+ 
+     private static String promptFrame(String id, String session) {
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageWireCompletenessTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageWireCompletenessTest.java
+@@ -0,0 +1,10 @@
++package dev.dual.adapter.acpx;
++
++import org.junit.jupiter.api.Test;
++import static org.junit.jupiter.api.Assertions.*;
++
++class AcpxUsageWireCompletenessTest {
++    @Test void partialTokenObjectIsNotMeasuredUsage() {
++        assertNull(AcpxStreamWireLine.parse("{\"id\":3,\"result\":{\"stopReason\":\"end_turn\",\"usage\":{\"totalTokens\":100}}}").result().usage());
++    }
++}

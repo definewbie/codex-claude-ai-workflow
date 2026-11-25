@@ -7,6 +7,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DeliveryMergePlanTest {
     @Test
+    void explicitUnknownProcessFieldsRemainNullableAndImmutable() throws Exception {
+        var facts = new java.util.LinkedHashMap<String,Object>(); facts.put("process", null); facts.put("application_closed", false);
+        var plan = DeliveryMergePlan.create("ws", "/source", "/target", "approved", "candidate", "sha", "base", "tree", "expected",
+                java.util.List.of("README.md"), java.util.List.of(), DeliveryMergeStatus.UNKNOWN, "", "").withOperation(facts);
+        facts.put("process", "changed external map");
+        assertEquals(null, plan.operation().get("process"));
+        org.junit.jupiter.api.Assertions.assertThrows(UnsupportedOperationException.class, () -> plan.operation().put("process", "new"));
+        var mapper = new ObjectMapper().findAndRegisterModules();
+        assertEquals(plan.operation(), mapper.readValue(mapper.writeValueAsBytes(plan), DeliveryMergePlan.class).operation());
+    }
+
+    @Test
     void missingFailureCodeFromOlderPlanRemainsReadable() throws Exception {
         var plan = new ObjectMapper().findAndRegisterModules().readValue("""
                 {

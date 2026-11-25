@@ -1,0 +1,37 @@
+Surely You’re Joking, AI Agent!
+
+Sometimes an agent’s behavior can be entertaining. It might call the wrong
+tool, loop endlessly, or produce an oddly creative response. In those
+moments you might laugh and say to yourself, addressing the AI agent:
+“You’re joking, right?” But when the same unpredictability reaches into
+access control, financial operations, or customer data, it’s no longer a joke.
+An action taken at the wrong moment or on the wrong system can have
+serious consequences. This is why human-in-the-loop (HITL) exists. HITL
+allows the agent to pause at critical points, ask for your approval, and
+continue only once it’s safe to proceed.
+
+HITL is not only about catching errors before they happen. It also provides
+accountability and transparency. By inserting checkpoints into an agent’s
+workflow, you make sure irreversible actions are reviewed, decisions are
+traceable, and sensitive operations stay under human control. Far from
+slowing the system down, this oversight makes agents more trustworthy and
+easier to adopt in production settings.
+
+Designing Human-in-the-Loop Workflows
+
+There are a couple of different interruptions that you can perform with a
+HITL workflow. The most common ones are shown as follows:
+
+Approve or reject
+
+   Pause the graph before a critical step, such as an API call, to review and
+   approve the action. If the action is rejected, you can prevent the graph
+   from executing the step, and potentially take an alternative action. This
+    pattern often involves routing the graph based on the human’s input.
+
+Review and edit
+
+   Pause the graph to review and edit the graph state. This is useful for
+    correcting mistakes or updating the state with additional information.
+
+Review tool calls

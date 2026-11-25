@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "gate_id": "gate-example-goal",
+  "node_instance_id": "requirement-review-001",
+  "workstream_id": "EXAMPLE",
+  "action": "approved",
+  "subject": {
+    "ref": "examples/proposal.json",
+    "sha256": "43034dd7da829e4427e1dfc00e03b7bc83636228a852cc0f957edf965eef7cf6"
+  },
+  "event_id": "evt-000006",
+  "note": "批准目标和验收，不授权产品写入",
+  "decision_checks": [
+    {
+      "rule_id": "proposal.subject.identity",
+      "rule_version": "2",
+      "consumer": "RoutingEngine",
+      "input_refs": [
+        {
+          "ref": "examples/proposal.json",
+          "sha256": "43034dd7da829e4427e1dfc00e03b7bc83636228a852cc0f957edf965eef7cf6"
+        }
+      ],
+      "result": "PASSED",
+      "reason": "synthetic example only"
+    }
+  ]
+}

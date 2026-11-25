@@ -1,5 +1,96 @@
 # __ACTIVE__ Real-Case-Driven Orchestrator Simplification
 
+## 当前实施前核对（2026-09-30，B03 批次依赖待明确）
+
+用户已授权进入所建议的 B03。开工基线和[核对材料](../../output/lifecycle-batch-03-20260930/preflight.md)已保存；主清单 §12 为当前进展。D07 新授权身份的生产依赖 W03/D03 尚未实施部分，此前 B03 建议没有明确这段生产/消费链如何纳入批次；在扩大范围或改变本批完成口径之前停止产品修改，等待用户取舍。
+
+这不撤销设计冻结，也不声称 D06 本地协议不能先实施。两种组织方式与限制已列明；本轮未修改产品/测试源码、未运行测试或真实调用，B01/B02 收口和真实 NO-GO 不变。下方“B03 未自动启动”为此前状态。
+
+## 当前实施（2026-09-30，B02 已获 CC PASS 并收口）
+
+用户在 B01 CC PASS 收口后要求进入下一步。[B02](../../output/lifecycle-batch-02-20260930/batch.md)落实 LiteFlow 全局 holder 的完整路由/清理周期互斥，并核验真实 CLI/server factory；主清单 §11 为当前进展。全模块 1,559 项通过、零跳过，源码身份已固定；用户已带回 CC PASS，本批收口；LOW-1 并入 D06 故障测试族、仍未验证，详见 [处置](../../output/lifecycle-batch-02-20260930/cc-review-disposition.md)。B03 未自动启动。
+
+构造默认收敛与 D06 统一读会话仍须联合迁移，D08/W05 整项未完成；本批不解除真实运行 NO-GO，不授权提交或额外 agent。下方 B01“后续批次未启动”为此前状态。
+
+## 当前实施（2026-09-30，B01 已获 CC PASS 并收口）
+
+D01–D10 设计冻结后，用户授权进入下一步。当前 B01 推进 W02 的执行原因→候选校验→唯一结果记录→发布→恢复提示，复跑 W01 既有续作。工作区保护、transition 与测试记录见 [B01](../../output/lifecycle-batch-01-20260930/batch.md)，唯一主索引为主清单 §10。
+
+最终全模块离线回归 1,550 项全通过、零跳过，源码身份已固定。用户已带回 CC 实施评审 PASS；唯一日志引用 LOW 已核实无误，按 R3 §7.1 完成 B01 收口，见 [处置](../../output/lifecycle-batch-01-20260930/cc-review-disposition.md)。后续批次未自动启动。W01–W09 未整体完成，无提交或真实运行授权。下方“实施未授权”等为之前阶段状态，以本段为准。
+
+## 当前状态（2026-09-30，D04 设计冻结）
+
+用户已明确接受提交后在途语义：撤销阻止新批准提交并请求取消，但不保证追回已提交的那一次回复。CC 设计 PASS、D06/D07 增量并入、用户语义确认均已完成；D04 与详设 §6.5/§7.2 增量为 DESIGN_FROZEN，D01–D10 设计冻结齐备。
+
+主清单 W01–W09 仍未完成，能力未由本次确认变为已证。实施、合入和新真实运行仍未授权；不自动开工，不另开确认材料轮次。下方待用户确认/待复审状态保留历史，以本段和主清单为准。
+
+
+## 最新评审处置（2026-09-30，D04 待用户确认在途语义）
+
+提交协议已获 CC 设计层 PASS；D06/D07 增量并入详设 §6.5/§7.2，IPC 单次连接/发送的现有入口已静态核对，新增透传与禁止上层重试归既有 patch 范围。详见 [CC 处置](../../output/d04-permission-wiring-audit-20260930/reply-commit-cc-disposition.md)。
+
+剩余冻结条件：用户接受批准先提交时可能仍在途，撤销阻止新提交并请求取消但不保证追回。确认后才登记 D04 与受影响增量冻结；确认语义不是实施授权。本轮未运行或实现。以下旧“待复审”状态由此更新。
+
+## 最新设计进展（2026-09-30，D04 提交协议候选）
+
+详设 §8.27、主清单 §9.19 与 [回复提交协议](../../output/d04-permission-wiring-audit-20260930/reply-commit-protocol.md)已给出 C/X 同锁排序、execution/run 分工、一次交付及冷启动不补发。明确保留“先提交的回复可能在途，后续撤销阻止新提交并请求取消”的窗口，待 CC 与 D06/D07 受影响部分合并评审，不冒充即时撤回保证。
+
+D04 仍 DESIGN GAP；本轮零产品实现、native/provider/额外 agent，未申请预算。原接线材料 PASS 不覆盖本协议；成本或权限边界扩大仍停交用户决定。后文旧进展中的下一步以此处及主清单为准。
+
+
+## 当前入口：2026-09-28 生命周期详细设计候选
+
+**2026-09-30 当前用户决定：收敛 D04，Dual 不扩建安全沙箱。** 当前规范为[详设 §8.25](20260928-dual-lifecycle-detailed-design.zh-CN.md#825-用户决定收敛为原生权限复用与审批接入2026-09-30当前规范)，索引为[主清单 §9.17](20260927-dual-lifecycle-worklist.zh-CN.md#917-d04-目标收敛2026-09-30当前)。复用原生权限，可靠接入批准/拒绝/续作；撤下底层不可绕过、硬链接/内核证明和后续实验前置。原生请求与人决定的实际桥接待核对，D04 DESIGN GAP；业务 scope/身份/证据/最终交付批准保持。旧 FAIL 不改，不宣称安全缺口已修复。以下调查及继续补测建议均为历史，本轮无运行、实施或额外 agent 授权。
+
+用户带回 §8.25 **设计层 PASS**；多请求关联/部分批准拒绝、原生等待超时两项 LOW 已并入 W03/W05/W08 原核对范围，补记仅作者自查。接口能力、消费者/记录映射与合法序列仍待核对及冻结前受影响评审，D04 状态不前移。
+
+2026-09-30 接线核对已完成：[合并材料与 CC 提示词](../../output/d04-permission-wiring-audit-20260930/assessment.md)，详设 §8.26、主清单 §9.18。固定接口存在，但 CLI/queue 通用回复尚需 adapter 增量；推荐复用现有 callback+queue，精确选项/取消、run 记录与 D06/D07 写序待受影响复审。仅案头材料与验证设计，未运行或实施；D04 仍 DESIGN GAP。
+
+2026-09-30 接线评审返回：材料层 PASS，两项 LOW 已并入详设 §8.26/主清单 §9.18；原报告保留。跨 owner 资格撤销与回复提交的排序协议仍未冻结，不能用发送前再读一次及事后 UNKNOWN 消除竞态。确定协议后再做受影响复审；不提前修投影代码、不启动实验。
+
+2026-09-30 当前案头结论：[创建链接与角色配置核验](../../output/d04-link-creation-desk-audit-20260930/assessment.md)已完成。CC 已确认旧 Gate FAIL；作者核验纠正其两个过度推论：OS 有建链前检查，且 Codex 只读实际含受限执行。具体组合的运行期建链仍 UNKNOWN，不能先作能力不可能或必然拒绝的决定。D04 保持 DESIGN GAP，增量待受影响复审，无新实验/预算/产品实施；报告附简洁 CC prompt。以下为此前状态，不覆盖本段。
+
+2026-09-30 最新执行结果：获批的内部控制目录差分 Gate **FAIL**。Claude 通过预建硬链接改写受保护文件；整组停止，Codex 未运行。合法产品修改/程序写控制树及直接、符号链接拒绝已观察，不抵消反例。1 会话、13 本地请求、零真实模型/子任务；无自动补跑或实施。D04 仍 DESIGN GAP，当前支持布局及全执行期条件未闭合，结果尚未 CC 复审。见 [结果与简洁评审提示词](../../output/d04-control-carveout-gate-20260930/result.md)、详设 §8.24、主清单 §9.16。以下准备/等待批准表述保留为历史，不覆盖本段。
+
+2026-09-30 当前：用户要求废弃 D04 过度部分，已落实于[详设 §8.23](20260928-dual-lifecycle-detailed-design.zh-CN.md#823-重新评估废弃过度前置限定-d04-的责任2026-09-30)。撤销 D2-P 独立材料前置、实施前全链绿色要求、已否定禁委派路线的继续调查和逐次 LOW 送审；必要 scope/证据/恢复验收归原 owner 与工作项，不降低完整生命周期目标。
+
+当前状态：已批准的合并 Gate 完成，两个原生能力缺口已获用户带回 CC 确认，见[运行结果](../../output/d04-freeze-gate-20260930/result.md)。不重复实验；正常完成与 interrupted/UNKNOWN 分开，D07 消费判据 owner 已补明。
+
+CC 建议落实两项 LOW 后冻结，作者定点核对发现其“现有 S/D 已保护产品内 control”依据不足：scope 采集明确排除 `.agent`，不能据此把控制账本隔离降为可选。**后续 CC 定点复核已撤回可冻结结论，双方确认 D04 仍被实际控制目录保护机制与成本这一未决设计决定阻塞**；详设 §8.23 记录证据、采纳及反驳。其余九项冻结不变，工作索引为[主清单 §9.16](20260927-dual-lifecycle-worklist.zh-CN.md#916-d04-过度前置废弃与重新评估2026-09-30)。未追加运行、预算或产品实施；如需新机制或降低原有保护，停止提交用户取舍。
+
+2026-09-30 接线候选：用户已授权补齐 [详设 §8.24](20260928-dual-lifecycle-detailed-design.zh-CN.md#824-产品控制目录保护现有接口的具体接线候选2026-09-30)。已明确整个 `.agent` 的原生限制、Claude/Codex 参数与 session/turn 消费、ACP 宿主拒绝、合法程序/产品写入、失败恢复和成本。该候选已获用户带回 CC 设计层 PASS，2 LOW 纳入工具规则覆盖与 Codex carve-out 子任务正反验证；Claude 不为对称性额外开放 Agent。D04 仍 DESIGN GAP，下一工作为离线准备内部控制目录差分 Gate，实际配置/合法写/原生拒绝须有证据，不预称一次必能冻结。运行须另获批准，本次仅文档处置。
+
+差分 Gate 已完成离线准备，见[本次批准对象](../../output/d04-control-carveout-gate-20260930/gate.md)：2 顶层会话+1 Codex 子任务、48 本地请求/270 秒，零真实模型、首错停整组。12 项离线检查通过，未启动任何原生实验；等待用户批准该 Gate，不沿用旧授权。
+
+### 2026-09-29 及此前进展（历史，不作为当前前置或执行顺序）
+
+2026-09-29 最新：[三类边界验证清单](../testing/20260929-d04-three-boundary-verification-checklist.zh-CN.md)获用户带回 CC 材料 PASS。两项 LOW 已细化：补 prepare 前注入并区分合法新基准与旧 preparation 失效；D2-P 要求先枚举真实消费路径、guard==null/其他守卫及覆盖缺口。路径映射尚未产出、用例未运行；详设 §8.22 与主清单 §9.15 同步。此次增量仅作者自查，D04 未冻结，无 native/provider/agent 或实施。
+
+当前状态：用户带回冻结候选 CC PASS；两项 LOW 已吸收，D01/D02/D03/D05–D10 九项设计冻结，D04 技术阻塞。详设 §13/§15.1、主清单 §9.5 与 [处置补记](../../output/freeze-review-20260928-r2/review-disposition.md)同步。修订固定了显式内核注入及执行合同中可审计的非必需声明；增量由作者核验，未另经 CC 复审。D04 当前缺口以详设 §8.21–§8.22 为准：原生只读切片已有实证，额外控制面及网络工具的完整能力上限尚未证明。全案未具备实施条件，未取得实施授权；本次无 provider/agent、产品改动或历史恢复。原冻结包与旧证据保留，以下为历史进展，不能覆盖本段当前状态。
+
+最新决定：用户已接受 D04“经过证明的必要受限执行”候选，并授权调整后进行有界原生能力实验。当前口径见详细设计 §8.9/主清单 §8.3；下文无 execute 及验证未授权记录均为此前状态。结论确定前不承诺可行，不开始产品实现；D04 仍待证。[本轮结果](../../output/d04-restricted-execution-20260928/result.md)：Codex 原生命令沙箱切片通过，模型切片因探针关闭必要工具宿主而 INVALID，已停止不自动补测。补测前修正前提检查/停止条件并确认增量预算，不改旧证据。
+
+用户已要求进入下一步：形成必要详细设计及普通核验；CC 仍由用户自行发起，不直接调用，不自动进入实现。
+当前契约入口：[完整生命周期可靠性设计](20260923-dual-lifecycle-reliability-design.zh-CN.md)；[D01–D10 详细设计候选](20260928-dual-lifecycle-detailed-design.zh-CN.md)修订版与 D04 报告已获用户带回的 CC 复审 PASS（新增 1 LOW，无 WARN/FAIL）。READY 正向表示、BUSY/pending 设计义务经独立确认；D03 仅移除已完成的表示复核项。本次补“限制只读 provider 集合”选项及其跨 provider 评审分工代价，增量未经独立复审；D02 关联语义和 §13 其余枚举工作仍未完成，不是冻结版通过。
+用户已同意优先细化 D04 的现有 adapter 强制只读绑定，保留 Claude 作者／Codex 评审，并要求成本收益偏离时停等确认；具体止损见详细设计 §8.6/主清单 §8.2。[接口报告](../../output/d04-readonly-binding-design-20260928/binding-assessment.md)及详细设计 §8.2–§8.7 已获用户带回的 CC PASS（2 LOW，无 WARN/FAIL）；本次补 ACP 读取比较、readOnlyBinding 写点/归属盘点，并纠正 app-server 与 ACP 接口混同，增量未独立复审，见 §14.3。必要读取/无 execute 的共存、实际配置、session 传播和 writer 归属仍未证明；D04 未冻结，实施、提交、真实运行仍未授权。
+9·13 控制链设计保留为第一批参考；当前已有未提交实现及序列测试，尚未证明整体组合可靠交付。
+用户随后要求先验证可行性；[本轮离线探针](../../output/d04-feasibility-probe-20260928/feasibility-result.md)完成宿主处理器 7 项断言及 Codex shell 开关解析核验。ACP 宿主能力可用不等于模型入口已接通，原生必要读取与无写/execute 的联合条件仍未证明；D04 不冻结。本轮无模型调用或产品/adapter 源码改动；下一原生能力实验仍须满足详细设计 §8.5/§8.8 的授权和 Gate。
+2026-09-27 补记（R3）已获用户带回的第三轮 CC 设计层 PASS：前两轮问题均确认为设计层解决，无新增 WARN/FAIL，仅余 INFO-1。本次补记其前向记录/历史不回填边界，并澄清“无记录不等于未检查”，此澄清未经独立复审。整体设计评审收口；对账材料见下，I1 字段/写序及 I3/I4/I5/I6 等详细设计缺口仍在，不能据 PASS 开工。
+本轮交付[主工作清单、35 个相关文件对账与测试证据地图](20260927-dual-lifecycle-worklist.zh-CN.md)，保存工作区内容指纹和本轮 10 类 / 97 项离线测试通过证据；未修改 production、测试源码或历史 ledger，未运行产品 E2E。此前误启动的只读 CLI 调用已停止，未形成评审结论，与用户带回的有效评审区分。
+执行与纠偏办法（设计 §7.1）最新修订也已获 CC PASS，WARN-1、LOW-1/2 均解决，无新增必须修正项。规则评审收口，四项残余留待实际批次观察；实际主清单、相关 tracked/untracked 改动对账及覆盖地图已获用户带回的 CC 材料层 PASS（2 LOW，无 WARN/FAIL）；两项已按清单 §8 修订，W00 材料任务收口，增量由作者核验、未另经 CC 复审；读过 diff 与 97 项测试通过均不等于整个生命周期已验证。
+任何评审 PASS 均不自动授予实施、合入、历史恢复或真实验证授权。
+
+## 2026-09-13 历史入口：工作流优先收敛设计
+
+以下各日期段保留为历史记录，不再按其“下一步”直接执行。
+当时记录：HEAD `3362eb42`；6NX5在人工READY后revise的输入准备阶段停止，零provider调用，
+随后原因被后处理改写。当时新设计尚未实施；后续工作区已有未提交实现，见当前入口。历史样本不恢复。
+
+新session先读 [架构演进、失误复盘与交接](../design/20260913-dual-evolution-retrospective-and-handoff.zh-CN.md)，
+再读 [工作流优先重设计与计划](20260913-workflow-first-convergence-redesign.zh-CN.md)。
+两文档是当前接手与前向计划入口；旧网络E1、后合同E1–E4和早期Phase A–D不能混用。
+本轮只补全复盘/设计，不改production；下一实施步骤与前置以新设计§12为准。
+
 ## 人工批准合理新增文件（2026-09-09，覆盖下方部分修正）
 
 最新：完整批准链已接通，正向序列达到真实 delivery candidate；原范围修回、证据篡改零写入、
@@ -258,7 +349,7 @@ P2-1 冻结参照标注及四条 P3 澄清已吸收；用户转交的是既有�
 配置观测 `gpt-6-astra` / `medium`；后续由 Codex 原生读取有效配置，不复制/解析成第二 owner，也不传固定 --model。
 旧 INVALID 原始证据不变，新目录执行新 health；成功后按用户授权直接 start(no-run)/capture/verify/首段 run，
 不重复询问 provider/start 权限，不代用户做 human gate 决定，不放宽原 Gate 的正确性/止损约束。
-正常 home 已实证返回 gpt-6-astra，但旧 codex-acp 内嵌 0.137.0 被服务端要求升级；第二 health 同样 INVALID 并关闭。
+正常 home 已实证返回 gpt-6-astra，但旧 codex-acp 内嵌 0.142.0 被服务端要求升级；第二 health 同样 INVALID 并关闭。
 最小维护升级 `38982c4` 已 full package 1398/0/0/0、Doctor/workflow validate 通过：installer/Doctor 改为
 @agentclientprotocol/codex-acp@1.10.0，实际 Codex 0.153.4，模型仍由原生配置拥有；未改 runtime/workflow/fork。
 Gate 已重冻结 JAR 6ff7a946；当前动作是新 adapter 单 health 成功后直接创建唯一业务样本。前两失败证据不覆盖。
@@ -2211,7 +2302,7 @@ Assessment 与首切片：
 - `HumanReviewGateHandler` 的 input artifact summary 不再直接 parse 和验证
   routed sidecar，而是消费 `AgentEvidenceIndex.validatedDocument`；
 - tampered published sidecar 在 review packet/recommendation 写入前 fail closed；
-- targeted tests 93/0，full reactor 9/9 modules / 1,137 tests / 0 failures；
+- targeted tests 93/0，full reactor 9/9 modules / 1,142 tests / 0 failures；
 - production 净减少 5 LOC，未新增 module、registry、engine 或 framework。
 
 最终 12-handler 复核：
@@ -3094,7 +3185,7 @@ Boundary Review WARN，未获提交许可；不把 1367 项回归通过提升为
 两个既有测试文件和计划记录，零新机制。聚焦序列与 adapter 测试 `15/0/0/0`，包含非 authored sibling 的同一 IO 故障。
 gate 的 catch 仅归一异常诊断，不宣称新增 persisted recovery 路由；自定义图支持面未变化。
 完整 E3 仍 WARN / NO COMMIT，不接受评审中“部分证据即可提交”的建议降低既定门槛。
-完整回归于 09:32 +08:00 完成：`mvn -fae test` BUILD SUCCESS，160 份 XML 聚合 `1371/0/0/0`，diff-check clean。
+完整回归于 09:32 +08:00 完成：`mvn -fae test` BUILD SUCCESS，160 份 XML 聚合 `1421/0/0/0`，diff-check clean。
 当前 active step：在既有测试内补 §17.2 的必要序列证明；不新增平台、不恢复历史样本。
 E4/provider/real-case/提交仍停止，详情见 E3 计划 §18。
 

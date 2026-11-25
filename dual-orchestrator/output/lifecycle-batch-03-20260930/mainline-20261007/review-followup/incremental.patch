@@ -1,0 +1,97 @@
+--- before/README.en.md
++++ after/README.en.md
+@@ -61,13 +61,14 @@
+ 
+ ## 5-Minute Validation
+ 
+-Run the controlled smoke first:
+-
+-```bash
+-./scripts/smoke-test.sh --case lifecycle --cleanup
+-```
+-
+-Then run the public real-case benchmark:
++Run the offline module regression first (the legacy controlled smoke is retired):
++
++```bash
++rtk proxy mvn -q clean test
++```
++
++Real-case runs require a separately approved Verification Gate. The following
++command is not current authorization to run the public benchmark:
+ 
+ ```bash
+ ./scripts/run-public-benchmark.sh
+@@ -222,8 +223,11 @@
+ 
+ ## Current Limits
+ 
+-- The P0 main lifecycle is closed as `Done with known limits`; see
+-  [P0 Closure Report](docs/testing/p0-closure-report.md).
++- The historical 2026-06-19 MVP conclusion was `Done with known limits`; see
++  [P0 Closure Report](docs/testing/p0-closure-report.md). Current lifecycle
++  convergence remains B03 `IN_PROGRESS`, with real runs `NO-GO`; use the
++  [main worklist](docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md).
++  Historical smoke results are not current admission evidence.
+ - The project is pre-1.0; workflow schemas and prompts will continue to evolve.
+ - Real runs depend on local `acpx`, Claude, Codex availability, and quota.
+ - Public benchmark runs consume real Agent quota.
+--- before/docs/architecture-and-execution-flow.en.md
++++ after/docs/architecture-and-execution-flow.en.md
+@@ -167,14 +167,15 @@
+ 
+ ## 4. Current Status
+ 
+-The main lifecycle is functionally closed. The strongest current boundary is
+-the artifact contract: the orchestrator no longer treats free-form Markdown as
++The artifact contract is an established boundary: the orchestrator does not treat free-form Markdown as
+ the machine source of truth. Agents may write rich human-readable reports, but
+ routing depends on typed structured artifacts and explicit lifecycle state.
+ 
+-P0 status is `Done with known limits`; see
+-[testing/p0-closure-report.md](testing/p0-closure-report.md). Current validated
+-capabilities:
++The historical 2026-06-19 MVP status was `Done with known limits`; see
++[testing/p0-closure-report.md](testing/p0-closure-report.md). Current lifecycle
++convergence remains B03 `IN_PROGRESS`, with real runs `NO-GO`; use the
++[main worklist](plans/20260927-dual-lifecycle-worklist.zh-CN.md). The historical
++report does not establish current admission. That MVP's validated capabilities included:
+ 
+ - safe worktree execution with the original repository kept clean;
+ - typed artifacts before routing;
+--- before/docs/architecture-and-execution-flow.md
++++ after/docs/architecture-and-execution-flow.md
+@@ -345,7 +345,9 @@
+ 
+ ## 9. P0 收口状态
+ 
+-P0 主生命周期状态是 `Done with known limits`。当前已经验证：
++2026-06-19 的历史 MVP 状态是 `Done with known limits`。当前生命周期收敛仍为
++B03 `IN_PROGRESS`、真实运行 `NO-GO`，以[主工作清单](plans/20260927-dual-lifecycle-worklist.zh-CN.md)
++为准；历史报告不能作为当前准入证明。当时已经验证：
+ 
+ - workstream 默认在安全 worktree 中运行，原始仓库保持干净；
+ - Claude/Codex 输出先进入 typed artifact，再由 orchestrator 路由；
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -545,3 +545,5 @@
+ 
+ 
+ §14 最终验证：单轮 clean test exit 0，1,631/198，零失败/错误/跳过，637 个构建/测试输入前后内容一致；退役脚本 8 项副作用前拒绝检查通过。详见本轮 verification.json 与原始 XML。该结果不替代原生身份接线、真实客户端能力、C/X 或整批独立判断；本次 LOW 合并到 B03 评审，不为首版限制再新增设计轮次。
++
++§14 CC 接收：用户带回 mainline-20261007 切片 PASS，独立认可作者对声明续作出口的纠正。精确口径为“合同变更→作者→复评→批准的同型序列已证，运行中补声明的具体入口未证”；首版规则按用户决定保留，仅当真实合法任务反复因此受阻才再评估。两项 LOW 已落实：英文 README 不再推荐已退役脚本，所有 *.en.md 已扫；架构中英文对照的历史 MVP 状态不再冒称当前已闭合。具体处置与证据见 [评审处置](../../output/lifecycle-batch-03-20260930/mainline-20261007/cc-review-disposition.md) 和 review-followup/。本次不新增测试轮次或独立评审轮次；原生身份接线和 B03 合并批末判断仍未完成，真实 NO-GO 与批外范围不变。
+--- before/output/lifecycle-batch-03-20260930/mainline-20261007/cc-review-disposition.md
++++ after/output/lifecycle-batch-03-20260930/mainline-20261007/cc-review-disposition.md
+@@ -10,3 +10,12 @@
+ - W03 实际 native/有效配置身份仍缺实际 producer/强制消费；C/X 保持批外。单轮全绿及整批独立评审仍是收口条件。
+ 
+ “80%”表示先闭合常见任务的优先级方向，不是已有成功率，也不削弱已批准的逐项验收。重新评估局部声明支持的触发证据是实际合法任务被此限制反复阻塞、已有出口的实际代价与精细支持预计维护成本；不预造计数平台或未经验证的阈值。
++
++## mainline-20261007 独立评审接收及 LOW 处置
++
++用户随后带回本检查点的独立评审：切片 PASS，B03 不收口。评审者明确接受并修正上轮“局部声明补全→重批已是可用出口”的判断：退出码要求变更的同型序列已证，运行中补全 node config 声明的具体入口未证。首版保守规则不变，此限制按用户决定仅在真实合法任务反复受阻时再评估，不能把结构类比当作入口证明。此前“须独立复核”的纠正现已获本次独立复核认可。
++
++- LOW-1：README.en.md 的活动旧 smoke 指令改为离线全模块回归，并同步真实 Gate 与历史 MVP 状态；扫过本项目全部两个 *.en.md，另发现英文架构文档仍将历史 MVP 写作当前闭环，已与其中文对照一并标明历史和当前 B03/NO-GO。未改历史测试结论。
++- LOW-2：上述“同型已证／具体入口未证／真实反复阻塞触发”的裁决已经落文，同时登记主清单 §14，不再称运行中补声明出口已可用。
++
++本次只有文档修正和材料登记，未改生产代码、脚本行为或测试，也未重跑 1,631 项回归。前轮 637 个构建/测试输入逐项重核，以实际结果为准；既有单轮全绿仍标注为前轮运行证据。具体增量和核验在 review-followup/，并入 B03 合并评审，不单开轮次。原生身份 producer→R01/dispatch/recovery 与整批独立判断仍待完成，W 项及真实 NO-GO 不变。

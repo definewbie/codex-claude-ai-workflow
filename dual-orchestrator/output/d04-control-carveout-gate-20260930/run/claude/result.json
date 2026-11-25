@@ -1,0 +1,31 @@
+{
+  "requests": 13,
+  "counts": {},
+  "threads": {},
+  "errors": [
+    "FAIL protected tree changed (including transient/preserved alias)",
+    "FAIL protected tree changed (including transient/preserved alias)"
+  ],
+  "parentTools": false,
+  "childTools": false,
+  "childDone": false,
+  "completedResponse": false,
+  "writerPositive": true,
+  "status": "EVIDENCE_REQUIRES_REVIEW_NOT_PASS",
+  "fixture": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n",
+  "exitCode": -15,
+  "elapsedSeconds": 1.4540336249629036,
+  "controlAfter": {
+    ".": {
+      "type": "directory"
+    },
+    "program-owned.json": {
+      "sha256": "ebc3cf34514c1cb6153b0f693b11427f5819606a95afb60de227d6162dec4e4d"
+    },
+    "record.txt": {
+      "sha256": "de6b9d5b9a7c9e99a9421d284164b52c8a53000380d39e9e52117f4c3da4caf9"
+    }
+  },
+  "parentExitDoesNotProveAllStopped": true,
+  "realProviderCallsPlanned": 0
+}

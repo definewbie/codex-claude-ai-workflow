@@ -1,0 +1,8 @@
+{
+  "reason": "STARTUP_EXECUTION_ENVIRONMENT_DRIFT",
+  "classification": "INVALID",
+  "evidence_ref": "evidence/authorized-startup-recheck-failure-20261024.json",
+  "next_dispatch": "FORBIDDEN_PENDING_ENVIRONMENT_RECONCILIATION",
+  "original_stop_preserved": true,
+  "new_model_calls": 0
+}

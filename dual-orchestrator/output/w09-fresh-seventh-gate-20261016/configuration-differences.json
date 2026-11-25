@@ -1,0 +1,15 @@
+{
+  "status": "CHECKED",
+  "differences": [
+    {
+      "path": "/Users/kriswang/.codex/config.toml",
+      "old_sha256": "58d5fdccc6f000c8620e745674d420016562197ad02a4960b16af5a7793f15bf",
+      "current_sha256": "dc96cc338225c169b6331e8da9949dd7810d73388fbfdbbcb9d3a3d8dd30e788",
+      "difference": "Only prior sixth fixture same trusted registration; every other byte equal",
+      "previous_target": "/private/tmp/dual-w09-newlines-20261015-fresh-06/target",
+      "new_settings_or_model_change": false
+    }
+  ],
+  "new_configuration_changes": false,
+  "new_native_execution_not_proven": true
+}

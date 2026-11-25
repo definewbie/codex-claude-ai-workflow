@@ -1,0 +1,8 @@
+Step 1: intake.claude_brainstorm -> WAITING_FOR_RECOVERY (workflow stopped at FAILED)
+
+Next actions:
+  1. Inspect the recovery summary:
+     dualctl recovery show --workdir /private/tmp/dual-w09-newlines-20261015-fresh-06/worktree ws-20261014T234009Z-RN9X
+     summary: /private/tmp/dual-w09-newlines-20261015-fresh-06/worktree/.agent/workstreams/ws-20261014T234009Z-RN9X/recovery/current-failure.md
+  2. Inspect the agent output contract, then retry the same active node.
+     dualctl retry --workdir /private/tmp/dual-w09-newlines-20261015-fresh-06/worktree ws-20261014T234009Z-RN9X

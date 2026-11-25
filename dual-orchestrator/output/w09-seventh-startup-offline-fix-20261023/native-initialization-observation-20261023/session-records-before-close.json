@@ -1,0 +1,188 @@
+[
+  {
+    "path": "/Users/kriswang/.acpx/sessions/572ac958-e2a7-4373-90b5-b1cfd401c156.json",
+    "record": {
+      "schema": "acpx.session.v1",
+      "acpx_record_id": "572ac958-e2a7-4373-90b5-b1cfd401c156",
+      "acp_session_id": "572ac958-e2a7-4373-90b5-b1cfd401c156",
+      "agent_command": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0",
+      "cwd": "/private/tmp/dual-w09-newlines-20261022-offline-07/worktree",
+      "name": "claude-bootstrap-observe-20261023-pending-approval",
+      "created_at": "2026-10-22T23:20:53.931Z",
+      "last_used_at": "2026-10-22T23:20:53.931Z",
+      "last_seq": 0,
+      "event_log": {
+        "active_path": "/Users/kriswang/.acpx/sessions/572ac958-e2a7-4373-90b5-b1cfd401c156.stream.ndjson",
+        "segment_count": 5,
+        "max_segment_bytes": 67108864,
+        "max_segments": 5,
+        "last_write_error": null
+      },
+      "closed": false,
+      "agent_started_at": "2026-10-22T23:20:51.526Z",
+      "last_agent_exit_code": null,
+      "last_agent_exit_signal": null,
+      "last_agent_exit_at": "2026-10-22T23:20:54.909Z",
+      "last_agent_disconnect_reason": "connection_close",
+      "protocol_version": 1,
+      "agent_capabilities": {
+        "_meta": {
+          "claudeCode": {
+            "promptQueueing": true
+          }
+        },
+        "promptCapabilities": {
+          "image": true,
+          "embeddedContext": true
+        },
+        "mcpCapabilities": {
+          "http": true,
+          "sse": true
+        },
+        "auth": {
+          "logout": {}
+        },
+        "providers": {},
+        "loadSession": true,
+        "sessionCapabilities": {
+          "additionalDirectories": {},
+          "close": {},
+          "delete": {},
+          "fork": {},
+          "list": {},
+          "resume": {}
+        }
+      },
+      "title": null,
+      "messages": [],
+      "updated_at": "2026-10-22T23:20:53.931Z",
+      "cumulative_token_usage": {},
+      "request_token_usage": {},
+      "acpx": {
+        "current_model_id": "default",
+        "available_models": [
+          "default",
+          "opus",
+          "sonnet",
+          "haiku"
+        ],
+        "model_control": "config_option",
+        "config_options": [
+          {
+            "id": "mode",
+            "name": "Mode",
+            "description": "Session permission mode",
+            "category": "mode",
+            "type": "select",
+            "currentValue": "default",
+            "options": [
+              {
+                "value": "auto",
+                "name": "Auto",
+                "description": "Use a model classifier to approve/deny permission prompts"
+              },
+              {
+                "value": "default",
+                "name": "Manual",
+                "description": "Standard behavior, prompts for dangerous operations"
+              },
+              {
+                "value": "acceptEdits",
+                "name": "Accept Edits",
+                "description": "Auto-accept file edit operations"
+              },
+              {
+                "value": "plan",
+                "name": "Plan Mode",
+                "description": "Planning mode, no actual tool execution"
+              },
+              {
+                "value": "dontAsk",
+                "name": "Don't Ask",
+                "description": "Don't prompt for permissions, deny if not pre-approved"
+              },
+              {
+                "value": "bypassPermissions",
+                "name": "Bypass Permissions",
+                "description": "Bypass all permission checks"
+              }
+            ]
+          },
+          {
+            "id": "model",
+            "name": "Model",
+            "description": "AI model to use",
+            "category": "model",
+            "type": "select",
+            "currentValue": "default",
+            "options": [
+              {
+                "value": "default",
+                "name": "Default (recommended)",
+                "description": "glm-5.3[1m]"
+              },
+              {
+                "value": "opus",
+                "name": "glm-5.3",
+                "description": "Custom Opus model"
+              },
+              {
+                "value": "sonnet",
+                "name": "glm-5.3",
+                "description": "Custom Sonnet model"
+              },
+              {
+                "value": "haiku",
+                "name": "glm-4.7-air",
+                "description": "Custom Haiku model"
+              }
+            ]
+          },
+          {
+            "id": "effort",
+            "name": "Effort",
+            "description": "Available effort levels for this model",
+            "category": "thought_level",
+            "type": "select",
+            "currentValue": "default",
+            "options": [
+              {
+                "value": "default",
+                "name": "Default"
+              },
+              {
+                "value": "low",
+                "name": "Low"
+              },
+              {
+                "value": "medium",
+                "name": "Medium"
+              },
+              {
+                "value": "high",
+                "name": "High"
+              },
+              {
+                "value": "xhigh",
+                "name": "Xhigh"
+              },
+              {
+                "value": "max",
+                "name": "Max"
+              }
+            ]
+          }
+        ],
+        "session_options": {
+          "allowed_tools": [
+            "Read",
+            "Grep",
+            "Glob"
+          ],
+          "claude_execution_policy_ref": ".agent/workstreams/ws-20261022T150557Z-Y2KB/runs/run-1792682394836/execution-authority/claude-execution-policy.json",
+          "claude_execution_policy_sha256": "ca7ed0e1f716667cdbc3f0890171c49b4f349dca38dffd458e29dc0eba31d2c2"
+        }
+      }
+    }
+  }
+]

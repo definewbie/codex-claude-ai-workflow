@@ -1,0 +1,32 @@
+{
+  "scope": "Previously indexed local adapter bytes read directly; source inspection only, not capability proof",
+  "files": [
+    {
+      "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js",
+      "sha256": "4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268",
+      "ranges": [
+        {
+          "start": 35039,
+          "end": 35064,
+          "text": "35039: function startAcpServer() {\n35040:   const codexPath = process.env[\"CODEX_PATH\"];\n35041:   const configString = process.env[\"CODEX_CONFIG\"];\n35042:   const authRequestString = process.env[\"DEFAULT_AUTH_REQUEST\"];\n35043:   const modelProvider = process.env[\"MODEL_PROVIDER\"];\n35044:   const config2 = configString ? JSON.parse(configString) : void 0;\n35045:   const parsedAuthRequest = authRequestString ? JSON.parse(authRequestString) : void 0;\n35046:   const defaultAuthRequest = parsedAuthRequest && isCodexAuthRequest(parsedAuthRequest) ? parsedAuthRequest : void 0;\n35047:   logger.log(\"Startup\", {\n35048:     name: package_default.name,\n35049:     version: package_default.version,\n35050:     codexPath,\n35051:     modelProvider: modelProvider ?? null,\n35052:     codexConfig: config2 ?? null,\n35053:     authRequest: authRequestString ?? null,\n35054:     defaultAuthRequest: defaultAuthRequest ?? null\n35055:   });\n35056:   const codexProcessState = {\n35057:     connection: startCodexConnection(codexPath),\n35058:     codexPath,\n35059:     config: config2,\n35060:     modelProvider,\n35061:     stderr: \"\"\n35062:   };\n35063:   process.stdin.on(\"close\", () => {\n35064:     codexProcessState.connection.process.stdin.end();"
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js",
+      "sha256": "f0cbbe408bb758cc4bacdae9a244bcac6efbdb6413f680195d017648abc6d816",
+      "ranges": [
+        {
+          "start": 232,
+          "end": 268,
+          "text": "232: }\n233: export async function claudeCliPath() {\n234:     if (process.env.CLAUDE_CODE_EXECUTABLE) {\n235:         return process.env.CLAUDE_CODE_EXECUTABLE;\n236:     }\n237:     // The SDK's CLI is a native binary shipped as a platform-specific optional\n238:     // dependency of @anthropic-ai/claude-agent-sdk. Resolve via a require bound\n239:     // to the SDK so nested installs are found even when npm doesn't hoist.\n240:     const { createRequire } = await import(\"node:module\");\n241:     const req = createRequire(import.meta.resolve(\"@anthropic-ai/claude-agent-sdk\"));\n242:     const ext = process.platform === \"win32\" ? \".exe\" : \"\";\n243:     // On linux, both glibc and musl variants may be installed side-by-side\n244:     // (e.g. bunx hydrates every optional dep), so picking one by trial is\n245:     // unreliable: the wrong binary segfaults at runtime instead of failing to\n246:     // spawn. Detect the runtime libc and prefer the matching variant, falling\n247:     // back to the other only if the preferred one isn't installed.\n248:     const candidates = process.platform === \"linux\"\n249:         ? isMuslLibc()\n250:             ? [\n251:                 `@anthropic-ai/claude-agent-sdk-linux-${process.arch}-musl/claude${ext}`,\n252:                 `@anthropic-ai/claude-agent-sdk-linux-${process.arch}/claude${ext}`,\n253:             ]\n254:             : [\n255:                 `@anthropic-ai/claude-agent-sdk-linux-${process.arch}/claude${ext}`,\n256:                 `@anthropic-ai/claude-agent-sdk-linux-${process.arch}-musl/claude${ext}`,\n257:             ]\n258:         : [`@anthropic-ai/claude-agent-sdk-${process.platform}-${process.arch}/claude${ext}`];\n259:     for (const candidate of candidates) {\n260:         try {\n261:             return req.resolve(candidate);\n262:         }\n263:         catch {\n264:             // try next candidate\n265:         }\n266:     }\n267:     throw new Error(`Claude native binary not found for ${process.platform}-${process.arch}. ` +\n268:         `Reinstall @anthropic-ai/claude-agent-sdk without --omit=optional, or set CLAUDE_CODE_EXECUTABLE.`);"
+        },
+        {
+          "start": 4902,
+          "end": 4911,
+          "text": "4902:             ...(elicitationSupport.form\n4903:                 ? {\n4904:                     onUserDialog: this.handleUserDialog(sessionId),\n4905:                     supportedDialogKinds: [REFUSAL_FALLBACK_DIALOG_KIND],\n4906:                 }\n4907:                 : {}),\n4908:             pathToClaudeCodeExecutable: process.env.CLAUDE_CODE_EXECUTABLE ?? (await claudeCliPath()),\n4909:             extraArgs: {\n4910:                 ...userProvidedOptions?.extraArgs,\n4911:                 \"replay-user-messages\": \"\","
+        }
+      ]
+    }
+  ]
+}

@@ -22,12 +22,57 @@ class WorkstreamAttentionEvaluatorTest {
     @TempDir
     Path tempDir;
 
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"not_a_map", "missing_primary", "blank_primary", "nontext_primary"})
+    void malformedTypedPrimaryCannotFallBackToAnAcquisitionReason(String fault) throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-invalid-summary"));
+        var ledger = LedgerTestFixture.ledger();
+        var definition = singleNodeDefinition();
+        LedgerTestFixture.initialize(ledger, paths, "wf-invalid-summary", definition);
+        var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        Object outcome = switch (fault) {
+            case "not_a_map" -> "invalid";
+            case "missing_primary" -> Map.of("status", "OUTPUT_INCOMPLETE");
+            case "blank_primary" -> Map.of("primaryReason", " ");
+            default -> Map.of("primaryReason", 7);
+        };
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
+                "AGENT_OUTPUT_CONTRACT_VIOLATION", List.of(),
+                Map.of("reason", "AGENT_OUTPUT_CONTRACT_VIOLATION", "agent_execution_outcome", outcome));
+        var summary = ledger.failureSummarySnapshot(paths);
+        assertTrue(summary.contains("- Reason: INVALID_AGENT_EXECUTION_OUTCOME\n"), summary);
+        assertFalse(summary.contains("- Reason: AGENT_OUTPUT_CONTRACT_VIOLATION\n"));
+    }
+
+    @Test
+    void genuineTypedArtifactFailureRetainsItsPrimaryDiagnostic() throws Exception {
+        var paths = new WorkstreamPaths(tempDir, new DualId("ws-contract-summary"));
+        var ledger = LedgerTestFixture.ledger();
+        var definition = singleNodeDefinition();
+        LedgerTestFixture.initialize(ledger, paths, "wf-contract-summary", definition);
+        var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        var outcome = new dev.dual.core.execution.AgentExecutionOutcome(
+                dev.dual.core.execution.AgentExecutionOutcomeStatus.CONTRACT_FAILED,
+                "required_artifact_contract_failed", List.of(), false,
+                dev.dual.core.execution.AgentExecutionRetryPolicy.MANUAL_ONLY,
+                dev.dual.core.execution.RecoveryCategory.ARTIFACT_CONTRACT_FAILURE, "Required artifact invalid");
+        var map = new com.fasterxml.jackson.databind.ObjectMapper().convertValue(outcome, Map.class);
+        ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
+                "AGENT_OUTPUT_CONTRACT_VIOLATION", List.of(), Map.of("agent_execution_outcome", map,
+                        "parse_error", Map.of("code", "ARTIFACT_INVALID", "message", "invalid schema")));
+        var summary = ledger.failureSummarySnapshot(paths);
+        assertTrue(summary.contains("- Reason: required_artifact_contract_failed\n"));
+        assertTrue(summary.contains("## Contract Failure Diagnostic"));
+        assertFalse(summary.contains("## Secondary Contract Diagnostic"));
+        assertTrue(summary.contains("- Retry Policy: MANUAL_ONLY\n"));
+    }
+
     @Test
     void recoverableRuntimeFailureIsRetrySafe() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-runtime-recovery"));
-        var ledger = new WorkflowFileLedger();
+        var ledger = LedgerTestFixture.ledger();
         var definition = singleNodeDefinition();
-        ledger.initialize(paths, "wf-runtime-recovery", definition);
+        LedgerTestFixture.initialize(ledger, paths, "wf-runtime-recovery", definition);
         var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
 
         ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,
@@ -48,9 +93,9 @@ class WorkstreamAttentionEvaluatorTest {
     @Test
     void currentRecoveryTakesPrecedenceOverStaleGoalOutcome() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-runtime-recovery-with-stale-goal"));
-        var ledger = new WorkflowFileLedger();
+        var ledger = LedgerTestFixture.ledger();
         var definition = singleNodeDefinition();
-        ledger.initialize(paths, "wf-runtime-recovery-with-stale-goal", definition);
+        LedgerTestFixture.initialize(ledger, paths, "wf-runtime-recovery-with-stale-goal", definition);
         var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
 
         new AtomicJsonWriter().write(paths.goalSatisfactionJson(), new GoalSatisfactionDocument(
@@ -91,7 +136,7 @@ class WorkstreamAttentionEvaluatorTest {
     @Test
     void revisionLimitIsSemanticAndNotRetrySafe() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-revision-limit-attention"));
-        var ledger = new WorkflowFileLedger();
+        var ledger = LedgerTestFixture.ledger();
         var definition = new WorkflowDefinition(
                 "wf-revision-limit-attention",
                 1,
@@ -102,7 +147,7 @@ class WorkstreamAttentionEvaluatorTest {
                 ),
                 List.of(new dev.dual.core.workflow.EdgeDefinition("design.decision", "NEEDS_REVISION", "design.claude_design"))
         );
-        ledger.initialize(paths, "wf-revision-limit-attention", definition);
+        LedgerTestFixture.initialize(ledger, paths, "wf-revision-limit-attention", definition);
         var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
 
         ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED,
@@ -126,7 +171,7 @@ class WorkstreamAttentionEvaluatorTest {
     @Test
     void completedWorkflowNeverSuggestsGoalLoopRun() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-completed-with-goal-warning"));
-        var ledger = new WorkflowFileLedger();
+        var ledger = LedgerTestFixture.ledger();
         var definition = new WorkflowDefinition(
                 "wf-completed-with-goal-warning",
                 1,
@@ -134,7 +179,7 @@ class WorkstreamAttentionEvaluatorTest {
                 List.of(new NodeDefinition("acceptance.decision", NodeKind.DECISION, "review.decision", Map.of())),
                 List.of()
         );
-        ledger.initialize(paths, "wf-completed-with-goal-warning", definition);
+        LedgerTestFixture.initialize(ledger, paths, "wf-completed-with-goal-warning", definition);
         var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
 
         ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED,
@@ -154,7 +199,7 @@ class WorkstreamAttentionEvaluatorTest {
     @Test
     void completedWorkflowAttentionDoesNotInterpretDeliveryMergePlan() throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-delivery-applied"));
-        var ledger = new WorkflowFileLedger();
+        var ledger = LedgerTestFixture.ledger();
         var definition = new WorkflowDefinition(
                 "wf-delivery-applied",
                 1,
@@ -162,7 +207,7 @@ class WorkstreamAttentionEvaluatorTest {
                 List.of(new NodeDefinition("acceptance.decision", NodeKind.DECISION, "review.decision", Map.of())),
                 List.of()
         );
-        ledger.initialize(paths, "wf-delivery-applied", definition);
+        LedgerTestFixture.initialize(ledger, paths, "wf-delivery-applied", definition);
         var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
 
         ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED,

@@ -1,0 +1,687 @@
+[
+  {
+    "project": "dual-smoke-lifecycle-99688",
+    "id": "ws-20260829T104041Z-7HJ7",
+    "path": "/private/tmp/dual-smoke-lifecycle-99688-agent-runs/ws-20260829T104041Z-7HJ7"
+  },
+  {
+    "project": "dual-smoke-lifecycle-99620",
+    "id": "ws-20260829T104017Z-H28Y",
+    "path": "/private/tmp/dual-smoke-lifecycle-99620-agent-runs/ws-20260829T104017Z-H28Y"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260817T141747Z-HUAX",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260817T141747Z-HUAX"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260815T033043Z-Z95C",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/captcha-auth-v14-20260815T1124Z"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260814T103857Z-AEHF",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260814T103857Z-AEHF"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260813T235458Z-4RQE",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260813T235458Z-4RQE"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260813T232431Z-5XZZ",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260813T232431Z-5XZZ"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260813T143229Z-BAS8",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260813T143229Z-BAS8"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260813T115256Z-8G74",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260813T115256Z-8G74"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260812T121349Z-V3TL",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260812T121349Z-V3TL"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260812T035340Z-E3P3",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260812T035340Z-E3P3"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260811T143704Z-RZQL",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260811T143704Z-RZQL"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260811T131349Z-8GHC",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260811T131349Z-8GHC"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260810T072433Z-J75J",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T072433Z-J75J"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260810T011244Z-8YVB",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260810T011244Z-8YVB"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260807T150938Z-2D5Y",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260807T150938Z-2D5Y"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260807T134039Z-R47H",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260807T134039Z-R47H"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260807T050827Z-PHZX",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260807T050827Z-PHZX"
+  },
+  {
+    "project": "captcha-auth-app",
+    "id": "ws-20260807T023154Z-EN8E",
+    "path": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260807T023154Z-EN8E"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260807T045323Z-RBSN",
+    "path": "/private/tmp/dual-semantic-reread-reason-37864/repo-agent-runs/ws-20260807T045323Z-RBSN"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260807T045217Z-4UMD",
+    "path": "/private/tmp/dual-semantic-reread-reason-37677/repo-agent-runs/ws-20260807T045217Z-4UMD"
+  },
+  {
+    "project": "dual-a10-terminal-delivery-a3-acbed93a",
+    "id": "ws-20260805T084458Z-54Y3",
+    "path": "/private/tmp/dual-a10-terminal-delivery-a3-acbed93a-agent-runs/ws-20260805T084458Z-54Y3"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-v5-run-target",
+    "id": "ws-20260804T092758Z-73XJ",
+    "path": "/private/tmp/dual-t6-cancer-clinic-v5-run-target-agent-runs/ws-20260804T092758Z-73XJ"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-v5-run-target",
+    "id": "ws-20260804T071332Z-CN47",
+    "path": "/private/tmp/dual-t6-cancer-clinic-v5-run-target-agent-runs/ws-20260804T071332Z-CN47"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-v5-run-target",
+    "id": "ws-20260804T051509Z-CUVU",
+    "path": "/private/tmp/dual-t6-cancer-clinic-v5-run-target-agent-runs/ws-20260804T051509Z-CUVU"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-v5-run-target",
+    "id": "ws-20260804T001619Z-FD2G",
+    "path": "/private/tmp/dual-t6-cancer-clinic-v5-run-target-agent-runs/ws-20260804T001619Z-FD2G"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-v5-run-target",
+    "id": "ws-20260803T224703Z-8BTJ",
+    "path": "/private/tmp/dual-t6-cancer-clinic-v5-run-target-agent-runs/ws-20260803T224703Z-8BTJ"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-v5-run-target",
+    "id": "ws-20260803T222702Z-V3GD",
+    "path": "/private/tmp/dual-t6-cancer-clinic-v5-run-target-agent-runs/ws-20260803T222702Z-V3GD"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-v5-run-target",
+    "id": "ws-20260803T222604Z-Y69L",
+    "path": "/private/tmp/dual-t6-cancer-clinic-v5-run-target-agent-runs/ws-20260803T222604Z-Y69L"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-v5-run-target",
+    "id": "ws-20260803T222554Z-A696",
+    "path": "/private/tmp/dual-t6-cancer-clinic-v5-run-target-agent-runs/ws-20260803T222554Z-A696"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-v5-run-target",
+    "id": "ws-20260803T145317Z-7DB2",
+    "path": "/private/tmp/dual-t6-cancer-clinic-v5-run-target-agent-runs/ws-20260803T145317Z-7DB2"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-v5-run-target",
+    "id": "ws-20260803T092510Z-UAXP",
+    "path": "/private/tmp/dual-t6-cancer-clinic-v5-run-target-agent-runs/ws-20260803T092510Z-UAXP"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-v5-run-target",
+    "id": "ws-20260802T152626Z-QN2R",
+    "path": "/private/tmp/dual-t6-cancer-clinic-v5-run-target-agent-runs/ws-20260802T152626Z-QN2R"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-readiness",
+    "id": "ws-20260802T101230Z-DLRW",
+    "path": "/private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260802T101230Z-DLRW"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-readiness",
+    "id": "ws-20260802T002001Z-36TY",
+    "path": "/private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260802T002001Z-36TY"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-readiness",
+    "id": "ws-20260731T202010Z-WW6V",
+    "path": "/private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260731T202010Z-WW6V"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-readiness",
+    "id": "ws-20260731T142928Z-6W28",
+    "path": "/private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260731T142928Z-6W28"
+  },
+  {
+    "project": "dual-t6-cancer-clinic-readiness",
+    "id": "ws-20260730T000417Z-5PXU",
+    "path": "/private/tmp/dual-t6-cancer-clinic-readiness-agent-runs/ws-20260730T000417Z-5PXU"
+  },
+  {
+    "project": "dual-public-issue-flow-20260728T152521Z",
+    "id": "ws-20260729T131421Z-BX54",
+    "path": "/private/tmp/dual-public-issue-flow-20260728T152521Z-agent-runs/ws-20260729T131421Z-BX54"
+  },
+  {
+    "project": "dual-public-issue-flow-20260728T152521Z",
+    "id": "ws-20260729T072508Z-NHNK",
+    "path": "/private/tmp/dual-public-issue-flow-20260728T152521Z-agent-runs/ws-20260729T072508Z-NHNK"
+  },
+  {
+    "project": "dual-public-issue-flow-20260728T152521Z",
+    "id": "ws-20260729T062937Z-G2XF",
+    "path": "/private/tmp/dual-public-issue-flow-20260728T152521Z-agent-runs/ws-20260729T062937Z-G2XF"
+  },
+  {
+    "project": "dual-public-issue-flow-20260728T152521Z",
+    "id": "ws-20260728T153012Z-JH74",
+    "path": "/private/tmp/dual-public-issue-flow-20260728T152521Z-agent-runs/ws-20260728T153012Z-JH74"
+  },
+  {
+    "project": "dual-phase-d-readme-repo",
+    "id": "ws-20260727T140433Z-K8F9",
+    "path": "/private/tmp/dual-phase-d-readme-repo-agent-runs/ws-20260727T140433Z-K8F9"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260726T153926Z-2H4Q",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260726T153926Z-2H4Q"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260726T145216Z-QKJJ",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260726T145216Z-QKJJ"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260726T144218Z-SP43",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260726T144218Z-SP43"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260726T111801Z-CM6B",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260726T111801Z-CM6B"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260726T033037Z-YW6K",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260726T033037Z-YW6K"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260723T114300Z-TMHV",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260723T114300Z-TMHV"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260723T112922Z-8P57",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260723T112922Z-8P57"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260723T111732Z-W22Q",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260723T111732Z-W22Q"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260723T100932Z-5M6F",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260723T100932Z-5M6F"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260723T075255Z-EKB9",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260723T075255Z-EKB9"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260723T024842Z-5YUG",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260723T024842Z-5YUG"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260722T150030Z-MP3G",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260722T150030Z-MP3G"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260722T134943Z-Z5FK",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260722T134943Z-Z5FK"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260722T123653Z-ZLRD",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260722T123653Z-ZLRD"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260722T083641Z-42V9",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260722T083641Z-42V9"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260722T075706Z-E5EQ",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260722T075706Z-E5EQ"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260722T070747Z-Z826",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260722T070747Z-Z826"
+  },
+  {
+    "project": "dual-typed-lineage-repo-20260722",
+    "id": "ws-20260722T061723Z-8Q9X",
+    "path": "/private/tmp/dual-typed-lineage-repo-20260722-agent-runs/ws-20260722T061723Z-8Q9X"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260726T031711Z-QCSD",
+    "path": "/private/tmp/dual-semantic-reread-reason-13370/repo-agent-runs/ws-20260726T031711Z-QCSD"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260726T030907Z-WBAE",
+    "path": "/private/tmp/dual-semantic-review-noise-13370/repo-agent-runs/ws-20260726T030907Z-WBAE"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260726T030807Z-HGR4",
+    "path": "/private/tmp/dual-semantic-plan-body-13370/repo-agent-runs/ws-20260726T030807Z-HGR4"
+  },
+  {
+    "project": "dual-smoke-lifecycle-86889",
+    "id": "ws-20260723T074008Z-HBFQ",
+    "path": "/private/tmp/dual-smoke-lifecycle-86889-agent-runs/ws-20260723T074008Z-HBFQ"
+  },
+  {
+    "project": "dual-smoke-lifecycle-81267",
+    "id": "ws-20260723T073239Z-NMNK",
+    "path": "/private/tmp/dual-smoke-lifecycle-81267-agent-runs/ws-20260723T073239Z-NMNK"
+  },
+  {
+    "project": "dual-smoke-lifecycle-79217",
+    "id": "ws-20260723T072938Z-V72Q",
+    "path": "/private/tmp/dual-smoke-lifecycle-79217-agent-runs/ws-20260723T072938Z-V72Q"
+  },
+  {
+    "project": "dual-smoke-lifecycle-54897",
+    "id": "ws-20260723T071239Z-67YM",
+    "path": "/private/tmp/dual-smoke-lifecycle-54897-agent-runs/ws-20260723T071239Z-67YM"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260723T071017Z-8ABR",
+    "path": "/private/tmp/dual-semantic-reread-reason-53251/repo-agent-runs/ws-20260723T071017Z-8ABR"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260723T070249Z-PTYS",
+    "path": "/private/tmp/dual-semantic-reread-reason-49456/repo-agent-runs/ws-20260723T070249Z-PTYS"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260723T070050Z-M7MJ",
+    "path": "/private/tmp/dual-semantic-reread-reason-47907/repo-agent-runs/ws-20260723T070050Z-M7MJ"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260723T065524Z-WVB4",
+    "path": "/private/tmp/dual-semantic-reread-reason-40497/repo-agent-runs/ws-20260723T065524Z-WVB4"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260723T064719Z-PVBJ",
+    "path": "/private/tmp/dual-semantic-review-noise-40497/repo-agent-runs/ws-20260723T064719Z-PVBJ"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260723T064618Z-JNRV",
+    "path": "/private/tmp/dual-semantic-plan-body-40497/repo-agent-runs/ws-20260723T064618Z-JNRV"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260723T064448Z-ECWQ",
+    "path": "/private/tmp/dual-semantic-plan-body-39849/repo-agent-runs/ws-20260723T064448Z-ECWQ"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260723T064139Z-KUZT",
+    "path": "/private/tmp/dual-semantic-plan-body-38444/repo-agent-runs/ws-20260723T064139Z-KUZT"
+  },
+  {
+    "project": "repo",
+    "id": "ws-20260723T064026Z-FKR5",
+    "path": "/private/tmp/dual-semantic-plan-body-37324/repo-agent-runs/ws-20260723T064026Z-FKR5"
+  },
+  {
+    "project": "dual-public-issue-flow-20260721T181842Z",
+    "id": "ws-20260721T182245Z-7KV4",
+    "path": "/private/tmp/dual-public-issue-flow-20260721T181842Z-agent-runs/ws-20260721T182245Z-7KV4"
+  },
+  {
+    "project": "dual-protocol-boundary-public-case",
+    "id": "ws-20260721T110112Z-36D7",
+    "path": "/private/tmp/dual-protocol-boundary-public-case-agent-runs/ws-20260721T110112Z-36D7"
+  },
+  {
+    "project": "dual-public-issue-flow-20260719T113246Z",
+    "id": "ws-20260719T113451Z-XGR3",
+    "path": "/private/tmp/dual-public-issue-flow-20260719T113246Z-agent-runs/ws-20260719T113451Z-XGR3"
+  },
+  {
+    "project": "dual-public-issue-flow-20260719T021634Z",
+    "id": "ws-20260719T021841Z-TT63",
+    "path": "/private/tmp/dual-public-issue-flow-20260719T021634Z-agent-runs/ws-20260719T021841Z-TT63"
+  },
+  {
+    "project": "ready-source",
+    "id": "ws-20260719T010342Z-X2BJ",
+    "path": "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-5135360183536066613/ready-source-worktree"
+  },
+  {
+    "project": "ready-source",
+    "id": "ws-20260719T005950Z-MZXN",
+    "path": "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-138816781514530390/ready-source-worktree"
+  },
+  {
+    "project": "ready-source",
+    "id": "ws-20260719T003741Z-TTRM",
+    "path": "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-10022206586880971739/ready-source-worktree"
+  },
+  {
+    "project": "dual-claude-session-harness-repo",
+    "id": "ws-20260704T011057Z-BRT2",
+    "path": "/tmp/dual-claude-session-harness-runs"
+  },
+  {
+    "project": "dual-public-issue-flow-20260703T001146Z",
+    "id": "ws-20260703T001349Z-CLKH",
+    "path": "/private/tmp/dual-public-issue-flow-20260703T001146Z-agent-runs/ws-20260703T001349Z-CLKH"
+  },
+  {
+    "project": "dual-public-issue-flow-20260702T012720Z",
+    "id": "ws-20260702T012913Z-VVT8",
+    "path": "/private/tmp/dual-public-issue-flow-20260702T012720Z-agent-runs/ws-20260702T012913Z-VVT8"
+  },
+  {
+    "project": "dual-public-issue-flow-20260630T144133Z",
+    "id": "ws-20260630T144326Z-WUDW",
+    "path": "/private/tmp/dual-public-issue-flow-20260630T144133Z-agent-runs/ws-20260630T144326Z-WUDW"
+  },
+  {
+    "project": "dual-public-issue-flow-20260630T141538Z",
+    "id": "ws-20260630T141732Z-ZGRY",
+    "path": "/private/tmp/dual-public-issue-flow-20260630T141538Z-agent-runs/ws-20260630T141732Z-ZGRY"
+  },
+  {
+    "project": "dual-public-issue-flow-20260630T135455Z",
+    "id": "ws-20260630T135648Z-2P2F",
+    "path": "/private/tmp/dual-public-issue-flow-20260630T135455Z-agent-runs/ws-20260630T135648Z-2P2F"
+  },
+  {
+    "project": "dual-public-issue-flow-20260630T104300Z",
+    "id": "ws-20260630T104549Z-PC7H",
+    "path": "/private/tmp/dual-public-issue-flow-20260630T104300Z-agent-runs/ws-20260630T104549Z-PC7H"
+  },
+  {
+    "project": "dual-public-issue-flow-20260630T094929Z",
+    "id": "ws-20260630T095114Z-B8FP",
+    "path": "/private/tmp/dual-public-issue-flow-20260630T094929Z-agent-runs/ws-20260630T095114Z-B8FP"
+  },
+  {
+    "project": "dual-public-issue-flow-20260630T092651Z",
+    "id": "ws-20260630T092840Z-RFA2",
+    "path": "/private/tmp/dual-public-issue-flow-20260630T092651Z-agent-runs/ws-20260630T092840Z-RFA2"
+  },
+  {
+    "project": "dual-public-issue-flow-20260627T133742Z",
+    "id": "ws-20260627T133927Z-D3NZ",
+    "path": "/private/tmp/dual-public-issue-flow-20260627T133742Z-agent-runs/ws-20260627T133927Z-D3NZ"
+  },
+  {
+    "project": "dual-public-issue-flow-20260627T130413Z",
+    "id": "ws-20260627T130601Z-GS2E",
+    "path": "/private/tmp/dual-public-issue-flow-20260627T130413Z-agent-runs/ws-20260627T130601Z-GS2E"
+  },
+  {
+    "project": "dual-public-issue-flow-20260627T115745Z",
+    "id": "ws-20260627T115933Z-W6FJ",
+    "path": "/private/tmp/dual-public-issue-flow-20260627T115745Z-agent-runs/ws-20260627T115933Z-W6FJ"
+  },
+  {
+    "project": "dual-public-issue-flow-20260627T052124Z",
+    "id": "ws-20260627T052310Z-6AFE",
+    "path": "/private/tmp/dual-public-issue-flow-20260627T052124Z-agent-runs/ws-20260627T052310Z-6AFE"
+  },
+  {
+    "project": "dual-public-issue-flow-20260627T050809Z",
+    "id": "ws-20260627T050955Z-NW3E",
+    "path": "/private/tmp/dual-public-issue-flow-20260627T050809Z-agent-runs/ws-20260627T050955Z-NW3E"
+  },
+  {
+    "project": "dual-public-issue-flow-20260627T045302Z",
+    "id": "ws-20260627T045448Z-U9T9",
+    "path": "/private/tmp/dual-public-issue-flow-20260627T045302Z-agent-runs/ws-20260627T045448Z-U9T9"
+  },
+  {
+    "project": "dual-public-issue-flow-20260627T011304Z",
+    "id": "ws-20260627T011452Z-QY83",
+    "path": "/private/tmp/dual-public-issue-flow-20260627T011304Z-agent-runs/ws-20260627T011452Z-QY83"
+  },
+  {
+    "project": "dual-glm-token-check",
+    "id": "ws-20260626T125327Z-7S7N",
+    "path": "/private/tmp/dual-glm-token-check-agent-runs/ws-20260626T125327Z-7S7N"
+  },
+  {
+    "project": "dual-provider-cache-aware-ab-policy-v2",
+    "id": "ws-20260626T114440Z-2ZHJ",
+    "path": "/private/tmp/dual-provider-cache-aware-ab-policy-v2-agent-runs/ws-20260626T114440Z-2ZHJ"
+  },
+  {
+    "project": "dual-provider-cache-aware-ab-policy",
+    "id": "ws-20260626T113442Z-X4EJ",
+    "path": "/private/tmp/dual-provider-cache-aware-ab-policy-agent-runs/ws-20260626T113442Z-X4EJ"
+  },
+  {
+    "project": "dual-provider-cache-aware-ab-naive",
+    "id": "ws-20260626T112206Z-P29X",
+    "path": "/private/tmp/dual-provider-cache-aware-ab-naive-agent-runs/ws-20260626T112206Z-P29X"
+  },
+  {
+    "project": "dual-compaction-ab-B",
+    "id": "ws-20260626T081430Z-9LU3",
+    "path": "/private/tmp/dual-compaction-ab-B-agent-runs/ws-20260626T081430Z-9LU3"
+  },
+  {
+    "project": "dual-compaction-ab-A",
+    "id": "ws-20260626T080230Z-ZA7Y",
+    "path": "/private/tmp/dual-compaction-ab-A-agent-runs/ws-20260626T080230Z-ZA7Y"
+  },
+  {
+    "project": "dual-public-issue-flow-20260625T143013Z",
+    "id": "ws-20260625T143159Z-ZS4V",
+    "path": "/private/tmp/dual-public-issue-flow-20260625T143013Z-agent-runs/ws-20260625T143159Z-ZS4V"
+  },
+  {
+    "project": "dual-public-issue-flow-20260625T111212Z",
+    "id": "ws-20260625T111358Z-GPUB",
+    "path": "/private/tmp/dual-public-issue-flow-20260625T111212Z-agent-runs/ws-20260625T111358Z-GPUB"
+  },
+  {
+    "project": "dual-public-issue-flow-20260625T015901Z",
+    "id": "ws-20260625T020047Z-BPDC",
+    "path": "/private/tmp/dual-public-issue-flow-20260625T015901Z-agent-runs/ws-20260625T020047Z-BPDC"
+  },
+  {
+    "project": "dual-public-issue-flow-20260625T005533Z",
+    "id": "ws-20260625T005720Z-8B2Y",
+    "path": "/private/tmp/dual-public-issue-flow-20260625T005533Z-agent-runs/ws-20260625T005720Z-8B2Y"
+  },
+  {
+    "project": "dual-public-issue-flow-20260625T004029Z",
+    "id": "ws-20260625T004215Z-E7U9",
+    "path": "/private/tmp/dual-public-issue-flow-20260625T004029Z-agent-runs/ws-20260625T004215Z-E7U9"
+  },
+  {
+    "project": "dual-ab-B",
+    "id": "ws-20260624T135317Z-LLZ7",
+    "path": "/private/tmp/dual-ab-B-agent-runs/ws-20260624T135317Z-LLZ7"
+  },
+  {
+    "project": "dual-ab-A",
+    "id": "ws-20260624T131733Z-DY2E",
+    "path": "/private/tmp/dual-ab-A-agent-runs/ws-20260624T131733Z-DY2E"
+  },
+  {
+    "project": "dual-token-simple-usage-check",
+    "id": "ws-20260623T215939Z-RFCM",
+    "path": "/private/tmp/dual-token-simple-usage-check-agent-runs/ws-20260623T215939Z-RFCM"
+  },
+  {
+    "project": "dual-token-simple",
+    "id": "ws-20260623T142227Z-X5QP",
+    "path": "/private/tmp/dual-token-simple-agent-runs/ws-20260623T142227Z-X5QP"
+  },
+  {
+    "project": "dual-public-memory-session-fix-v2",
+    "id": "ws-20260623T102717Z-7Q9C",
+    "path": "/private/tmp/dual-public-memory-session-fix-v2-agent-runs/ws-20260623T102717Z-7Q9C"
+  },
+  {
+    "project": "dual-public-memory-session-fix",
+    "id": "ws-20260623T101509Z-LHWC",
+    "path": "/private/tmp/dual-public-memory-session-fix-agent-runs/ws-20260623T101509Z-LHWC"
+  },
+  {
+    "project": "dual-public-memory-phase-a-v5",
+    "id": "ws-20260623T092301Z-CLKZ",
+    "path": "/private/tmp/dual-public-memory-phase-a-v5-agent-runs/ws-20260623T092301Z-CLKZ"
+  },
+  {
+    "project": "dual-public-memory-phase-a-v4",
+    "id": "ws-20260623T082031Z-FZUV",
+    "path": "/private/tmp/dual-public-memory-phase-a-v4-agent-runs/ws-20260623T082031Z-FZUV"
+  },
+  {
+    "project": "dual-public-memory-phase-a-v3",
+    "id": "ws-20260623T080823Z-3LHT",
+    "path": "/private/tmp/dual-public-memory-phase-a-v3-agent-runs/ws-20260623T080823Z-3LHT"
+  },
+  {
+    "project": "dual-public-memory-phase-a-v2",
+    "id": "ws-20260623T075013Z-6EWD",
+    "path": "/private/tmp/dual-public-memory-phase-a-v2-agent-runs/ws-20260623T075013Z-6EWD"
+  },
+  {
+    "project": "dual-public-memory-phase-a",
+    "id": "ws-20260623T074608Z-AM2S",
+    "path": "/private/tmp/dual-public-memory-phase-a-agent-runs/ws-20260623T074608Z-AM2S"
+  },
+  {
+    "project": "dual-public-memory-bench-1782171294",
+    "id": "ws-20260622T233455Z-G6RT",
+    "path": "/private/tmp/dual-public-memory-bench-1782171294-agent-runs/ws-20260622T233455Z-G6RT"
+  },
+  {
+    "project": "dual-token-simple-repo",
+    "id": "ws-20260622T214330Z-K6R5",
+    "path": "/private/tmp/dual-token-simple-repo-agent-runs/ws-20260622T214330Z-K6R5"
+  },
+  {
+    "project": "dual-token-simple-repo",
+    "id": "ws-20260622T213639Z-795U",
+    "path": "/private/tmp/dual-token-simple-repo-agent-runs/ws-20260622T213639Z-795U"
+  },
+  {
+    "project": "dual-token-simple-repo",
+    "id": "ws-20260622T213041Z-BUY4",
+    "path": "/private/tmp/dual-token-simple-repo-agent-runs/ws-20260622T213041Z-BUY4"
+  },
+  {
+    "project": "dual-token-simple-repo",
+    "id": "ws-20260622T212838Z-MVPN",
+    "path": "/private/tmp/dual-token-simple-repo-agent-runs/ws-20260622T212838Z-MVPN"
+  },
+  {
+    "project": "dual-outcome-simple-repo",
+    "id": "ws-20260622T155142Z-727M",
+    "path": "/private/tmp/dual-outcome-simple-repo-agent-runs/ws-20260622T155142Z-727M"
+  },
+  {
+    "project": "dual-outcome-simple-repo",
+    "id": "ws-20260622T144603Z-SQ84",
+    "path": "/private/tmp/dual-outcome-simple-repo-agent-runs/ws-20260622T144603Z-SQ84"
+  },
+  {
+    "project": "dual-memory-telemetry-simple-repo",
+    "id": "ws-20260622T122951Z-A9KM",
+    "path": "/private/tmp/dual-memory-telemetry-simple-repo-agent-runs/ws-20260622T122951Z-A9KM"
+  },
+  {
+    "project": "dual-parser-real-run-repo",
+    "id": "ws-20260622T112725Z-X372",
+    "path": "/private/tmp/dual-parser-real-run-repo-agent-runs/ws-20260622T112725Z-X372"
+  },
+  {
+    "project": "dual-simple-token-case",
+    "id": "ws-20260622T061634Z-2VLG",
+    "path": "/private/tmp/dual-simple-token-case-agent-runs/ws-20260622T061634Z-2VLG"
+  },
+  {
+    "project": "dual-public-issue-flow-20260621T140857Z",
+    "id": "ws-20260621T140858Z-QP77",
+    "path": "/private/tmp/dual-public-issue-flow-20260621T140857Z-agent-runs/ws-20260621T140858Z-QP77"
+  },
+  {
+    "project": "dual-public-issue-flow-20260621T133947Z",
+    "id": "ws-20260621T133948Z-3CYW",
+    "path": "/private/tmp/dual-public-issue-flow-20260621T133947Z-agent-runs/ws-20260621T133948Z-3CYW"
+  },
+  {
+    "project": "dual-public-issue-flow-20260621T131749Z",
+    "id": "ws-20260621T131750Z-YQ9H",
+    "path": "/private/tmp/dual-public-issue-flow-20260621T131749Z-agent-runs/ws-20260621T131750Z-YQ9H"
+  },
+  {
+    "project": "dual-public-issue-flow-20260621T114801Z",
+    "id": "ws-20260621T114946Z-QUZU",
+    "path": "/private/tmp/dual-public-issue-flow-20260621T114801Z-agent-runs/ws-20260621T114946Z-QUZU"
+  },
+  {
+    "project": "dual-public-issue-flow-20260621T111838Z",
+    "id": "ws-20260621T112018Z-GQPE",
+    "path": "/private/tmp/dual-public-issue-flow-20260621T111838Z-agent-runs/ws-20260621T112018Z-GQPE"
+  }
+]

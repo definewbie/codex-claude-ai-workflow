@@ -1,0 +1,31 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-context-acceptance_codex_verifier_review-034",
+  "nodeDefinitionId" : "context.acceptance_codex_verifier_review",
+  "kind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "COMPLETED",
+  "stageId" : "stage-context",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315595719/outputs/implement-claude-self-test.contract.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/git-evidence.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/base-commit.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/head-commit.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/branch.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/git-root.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/git-status-short.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/git-name-status.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/diff.stat", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/diff.patch", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/changed-files.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/change-scope-evaluation.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/git-evidence/occurrences/node-implement-artifact_validation-033/change-scope-evaluation-08ed4a49cfff31b453f0bb419e8d90541288411911b6518413f837ff37337134.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-acceptance_codex_verifier_review-034.md", ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-acceptance_codex_verifier_review-034.json" ],
+  "result" : {
+    "context_package" : ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-acceptance_codex_verifier_review-034.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-acceptance_codex_verifier_review-034.json",
+    "target_node" : "acceptance.codex_verifier_review",
+    "profile" : "acceptance",
+    "sections" : [ "input_artifacts", "iteration_history", "human_feedback", "review_evidence", "recent_agent_outputs", "git_evidence", "ledger_pointers", "task_contract" ],
+    "input_ref_count" : 13,
+    "generated_at" : "2026-09-13T16:06:46.395350Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315606364-232a8ee3",
+  "startedAt" : "2026-09-13T16:06:46.376536Z",
+  "finishedAt" : "2026-09-13T16:06:46.407710Z"
+}

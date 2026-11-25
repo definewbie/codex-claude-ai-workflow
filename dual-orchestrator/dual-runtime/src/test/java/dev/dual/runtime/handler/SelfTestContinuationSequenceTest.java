@@ -29,8 +29,9 @@ class SelfTestContinuationSequenceTest {
                 "implement.self_test_decision", loaded.nodes(), loaded.edges());
         var paths = new WorkstreamPaths(temp.resolve("invalid"), new DualId("ws-test"));
         try (var kernel = new LiteFlowPrototypeKernel()) {
-            var ledger = new WorkflowFileLedger(kernel);
-            ledger.initialize(paths, "workflow-test", definition);
+            var ledger = new WorkflowFileLedger(kernel,
+                java.util.Map.of("test_binary", "runtime-tests-v3"));
+            dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "workflow-test", definition);
             var current = ledger.loadCurrent(paths);
             var id = current.activeNodeInstanceIds().getFirst();
             var before = Files.readString(paths.nodeJson(id));
@@ -66,13 +67,28 @@ class SelfTestContinuationSequenceTest {
             for (var mode : List.of("complete", "evidence", "mixed", "blocked")) {
                 var workspace = temp.resolve(variant + "-" + mode);
                 var paths = new WorkstreamPaths(workspace, new DualId("ws-test"));
+                if (mode.equals("complete")) {
+                    try (var kernel = new LiteFlowPrototypeKernel()) {
+                        var ledger = new WorkflowFileLedger(kernel, java.util.Map.of("test_binary", "runtime-tests-v3"));
+                        var fixture = new AcceptanceRepairSequenceTest.Fixture(workspace, "IMPLEMENTATION_BUG", "product.txt", "ws-test", variant, ledger);
+                        fixture.until("implement.claude_self_test_report");
+                        fixture.step(); fixture.step();
+                    }
+                    try (var kernel = new LiteFlowPrototypeKernel()) {
+                        var cold = new WorkflowFileLedger(kernel, java.util.Map.of("test_binary", "runtime-tests-v3"));
+                        var current = cold.loadCurrent(paths);
+                        assertEquals("implement.artifact_validation", cold.loadNode(paths, current.activeNodeInstanceIds().getFirst()).nodeDefinitionId());
+                    }
+                    continue;
+                }
                 var loaded = new WorkflowDefinitionLoader().loadOrDefault(null, variant);
                 // Enter at the affected stage; upstream qualification is not bypassed by a provider run.
                 var definition = new WorkflowDefinition(loaded.workflowId(), loaded.version(),
                         "implement.claude_self_test_report", loaded.nodes(), loaded.edges());
                 try (var kernel = new LiteFlowPrototypeKernel()) {
-                    var ledger = new WorkflowFileLedger(kernel);
-                    ledger.initialize(paths, "workflow-test", definition);
+                    var ledger = new WorkflowFileLedger(kernel,
+                java.util.Map.of("test_binary", "runtime-tests-v3"));
+                    dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "workflow-test", definition);
                     var sourceId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
                     var decision = mode.equals("complete") ? "SELF_TEST_COMPLETE"
                             : mode.equals("blocked") ? "BLOCKED" : "SELF_TEST_INCOMPLETE";
@@ -82,7 +98,7 @@ class SelfTestContinuationSequenceTest {
                             "Verification result", mode.equals("complete") ? "READY"
                                     : mode.equals("blocked") ? "BLOCKED" : "INSUFFICIENT_EVIDENCE",
                             List.of("local test"), List.of(), List.of("local result"), missing, mustFix,
-                            List.of(), "Recorded actual evidence");
+                            List.of(), "Recorded actual evidence", List.of());
                     var envelope = new AgentResultEnvelope(1, "ws-test", "run-test",
                             "implement.claude_self_test_report", payload);
                     var contract = ContractRegistry.forNode(envelope.nodeId());
@@ -101,14 +117,14 @@ class SelfTestContinuationSequenceTest {
                     var decisionNode = ledger.loadCoreNode(paths,
                             ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
                     assertEquals("implement.self_test_decision", decisionNode.nodeDefinitionId());
-                    var result = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(
-                            workspace, "ws-test", definition.node(decisionNode.nodeDefinitionId()), decisionNode));
+                    var result = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(workspace, "ws-test", definition.node(decisionNode.nodeDefinitionId()), decisionNode, dev.dual.runtime.RuntimeTestLedger.ledger()));
                     assertEquals(NodeStatus.COMPLETED, result.status(), result.toString());
                     ledger.completeAndRoute(paths, definition, decisionNode.nodeInstanceId(), result.status(),
                             result.outcome(), result.outputRefs(), result.result());
                 }
                 try (var coldKernel = new LiteFlowPrototypeKernel()) {
-                    var cold = new WorkflowFileLedger(coldKernel);
+                    var cold = new WorkflowFileLedger(coldKernel,
+                java.util.Map.of("test_binary", "runtime-tests-v3"));
                     var current = cold.loadCurrent(paths);
                     assertEquals(1, current.activeNodeInstanceIds().size());
                     var next = cold.loadNode(paths, current.activeNodeInstanceIds().getFirst());

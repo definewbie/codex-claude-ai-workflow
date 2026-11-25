@@ -1,0 +1,87 @@
+{
+  "sessions": [
+    {
+      "record_id": "01a178e7-262f-7420-b6f5-a88652750a69",
+      "name": "codex-reviewer-ws-20261026T142203Z-7SNA",
+      "agent": "codex",
+      "metadata_path": "/Users/kriswang/.acpx/sessions/01a178e7-262f-7420-b6f5-a88652750a69.json",
+      "commands": [
+        {
+          "action": "close",
+          "exit": 0,
+          "elapsed_seconds": 0.13209708407521248,
+          "timed_out": false
+        },
+        {
+          "action": "show",
+          "exit": 0,
+          "elapsed_seconds": 0.13237166707403958,
+          "timed_out": false
+        }
+      ]
+    },
+    {
+      "record_id": "ab3986d9-d5da-4816-86e3-0bd22b614e3f",
+      "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793029979831",
+      "agent": "claude",
+      "metadata_path": "/Users/kriswang/.acpx/sessions/ab3986d9-d5da-4816-86e3-0bd22b614e3f.json",
+      "commands": [
+        {
+          "action": "close",
+          "exit": 0,
+          "elapsed_seconds": 0.12679762509651482,
+          "timed_out": false
+        },
+        {
+          "action": "show",
+          "exit": 0,
+          "elapsed_seconds": 0.12932895915582776,
+          "timed_out": false
+        }
+      ]
+    },
+    {
+      "record_id": "7a1a6c84-99d9-438e-8cc9-418f106e97e8",
+      "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793030521008",
+      "agent": "claude",
+      "metadata_path": "/Users/kriswang/.acpx/sessions/7a1a6c84-99d9-438e-8cc9-418f106e97e8.json",
+      "commands": [
+        {
+          "action": "close",
+          "exit": 0,
+          "elapsed_seconds": 0.12905337498523295,
+          "timed_out": false
+        },
+        {
+          "action": "show",
+          "exit": 0,
+          "elapsed_seconds": 0.12565766600891948,
+          "timed_out": false
+        }
+      ]
+    },
+    {
+      "record_id": "c25437b3-add8-43f4-b51a-7a2510108b64",
+      "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793048679201",
+      "agent": "claude",
+      "metadata_path": "/Users/kriswang/.acpx/sessions/c25437b3-add8-43f4-b51a-7a2510108b64.json",
+      "commands": [
+        {
+          "action": "close",
+          "exit": 0,
+          "elapsed_seconds": 0.23764029098674655,
+          "timed_out": false
+        },
+        {
+          "action": "show",
+          "exit": 0,
+          "elapsed_seconds": 0.1282081250101328,
+          "timed_out": false
+        }
+      ]
+    }
+  ],
+  "open_record_count_before": 4,
+  "model_calls": 0,
+  "no_subtree_stop_claim": true
+}

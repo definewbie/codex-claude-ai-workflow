@@ -1,0 +1,791 @@
+{
+  "package_exit": 0,
+  "package_tests_skipped": true,
+  "not_a_second_test_run": true,
+  "applications": {
+    "dual-cli": {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+      "sha256": "06900ad8f7273e3d5410095f11cc956ed4a6b68eeccdfea17d53d8be9279d88e",
+      "embedded_project_modules": [
+        {
+          "module": "dual-core",
+          "sha256": "6d816c583d70404afc35a92d5bc5abf5c66a93e7e1f13867adabe580b4de9a1f",
+          "embedded_bytes_equal": true
+        },
+        {
+          "module": "dual-ledger-file",
+          "sha256": "2770f9b9e362fddbe778d05db75f5e7fbe4df27600664c9822f4d958c76e1329",
+          "embedded_bytes_equal": true
+        },
+        {
+          "module": "dual-flow-liteflow",
+          "sha256": "48b03fc8bfd11c9e047b2d2e2c4c838fc75dddc82c9d826b163e34dfca5bc5d1",
+          "embedded_bytes_equal": true
+        },
+        {
+          "module": "dual-runtime",
+          "sha256": "1a9031b33d3670fbb13cbe4cd00240ce97b3858b165a730faaddf66ec1170d3d",
+          "embedded_bytes_equal": true
+        },
+        {
+          "module": "dual-adapter-acpx",
+          "sha256": "c0768670c26ca8c0fc5678c221cee48a23a11ed6d869b1f5a42467cfed6febf7",
+          "embedded_bytes_equal": true
+        },
+        {
+          "module": "dual-adapter-git",
+          "sha256": "ed559cfe7ce64fd0441f6b02691e824f7154dc7b52602744f9cda2c0d67de5e8",
+          "embedded_bytes_equal": true
+        }
+      ],
+      "own_class_resource_files": 92,
+      "own_class_resource_bytes_equal": true,
+      "own_files": [
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CliLedgerFactory.class",
+          "sha256": "623ad8d5c1ebfc19d4becb3fb04946d4745d8ad1c4a55ca3dcc2e7df229a97c6"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviewDecideCommand.class",
+          "sha256": "b444850e368c770815c82e5a65609a6a37bc85465b2e534567ea22c32a5e46f0"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RunUsageProjection.class",
+          "sha256": "87c81750bc537d24d7bf1463150d57009ce8bbfc372c83b14b81f64b34901328"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/WorkerCommand.class",
+          "sha256": "e090ed640b28d74ca477abdcbee7f4db9da357b6155574c28843ea98f518457d"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/WorkflowPrintDefaultCommand.class",
+          "sha256": "8cfe7801054b52febbbe5df54987937986c870908315ff090f2eea4b53c5994d"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviseCommand.class",
+          "sha256": "0b38928307fd7918235b6fd4ef5342b0145dca50a5bba4b57c0a813463f23dda"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviewCompleteCommand.class",
+          "sha256": "dbee6e5c6485e0e043f77a2d6c868027b07beb3a4eb67ab79b0280fe25a45354"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/WatchCommand.class",
+          "sha256": "4f3813cc647d08a740eae4804d1070c045f5f9a24288493f5dd5eea70f026804"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviewReviseCommand.class",
+          "sha256": "a859d79ac7cf02acb1e499fec48f9c116f11b52c5629b0777d4c86fa4d3f1710"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DualCtlApplication$ExitCodeRunner.class",
+          "sha256": "69e070b7915459cbfdfccf81b020c23a9b86f4fcc4b162d0be6abe8d0bfa6266"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RunMetadata$RunUsage.class",
+          "sha256": "5a8433af4aa7f8dde48dd1c005fcfa9f878d2b1e97060b25814e4713d28bf60f"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/AutoRunCommand$Snapshot.class",
+          "sha256": "5ae11978c7d392053de14560d6e8196be56c5498a2cfc5b317f91dce99d55608"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RunCommand.class",
+          "sha256": "88c220bb793a9b17376b9935bde03ddc79d91b4099b1b1f8b4f82d273ab168f9"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/WorkflowValidateCommand.class",
+          "sha256": "374aff03fb6ab005e843061211f676b13a4b133285df2f7becfc00fcc86d4a29"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CalibrationPromoteCommand.class",
+          "sha256": "f633100b60763de79d8ad50c6103620e2904deaa0f1d61e651d3e4c0be1c634e"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DualCtlApplication.class",
+          "sha256": "823758787fbcd752cae19c326b04371b9688d5c696585900434584a460aac148"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DoctorCommand$PinLevel.class",
+          "sha256": "38d4ba18c7fc0966f9b9347765d4b4540cad3731f8f5c6689a73f162dde3053d"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CliWorkflowRuntimeFactory.class",
+          "sha256": "43aab141f2ea210d678637048ef764f455e7b1d26b6433219758774c11a7951f"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/TraceCommand$1.class",
+          "sha256": "44db3714e4f58727ce46510f7bce97be480425ca59fede155a75b0c28defc150"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RunMetadata.class",
+          "sha256": "382dd8428ef56aae19f08f269cd8240b419b0e5ef92fcd6702eb9639b6091b6f"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/StatusCommand.class",
+          "sha256": "4d65fbb6005db9548071c669534da3f58f921ba1a718c4a9747f516925fdd4d2"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/TraceCommand$AttentionItem.class",
+          "sha256": "586618791c671d0c9f0e072db7f2e82fcbe7214356d2f371d95648d9ff310e95"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RecoveryAbortCommand.class",
+          "sha256": "e57d9355c240bb6f25396752809e7fba46db3d822fb286fdf2df0d057f03560d"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ApproveCommand.class",
+          "sha256": "78c0800a6caee6cddb496dc3fd2dae9c34bf28450f22f98873a21aa7e631d6cb"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviewRecordReadinessCommand.class",
+          "sha256": "b9491b6226a0e2ca6fdf3965ea83e362dd883c6c6a4e0b6a380adadb64c61351"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/StartCommand.class",
+          "sha256": "7bbd076a77e036c370a605d9f121deef0e6e861c52eb37a10abcd3adef160a38"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/TraceCommand$Acceptance.class",
+          "sha256": "9c605146ca9c41c89d49978be32550cbf2a4de8cbaeaf628f886dc0fc5525155"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RecoveryStaleCommand.class",
+          "sha256": "c01e1e33884937073845fc3410013cf72bf156b1fe45e80494ce58ffafbc5f2e"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/TraceCommand.class",
+          "sha256": "b5ad3da93ff1acc314cde3539ba19b24aaa5e895d49874c76789453af3f25122"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DoctorCommand$PinCheck.class",
+          "sha256": "1e0c971071fc0c1507ee5192089802ce2bf5c605f2ffcac74693499c4e358028"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviewCommand.class",
+          "sha256": "a4a0545b45621b239dd5f6e0e43eeb03c7461a18479382d2d30f4f3ffe323039"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ProjectionsRefreshCommand.class",
+          "sha256": "9f6a7ef15ebfff5ab73ff05cae5b638864a63993ac63843fb5ed6e6bec2f1153"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/WorkflowCommand.class",
+          "sha256": "086e55f8427ee3a90ff906302d04ae2961e60dfe1ca938949a02264591fb5384"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/WorkerRunOnceCommand.class",
+          "sha256": "062738316801306676dde57ce337d1080ad1436cd526885545aa7126cc49f444"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RetryCommand.class",
+          "sha256": "40a53705a08325d8b930ce7b92127614223e8206c583040de46c4d4ff1c8b588"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DeliveryMergeCommand.class",
+          "sha256": "6de26e67ff2e5a0daa89d470ad58b84bc592a3fc8dd09c55e8f5b651188a6dd6"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RecoveryApproveWebSearchCommand.class",
+          "sha256": "dc9fb67fbc0dc30120a333e0c4598e081147c55c48c8eb36426cd8cc379c6c20"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviewApproveCommand.class",
+          "sha256": "d8d7561d926981fe77bce5099ca49ade11f0d4df354943a09c53178f1fc1a4bf"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CliNextActionHints$1.class",
+          "sha256": "3dba3f29f3d9e5bccede7eb1f7c95bdde8ef37521096b5bd70682a8fce93f752"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviewPrepareEvidenceCommand.class",
+          "sha256": "ffbf041e7d44e91923547a5426831ac7dfc87fee3258d2d0be9b4f772e8f0744"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RecoveryCloseMistakenIterationCommand.class",
+          "sha256": "757e5f2926fb1229138e67005fd3a8a8952d096815110670d7acf8c7bbc43ff4"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/SummaryCommand$1.class",
+          "sha256": "00546fb266d55a5feaf8e9f648da5c0bca4473888b37e92c58a7d9933ac7bf56"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/TraceCommand$ArtifactRef.class",
+          "sha256": "43ea541ee4f332f533f2c001a8ffb5810bab05ea5573d5302268b5fa4e937345"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CalibrationListCommand$CandidateRow.class",
+          "sha256": "6e25c092719961e6cae6df89a5f6c665d8d3968492aca75ee07de8f3957ef809"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DeliveryResolveCommand.class",
+          "sha256": "6657e9b6fb8e3df7446b6464866f1daeefa2b208349802c35e08711d54560864"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CalibrationPlanCommand.class",
+          "sha256": "b73c6ffe21a293f1d5b0f1571b2a99f566a34726087f0518b6c737c81d28b893"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RunMetadataReader.class",
+          "sha256": "ad58bb0d2f24aaa64a3b1b5c6c06d385ce9572cd1bf12815c34437f5dbfe2855"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/TimelineCommand.class",
+          "sha256": "31ca24a97f0ad4188cafac38106405b6bfab26fbca1bb920aafadf66eba83829"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DeliveryCommand.class",
+          "sha256": "dfd68ee4cf7399d388e5bf0b00ae437f8f6de0f4cae696e61915720bc8688d7a"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/WorkflowHandlersCommand.class",
+          "sha256": "d4b676dd486b5ae8a54eb9acf3063efebcd7343c95ee35013e4b31151e0de06f"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CalibrationListCommand.class",
+          "sha256": "e5e36fa6cb18a2b6db2411fec161fa31ecc6c40b219f53a70804db5a3229097a"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ResumeCommand.class",
+          "sha256": "3c9c8ecc7cd3b99b255c5aee72a882c5cad44ef85db4d5e03d4da4f8e996f1c7"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ProjectionsRefreshCommand$1.class",
+          "sha256": "595317b7fdc34745a7b00ccf3026cfa35aa29942974aa88288496d6b15a2187a"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviewPacketCliHints.class",
+          "sha256": "9e1cb43ecc420e58d10f9a5b0d8b9262078ef281cf60ff491b95e7ea2db44f78"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CliWorkflowLoop.class",
+          "sha256": "c7ebd3696e147e1844d86f1acbc01956aa3437645b3f793cdfadac950cc13cc0"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CalibrationDecideCommand.class",
+          "sha256": "53c217a6830d631c505b473074afb1c9b5e477e2c33336a242af8f8858c55495"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/AutoRunCommand.class",
+          "sha256": "04cb4768dd644318a47bd8312c951433dcfc85db0aa23da69d9b144700875be0"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DoctorCommand$2.class",
+          "sha256": "6c23b3a46cf1ec8b06972a40382be88fff7fb23a5eaff747c06e40195420e358"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DoctorCommand.class",
+          "sha256": "777f0774f71f2c9ca69875d1cf5d20294102fe3b5cccf38c02ad67c9e087f552"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CliNextActionHints.class",
+          "sha256": "d4edbb1d5b770363020774cad33867a197f6f5bbf9a0f24e4115d177502b571c"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CalibrationCandidateFiles.class",
+          "sha256": "ed6cdee39ba169a57f51811d4dbe6cc0944379a6a0a9e898fb5c2d689e93bd06"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RecoveryCommand.class",
+          "sha256": "27093e70fe52c620e126080f6b4e6a96fce3b3a858c31ac125476dc13c48f523"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DualCtlCommand.class",
+          "sha256": "3d5d3d11b3de9653fc38dc0dc2fece4d886c753ffa7683f9da9a3f6ac0880cd6"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CompleteCommand.class",
+          "sha256": "b4398d4bedc7251932eeb4dddb97644b6263cb6449cb82595b0ef1f8b803b9bb"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DeliveryFinalizeCommand.class",
+          "sha256": "f1cf9b201cde9a1d558c4b350d36a881968927f79f8e5ceac61923dfa0cfc39b"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/InspectCommand.class",
+          "sha256": "42e9fe67c0991e2a73f835bb14adfa5b5608e72e4d7aa7ab433c6f24b203c7ba"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DoctorCommand$CommandResult.class",
+          "sha256": "e02578bba8829401e608097eaba8b107418db2c79c101f34056e15cf9255b389"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RecoveryReplayClassificationCommand.class",
+          "sha256": "a926907e1f7931e6edc50329502bf444f54a748cecb29653e9e22b7a3fe0d2aa"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RunMetadataReader$RunMetadataListing.class",
+          "sha256": "c592917b996630b97804f8cf31dd33e0492e2557e7ce3fa10a85d21c19bcbe93"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviewSubmitEvidenceCommand.class",
+          "sha256": "783d01db463748efbe36720418656289d6043900b13b3599a241d857df9167d0"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RunUsageProjection$1.class",
+          "sha256": "e7259943df9e610a5763312ba61452043958e7672b31947f66919f9edac3b1b1"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RunMetadataReader$RunMetadataWarning.class",
+          "sha256": "923cb41e202cc772fe97086c8d7502762c5890fd19db9419125dbd18534fa877"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/EventsCommand.class",
+          "sha256": "676121d88fc4f79cebaad24c6566870529be6fee68b45d84c480e251ac0e4e3d"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DoctorCommand$3.class",
+          "sha256": "ef7e32c47458f0626bb2147b58c7875f54b08a117cf86b4098d802307b9ced9a"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviewShowCommand.class",
+          "sha256": "8e5b680e44cf3077530a4db217787a9c8ae1c45efc97b6603b8167b9b31937d7"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RunsCommand.class",
+          "sha256": "334d6dd30920062a74e9fd548abdf746a63524bb3c9aeb31efbcfa95be66c87b"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RunsCommand$UsageField.class",
+          "sha256": "235b133af16866fb7f373a750f06907048633b0fa0fadf705d8b8e396d8aa5da"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CalibrationShowCommand.class",
+          "sha256": "4749f592313033cf3783fd0fac42042d860d52b93e8ba6dbcb5a9833012c5536"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ProjectionsCommand.class",
+          "sha256": "0725d9cfa414dd284cc0a3117c1e60f8af6ff77b175dfb592dd9d87d48887055"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/InspectRunnerKindCommand.class",
+          "sha256": "45c1f4adc8957de60836489e60344ccfbd69f8ffb969139480e46eed62b7c290"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/TimelineCommand$1.class",
+          "sha256": "b3a44d3b7dc59ff1779e996f396ac666d3946a42416eb7c114d67723df3c7f74"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RecoveryShowCommand.class",
+          "sha256": "095e62153798a9b81791908d66f17bb02ac7f4719f1e8b5164e1fa048bffee3c"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CliSupportedHandlers.class",
+          "sha256": "3523448a29292ce0be6e735c553e728195b7ddd4da91311a0aaa410a3d6109bb"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/DoctorCommand$1.class",
+          "sha256": "0a70790807d48272371f29962cad3a60676335002ffee4edde1c612a8b250b75"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/PermissionsCommand.class",
+          "sha256": "44c9eeaf9a5dec467317c5464f5119ce3f5009971c780de57e2e05dcefc007a9"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CalibrationCommand.class",
+          "sha256": "a81094fc6e40dc37711515e36a3879d6cdf09641a00c88d08342a8aefe36b3ab"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/ReviewRequestActionCommand.class",
+          "sha256": "95e320c79e73769584ad3e78524844e12d93bd10cce831928aec749e5f0562d5"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/RecoveryNetworkCommand.class",
+          "sha256": "2e6200e1c3fee2497f091c86c2f21f70dd379070e28d0722af4073cb8c429e55"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/SummaryCommand.class",
+          "sha256": "a1869c7d6acf03fbcfd152958952132b3c8bf247889d82ccfd6754e4af1fd373"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/SessionsReapCommand.class",
+          "sha256": "8c4f16eae548e3da034b3de22851397143ae2f5de1f7495db0ad816c5d2e2023"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/CalibrationBillingCsvCommand.class",
+          "sha256": "7b16153fbeb45b135f58d80c01f80ceb3f225274bdcddc9449ba8f253e77e138"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/cli/WatchCommand$1.class",
+          "sha256": "c2dcb31034b6c43eaf70f961b3491cb839f649929ac15e1c34260bbb4e929545"
+        }
+      ]
+    },
+    "dual-server": {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/target/dual-server-0.1.0-SNAPSHOT.jar",
+      "sha256": "0f4ca616a4eeeccb4409aa7f5c4f3f508c9bcb394686c6d0b272a23df7f5be19",
+      "embedded_project_modules": [
+        {
+          "module": "dual-core",
+          "sha256": "6d816c583d70404afc35a92d5bc5abf5c66a93e7e1f13867adabe580b4de9a1f",
+          "embedded_bytes_equal": true
+        },
+        {
+          "module": "dual-ledger-file",
+          "sha256": "2770f9b9e362fddbe778d05db75f5e7fbe4df27600664c9822f4d958c76e1329",
+          "embedded_bytes_equal": true
+        },
+        {
+          "module": "dual-flow-liteflow",
+          "sha256": "48b03fc8bfd11c9e047b2d2e2c4c838fc75dddc82c9d826b163e34dfca5bc5d1",
+          "embedded_bytes_equal": true
+        },
+        {
+          "module": "dual-runtime",
+          "sha256": "1a9031b33d3670fbb13cbe4cd00240ce97b3858b165a730faaddf66ec1170d3d",
+          "embedded_bytes_equal": true
+        },
+        {
+          "module": "dual-adapter-acpx",
+          "sha256": "c0768670c26ca8c0fc5678c221cee48a23a11ed6d869b1f5a42467cfed6febf7",
+          "embedded_bytes_equal": true
+        },
+        {
+          "module": "dual-adapter-git",
+          "sha256": "ed559cfe7ce64fd0441f6b02691e824f7154dc7b52602744f9cda2c0d67de5e8",
+          "embedded_bytes_equal": true
+        }
+      ],
+      "own_class_resource_files": 46,
+      "own_class_resource_bytes_equal": true,
+      "own_files": [
+        {
+          "path": "BOOT-INF/classes/static/index.html",
+          "sha256": "207fdfa830639409a9d4c0102abbd33d9e0db00cf8b3e1f56669087f879df36d"
+        },
+        {
+          "path": "BOOT-INF/classes/static/console.js",
+          "sha256": "8a086c6936fd61deea34bd2c1f997f01b04026aa9d3b77c1b00b192f61ed9b98"
+        },
+        {
+          "path": "BOOT-INF/classes/static/native-permissions.js",
+          "sha256": "dbb098b2c002fe8e38f08bf0f40669fa2d13a04fb2cc31bec966577edf346508"
+        },
+        {
+          "path": "BOOT-INF/classes/static/console.html",
+          "sha256": "0bb49bd548857dd0fff3298e7892010d9da240e3a17784b4a788f4770c775637"
+        },
+        {
+          "path": "BOOT-INF/classes/static/console.css",
+          "sha256": "2278eadd2ab55e4ad57f0dc2646441d2b244794eb0a46eda8260faed593be6a5"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController$NetworkApprovalRequest.class",
+          "sha256": "9a16cfca68f0de97452ddd17cd71ed068404fc0c0f67cbf28c6e87b324364360"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkspaceBrowseController.class",
+          "sha256": "5121214afc5ffc55be24fa3a0db8e2092c8d6224cbab6b9f99884c8ff759fb57"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamQueryService$2.class",
+          "sha256": "2bb57a24cf8d88338cc3efa2f18fdb043d33c0068e37fba69bbb3b1168cbdb21"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamQueryService$SnapshotQuery.class",
+          "sha256": "41434604827f2538743cee6c17add45e0a86dbe2cdbadd84587c1dab899c3da7"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamStreamService.class",
+          "sha256": "6a839641d82a2ce0b14332ef8cdf142ff210bcd2e48143acbdb87b83112f8925"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController.class",
+          "sha256": "9a2524958cb1b16094b325d01a7e11568fb2fc0ca511d8e3b4e7fc4408330f84"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController$NativePermissionDecision.class",
+          "sha256": "6f3bcf89a6c2acacdfa9fc5ea840ffce1ff431fbe07ff69b57b934275ac6e240"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController$RecoveryCloseRequest.class",
+          "sha256": "e2ae5e872387b3c12efe156fb3ce1e8660a8538f4cd35bd6009cb227b1079da3"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkspaceRegistryService.class",
+          "sha256": "818e600ee49f8acef3c665d07ac08183ddf80229f28b091b23d2c92f715af8d8"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkflowResumer.class",
+          "sha256": "b3e69f63330d6e30d9146c7314a23dc7dedbcb608b8bb534d2c22589704e0757"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController$DeliveryFinalizeRequest.class",
+          "sha256": "89b11511325666423d5438ad18efdd46f0f6a35cdb5412129af65958cfbfe98f"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController$PublicWebSearchApprovalRequest.class",
+          "sha256": "b303736b9339579229e1c61839d546fe0dc7896c47805dfe7022b46a566694c4"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/ServerWorkflowRuntimeFactory.class",
+          "sha256": "78508b6bb93b96adb4df872b40861eb9cc8ce3e3a9a2e8484920ea4b7fe86ec5"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamQueryService$WorkstreamQueryException.class",
+          "sha256": "9214a7b965cf25afc5700c61ac8a4f1e045c01f19dc1960cede3e699fbec9bf1"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamQueryService$1.class",
+          "sha256": "a0579c3681502050bc55d3a74f354066085a3fb16582a11badb4b7603da9bb8d"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/BackgroundSchedulerService.class",
+          "sha256": "8ddebacbfaa9baff476facfe1ad0b7ea7b376c9715e9755ee7c37c73ef387107"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/SchedulerService.class",
+          "sha256": "9bd3afab8b6ecd2b4f413e92910f47ddae321055122e35c665e75d39b46f64b2"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/NotificationService.class",
+          "sha256": "018f2c9232c56bf2ee4459ad8e780cd6c7ba3dff4cabaf4bad7ea8d2fea27fce"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/SchedulerService$1.class",
+          "sha256": "daa6509776db42574dccd6d90dfd5f58f2455834cebcac52dc776606d704b77d"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/DeliveryViewService.class",
+          "sha256": "6235c0ca96808cf477b1002e5d09cd0ac5c79b031ed517b21a4e5c96ccb06869"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController$ReviewReviseRequest.class",
+          "sha256": "dcb1ab410c38e5408da775550699fbdbab6f1dd4aa202e28d90a200b96f0d70d"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/SchedulerWorkstreamResult.class",
+          "sha256": "85df68150d293e098b9c5be5b9030862475c0f76805866b40b2592a281e11d37"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController$RecoveryStaleRequest.class",
+          "sha256": "0fed22e97bdaa478d340aeb58db227d47f262e22a2603fdda567a3763993e311"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/SchedulerPolicy.class",
+          "sha256": "119345960b8b443253258d4aa209fa4e36944d5149a5dfa634f061e89cf2a000"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController$RetryRequest.class",
+          "sha256": "494b51e256835cb589df9cc14a2bb6a749c927a8cf7870b8e83f64e9ec5dc4c7"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamActionService.class",
+          "sha256": "30071313c5fd6213d7a58eeef4c8e25db6122cff180016f7a1fb6585de012867"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/DualServerApplication.class",
+          "sha256": "1cdad2f3b1d282e63ccb87f67ffb59676b726d4b24713762ba4e24db822b94e8"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController$ReviewApproveRequest.class",
+          "sha256": "11b3fa13ecf12ce571196a6123b54e79b311ff0a0ae27a9b79c2a827692404fc"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController$ReviewCompleteRequest.class",
+          "sha256": "07a7ed6ed35b49741ca97df9412f4affe3b792738a7c98ed849082292c388def"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/ServerLedgerFactory.class",
+          "sha256": "c7624d3b6a3f8f671dca4a823e087a9cbefd66985ad808495b0c90301ab8d18a"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/SchedulerApiController.class",
+          "sha256": "6d3f2d2232bf84eb3505242f93e3f9711e9e64875a1e48bc60ad059a220547c6"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/SchedulerDecision.class",
+          "sha256": "a37d2b6c3d80b7aae613b87efd27b61244c69ae3399c0d992e710c4137c157c8"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamQueryService.class",
+          "sha256": "f69cd839b1a2e789698d6fdfd81f1dd5c8dc67b691f27c32026763ad689294ff"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/SchedulerDecision$Action.class",
+          "sha256": "5e66bc8ed688130b4c3489bd3b77ad6147d8b9f2da7a9b31b4ce1704563ddf99"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/SchedulerTickResult.class",
+          "sha256": "4efafe25df9cdc1856091328a63591dc856c639d54de76a08490c486e30d1589"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkspaceRegistryController.class",
+          "sha256": "6e4d4a4d1e8adffb9038af0c61f2242e26c4c70696186cfed96f4a730e2de347"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkstreamApiController$NativePermissionCancel.class",
+          "sha256": "2e3944cfdaa98cb96e414c622874ca986fdef6e84fd572d091cd75626e1b0758"
+        },
+        {
+          "path": "BOOT-INF/classes/dev/dual/server/WorkspaceRegistryController$RegisterWorkspaceRequest.class",
+          "sha256": "28f8fd29ab1886531d4278c4159aa091d861405190d6d9ecd11b09834a3b08ad"
+        },
+        {
+          "path": "BOOT-INF/classes/static/mgt/index.html",
+          "sha256": "8d69ca75b9d7dfd22cd9f99ce77f6f87ccabb965faad1b0a2e36eb1e0457bf92"
+        },
+        {
+          "path": "BOOT-INF/classes/static/mgt/styles.css",
+          "sha256": "1627e9690dc9f91dadd4948adf4ad39342f1a9487ae412f255737469f9f1d3b6"
+        },
+        {
+          "path": "BOOT-INF/classes/static/mgt/app.js",
+          "sha256": "8974568c8fbb76d1fb4c7f3becd6e0f3b3f03e0fb2058703d5f1f369883839a2"
+        }
+      ]
+    }
+  },
+  "module_resources": [
+    {
+      "module": "dual-adapter-acpx",
+      "path": "dev/dual/adapter/acpx/prompts/acceptance-codex-review.md",
+      "sha256": "52cbfb5725de17dc78473749bb014533243bb87b0ba8ea73fc5865c7fe17d59e",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "path": "dev/dual/adapter/acpx/prompts/design-claude.md",
+      "sha256": "3a10471458b9f5b0bbb224c8279e0fc4d89272784c982b519a9184ada99aa0ec",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "path": "dev/dual/adapter/acpx/prompts/design-codex-review.md",
+      "sha256": "373469b95e19d190312789ded882c8bf99f6dfa0b1d81151df5e357f68236007",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "path": "dev/dual/adapter/acpx/prompts/implement-claude-self-test.md",
+      "sha256": "54466e5d8d8a3a2119aaa7e7fc2c4cf8dc42e95c6bdc83f18086b7bb18357331",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "path": "dev/dual/adapter/acpx/prompts/implement-claude.md",
+      "sha256": "03d6be97b1d7aa94a210ec73b058f53e2770e71623f006c5de59caaa218f28e6",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "path": "dev/dual/adapter/acpx/prompts/intake-claude-brainstorm.md",
+      "sha256": "c26b10a8cb892bb98c1d89fa4c1973d34740f550c5d364effe63b28a70a41215",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "path": "dev/dual/adapter/acpx/prompts/intake-codex-product-review.md",
+      "sha256": "528dc1f4fad668a367979727b00e40d79a0509f1859d0abef68fa006b5209c9e",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "path": "dev/dual/adapter/acpx/prompts/plan-claude.md",
+      "sha256": "95b8714b94385f5871ff1b98f401ec528aba2004c187f5aba1db3924098f146b",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "path": "dev/dual/adapter/acpx/prompts/plan-codex-review.md",
+      "sha256": "b5f1bcb676e78bdd5a0df3a959eaea9d29d426524ed6109a1c21a41eb7817022",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "path": "dev/dual/adapter/acpx/prompts/stage-claude-handoff.md",
+      "sha256": "cb8916a9bb42f4f96a53e87beedabbe542ea2a024fbee84f6c272877ea1042b6",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "path": "dev/dual/adapter/acpx/templates/contract-review-principles.md",
+      "sha256": "ca273a6a8b8db90fd3714b13820dfd008ca3829b6f2e5f4c0d19152186085b70",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-runtime",
+      "path": "dev/dual/runtime/lifecycle/agent-lifecycle.contract.json",
+      "sha256": "38979a69837754cc97af6c83df2aae6a750902b704e8b730eea3fbf64d4ff79c",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-runtime",
+      "path": "dev/dual/runtime/lifecycle/agent-lifecycle.full.json",
+      "sha256": "4375c8074896871bb00970b0ba8946bb4344d098800dbe060038c112a6897c0e",
+      "jar_bytes_equal": true
+    },
+    {
+      "module": "dual-runtime",
+      "path": "dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json",
+      "sha256": "d9cdcf71b8974d1ed023150dc1c2146d79769d6ac6aea994b0305d2d6b895fa2",
+      "jar_bytes_equal": true
+    }
+  ],
+  "commands": [
+    {
+      "args": [
+        "--help"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c640026efb4cad87eb09d6429b340692f183a8751937eb719e3eff4168d91885",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifact": "cli-help.txt"
+    },
+    {
+      "args": [
+        "start",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout_sha256": "52e834f97dc4e4d4096a9679540c9dc2d86935bc47c8864ef5227b87d032753d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifact": "cli-start-help.txt"
+    },
+    {
+      "args": [
+        "review",
+        "record-readiness",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ca7eae1cb7b19c6e0e9782901561a43cde542be11b73f680453450943fb2b1b1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifact": "cli-record-readiness-help.txt"
+    },
+    {
+      "args": [
+        "workflow",
+        "validate",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b5058a0d70ff918e51c4ffff41080f624a16dc613517e3c39e4689728870556c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifact": "agent-lifecycle.contract-validate.txt"
+    },
+    {
+      "args": [
+        "workflow",
+        "validate",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e5a700f930d8ab7c9a20aaad7c123320e16da1df67427883b9cdc5c3aa317617",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifact": "agent-lifecycle.full-validate.txt"
+    },
+    {
+      "args": [
+        "workflow",
+        "validate",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "5d4807f9456a9b06ef066ca38d9020be735cb6a77135664680a4259a1d6225f6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "artifact": "agent-lifecycle.terminal-delivery-validate.txt"
+    }
+  ],
+  "client_or_provider_sessions": 0
+}

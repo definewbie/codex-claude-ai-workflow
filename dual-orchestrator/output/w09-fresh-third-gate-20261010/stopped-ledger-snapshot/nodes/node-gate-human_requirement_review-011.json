@@ -1,0 +1,40 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-gate-human_requirement_review-011",
+  "nodeDefinitionId" : "gate.human_requirement_review",
+  "kind" : "GATE",
+  "handlerType" : "human.review",
+  "status" : "COMPLETED",
+  "stageId" : "stage-gate",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "required" : true,
+    "source_node_instance_id" : "node-intake-decision-010",
+    "source_node_sha256" : "af5de26bf6c25a6e108b7b83f3757e6efb1c45b7be1a71307c378ad200952b89",
+    "purpose" : "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "decision_checks" : {
+      "schemaVersion" : 1,
+      "family" : "TaskContractProjectionVerifier",
+      "familyCoverage" : "NOT_INVOKED",
+      "gateNodeInstanceId" : "node-gate-human_requirement_review-011",
+      "sourceNodeInstanceId" : "node-intake-decision-010",
+      "subjectRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json" ],
+      "runtimeIdentitySha256" : "390b16750ef5a6f952e23849d88ee3cf51d2ca22cd3349778d566e46a5cc16f5",
+      "checks" : [ ]
+    },
+    "source_node_instance_id" : "node-intake-decision-010",
+    "requested_action" : "approve",
+    "note" : "用户在当前GOAL材料展示后明确批准目标、验收和排除范围；不批准精确实施范围或最终交付。",
+    "human_action" : "approved"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "",
+  "startedAt" : null,
+  "finishedAt" : "2026-10-10T14:12:15.360749Z"
+}

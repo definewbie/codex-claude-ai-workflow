@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-plan-claude_plan-022",
+  "nodeDefinitionId": "plan.claude_plan",
+  "kind": "TASK",
+  "handlerType": "acpx.agent_run",
+  "status": "COMPLETED",
+  "stageId": "stage-plan",
+  "iterationId": "iter-003",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1793030916946/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.contract.json"
+  ],
+  "inputTransition": {
+    "required": true,
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_instance_id": "node-gate-human_plan_approval-021",
+    "source_node_sha256": "aa080be8392d4d915fa4861934a31d40a3f78c199168ef0067958e3d40273650",
+    "transition_type": "loop",
+    "loop_reason": "Human resolution requires a fresh author and independent review",
+    "condition": "unconditional"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1793048679201/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.contract.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.plan.json"
+  ],
+  "result": {
+    "adapter_signals": [],
+    "agent": "claude",
+    "agent_execution_artifact_contract_results": [
+      {
+        "contractType": "plan_result",
+        "errorCode": "",
+        "errorMessage": "",
+        "path": "",
+        "present": true,
+        "required": true,
+        "valid": true
+      }
+    ],
+    "agent_execution_outcome": {
+      "nodeMaySucceed": true,
+      "operatorMessage": "The agent produced valid result and artifact evidence.",
+      "primaryReason": "completed",
+      "recoveryCategory": "NONE",
+      "retryPolicy": "NONE",
+      "secondarySignals": [],
+      "status": "SUCCESS"
+    },
+    "agent_execution_result_contract": {
+      "decision": "READY_FOR_PLAN_REVIEW",
+      "present": true,
+      "summary": "",
+      "valid": true,
+      "validationError": ""
+    },
+    "contract_sidecar_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.contract.json",
+    "contract_sidecar_sha256": "556c113cdb4bf9b4d70aa7c43fdc45972e69b3625f3fbb605f1afb9398a57af9",
+    "decision": "READY_FOR_PLAN_REVIEW",
+    "exit_code": 0,
+    "output_complete": true,
+    "permission_assessments": [],
+    "plan_artifact_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.plan.json",
+    "process_usability": "EXITED_ZERO",
+    "repository_fact_binding_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1793048679201/binding.json",
+    "repository_fact_binding_sha256": "aaaff980c9e0262da812c71899861f1c9841774f420cbff027ec0788dcd9cd5d",
+    "run_id": "run-1793048679201",
+    "run_metadata": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/run.json",
+    "session": "claude-main-ws-20261026T142203Z-7SNA-run-1793048679201",
+    "summary": "按人工门三项返修要求完成验证绑定重接线：AC-1..AC-5 逐项全量绑定、精确消费 operator 就绪声明的 ref/SHA 与 method/executor/evidence_kind/detail_owner、移除统一 actual_exit 硬性要求，六文件实施范围与全部 GOAL 验收保持不变。",
+    "transcript_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.transcript.log",
+    "completion_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/nxe-1793048679156-e40e509c-completion.json",
+    "completion_sha256": "fa4ef3bf9042b253e0082bf77039b9d22d2fe7f8da976bb8f65f034637b0a309"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1793048679156-e40e509c",
+  "startedAt": "2026-10-26T21:04:39.166446Z",
+  "finishedAt": "2026-10-26T21:08:58.071359Z"
+}

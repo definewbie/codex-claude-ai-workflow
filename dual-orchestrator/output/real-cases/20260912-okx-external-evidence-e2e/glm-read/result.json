@@ -1,0 +1,79 @@
+{
+  "startedAt" : 1789168573.539384000,
+  "finishedAt" : 1789168586.801744000,
+  "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--ttl", "1800", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "--claude-execution-policy-ref", ".agent/workstreams/probe/runs/run-9b0fbf73-044a-4114-a68c-213a3f49f6d5/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "db2b61dd2971f30243823a0da9be31f1061774fcfaa347584b18dce85266e53d", "claude", "-s", "read-probe-9b0fbf73-044a-4114-a68c-213a3f49f6d5", "-f", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/real-cases/20260912-okx-external-evidence-e2e/glm-read/prompt.md" ],
+  "executionTimeline" : [ {
+    "kind" : "PROCESS_STARTED",
+    "source" : "adapter",
+    "sequence" : 0,
+    "observedAt" : 1789168573.542363000,
+    "elapsedMs" : 2,
+    "details" : {
+      "pid" : 9555
+    }
+  }, {
+    "kind" : "PROCESS_WAIT_STARTED",
+    "source" : "adapter",
+    "sequence" : 0,
+    "observedAt" : 1789168573.542408000,
+    "elapsedMs" : 0,
+    "details" : {
+      "pid" : 9555
+    }
+  }, {
+    "kind" : "PROMPT_ACCEPTED",
+    "source" : "acpx_stream",
+    "sequence" : 11,
+    "observedAt" : 1789168577.582526000,
+    "elapsedMs" : 4040,
+    "details" : {
+      "lifecycleSequence" : 11
+    }
+  }, {
+    "kind" : "PROMPT_COMPLETED",
+    "source" : "acpx_stream",
+    "sequence" : 88,
+    "observedAt" : 1789168586.801283000,
+    "elapsedMs" : 13258,
+    "details" : {
+      "lifecycleSequence" : 88
+    }
+  }, {
+    "kind" : "PROCESS_WAIT_COMPLETED",
+    "source" : "adapter",
+    "sequence" : 90,
+    "observedAt" : 1789168586.801325000,
+    "elapsedMs" : 13258,
+    "details" : {
+      "waitMode" : "process_exit",
+      "exitCode" : 0
+    }
+  }, {
+    "kind" : "PROCESS_EXITED",
+    "source" : "adapter",
+    "sequence" : 5,
+    "observedAt" : 1789168586.801740000,
+    "elapsedMs" : 13262,
+    "details" : {
+      "exitCode" : 0
+    }
+  } ],
+  "usage" : null,
+  "promptCompletion" : {
+    "requestId" : "3",
+    "stopReason" : "end_turn",
+    "finalAssistantMessage" : "{\"nonce\":\"fff30871-b275-492f-9013-04ef73dec9cd\"}"
+  },
+  "processResult" : {
+    "command" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx --ttl 1800 --approve-reads --non-interactive-permissions fail --permission-policy {\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"} --allowed-tools Read,Grep,Glob --claude-execution-policy-ref .agent/workstreams/probe/runs/run-9b0fbf73-044a-4114-a68c-213a3f49f6d5/execution-authority/claude-execution-policy.json --claude-execution-policy-sha256 db2b61dd2971f30243823a0da9be31f1061774fcfaa347584b18dce85266e53d claude -s read-probe-9b0fbf73-044a-4114-a68c-213a3f49f6d5 -f /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/real-cases/20260912-okx-external-evidence-e2e/glm-read/prompt.md",
+    "pid" : 9555,
+    "exitCode" : 0,
+    "usability" : "EXITED_ZERO",
+    "durationMs" : 13262,
+    "stdoutPath" : "stream.jsonl",
+    "stderrPath" : "stderr.log",
+    "interrupted" : false,
+    "timedOut" : false
+  },
+  "adapterSignals" : [ ]
+}

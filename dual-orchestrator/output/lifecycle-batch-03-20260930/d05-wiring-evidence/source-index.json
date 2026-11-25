@@ -1,0 +1,93 @@
+{
+  "kind": "STATIC_SOURCE_AUDIT_NOT_RUNTIME_PROOF",
+  "sources": [
+    {
+      "path": "dual-core/src/main/java/dev/dual/core/contract/TaskContract.java",
+      "sha256": "fac3c3b6f14fbbbe70edf43bfe218e728c2eb7fb0185e8da0adbe6847b0a2de0"
+    },
+    {
+      "path": "dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java",
+      "sha256": "72d8ef674c7729cf451a33bd332de9d77d5984dd2d6f6a4998f38481e1d53ce7"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java",
+      "sha256": "885f9dfbd65b2793a66023f094d2bc5bf433e057d42e7318f1e0aa03e9b64567"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java",
+      "sha256": "7014f85a4ee7c2240ce1c68d8425e4129fd413cec3f5184d44fb0d18a915a0a0"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/PlanScopeValidator.java",
+      "sha256": "1a1c8d03bc297cf39cfaa819beb0a2660aa7509c2451ff2c1950064f45842a78"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunGovernanceContext.java",
+      "sha256": "ab944281a2fb261716d2df9569bdeac2c33653aa7ce5ddc59924b2235e5238c9"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "sha256": "6442114b49b0b4a7edae7f1535f8d43b2c372d5695ca7b865a8fa16853c82ee8"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "sha256": "212a243c97ed31ffdb3a543a08177bf64a8ca934b4f0fdbcbfb2d044c35171f4"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollectionSource.java",
+      "sha256": "a6e7a47da104451c03b146a06c801beb97e28b508cd3a0d2906a82afab1d6d3b"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/ReviewCommand.java",
+      "sha256": "29f8a91fcf90d6856b30adabdb46353a8dccd504cf9190306f5a7c8b85a1d73d"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/ReviewRequestActionCommand.java",
+      "sha256": "5732e1ea0ed907b7dcc22e74b6b4d1a12a5238f7e18e7f21c18c3513a03947fd"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/ReviewSubmitEvidenceCommand.java",
+      "sha256": "54aadd364545de87e96c38cea9bd3191c06a0269f3d8ad5841830055c926e188"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/DoctorCommand.java",
+      "sha256": "4cfe329e1534632a0a7a7e956c20a3c32431140532faaa6f46b61fcbf3290f6b"
+    },
+    {
+      "path": "dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java",
+      "sha256": "818a7ebcb4d689babbe30718e958c5c59402d9879c60adcabd5497cc2d84a596"
+    },
+    {
+      "path": "dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "sha256": "a7554fee6dd0824732f22ae5669a5bdcaa9e68cba455b68defb6d518b266fc2e"
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "sha256": "952752796874d0838a80e625c0728cf3937d94b3bd2129d4b329a4efbfa13fb7"
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+      "sha256": "3d347ccd351b53f015324321b6e526e7135e86a6b2895e1cc1f91b1e992bd6f1"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentRunMetadataWriter.java",
+      "sha256": "7eb8a3379f1d0cf1a8ca7f78b816c1d0737b8b91fbec524b316203dcd2b62063"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxToolUsage.java",
+      "sha256": "4b8a635a8eeba120f08d02ebda2692f838aff671c401244eb258fac50db9c601"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxTranscriptToolUsageReader.java",
+      "sha256": "1b32c44d13b090d14b84a9f8a76ab4314b7b0bead1d6eb8f3352874e00b0e805"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamEvidence.java",
+      "sha256": "5d64e5f674f27c6978e11b64066e2108e2d9a59474f86d63b0f87641876f5365"
+    },
+    {
+      "path": "dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json",
+      "sha256": "869b95defbacc23ac10201ec1a1abb0b2eec1d9ba6043b7f36bf0a2376610585"
+    }
+  ]
+}

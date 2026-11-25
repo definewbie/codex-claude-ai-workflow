@@ -56,6 +56,24 @@ public final class AgentExecutionOutcomeResolver {
                     "The agent process was interrupted before a trustworthy completion boundary."
             );
         }
+        if (process.usability() == ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT
+                || process.usability() == ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL) {
+            var status = signals.isEmpty()
+                    ? AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE
+                    : AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE;
+            var category = signals.isEmpty()
+                    ? RecoveryCategory.OUTPUT_INCOMPLETE
+                    : RecoveryCategory.RECOVERABLE_ADAPTER_FAILURE;
+            return new AgentExecutionOutcome(
+                    status,
+                    "process_output_incomplete",
+                    signals,
+                    false,
+                    AgentExecutionRetryPolicy.MANUAL_ONLY,
+                    category,
+                    "The agent process ended before the process boundary was trustworthy."
+            );
+        }
         if (!evidence.agentResultContract().present() || !evidence.agentResultContract().valid()) {
             return new AgentExecutionOutcome(
                     AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE,
@@ -81,26 +99,8 @@ public final class AgentExecutionOutcomeResolver {
                     "The agent result was valid, but one or more required artifact projections failed validation."
             );
         }
-        if (process.usability() == ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT
-                || process.usability() == ProcessUsability.KILLED_AFTER_RECOVERABLE_SIGNAL) {
-            var status = signals.isEmpty()
-                    ? AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE
-                    : AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE;
-            var category = signals.isEmpty()
-                    ? RecoveryCategory.OUTPUT_INCOMPLETE
-                    : RecoveryCategory.RECOVERABLE_ADAPTER_FAILURE;
-            return new AgentExecutionOutcome(
-                    status,
-                    "process_output_incomplete",
-                    signals,
-                    false,
-                    AgentExecutionRetryPolicy.MANUAL_ONLY,
-                    category,
-                    "The agent process ended before the process boundary was trustworthy."
-            );
-        }
         if (process.usability() == ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
-                || hasRecoverableWarning(signals)) {
+                || hasRecoverableWarning(signals) || signals.stream().anyMatch(signal -> isContainedPermissionDenial(signal, evidence))) {
             return new AgentExecutionOutcome(
                     AgentExecutionOutcomeStatus.SUCCESS_WITH_WARNINGS,
                     "completed_with_adapter_or_process_warnings",
@@ -133,7 +133,9 @@ public final class AgentExecutionOutcomeResolver {
         if (signal.type() != AdapterSignalType.PERMISSION_BLOCKED) {
             return false;
         }
-        return evidence.processResult().usability() == ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
+        return (evidence.processResult().usability() == ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT
+                || evidence.processResult().usability() == ProcessUsability.EXITED_ZERO)
+                && evidence.permissionAssessments().stream().filter(a -> a.proves(signal)).count() == 1
                 && evidence.agentResultContract().present()
                 && evidence.agentResultContract().valid()
                 && evidence.artifactContracts().stream().allMatch(ArtifactContractResult::satisfied);

@@ -1,0 +1,24 @@
+{
+  "checks": [
+    {
+      "mode": "prompt",
+      "baseline_exit": 0
+    },
+    {
+      "mode": "suffix",
+      "baseline_exit": 0
+    },
+    {
+      "mode": "prompt",
+      "mutant_exit": 1,
+      "expected_failure": true
+    },
+    {
+      "mode": "suffix",
+      "mutant_exit": 1,
+      "expected_failure": true
+    }
+  ],
+  "separate_from_reactor_count": true,
+  "workspace_production_never_mutated": true
+}

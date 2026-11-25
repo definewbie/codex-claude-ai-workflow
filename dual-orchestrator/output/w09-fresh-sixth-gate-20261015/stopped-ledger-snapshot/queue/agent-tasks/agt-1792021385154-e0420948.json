@@ -1,0 +1,41 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1792021385154-e0420948",
+  "workflowExecutionId" : "wfe-1792021385081-b12c1c2a",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-006",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "nodeKind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "FAILED",
+  "agent" : "claude",
+  "session" : "claude-main",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "acpx.agent_run",
+    "agent" : "claude",
+    "session" : "claude-main",
+    "prompt_template" : "intake-claude-brainstorm",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "agent" : "claude",
+      "session" : "claude-main",
+      "permission_profile" : "contract_discovery",
+      "prompt_template" : "intake-claude-brainstorm",
+      "expected_artifact" : "task_contract_proposal",
+      "artifact_compiler" : "task_contract_proposal_compiler",
+      "allowed_stage_outcomes" : [ "READY", "BLOCKED" ]
+    },
+    "outcome" : "agent_result_missing_or_invalid",
+    "node_status" : "FAILED",
+    "output_ref_count" : 6
+  },
+  "nodeExecutionId" : "nxe-1792021385159-7429471f",
+  "errorMessage" : "The final ACP assistant message did not contain a valid AgentResultEnvelope.",
+  "createdAt" : "2026-10-14T23:43:05.154676Z",
+  "claimedAt" : "2026-10-14T23:43:05.169496Z",
+  "completedAt" : "2026-10-14T23:45:06.474275Z"
+}

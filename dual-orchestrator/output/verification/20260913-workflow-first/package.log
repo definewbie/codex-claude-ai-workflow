@@ -1,0 +1,99 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+Default workflow written.
+Path: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-3685295155003016515/workflow.json
+Workflow: agent-lifecycle-full@10
+Nodes: 34
+Edges: 60
+Active node marked ready for retry
+Workstream: ws-cli-retry-diagnostic
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-16798301116975169389 ws-cli-retry-diagnostic
+Calibration candidate decided
+Workstream: ws-cal
+Candidate: candidate-3
+Status: ACCEPTED
+Path: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-15774508835051886084/.agent/workstreams/ws-cal/calibration/candidates/candidate-3.json
+Delivery: FAILED
+Reason: final acceptance occurrence is missing
+{
+  "grant" : {
+    "schemaVersion" : 1,
+    "workstreamId" : "ws-cli-network",
+    "sourceNodeInstanceId" : "node-verify-tests-001",
+    "targetNodeDefinitionId" : "verify.tests",
+    "definitionSha256" : "5c30887d93d01f6c7f0ae8e8ece3c7e053b73d20a939be847303381a1aff1680",
+    "domains" : [ "api.example.org", "packages.example.org" ],
+    "note" : "approved tests",
+    "approvedAt" : "2026-09-13T15:53:00.871634Z",
+    "state" : "PENDING",
+    "claimedNodeInstanceId" : "",
+    "claimedRunId" : ""
+  },
+  "targets" : [ "verify.tests" ],
+  "grantRef" : ".agent/workstreams/ws-cli-network/execution-authority/network-grants/grant-348b4177-8849-418b-9e3c-b229ae92df90.json",
+  "scope" : "one_execution",
+  "canApprove" : false,
+  "canCancel" : true
+}
+{
+  "grant" : {
+    "schemaVersion" : 1,
+    "workstreamId" : "ws-cli-network",
+    "sourceNodeInstanceId" : "node-verify-tests-001",
+    "targetNodeDefinitionId" : "verify.tests",
+    "definitionSha256" : "5c30887d93d01f6c7f0ae8e8ece3c7e053b73d20a939be847303381a1aff1680",
+    "domains" : [ "api.example.org", "packages.example.org" ],
+    "note" : "approved tests",
+    "approvedAt" : "2026-09-13T15:53:00.871634Z",
+    "state" : "CANCELLED",
+    "claimedNodeInstanceId" : "",
+    "claimedRunId" : ""
+  },
+  "targets" : [ "verify.tests" ],
+  "grantRef" : ".agent/workstreams/ws-cli-network/execution-authority/network-grants/grant-348b4177-8849-418b-9e3c-b229ae92df90.json",
+  "scope" : "one_execution",
+  "canApprove" : true,
+  "canCancel" : false
+}
+Human gate decided
+Workstream: ws-review-decide-approve
+Action: approve
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-6946643476416004290 ws-review-decide-approve
+Human gate decided
+Workstream: ws-review-decide
+Action: reject
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-14331836836870178754 ws-review-decide
+Human gate approved
+Workstream: ws-review-approve-terminal
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-11186629150720773728 ws-review-approve-terminal
+Action need recorded. Gate remains waiting; no execution was authorized.
+Action need recorded. Gate remains waiting; no execution was authorized.
+Stale running node moved to recovery
+Workstream: ws-stale-command
+Next: dualctl retry --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-7637257634838607606 ws-stale-command
+reap ws=ws-done status=COMPLETED distinct=0 closed=0 failed=0
+skip ws=ws-running status=RUNNING (not terminal)
+reaped=1 skipped=1 statusFailed=0 closeFailed=0
+reap ws=ws-close-failed status=WAITING_FOR_RECOVERY explicit=true distinct=1 closed=0 failed=1
+No workstreams found at /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-3463888605859954789/.agent/workstreams
+reap ws=ws-recoverable status=WAITING_FOR_RECOVERY explicit=true distinct=1 closed=1 failed=0
+skip ws=ws-running-selected status=RUNNING (not stopped or recoverable)
+Workstream ledger not found: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-13284487211707445025/.agent/workstreams/ws-missing/workflow/current.json
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.4)
+
+2026-09-13T23:53:02.418+08:00  INFO 72688 --- [           main] o.a.maven.surefire.booter.ForkedBooter   : Starting ForkedBooter v3.5.2 using Java 25.0.3 with PID 72688 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server)
+2026-09-13T23:53:02.419+08:00  INFO 72688 --- [           main] o.a.maven.surefire.booter.ForkedBooter   : No active profile set, falling back to 1 default profile: "default"
+2026-09-13T23:53:02.700+08:00  INFO 72688 --- [           main] o.a.maven.surefire.booter.ForkedBooter   : Started ForkedBooter in 0.393 seconds (process running for 0.641)

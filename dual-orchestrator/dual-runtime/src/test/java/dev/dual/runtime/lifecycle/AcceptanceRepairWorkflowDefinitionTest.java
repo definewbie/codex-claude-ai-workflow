@@ -24,6 +24,14 @@ class AcceptanceRepairWorkflowDefinitionTest {
         for (var variant : RESOURCES) {
             var definition = loadResource(root, variant);
             assertEquals(3, definition.node("acceptance.classify_failure").config().get("max_revisions"));
+            for (var prerequisite : List.of("REJECT_TOOL_LIMITATION", "REJECT_CONTEXT_INSUFFICIENT")) {
+                var routes = definition.edgesFrom("acceptance.classify_failure").stream()
+                        .filter(edge -> prerequisite.equals(edge.on())).toList();
+                assertEquals(1, routes.size());
+                assertEquals("gate.human_implementation_repair", routes.getFirst().to());
+                assertEquals("normal", routes.getFirst().metadata().transitionType(),
+                        "missing prerequisites cannot start an automatic product revision");
+            }
             var scope = definition.edgesFrom("gate.human_implementation_repair").stream()
                     .filter(edge -> edge.on().equals("request_scope_revision")).toList();
             assertEquals(1, scope.size());
@@ -42,8 +50,7 @@ class AcceptanceRepairWorkflowDefinitionTest {
                     definition.edgesFrom("context.intake_claude_brainstorm").getFirst().to());
             assertEquals("task_contract_proposal",
                     definition.node("intake.claude_brainstorm").config().get("expected_artifact"));
-            assertFalse(Boolean.TRUE.equals(definition.node("context.intake_claude_brainstorm")
-                    .config().get("requires_approved_task_contract")));
+            assertFalse(definition.node("context.intake_claude_brainstorm").config().containsKey("required_contract_phase"));
         }
     }
 
@@ -72,7 +79,7 @@ class AcceptanceRepairWorkflowDefinitionTest {
                 json -> repair(json).put("from", "acceptance.decision"),
                 json -> node(json, "acceptance.classify_failure").put("handlerType", "noop.task"),
                 json -> node(json, "acceptance.classify_failure").put("kind", "DECISION"),
-                json -> config(json, "acceptance.classify_failure").put("requires_approved_task_contract", false),
+                json -> config(json, "acceptance.classify_failure").put("required_contract_phase", "GOAL"),
                 json -> repair(json).put("to", "contract.compile"),
                 json -> repair(json).put("to", "intake.claude_brainstorm"),
                 json -> repair(json).put("to", "context.intake_codex_product_review"),

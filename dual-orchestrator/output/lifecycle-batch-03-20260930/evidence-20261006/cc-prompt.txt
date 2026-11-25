@@ -1,0 +1,7 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 B03 本轮 D05 证据接线做只读独立评审，遵守 AGENTS.md。
+
+入口：output/lifecycle-batch-03-20260930/evidence-20261006/checkpoint.md；同目录有转换表、相对本轮 dirty 基线的增量、测试与源码身份。用户已批准“退出码按验收项要求，明确要求时仍必须取得”。
+
+请自行重建批准要求→实际观察→自测→独立验收→发布/恢复→报告与交付消费链，检查合法续作、拒绝、写入失败和兄弟入口。重点判断程序观察、模型断言、人工声明是否混用，以及测试是否真的证明所声明的能力。按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给分级发现、证据和未核验范围。
+
+本轮不是 B03 整批收口。核对未竟项是否如实、是否遗漏，不预设 PASS。不要修改文件、启动额外 agent 或运行 Claude/Codex/acpx/provider；不扩大为沙箱或通用验证平台评审。

@@ -1,0 +1,32 @@
+{
+  "exit": 1,
+  "scope": "Two added full-render/context assertions against unchanged production",
+  "suites": [
+    {
+      "{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation": "https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd",
+      "version": "3.0.2",
+      "name": "dev.dual.runtime.handler.AgentResultPromptContractTest",
+      "time": "0.014",
+      "tests": "1",
+      "errors": "0",
+      "skipped": "0",
+      "failures": "1",
+      "failed_cases": [
+        "planPromptSeparatesRegisteredMethodFromCriterionDetails"
+      ]
+    },
+    {
+      "{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation": "https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd",
+      "version": "3.0.2",
+      "name": "dev.dual.runtime.handler.VerificationReadinessTest",
+      "time": "0.393",
+      "tests": "1",
+      "errors": "0",
+      "skipped": "0",
+      "failures": "1",
+      "failed_cases": [
+        "readinessContextSeparatesFixedMethodFromDetailsWithoutInventingReadiness"
+      ]
+    }
+  ]
+}

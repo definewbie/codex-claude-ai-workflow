@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "command": "offline Maven selected DeliveryViewServiceTest, dependencies compiled",
+  "counts": {
+    "tests": 6,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "whole_reactor": false,
+  "low": "B06 LOW-1 resident query lock ordering",
+  "native_provider_runs": 0
+}

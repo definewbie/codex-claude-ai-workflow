@@ -1,0 +1,58 @@
+详细设计候选（2026-09-28，D01–D10）· 设计层评审
+
+结论：PASS（1 项 WARN、3 项 LOW）。候选方案整体满足完整生命周期目标，职责无冲突、无平台性复杂度；本地恢复与外部未知结果的分离在 D06/D07/D09 三处机制上清晰成立。§13 未冻结项登记基本准确——唯一例外是 WARN-1：D03 自动推进路径的账本表示是未登记的关键设计决定，须补入冻结条件后才可关 D03。
+
+1. 事实核验（本轮新声明，不与前轮重复）
+
+┌────────────────────────────────────────────────────────────────────┬───────────────────────────────────────────────────────────────────────────┬──────┐
+│                                声明                                │                                   证据                                    │ 结果 │
+├────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────┼──────┤
+│ 三个 recovery 入口仅 (paths, note)                                 │ WorkflowFileLedger.java:434/453/462 —                                     │ ✓    │
+│                                                                    │ retryActiveNode/recoverStaleRunningNode/abortRecovery 签名属实            │      │
+├────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────┼──────┤
+│ AuthoredExecutionContext 有 Approval/approvedDesign/approvedPlan   │ :166 record Approval(Reference gate, String eventId, Candidate            │ ✓    │
+│                                                                    │ candidate)；:118-126 消费点                                               │      │
+├────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────┼──────┤
+│ qualification 专认 contract_review                                 │ TaskContractProjectionVerifier.java:54,285                                │ ✓    │
+├────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────┼──────┤
+│ 输出工件                                                           │ baseline.json 1318 文件；boundary-access-inventory 116 文件/565           │ ✓    │
+│                                                                    │ 行；source-index.json 齐全                                                │      │
+├────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────┼──────┤
+│ resolver 次序、node 先写、observe/review terminal、Claude          │ 前几轮已逐项对码证实                                                      │ ✓    │
+│ allow_write、DeliveryMergePlan 四态、holder 无互斥                 │                                                                           │      │
+└────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────────────────────────┴──────┘
+
+2. 三个重点问题
+
+分期批准是否兼顾严格授权与有界推进——成立。 授权侧三道人门保留且有增强：GOAL 批准（目标/验收/禁区）、contract_review 后移至复评后批精确范围+权限（“approve 才给精确写权限”）、最终候选批准；EXECUTION 资格永久排除 GOAL 冒充（§2.1）；“缺配置默认为已授权”被禁止。推进侧：design/plan READY 不再强制等待，且 §2.3 失效矩阵划清了“程序可续”（目标/范围/权限/必需验收四维核验通过）与“必须新批准”（任一超界）的界——这正是 R3 产品要求 1 的精确化。关键护栏在位：“不把 reviewer READY 记录为 human_action=approved”、“移门不删 reviewer”、AuthoredExecutionContext 区分 reviewed candidate 与 execution authorization。预算沿 definition max_revisions，不静默增加。
+
+本地恢复与外部未知是否分清——分清了，且三机制咬合。 D06 prepared manifest “只负责完成同一次提交”，恢复不重算路由、不再批准、不触碰 provider/Git；D07 的 dispatch intent 在触碰外部进程之前耐久落盘，intent 后无可信完成即进入不明窗口、禁止自动再调用，--prompt-retries 不得绕开；D09 的 apply_intent/observation 让 Git 窗口的“已知/不明”由事实派生而非 status 推测。反向也成立：“本地完成零新 provider”、“不能重新调用 provider 来补本地写”。两层身份（frozen composition / per-occurrence）与“合同修订是新 occurrence 不是 binary 变化”的区分与 R3 一致。
+
+§13 是否准确、有无关键问题后移——基本准确，一处遗漏（见 WARN-1）。 逐项检查十个“仍需完成”：除 D02 的 contained-permission 关联（有保守默认“缺证据不容纳”）外，均为枚举/盘点/可行性核验类工作，不是伪装的设计决定；D04 被诚实标为最硬阻塞并给出向用户提交选项的退出路径。WARN-1 是唯一未登记的设计级决定。
+
+3. 控制链与六维
+
+§11 十一行覆盖全部生命周期 transition（含 request_action、abort、scope revision 这些非主线兄弟路径），每行带完整写序与 retry/resume/replay 反例，本地多写点显式折叠进 §6 前缀、外部行为叠加 §7/§9——无统一模板跳过窗口。§12.1 六维表按不变量逐一规划且自标“待实现/待验证，非 PASS”；§12.2 反切片条款（“不能把以上各行切成独立完成”）与“四变体×inline/worker 为基本组合、kernel 另做对照、不堆笛卡尔积”与 R3 §5 一致。E02 在 D02 矩阵中被正面修复（“incomplete process…即使 envelope 完整、artifact 发布受阻也不改写”），并要求常驻回归含成功/警告对照——该方案取代未提交实现中 A06 的 EXECUTION_NOT_PUBLISHABLE 伪产物失败路径，与工作清单“A06 需调整”处置一致，无矛盾但实施批次须按此对账。
+
+4. 发现
+
+WARN-1 · D03 自动推进的正向账本表示未指定、未入 §13。 §2.2 只定义了否定面（READY 不等待、不伪造 approved）和消费面（EXECUTION compile 引用两个 reviewed candidate/ref/SHA），但没有指定：READY 路由上人工门节点是否实例化（从 LiteFlowPrototypeKernelTest.returnsHumanGateAsTransitionCandidateWithoutCreatingAGate 推断可能是“不创建 gate occurrence、仅 BLOCKED 才入人门”，但这是推断不是设计）；reviewed candidate 在何处耐久固化（review 节点 refs？）；D06 写集是否包含该固化写点；CLI/API/UI 如何区分“已自动推进（程序固化）”与“已获人工批准”的资格显示。这是“严格授权与有界推进”边界的核心表示，属设计决定而非实施细节。修正：在 D03 增加一段明确 READY 路径的节点/路由/事实表示，并加入 §13 D03 的冻结条件。
+
+LOW-1 · D02 contained-permission 关联是残留语义问题（有保守默认，已入 §13）——冻结前须给出“非必需”证据与 signal/义务的精确关联或明确不能容纳的范围。可留待 D02 冻结时解决。
+
+LOW-2 · §6.3 reader BUSY 的投影适配未列 sibling。 “锁不可得返回 BUSY”是正确性优先的合理选择，但 CLI/API/UI/report 对 BUSY 与“持久化未完成”的展示是 I1 投影对等义务的新增面，§12.2 第一族 sibling 仅列“CLI/API/UI/report”未点名 BUSY/pending 两态。修正：在 §12.1 I1 行的 Cannot-bypass/Proven 中补“BUSY 与 pending 态的两个具体 UI 实例对照”。
+
+LOW-3 · 复杂度检查通过但须守住两条线。 prepared mutation 与 D03 条款 id 迁移是两大重活；设计已拒绝更重方案（generation pointer、GoalContract、DSL）。风险在实施期 scope 膨胀：116 文件候选索引的诚实免责（“绝不等于需改 116 个文件”）应在批次对账时逐条落实为“改/不改+理由”。
+
+5. 可冻结与仍阻塞实施
+
+- 设计已定、待独立评审后可冻结：D01（字段/分类/配对语义）、D05（绑定 schema+四检查点+可信边界）、D06（协议与写序）、D07（两层身份+dispatch intent+裁定参数）、D08（互斥方案+临时约束）、D09（窗口表+target 锁）、D10（保守保留）、D02（矩阵，pending LOW-1）、D03（pending WARN-1 + JSON 样例与 consumer 迁移对照）。
+- 仍阻塞实施：§13 各行冻结条件未完成；D04 可行性（最硬阻塞，无法证明只读执行面时须交用户选项）；WARN-1；以及 R3 §7.1 的对账与独立评审触发条件。实施、提交、真实运行维持未授权。
+
+6. 尚未核验范围
+
+“transport 的 policy binding 仅适用 Claude”一项未直接对码（由 ClaudeExecutionPolicy 命名推定）；source-index.json 的读取范围内容未逐项复核；四变体“compile 在设计前”的完整顺序仅抽验 contract_review 认定；M6/worker 内部、small 变体逐门行为、boundary-access-inventory 的分类质量、D04 各 provider 实际隔离能力（本身即待证明项）、§11 各行写序与未来实现的一致性（尚无实现）。
+
+7. 结语
+
+这份详细设计把 R3 登记的十个缺口全部给出了带失败矩阵与反证义务的候选方案，且在最高风险处（D04）拒绝粉饰。所有抽样事实声明再次无一失真。WARN-1 修复并完成 §13 各行冻结条件后，D01/D02/D05–D10 可达 Implementation Ready；D03 随 WARN-1 与迁移对照关闭；D04 取决于可行性证明或用户取舍。按约定，本 PASS 不授权实施、提交或真实运行。

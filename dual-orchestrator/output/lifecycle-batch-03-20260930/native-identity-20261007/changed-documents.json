@@ -1,0 +1,12 @@
+[
+  {
+    "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "before_sha256": "41226b6c70e399067685e5f68ddde4481a6455b4751e6aeaba563b8d24100e1f",
+    "after_sha256": "df2564d0ffb5ebbd95c3cf13a1e7dae4a71489e325c3ecf5d038950682aff35a"
+  },
+  {
+    "path": "output/lifecycle-batch-03-20260930/progress-and-decision.md",
+    "before_sha256": "a0d7992d0d0f88c058c01791d81dd52504ab3b9279ebee2ba76ba35007655a20",
+    "after_sha256": "c846de683e1e92b630b3e90d7b9d9789763d5637318514872406a4ce6a456c0f"
+  }
+]

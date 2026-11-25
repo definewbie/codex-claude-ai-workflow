@@ -1,0 +1,21 @@
+{
+  "files": {
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java": "56a03d86225676adebd4c16d88be34231e55234cefe11398b7828bf2f1369f55",
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java": "3dfd8d2531fab9c496145d8818be233c23e4687c961b444600021cb9b2eae8cf",
+    "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java": "a1cf88cc028b29e1baeff576028100a0590079610d02e3a23ecc574adb266f65",
+    "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/SessionMetadataFixture.java": "4bb70939a0f942259d024513f7e0bf3a924e8b935881104065348c8b4d8935f8",
+    "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionTransportSequenceTest.java": "03c7f3c2b84f18f49e79d1fbc92d24fd2b38f77f27b424baf22f376cfef736eb",
+    "dual-ledger-file/src/main/java/dev/dual/ledger/file/FailureSummaryWriter.java": "a2d03952533d2bff4baabc2ae8b1e347afd6b80eb4103c95153adeac0638ddc0",
+    ".tools/acpx-e1/source/src/acp/client.ts": "3f4204143fd1de4d160d74f4b74a966ffa6e5a12b9b682bb5a594a9309c443b5",
+    ".tools/acpx-e1/source/src/acp/agent-session-id.ts": "718fd63fecf4cfed94f8e27df83e1f6ace1ec5893e1f60332b11696ad1e0b4d3",
+    ".tools/acpx-e1/source/src/types.ts": "3e7d49604a93b7615e42fe5afea3b6353362456bc2586b2e4896f943e31da2da",
+    ".tools/acpx-e1/source/src/runtime/public/contract.ts": "6cfe889b372e1477fc3ed033269d3743f79c283660656057069b1a1f1c4ad620"
+  },
+  "anchors": {
+    "required_optional_field": "AcpxSessionCompatibility.failure: acpxRecordId/acpSessionId/agentSessionId all required",
+    "producer": "SessionCreateResult.agentSessionId?:string; createSession extracts from optional _meta, separate result.sessionId retained",
+    "projection": "FailureSummaryWriter.render chooses acpx_failure.reason then result.reason, not unique typed executionOutcome.primaryReason",
+    "fixture_gap": "existing normal compatibility metadata always supplies agentSessionId; no legal missing-optional-field positive case observed"
+  },
+  "source_not_modified": true
+}

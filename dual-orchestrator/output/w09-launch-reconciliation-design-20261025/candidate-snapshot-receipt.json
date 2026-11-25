@@ -1,0 +1,9 @@
+{
+  "status": "UNAPPROVED_CANDIDATE_ONLY",
+  "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-launch-reconciliation-design-20261025/private-candidate/config.toml",
+  "sha256": "d6e48e362ced42a8a61e3615be4c9fefc6bc3979132fd33b735a6aa0eb9faab6",
+  "mode": "0600",
+  "directory_mode": "0700",
+  "old_snapshot_not_overwritten": true,
+  "program_byte_identity_reference": "../relay-readonly-study-20261025/installed-input-differences.json"
+}

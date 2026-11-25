@@ -61,13 +61,14 @@ dualctl --help
 
 ## 5-Minute Validation
 
-Run the controlled smoke first:
+Run the offline module regression first (the legacy controlled smoke is retired):
 
 ```bash
-./scripts/smoke-test.sh --case lifecycle --cleanup
+rtk proxy mvn -q clean test
 ```
 
-Then run the public real-case benchmark:
+Real-case runs require a separately approved Verification Gate. The following
+command is not current authorization to run the public benchmark:
 
 ```bash
 ./scripts/run-public-benchmark.sh
@@ -222,8 +223,11 @@ To plan local worktree cleanup without deleting anything:
 
 ## Current Limits
 
-- The P0 main lifecycle is closed as `Done with known limits`; see
-  [P0 Closure Report](docs/testing/p0-closure-report.md).
+- The historical 2026-06-19 MVP conclusion was `Done with known limits`; see
+  [P0 Closure Report](docs/testing/p0-closure-report.md). Current lifecycle
+  convergence remains B03 `IN_PROGRESS`, with real runs `NO-GO`; use the
+  [main worklist](docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md).
+  Historical smoke results are not current admission evidence.
 - The project is pre-1.0; workflow schemas and prompts will continue to evolve.
 - Real runs depend on local `acpx`, Claude, Codex availability, and quota.
 - Public benchmark runs consume real Agent quota.

@@ -1,0 +1,31 @@
+Table 1-1. Comparison of static LLMs and agentic systems
+
+ Static LLM (traditional
+ use)                    Agentic system
+
+ Single-pass token generator    Iterative reasoning–action–feedback
+                             system
+
+ Confined to training data     Can retrieve, verify, and update
+                           knowledge
+
+ No memory, stateless           Stateful with short- and long-term
+                        memory
+
+ Linear prompt–response        Iterative and adaptive workflow
+
+ No tool use                 Tool-augmented (retrieval, code, APIs)
+
+ Fixed interpretation of       Can refine or reinterpret goals
+ prompt                      dynamically
+
+ No external validation         Actively checks, corrects, and improves
+                               output
+
+
+Figure 1-4 illustrates how modules turn a static LLM into a dynamic agent.
+The user request enters the core, planning and memory shape its reasoning,
+and tools enable concrete action. The cycle of reasoning, acting, and
+adapting emerges from the coordination of these elements. Concrete
+memory architectures, storage choices, retrieval strategies, and persistence
+mechanisms are covered in Chapter 10.

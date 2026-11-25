@@ -1,0 +1,6 @@
+Step 1: intake.claude_brainstorm -> RUNNING (resumed workflow)
+Stopped after --max-steps=1. Run again to continue.
+
+Next actions:
+  Continue running until the next gate, recovery, failure, or completion:
+     dualctl run --workdir /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree ws-20261010T085617Z-8SVF

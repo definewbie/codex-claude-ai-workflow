@@ -1,0 +1,113 @@
+{
+  "scope": "current files, not a reconstruction of all ambient third-run env",
+  "files": [
+    {
+      "path": "/Users/kriswang/.acpx/config.json",
+      "exists": true,
+      "sha256": "6213952d843458bda48342d9d132587177dc6279f1f5f63799bde1e81185f6d6",
+      "key_names": [
+        "defaultAgent",
+        "defaultPermissions",
+        "nonInteractivePermissions",
+        "authPolicy",
+        "ttl",
+        "timeout",
+        "queueMaxDepth",
+        "format",
+        "agents",
+        "auth"
+      ],
+      "selected": {
+        "defaultAgent": "codex",
+        "defaultPermissions": "approve-all",
+        "nonInteractivePermissions": "deny"
+      },
+      "selected_env": {},
+      "agent_commands": {
+        "codex": {
+          "command": "npx -y @agentclientprotocol/codex-acp@1.10.0"
+        },
+        "claude": {
+          "command": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0"
+        }
+      }
+    },
+    {
+      "path": "/Users/kriswang/.claude/settings.json",
+      "exists": true,
+      "sha256": "653353244cd40a3540eaa56104a414c32c1c966bc69410aa175b6f6e1fbc5c97",
+      "key_names": [
+        "enabledPlugins",
+        "env",
+        "extraKnownMarketplaces",
+        "hooks",
+        "permissions",
+        "statusLine",
+        "theme"
+      ],
+      "selected": {},
+      "selected_env": {
+        "CLAUDE_CODE_MAX_CONTEXT_TOKENS": "200000",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5.3",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.3",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.7-air"
+      }
+    },
+    {
+      "path": "/Users/kriswang/.claude/settings.local.json",
+      "exists": true,
+      "sha256": "2666cddb5efd27f97cebdffab9f3878d6910a49dcc6eb2b92dc2bf5a30977a5a",
+      "key_names": [
+        "permissions"
+      ],
+      "selected": {},
+      "selected_env": {}
+    },
+    {
+      "path": "/Users/kriswang/.codex/config.toml",
+      "exists": true,
+      "sha256": "0ec7e2b53ce588b8720129658f61322784ee023a7bda70b5b1c6f7d5dce70892",
+      "key_names": [
+        "model",
+        "model_reasoning_effort",
+        "model_context_window",
+        "model_auto_compact_token_limit",
+        "notify",
+        "approval_policy",
+        "approvals_reviewer",
+        "sandbox_mode",
+        "personality",
+        "marketplaces",
+        "plugins",
+        "projects",
+        "desktop",
+        "features",
+        "mcp_servers",
+        "hooks",
+        "shell_environment_policy"
+      ],
+      "selected": {
+        "model": "gpt-6-astra",
+        "model_reasoning_effort": "high",
+        "model_context_window": 272000,
+        "model_auto_compact_token_limit": 240000
+      },
+      "selected_env": {}
+    },
+    {
+      "path": "/Library/Application Support/ClaudeCode/managed-settings.json",
+      "exists": false
+    },
+    {
+      "path": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.claude/settings.json",
+      "exists": false
+    },
+    {
+      "path": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.claude/settings.local.json",
+      "exists": false
+    }
+  ],
+  "current_inherited_selected_env": {},
+  "client_provider_invocations": 0,
+  "persistent_configuration_changes": 0
+}

@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "node_instance_id" : "node-intake-claude_brainstorm-002",
+  "run_id" : "run-1792717427983",
+  "inventory_head" : "c442fd02fb39d87481bbd940aa5f270947a72a60",
+  "inventory_sha256" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1792717427983/agent-capability-catalog.json",
+      "sha256" : "9112ec04e5c4e5adb0a3588bb90eaa96d980e7925937453df1a90e4772023b00"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1792717427983/planned-report.json",
+      "sha256" : "44586ec229a8bf9c1b4124621cfb50b6a4e5238fd319610f1bc436bcc8f632db"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1792717427983/repo-map.json",
+      "sha256" : "5844e47fd1af1f72cfb538a1a388f208c98a5a8549bf2a7b14e9484b079b9e97"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1792717427983/file-summaries.json",
+      "sha256" : "e4d2c2e770c465f7252d623033862fa96c8253cc5329d7842ef961a21b701116"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1792717427983/stage-scope-policy.json",
+      "sha256" : "8774a7355b3915b821cda97e7cf73705709dcf6041f055825b572818955e7126"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1792717427983/file-relevance-plan.json",
+      "sha256" : "164da8546e61b87ca7e6415da0a5ac66dd2261ce1ce08dc82b8c5241da802e1a"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1792717427983/working-set.json",
+      "sha256" : "1b7514424cf32bd21cd7bbbe23a0157d1e2a26ba1776e8876d8d1a51e7f645df"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1792717427983/read-reuse-contract.json",
+      "sha256" : "d319ddb13c21e9c800fd769f4c379fc4fb56399e8d2e965f0956c81253d5fb47"
+    }
+  }
+}

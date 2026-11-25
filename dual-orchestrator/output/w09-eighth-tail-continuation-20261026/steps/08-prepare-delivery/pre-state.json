@@ -1,0 +1,46 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-delivery-prepare_pr-038"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000038",
+    "updatedAt": "2026-10-26T01:21:36.650686Z",
+    "commitSequence": 148
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-delivery-prepare_pr-038",
+    "nodeDefinitionId": "delivery.prepare_pr",
+    "kind": "TASK",
+    "handlerType": "delivery.prepare_pr",
+    "status": "READY",
+    "stageId": "stage-delivery",
+    "iterationId": "iter-003",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/reports/iter-003-final-report.md",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/reports/latest-final-report.md"
+    ],
+    "inputTransition": {
+      "purpose": "Only verified complete self-test evidence may enter artifact validation.",
+      "source_node_sha256": "c06208b91759245bb3c6b66a9d0e90f2559161035dbc96e744c495f5f69a9d3b",
+      "source_node_instance_id": "node-acceptance-generate_final_report-037",
+      "required": true,
+      "transition_type": "normal",
+      "condition": "unconditional"
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 2047.7269193335621
+}

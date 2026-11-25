@@ -1,0 +1,35 @@
+{
+  "sha256": {
+    "jar": "b9147829d793dc79d5c3f4c60daa12a4b894b53536c25bd8e4a6f9149ff0aa26",
+    "workflow": "3ea9ea6c567608f4593bfef65f5868d7cbbd1be0925315c650abd8ec3f1896d5",
+    "requirement": "9ac1544b1216eca575456e1b4c639b3d716d6eb9b89693991222192a5a2ac33a",
+    "check": "c9401ad2933920406ff643fc39f8c4078a3624e537a09264ba0928d00aa28f23",
+    "claude_settings": "653353244cd40a3540eaa56104a414c32c1c966bc69410aa175b6f6e1fbc5c97",
+    "codex_config": "d7efe838f7ac0a0191eca7f6901d796d19b68f18e5deefff34d018e51586733d"
+  },
+  "embedded_classes": {
+    "dev/dual/ledger/file/NodeStateWriter.class": {
+      "matches_compiled": true,
+      "contains_retry_context": true,
+      "sha256": "7343bf6e008de20a595cc8d3477847e796841a6a22d56155ea90ea440735240c"
+    },
+    "dev/dual/adapter/acpx/AcpxAgentTaskHandler.class": {
+      "matches_compiled": true,
+      "contains_retry_context": true,
+      "sha256": "e87c7a2849ff2d4e4aec4f56f2a4a2719608256861f27dff785d8ed03984c84b"
+    }
+  },
+  "claude_model_mapping": {
+    "ANTHROPIC_BASE_URL": "https://open.bigmodel.cn/api/anthropic",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5.3",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.3",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.7-air",
+    "ANTHROPIC_MODEL": null,
+    "CLAUDE_CODE_MODEL": null
+  },
+  "codex_model": {
+    "model": "gpt-6-astra",
+    "model_reasoning_effort": "medium"
+  }
+}
+

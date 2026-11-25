@@ -1,0 +1,1111 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] dual-cli                                                           [jar]
+[INFO] dual-server                                                        [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-orchestrator ---
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/9]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-core ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 62 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 16 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.core.contract.TaskContractTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.167 s -- in dev.dual.core.contract.TaskContractTest
+[INFO] Running dev.dual.core.contract.PhasedContractTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in dev.dual.core.contract.PhasedContractTest
+[INFO] Running dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Running dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Running dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Running dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Running dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Running dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Running dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Running dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Running dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Running dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Running dev.dual.core.workflow.EdgeConditionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.workflow.EdgeConditionTest
+[INFO] Running dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Running dev.dual.core.id.DualIdGeneratorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.id.DualIdGeneratorTest
+[INFO] Running dev.dual.core.domain.PromptLanguageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.core.domain.PromptLanguageTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 126, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/9]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-ledger-file ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 70 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 24 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java使用了未经检查或不安全的操作。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Running dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Running dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.115 s -- in dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Running dev.dual.ledger.file.FileLedgerStoreTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.148 s -- in dev.dual.ledger.file.FileLedgerStoreTest
+[INFO] Running dev.dual.ledger.file.IterationRefTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.ledger.file.IterationRefTest
+[INFO] Running dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.463 s -- in dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[INFO] Running dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.462 s -- in dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Running dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Running dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Running dev.dual.ledger.file.WorkflowGateResolutionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.175 s -- in dev.dual.ledger.file.WorkflowGateResolutionTest
+[INFO] Running dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.070 s -- in dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[INFO] Running dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.289 s -- in dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[INFO] Running dev.dual.ledger.file.ParallelFanOutTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.166 s -- in dev.dual.ledger.file.ParallelFanOutTest
+[INFO] Running dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Running dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Running dev.dual.ledger.file.WorkflowFileLedgerTest
+[INFO] Tests run: 50, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.368 s -- in dev.dual.ledger.file.WorkflowFileLedgerTest
+[INFO] Running dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Running dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.411 s -- in dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[INFO] Running dev.dual.ledger.file.ExecutionClaimSequenceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.064 s -- in dev.dual.ledger.file.ExecutionClaimSequenceTest
+[INFO] Running dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.163 s -- in dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Running dev.dual.ledger.file.HumanActionRequestTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.112 s -- in dev.dual.ledger.file.HumanActionRequestTest
+[INFO] Running dev.dual.ledger.file.LedgerSessionTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.533 s -- in dev.dual.ledger.file.LedgerSessionTest
+[INFO] Running dev.dual.ledger.file.RetryFailureContextTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.265 s -- in dev.dual.ledger.file.RetryFailureContextTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 161, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/9]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-flow-liteflow ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 8 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.740 s -- in dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest
+[INFO] Running dev.dual.flow.liteflow.FlowKernelProviderTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.flow.liteflow.FlowKernelProviderTest
+[INFO] Running dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest
+[INFO] Running dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest
+D08 topology: pid=51122, kernel=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, kernelLoader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, holderLoader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, holderSource=file:/Users/kriswang/.m2/repository/com/yomahub/liteflow-core/2.16.0/liteflow-core-2.16.0.jar
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.485 s -- in dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/9]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-adapter-git ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.adapter.git.GitPatchMergeServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.214 s -- in dev.dual.adapter.git.GitPatchMergeServiceTest
+[INFO] Running dev.dual.adapter.git.GitWorkspaceServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.081 s -- in dev.dual.adapter.git.GitWorkspaceServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/9]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-runtime ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 108 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 3 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 95 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- jar:3.4.2:test-jar (shared-lifecycle-test-fixtures) @ dual-runtime ---
+[INFO] Building jar: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/dual-runtime-0.1.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.runtime.handler.LateContractRevisionContextTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 34.81 s -- in dev.dual.runtime.handler.LateContractRevisionContextTest
+[INFO] Running dev.dual.runtime.handler.PlanArtifactDocumentTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.runtime.handler.PlanArtifactDocumentTest
+[INFO] Running dev.dual.runtime.handler.PermissionEvidenceSequenceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 46.90 s -- in dev.dual.runtime.handler.PermissionEvidenceSequenceTest
+[INFO] Running dev.dual.runtime.handler.TypedDesignScopeTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.704 s -- in dev.dual.runtime.handler.TypedDesignScopeTest
+[INFO] Running dev.dual.runtime.handler.EvidenceCollectionSourceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.839 s -- in dev.dual.runtime.handler.EvidenceCollectionSourceTest
+[INFO] Running dev.dual.runtime.handler.TokenEstimatorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.handler.TokenEstimatorTest
+[INFO] Running dev.dual.runtime.handler.TypedPlanScopeTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 40.78 s -- in dev.dual.runtime.handler.TypedPlanScopeTest
+[INFO] Running dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.239 s -- in dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest
+[INFO] Running dev.dual.runtime.handler.ContractQualificationSequenceTest
+[INFO] Tests run: 29, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 35.83 s -- in dev.dual.runtime.handler.ContractQualificationSequenceTest
+[INFO] Running dev.dual.runtime.handler.TaskContractScopeResolverTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.runtime.handler.TaskContractScopeResolverTest
+[INFO] Running dev.dual.runtime.handler.SelfTestContinuationSequenceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.998 s -- in dev.dual.runtime.handler.SelfTestContinuationSequenceTest
+[INFO] Running dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.159 s -- in dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest
+[INFO] Running dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.364 s -- in dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest
+[INFO] Running dev.dual.runtime.handler.EvidenceCollectionSequenceTest
+[ERROR] Tests run: 7, Failures: 0, Errors: 5, Skipped: 0, Time elapsed: 9.983 s <<< FAILURE! -- in dev.dual.runtime.handler.EvidenceCollectionSequenceTest
+[ERROR] dev.dual.runtime.handler.EvidenceCollectionSequenceTest.realInlineAndWorkerConsumersRejectBeforeAndAfterExecutionIncludingThrownFailure -- Time elapsed: 7.310 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.AgentRunCommitProtocol.lambda$qualifyDispatch$0(AgentRunCommitProtocol.java:96)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:83)
+	at dev.dual.runtime.handler.AgentRunCommitProtocol.qualifyDispatch(AgentRunCommitProtocol.java:87)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.executeProvider(AuthoredStageSequenceTest.java:402)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture$1.execute(AuthoredStageSequenceTest.java:360)
+	at dev.dual.runtime.WorkflowRuntime.executeNode(WorkflowRuntime.java:365)
+	at dev.dual.runtime.WorkflowRuntime.lambda$executeAndRecordNode$0(WorkflowRuntime.java:327)
+	at dev.dual.runtime.handler.EvidenceCollection.execute(EvidenceCollection.java:94)
+	at dev.dual.runtime.WorkflowRuntime.executeAndRecordNode(WorkflowRuntime.java:326)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveNode(WorkflowRuntime.java:236)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveSnapshot(WorkflowRuntime.java:197)
+	at dev.dual.runtime.WorkflowRuntime.resumeWithinExecution(WorkflowRuntime.java:136)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:105)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.before(AuthoredStageSequenceTest.java:481)
+	at dev.dual.runtime.handler.EvidenceCollectionSequenceTest.waiting(EvidenceCollectionSequenceTest.java:229)
+	at dev.dual.runtime.handler.EvidenceCollectionSequenceTest.realInlineAndWorkerConsumersRejectBeforeAndAfterExecutionIncludingThrownFailure(EvidenceCollectionSequenceTest.java:35)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 20 more
+
+[ERROR] dev.dual.runtime.handler.EvidenceCollectionSequenceTest.evidenceOnlyLoopKeepsOriginalApprovalButImplementationRepairDoesNot -- Time elapsed: 0.148 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.EvidenceCollectionSequenceTest.waiting(EvidenceCollectionSequenceTest.java:228)
+	at dev.dual.runtime.handler.EvidenceCollectionSequenceTest.evidenceOnlyLoopKeepsOriginalApprovalButImplementationRepairDoesNot(EvidenceCollectionSequenceTest.java:176)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 13 more
+
+[ERROR] dev.dual.runtime.handler.EvidenceCollectionSequenceTest.approvalRequiresNoteQualificationAndCannotUseBareLedgerDecision -- Time elapsed: 0.108 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.EvidenceCollectionSequenceTest.waiting(EvidenceCollectionSequenceTest.java:228)
+	at dev.dual.runtime.handler.EvidenceCollectionSequenceTest.approvalRequiresNoteQualificationAndCannotUseBareLedgerDecision(EvidenceCollectionSequenceTest.java:20)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 13 more
+
+[ERROR] dev.dual.runtime.handler.EvidenceCollectionSequenceTest.directPublicationRejectsChangedSourceAndOrdinaryRunsRemainUnaffected -- Time elapsed: 0.140 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.EvidenceCollectionSequenceTest.waiting(EvidenceCollectionSequenceTest.java:228)
+	at dev.dual.runtime.handler.EvidenceCollectionSequenceTest.directPublicationRejectsChangedSourceAndOrdinaryRunsRemainUnaffected(EvidenceCollectionSequenceTest.java:127)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 13 more
+
+[ERROR] dev.dual.runtime.handler.EvidenceCollectionSequenceTest.coldRetryCannotRecaptureBaselineOrLoseBindingAndApprovalTamperingIsRejected -- Time elapsed: 0.113 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.EvidenceCollectionSequenceTest.waiting(EvidenceCollectionSequenceTest.java:228)
+	at dev.dual.runtime.handler.EvidenceCollectionSequenceTest.coldRetryCannotRecaptureBaselineOrLoseBindingAndApprovalTamperingIsRejected(EvidenceCollectionSequenceTest.java:99)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 13 more
+
+[INFO] Running dev.dual.runtime.handler.HandlerRegistryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.handler.HandlerRegistryTest
+[INFO] Running dev.dual.runtime.handler.AgentEvidenceIndexTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.170 s -- in dev.dual.runtime.handler.AgentEvidenceIndexTest
+[INFO] Running dev.dual.runtime.handler.FailureArbiterTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.FailureArbiterTest
+[INFO] Running dev.dual.runtime.handler.ContractQualificationRejectionInventoryTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.309 s -- in dev.dual.runtime.handler.ContractQualificationRejectionInventoryTest
+[INFO] Running dev.dual.runtime.handler.PhasedContractContinuationTest
+[ERROR] Tests run: 11, Failures: 0, Errors: 11, Skipped: 0, Time elapsed: 0.695 s <<< FAILURE! -- in dev.dual.runtime.handler.PhasedContractContinuationTest
+[ERROR] dev.dual.runtime.handler.PhasedContractContinuationTest.failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval(boolean)[1] -- Time elapsed: 0.077 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:148)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:143)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.<init>(PhasedContractContinuationTest.java:309)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest.failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval(PhasedContractContinuationTest.java:150)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 53 more
+
+[ERROR] dev.dual.runtime.handler.PhasedContractContinuationTest.failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval(boolean)[2] -- Time elapsed: 0.080 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:148)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:143)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.<init>(PhasedContractContinuationTest.java:309)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest.failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval(PhasedContractContinuationTest.java:150)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 53 more
+
+[ERROR] dev.dual.runtime.handler.PhasedContractContinuationTest.missingReadinessCanBeRecordedRevisedReviewedApprovedAndConsumed(String)[1] -- Time elapsed: 0.070 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:148)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:143)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.<init>(PhasedContractContinuationTest.java:309)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest.missingReadinessCanBeRecordedRevisedReviewedApprovedAndConsumed(PhasedContractContinuationTest.java:23)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 53 more
+
+[ERROR] dev.dual.runtime.handler.PhasedContractContinuationTest.missingReadinessCanBeRecordedRevisedReviewedApprovedAndConsumed(String)[2] -- Time elapsed: 0.067 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:148)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:143)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.<init>(PhasedContractContinuationTest.java:309)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest.missingReadinessCanBeRecordedRevisedReviewedApprovedAndConsumed(PhasedContractContinuationTest.java:23)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 53 more
+
+[ERROR] dev.dual.runtime.handler.PhasedContractContinuationTest.unknownExecutionRequiresExactStopAndRiskDecisionBeforeRetryOrAbort(boolean)[1] -- Time elapsed: 0.062 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:148)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:143)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.<init>(PhasedContractContinuationTest.java:309)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest.unknownExecutionRequiresExactStopAndRiskDecisionBeforeRetryOrAbort(PhasedContractContinuationTest.java:187)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 53 more
+
+[ERROR] dev.dual.runtime.handler.PhasedContractContinuationTest.unknownExecutionRequiresExactStopAndRiskDecisionBeforeRetryOrAbort(boolean)[2] -- Time elapsed: 0.059 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:148)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:143)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.<init>(PhasedContractContinuationTest.java:309)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest.unknownExecutionRequiresExactStopAndRiskDecisionBeforeRetryOrAbort(PhasedContractContinuationTest.java:187)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 53 more
+
+[ERROR] dev.dual.runtime.handler.PhasedContractContinuationTest.dependencyDriftBeforeApprovalRejectsWithoutDecisionOrDispatch -- Time elapsed: 0.056 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:148)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:143)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.<init>(PhasedContractContinuationTest.java:309)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest.dependencyDriftBeforeApprovalRejectsWithoutDecisionOrDispatch(PhasedContractContinuationTest.java:53)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 10 more
+
+[ERROR] dev.dual.runtime.handler.PhasedContractContinuationTest.coldJvmCompletesFixedPublicationWithoutProviderOrNewBytes -- Time elapsed: 0.055 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:148)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:143)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.<init>(PhasedContractContinuationTest.java:309)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest.coldJvmCompletesFixedPublicationWithoutProviderOrNewBytes(PhasedContractContinuationTest.java:244)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 10 more
+
+[ERROR] dev.dual.runtime.handler.PhasedContractContinuationTest.weakeningApprovedExitRequirementReturnsToAuthorReviewAndNewExecutionApproval -- Time elapsed: 0.058 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:148)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:143)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.<init>(PhasedContractContinuationTest.java:309)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest.weakeningApprovedExitRequirementReturnsToAuthorReviewAndNewExecutionApproval(PhasedContractContinuationTest.java:89)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 10 more
+
+[ERROR] dev.dual.runtime.handler.PhasedContractContinuationTest.changedPersistedReviewFactsCannotBecomeQualifiedByNumericNormalization -- Time elapsed: 0.052 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:148)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:143)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.<init>(PhasedContractContinuationTest.java:309)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest.changedPersistedReviewFactsCannotBecomeQualifiedByNumericNormalization(PhasedContractContinuationTest.java:125)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 10 more
+
+[ERROR] dev.dual.runtime.handler.PhasedContractContinuationTest.driftAfterApprovalIsTypedPreparationFailureAndRestoredSameProofCanContinue -- Time elapsed: 0.053 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:148)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:143)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.<init>(PhasedContractContinuationTest.java:309)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest.driftAfterApprovalIsTypedPreparationFailureAndRestoredSameProofCanContinue(PhasedContractContinuationTest.java:67)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 10 more
+
+[INFO] Running dev.dual.runtime.handler.ContractRegistryTest
+[INFO] Tests run: 50, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in dev.dual.runtime.handler.ContractRegistryTest
+[INFO] Running dev.dual.runtime.handler.TaskContractProjectionVerifierTest
+[ERROR] Tests run: 9, Failures: 0, Errors: 9, Skipped: 0, Time elapsed: 0.983 s <<< FAILURE! -- in dev.dual.runtime.handler.TaskContractProjectionVerifierTest
+[ERROR] dev.dual.runtime.handler.TaskContractProjectionVerifierTest.realContractRepairSwitchesQualificationOnlyAfterTheNewApproval -- Time elapsed: 0.100 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifierTest.setUp(TaskContractProjectionVerifierTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 12 more
+
+[ERROR] dev.dual.runtime.handler.TaskContractProjectionVerifierTest.rejectsArtifactWithoutCompletedCompileBinding -- Time elapsed: 0.093 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifierTest.setUp(TaskContractProjectionVerifierTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 12 more
+
+[ERROR] dev.dual.runtime.handler.TaskContractProjectionVerifierTest.resolvedClarifyOrRejectCannotBeUsedAsApproval -- Time elapsed: 0.101 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifierTest.setUp(TaskContractProjectionVerifierTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 12 more
+
+[ERROR] dev.dual.runtime.handler.TaskContractProjectionVerifierTest.rejectsUnreadableNodeLedgerInsteadOfSelectingPartialHistory -- Time elapsed: 0.104 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifierTest.setUp(TaskContractProjectionVerifierTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 12 more
+
+[ERROR] dev.dual.runtime.handler.TaskContractProjectionVerifierTest.qualifiedSnapshotFeedsAllContextConsumersAfterDiskMutation -- Time elapsed: 0.118 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifierTest.setUp(TaskContractProjectionVerifierTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 12 more
+
+[ERROR] dev.dual.runtime.handler.TaskContractProjectionVerifierTest.rejectsGateSourceIdentityMismatch -- Time elapsed: 0.107 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifierTest.setUp(TaskContractProjectionVerifierTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 12 more
+
+[ERROR] dev.dual.runtime.handler.TaskContractProjectionVerifierTest.copiedNewerCompilerCannotBorrowTheOriginalApproval -- Time elapsed: 0.120 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifierTest.setUp(TaskContractProjectionVerifierTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 12 more
+
+[ERROR] dev.dual.runtime.handler.TaskContractProjectionVerifierTest.resolvesOneQualifiedSnapshotFromActualReviewedAndApprovedSequence -- Time elapsed: 0.125 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifierTest.setUp(TaskContractProjectionVerifierTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 12 more
+
+[ERROR] dev.dual.runtime.handler.TaskContractProjectionVerifierTest.rejectsContractMutationAfterCompile -- Time elapsed: 0.110 s <<< ERROR!
+java.lang.IllegalStateException: cannot measure qualification rule identity
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:105)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve(TaskContractProjectionVerifier.java:75)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.goal(VerificationReadinessTest.java:222)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:218)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:350)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:290)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:285)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:280)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:276)
+	at dev.dual.runtime.handler.TaskContractProjectionVerifierTest.setUp(TaskContractProjectionVerifierTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: loaded checker bytes unavailable
+	at dev.dual.runtime.handler.ContractQualificationTrace.<init>(ContractQualificationTrace.java:100)
+	... 12 more
+
+[INFO] Running dev.dual.runtime.handler.LateProposalScopeTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.064 s -- in dev.dual.runtime.handler.LateProposalScopeTest
+[INFO] Running dev.dual.runtime.handler.ContractReviewGateTest
+[ERROR] Tests run: 3, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.064 s <<< FAILURE! -- in dev.dual.runtime.handler.ContractReviewGateTest
+[ERROR] dev.dual.runtime.handler.ContractReviewGateTest.humanReviewGateSupportsContractReviewActions -- Time elapsed: 0.062 s <<< ERROR!
+java.io.IOException: bundled workflow resource not found: /dev/dual/runtime/lifecycle/agent-lifecycle.contract.json
+	at dev.dual.runtime.lifecycle.WorkflowDefinitionLoader.loadBundledWorkflow(WorkflowDefinitionLoader.java:151)
+	at dev.dual.runtime.lifecycle.WorkflowDefinitionLoader.loadBundledContractWorkflow(WorkflowDefinitionLoader.java:129)
+	at dev.dual.runtime.lifecycle.WorkflowDefinitionLoader.loadBundledVariant(WorkflowDefinitionLoader.java:140)
+	at dev.dual.runtime.lifecycle.WorkflowDefinitionLoader.loadOrDefault(WorkflowDefinitionLoader.java:41)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.<init>(AcceptanceRepairSequenceTest.java:229)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.<init>(AcceptanceRepairSequenceTest.java:213)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.<init>(AcceptanceRepairSequenceTest.java:209)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.<init>(AcceptanceRepairSequenceTest.java:205)
+	at dev.dual.runtime.handler.ContractReviewGateTest.humanReviewGateSupportsContractReviewActions(ContractReviewGateTest.java:23)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.AcceptanceRepairSequenceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Errors: 
+[ERROR]   ContractReviewGateTest.humanReviewGateSupportsContractReviewActions:23 » IO bundled workflow resource not found: /dev/dual/runtime/lifecycle/agent-lifecycle.contract.json
+[ERROR]   EvidenceCollectionSequenceTest.approvalRequiresNoteQualificationAndCannotUseBareLedgerDecision:20->waiting:228 » IllegalState cannot measure qualification rule identity
+[ERROR]   EvidenceCollectionSequenceTest.coldRetryCannotRecaptureBaselineOrLoseBindingAndApprovalTamperingIsRejected:99->waiting:228 » IllegalState cannot measure qualification rule identity
+[ERROR]   EvidenceCollectionSequenceTest.directPublicationRejectsChangedSourceAndOrdinaryRunsRemainUnaffected:127->waiting:228 » IllegalState cannot measure qualification rule identity
+[ERROR]   EvidenceCollectionSequenceTest.evidenceOnlyLoopKeepsOriginalApprovalButImplementationRepairDoesNot:176->waiting:228 » IllegalState cannot measure qualification rule identity
+[ERROR]   EvidenceCollectionSequenceTest.realInlineAndWorkerConsumersRejectBeforeAndAfterExecutionIncludingThrownFailure:35->waiting:229 » IllegalState cannot measure qualification rule identity
+[ERROR]   PhasedContractContinuationTest.changedPersistedReviewFactsCannotBecomeQualifiedByNumericNormalization:125 » IllegalState cannot measure qualification rule identity
+[ERROR]   PhasedContractContinuationTest.coldJvmCompletesFixedPublicationWithoutProviderOrNewBytes:244 » IllegalState cannot measure qualification rule identity
+[ERROR]   PhasedContractContinuationTest.dependencyDriftBeforeApprovalRejectsWithoutDecisionOrDispatch:53 » IllegalState cannot measure qualification rule identity
+[ERROR]   PhasedContractContinuationTest.driftAfterApprovalIsTypedPreparationFailureAndRestoredSameProofCanContinue:67 » IllegalState cannot measure qualification rule identity
+[ERROR]   PhasedContractContinuationTest.failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval:150 » IllegalState cannot measure qualification rule identity
+[ERROR]   PhasedContractContinuationTest.failedPreparationReturnsToAuthorAndReviewThenKeepsOrRenewsApproval:150 » IllegalState cannot measure qualification rule identity
+[ERROR]   PhasedContractContinuationTest.missingReadinessCanBeRecordedRevisedReviewedApprovedAndConsumed:23 » IllegalState cannot measure qualification rule identity
+[ERROR]   PhasedContractContinuationTest.missingReadinessCanBeRecordedRevisedReviewedApprovedAndConsumed:23 » IllegalState cannot measure qualification rule identity
+[ERROR]   PhasedContractContinuationTest.unknownExecutionRequiresExactStopAndRiskDecisionBeforeRetryOrAbort:187 » IllegalState cannot measure qualification rule identity
+[ERROR]   PhasedContractContinuationTest.unknownExecutionRequiresExactStopAndRiskDecisionBeforeRetryOrAbort:187 » IllegalState cannot measure qualification rule identity
+[ERROR]   PhasedContractContinuationTest.weakeningApprovedExitRequirementReturnsToAuthorReviewAndNewExecutionApproval:89 » IllegalState cannot measure qualification rule identity
+[ERROR]   TaskContractProjectionVerifierTest.setUp:37 » IllegalState cannot measure qualification rule identity
+[ERROR]   TaskContractProjectionVerifierTest.setUp:37 » IllegalState cannot measure qualification rule identity
+[ERROR]   TaskContractProjectionVerifierTest.setUp:37 » IllegalState cannot measure qualification rule identity
+[ERROR]   TaskContractProjectionVerifierTest.setUp:37 » IllegalState cannot measure qualification rule identity
+[ERROR]   TaskContractProjectionVerifierTest.setUp:37 » IllegalState cannot measure qualification rule identity
+[ERROR]   TaskContractProjectionVerifierTest.setUp:37 » IllegalState cannot measure qualification rule identity
+[ERROR]   TaskContractProjectionVerifierTest.setUp:37 » IllegalState cannot measure qualification rule identity
+[ERROR]   TaskContractProjectionVerifierTest.setUp:37 » IllegalState cannot measure qualification rule identity
+[ERROR]   TaskContractProjectionVerifierTest.setUp:37 » IllegalState cannot measure qualification rule identity
+[INFO] 
+[ERROR] Tests run: 200, Failures: 0, Errors: 26, Skipped: 0
+[INFO] 

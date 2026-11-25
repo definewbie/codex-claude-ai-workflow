@@ -1,0 +1,81 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1791694259350-68c9af94",
+  "agentTaskId" : "agt-1791694259345-9bc4e0ae",
+  "workflowExecutionId" : "wfe-1791694259277-f89637aa",
+  "nodeInstanceId" : "node-intake-codex_product_review-004",
+  "nodeDefinitionId" : "intake.codex_product_review",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "pid" : 73656,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/binding.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-11T04:50:58.122Z",
+      "executor_pid" : 73656,
+      "input_identity" : "20d4b4624eadbfaad3927d4545d9fc1de06af6c47ed5d2e6b0f835fb76169eff"
+    },
+    "prepared_run" : {
+      "sha256" : "0f36ce15df0167085b6c7e4b67ec834d56a75d67f7183350cd7370bb54f89620",
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/nxe-1791694259350-68c9af94-prepared.json"
+    },
+    "adapter_signals" : [ ],
+    "agent" : "codex",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "agent_output_contract",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "NEEDS_REVISION",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.contract.json",
+    "contract_sidecar_sha256" : "3c25ec80f843e1f77e4521b53dc52f9819d45c5008bf8cbf3dd48d2d9e1c9f3c",
+    "decision" : "NEEDS_REVISION",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/binding.json",
+    "repository_fact_binding_sha256" : "3ca6ddf05dc6ea7a0f8cd8b320b7b9fed9c44f0dea1593fd200951687871df73",
+    "reread_reasons" : [ ],
+    "run_id" : "run-1791694259389",
+    "run_metadata" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/run.json",
+    "session" : "codex-reviewer-ws-20261011T044656Z-BMDJ",
+    "summary" : "函数行为与标准库约束已完整保留，但实际输入输出证据要求和候选文件的审批边界需要修订。",
+    "transcript_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/nxe-1791694259350-68c9af94-completion.json",
+    "completion_sha256" : "142d2691018d248dc899fbb9972fe28bc615815921185446c2e0da548dd0fd1c",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "run-1791694259389",
+  "agentRunRef" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/run.json",
+  "agent" : "codex",
+  "session" : "codex-reviewer-ws-20261011T044656Z-BMDJ",
+  "exitCode" : 0,
+  "startedAt" : "2026-10-11T04:50:59.350195Z",
+  "finishedAt" : "2026-10-11T04:52:01.881433Z",
+  "durationMs" : 62531
+}

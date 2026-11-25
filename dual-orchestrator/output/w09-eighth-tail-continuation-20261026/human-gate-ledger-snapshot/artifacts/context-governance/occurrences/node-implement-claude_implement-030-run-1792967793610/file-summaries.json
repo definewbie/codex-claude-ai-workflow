@@ -1,0 +1,31 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "file_summaries",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "implement",
+  "nodeInstanceId" : "node-implement-claude_implement-030",
+  "iterationId" : "iter-003",
+  "files" : [ {
+    "path" : "src/normalize_text.py",
+    "taskRelevance" : "core",
+    "summary" : "Task-relevant file. Reuse existing evidence before re-reading.",
+    "previousReadCount" : 0,
+    "evidenceKnown" : false,
+    "staleness" : "unknown"
+  }, {
+    "path" : "tests/test_normalize_text.py",
+    "taskRelevance" : "core",
+    "summary" : "Task-relevant file. Reuse existing evidence before re-reading.",
+    "previousReadCount" : 0,
+    "evidenceKnown" : false,
+    "staleness" : "unknown"
+  }, {
+    "path" : "README.md",
+    "taskRelevance" : "core",
+    "summary" : "Task-relevant file. Reuse existing evidence before re-reading.",
+    "previousReadCount" : 0,
+    "evidenceKnown" : false,
+    "staleness" : "unknown"
+  } ],
+  "generatedAt" : "2026-10-25T22:36:33.836242Z"
+}

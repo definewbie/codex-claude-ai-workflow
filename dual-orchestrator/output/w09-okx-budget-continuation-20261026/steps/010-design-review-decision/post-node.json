@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-design-decision-011",
+  "nodeDefinitionId": "design.decision",
+  "kind": "DECISION",
+  "handlerType": "review.decision",
+  "status": "COMPLETED",
+  "stageId": "stage-design",
+  "iterationId": "iter-001",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-design-codex_arch_review-010-run-1793029770286/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.contract.json"
+  ],
+  "inputTransition": {
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256": "59245532f2ae4b8839240d05218c862e5ff4e2d59da19c315eccfeb2442d0125",
+    "source_node_instance_id": "node-design-codex_arch_review-010",
+    "required": true,
+    "transition_type": "normal",
+    "condition": "unconditional"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-design-codex_arch_review-010-run-1793029770286/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029770286/outputs/design-codex-review.contract.json"
+  ],
+  "result": {
+    "summary": "六文件方案的计算口径与职责划分合理，但精度断言和展示舍入不影响建议的验证设计尚未满足合同。",
+    "source": "contract-sidecar",
+    "decision": "NEEDS_REVISION"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1793029964763-f4b40e70",
+  "startedAt": "2026-10-26T15:52:44.774324Z",
+  "finishedAt": "2026-10-26T15:52:44.818345Z"
+}

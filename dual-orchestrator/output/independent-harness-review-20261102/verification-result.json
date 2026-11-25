@@ -1,0 +1,47 @@
+{
+  "sourceSnapshot": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/independent-harness-review-20261102/source-snapshot",
+  "sourceManifest": "source-snapshot-sha256.json",
+  "reviewedGitHead": "3362eb421514e75fdc4332f570df5bf274b3725e",
+  "testCommand": "rtk proxy mvn -o -q -pl dual-runtime,dual-ledger-file -am -Dtest=AgentExecutionOutcomeResolverTest,VerificationReadinessTest,DeliveryApplicationServiceTest,WorkflowCommitSequenceTest -Dsurefire.failIfNoSpecifiedTests=false -Djava.io.tmpdir=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/independent-harness-review-20261102/tmp test",
+  "commandExit": 0,
+  "tests": [
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/independent-harness-review-20261102/source-snapshot/dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.WorkflowCommitSequenceTest.xml",
+      "name": "dev.dual.ledger.file.WorkflowCommitSequenceTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.879"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/independent-harness-review-20261102/source-snapshot/dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.VerificationReadinessTest.xml",
+      "name": "dev.dual.runtime.handler.VerificationReadinessTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.229"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/independent-harness-review-20261102/source-snapshot/dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.delivery.DeliveryApplicationServiceTest.xml",
+      "name": "dev.dual.runtime.delivery.DeliveryApplicationServiceTest",
+      "tests": "24",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "69.963"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/independent-harness-review-20261102/source-snapshot/dual-core/target/surefire-reports/TEST-dev.dual.core.execution.AgentExecutionOutcomeResolverTest.xml",
+      "name": "dev.dual.core.execution.AgentExecutionOutcomeResolverTest",
+      "tests": "22",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.052"
+    }
+  ],
+  "totalTests": 59,
+  "scope": "selected offline boundary tests; no provider; current copied source; not a full-module regression"
+}

@@ -1,0 +1,8 @@
+{
+  "user_reply": "批准",
+  "scope": "Current GOAL objective, acceptance and exclusions; precise EXECUTION scope and final delivery not authorized",
+  "gate_id": "gate-node-gate-human_requirement_review-011",
+  "subject_ref": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636803114/outputs/intake-claude-brainstorm.contract.json",
+  "subject_sha256": "320e15b65a9c523bd0b2f33ba01b5b296e3f4c23b04e82f74d128b161867fefe",
+  "at": "2026-10-10T22:12:14.006114+08:00"
+}

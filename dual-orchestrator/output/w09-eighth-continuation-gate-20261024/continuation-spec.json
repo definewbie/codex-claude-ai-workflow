@@ -1,0 +1,12 @@
+{
+  "case": "EIGHTH_CONTINUATION",
+  "original_package": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023",
+  "workstream": "ws-20261023T005431Z-9YYF",
+  "checkpoint_sha256": "d11003a0f43d63de8580968d6f2424d76bee5636a73b2689d8c37fc291a036ea",
+  "original_stop_sha256": "b0d1e123671e6f220469254109de3065a823eecf93dbc060be623b26d594fbcc",
+  "token_limit": 1700000,
+  "call_limit": 18,
+  "active_seconds_limit": 3600,
+  "initial_next_node": "plan.decision",
+  "preserve_original_stop": true
+}

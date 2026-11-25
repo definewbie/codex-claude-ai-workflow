@@ -1,0 +1,57 @@
+package dev.dual.adapter.acpx;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+
+record AgentRunDocument(
+        int schemaVersion,
+        String runId,
+        String workstreamId,
+        String nodeId,
+        String agent,
+        String session,
+        String sessionScope,
+        String sessionSegmentKey,
+        String sessionScopeReason,
+        String stage,
+        String semanticIteration,
+        String sessionCompactionMode,
+        boolean sessionCompactionEnabled,
+        String sessionCompactionReason,
+        String sessionCompactionSeedKind,
+        String sessionCompactionSeedPath,
+        String promptTemplate,
+        String workdir,
+        String promptPath,
+        String promptManifestPath,
+        String outputPath,
+        String transcriptPath,
+        String stderrPath,
+        String promptMetadataPath,
+        String outputMetadataPath,
+        String transcriptMetadataPath,
+        String stderrMetadataPath,
+        List<String> command,
+        Instant startedAt,
+        Instant finishedAt,
+        long durationMs,
+        Integer exitCode,
+        String status,
+        String failureReason,
+        Boolean recoverable,
+        AcpxUsage usage,
+        AgentResultAcquisitionDocument agentResultAcquisition,
+        Map<String, Object> providerModelIdentity,
+        AcpxToolUsage toolUsage,
+        String contextGovernanceActualReportPath,
+        Map<String, Object> executionAuthority,
+        Map<String, Object> processResult,
+        List<Map<String, Object>> adapterSignals,
+        Map<String, Object> agentResultContract,
+        List<Map<String, Object>> artifactContractResults,
+        Map<String, Object> executionAttempt,
+        Map<String, Object> executionOutcome,
+        List<Map<String, Object>> executionTimeline
+) {
+}

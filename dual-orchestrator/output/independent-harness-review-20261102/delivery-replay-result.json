@@ -1,0 +1,57 @@
+{
+  "copiedFrom": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target",
+  "files": {
+    "src/normalize_text.py": "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c",
+    "tests/test_normalize_text.py": "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be",
+    "README.md": "0af74daeacfdd946a47e88d3b3f28d41ef125285084fd5f1c8735859e5caaae5"
+  },
+  "unittest": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": "test_consecutive_blank_lines_normalized (test_normalize_text.TestNormalizeNewlines.test_consecutive_blank_lines_normalized) ... ok\ntest_crlf_becomes_single_lf (test_normalize_text.TestNormalizeNewlines.test_crlf_becomes_single_lf) ... ok\ntest_empty_string_returns_empty (test_normalize_text.TestNormalizeNewlines.test_empty_string_returns_empty) ... ok\ntest_idempotent_across_all_cases (test_normalize_text.TestNormalizeNewlines.test_idempotent_across_all_cases) ... ok\ntest_lone_cr_becomes_lf (test_normalize_text.TestNormalizeNewlines.test_lone_cr_becomes_lf) ... ok\ntest_mixed_newlines_normalized (test_normalize_text.TestNormalizeNewlines.test_mixed_newlines_normalized) ... ok\ntest_no_cr_left_in_output (test_normalize_text.TestNormalizeNewlines.test_no_cr_left_in_output) ... ok\ntest_pure_lf_unchanged (test_normalize_text.TestNormalizeNewlines.test_pure_lf_unchanged) ... ok\ntest_trailing_newline_absent_kept (test_normalize_text.TestNormalizeNewlines.test_trailing_newline_absent_kept) ... ok\ntest_trailing_newline_present_kept (test_normalize_text.TestNormalizeNewlines.test_trailing_newline_present_kept) ... ok\ntest_unicode_and_line_separators_preserved (test_normalize_text.TestNormalizeNewlines.test_unicode_and_line_separators_preserved) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.000s\n\nOK\n"
+  },
+  "doctest": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "commit": {
+    "sha": "f8ec3d41cbe1cac554a78c3131372af434440691",
+    "tree": "0233afaf8755e44b6c8ab156e311ffbef6e50983",
+    "parent": "c442fd02fb39d87481bbd940aa5f270947a72a60",
+    "currentHead": "f8ec3d41cbe1cac554a78c3131372af434440691",
+    "copiedFilesMatchCommit": {
+      "src/normalize_text.py": true,
+      "tests/test_normalize_text.py": true,
+      "README.md": true
+    }
+  },
+  "commands": [
+    {
+      "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/independent-harness-review-20261102/delivery-replay",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ]
+    },
+    {
+      "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/independent-harness-review-20261102/delivery-replay",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "doctest",
+        "README.md"
+      ],
+      "envOverride": {
+        "PYTHONPATH": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/independent-harness-review-20261102/delivery-replay/src"
+      }
+    }
+  ]
+}

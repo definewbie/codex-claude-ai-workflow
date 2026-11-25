@@ -26,10 +26,12 @@ class CompletionEvidenceLineageResolverTest {
 
     @Test
     void resolvesAcceptanceAndSelfTestThroughPersistedContextLineage() throws Exception {
-        var fixture = CompletionEvidenceLineageFixture.prepare(tempDir, "ws-lineage");
+        var fixture = CompletionEvidenceLineageFixture.prepareApproved(tempDir, "ws-lineage");
 
-        var resolution = CompletionEvidenceLineageResolver.resolveForReport(
-                tempDir, "ws-lineage", fixture.reportNode());
+        var resolution = CompletionEvidenceLineageResolver.resolveForReport(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-lineage",
+                fixture.reportNode());
 
         assertEquals(CompletionEvidenceLineageResolver.Status.AVAILABLE, resolution.status());
         assertEquals("acceptance.codex_verifier_review", resolution.acceptance().document().nodeId());
@@ -42,9 +44,13 @@ class CompletionEvidenceLineageResolverTest {
     @Test
     void distinguishesMissingAndNonFinalGoalsFromCorruption() throws Exception {
         assertEquals(CompletionEvidenceLineageResolver.Status.NOT_CONFIGURED,
-                CompletionEvidenceLineageResolver.resolveCurrent(tempDir, "ws-missing").status());
+                CompletionEvidenceLineageResolver.resolveCurrent(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-missing").status());
         assertEquals(CompletionEvidenceLineageResolver.GOAL_NOT_CONFIGURED,
-                CompletionEvidenceLineageResolver.resolveCurrent(tempDir, "ws-missing").failureCode());
+                CompletionEvidenceLineageResolver.resolveCurrent(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-missing").failureCode());
 
         CompletionEvidenceLineageFixture.prepare(tempDir, "ws-not-final");
         var goalPath = workstreamDir("ws-not-final").resolve("domain/goal-satisfaction.json");
@@ -54,7 +60,9 @@ class CompletionEvidenceLineageResolverTest {
                 "design.decision", goal.iterationId(), "NEEDS_REVISION", GoalDomainOutcome.NEEDS_REDESIGN,
                 "design needs revision", goal.evidenceRefs(), goal.sourceResult(), goal.generatedAt()));
 
-        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(tempDir, "ws-not-final");
+        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-not-final");
         assertEquals(CompletionEvidenceLineageResolver.Status.NOT_FINAL, resolution.status());
         assertEquals(CompletionEvidenceLineageResolver.GOAL_NOT_FINAL, resolution.failureCode());
     }
@@ -66,8 +74,10 @@ class CompletionEvidenceLineageResolverTest {
         var node = MAPPER.readValue(nodePath.toFile(), NodeInstanceDocument.class);
         MAPPER.writeValue(nodePath.toFile(), copy(node, node.inputRefs(), List.of(fixture.metadataRef()), node.iterationId()));
 
-        var resolution = CompletionEvidenceLineageResolver.resolveForReport(
-                tempDir, "ws-forged-package", fixture.reportNode());
+        var resolution = CompletionEvidenceLineageResolver.resolveForReport(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-forged-package",
+                fixture.reportNode());
 
         assertEquals(CompletionEvidenceLineageResolver.Status.INVALID, resolution.status());
         assertEquals(CompletionEvidenceLineageResolver.CONTEXT_INVALID, resolution.failureCode());
@@ -83,8 +93,10 @@ class CompletionEvidenceLineageResolverTest {
         Files.setLastModifiedTime(tempDir.resolve(fixture.selfTestRef()),
                 java.nio.file.attribute.FileTime.from(Instant.parse("2030-01-01T00:00:00Z")));
 
-        var resolution = CompletionEvidenceLineageResolver.resolveForReport(
-                tempDir, "ws-missing-self-test", fixture.reportNode());
+        var resolution = CompletionEvidenceLineageResolver.resolveForReport(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-missing-self-test",
+                fixture.reportNode());
 
         assertEquals(CompletionEvidenceLineageResolver.Status.INVALID, resolution.status());
         assertEquals(CompletionEvidenceLineageResolver.SELF_TEST_INVALID, resolution.failureCode());
@@ -99,7 +111,9 @@ class CompletionEvidenceLineageResolverTest {
         var node = MAPPER.readValue(nodePath.toFile(), NodeInstanceDocument.class);
         MAPPER.writeValue(nodePath.toFile(), copy(node, node.inputRefs(), node.outputRefs(), "iter-000"));
 
-        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(tempDir, "ws-cross-acceptance");
+        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-cross-acceptance");
 
         assertEquals(CompletionEvidenceLineageResolver.Status.INVALID, resolution.status());
         assertEquals(CompletionEvidenceLineageResolver.ACCEPTANCE_INVALID, resolution.failureCode());
@@ -112,7 +126,9 @@ class CompletionEvidenceLineageResolverTest {
         var node = MAPPER.readValue(nodePath.toFile(), NodeInstanceDocument.class);
         MAPPER.writeValue(nodePath.toFile(), copy(node, node.inputRefs(), node.outputRefs(), "iter-000"));
 
-        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(tempDir, "ws-cross-context");
+        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-cross-context");
 
         assertEquals(CompletionEvidenceLineageResolver.Status.INVALID, resolution.status());
         assertEquals(CompletionEvidenceLineageResolver.CONTEXT_INVALID, resolution.failureCode());
@@ -127,8 +143,10 @@ class CompletionEvidenceLineageResolverTest {
         var node = MAPPER.readValue(nodePath.toFile(), NodeInstanceDocument.class);
         MAPPER.writeValue(nodePath.toFile(), copy(node, node.inputRefs(), node.outputRefs(), "iter-000"));
 
-        var resolution = CompletionEvidenceLineageResolver.resolveForReport(
-                tempDir, "ws-cross-iteration", fixture.reportNode());
+        var resolution = CompletionEvidenceLineageResolver.resolveForReport(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-cross-iteration",
+                fixture.reportNode());
 
         assertEquals(CompletionEvidenceLineageResolver.Status.INVALID, resolution.status());
         assertEquals(CompletionEvidenceLineageResolver.SELF_TEST_INVALID, resolution.failureCode());
@@ -139,7 +157,9 @@ class CompletionEvidenceLineageResolverTest {
         var fixture = CompletionEvidenceLineageFixture.prepare(tempDir, "ws-tampered-acceptance");
         Files.writeString(tempDir.resolve(fixture.acceptanceRef()), "\n", java.nio.file.StandardOpenOption.APPEND);
 
-        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(tempDir, "ws-tampered-acceptance");
+        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-tampered-acceptance");
 
         assertEquals(CompletionEvidenceLineageResolver.Status.INVALID, resolution.status());
         assertEquals(CompletionEvidenceLineageResolver.ACCEPTANCE_INVALID, resolution.failureCode());
@@ -155,7 +175,9 @@ class CompletionEvidenceLineageResolverTest {
                 goal.nodeDefinitionId(), goal.iterationId(), goal.outcome(), goal.domainOutcome(), goal.reason(),
                 List.of(fixture.acceptanceRef()), goal.sourceResult(), goal.generatedAt()));
 
-        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(tempDir, "ws-goal-ref-drift");
+        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-goal-ref-drift");
 
         assertEquals(CompletionEvidenceLineageResolver.Status.INVALID, resolution.status());
         assertEquals(CompletionEvidenceLineageResolver.GOAL_INVALID, resolution.failureCode());
@@ -203,7 +225,9 @@ class CompletionEvidenceLineageResolverTest {
                 goal.nodeDefinitionId(), goal.iterationId(), goal.outcome(), goal.domainOutcome(), goal.reason(),
                 combinedRefs, goal.sourceResult(), goal.generatedAt()));
 
-        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(tempDir, "ws-duplicate-acceptance");
+        var resolution = CompletionEvidenceLineageResolver.resolveCurrent(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-duplicate-acceptance");
 
         assertEquals(CompletionEvidenceLineageResolver.Status.INVALID, resolution.status());
         assertEquals(CompletionEvidenceLineageResolver.ACCEPTANCE_INVALID, resolution.failureCode());
@@ -213,8 +237,10 @@ class CompletionEvidenceLineageResolverTest {
     @Test
     void reportEntryPreservesNotConfiguredAndNotFinalFailureCodes() throws Exception {
         var missingReport = reportNode("ws-report-missing", List.of());
-        var missing = CompletionEvidenceLineageResolver.resolveForReport(
-                tempDir, "ws-report-missing", missingReport);
+        var missing = CompletionEvidenceLineageResolver.resolveForReport(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-report-missing",
+                missingReport);
         assertEquals(CompletionEvidenceLineageResolver.Status.NOT_CONFIGURED, missing.status());
         assertEquals(CompletionEvidenceLineageResolver.GOAL_NOT_CONFIGURED, missing.failureCode());
 
@@ -225,8 +251,10 @@ class CompletionEvidenceLineageResolverTest {
                 goal.schemaVersion(), goal.workstreamId(), goal.workflowInstanceId(), goal.nodeInstanceId(),
                 "plan.decision", goal.iterationId(), "NEEDS_REVISION", GoalDomainOutcome.NEEDS_REDESIGN,
                 "plan needs revision", goal.evidenceRefs(), goal.sourceResult(), Instant.now()));
-        var notFinal = CompletionEvidenceLineageResolver.resolveForReport(
-                tempDir, "ws-report-not-final", fixture.reportNode());
+        var notFinal = CompletionEvidenceLineageResolver.resolveForReport(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                tempDir,
+                "ws-report-not-final",
+                fixture.reportNode());
         assertEquals(CompletionEvidenceLineageResolver.Status.NOT_FINAL, notFinal.status());
         assertEquals(CompletionEvidenceLineageResolver.GOAL_NOT_FINAL, notFinal.failureCode());
     }

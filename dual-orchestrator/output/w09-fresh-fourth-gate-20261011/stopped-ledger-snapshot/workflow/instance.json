@@ -1,0 +1,11 @@
+{
+  "schemaVersion" : 1,
+  "workflowInstanceId" : "wf-ws-20261011T044656Z-BMDJ",
+  "workflowId" : "agent-lifecycle-terminal-delivery",
+  "definitionVersion" : 5,
+  "status" : "RUNNING",
+  "activeNodeInstanceIds" : [ "node-design-decision-021" ],
+  "lastEventId" : "evt-000021",
+  "createdAt" : "2026-10-11T04:46:56.118037Z",
+  "updatedAt" : "2026-10-11T06:49:09.801968Z"
+}

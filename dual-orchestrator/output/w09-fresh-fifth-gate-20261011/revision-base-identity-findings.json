@@ -1,0 +1,36 @@
+{
+  "expected_base_id": "node-intake-claude_brainstorm-002:517fc15b11bd1676",
+  "expected_sha256": "517fc15b11bd16761e1c694d0625156981e8e515f239f6243186735ff00de94c",
+  "returned_sha256": "517fc15b11bd16761e1c694d0625156981e8e515f237f6243186735ff00de94c",
+  "different_characters": [
+    {
+      "zero_based_position": 43,
+      "expected": "9",
+      "returned": "7"
+    }
+  ],
+  "prompt_ref": ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728580831/prompts/intake-claude-brainstorm.md",
+  "prompt_sha256": "b2da7c760c33bdc0a34f47125721192da9f4ee7a675e8a7e273b336848b91cb4",
+  "result_ref": ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728580831/outputs/intake-claude-brainstorm.json",
+  "result_sha256": "119d0b4e3ffef6f19e4047afe8383c5783e741ef8314137f3ce61aaeaeeda5ab",
+  "original_base_ref": ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728289467/outputs/intake-claude-brainstorm.contract.json",
+  "original_base_bytes_match": true,
+  "expected_sha_present_in_instruction_and_example": true,
+  "primary_outcome": {
+    "status": "CONTRACT_FAILED",
+    "primaryReason": "required_artifact_contract_failed",
+    "nodeMaySucceed": false,
+    "retryPolicy": "MANUAL_ONLY",
+    "recoveryCategory": "ARTIFACT_CONTRACT_FAILURE",
+    "operatorMessage": "The agent result was valid, but one or more required artifact projections failed validation.",
+    "secondarySignals": []
+  },
+  "failure_code": "TASK_CONTRACT_REVISION_PATCH_INVALID",
+  "failure_details": {
+    "errors": [
+      "REVISION_BASE_PROPOSAL_SHA256_MISMATCH"
+    ]
+  },
+  "blocked_before_publish": true,
+  "unimplemented_counterfactual": "No repaired-patch replay or model retry performed"
+}

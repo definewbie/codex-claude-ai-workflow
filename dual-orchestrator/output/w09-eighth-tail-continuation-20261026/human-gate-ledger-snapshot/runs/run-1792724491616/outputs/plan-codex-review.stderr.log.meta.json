@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "stderr",
+  "runId" : "run-1792724491616",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "nodeId" : "plan.codex_plan_review",
+  "agent" : "codex",
+  "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+  "promptTemplate" : "plan-codex-review",
+  "workdir" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+  "artifactPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.stderr.log",
+  "contentType" : "text/plain",
+  "byteSize" : 236,
+  "estimatedTokens" : 59,
+  "lineCount" : 1,
+  "sha256" : "a6ba01b1571d1e09c984c62119f7b9deb86110f9d699d4c287c6be17701abb64",
+  "generatedAt" : "2026-10-23T03:02:20.129517Z"
+}

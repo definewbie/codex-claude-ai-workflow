@@ -1,0 +1,138 @@
+package dev.dual.runtime.lifecycle;
+
+import dev.dual.core.workflow.NodeKind;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class LifecycleWorkflowDefinitionFactoryTest {
+    @Test
+    void includesFullVariantAcrossLifecycleStages() {
+        var definition = new LifecycleWorkflowDefinitionFactory().forVariant("full");
+
+        assertEquals("agent-lifecycle-full", definition.workflowId());
+        assertEquals(10, definition.version());
+        assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
+        assertEquals(NodeKind.TASK, definition.node("context.intake_claude_brainstorm").kind());
+        assertEquals("context.build_package", definition.node("context.intake_claude_brainstorm").handlerType());
+        assertEquals(NodeKind.TASK, definition.node("intake.claude_brainstorm").kind());
+        assertEquals(NodeKind.TASK, definition.node("contract.compile").kind());
+        assertEquals(NodeKind.TASK, definition.node("design.codex_arch_review").kind());
+        assertEquals(NodeKind.TASK, definition.node("plan.claude_plan").kind());
+        assertEquals(NodeKind.TASK, definition.node("context.implement_claude").kind());
+        assertEquals(NodeKind.TASK, definition.node("implement.claude_implement").kind());
+        assertEquals(NodeKind.DECISION, definition.node("implement.self_test_decision").kind());
+        assertEquals(NodeKind.GATE, definition.node("gate.human_implementation_repair").kind());
+        assertEquals(NodeKind.TASK, definition.node("context.acceptance_codex_verifier_review").kind());
+        assertEquals(NodeKind.TASK, definition.node("acceptance.codex_verifier_review").kind());
+        assertEquals(NodeKind.TASK, definition.node("delivery.prepare_pr").kind());
+        assertEquals(NodeKind.TASK, definition.node("stage.generate_next_prompt").kind());
+        assertEquals(NodeKind.GATE, definition.node("gate.human_design_approval").kind());
+        assertEquals(3, definition.node("intake.decision").config().get("max_revisions"));
+        assertFalse(definition.node("design.decision").config().containsKey("max_revisions"));
+        assertEquals(3, definition.node("gate.human_design_approval").config().get("max_revisions"));
+        assertEquals(3, definition.node("plan.decision").config().get("max_revisions"));
+        assertEquals(1, definition.node("implement.self_test_decision").config().get("max_revisions"));
+        assertEquals(1, definition.node("gate.human_implementation_repair").config().get("max_revisions"));
+        assertEquals("context.build_package", definition.node("context.implement_claude").handlerType());
+        assertTrue(definition.edgesFrom("context.intake_claude_brainstorm").stream()
+                .anyMatch(edge -> edge.to().equals("intake.claude_brainstorm")));
+        assertTrue(definition.edgesFrom("intake.claude_brainstorm").stream()
+                .anyMatch(edge -> edge.to().equals("context.intake_codex_product_review")));
+        assertEquals(java.util.Map.of(
+                        "READY_FOR_ARCH_REVIEW", "plan.claude_plan",
+                        "NEEDS_REVISION", "design.claude_design",
+                        "BLOCKED", "gate.human_design_approval"),
+                definition.edgesFrom("design.decision").stream()
+                        .collect(java.util.stream.Collectors.toMap(edge -> edge.on(), edge -> edge.to())));
+        assertTrue(definition.edgesFrom("context.intake_codex_product_review").stream()
+                .anyMatch(edge -> edge.to().equals("intake.codex_product_review")));
+        assertTrue(definition.edgesFrom("acceptance.generate_final_report").stream()
+                .anyMatch(edge -> edge.to().equals("stage.claude_handoff")));
+        assertTrue(definition.edgesFrom("implement.claude_self_test_report").stream()
+                .anyMatch(edge -> edge.to().equals("implement.self_test_decision")));
+        assertTrue(definition.edgesFrom("implement.self_test_decision").stream()
+                .anyMatch(edge -> "SELF_TEST_INCOMPLETE".equals(edge.on())
+                        && edge.to().equals("context.implement_claude")));
+        assertTrue(definition.edgesFrom("implement.self_test_decision").stream()
+                .anyMatch(edge -> "BLOCKED".equals(edge.on())
+                        && edge.to().equals("gate.human_implementation_repair")));
+        assertTrue(definition.edgesFrom("delivery.prepare_pr").stream()
+                .anyMatch(edge -> edge.to().equals("gate.human_acceptance")));
+    }
+
+    @Test
+    void allEdgesPointToDeclaredNodes() {
+        var definition = new LifecycleWorkflowDefinitionFactory().forVariant("full");
+
+        for (var edge : definition.edges()) {
+            assertEquals(edge.from(), definition.node(edge.from()).id());
+            assertEquals(edge.to(), definition.node(edge.to()).id());
+        }
+    }
+
+    @Test
+    void architectureReviewControlsAutomaticProgressAcrossBundledVariants() {
+        var factory = new LifecycleWorkflowDefinitionFactory();
+
+        for (var variant : java.util.List.of("full", "contract", "terminal-delivery")) {
+            var definition = factory.forVariant(variant);
+            assertFalse(definition.node("design.decision").config().containsKey("max_revisions"), variant);
+            assertEquals(3, definition.node("gate.human_design_approval").config().get("max_revisions"), variant);
+            assertEquals(java.util.Map.of(
+                            "READY_FOR_ARCH_REVIEW", "plan.claude_plan",
+                            "NEEDS_REVISION", "design.claude_design",
+                            "BLOCKED", "gate.human_design_approval"),
+                    definition.edgesFrom("design.decision").stream()
+                            .collect(java.util.stream.Collectors.toMap(edge -> edge.on(), edge -> edge.to())),
+                    variant);
+        }
+    }
+
+    @Test
+    void selfTestAgentCanRunVerificationCommands() {
+        var factory = new LifecycleWorkflowDefinitionFactory();
+
+        assertEquals(true, factory.forVariant("contract")
+                .node("implement.claude_self_test_report")
+                .config()
+                .get("approve_all"));
+        assertEquals(true, factory.forVariant("full")
+                .node("implement.claude_self_test_report")
+                .config()
+                .get("approve_all"));
+    }
+
+    @Test
+    void builtInVariantsOnlyGrantWriteAccessToImplementationOwnedAgentNodes() {
+        var factory = new LifecycleWorkflowDefinitionFactory();
+
+        for (var definition : java.util.List.of(
+                factory.forVariant("contract"),
+                factory.forVariant("full")
+        )) {
+            var writableNodes = definition.nodes().stream()
+                    .filter(node -> "acpx.agent_run".equals(node.handlerType()))
+                    .filter(node -> Boolean.TRUE.equals(node.config().get("approve_all")))
+                    .map(node -> node.id())
+                    .toList();
+
+            assertEquals(java.util.List.of(
+                    "implement.claude_implement",
+                    "implement.claude_self_test_report"
+            ), writableNodes, definition.workflowId() + " must not grant write access outside implementation");
+        }
+    }
+
+    @Test
+    void finalDeliveryDecisionCannotStartAnotherModelStage() {
+        var definition = new LifecycleWorkflowDefinitionFactory().forVariant("full");
+        assertEquals(java.util.List.of("approve", "revise"), definition.node("gate.human_acceptance").config().get("allowed_actions"));
+        assertFalse(definition.edgesFrom("gate.human_acceptance").stream().anyMatch(edge -> "approved".equals(edge.on())));
+        assertTrue(definition.edgesFrom("gate.human_acceptance").stream().anyMatch(edge -> "revise".equals(edge.on()) && "context.implement_claude".equals(edge.to())));
+        assertFalse(definition.nodes().stream().anyMatch(node -> node.id().equals("gate.human_next_stage_approval")));
+    }
+}

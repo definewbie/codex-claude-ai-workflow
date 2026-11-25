@@ -1,0 +1,163 @@
+{
+  "historical_exclusion_ref": "evidence/baseline-suite-selection.json",
+  "historical_exclusion_sha256": "be83b8b4933b7bae94be7db2312b8a755642a6b6693215357f9673541b8c9000",
+  "suite_count": 11,
+  "tests": 52,
+  "rows": [
+    {
+      "source": "src/test/java/app/cryptoincome/assessment/MybatisFundingRateFactQueryTest.java",
+      "source_sha256": "e16566f80ff6b8883b95a5e9f3c66d11c8bd7b8e3ff385edbb2a3e9f5fed632a",
+      "suite": "app.cryptoincome.assessment.MybatisFundingRateFactQueryTest",
+      "xml_ref": "evidence/baseline-full-reports/TEST-app.cryptoincome.assessment.MybatisFundingRateFactQueryTest.xml",
+      "xml_sha256": "c0743c5a4422dfeb4c9bbfc269b7bcac282ff49ed5e314cf99ee586518488d0a",
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mysql_image": "mysql:8.4"
+    },
+    {
+      "source": "src/test/java/app/cryptoincome/cli/SyncMarketCliRunnerTest.java",
+      "source_sha256": "75a5e2315c7e6095950d4bd8a6ad588a150f9f85c4105663354d609ed9e7f8c7",
+      "suite": "app.cryptoincome.cli.SyncMarketCliRunnerTest",
+      "xml_ref": "evidence/baseline-full-reports/TEST-app.cryptoincome.cli.SyncMarketCliRunnerTest.xml",
+      "xml_sha256": "59deac5c8449433854c534673a618f9a56895c8a24e7abb773ae56436389277f",
+      "counts": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mysql_image": "mysql:8.4"
+    },
+    {
+      "source": "src/test/java/app/cryptoincome/funding/FundingRateBackfillServiceTest.java",
+      "source_sha256": "214af7859e59cca9b0c9081974eceb7d25923a60c01b8c3586e9c155e2da52fa",
+      "suite": "app.cryptoincome.funding.FundingRateBackfillServiceTest",
+      "xml_ref": "evidence/baseline-full-reports/TEST-app.cryptoincome.funding.FundingRateBackfillServiceTest.xml",
+      "xml_sha256": "5d6cbf377bf555de689aaa048e0c92fc9e23f350fd7fe64ad94486e3a4fadac3",
+      "counts": {
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mysql_image": "mysql:8.4"
+    },
+    {
+      "source": "src/test/java/app/cryptoincome/funding/FundingRateSyncServiceTest.java",
+      "source_sha256": "934f8601b52a82b6067a3277c964a30a3a852647e709858fbe4c07fc4ad70e3b",
+      "suite": "app.cryptoincome.funding.FundingRateSyncServiceTest",
+      "xml_ref": "evidence/baseline-full-reports/TEST-app.cryptoincome.funding.FundingRateSyncServiceTest.xml",
+      "xml_sha256": "1c6bc887c44ef2dcb6d3205ccf41719c008fc1aab22df62c78f59bf895e1e6d8",
+      "counts": {
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mysql_image": "mysql:8.4"
+    },
+    {
+      "source": "src/test/java/app/cryptoincome/grid/MybatisCandleSyncExecutionRepositoryTest.java",
+      "source_sha256": "02b9d031d6d0a8e3012b47723788f6ae636d6f311e54e5b4cb90033ed2722f96",
+      "suite": "app.cryptoincome.grid.MybatisCandleSyncExecutionRepositoryTest",
+      "xml_ref": "evidence/baseline-full-reports/TEST-app.cryptoincome.grid.MybatisCandleSyncExecutionRepositoryTest.xml",
+      "xml_sha256": "b0e8bc63b783f2027404f747bcdf80dcb587573fe088b3f8ff99c1c0612ce7c8",
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mysql_image": "mysql:8.4"
+    },
+    {
+      "source": "src/test/java/app/cryptoincome/grid/MybatisGridConfigurationSnapshotTest.java",
+      "source_sha256": "b627975aee4d91b5c2c93d4e6431d658cf200a523cb3f4728271d77088c23fed",
+      "suite": "app.cryptoincome.grid.MybatisGridConfigurationSnapshotTest",
+      "xml_ref": "evidence/baseline-full-reports/TEST-app.cryptoincome.grid.MybatisGridConfigurationSnapshotTest.xml",
+      "xml_sha256": "3d7624230c85e60b8a3a3fd2f81901092fafb229b79f84ad70a8d01b651a969f",
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mysql_image": "mysql:8.4"
+    },
+    {
+      "source": "src/test/java/app/cryptoincome/grid/MybatisGridParameterSnapshotStoreTest.java",
+      "source_sha256": "eb36196de9dce4d58f03fad06e36bad482a95be21c7ae801b2a9166bea407d3b",
+      "suite": "app.cryptoincome.grid.MybatisGridParameterSnapshotStoreTest",
+      "xml_ref": "evidence/baseline-full-reports/TEST-app.cryptoincome.grid.MybatisGridParameterSnapshotStoreTest.xml",
+      "xml_sha256": "6b8a4c7c23a2894d15cfc9a4a06dd75881a8a0b69f0ed0fc2fd037a03e957c20",
+      "counts": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mysql_image": "mysql:8.4"
+    },
+    {
+      "source": "src/test/java/app/cryptoincome/grid/MybatisSpotCandleFactTest.java",
+      "source_sha256": "d0b35d9c06bf400154a6082c2605663a5581ecd7fdbaa423b1309868b591e574",
+      "suite": "app.cryptoincome.grid.MybatisSpotCandleFactTest",
+      "xml_ref": "evidence/baseline-full-reports/TEST-app.cryptoincome.grid.MybatisSpotCandleFactTest.xml",
+      "xml_sha256": "2217c9714fdb49a64d2e0ff482a96de29bb5d260e1dca3950306e9dba874c7b5",
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mysql_image": "mysql:8.4"
+    },
+    {
+      "source": "src/test/java/app/cryptoincome/market/MybatisBtcMarketTickTest.java",
+      "source_sha256": "a0367ce13aa69874bfea21b02c412889ffa39e56d8aa69dc009c57d98951aa79",
+      "suite": "app.cryptoincome.market.MybatisBtcMarketTickTest",
+      "xml_ref": "evidence/baseline-full-reports/TEST-app.cryptoincome.market.MybatisBtcMarketTickTest.xml",
+      "xml_sha256": "451ec9530006d2394890b5963e50340173c312229ae40be51068c2d7d7c4eaf6",
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mysql_image": "mysql:8.4"
+    },
+    {
+      "source": "src/test/java/app/cryptoincome/run/AnalysisRunServiceTest.java",
+      "source_sha256": "0af33fa8f052c10f625a54131760dfbee94faf7a4efc91bca4ad1b5bbfbec40f",
+      "suite": "app.cryptoincome.run.AnalysisRunServiceTest",
+      "xml_ref": "evidence/baseline-full-reports/TEST-app.cryptoincome.run.AnalysisRunServiceTest.xml",
+      "xml_sha256": "217655794cbd409df1fb6f90e242e839448b16c6b172160261e039cad9375b93",
+      "counts": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mysql_image": "mysql:8.4"
+    },
+    {
+      "source": "src/test/java/app/cryptoincome/shadow/MybatisGridShadowStudyRepositoryTest.java",
+      "source_sha256": "b9b9f210c780dd8c089f0ee16319d800fdc78f48d5c7f00431078b70edf5dbdc",
+      "suite": "app.cryptoincome.shadow.MybatisGridShadowStudyRepositoryTest",
+      "xml_ref": "evidence/baseline-full-reports/TEST-app.cryptoincome.shadow.MybatisGridShadowStudyRepositoryTest.xml",
+      "xml_sha256": "9cb22500b8b451480b9a82d908716d714ce1a5f4e68d1c5755be9a51f8fce4ba",
+      "counts": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "mysql_image": "mysql:8.4"
+    }
+  ],
+  "scope": "static source and saved full-run XML crosscheck; no rerun or native call"
+}

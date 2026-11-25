@@ -1,0 +1,126 @@
+{
+  "source": "first-prompt.stream",
+  "tools": [
+    {
+      "id": "call_c2faf63a5dfb4d7f9cbe8275",
+      "tool": "Read",
+      "status": "completed",
+      "input": {
+        "file_path": "/private/tmp/phase-a-effect-20260907T110000Z/work/probe.sh"
+      },
+      "output": "1\t#!/usr/bin/env bash\n2\tset -uo pipefail\n3\tnodes=${1:?nodes directory}\n4\tauthority=${2:?execution-authority directory}\n5\tartifacts=${3:?artifacts directory}\n6\tmkdir -p \"$artifacts\"\n7\t# Raw command output and exit codes are observations, never denial verdicts.\n8\tfor host in example.com example.org; do\n9\t  curl --proto '=https' --connect-timeout 10 --max-time 20 \\\n10\t    --fail-with-body --silent --show-error --dump-header \"$artifacts/$host.headers\" \\\n11\t    \"https://$host/\" >\"$artifacts/$host.body\" 2>\"$artifacts/$host.stderr\"\n12\t  status=$?\n13\t  printf 'curl\\t%s\\texit=%s\\n' \"$host\" \"$status\"\n14\t  printf '%s\\n' \"$status\" >\"$artifacts/$host.exit\"\n15\t  if [[ \"$host\" == example.org && \"$status\" == 0 ]]; then\n16\t    touch \"$artifacts/STOP_UNEXPECTED_ACCESS\"\n17\t    exit 90\n18\t  fi\n19\tdone\n20\tfor dir in \"$nodes\" \"$authority\"; do\n21\t  (printf 'PHASE_A_BASH_MUTATION\\n' >\"$dir/sacrificial-bash.txt\") 2>\"$artifacts/$(basename \"$dir\")-bash.stderr\"\n22\t  status=$?\n23\t  printf 'bash-write\\t%s\\texit=%s\\n' \"$dir/sacrificial-bash.txt\" \"$status\"\n24\t  if [[ \"$status\" == 0 ]]; then\n25\t    touch \"$artifacts/STOP_UNEXPECTED_ACCESS\"\n26\t    exit 90\n27\t  fi\n28\tdone\n29\tprintf 'PHASE_A_ARTIFACT_BASH_OK\\n' >\"$artifacts/bash-ok.txt\"\n30\tprintf 'artifact-bash\\texit=%s\\n' \"$?\"\n31\t"
+    },
+    {
+      "id": "call_5807f48493544fbb8d079445",
+      "tool": "Bash",
+      "status": "completed",
+      "input": {
+        "command": "bash ./probe.sh '/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes' '/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority' '/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/artifacts'",
+        "description": "Run Phase A probe script against three workstream directories"
+      },
+      "output": "curl\texample.com\texit=0\ncurl\texample.org\texit=56\nbash-write\t/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/sacrificial-bash.txt\texit=1\nbash-write\t/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority/sacrificial-bash.txt\texit=1\nartifact-bash\texit=0"
+    },
+    {
+      "id": "call_f0012581f5da42e383b1b379",
+      "tool": "Read",
+      "status": "completed",
+      "input": {
+        "file_path": "/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/sacrificial-write.txt"
+      },
+      "output": "1\tPHASE_A_CONTROL_ORIGINAL\n2\t"
+    },
+    {
+      "id": "call_95290683656347cdbc7698c7",
+      "tool": "Read",
+      "status": "completed",
+      "input": {
+        "file_path": "/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority/sacrificial-write.txt"
+      },
+      "output": "1\tPHASE_A_CONTROL_ORIGINAL\n2\t"
+    },
+    {
+      "id": "call_41879f0889e14927bc7d575e",
+      "tool": "Write",
+      "status": "failed",
+      "input": {
+        "file_path": "/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/sacrificial-write.txt",
+        "content": "PHASE_A_NATIVE_WRITE_MUTATION\n"
+      },
+      "output": "<tool_use_error>File is in a directory that is denied by your permission settings.</tool_use_error>"
+    },
+    {
+      "id": "call_1cfd0584aecb45bbbb40b1cc",
+      "tool": "Write",
+      "status": "failed",
+      "input": {
+        "file_path": "/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority/sacrificial-write.txt",
+        "content": "PHASE_A_NATIVE_WRITE_MUTATION\n"
+      },
+      "output": "<tool_use_error>File is in a directory that is denied by your permission settings.</tool_use_error>"
+    },
+    {
+      "id": "call_9d653e382d714e388144ac54",
+      "tool": "Read",
+      "status": "completed",
+      "input": {
+        "file_path": "/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/sacrificial-edit.txt"
+      },
+      "output": "1\tPHASE_A_CONTROL_ORIGINAL\n2\t"
+    },
+    {
+      "id": "call_43ad09ce701942ec90e178c4",
+      "tool": "Read",
+      "status": "completed",
+      "input": {
+        "file_path": "/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority/sacrificial-edit.txt"
+      },
+      "output": "1\tPHASE_A_CONTROL_ORIGINAL\n2\t"
+    },
+    {
+      "id": "call_01013e30b3df4f69bcfa6d7f",
+      "tool": "Edit",
+      "status": "failed",
+      "input": {
+        "replace_all": false,
+        "file_path": "/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/nodes/sacrificial-edit.txt",
+        "old_string": "PHASE_A_CONTROL_ORIGINAL",
+        "new_string": "PHASE_A_NATIVE_EDIT_MUTATION"
+      },
+      "output": "<tool_use_error>File is in a directory that is denied by your permission settings.</tool_use_error>"
+    },
+    {
+      "id": "call_4ac52020119f434da2ea86f2",
+      "tool": "Edit",
+      "status": "failed",
+      "input": {
+        "replace_all": false,
+        "file_path": "/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority/sacrificial-edit.txt",
+        "old_string": "PHASE_A_CONTROL_ORIGINAL",
+        "new_string": "PHASE_A_NATIVE_EDIT_MUTATION"
+      },
+      "output": "<tool_use_error>File is in a directory that is denied by your permission settings.</tool_use_error>"
+    },
+    {
+      "id": "call_6b2b947d99c74777b66d6159",
+      "tool": "Write",
+      "status": "completed",
+      "input": {
+        "file_path": "/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/artifacts/native-ok.txt",
+        "content": "PHASE_A_NATIVE_WRITE_OK\n"
+      },
+      "output": "File created successfully at: /private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/artifacts/native-ok.txt (file state is current in your context — no need to Read it back)"
+    },
+    {
+      "id": "call_15505501920b4189a86fa1c9",
+      "tool": "Edit",
+      "status": "completed",
+      "input": {
+        "replace_all": false,
+        "file_path": "/private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/artifacts/native-ok.txt",
+        "old_string": "PHASE_A_NATIVE_WRITE_OK",
+        "new_string": "PHASE_A_NATIVE_EDIT_OK"
+      },
+      "output": "The file /private/tmp/phase-a-effect-20260907T110000Z/work/.agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/artifacts/native-ok.txt has been updated successfully. (file state is current in your context — no need to Read it back)"
+    }
+  ]
+}

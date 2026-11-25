@@ -1,0 +1,27 @@
+Workstream: ws-20261010T085617Z-8SVF
+Workspace: /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree
+Branch: codex/w09-newlines-20261010-fresh-02
+Ledger: /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree/.agent/workstreams/ws-20261010T085617Z-8SVF
+
+Workflow:
+  Definition: agent-lifecycle-terminal-delivery@5
+  Status: WAITING_FOR_RECOVERY
+  Active nodes: [node-intake-claude_brainstorm-002]
+  Open gates: [recovery-node-intake-claude_brainstorm-002]
+  Active node definition: intake.claude_brainstorm
+  Active node status: FAILED
+  Active iteration: iter-001
+  Recovery: Artifact contract failed
+  Recovery detail: Inspect the diagnostic details, prompt contract, and source output before retrying the node.
+  Next action: Inspect the contract diagnostic and fix the output contract before retrying.
+  Command: dualctl retry --workdir /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree ws-20261010T085617Z-8SVF
+
+Delivery:
+  Status: BLOCKED
+  Eligibility: Current workflow is not yet deliverable.
+  Reason: WORKFLOW_NOT_DELIVERABLE - workstream is not completed: WAITING_FOR_RECOVERY
+  Changed files: 0
+  Can merge: false
+  Can finalize: false
+  Stop basis: UNKNOWN
+  Next action: workstream is not completed: WAITING_FOR_RECOVERY

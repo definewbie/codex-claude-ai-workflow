@@ -1,0 +1,71 @@
+--- a/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ b/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -4,7 +4,7 @@
+ 
+ 本文是唯一跨批次工作索引，不重新定义验收。唯一设计依据为 [R3 设计](20260923-dual-lifecycle-reliability-design.zh-CN.md) §0/§3–§7.1；证据层次和状态沿用该文 §5 与 [engineering-checklist](../engineering-checklist.md)。后续更新本文，不再按日期复制一份新主清单。§3 的文件处置都是建议，不授权删除、还原或提交既有改动。
+ 
+-2026-10-09 当前补记：B01–B04 以各批末记录为准；B05 首版 C 已获用户带回的 CC 批末独立 PASS，按合同资格单族收口（CLOSED / PASS），见 §21.2–§21.3。时钟判别尚未常驻的 LOW 已登记。B06 W06/D09 开工核对已形成，见 §22，当前 PREFLIGHT / NOT IMPLEMENTED，未知交付的具体裁定接线仍待补齐。未覆盖族 UNKNOWN，D01/I1.a/W01 与其他 W 项、真实 NO-GO 均不因此关闭，不自动启动实施。
++2026-10-09 当前补记：B01–B04 以各批末记录为准；B05 首版 C 已获用户带回的 CC 批末独立 PASS，按合同资格单族收口（CLOSED / PASS），见 §21.2–§21.3。时钟判别尚未常驻的 LOW 已登记。B06 W06/D09 开工核对及裁定接线候选已形成，见 §22–§22.1，当前 DESIGN_CANDIDATE / NOT IMPLEMENTED / AWAITING_CC；原预检状态保留，不把新接线当已冻结。未覆盖族 UNKNOWN，D01/I1.a/W01 与其他 W 项、真实 NO-GO 均不因此关闭，不自动启动实施。
+ 
+ ## 1. 当前结论、工作区身份和核验范围
+ 
+@@ -36,7 +36,7 @@
+ | W03 目标批准→只读设计/计划/复评→精确范围与必要权限批准→首次实现 | I3、I1；proposal/TaskContract/qualification、四种 definition、adapter/transport | A11–A13；T07/T08；现有严格批准和 scope 可复用，阶段顺序仍是旧合同先行 | 落实已冻结 D03 的分期批准表示、compile/qualification/逐门迁移及旧批准失效；D04 按 §8.25/§8.27 实施已冻结的原生配置、权限请求/批准/拒绝/续作与阶段检查接入；D05 同批绑定 W04 的验证出口，防止互相要求对方先完成 | W00；W01/W02 安全网；与 W04 联合实施/验收；设计已冻结，产品未完成 |
+ | W04 必需验证可行→实现→自测→独立验收；仅缺材料时补证据→再自测/验收 | I4、I1、I2；plan/contract、EvidenceCollection、ExternalVerificationEvidence、自测与验收 | A10–A13；T08/T09；工具/上下文缺口改走现有人门，补证据和代码返修已有区别 | 落实已冻结 D05 的必需验收项与方法/环境/权限/责任/证据绑定及检查时点；环境失效必须保留原因与解决动作；不可把上传声明当机器执行证明 | W03 联合；W02 失败事实；W05 部分写恢复；部分 Implemented；D05 已冻结，验证出口待实施 |
+ | W05 进程中断→核对冻结身份/耐久事实→本地幂等续作；外部未知→人工裁定；终态不重开 | I5、I1；ledger writers/readers、runtime/worker、kernel | T02/T10/T11/T15；已有拒绝孤立后继与终态保护；R1 测试直接断言重放缺口 | 落实 D06 已选 prepared mutation、本地提交/reader/event 幂等协议；覆盖 queue/task/execution/run/node 桥接；落实已冻结 D07 的运行身份和 provider 未知窗口；D08 证明默认 LiteFlow 临时隔离或完成等效保障 | W00；与 W01/W02 写序协同，与 W06 外部窗口协同；D06/D07/D08 已冻结；B02 holder 互斥实施/离线验证通过、CC PASS 已收口；构造/读会话与耐久协议仍待联合实施 |
+-| W06 验收满足→候选批准→目标 Git 应用→实际提交→交付确认/中断处置 | I6，§4 交付行；candidate、DeliveryApplicationService、Git、query | T12；B03 已接 target common-dir 锁、intent/L07、实际观测、确认提交；B05 旧临时 Git 测试通过，不等于连续研发交付已证 | 见 §22：补未知交付的具名裁定/合法新操作入口、发送前目标与完整 plan 身份核验、当前观察及动作同源、逐窗/冷启动/整链证明；不自动 commit、不盲目重 apply、不把 APPLIED 空 commit 判错 | W04 验收/批准；W05 本地边界；D09 DESIGN_FROZEN，B06 PREFLIGHT / NOT IMPLEMENTED；具体裁定接线未定，W06 未关闭 |
++| W06 验收满足→候选批准→目标 Git 应用→实际提交→交付确认/中断处置 | I6，§4 交付行；candidate、DeliveryApplicationService、Git、query | T12；B03 已接 target common-dir 锁、intent/L07、实际观测、确认提交；B05 旧临时 Git 测试通过，不等于连续研发交付已证 | 见 §22–§22.1：裁定入口/停止事实/一次新操作候选待合并复审；实施与逐窗/冷启动/整链证明仍未开始；不自动 commit、不盲目重 apply、不把 APPLIED 空 commit 判错 | W04 验收/批准；W05 本地边界；原 D09 DESIGN_FROZEN，新具体接线 DESIGN_CANDIDATE / AWAITING_CC；W06 未关闭 |
+ | W07 机器身份与语义义务分离，修订能回应真实意见且不丢约束 | I1/I2 的 GCTW 承接；既有 context/contract owner、有限 correction | T13 与 E04；程序示例生成 fixture 已暴露此类测试不能证明模型复制负担 | D10 逐字段列机器绑定与模型语义，核实现有有限 correction 足够否；需要改动时选已有 context/validator 最小增量，保留错身份/漏义务拒绝；不提前承诺 token 节省 | W00；关联 W01–W04；D10 已冻结，待实施验证；不自动升级为成本优化平台 |
+ | W08 四变体、两种执行入口与各投影组合回归→冻结可审查运行 Gate | §4/§5/§6；以上全部消费者，CLI/API/UI/report | T06/T14；部分组合有受控断言，small 不是第三个 bundled；脚本 fixture 有独立局限 | 验证 W01–W07 所声明的必经合法/拒绝/中断路径；补遗漏而非追求测试数量；核验 UI/report 与 CLI/API 对状态、资格、原因和真实下一步同源消费，不各自推导 authority；确认实际 JVM 拓扑、kernel、工件/配置、预算监测与停止方式；清单/地图纳入同次独立评审 | 前项所需能力与证据，未达成；技术 NO-GO 与未授权分列 |
+ | W09 fresh 合法任务真实研发→测试/验收→批准交付→按声明级别确认结果 | §0、§6；批准的需求、真实 evidence、candidate、目标 Git | E04 历史调查与旧 Gate 仅作输入，当前组合真实产品交付 NOT PROVEN | 当具体 Gate 技术前提满足且取得授权后，执行有效 fresh case；FAIL/INVALID 止损不拼接样本；自然分支未触发记 NOT EXERCISED；不恢复旧样本、不以一次成功证明所有场景 | W08；预算/目标/外部权限依 Gate 决定；本轮不运行 |
+@@ -665,3 +665,13 @@
+ **先决缺口**：现有 apply 对旧 intent 不匹配时保守零重发，但没有被消费的交付裁定；通用 D07 入口绑定 active node/native preparation，不适合终态后的独立 delivery operation。D09 已声明裁定语义，具体入口/记录/唯一消费尚未指定；不得以手改 plan、删除 intent、自动 retry 或重开 workflow填补。先补该接线的具体协议（含停止/不明事实生产者），与本批其他接线合并受影响范围 CC 复审；本预检不单开材料轮次。若必须新增 authority/监督平台或成本偏差，按既定规则停止交用户取舍。
+ 
+ 本轮保存 653 项当前 dirty source/resource/pom 内容与前态、条件性文件范围、主清单增量；无生产/测试源码修改、测试/临时 Git 实验、provider/native、额外 agent、installer、提交或真实目标副作用。源输入与 B05 格式收尾身份相同，整体 W 项和真实 NO-GO 保持。下一步明确为**补齐交付未知结果裁定协议→一次合并设计复审→获授权后 B06 实施及离线验证→批末独立判断**，不能从本预检自行跳入编码。
++
++### 22.1 B06 交付裁定与受影响接线候选（2026-10-09）
++
++按用户“进入下一步”补齐 [protocol.md](../../output/lifecycle-batch-06-20261009/wiring-candidate/protocol.md)。当前 **DESIGN_CANDIDATE / NOT IMPLEMENTED / AWAITING_CC**；§22 的原预检与证据不改为已完成。详设 §9.1 同步，候选字段例子/source anchors/文件范围/文档增量单列于 wiring-candidate，不覆盖此前 preflight manifest。
++
++候选只有一个新的人工入口、两项处置：确认停止且目标精确 base 时授权一次新 apply；或关闭后续 apply、保留现场。已应用/提交使用原 merge/finalize 补确认，正常等待人工 commit 可达。新操作绑定原批准/候选/目标/旧 operation；同请求仅重读回执，冷启动/固定补齐不启动 Git。程序主进程结束、实测退出码、操作员停止声明分别保留证据类型；已知活动不能由人声明覆盖。人工声明的适用性显式交 CC 判断，未当作新 authority 已获批准。
++
++合并设计还覆盖发送前目标重核、完整 plan 绑定、标准 apply 有限 process callback/L07 顺序、当前动作与历史状态分离、各 query 锁顺序及逐写点/冷启动/共享 target 反证。优先现有 owner/测试 harness，无全进程树证明、自动提交、后台恢复发送或新平台。24 个既有文件仍为条件候选，另明确一个 CLI 命令 CREATE 候选，不是文件修改许可。
++
++作者自查、材料格式/身份核验不能替代 CC 独立审查。下一步把协议与 preflight 合并交 CC **一次受影响范围设计复审**；有 WARN/FAIL 回到对应边界，PASS 也不自动开工。复审通过且实施获授权后，按 W06 完整清单实施/离线验证→批末 CC 判断。无新测试/Git实验/native/provider/提交，真实 NO-GO 和总体 W 项保持。
+
+--- a/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ b/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -963,6 +963,18 @@
+ 
+ commit 继续由既有外部操作完成，finalize 只确认，不获得创建 commit 的新权限。无变化 candidate 不伪造新 commit；若既有合同允许 no-change，必须明确按该既有交付语义报告，否则拒绝不满足的承诺，不在本轮偷偷引入新完成类型。
+ 
++### 9.1 B06 具体接线候选（2026-10-09，未冻结）
++
++用户授权在开工核对后补齐接线材料、合并做受影响范围复审；本补记不是实施授权。完整候选见 [交付裁定协议](../../output/lifecycle-batch-06-20261009/wiring-candidate/protocol.md)，结合上级 preflight 的 G01–G07/V01–V07；字段例子、source anchors、条件性文件范围与作者自查在同目录。原 §9/冻结附录的结果义务仍有效，新入口和停止依据 **DESIGN_CANDIDATE / NOT IMPLEMENTED / AWAITING_CC**，不得提前称为已冻结或能力已证。
++
++正常路径仍是获批 candidate→merge→人实际 commit→finalize；异常只增加原 delivery owner 的 resolve：确认旧操作停止且精确 base 时，明确授权一次新 apply；或单向关闭该 candidate 的后续 apply，保留现场和历史。已应用/已提交只走原入口核验确认，不重 apply、不自动 commit、不重开终态。原 target→L、L07 写集、同版固定字节续完复用，无 outbox/新账本/监督服务。
++
++停止依据分开：程序观察准确已登记 Git 主进程结束，实际退出码仅来自 waitFor；操作员确认停止始终保留人工声明类型，不回填机器退出或抹去 UNKNOWN。已知原调用仍活动不得由声明覆盖。人工确认在原 D09 人工裁定边界内是否适用，明确交本次 CC 判断；不能因原语义已冻结而宣称此具体信任选择已经获批。父 JVM/PID 消失、目标恰是 base、只取得锁均不独立证明全停。
++
++候选将裁定+旧操作快照+新 intent 放同一次 L07；只有本次完整 commit 返回的 live 调用可启动一次，重复决定/冷启动/本地补齐零发送。实际 Git 启动后、patch 输入前固定准确 process 身份；各前缀未知保留。view 统一核当前目标与历史状态，CLI status/summary、API status/overview 的既有 L 内调用同时迁移，避免 L→target 锁反转；投影不生产资格。全部具体新能力 NOT RUN，成本偏离或需要新增 authority/平台时停止。
++
++下一步：与其他目标/身份/投影接线一次合并 CC 设计复审；通过且获实施授权后才开始 B06 完整工作包、离线回归和批末独立判断。总体 W 项、真实 NO-GO、提交权限保持。
++
+ ## 10. D10：机器身份回显与语义义务
+ 
+ 推荐本阶段保留严格 wire identity，不以降低校验换成功率；先消除 prompt 中重复来源和过期引用。AgentResultPromptContract 已生成带 machine identity 的完整示例，新增序列 fixture 正是消费该示例，因此它们不能证明真实模型负担已消除。
+
+--- a/output/lifecycle-batch-06-20261009/preflight.md
++++ b/output/lifecycle-batch-06-20261009/preflight.md
+@@ -128,3 +128,11 @@
+ 先补**交付未知结果裁定的具体协议**：旧操作身份/停止证据、当前目标事实、人的决定、原批准重核、本地写序/一次消费、新操作与回执未知、CLI/API合法入口。与 G02/G04/G05 的核验/投影接线合并冻结受影响范围后，给 CC 一次合并复审；不为每个补记单开轮次。
+ 
+ 协议通过且实施范围获授权后，沿上述完整工作包实施与离线验证，再交 CC 批末评审。不得从本预检 WARN 自行继续堆代码。真实 NO-GO、所有总体 W 项和提交权限不变。
++
++## 10. 接线候选后续材料（2026-10-09）
++
++上文保留开工核对时的状态、G01–G07 现状与 NOT RUN 口径。用户随后授权补具体接线，本次形成 [wiring-candidate/protocol.md](wiring-candidate/protocol.md)，含 resolve 的两项决定、程序/人工停止依据、同 L07 的一次新 operation、标准 apply lifecycle 顺序、当前 view 与锁顺序、全部失败前缀及原入口合法续作。字段例子、源码锚点、条件范围、作者自查/文档增量另存同目录。
++
++当前更新为 **设计候选待合并 CC 复审**，不把 G01 的消费者或新强制点称为已实现/已证明。尤其人工停止确认的信任边界需独立判断，观察准确主进程结束不等于测得退出码/任意子树全停。原 preflight manifest 作为历史凭证保留，当前材料使用新 manifest；源码 653 项身份继续核对，产品/测试未修改。
++
++下一步：协议+原预检合并一次受影响范围设计复审；通过且实施获授权后推进 B06 W06 全链实现/离线验证及批末独立判断。无测试/Git实验/原生或 provider 调用、提交；真实 NO-GO 保持。

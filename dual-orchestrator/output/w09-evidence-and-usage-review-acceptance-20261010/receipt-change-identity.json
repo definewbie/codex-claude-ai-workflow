@@ -1,0 +1,8 @@
+{
+  "worklist_before_sha256": "68bf302d969b8d8d8af2937ff31993beb8a8c5efc7d8ef6d9e62c35ba1a127c4",
+  "worklist_after_sha256": "d29d7e300f9bdbe18b12eeee238617d461c8312bfbebad0ac5719192d219a8b4",
+  "receipt_sha256": "e4d08ebc63e8a0a0fc633993ecc0738095e2bfedd71ae40993e494307c4b6321",
+  "source_changes": 0,
+  "native_provider_calls": 0,
+  "tests_rerun": 0
+}

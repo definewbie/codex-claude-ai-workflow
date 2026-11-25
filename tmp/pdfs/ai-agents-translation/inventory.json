@@ -1,0 +1,320 @@
+{
+  "figures": [
+    {
+      "figure": "1-1",
+      "pdf_page": 23,
+      "asset": "figure-1-1.png",
+      "bbox": [
+        88.50000762939453,
+        71.99998474121094,
+        523.5000610351562,
+        294.75
+      ]
+    },
+    {
+      "figure": "1-2",
+      "pdf_page": 29,
+      "asset": "figure-1-2.png",
+      "bbox": [
+        88.50000762939453,
+        161.99998474121094,
+        523.5000610351562,
+        384.75
+      ]
+    },
+    {
+      "figure": "1-3",
+      "pdf_page": 31,
+      "asset": "figure-1-3.png",
+      "bbox": [
+        88.50000762939453,
+        72.0,
+        523.5000610351562,
+        237.75001525878906
+      ]
+    },
+    {
+      "figure": "1-4",
+      "pdf_page": 37,
+      "asset": "figure-1-4.png",
+      "bbox": [
+        88.50000762939453,
+        72.0,
+        523.5000610351562,
+        350.2500305175781
+      ]
+    },
+    {
+      "figure": "1-5",
+      "pdf_page": 42,
+      "asset": "figure-1-5.png",
+      "bbox": [
+        88.50000762939453,
+        72.0,
+        523.5000610351562,
+        405.0000305175781
+      ]
+    },
+    {
+      "figure": "1-6",
+      "pdf_page": 52,
+      "asset": "figure-1-6.png",
+      "bbox": [
+        88.50000762939453,
+        71.99998474121094,
+        523.5000610351562,
+        273.75
+      ]
+    },
+    {
+      "figure": "2-1",
+      "pdf_page": 57,
+      "asset": "figure-2-1.png",
+      "bbox": [
+        88.50000762939453,
+        72.0,
+        523.5000610351562,
+        444.7500305175781
+      ]
+    },
+    {
+      "figure": "2-2",
+      "pdf_page": 66,
+      "asset": "figure-2-2.png",
+      "bbox": [
+        103.50001525878906,
+        120.75,
+        509.25006103515625,
+        679.5000610351562
+      ]
+    },
+    {
+      "figure": "2-3",
+      "pdf_page": 68,
+      "asset": "figure-2-3.png",
+      "bbox": [
+        141.00001525878906,
+        158.25,
+        471.75006103515625,
+        490.5000305175781
+      ]
+    },
+    {
+      "figure": "2-4",
+      "pdf_page": 85,
+      "asset": "figure-2-4.png",
+      "bbox": [
+        88.50000762939453,
+        71.99998474121094,
+        523.5000610351562,
+        264.75
+      ]
+    },
+    {
+      "figure": "2-5",
+      "pdf_page": 86,
+      "asset": "figure-2-5.png",
+      "bbox": [
+        88.50000762939453,
+        71.99998474121094,
+        523.5000610351562,
+        283.5
+      ]
+    },
+    {
+      "figure": "2-6",
+      "pdf_page": 86,
+      "asset": "figure-2-6.png",
+      "bbox": [
+        88.50000762939453,
+        420.0,
+        523.5000610351562,
+        560.25
+      ]
+    },
+    {
+      "figure": "2-7",
+      "pdf_page": 92,
+      "asset": "figure-2-7.png",
+      "bbox": [
+        88.50000762939453,
+        198.74998474121094,
+        523.5000610351562,
+        343.5
+      ]
+    },
+    {
+      "figure": "2-8",
+      "pdf_page": 94,
+      "asset": "figure-2-8.png",
+      "bbox": [
+        168.00001525878906,
+        279.7499694824219,
+        444.75006103515625,
+        687.75
+      ]
+    }
+  ],
+  "links": [
+    {
+      "page": 25,
+      "text": " accompanying website",
+      "uri": "https://ai-agents-the-definitive-guide.com/"
+    },
+    {
+      "page": 25,
+      "text": "Discord channel ",
+      "uri": "https://oreil.ly/JXpgv"
+    },
+    {
+      "page": 25,
+      "text": "Hands-On Large Language Models",
+      "uri": "https://learning.oreilly.com/library/view/hands-on-large-language/9781098150952//"
+    },
+    {
+      "page": 26,
+      "text": "accompanying GitHub repository",
+      "uri": "https://oreil.ly/github-ai-agents"
+    },
+    {
+      "page": 26,
+      "text": "Transformers:",
+      "uri": "https://learning.oreilly.com/library/view/transformers-the-definitive/9781098167004/"
+    },
+    {
+      "page": 26,
+      "text": "The Definitive Guide",
+      "uri": "https://learning.oreilly.com/library/view/transformers-the-definitive/9781098167004/"
+    },
+    {
+      "page": 27,
+      "text": "LangGraph,",
+      "uri": "https://oreil.ly/duukM"
+    },
+    {
+      "page": 27,
+      "text": "CrewAI",
+      "uri": "https://crewai.com/"
+    },
+    {
+      "page": 39,
+      "text": "Kimi K2",
+      "uri": "https://oreil.ly/2rXu1"
+    },
+    {
+      "page": 39,
+      "text": "Llama",
+      "uri": "https://oreil.ly/oWvTA"
+    },
+    {
+      "page": 39,
+      "text": "4",
+      "uri": "https://oreil.ly/oWvTA"
+    },
+    {
+      "page": 39,
+      "text": " Qwen3.6 ",
+      "uri": "https://oreil.ly/CPUFZ"
+    },
+    {
+      "page": 42,
+      "text": "Pydantic BaseModel.",
+      "uri": "https://oreil.ly/mPQkx"
+    },
+    {
+      "page": 53,
+      "text": " ICLR workshop,",
+      "uri": "https://iclr.cc/About"
+    },
+    {
+      "page": 54,
+      "text": " “Chain-of-Thought Prompting Elicits Reasoning in Large Language Models”",
+      "uri": "https://arxiv.org/abs/2201.11903"
+    },
+    {
+      "page": 55,
+      "text": " “Tree of Thoughts: Deliberate Problem Solving with Large Language",
+      "uri": "https://arxiv.org/abs/2305.10601"
+    },
+    {
+      "page": 55,
+      "text": "Models” ",
+      "uri": "https://arxiv.org/abs/2305.10601"
+    },
+    {
+      "page": 55,
+      "text": "“The AI Scientist-v2: Workshop-Level Automated Scientific Discovery",
+      "uri": "https://arxiv.org/abs/2504.08066"
+    },
+    {
+      "page": 55,
+      "text": "via Agentic Tree Search” ",
+      "uri": "https://arxiv.org/abs/2504.08066"
+    },
+    {
+      "page": 61,
+      "text": "book’s repository.",
+      "uri": "https://oreil.ly/github-ai-agents"
+    },
+    {
+      "page": 64,
+      "text": "book’s repository",
+      "uri": "https://oreil.ly/github-ai-agents"
+    },
+    {
+      "page": 69,
+      "text": "accompanying",
+      "uri": "https://oreil.ly/-6AJc"
+    },
+    {
+      "page": 69,
+      "text": "notebook",
+      "uri": "https://oreil.ly/-6AJc"
+    },
+    {
+      "page": 76,
+      "text": "extensive documentation",
+      "uri": "https://oreil.ly/n0BLl"
+    },
+    {
+      "page": 76,
+      "text": "book’s repository",
+      "uri": "https://oreil.ly/github-ai-agents"
+    },
+    {
+      "page": 84,
+      "text": "provided notebook",
+      "uri": "https://oreil.ly/G-f2Z"
+    },
+    {
+      "page": 85,
+      "text": " Exa",
+      "uri": "https://exa.ai/"
+    },
+    {
+      "page": 95,
+      "text": " open source library ",
+      "uri": "https://oreil.ly/JqLgF"
+    },
+    {
+      "page": 100,
+      "text": " “Chain-of-Thought Prompting Elicits Reasoning in Large Language Models”",
+      "uri": "https://arxiv.org/abs/2201.11903"
+    },
+    {
+      "page": 100,
+      "text": " “Tree of Thoughts: Deliberate Problem Solving with Large Language",
+      "uri": "https://arxiv.org/abs/2305.10601"
+    },
+    {
+      "page": 100,
+      "text": "Models” ",
+      "uri": "https://arxiv.org/abs/2305.10601"
+    },
+    {
+      "page": 100,
+      "text": " “ReAct: Synergizing Reasoning and Acting in Language Models”",
+      "uri": "https://arxiv.org/abs/2210.03629"
+    }
+  ]
+}

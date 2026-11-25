@@ -1,0 +1,10 @@
+{
+  "exit": 1,
+  "elapsed_seconds": 0.714181709,
+  "duration_source": "prior exec tool wall_time_seconds; not provider/run duration",
+  "classification": "OPERATOR_CHECK_ERROR_BEFORE_EXTERNAL_ACTION",
+  "reason": "Local diagnostic expected approved status; actual schema is resolved with human_action approve",
+  "external_apply_started": false,
+  "apply_directory_absent_at_failure": true,
+  "domain_state_unchanged_by_failed_check": true
+}

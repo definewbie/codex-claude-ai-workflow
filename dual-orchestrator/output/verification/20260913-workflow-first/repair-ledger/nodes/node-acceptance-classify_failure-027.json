@@ -1,0 +1,33 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-acceptance-classify_failure-027",
+  "nodeDefinitionId" : "acceptance.classify_failure",
+  "kind" : "TASK",
+  "handlerType" : "acceptance.failure_classify",
+  "status" : "COMPLETED",
+  "stageId" : "stage-acceptance",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315574666/outputs/acceptance-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315574666/outputs/acceptance-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315574666/outputs/acceptance-codex-review.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-025-run-1789315574666/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315574666/outputs/acceptance-codex-review.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315574666/outputs/acceptance-codex-review.contract.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/failure-classification.json", ".agent/workstreams/ws-20260913T160441Z-H55W/calibration/candidates/node-acceptance-classify_failure-027-implementation-bug.json", ".agent/workstreams/ws-20260913T160441Z-H55W/recovery/current-failure.md" ],
+  "result" : {
+    "category" : "IMPLEMENTATION_BUG",
+    "reasoning" : "Validated explicit acceptance category: IMPLEMENTATION_BUG",
+    "suggested_action" : "Repair within the approved contract, then run self-test",
+    "matched_rule" : 0,
+    "review_decision" : "REJECT",
+    "stage_outcome" : "REJECTED",
+    "classification_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/failure-classification.json",
+    "calibration_candidate_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/calibration/candidates/node-acceptance-classify_failure-027-implementation-bug.json",
+    "failure_summary_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/recovery/current-failure.md"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315585125-18f8d9ec",
+  "startedAt" : "2026-09-13T16:06:25.137674Z",
+  "finishedAt" : "2026-09-13T16:06:25.160790Z"
+}

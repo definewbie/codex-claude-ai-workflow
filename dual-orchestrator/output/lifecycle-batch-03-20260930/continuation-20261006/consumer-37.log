@@ -1,0 +1,1426 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/7]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/7]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/7]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/7]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/7]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/7]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 88 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- jar:3.4.2:test-jar (shared-lifecycle-test-fixtures) @ dual-runtime ---
+[INFO] Building jar: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/dual-runtime-0.1.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-acpx >---------------------
+[INFO] Building dual-adapter-acpx 0.1.0-SNAPSHOT                          [7/7]
+[INFO]   from dual-adapter-acpx/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-acpx ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 11 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-acpx ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-acpx ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-acpx ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 37 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-acpx ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest
+[ERROR] Tests run: 10, Failures: 8, Errors: 2, Skipped: 0, Time elapsed: 9.178 s <<< FAILURE! -- in dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.ordinarySchemaCorrectionAlsoCannotPublishChangedSemanticContent(boolean)[1] -- Time elapsed: 1.293 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <1> but was: <0>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.ordinarySchemaCorrectionAlsoCannotPublishChangedSemanticContent(AuthoredReferenceCorrectionSequenceTest.java:97)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.ordinarySchemaCorrectionAlsoCannotPublishChangedSemanticContent(boolean)[2] -- Time elapsed: 0.788 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <1> but was: <0>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.ordinarySchemaCorrectionAlsoCannotPublishChangedSemanticContent(AuthoredReferenceCorrectionSequenceTest.java:97)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.stillMalformedCorrectionStopsAfterOneAttemptWithoutSidecar(boolean)[1] -- Time elapsed: 0.882 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287298551/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287298551/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287298551/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287298551/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287298551/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=702eb96371e776b075911c38044c2103d427bbe24dcafca07ab6d23f91e1d1a8}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287298677/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287298677/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287298677/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287298677/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287298677/binding.json, repository_fact_binding_sha256=619e9eaac2d4b2669c4f64b447d9bccb89c991f4ee525cdca400d0d54e78cd59, run_id=run-1791287298677, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287298677/run.json, session=authored-fixture-ws-reference-correction-run-1791287298677, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287298677/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287298677/outputs/nxe-1791287298670-4aeef898-completion.json, completion_sha256=ac6f409255f3cebc901ad4009ed96beeb382bb92d7d09574adf7904b730dd9ec}, runRef=null, latestExecutionId=nxe-1791287298670-4aeef898, startedAt=2026-10-06T11:48:18.671291Z, finishedAt=2026-10-06T11:48:18.722004Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.assertRejected(AuthoredReferenceCorrectionSequenceTest.java:118)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.stillMalformedCorrectionStopsAfterOneAttemptWithoutSidecar(AuthoredReferenceCorrectionSequenceTest.java:79)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.stillMalformedCorrectionStopsAfterOneAttemptWithoutSidecar(boolean)[2] -- Time elapsed: 1.029 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287299550/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287299550/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287299550/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287299550/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287299550/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=f46cb3a86dde3575d91392bfa9eb94d9edff92d0d5f70d91c9a3fd52fa496ef8}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287299707/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287299707/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287299707/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287299707/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287299707/binding.json, repository_fact_binding_sha256=86c29a420e01bab70db2afb4ec14b86c7f187747b9d3662983eff2efdb512b6a, run_id=run-1791287299707, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287299707/run.json, session=authored-fixture-ws-reference-correction-run-1791287299707, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287299707/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287299707/outputs/nxe-1791287299696-453d7dbb-completion.json, completion_sha256=c23ac08133f9e6f236243a8a5b2b1fa2b32d39f1ecc3ad8cff15174be1a3ef41}, runRef=null, latestExecutionId=nxe-1791287299696-453d7dbb, startedAt=2026-10-06T11:48:19.698417Z, finishedAt=2026-10-06T11:48:19.754693Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.assertRejected(AuthoredReferenceCorrectionSequenceTest.java:118)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.stillMalformedCorrectionStopsAfterOneAttemptWithoutSidecar(AuthoredReferenceCorrectionSequenceTest.java:79)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan(boolean)[1] -- Time elapsed: 0.713 s <<< ERROR!
+java.io.IOException: active node is not a gate: plan.claude_plan
+	at dev.dual.ledger.file.RoutingEngine.resolveOpenGate(RoutingEngine.java:504)
+	at dev.dual.ledger.file.RoutingEngine.resolveOpenGate(RoutingEngine.java:485)
+	at dev.dual.ledger.file.RoutingEngine.resolveOpenGate(RoutingEngine.java:480)
+	at dev.dual.ledger.file.WorkflowFileLedger.resolveOpenGate(WorkflowFileLedger.java:815)
+	at dev.dual.ledger.file.WorkflowFileLedger.resolveOpenGate(WorkflowFileLedger.java:810)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest$Fixture.revise(AuthoredReferenceCorrectionSequenceTest.java:206)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan(AuthoredReferenceCorrectionSequenceTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan(boolean)[2] -- Time elapsed: 0.870 s <<< ERROR!
+java.io.IOException: active node is not a gate: plan.claude_plan
+	at dev.dual.ledger.file.RoutingEngine.resolveOpenGate(RoutingEngine.java:504)
+	at dev.dual.ledger.file.RoutingEngine.resolveOpenGate(RoutingEngine.java:485)
+	at dev.dual.ledger.file.RoutingEngine.resolveOpenGate(RoutingEngine.java:480)
+	at dev.dual.ledger.file.WorkflowFileLedger.resolveOpenGate(WorkflowFileLedger.java:815)
+	at dev.dual.ledger.file.WorkflowFileLedger.resolveOpenGate(WorkflowFileLedger.java:810)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest$Fixture.revise(AuthoredReferenceCorrectionSequenceTest.java:206)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan(AuthoredReferenceCorrectionSequenceTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.changedAuthoredSourceBeforePublicationStillFailsClosed(boolean)[1] -- Time elapsed: 0.818 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287301997/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287301997/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287301997/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287301997/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287301997/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=90311c2d7360bedc6d917241e5148353770655d8b98c0c468de341ae5b8d0146}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287302116/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287302116/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287302116/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287302116/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287302116/binding.json, repository_fact_binding_sha256=70c1956bbb4bbe0469201ea4be0cc6cb5a995db5884b1efa99effd6012b4c068, run_id=run-1791287302116, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287302116/run.json, session=authored-fixture-ws-reference-correction-run-1791287302116, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287302116/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287302116/outputs/nxe-1791287302109-ef639f17-completion.json, completion_sha256=ad51471ae38839d16af5935242a373e9b86e81ec8e5aee372f976143cc6e241b}, runRef=null, latestExecutionId=nxe-1791287302109-ef639f17, startedAt=2026-10-06T11:48:22.110581Z, finishedAt=2026-10-06T11:48:22.160256Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.assertRejected(AuthoredReferenceCorrectionSequenceTest.java:118)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.changedAuthoredSourceBeforePublicationStillFailsClosed(AuthoredReferenceCorrectionSequenceTest.java:84)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.changedAuthoredSourceBeforePublicationStillFailsClosed(boolean)[2] -- Time elapsed: 0.949 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287302912/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287302912/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287302912/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287302912/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287302912/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=6240c322f70dfec577e05957c84a2fde2e5bc1c2601ca03665529f3ce0f60a57}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287303065/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303065/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303065/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287303065/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287303065/binding.json, repository_fact_binding_sha256=b0dff323ba6ca6153b40f016d45ec171f667909380a5cf611595ee3b63e140af, run_id=run-1791287303065, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287303065/run.json, session=authored-fixture-ws-reference-correction-run-1791287303065, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287303065/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287303065/outputs/nxe-1791287303058-be77b9ab-completion.json, completion_sha256=37dfc97ea4329f0c5091dfa3b6b78fc915a98c3743e2b87b46707c45320862ad}, runRef=null, latestExecutionId=nxe-1791287303058-be77b9ab, startedAt=2026-10-06T11:48:23.059137Z, finishedAt=2026-10-06T11:48:23.107956Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.assertRejected(AuthoredReferenceCorrectionSequenceTest.java:118)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.changedAuthoredSourceBeforePublicationStillFailsClosed(AuthoredReferenceCorrectionSequenceTest.java:84)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.shapeValidCorrectionThatChangesEvidenceMustNotPublishOrRoute(boolean)[1] -- Time elapsed: 0.812 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287303753/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303753/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303753/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287303753/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287303753/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=a68f5b45c8fdf817278a3732e103f46b6020a693e171f38569ba87ce0c6c6efe}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287303879/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303879/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303879/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287303879/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287303879/binding.json, repository_fact_binding_sha256=ac0e08da7ef82b0c76de9861af6fdeeabab443f9a664609a6f5b7f448a02d44d, run_id=run-1791287303879, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287303879/run.json, session=authored-fixture-ws-reference-correction-run-1791287303879, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287303879/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287303879/outputs/nxe-1791287303871-922b1c02-completion.json, completion_sha256=eb7b08f94ec7cd748ee7f9057faf974438b5de4bce879061c1a977dc9bfeeaee}, runRef=null, latestExecutionId=nxe-1791287303871-922b1c02, startedAt=2026-10-06T11:48:23.872983Z, finishedAt=2026-10-06T11:48:23.921924Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.assertRejected(AuthoredReferenceCorrectionSequenceTest.java:118)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.shapeValidCorrectionThatChangesEvidenceMustNotPublishOrRoute(AuthoredReferenceCorrectionSequenceTest.java:74)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.shapeValidCorrectionThatChangesEvidenceMustNotPublishOrRoute(boolean)[2] -- Time elapsed: 0.928 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287304673/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287304673/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287304673/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287304673/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287304673/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=a513bb042bd857265a2d6b2061619acc88244210b02feeda82504522ed8dac03}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287304813/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287304813/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287304813/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287304813/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287304813/binding.json, repository_fact_binding_sha256=6d17894c1e4e4553af5f5a53600ab56c395729c981ac0baf569426a0dadc52f6, run_id=run-1791287304813, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287304813/run.json, session=authored-fixture-ws-reference-correction-run-1791287304813, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287304813/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287304813/outputs/nxe-1791287304806-c76bfbc9-completion.json, completion_sha256=9209038ec88ea38faebec27f92c5dab88eab57a317f050ecc7f1aa420ce94103}, runRef=null, latestExecutionId=nxe-1791287304806-c76bfbc9, startedAt=2026-10-06T11:48:24.807369Z, finishedAt=2026-10-06T11:48:24.852975Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.assertRejected(AuthoredReferenceCorrectionSequenceTest.java:118)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.shapeValidCorrectionThatChangesEvidenceMustNotPublishOrRoute(AuthoredReferenceCorrectionSequenceTest.java:74)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.adapter.acpx.AuthoredManifestDispatchTest
+[ERROR] Tests run: 11, Failures: 1, Errors: 8, Skipped: 0, Time elapsed: 0.706 s <<< FAILURE! -- in dev.dual.adapter.acpx.AuthoredManifestDispatchTest
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(boolean)[1] -- Time elapsed: 0.063 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.ValueInstantiationException: 
+Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+	at com.fasterxml.jackson.databind.exc.ValueInstantiationException.from(ValueInstantiationException.java:47)
+	at com.fasterxml.jackson.databind.DeserializationContext.instantiationException(DeserializationContext.java:2015)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.wrapAsJsonMappingException(StdValueInstantiator.java:622)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.rewrapCtorProblem(StdValueInstantiator.java:645)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:293)
+	at com.fasterxml.jackson.databind.deser.ValueInstantiator.createFromObjectWith(ValueInstantiator.java:301)
+	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:214)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:541)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3868)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3836)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:423)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(AuthoredManifestDispatchTest.java:33)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.IllegalArgumentException: schemaVersion must be positive
+	at dev.dual.ledger.file.WorkflowDefinitionDocument.<init>(WorkflowDefinitionDocument.java:18)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.fasterxml.jackson.databind.introspect.AnnotatedConstructor.call(AnnotatedConstructor.java:126)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:291)
+	... 62 more
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(boolean)[2] -- Time elapsed: 0.061 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.ValueInstantiationException: 
+Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+	at com.fasterxml.jackson.databind.exc.ValueInstantiationException.from(ValueInstantiationException.java:47)
+	at com.fasterxml.jackson.databind.DeserializationContext.instantiationException(DeserializationContext.java:2015)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.wrapAsJsonMappingException(StdValueInstantiator.java:622)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.rewrapCtorProblem(StdValueInstantiator.java:645)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:293)
+	at com.fasterxml.jackson.databind.deser.ValueInstantiator.createFromObjectWith(ValueInstantiator.java:301)
+	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:214)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:541)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3868)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3836)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:423)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(AuthoredManifestDispatchTest.java:33)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.IllegalArgumentException: schemaVersion must be positive
+	at dev.dual.ledger.file.WorkflowDefinitionDocument.<init>(WorkflowDefinitionDocument.java:18)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.fasterxml.jackson.databind.introspect.AnnotatedConstructor.call(AnnotatedConstructor.java:126)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:291)
+	... 62 more
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider(boolean)[1] -- Time elapsed: 0.063 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.ValueInstantiationException: 
+Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+	at com.fasterxml.jackson.databind.exc.ValueInstantiationException.from(ValueInstantiationException.java:47)
+	at com.fasterxml.jackson.databind.DeserializationContext.instantiationException(DeserializationContext.java:2015)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.wrapAsJsonMappingException(StdValueInstantiator.java:622)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.rewrapCtorProblem(StdValueInstantiator.java:645)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:293)
+	at com.fasterxml.jackson.databind.deser.ValueInstantiator.createFromObjectWith(ValueInstantiator.java:301)
+	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:214)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:541)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3868)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3836)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:423)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider(AuthoredManifestDispatchTest.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.IllegalArgumentException: schemaVersion must be positive
+	at dev.dual.ledger.file.WorkflowDefinitionDocument.<init>(WorkflowDefinitionDocument.java:18)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.fasterxml.jackson.databind.introspect.AnnotatedConstructor.call(AnnotatedConstructor.java:126)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:291)
+	... 62 more
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider(boolean)[2] -- Time elapsed: 0.062 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.ValueInstantiationException: 
+Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+	at com.fasterxml.jackson.databind.exc.ValueInstantiationException.from(ValueInstantiationException.java:47)
+	at com.fasterxml.jackson.databind.DeserializationContext.instantiationException(DeserializationContext.java:2015)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.wrapAsJsonMappingException(StdValueInstantiator.java:622)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.rewrapCtorProblem(StdValueInstantiator.java:645)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:293)
+	at com.fasterxml.jackson.databind.deser.ValueInstantiator.createFromObjectWith(ValueInstantiator.java:301)
+	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:214)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:541)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3868)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3836)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:423)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider(AuthoredManifestDispatchTest.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.IllegalArgumentException: schemaVersion must be positive
+	at dev.dual.ledger.file.WorkflowDefinitionDocument.<init>(WorkflowDefinitionDocument.java:18)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.fasterxml.jackson.databind.introspect.AnnotatedConstructor.call(AnnotatedConstructor.java:126)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:291)
+	... 62 more
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.prepareOnlyWritesAndReadsTheSameManifestWithoutProvider -- Time elapsed: 0.074 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+{failure_code=AUTHORED_CONTEXT_INVALID, errors=[Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]], reason=REQUIRED_AGENT_EVIDENCE_MISSING, input_preparation_failure={code=AUTHORED_CONTEXT_INVALID, reason=REQUIRED_AGENT_EVIDENCE_MISSING, details=[Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]], providerInvoked=false, retryPolicy=MANUAL_ONLY}} ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.prepareOnlyWritesAndReadsTheSameManifestWithoutProvider(AuthoredManifestDispatchTest.java:84)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider(boolean)[1] -- Time elapsed: 0.064 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.ValueInstantiationException: 
+Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+	at com.fasterxml.jackson.databind.exc.ValueInstantiationException.from(ValueInstantiationException.java:47)
+	at com.fasterxml.jackson.databind.DeserializationContext.instantiationException(DeserializationContext.java:2015)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.wrapAsJsonMappingException(StdValueInstantiator.java:622)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.rewrapCtorProblem(StdValueInstantiator.java:645)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:293)
+	at com.fasterxml.jackson.databind.deser.ValueInstantiator.createFromObjectWith(ValueInstantiator.java:301)
+	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:214)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:541)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3868)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3836)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:423)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertWriteFailure(AuthoredManifestDispatchTest.java:72)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider(AuthoredManifestDispatchTest.java:48)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.IllegalArgumentException: schemaVersion must be positive
+	at dev.dual.ledger.file.WorkflowDefinitionDocument.<init>(WorkflowDefinitionDocument.java:18)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.fasterxml.jackson.databind.introspect.AnnotatedConstructor.call(AnnotatedConstructor.java:126)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:291)
+	... 62 more
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider(boolean)[2] -- Time elapsed: 0.063 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.ValueInstantiationException: 
+Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+	at com.fasterxml.jackson.databind.exc.ValueInstantiationException.from(ValueInstantiationException.java:47)
+	at com.fasterxml.jackson.databind.DeserializationContext.instantiationException(DeserializationContext.java:2015)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.wrapAsJsonMappingException(StdValueInstantiator.java:622)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.rewrapCtorProblem(StdValueInstantiator.java:645)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:293)
+	at com.fasterxml.jackson.databind.deser.ValueInstantiator.createFromObjectWith(ValueInstantiator.java:301)
+	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:214)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:541)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3868)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3836)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:423)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertWriteFailure(AuthoredManifestDispatchTest.java:72)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider(AuthoredManifestDispatchTest.java:48)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.IllegalArgumentException: schemaVersion must be positive
+	at dev.dual.ledger.file.WorkflowDefinitionDocument.<init>(WorkflowDefinitionDocument.java:18)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.fasterxml.jackson.databind.introspect.AnnotatedConstructor.call(AnnotatedConstructor.java:126)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:291)
+	... 62 more
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(boolean)[1] -- Time elapsed: 0.064 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.ValueInstantiationException: 
+Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+	at com.fasterxml.jackson.databind.exc.ValueInstantiationException.from(ValueInstantiationException.java:47)
+	at com.fasterxml.jackson.databind.DeserializationContext.instantiationException(DeserializationContext.java:2015)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.wrapAsJsonMappingException(StdValueInstantiator.java:622)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.rewrapCtorProblem(StdValueInstantiator.java:645)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:293)
+	at com.fasterxml.jackson.databind.deser.ValueInstantiator.createFromObjectWith(ValueInstantiator.java:301)
+	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:214)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:541)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3868)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3836)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:423)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(AuthoredManifestDispatchTest.java:38)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.IllegalArgumentException: schemaVersion must be positive
+	at dev.dual.ledger.file.WorkflowDefinitionDocument.<init>(WorkflowDefinitionDocument.java:18)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.fasterxml.jackson.databind.introspect.AnnotatedConstructor.call(AnnotatedConstructor.java:126)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:291)
+	... 62 more
+
+[ERROR] dev.dual.adapter.acpx.AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(boolean)[2] -- Time elapsed: 0.061 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.ValueInstantiationException: 
+Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+	at com.fasterxml.jackson.databind.exc.ValueInstantiationException.from(ValueInstantiationException.java:47)
+	at com.fasterxml.jackson.databind.DeserializationContext.instantiationException(DeserializationContext.java:2015)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.wrapAsJsonMappingException(StdValueInstantiator.java:622)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.rewrapCtorProblem(StdValueInstantiator.java:645)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:293)
+	at com.fasterxml.jackson.databind.deser.ValueInstantiator.createFromObjectWith(ValueInstantiator.java:301)
+	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:214)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:541)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3868)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3836)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:423)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadDefinition(WorkflowFileLedger.java:417)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:80)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.execute(AuthoredManifestDispatchTest.java:129)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.assertRejected(AuthoredManifestDispatchTest.java:116)
+	at dev.dual.adapter.acpx.AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(AuthoredManifestDispatchTest.java:38)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.IllegalArgumentException: schemaVersion must be positive
+	at dev.dual.ledger.file.WorkflowDefinitionDocument.<init>(WorkflowDefinitionDocument.java:18)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.fasterxml.jackson.databind.introspect.AnnotatedConstructor.call(AnnotatedConstructor.java:126)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:291)
+	... 62 more
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   AuthoredManifestDispatchTest.prepareOnlyWritesAndReadsTheSameManifestWithoutProvider:84 {failure_code=AUTHORED_CONTEXT_INVALID, errors=[Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]], reason=REQUIRED_AGENT_EVIDENCE_MISSING, input_preparation_failure={code=AUTHORED_CONTEXT_INVALID, reason=REQUIRED_AGENT_EVIDENCE_MISSING, details=[Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]], providerInvoked=false, retryPolicy=MANUAL_ONLY}} ==> expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.changedAuthoredSourceBeforePublicationStillFailsClosed:84->assertRejected:118 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287301997/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287301997/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287301997/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287301997/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287301997/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=90311c2d7360bedc6d917241e5148353770655d8b98c0c468de341ae5b8d0146}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287302116/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287302116/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287302116/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287302116/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287302116/binding.json, repository_fact_binding_sha256=70c1956bbb4bbe0469201ea4be0cc6cb5a995db5884b1efa99effd6012b4c068, run_id=run-1791287302116, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287302116/run.json, session=authored-fixture-ws-reference-correction-run-1791287302116, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287302116/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287302116/outputs/nxe-1791287302109-ef639f17-completion.json, completion_sha256=ad51471ae38839d16af5935242a373e9b86e81ec8e5aee372f976143cc6e241b}, runRef=null, latestExecutionId=nxe-1791287302109-ef639f17, startedAt=2026-10-06T11:48:22.110581Z, finishedAt=2026-10-06T11:48:22.160256Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.changedAuthoredSourceBeforePublicationStillFailsClosed:84->assertRejected:118 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287302912/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287302912/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287302912/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287302912/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287302912/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=6240c322f70dfec577e05957c84a2fde2e5bc1c2601ca03665529f3ce0f60a57}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287303065/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303065/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303065/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287303065/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287303065/binding.json, repository_fact_binding_sha256=b0dff323ba6ca6153b40f016d45ec171f667909380a5cf611595ee3b63e140af, run_id=run-1791287303065, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287303065/run.json, session=authored-fixture-ws-reference-correction-run-1791287303065, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287303065/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287303065/outputs/nxe-1791287303058-be77b9ab-completion.json, completion_sha256=37dfc97ea4329f0c5091dfa3b6b78fc915a98c3743e2b87b46707c45320862ad}, runRef=null, latestExecutionId=nxe-1791287303058-be77b9ab, startedAt=2026-10-06T11:48:23.059137Z, finishedAt=2026-10-06T11:48:23.107956Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.ordinarySchemaCorrectionAlsoCannotPublishChangedSemanticContent:97 expected: <1> but was: <0>
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.ordinarySchemaCorrectionAlsoCannotPublishChangedSemanticContent:97 expected: <1> but was: <0>
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.shapeValidCorrectionThatChangesEvidenceMustNotPublishOrRoute:74->assertRejected:118 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287303753/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303753/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303753/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287303753/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287303753/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=a68f5b45c8fdf817278a3732e103f46b6020a693e171f38569ba87ce0c6c6efe}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287303879/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303879/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287303879/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287303879/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287303879/binding.json, repository_fact_binding_sha256=ac0e08da7ef82b0c76de9861af6fdeeabab443f9a664609a6f5b7f448a02d44d, run_id=run-1791287303879, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287303879/run.json, session=authored-fixture-ws-reference-correction-run-1791287303879, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287303879/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287303879/outputs/nxe-1791287303871-922b1c02-completion.json, completion_sha256=eb7b08f94ec7cd748ee7f9057faf974438b5de4bce879061c1a977dc9bfeeaee}, runRef=null, latestExecutionId=nxe-1791287303871-922b1c02, startedAt=2026-10-06T11:48:23.872983Z, finishedAt=2026-10-06T11:48:23.921924Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.shapeValidCorrectionThatChangesEvidenceMustNotPublishOrRoute:74->assertRejected:118 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287304673/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287304673/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287304673/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287304673/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287304673/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=a513bb042bd857265a2d6b2061619acc88244210b02feeda82504522ed8dac03}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287304813/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287304813/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287304813/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287304813/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287304813/binding.json, repository_fact_binding_sha256=6d17894c1e4e4553af5f5a53600ab56c395729c981ac0baf569426a0dadc52f6, run_id=run-1791287304813, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287304813/run.json, session=authored-fixture-ws-reference-correction-run-1791287304813, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287304813/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287304813/outputs/nxe-1791287304806-c76bfbc9-completion.json, completion_sha256=9209038ec88ea38faebec27f92c5dab88eab57a317f050ecc7f1aa420ce94103}, runRef=null, latestExecutionId=nxe-1791287304806-c76bfbc9, startedAt=2026-10-06T11:48:24.807369Z, finishedAt=2026-10-06T11:48:24.852975Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.stillMalformedCorrectionStopsAfterOneAttemptWithoutSidecar:79->assertRejected:118 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287298551/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287298551/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287298551/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287298551/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287298551/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=702eb96371e776b075911c38044c2103d427bbe24dcafca07ab6d23f91e1d1a8}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287298677/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287298677/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287298677/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287298677/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287298677/binding.json, repository_fact_binding_sha256=619e9eaac2d4b2669c4f64b447d9bccb89c991f4ee525cdca400d0d54e78cd59, run_id=run-1791287298677, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287298677/run.json, session=authored-fixture-ws-reference-correction-run-1791287298677, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287298677/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287298677/outputs/nxe-1791287298670-4aeef898-completion.json, completion_sha256=ac6f409255f3cebc901ad4009ed96beeb382bb92d7d09574adf7904b730dd9ec}, runRef=null, latestExecutionId=nxe-1791287298670-4aeef898, startedAt=2026-10-06T11:48:18.671291Z, finishedAt=2026-10-06T11:48:18.722004Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.stillMalformedCorrectionStopsAfterOneAttemptWithoutSidecar:79->assertRejected:118 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-plan-claude_plan-010, nodeDefinitionId=plan.claude_plan, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-plan, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287299550/outputs/design-codex-review.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287299550/outputs/design-codex-review.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287299550/outputs/design-codex-review.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-design-codex_arch_review-007-run-1791287299550/binding.json, .agent/workstreams/ws-reference-correction/runs/run-1791287299550/outputs/design-codex-review.contract.json], inputTransition={condition=unconditional, transition_type=normal, required=true, source_node_instance_id=node-gate-human_design_approval-009, source_node_sha256=f46cb3a86dde3575d91392bfa9eb94d9edff92d0d5f70d91c9a3fd52fa496ef8}, outputRefs=[.agent/workstreams/ws-reference-correction/runs/run-1791287299707/outputs/plan-claude.stderr.log, .agent/workstreams/ws-reference-correction/runs/run-1791287299707/outputs/plan-claude.transcript.log, .agent/workstreams/ws-reference-correction/runs/run-1791287299707/outputs/plan-claude.json, .agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287299707/binding.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, .agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=plan_result, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, contract_allowed_decisions=[READY_FOR_PLAN_REVIEW], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-reference-correction/artifacts/contract-failures/node-plan-claude_plan-010.json, contract_node_id=plan.claude_plan, contract_required_keys=[summary, decision], exit_code=0, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH], output_complete=true, parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[PLAN_EDIT_FILES_MISMATCH]}, message=AgentResultEnvelope failed contract validation: [PLAN_EDIT_FILES_MISMATCH]}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-reference-correction/artifacts/context-governance/occurrences/node-plan-claude_plan-010-run-1791287299707/binding.json, repository_fact_binding_sha256=86c29a420e01bab70db2afb4ec14b86c7f187747b9d3662983eff2efdb512b6a, run_id=run-1791287299707, run_metadata=.agent/workstreams/ws-reference-correction/runs/run-1791287299707/run.json, session=authored-fixture-ws-reference-correction-run-1791287299707, transcript_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287299707/outputs/plan-claude.transcript.log, completion_ref=.agent/workstreams/ws-reference-correction/runs/run-1791287299707/outputs/nxe-1791287299696-453d7dbb-completion.json, completion_sha256=c23ac08133f9e6f236243a8a5b2b1fa2b32d39f1ecc3ad8cff15174be1a3ef41}, runRef=null, latestExecutionId=nxe-1791287299696-453d7dbb, startedAt=2026-10-06T11:48:19.698417Z, finishedAt=2026-10-06T11:48:19.754693Z] ==> expected: <gate.human_plan_approval> but was: <plan.claude_plan>
+[ERROR] Errors: 
+[ERROR]   AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider:33->assertRejected:116->execute:129 » ValueInstantiation Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+[ERROR]   AuthoredManifestDispatchTest.aSuccessfulWriterWithWrongIdentityCannotDispatchProvider:33->assertRejected:116->execute:129 » ValueInstantiation Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+[ERROR]   AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider:48->assertWriteFailure:72->execute:129 » ValueInstantiation Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+[ERROR]   AuthoredManifestDispatchTest.manifestWriteFailureRemainsAnIoFailureBeforeProvider:48->assertWriteFailure:72->execute:129 » ValueInstantiation Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+[ERROR]   AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider:43->assertRejected:116->execute:129 » ValueInstantiation Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+[ERROR]   AuthoredManifestDispatchTest.partialManifestCannotDispatchProvider:43->assertRejected:116->execute:129 » ValueInstantiation Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+[ERROR]   AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider:38->assertRejected:116->execute:129 » ValueInstantiation Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+[ERROR]   AuthoredManifestDispatchTest.retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider:38->assertRejected:116->execute:129 » ValueInstantiation Cannot construct instance of `dev.dual.ledger.file.WorkflowDefinitionDocument`, problem: schemaVersion must be positive
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 408, column: 1]
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan:37 » IO active node is not a gate: plan.claude_plan
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan:37 » IO active node is not a gate: plan.claude_plan
+[INFO] 
+[ERROR] Tests run: 21, Failures: 9, Errors: 10, Skipped: 0
+[INFO] 
+[ERROR] There are test failures.
+
+See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target/surefire-reports for the individual test results.
+See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.225 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  0.028 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  0.057 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  0.015 s]
+[INFO] dual-runtime ....................................... SUCCESS [  1.898 s]
+[INFO] dual-adapter-acpx .................................. SUCCESS [ 10.632 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  12.996 s
+[INFO] Finished at: 2026-10-06T19:48:25+08:00
+[INFO] ------------------------------------------------------------------------

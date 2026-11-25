@@ -1,0 +1,295 @@
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentPromptRenderer.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentPromptRenderer.java
+@@ -265,7 +265,8 @@
+ 
+                     - `must_fix` and `missing_evidence` mean unresolved blockers; keep them empty for a ready design.
+                     - Put resolved review comments in `checks` or `evidence`, not `must_fix`.
+-                    - `design.planned_files` declares intended changes only; exact paths and operations must be authorized by the approved TaskContract.
++                    - Under GOAL, `design.planned_files` contains proposals, not authorization; use canonical paths and operations respecting its exclusions. Exact implementation scope requires later EXECUTION approval.
++                    - Under EXECUTION, declared paths and operations must remain within its approved scope. Design or plan review does not grant additional write authority.
+                     """.stripTrailing();
+         }
+         if (!contract.emitsArtifact("agent_output_contract")
+--- before/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/implement-claude.md
++++ after/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/implement-claude.md
+@@ -16,6 +16,8 @@
+ You are Claude acting as the only agent allowed to modify business code.
+ 
+ Implement the approved plan. Keep the change scoped. Do not perform unrelated refactors. Preserve user changes. If the plan is unsafe or incomplete, stop and explain instead of guessing.
++
++Copy exact canonical paths and operations from the approved EXECUTION TaskContract scope. Neither a reviewed design nor a reviewed plan authorizes an additional path or operation. GOAL approval alone does not authorize implementation. Prose and reference files cannot expand scope; stop and request the existing revision/approval path when the plan needs an unapproved change.
+ 
+ Implementation-stage boundary:
+ 
+--- before/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/design-codex-review.md
++++ after/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/design-codex-review.md
+@@ -19,6 +19,7 @@
+ 
+ - Review the complete current typed design, not only the latest delta. Prior must-fix items, when present, are closure seeds rather than the review boundary.
+ - Use the required architecture subject's Declared Planned Files as the candidate file list. Verify that it covers the proposed responsibilities and agrees with the design explanation; mechanical scope validation does not prove completeness or business correctness.
++- Under GOAL, file entries are proposals, not authorization; check the approved objective and exclusions without demanding an already-approved implementation file set. Exact EXECUTION scope approval follows design and plan review. Under EXECUTION, proposals outside approved paths or operations require new approval before implementation.
+ - Before returning `NEEDS_REVISION`, examine every applicable lifecycle boundary introduced or changed by state, indexes, locks, transactions, queues, caches, external side effects, or compensation: normal completion, concurrency, timeout/provider failure, interruption/crash, restart/recovery, rollback/conflict, and cannot-bypass tests.
+ - Report the complete blocking set that can be derived from the supplied evidence in this turn. Do not intentionally defer a visible blocker to a later revision.
+ - Evaluate whether deleting a mechanism or simplifying the state model is safer than adding another patch.
+--- before/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/plan-codex-review.md
++++ after/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/plan-codex-review.md
+@@ -11,7 +11,9 @@
+ - Only the orchestrator writes run ledger artifacts.
+ - Return your artifact in stdout using the contract below.
+ 
+-You are Codex acting as an external reviewer. Check whether the implementation plan is complete enough to execute without drifting from the approved scope.
++You are Codex acting as an external reviewer. Check whether the implementation plan is complete enough to execute within the approved objective and exclusions.
++
++Under GOAL, planned files are proposals, not authorization; do not require an already-approved implementation file set. Check their consistency with the reviewed design and the verification plan. Exact EXECUTION scope approval follows this review. Under EXECUTION, proposed paths and operations must remain within its approved scope; outside changes require new approval before implementation.
+ 
+ Do not modify files.
+ 
+--- before/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/plan-claude.md
++++ after/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/plan-claude.md
+@@ -11,9 +11,11 @@
+ - Only the orchestrator writes run ledger artifacts.
+ - Return your artifact in stdout using the contract below.
+ 
+-You are Claude acting as the primary developer. Convert the approved design into a concrete implementation plan.
++You are Claude acting as the primary developer. Convert the independently reviewed design into a concrete implementation plan.
+ 
+ Do not implement code in this stage. Keep the plan small enough to execute and verify. Do not expand scope.
++
++Under GOAL, planned files are proposals, not authorization: derive canonical paths from the reviewed design while respecting the approved objective and exclusions. Exact EXECUTION scope approval follows design and plan review. Under EXECUTION, the plan must remain within approved paths and operations; a change outside them requires new approval before implementation.
+ 
+ Planning-stage boundary:
+ 
+--- before/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/design-claude.md
++++ after/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/design-claude.md
+@@ -16,9 +16,10 @@
+ Do not implement code in this stage. Produce an implementation-ready design that is narrow, testable, and avoids unrelated refactors.
+ 
+ Declare the complete planned file set in `result.design.planned_files`, for initial and replacement designs alike.
+-Copy exact canonical paths and operations from the approved TaskContract scope; prose cannot authorize other paths.
++Under GOAL, these are proposals, not authorization: propose exact canonical paths and operations consistent with the approved objective and exclusions. GOAL does not contain an approved implementation file set.
++Under EXECUTION, proposed paths and operations must remain within its approved scope; a change outside it requires new approval before implementation.
+ Each entry assigns a responsibility, not an actual file change. CREATE files need not exist yet.
+-The declared set may be a subset of approved scope, but must cover every change this design proposes.
++The declared set must cover every change this design proposes. Independent design and plan review precede exact EXECUTION scope approval; neither review nor prose authorizes repository changes.
+ 
+ Revision discipline:
+ 
+--- before/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/intake-claude-brainstorm.md
++++ after/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/prompts/intake-claude-brainstorm.md
+@@ -19,7 +19,7 @@
+ - For an initial proposal over a non-empty tracked inventory, include at least one `evidence_refs` entry from the projected repo map. Evidence references support scope reasoning but never authorize edits by themselves.
+ - Do not copy the current node's `AgentResultEnvelope`, JSON-only output, or workflow-routing protocol into the task proposal. Those are enforced independently by the orchestrator's Output Contract and are not product or implementation requirements.
+ - Preserve the user's semantic boundary exactly. Do not broaden or narrow behavior based on language-specific edge cases, inferred product preferences, or a conservative implementation choice that the user did not request.
+-- Treat the typed scope projected by the Output Contract as the exhaustive authorization set for permitted repository changes. It does not require every declared path to be changed. Do not use acceptance criteria, constraints, risks, or other prose to authorize undeclared paths, and never describe typed scope as illustrative or non-exhaustive. When a revision obligation identifies a scope gap, use only the exact typed scope-addition field rendered by the Output Contract and map the obligation to one or more genuinely relevant clause IDs.
++- Treat intake file entries as proposals, not authorization. GOAL approval confirms the objective, acceptance and exclusions; exact implementation files and operations are approved in EXECUTION after design and plan review. Keep any proposed paths canonical and evidence-grounded. The approved EXECUTION `scope.included` is the exhaustive authorization set; it does not require every declared path to be changed. Do not use acceptance criteria, constraints, risks, or other prose to authorize undeclared paths. When a revision obligation identifies a scope gap, use only the exact typed scope-addition field rendered by the Output Contract and map the obligation to one or more genuinely relevant clause IDs.
+ - Use `open_questions` only for real product ambiguity that cannot be resolved from the user request, repository evidence, or prior Codex feedback.
+ - If an implementation tradeoff does not change user-visible semantics, choose the simplest compliant implementation and record material risk in `risk_areas`. If it would change the accepted input, output, scope, or observable behavior, preserve the literal user requirement and record the unresolved choice without turning it into a constraint or test.
+ - When revising after a Codex Must Fix, include at least one acceptance criterion or test requirement for each Must Fix. Do not claim readiness while leaving a Must Fix as a future human decision.
+--- before/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/templates/contract-review-principles.md
++++ after/dual-adapter-acpx/src/main/resources/dev/dual/adapter/acpx/templates/contract-review-principles.md
+@@ -4,7 +4,7 @@
+ - Explicit-requirement coverage: every user-stated objective, scope boundary, behavior constraint, acceptance criterion, and verification requirement must appear in a binding proposal field; `risk_areas`, `open_questions`, and `evidence_refs` do not preserve requirements.
+ - Protocol ownership: harness output and routing protocols belong to the orchestrator's node Output Contract and must not be duplicated into the product task proposal.
+ - Semantic neutrality: the proposal must not broaden or narrow accepted input, output, scope, or observable behavior based on an unstated implementation preference or language-specific edge case.
+-- Typed scope authority: `scope.included` is the exhaustive authorization set for permitted repository changes; each entry names one exact repository-relative path and `CREATE` or `MODIFY`. It does not require every declared path to be changed. Acceptance criteria, constraints, risks, and other prose cannot authorize an undeclared path. Never request an illustrative or non-exhaustive scope. A scope gap must request concrete typed path-and-operation changes.
++- Typed scope authority: intake file entries are proposals, not authorization. GOAL approval fixes the objective, acceptance and exclusions, not an implementation file set. Design and plan review produce the candidate for later exact EXECUTION approval. Only the approved EXECUTION `scope.included` is the exhaustive authorization set for permitted repository changes; each entry names one exact repository-relative path and `CREATE` or `MODIFY`. It does not require every declared path to be changed. Acceptance criteria, constraints, risks, and other prose cannot authorize an undeclared path. Never request an illustrative or non-exhaustive EXECUTION scope. A scope gap must request concrete typed path-and-operation changes.
+ - Non-goal clarity: boundaries must prevent unrelated refactors and scope creep.
+ - Verifiability: acceptance criteria must be observable by self-test, reviewer inspection, or user acceptance.
+ - Evidence grounding: important claims should point to user request, repo files, or prior artifacts.
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentPromptRendererTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentPromptRendererTest.java
+@@ -28,6 +28,63 @@
+ class AgentPromptRendererTest {
+     @TempDir
+     Path tempDir;
++
++    @Test
++    void qualifiedGoalPromptsPermitFileProposalsWithoutPretendingExactScopeWasApproved() throws Exception {
++        for (var topology : dev.dual.runtime.handler.AuthoredStageSequenceTest.PlanTopology.values()) {
++            var ledger = AcpxTestLedger.ledger();
++            var root = tempDir.resolve(topology.name());
++            var fixture = new dev.dual.runtime.handler.AuthoredStageSequenceTest.Fixture(
++                    root, "src/new_product.py", topology, "ws-phase", null, ledger);
++            for (var target : List.of(
++                    Map.entry("design.claude_design", "design-claude"),
++                    Map.entry("design.codex_arch_review", "design-codex-review"),
++                    Map.entry("plan.claude_plan", "plan-claude"),
++                    Map.entry("plan.codex_plan_review", "plan-codex-review"))) {
++                var context = fixture.before(target.getKey());
++                var prepared = dev.dual.runtime.handler.AgentRunGovernanceContext.ensureQualified(context, "render-proof");
++                assertEquals(dev.dual.core.contract.TaskContract.Phase.GOAL,
++                        prepared.qualifiedTaskContract().orElseThrow().phase());
++                assertTrue(prepared.qualifiedTaskContract().orElseThrow().scope().included().isEmpty());
++                var refs = new java.util.ArrayList<>(context.instance().inputRefs());
++                refs.add(prepared.contextRef());
++                var prompt = new AgentPromptRenderer(ledger).renderWithSections(
++                        root, "ws-phase", "render-proof", target.getKey(), target.getValue(), refs, null,
++                        prepared.trustedTaskContractPayload().orElseThrow()).content();
++                assertFalse(prompt.contains("Copy exact canonical paths and operations from the approved TaskContract scope"), target.toString());
++                assertFalse(prompt.contains("exact paths and operations must be authorized by the approved TaskContract"), target.toString());
++                assertTrue(prompt.contains("GOAL"), target.toString());
++                assertTrue(prompt.contains("proposals, not authorization"), target.toString());
++                assertTrue(prompt.contains("EXECUTION"), target.toString());
++                assertFalse(Files.exists(root.resolve("src/new_product.py")), "a proposed path is not an implementation");
++            }
++        }
++    }
++
++    @Test
++    void qualifiedExecutionPromptRetainsExactPathAndOperationApprovalBeforeImplementation() throws Exception {
++        var ledger = AcpxTestLedger.ledger();
++        var root = tempDir.resolve("execution");
++        var fixture = new dev.dual.runtime.handler.AuthoredStageSequenceTest.Fixture(
++                root, "src/new_product.py",
++                dev.dual.runtime.handler.AuthoredStageSequenceTest.PlanTopology.AUTOMATIC,
++                "ws-phase", null, ledger);
++        var context = fixture.before("implement.claude_implement");
++        var prepared = dev.dual.runtime.handler.AgentRunGovernanceContext.ensureQualified(context, "render-proof");
++        assertEquals(dev.dual.core.contract.TaskContract.Phase.EXECUTION,
++                prepared.qualifiedTaskContract().orElseThrow().phase());
++        assertTrue(prepared.qualifiedTaskContract().orElseThrow().scope().included().stream()
++                .anyMatch(entry -> entry.path().equals("src/new_product.py")));
++        var refs = new java.util.ArrayList<>(context.instance().inputRefs());
++        refs.add(prepared.contextRef());
++        var prompt = new AgentPromptRenderer(ledger).renderWithSections(
++                root, "ws-phase", "render-proof", "implement.claude_implement", "implement-claude", refs, null,
++                prepared.trustedTaskContractPayload().orElseThrow()).content();
++        assertTrue(prompt.contains("Copy exact canonical paths and operations from the approved EXECUTION TaskContract scope"));
++        assertTrue(prompt.contains("Neither a reviewed design nor a reviewed plan authorizes an additional path or operation"));
++        assertTrue(prompt.contains("src/new_product.py"));
++        assertFalse(Files.exists(root.resolve("src/new_product.py")), "rendering cannot execute the approved implementation");
++    }
+ 
+     @Test
+     void renderWithSectionsProducesContentAndProvenance() throws Exception {
+@@ -348,7 +405,9 @@
+                 "`scope.included` is the exhaustive authorization set for permitted repository changes"));
+         assertTrue(prompt.contains(
+                 "Acceptance criteria, constraints, risks, and other prose cannot authorize an undeclared path"));
+-        assertTrue(prompt.contains("Never request an illustrative or non-exhaustive scope"));
++        assertTrue(prompt.contains("Never request an illustrative or non-exhaustive EXECUTION scope"));
++        assertTrue(prompt.contains("intake file entries are proposals, not authorization"));
++        assertTrue(prompt.contains("GOAL approval fixes the objective, acceptance and exclusions, not an implementation file set"));
+         assertTrue(prompt.contains("A scope gap must request concrete typed path-and-operation changes"));
+         assertTrue(prompt.contains("must not broaden or narrow accepted input"));
+         assertTrue(prompt.contains("Do not require the task proposal to duplicate those harness protocols"));
+@@ -370,10 +429,12 @@
+                 .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
+ 
+         assertTrue(prompt.contains(
+-                "Treat the typed scope projected by the Output Contract as the exhaustive authorization set"));
++                "Treat intake file entries as proposals, not authorization"));
++        assertTrue(prompt.contains("GOAL approval confirms the objective, acceptance and exclusions"));
++        assertTrue(prompt.contains("approved EXECUTION `scope.included` is the exhaustive authorization set"));
+         assertTrue(prompt.contains(
+                 "Do not use acceptance criteria, constraints, risks, or other prose to authorize undeclared paths"));
+-        assertTrue(prompt.contains("never describe typed scope as illustrative or non-exhaustive"));
++        assertFalse(prompt.contains("Treat the typed scope projected by the Output Contract as the exhaustive authorization set"));
+         assertTrue(prompt.contains(
+                 "When a revision obligation identifies a scope gap, use only the exact typed scope-addition field"));
+     }
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
+@@ -145,7 +145,9 @@
+                                         "AC-1", "replacement text")),
+                                 List.of(), List.of()));
+             }
+-            return "`result.scope.included` is the exhaustive authorization set for permitted repository changes; "
++            return "Intake `result.scope.included` contains candidate paths, not write authorization. "
++                    + "GOAL approval fixes objective, acceptance and exclusions; exact implementation scope is approved in EXECUTION after design and plan review. "
++                    + "Only approved EXECUTION `scope.included` is the exhaustive authorization set for permitted repository changes; "
+                     + "each entry names one exact repository-relative path. " + CANONICAL_SCOPE_PATH_REQUIREMENT
+                     + "Dual derives CREATE/MODIFY from the effective worktree. "
+                     + "It does not require every declared path to be changed. Acceptance criteria, constraints, "
+@@ -327,7 +329,7 @@
+                     List.of(), List.of(), List.of(), "Design only; no implementation performed.",
+                     new AgentResultEnvelope.Design(List.of(new AgentResultEnvelope.PlannedFile(
+                             "repo/relative/new.ext", dev.dual.core.contract.TaskContract.ScopeOperation.CREATE,
+-                            "responsibility assigned within the approved scope"))), List.of());
++                            "proposed responsibility respecting the approved objective and exclusions"))), List.of());
+             case "plan.claude_plan" -> new AgentResultEnvelope.PlanResult(
+                     "plan_result",
+                     decision,
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/RepoScopeGovernance.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/RepoScopeGovernance.java
+@@ -211,7 +211,7 @@
+         appendPathList(builder, "Forbidden scope", textList(documents.policy().get("forbiddenScope")), 8);
+         appendPathList(builder, "Already inspected files", textList(documents.plan().get("previouslyReadFiles")), 8);
+         appendReadAvoidanceRules(builder, documents);
+-        builder.append("Read recommendations are context only. Declared edits must match TaskContract.scope and are verified from Git evidence.\n\n");
++        builder.append("Read recommendations are context only. GOAL design/plan files are proposals; edits require approved EXECUTION scope and Git evidence.\n\n");
+     }
+ 
+     private static void appendCompactMarkdownGuidance(StringBuilder builder, Documents documents, Path workspaceRoot) {
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java
+@@ -104,7 +104,9 @@
+                 "Formatting normalization is a modification and is prohibited unless that clause ID is declared"));
+         assertTrue(intake.contains("do not delete existing clause IDs"));
+         assertTrue(intake.contains(
+-                "`result.scope.included` is the exhaustive authorization set for permitted repository changes"));
++                "Intake `result.scope.included` contains candidate paths, not write authorization"));
++        assertTrue(intake.contains("Only approved EXECUTION `scope.included` is the exhaustive authorization set"));
++        assertFalse(intake.contains("`result.scope.included` is the exhaustive authorization set"));
+         assertTrue(intake.contains("Each scope path must name one exact file, not a directory"));
+         assertTrue(intake.contains("must not end with `/`"));
+         assertTrue(intake.contains("no `./`, `..`, repeated separators"));
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -6,7 +6,7 @@
+ 
+ 2026-10-09 当前补记：B01–B04 以各批末记录为准；B05 首版 C 已获用户带回的 CC 批末独立 PASS，按合同资格单族收口（CLOSED / PASS），见 §21.2–§21.3。时钟判别尚未常驻的 LOW 已登记。B06 W06/D09 具体接线已获 CC 合并设计 PASS，并获用户明确授权；实施与离线验证完成，随后用户带回 CC 批末独立 PASS，本批 CLOSED / PASS（离线范围），见 §22.4。两设计 LOW 的理由和常驻反证已落实；原预检/候选/授权前状态作为历史保留。未覆盖族 UNKNOWN，D01/I1.a/W01 与其他 W 项、真实 NO-GO 均不因此关闭，不自动启动下一批。
+ 
+-2026-10-09 W08 当前补记：用户授权离线对账与真实 Gate 草案；本轮材料完成，作者自查 WARN / 技术 NO-GO。查询锁序 LOW 已常驻并有隔离反证；W07 确认设计提示要求复制已批精确 scope 与 GOAL 分期冲突，尚未纠正。见 §23。真实 Gate、预算、安装/提交未授权；历史待办须以本次对账重新解释，不能据 B01–B06 PASS 自动开跑。
++2026-10-09 W08 历史检查点（当前见 §23.1）：用户授权离线对账与真实 Gate 草案；本轮材料完成，作者自查 WARN / 技术 NO-GO。查询锁序 LOW 已常驻并有隔离反证；W07 确认设计提示要求复制已批精确 scope 与 GOAL 分期冲突，尚未纠正。见 §23。真实 Gate、预算、安装/提交未授权；历史待办须以本次对账重新解释，不能据 B01–B06 PASS 自动开跑。
+ 
+ ## 1. 当前结论、工作区身份和核验范围
+ 
+@@ -35,13 +35,13 @@
+ | W00 对账与建立完整覆盖地图 | R3 §7.1；文档索引不持有运行 authority | 本文 §3 覆盖所有相关 dirty 文件；§4 映射测试与缺口；冻结身份可复核；CC 材料层 PASS | 2 LOW 处置及限制见 §8；后续材料实质变化重核受影响结论，不以本次抽样代替产品证明 | 材料任务收口；独立评审与作者修订核验分列，不是产品能力完成 |
+ | W01 人工决定→作者修订→复评→重新批准；失败原因→合法补足后续作 | I1/I1.a；core/ledger/revision/recovery | B03 合法续作与返修/重批，B05 C 单族独立 PASS，最新受控序列见 §23 | 其余诊断族 UNKNOWN，按用户 C/真实反复阻塞触发，不自动第二族；单族及合法离线流程不外推 I1.a 全体 | 本族 CLOSED/PASS；完整 W01 未关闭，真实能力按 Gate |
+ | W02 输入准备→provider→验证→发布→node/run/recovery | I2；adapter、唯一 outcome/finalizer、恢复 read model | B01/B03/B04 离线与独立 PASS；E02 常驻、权限双通道/固定完成/失败保真，见 §23 | 真实 native/工具能力待 Gate；首版全量声明已接受，具体运行中补声明入口未证，真实反复阻塞才重评 | 实施/具名离线链有据；总体真实能力未证 |
+-| W03 目标批准→只读设计/计划/复评→精确执行批准→首次实现 | I3/I1；TaskContract/proposal/qualification/adapter | B03 分期合同、B04 原生 C/X 接线与独立 PASS，见 §23 | W07 提示词与 GOAL 文件提案冲突 G01 必须纠正；实际选定 native 装配/合法请求续作按 Gate 核验 | 编译/控制链离线有据；G01 未修、真实 NO-GO |
++| W03 目标批准→只读设计/计划/复评→精确执行批准→首次实现 | I3/I1；TaskContract/proposal/qualification/adapter | B03 分期合同、B04 原生 C/X 接线与独立 PASS，见 §23 | G01 分期提示已纠正并配对验证，见 §23.1；实际选定 native 装配/合法请求续作按 Gate 核验 | 编译/控制链与提示修正离线有据；受影响评审待决、真实 NO-GO |
+ | W04 必需验证可行→实现→自测→独立验收；缺材料补证据 | I4/I1/I2；D05、EvidenceCollection、ExternalVerificationEvidence | B03 D05 程序/模型/人工分立、实际退出码按批准条款、漂移与合法复用、返修/补证据离线有据，见 §23 | fresh 各验收项绑定实际方法/环境/权限/责任/证据出口，未知工具不假装可用，不默认通用环境认证 | D05 接线离线有据；具体 fresh 出口 Gate 前核齐 |
+ | W05 同冻结身份中断恢复；外部未知人工裁定；终态不重开 | I5/I1；D06/D07 ledger/runtime/worker/kernel | B02 holder、B03 本地协议/构造与身份、B04/B05/B06 写点/冷 JVM 独立 PASS，见 §23 | kernel 内部 I/O 专项与部署拓扑未全证，保留；首 Gate 限单 JVM 路由/ClassLoader，实际身份/停止核验不能以测试 JVM 代替 | 具名协议离线有据；I5 全故障/部署普适性未关闭 |
+ | W06 验收满足→候选批准→目标 Git 应用→实际提交→交付确认/中断处置 | I6，§4 交付行；candidate、DeliveryApplicationService、Git、query | T12；B06 四变体×inline/worker 受控完整批准链接临时真实 Git apply/人工实际 commit/finalize；写点、冷 JVM、拒绝/续作与同源投影证据见 §22.3；CC 批末独立 PASS 见 §22.4 | 本批实施/离线接线范围收口；LOW-1 查询锁序常驻化已登记，现有一次性反证仍有效；真实目标 Git、浏览器视觉与真实客户端未证，归组合准入/Gate；不自动 commit 或盲目重 apply | W04 验收/批准；W05 本地边界；B06/W06/D09 批次 CLOSED / PASS（离线范围）；真实交付证明未关闭，NO-GO 保持 |
+-| W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | 单一示例/typed 去重/受限 correction 已有；本轮逐字段案头表完成，见 §23 | G01：GOAL 设计提案与模板已批准精确路径要求冲突，先受影响核验后纠正；不删严格 wire identity，不承诺 token 节省 | 案头审计完成、G01 未实施；真实回应负担 NOT PROVEN |
+-| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 对账已有 B01–B06 证据；本轮查询 LOW 常驻 6/0 与隔离 1 expected failure；离线 package/JAR help/三个定义 validate，未冒称新全模块 | G01–G05/P01–P08 尚未齐；完整 browser/真实 worker 未证；草案首个 CLI/INLINE 范围不关闭整体 W08 | 材料完成、自查 WARN / 技术 NO-GO；待 CC 受影响评审与实际前提核齐 |
+-| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh 小型 Python 需求与 Gate 仅为草案，不授执行/写权 | CC 核对 W08 必要缺口、纠正 G01、当次前提/需求/目标/预算明确批准后才运行；自然未触发分支 NOT EXERCISED、不恢复旧样本 | NOT RUN / NOT AUTHORIZED；真实 NO-GO 保持 |
++| W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | 单一示例/typed 去重/受限 correction 已有；本轮逐字段案头表完成，见 §23 | G01 已在既有 prompt/template owner 修正并扫 intake/design/plan/reviewer/implement，共同保留严格身份；实际模型负担待真实 Gate，不承诺 token 节省 | 案头审计和 G01 离线修正完成，待合并独立评审；真实回应负担 NOT PROVEN |
++| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 对账已有 B01–B06 证据；本轮查询 LOW 常驻 6/0 与隔离 1 expected failure；离线 package/JAR help/三个定义 validate，未冒称新全模块 | 本轮 G01 修正/G02 元数据/G03 出口/G04 新发行候选见 §23.1；G05 与最终动态前提未齐；browser/真实 worker 未证，首个 CLI/INLINE 不关闭整体 W08 | 本轮材料离线自查、待 CC 合并受影响评审 / 真实 NO-GO；实际前提与 G05 未批准 |
++| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh 小型 Python 需求与 Gate 仅为草案，不授执行/写权 | CC 合并核对本轮 G01/发行/Gate，当次前提/需求/目标/预算明确批准后才运行；自然未触发分支 NOT EXERCISED、不恢复旧样本 | NOT RUN / NOT AUTHORIZED；真实 NO-GO 保持 |
+ 
+ ### 2.1 次序、依赖与独立评审触发
+ 
+@@ -727,3 +727,17 @@
+ [Gate 草案](../../output/w08-offline-gate-20261009/verification-gate-draft.md) 提案为一 fresh 标准库 Python 小任务、terminal-delivery/INLINE、最多18顶层调用、600s/命令、累计运行60min、可见实际token160000止损；均未获用户预算批准，也不是原生内部绝对调用/token/子树取消保证。关键和最终人批准保持，真实能力未证不能被合成 fixture 填PASS。
+ 
+ 下一步：[CC 受影响范围评审](../../output/w08-offline-gate-20261009/cc-review-prompt.txt) 合并核查对账、G01分类和 Gate 可执行性/ROI，避免为两处材料补记另开轮次。之后处理 G01 和当次前提，具体 Gate 齐备再交用户批准；不自动实施、安装或启动真实运行。
++
++### 23.1 W08 准备批次：G01 修正与 G02–G05 候选（2026-10-10）
++
++用户带回前轮 CC 材料层 PASS/WARN/NO-GO，随后明确批准准备批次；仅授权 G01 接线纠正及必要离线验证、G02–G04 案头/元数据/发行核验和具体 Gate。当前 **AUTHOR_SELF_REVIEW / AWAITING_AFFECTED_CC / REAL_RUN_NO_GO**。入口：[本轮 assessment](../../output/w08-preparation-20261010/assessment.md)，增量相对批前 dirty 单列，不覆盖既有改动；前轮输出与测试凭证原样保留。
++
++G01：GOAL 下 design/plan 文件是 canonical 提案，不假定已批准实现路径；只有 EXECUTION 授具体操作。修正 renderer、design/plan 作者/复评、intake/共享原则和 passive guidance；implement 保留精确复制 EXECUTION 及越范围重批要求。未改 validator/compiler/qualification/批准/身份/scope/恢复。CC LOW-1 的 GOAL 旧指令负向和 EXECUTION 精确约束正向均用真实 qualified 输入渲染，三种 plan 拓扑 × 四角色，并保留严格程序拒绝与合法续作对照。
++
++先红两项断言失败；98 项首轮聚焦全绿。首轮全模块发现 acceptance 提示 6555 超过既有 6500 字符预算，按 FAIL 留档；只精简重复 passive guidance 67 字符，不放宽预算或断言。最终单轮 clean：1755 tests / 206 suites / 0 failure/error/skipped，654项输入前后相同；新package及CLI三次help/三个定义validate PASS，CLI/server内嵌模块及资源字节一致。凭证见本轮 test-results.json / release-identity.json / artifact-verification.json，不拼中间绿灯。
++
++G02：本仓 wrapper 实际 build-info 为当前受审 1517f828，config/help/permission-reply 元数据已测；不执行客户端/session/provider/installer。配置默认 approve-all 不作业务授权，原具名 profile 显式覆盖；实际握手/工具能力和最终 workspace 装配仍待授权后的核验。G03：三条验收的方法/证据/生产/消费及合法补齐见 verification-exits.md，真实 GOAL/epoch/occurrence 产生后走原 record-readiness，再作者→复评→EXECUTION 编译/批准；可用性声明不冒充执行实证。G04：固定本轮新发行及 source/resource 内容身份候选，实际启动 PID/loader 不冒填。
++
++[更新 Gate](../../output/w08-preparation-20261010/verification-gate-draft.md) 和纯产品 task-requirement.md 分开；G05 仍待批准。提案为 fresh Python/标准库任务，新临时 target/worktree、terminal-delivery/INLINE，18 顶层调用/600s 单命令/60min 主动窗口/160000 可见实际 token。实际正常主链 9 节点（纠正旧草案误写 8，不增预算）；内部总量不保证绝对硬限；关键/最终人门及实际 commit 责任需本次具名。
++
++下一步：[CC 合并受影响评审提示](../../output/w08-preparation-20261010/cc-review-prompt.txt) 核对修正、证据、Gate 可执行性及 ROI；按发现纠偏后向用户提交 G05。材料 PASS 不授权真实运行、目标创建、安装或项目提交，也不自动关闭 W01–W09。
+--- before/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ after/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -1002,6 +1002,9 @@
+ 
+ 2026-10-09 W08 对账补记：[逐字段案头表](../../output/w08-offline-gate-20261009/w07-field-audit.md) 已形成，单一schema/当前typed引用/受限correction与真实负担未证分别登记。确认 design-claude 精确scope复制指令与GOAL文件提案时序冲突 G01，需要在现有 prompt/template owner 内纠正并扫同族；本轮未改生产模板、不以材料形成宣布减负完成。整体 Gate 与下一步见主清单 §23，真实 NO-GO 保持。
+ 
++2026-10-10 W08 准备补记：用户授权后，G01 在既有 prompt/template owner 完成前向纠正和同族 sweep，GOAL 的 canonical 文件提案不再被当作已批准实现范围，EXECUTION 精确路径/操作要求保留；不改 wire schema、资格、scope 或批准权威。实际 qualified 渲染先红后绿，预算误超以精简重复文案修复而非放宽预算。必要离线单轮验证、新发行、实际 acpx 元数据、逐条验收出口与有界 Gate 候选见 [本轮材料](../../output/w08-preparation-20261010/assessment.md) 及主清单 §23.1。当前待 CC 合并受影响复审和 G05 用户当次授权；不宣称真实模型负担、token 节省或 native 行为已证，真实 NO-GO 保持。
++
++
+ ## 11. 整链 transition 与失败组合
+ 
+ 以下是目标序列，所有本地多写点均展开为 §6 的每个前缀；包含外部行为的行再叠加 §7/§9，不能用统一模板跳过外部窗口。角色许可沿现有 operator/agent 边界；模型不得代作人决定。

@@ -1,0 +1,41 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1791614610548-6f172703",
+  "workflowExecutionId" : "wfe-1791614610491-64eef3f2",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "nodeKind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "FAILED",
+  "agent" : "claude",
+  "session" : "claude-main",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "contextPackageRef" : ".agent/workstreams/ws-20261010T055644Z-6QCS/context/node-context-intake_claude_brainstorm-001.md",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "acpx.agent_run",
+    "agent" : "claude",
+    "session" : "claude-main",
+    "prompt_template" : "intake-claude-brainstorm",
+    "context_package_ref" : ".agent/workstreams/ws-20261010T055644Z-6QCS/context/node-context-intake_claude_brainstorm-001.md",
+    "expected_contract" : "",
+    "node_config" : {
+      "agent" : "claude",
+      "session" : "claude-main",
+      "permission_profile" : "contract_discovery",
+      "prompt_template" : "intake-claude-brainstorm",
+      "expected_artifact" : "task_contract_proposal",
+      "artifact_compiler" : "task_contract_proposal_compiler",
+      "allowed_stage_outcomes" : [ "READY", "BLOCKED" ]
+    },
+    "outcome" : "adapter_incompatible",
+    "node_status" : "FAILED",
+    "output_ref_count" : 4
+  },
+  "nodeExecutionId" : "nxe-1791614610553-b1df99de",
+  "errorMessage" : "Blocking adapter signal: ADAPTER_INCOMPATIBLE - {\"source\":\"acpx.sessions.show\",\"native_version\":\"UNKNOWN\",\"schema\":\"acpx.session.v1\",\"acpxRecordId\":\"1d507713-7c39-44bd-9010-2a15019a4f1e\",\"acpSessionId\":\"1d507713-7c39-44bd-9010-2a15019a4f1e\",\"cwd\":\"/private/tmp/dual-w09-newlines-20261010/worktree\",\"name\":\"claude-main-ws-20261010T055644Z-6QCS-run-1791614610585\",\"protocolVersion\":1,\"closed\":false,\"agentCapabilities\":{\"loadSession\":true,\"promptCapabilities\":{\"image\":true,\"embeddedContext\":true}},\"compatible\":false,\"failure\":\"missing session identity: agentSessionId\"}",
+  "createdAt" : "2026-10-10T06:43:30.548580Z",
+  "claimedAt" : "2026-10-10T06:43:30.562331Z",
+  "completedAt" : "2026-10-10T06:43:34.187122Z"
+}

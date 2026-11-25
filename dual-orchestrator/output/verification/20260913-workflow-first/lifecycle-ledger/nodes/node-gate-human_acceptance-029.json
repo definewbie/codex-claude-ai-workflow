@@ -1,0 +1,28 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-gate-human_acceptance-029",
+  "nodeDefinitionId" : "gate.human_acceptance",
+  "kind" : "GATE",
+  "handlerType" : "human.review",
+  "status" : "COMPLETED",
+  "stageId" : "stage-gate",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/commit-message.txt", ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/pr-body.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/candidates/node-delivery-prepare_pr-028/candidate-4ae728ea818e155c8f3a0601c0375aa5d1c970f0266f54f262c7ef216b6c2e6f.json" ],
+  "inputTransition" : {
+    "required" : true,
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "transition_type" : "normal",
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/commit-message.txt", ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/pr-body.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/candidates/node-delivery-prepare_pr-028/candidate-4ae728ea818e155c8f3a0601c0375aa5d1c970f0266f54f262c7ef216b6c2e6f.json" ],
+  "result" : {
+    "source_node_instance_id" : "node-delivery-prepare_pr-028",
+    "requested_action" : "approve",
+    "human_action" : "approved",
+    "note" : ""
+  },
+  "runRef" : null,
+  "latestExecutionId" : "",
+  "startedAt" : null,
+  "finishedAt" : "2026-09-13T16:05:28.349431Z"
+}

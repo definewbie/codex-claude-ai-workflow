@@ -61,8 +61,8 @@ class WorkflowRuntimeTest {
                 ),
                 List.of(new EdgeDefinition("task.one", "completed", "gate.review"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-runtime", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-runtime", definition);
 
         var gate = new FakeGate();
         var runtime = new WorkflowRuntime(
@@ -92,7 +92,6 @@ class WorkflowRuntimeTest {
             }
             Files.copy(source, sidecar);
         }
-        AgentOutputLineageFixture.completeAndPublish(tempDir, workstreamId, sidecar);
         var sidecarRef = tempDir.relativize(sidecar).toString();
 
         var artifactsDir = paths.workstreamDir().resolve("artifacts");
@@ -100,19 +99,33 @@ class WorkflowRuntimeTest {
         var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         mapper.writerWithDefaultPrettyPrinter().writeValue(
                 artifactsDir.resolve("task-contract.json").toFile(),
-                new TaskContract(
-                        "tc-replay", 1, Instant.parse("2026-07-09T00:00:00Z"),
-                        "Verify structured preparation items",
-                        new TaskContract.Scope(
+                new TaskContract(2,
+                dev.dual.core.contract.TaskContract.Phase.EXECUTION,
+                1,
+                "tc-replay",
+                1,
+                Instant.parse("2026-07-09T00:00:00Z"),
+                "Verify structured preparation items",
+                new TaskContract.Scope(
                                 List.of(new TaskContract.ScopeEntry(
                                         "backend/app/api/summaries.py",
                                         TaskContract.ScopeOperation.MODIFY)),
                                 List.of()),
-                        List.of("Backend tests pass", "Frontend type check passes"),
-                        List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
-                        ContractStatus.READY_FOR_REVIEW, 1,
-                        new TaskContract.Source("historical-real-case", "replay")
-                ));
+                dev.dual.runtime.RuntimeTestLedger.clauses("AC-", List.of("Backend tests pass", "Frontend type check passes")),
+                dev.dual.runtime.RuntimeTestLedger.clauses("TR-", List.of()),
+                List.of(),
+                List.of(),
+                List.of(),
+                java.util.List.of(),
+                List.of(),
+                List.of(),
+                ContractStatus.READY_FOR_REVIEW,
+                1,
+                new TaskContract.Source("historical-real-case", "replay", null, null),
+                null,
+                java.util.List.of(),
+                java.util.List.of(),
+                java.util.List.of()));
 
         var definition = new WorkflowDefinition(
                 "acceptance-reject-replay", 1, "replay.seed",
@@ -134,8 +147,9 @@ class WorkflowRuntimeTest {
                                 "implement.claude_self_test_report")
                 )
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-acceptance-reject-replay", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-acceptance-reject-replay", definition);
+        AgentOutputLineageFixture.completeAndPublish(tempDir, workstreamId, sidecar);
         var seed = new TaskHandler() {
             @Override
             public String type() {
@@ -184,8 +198,8 @@ class WorkflowRuntimeTest {
                 ),
                 List.of(new EdgeDefinition("task.one", "completed", "gate.review"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-worker-queue", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-worker-queue", definition);
 
         var runtime = new WorkflowRuntime(
                 ledger,
@@ -220,8 +234,8 @@ class WorkflowRuntimeTest {
                 ),
                 List.of(new EdgeDefinition("task.one", "completed", "gate.review"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-worker-run-once", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-worker-run-once", definition);
         var gate = new FakeGate();
         var handlers = new HandlerRegistry(List.of(new FakeTask()), List.of(), List.of(gate));
 
@@ -256,8 +270,8 @@ class WorkflowRuntimeTest {
                         new NodeDefinition("gate.review", NodeKind.GATE, "human.review", Map.of())),
                 List.of(new EdgeDefinition("before.gate", "completed", "gate.review"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-gate", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-gate", definition);
 
         var runtime = new WorkflowRuntime(
                 ledger,
@@ -283,8 +297,8 @@ class WorkflowRuntimeTest {
                 ),
                 List.of(new EdgeDefinition("task.one", "completed", "task.two"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-failed-runtime", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-failed-runtime", definition);
 
         var runtime = new WorkflowRuntime(
                 ledger,
@@ -303,7 +317,7 @@ class WorkflowRuntimeTest {
     }
 
     @Test
-    void changeScopeViolationStopsBeforeAcceptanceContext() throws Exception {
+    void unqualifiedScopeValidationStopsBeforeAcceptanceContext() throws Exception {
         var workstreamId = "ws-change-scope-runtime";
         git("init");
         git("config", "user.email", "dual@example.test");
@@ -312,7 +326,6 @@ class WorkflowRuntimeTest {
         git("add", "README.md");
         git("commit", "-m", "init");
         var baseCommit = gitOutput("rev-parse", "HEAD").trim();
-        writeChangeScopeControlFacts(workstreamId, baseCommit);
         Files.writeString(tempDir.resolve("unexpected.txt"), "outside contract\n");
 
         var paths = new WorkstreamPaths(tempDir, new DualId(workstreamId));
@@ -340,8 +353,8 @@ class WorkflowRuntimeTest {
                         "context.acceptance_codex_verifier_review"
                 ))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-change-scope-runtime", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-change-scope-runtime", definition);
         var runtime = new WorkflowRuntime(
                 ledger,
                 new HandlerRegistry(
@@ -358,7 +371,7 @@ class WorkflowRuntimeTest {
         assertEquals(0, acceptanceContextExecutions);
         var node = ledger.loadNode(paths, "node-implement-artifact_validation-001");
         assertEquals(NodeStatus.FAILED, node.status());
-        assertEquals("FAIL", node.result().get("change_scope_status"));
+        assertEquals("CONTRACT_PHASE_MISSING", node.result().get("reason"));
         assertTrue(Files.readString(paths.eventsJsonl()).contains("agent_task_failed"));
     }
 
@@ -387,8 +400,6 @@ class WorkflowRuntimeTest {
                   }
                 }
                 """.formatted(source.replace("\\", "\\\\")));
-        dev.dual.runtime.handler.AgentOutputLineageFixture.publish(
-                tempDir, "ws-decision-runtime", tempDir.resolve(output));
         var definition = new WorkflowDefinition(
                 "agent-lifecycle",
                 1,
@@ -403,9 +414,11 @@ class WorkflowRuntimeTest {
                         new EdgeDefinition("acceptance.decision", "REJECT", "implement.claude_implement")
                 )
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-decision-runtime", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-decision-runtime", definition);
 
+        dev.dual.runtime.handler.AgentOutputLineageFixture.publish(
+                tempDir, "ws-decision-runtime", tempDir.resolve(output));
         var runtime = new WorkflowRuntime(
                 ledger,
                 new HandlerRegistry(List.of(new FakeTask(), new OutputTask()), List.of(new dev.dual.runtime.handler.ReviewDecisionHandler()), List.of())
@@ -430,7 +443,7 @@ class WorkflowRuntimeTest {
                         List.of("reviewed diff"), List.of("tests passed"), List.of(),
                         blocking ? List.of() : List.of("repair the implementation"), List.of(), List.of(),
                         List.of(), "verified", new AgentResultEnvelope.Failure("",
-                        AgentResultEnvelope.VerificationRemediation.NONE, List.of(), List.of(), List.of(), List.of(), ""));
+                        AgentResultEnvelope.VerificationRemediation.NONE, List.of(), List.of(), List.of(), List.of(), ""), List.of());
                 var mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
                 var output = writeOutput(workstreamId, "acceptance.json", mapper.writeValueAsString(
                         new AgentResultEnvelope(1, workstreamId, "run-001", "acceptance.codex_verifier_review", review)));
@@ -444,8 +457,8 @@ class WorkflowRuntimeTest {
                                 new EdgeDefinition("acceptance.codex_verifier_review", "completed", "acceptance.decision"),
                                 new EdgeDefinition("acceptance.decision", decision, "report.generate_final"),
                                 new EdgeDefinition("report.generate_final", "completed", "delivery.prepare_pr")));
-                var ledger = new WorkflowFileLedger();
-                ledger.initialize(paths, "wf-acceptance-guard", definition);
+                var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+                dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-acceptance-guard", definition);
                 var registry = new HandlerRegistry(List.of(new AgentOutputTask(), new FakeTask()),
                         List.of(new ReviewDecisionHandler()), List.of());
                 var result = new WorkflowRuntime(ledger, registry).resume(new WorkflowCommand(tempDir, workstreamId));
@@ -459,7 +472,7 @@ class WorkflowRuntimeTest {
                 try (var nodes = Files.list(paths.nodesDir())) {
                     assertEquals(1, nodes.count(), "no decision/report/delivery successor may be created");
                 }
-                var coldResult = new WorkflowRuntime(new WorkflowFileLedger(), registry)
+                var coldResult = new WorkflowRuntime(dev.dual.runtime.RuntimeTestLedger.ledger(), registry)
                         .resume(new WorkflowCommand(tempDir, workstreamId));
                 assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, coldResult.status());
                 assertEquals(0, fakeTaskExecutions, "report/delivery consumers must never execute");
@@ -477,25 +490,25 @@ class WorkflowRuntimeTest {
                   "schema_version": 1,
                   "workstream_id": "ws-agent-contract",
                   "run_id": "run-001",
-                  "node_id": "design.codex_arch_review",
+                  "node_id": "acceptance.codex_verifier_review",
                   "result": {
                     "artifact_type": "agent_output_contract",
-                    "decision": "READY_FOR_ARCH_REVIEW"
+                    "decision": "ACCEPT"
                   }
                 }
                 """);
         var definition = new WorkflowDefinition(
                 "agent-lifecycle",
                 1,
-                "design.codex_arch_review",
+                "acceptance.codex_verifier_review",
                 List.of(
-                        new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "acpx.agent_run", Map.of("output_ref", invalidOutput)),
-                        new NodeDefinition("design.decision", NodeKind.DECISION, "review.decision", Map.of())
+                        new NodeDefinition("acceptance.codex_verifier_review", NodeKind.TASK, "acpx.agent_run", Map.of("output_ref", invalidOutput)),
+                        new NodeDefinition("acceptance.decision", NodeKind.DECISION, "review.decision", Map.of())
                 ),
-                List.of(new EdgeDefinition("design.codex_arch_review", "completed", "design.decision"))
+                List.of(new EdgeDefinition("acceptance.codex_verifier_review", "completed", "acceptance.decision"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-agent-contract", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-agent-contract", definition);
 
         var runtime = new WorkflowRuntime(
                 ledger,
@@ -504,8 +517,8 @@ class WorkflowRuntimeTest {
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-agent-contract"));
 
         assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, result.status());
-        assertEquals("design.codex_arch_review", result.activeNode());
-        var node = ledger.loadNode(paths, "node-design-codex_arch_review-001");
+        assertEquals("acceptance.codex_verifier_review", result.activeNode());
+        var node = ledger.loadNode(paths, "node-acceptance-codex_verifier_review-001");
         assertEquals(NodeStatus.FAILED, node.status());
         assertEquals("AGENT_OUTPUT_CONTRACT_VIOLATION", node.result().get("reason"));
         assertTrue(String.valueOf(node.result().get("message")).contains("summary"));
@@ -578,13 +591,9 @@ class WorkflowRuntimeTest {
         }
 
         @Override
-        public NodeResult execute(TaskContext context) {
-            return NodeResult.completed("completed", List.of((String) context.definition().config().get("output_ref")), Map.of(
-                    "agent", "codex",
-                    "session", "codex-reviewer",
-                    "exit_code", 0,
-                    "run_id", "run-001"
-            ));
+        public NodeResult execute(TaskContext context) throws Exception {
+            var run = dev.dual.runtime.handler.OfflineAgentRun.start(context, "run-001");
+            return run.candidate(List.of((String) context.definition().config().get("output_ref")));
         }
     }
 
@@ -626,7 +635,9 @@ class WorkflowRuntimeTest {
         var workspacesDir = workstreamDir.resolve("workspaces");
         Files.createDirectories(artifactsDir);
         Files.createDirectories(workspacesDir);
-        var contract = new TaskContract(
+        var contract = new TaskContract(2,
+                dev.dual.core.contract.TaskContract.Phase.EXECUTION,
+                1,
                 "task-" + workstreamId,
                 1,
                 Instant.parse("2026-07-26T00:00:00Z"),
@@ -638,17 +649,21 @@ class WorkflowRuntimeTest {
                         )),
                         List.of()
                 ),
-                List.of("README is updated", "No undeclared files are changed"),
-                List.of("Run focused tests"),
+                dev.dual.runtime.RuntimeTestLedger.clauses("AC-", List.of("README is updated", "No undeclared files are changed")),
+                dev.dual.runtime.RuntimeTestLedger.clauses("TR-", List.of("Run focused tests")),
                 List.of("Keep the change bounded"),
                 List.of(),
                 List.of(),
+                java.util.List.of(),
                 List.of(),
                 List.of(),
                 ContractStatus.READY_FOR_REVIEW,
                 1,
-                new TaskContract.Source("requirement.md", "test")
-        );
+                new TaskContract.Source("requirement.md", "test", null, null),
+                null,
+                java.util.List.of(),
+                java.util.List.of(),
+                java.util.List.of());
         new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

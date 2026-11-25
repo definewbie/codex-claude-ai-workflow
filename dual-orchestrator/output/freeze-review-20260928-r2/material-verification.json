@@ -1,0 +1,32 @@
+{
+  "status": "PASS_DOCUMENTATION_ONLY",
+  "changedExistingFiles": [
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md"
+  ],
+  "unchangedBaselineFiles": 20802,
+  "priorReviewManifestEntriesPreserved": 34,
+  "priorMainDocumentVersions": "before/ matches prior review-package.json",
+  "productCodeChanged": false,
+  "providerCalls": 0,
+  "agentsStarted": 0,
+  "productTestsRun": false,
+  "independentReviewOfAmendment": false,
+  "frozenDecisions": [
+    "D01",
+    "D02",
+    "D03",
+    "D05",
+    "D06",
+    "D07",
+    "D08",
+    "D09",
+    "D10"
+  ],
+  "D04": "DESIGN_GAP",
+  "implementationAuthorized": false,
+  "gitDiffCheck": "PASS",
+  "newLocalLinks": "PASS",
+  "existingHistoricalMissingLinks": []
+}

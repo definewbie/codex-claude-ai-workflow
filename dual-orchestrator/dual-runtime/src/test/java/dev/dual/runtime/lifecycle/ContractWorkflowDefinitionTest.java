@@ -27,7 +27,7 @@ class ContractWorkflowDefinitionTest {
     }
 
     @Test
-    void contractVariantRoutesContractReviewToDesign() {
+    void executionApprovalRoutesToImplementationAfterDesignAndPlan() {
         WorkflowDefinition wf = factory.forVariant("contract");
 
         var approvedEdges = wf.edgesFrom("gate.contract_review").stream()
@@ -36,7 +36,7 @@ class ContractWorkflowDefinitionTest {
 
         assertEquals(1, approvedEdges.size(),
                 "Expected exactly one edge from gate.contract_review on 'approved'");
-        assertEquals("design.claude_design", approvedEdges.get(0).to());
+        assertEquals("context.implement_claude", approvedEdges.get(0).to());
     }
 
     @Test

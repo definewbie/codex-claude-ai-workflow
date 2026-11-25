@@ -1,0 +1,102 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261011T141651Z-MBC2",
+  "runId" : "run-1791728580831",
+  "nodeId" : "intake.claude_brainstorm",
+  "agent" : "claude",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "promptPath" : "/private/tmp/dual-w09-newlines-20261011-fresh-05/worktree/.agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728580831/prompts/intake-claude-brainstorm.md",
+  "totalBytes" : 24378,
+  "totalEstimatedTokens" : 6095,
+  "sections" : [ {
+    "name" : "workspace_guard",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "workspace-guard",
+    "bytes" : 562,
+    "estimatedTokens" : 141,
+    "sha256" : "23b3b1c33cee3cce1d2fe19e9c740f34cd5fc95558ff2117b817fbdbe9c34937",
+    "includedReason" : "execution safety boundary",
+    "required" : true
+  }, {
+    "name" : "language_policy",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "language-policy",
+    "bytes" : 244,
+    "estimatedTokens" : 61,
+    "sha256" : "d20252d3644a0521308cb5b24f421c899463b6078aece0141858ed2ed32f50d5",
+    "includedReason" : "output language policy",
+    "required" : true
+  }, {
+    "name" : "structured_artifact_field_semantics",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "structured-artifact-field-semantics",
+    "bytes" : 0,
+    "estimatedTokens" : 0,
+    "sha256" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "includedReason" : "structured artifact field semantics",
+    "required" : false
+  }, {
+    "name" : "template_static_frame",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "dev/dual/adapter/acpx/prompts/intake-claude-brainstorm.md",
+    "bytes" : 4777,
+    "estimatedTokens" : 1195,
+    "sha256" : "87e1e4095cce1664eccc2772424081eef101031654f5ae7f0703b5e50a0f7f0f",
+    "includedReason" : "prompt skeleton instructions",
+    "required" : true
+  }, {
+    "name" : "requirement",
+    "sourceType" : "requirement",
+    "sourceRef" : ".agent/workstreams/ws-20261011T141651Z-MBC2/requirement.md",
+    "bytes" : 1190,
+    "estimatedTokens" : 298,
+    "sha256" : "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+    "includedReason" : "task requirement",
+    "required" : true
+  }, {
+    "name" : "context_package",
+    "sourceType" : "context_package",
+    "sourceRef" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.stderr.log,.agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.transcript.log,.agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.json,.agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791728450947/binding.json,.agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.contract.json,.agent/workstreams/ws-20261011T141651Z-MBC2/context/agent-governance-node-intake-claude_brainstorm-006-run-1791728580831.md",
+    "bytes" : 12883,
+    "estimatedTokens" : 3221,
+    "sha256" : "4ed2fcbe191246f376aae1460abaf50be0a286dfbe130c0175d0d69d3e79ec41",
+    "includedReason" : "prior artifacts / assembled context",
+    "required" : true
+  }, {
+    "name" : "read_reuse_contract",
+    "sourceType" : "read_reuse_contract",
+    "sourceRef" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.stderr.log,.agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.transcript.log,.agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.json,.agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791728450947/binding.json,.agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.contract.json,.agent/workstreams/ws-20261011T141651Z-MBC2/context/agent-governance-node-intake-claude_brainstorm-006-run-1791728580831.md",
+    "bytes" : 0,
+    "estimatedTokens" : 0,
+    "sha256" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "includedReason" : "typed memory read-reuse projection",
+    "required" : false
+  }, {
+    "name" : "contract_review_principles",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "contract-review-principles.md",
+    "bytes" : 1996,
+    "estimatedTokens" : 499,
+    "sha256" : "255a1af39f7d8cc79006c28508b0833b7f25c8a60ef50ec52fbd956a5947a5f8",
+    "includedReason" : "review principles",
+    "required" : true
+  }, {
+    "name" : "prompt_contract",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "ContractRegistry:intake.claude_brainstorm",
+    "bytes" : 4078,
+    "estimatedTokens" : 1020,
+    "sha256" : "6520606eb47557b4e9ffe3cd1a184b9b5274a841f54c18b90a8100431ce03d84",
+    "includedReason" : "strict agent result envelope",
+    "required" : true
+  }, {
+    "name" : "external_research_discipline",
+    "sourceType" : "permission_policy_projection",
+    "sourceRef" : "contract_discovery",
+    "bytes" : 521,
+    "estimatedTokens" : 131,
+    "sha256" : "518335f6aed4ae3d471ead53c2a92286330b234a02bc3fd4cbdd7a5b3cf27867",
+    "includedReason" : "guide provider behavior without replacing adapter enforcement",
+    "required" : true
+  } ]
+}

@@ -1,0 +1,86 @@
+{
+  "native_rpc_usage_by_request": [
+    {
+      "id": 3,
+      "result": {
+        "stopReason": "end_turn",
+        "usage": {
+          "inputTokens": 17904,
+          "outputTokens": 14305,
+          "cachedReadTokens": 4736,
+          "cachedWriteTokens": 0,
+          "totalTokens": 36945
+        }
+      }
+    },
+    {
+      "id": 4,
+      "result": {
+        "stopReason": "end_turn",
+        "usage": {
+          "inputTokens": 3950,
+          "outputTokens": 4806,
+          "cachedReadTokens": 17792,
+          "cachedWriteTokens": 0,
+          "totalTokens": 26548
+        }
+      }
+    }
+  ],
+  "native_two_request_token_sum": 63493,
+  "run_declared_total": 53096,
+  "difference": 10397,
+  "run_occurrences": [
+    {
+      "occurrence": 1,
+      "requestId": "3",
+      "usage": {
+        "inputTokens": 3950,
+        "outputTokens": 4806,
+        "cachedReadTokens": 17792,
+        "cachedWriteTokens": 0,
+        "totalTokens": 26548,
+        "costAmount": 0.14879600000000004,
+        "costCurrency": "USD",
+        "source": "acpx_stream",
+        "measurementType": "PROVIDER_RUN_USAGE",
+        "attribution": "LATEST_PROMPT_IN_SESSION",
+        "cumulative": false,
+        "contextUsedTokens": 0,
+        "sessionCostAmount": 0.5983090000000001,
+        "sessionCostCurrency": "USD",
+        "providerId": "zhipu",
+        "model": "glm-5.3",
+        "billingMode": "subscription_token_only",
+        "providerMetadataSource": "acpx_session_json",
+        "unavailableReason": ""
+      }
+    },
+    {
+      "occurrence": 2,
+      "requestId": "4",
+      "usage": {
+        "inputTokens": 3950,
+        "outputTokens": 4806,
+        "cachedReadTokens": 17792,
+        "cachedWriteTokens": 0,
+        "totalTokens": 26548,
+        "costAmount": 0.14879600000000004,
+        "costCurrency": "USD",
+        "source": "acpx_stream",
+        "measurementType": "PROVIDER_RUN_USAGE",
+        "attribution": "EXACT_PROMPT_MATCH",
+        "cumulative": false,
+        "contextUsedTokens": 0,
+        "sessionCostAmount": 0.5983090000000001,
+        "sessionCostCurrency": "USD",
+        "providerId": "zhipu",
+        "model": "glm-5.3",
+        "billingMode": "subscription_token_only",
+        "providerMetadataSource": "acpx_session_json",
+        "unavailableReason": ""
+      }
+    }
+  ],
+  "provider_billing_amount": "NOT_INFERRED; subscription numeric cost fields not treated as bill"
+}

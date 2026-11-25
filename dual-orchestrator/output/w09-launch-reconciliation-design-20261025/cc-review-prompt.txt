@@ -1,0 +1,25 @@
+请对下面材料做一次只读、合并受影响复审，自行重建控制链，不运行真实客户端/模型，不改产品、Gate、配置或账本，不启新agent。
+
+项目：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow
+遵守当前AGENTS.md与boundary-first-engineering。目标是判断：Relay是否提供更低成本的具体解决办法；否则当前启动选择收敛是否真正解除辅助误拒，同时保留真实漂移、停止、批准和预算边界。
+
+候选与证据：
+/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-launch-reconciliation-design-20261025/wiring-design.zh-CN.txt
+/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-launch-reconciliation-design-20261025/config-diff.redacted.json
+/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-launch-reconciliation-design-20261025/candidate-snapshot-receipt.json
+/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/relay-readonly-study-20261025/effective-program-comparison.json
+/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/relay-readonly-study-20261025/java-runtime-observation.json
+/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/relay-readonly-study-20261025/installed-input-differences.json
+Relay固定源码与Git blob校验：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/relay-readonly-study-20261025/official-source、/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/relay-readonly-study-20261025/official-source-byte-verification.json。
+当前操作包（只读）：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024。
+旧配置快照：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/private-baseline/config.toml。必要时读取私有候选配置做本地比较，禁止输出秘密值。
+
+请独立检查：
+1. 从实际命令选择、子环境、wrapper的node到原生会话、输出固定、预算消费、恢复出口重建完整transition。检查每个durable write前/间/后的状态和重启解释；不要只认可设计说明列出的断言。
+2. 对比实际Relay实现与Dual需求：哪些办法已被Dual采用、哪些可小范围复用、哪些没有足够证据或并不更优；是否存在更简单的现有接线。
+3. 启动检查和实际消费同一E是否覆盖Python入口、rtk/ps、Java、wrapper Node及两个入口；是否仍有重新解析、父PATH或另一份基线造成旁路/误拒。
+4. 配置差异与Codex字节变化的事实边界是否准确；“九组相同”有没有被扩大成全部语义等价或兼容已证；新候选与旧历史是否严格分开。
+5. 累计预算/耗时、两个历史停止、当前新授权、业务人门、外部UNKNOWN、原frozenRuntimeIdentity是否保持；测试设计是否覆盖完整装配、合法正向、拒绝、写前缀和冷启动。
+6. 复杂度是否超过解除当前阻塞的必要范围；若超过，请给出更小替代，不引入环境认证/进程监督平台。
+
+逐项给出Declared by、Proven by、Consumed by、Enforced before、Failure route、Cannot-bypass test。区分设计成立/尚未实施/真实未证，自查不当独立运行证据。给出你自己的判定与具名发现，并指出下一步最小必要动作；不要把本文当作实施或运行授权。

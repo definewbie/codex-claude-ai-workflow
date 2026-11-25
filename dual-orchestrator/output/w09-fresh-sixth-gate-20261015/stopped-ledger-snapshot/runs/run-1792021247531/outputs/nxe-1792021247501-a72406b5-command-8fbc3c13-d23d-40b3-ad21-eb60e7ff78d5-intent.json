@@ -1,0 +1,30 @@
+{
+  "details" : {
+    "cleanup" : false,
+    "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--timeout", "600", "--ttl", "1800", "--prompt-retries", "1", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "--no-terminal", "--claude-execution-policy-ref", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021247531/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "32bcb9a38144f99da4c9e012ec9b57af8cc4969bc57759f4d8688f17e590f07a", "claude", "-s", "claude-main-ws-20261014T234009Z-RN9X-run-1792021247531", "-f", "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree/.agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021247531/prompts/intake-claude-brainstorm.md" ],
+    "command_id" : "8fbc3c13-d23d-40b3-ad21-eb60e7ff78d5",
+    "invocation" : {
+      "agent" : "claude",
+      "cwd" : "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+      "executable" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "launch_environment" : {
+        "CLAUDE_CODE_EXECUTABLE" : "",
+        "PATH" : "/Users/kriswang/.pyenv/versions/3.13.0/bin:/Users/kriswang/.pyenv/libexec:/Users/kriswang/.pyenv/plugins/python-build/bin:/Users/kriswang/.pyenv/plugins/pyenv-virtualenv/bin:/Users/kriswang/.pyenv/plugins/pyenv-update/bin:/Users/kriswang/.pyenv/plugins/pyenv-doctor/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/usr/local/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Users/kriswang/.codex/tmp/arg0/codex-arg04zOxWP:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.foundry/bin"
+      },
+      "schema" : "dual.acpx.invocation.v1",
+      "session" : "claude-main-ws-20261014T234009Z-RN9X-run-1792021247531"
+    },
+    "prompt" : "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree/.agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021247531/prompts/intake-claude-brainstorm.md",
+    "prompt_sha256" : "b8fe9d6fdc47a22b52ee88c51a978919efe1aaad2028584dd7972197f15c31e4",
+    "purpose" : "prompt",
+    "request_options" : [ "--prompt-retries", "1", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "--no-terminal", "--claude-execution-policy-ref", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021247531/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "32bcb9a38144f99da4c9e012ec9b57af8cc4969bc57759f4d8688f17e590f07a" ],
+    "session" : "claude-main-ws-20261014T234009Z-RN9X-run-1792021247531"
+  },
+  "kind" : "command_intent",
+  "ordinal" : 4,
+  "prepared" : {
+    "ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021247531/outputs/nxe-1792021247501-a72406b5-prepared.json",
+    "sha256" : "820cd5e32e4ff8673841de23d5820a541e904044b20fc1fcecf17145c92d5730"
+  },
+  "schema" : "dual.run.command.v1"
+}

@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-intake-claude_brainstorm-006",
+  "nodeDefinitionId": "intake.claude_brainstorm",
+  "kind": "TASK",
+  "handlerType": "acpx.agent_run",
+  "status": "COMPLETED",
+  "stageId": "stage-intake",
+  "iterationId": "iter-002",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.stderr.log",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.transcript.log",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.json",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/binding.json",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.contract.json"
+  ],
+  "inputTransition": {
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256": "04413b1961ab13715df2b4eb58251fb65dabfc05c7d0c28ac840954fe3adb2f0",
+    "source_node_instance_id": "node-intake-decision-005",
+    "required": true,
+    "transition_type": "normal",
+    "condition": "unconditional"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694532578/outputs/intake-claude-brainstorm.stderr.log",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694532578/outputs/intake-claude-brainstorm.transcript.log",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694532578/outputs/intake-claude-brainstorm.json",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791694532578/binding.json",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694532578/outputs/intake-claude-brainstorm.contract.json",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/task-contract-proposals/node-intake-claude_brainstorm-006-4945d1a44ce37787.ref.json"
+  ],
+  "result": {
+    "adapter_signals": [],
+    "agent": "claude",
+    "agent_execution_artifact_contract_results": [
+      {
+        "contractType": "task_contract_revision_patch",
+        "errorCode": "",
+        "errorMessage": "",
+        "path": "",
+        "present": true,
+        "required": true,
+        "valid": true
+      }
+    ],
+    "agent_execution_outcome": {
+      "nodeMaySucceed": true,
+      "operatorMessage": "The agent produced valid result and artifact evidence.",
+      "primaryReason": "completed",
+      "recoveryCategory": "NONE",
+      "retryPolicy": "NONE",
+      "secondarySignals": [],
+      "status": "SUCCESS"
+    },
+    "agent_execution_result_contract": {
+      "decision": "READY_FOR_PRODUCT_REVIEW",
+      "present": true,
+      "summary": "",
+      "valid": true,
+      "validationError": ""
+    },
+    "contract_sidecar_ref": ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694532578/outputs/intake-claude-brainstorm.contract.json",
+    "contract_sidecar_sha256": "4945d1a44ce37787501c93d662282c8d46ff5ddc6dab15179b673b891559fd8d",
+    "decision": "READY_FOR_PRODUCT_REVIEW",
+    "exit_code": 0,
+    "output_complete": true,
+    "permission_assessments": [],
+    "process_usability": "EXITED_ZERO",
+    "repository_fact_binding_ref": ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791694532578/binding.json",
+    "repository_fact_binding_sha256": "e2d01d6b523fc57f9d86950a966015b1b1b1caf8b2040557b65c955530dc8f65",
+    "run_id": "run-1791694532578",
+    "run_metadata": ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694532578/run.json",
+    "session": "claude-main-ws-20261011T044656Z-BMDJ-run-1791694532578",
+    "summary": "已将 AC-2/TR-2 绑定实际输入、实际输出与测试源码可核对的真实验证证据，并修订 NG-3/C-3 以保留三文件候选性质与 EXECUTION 单独批准的范围授权边界。",
+    "task_contract_proposal_id": "node-intake-claude_brainstorm-006:4945d1a44ce37787",
+    "task_contract_proposal_ref": ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/task-contract-proposals/node-intake-claude_brainstorm-006-4945d1a44ce37787.ref.json",
+    "transcript_ref": ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694532578/outputs/intake-claude-brainstorm.transcript.log",
+    "completion_ref": ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694532578/outputs/nxe-1791694532542-548febed-completion.json",
+    "completion_sha256": "57304075fb82ff4a8c1863b4ac89b763a19e72cd70de348ae2401c8df43f69c5"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1791694532542-548febed",
+  "startedAt": "2026-10-11T04:55:32.552196Z",
+  "finishedAt": "2026-10-11T04:56:49.234180Z"
+}

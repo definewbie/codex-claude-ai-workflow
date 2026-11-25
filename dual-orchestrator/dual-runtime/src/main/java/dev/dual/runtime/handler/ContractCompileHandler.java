@@ -27,8 +27,9 @@ public final class ContractCompileHandler implements TaskHandler {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
     private final TaskContractProposalValidator proposalValidator = new TaskContractProposalValidator();
-    private final TaskContractRevisionContextResolver revisionContextResolver =
-            new TaskContractRevisionContextResolver();
+
+    @Override
+    public boolean localLedgerMutation() { return true; }
 
     @Override
     public String type() {
@@ -37,6 +38,9 @@ public final class ContractCompileHandler implements TaskHandler {
 
     @Override
     public NodeResult execute(TaskContext context) throws IOException {
+        if ("EXECUTION".equals(context.definition().config().get("contract_phase"))) {
+            return compileExecution(context);
+        }
         if (!"approved_task_contract_proposal".equals(
                 String.valueOf(context.definition().config().getOrDefault("required_subject", "")))) {
             return proposalFailure(
@@ -70,7 +74,7 @@ public final class ContractCompileHandler implements TaskHandler {
             return revisionContext.failed();
         }
         var proposalResult = compileFromProposal(
-                Optional.of(approvedProposal.sidecarPath()), context, revisionContext.context());
+                Optional.of(approvedProposal.sidecarPath()), context, revisionContext.context(), approvedProposal.gate());
         if (proposalResult.failed() != null) {
             return proposalResult.failed();
         }
@@ -95,37 +99,41 @@ public final class ContractCompileHandler implements TaskHandler {
             var humanQuestions = new ArrayList<>(contract.humanQuestions());
             humanQuestions.add("Contract compilation produced validation errors — please clarify the requirement");
             contract = new TaskContract(
+                    contract.schemaVersion(), contract.phase(), contract.epoch(),
                     contract.id(), contract.version(), contract.createdAt(),
                     contract.objective(), contract.scope(), contract.acceptanceCriteria(),
                     contract.testRequirements(), contract.constraints(),
                     contract.nonGoals(), contract.riskAreas(), contract.evidenceRefs(),
                     ambiguityNotes, humanQuestions,
-                    ContractStatus.NEEDS_CLARIFICATION, contract.compilationPass(), contract.source()
+                    ContractStatus.NEEDS_CLARIFICATION, contract.compilationPass(), contract.source(),
+                    contract.goalContract(), contract.reviewedCandidates(), contract.verificationBindings(), contract.authorityRefs()
             );
         }
 
         // Write artifacts
-        var artifactsDir = workstreamDir.resolve("artifacts");
-        TaskContractArtifactWriter.writeJson(contract, artifactsDir);
-        TaskContractArtifactWriter.writeMarkdown(contract, artifactsDir);
-        var contractSha256 = TaskContractArtifactWriter.sha256(artifactsDir.resolve("task-contract.json"));
+        var artifactsDir = workstreamDir.resolve("artifacts/contracts").resolve(context.instance().nodeInstanceId());
+        var contractBytes = TaskContractArtifactWriter.mapper().writeValueAsBytes(contract);
+        context.ledger().files().writeBytes(artifactsDir.resolve("task-contract.json"), contractBytes);
+        context.ledger().files().writeBytes(artifactsDir.resolve("task-contract.md"),
+                TaskContractArtifactWriter.renderMarkdown(contract).getBytes(StandardCharsets.UTF_8));
+        var contractSha256 = TaskContractArtifactWriter.sha256(contractBytes);
         var resolutionRefs = writeContractResolutionArtifacts(context, artifactsDir, resolutionResult.resolution());
         var resolutionPath = artifactsDir.resolve("contract-resolution.json");
-        var resolutionSha256 = Files.isRegularFile(resolutionPath)
-                ? TaskContractArtifactWriter.sha256(resolutionPath)
-                : "";
+        var resolutionSha256 = TaskContractArtifactWriter.sha256(context.ledger().files().readBytes(resolutionPath));
 
         var now = Instant.now();
         var result = new LinkedHashMap<String, Object>();
         result.put("contract_id", contract.id());
         result.put("contract_status", contract.status().name());
         result.put("contract_version", contract.version());
+        result.put("contract_phase", contract.phase().name());
+        result.put("contract_epoch", contract.epoch());
         result.put("task_contract_sha256", contractSha256);
         result.put("contract_resolution_sha256", resolutionSha256);
         result.put("compilation_pass", contract.compilationPass());
         var outputRefs = new ArrayList<String>();
-        outputRefs.add(".agent/workstreams/" + context.workstreamId() + "/artifacts/task-contract.json");
-        outputRefs.add(".agent/workstreams/" + context.workstreamId() + "/artifacts/task-contract.md");
+        outputRefs.add(".agent/workstreams/" + context.workstreamId() + "/artifacts/contracts/" + context.instance().nodeInstanceId() + "/task-contract.json");
+        outputRefs.add(".agent/workstreams/" + context.workstreamId() + "/artifacts/contracts/" + context.instance().nodeInstanceId() + "/task-contract.md");
         outputRefs.addAll(resolutionRefs);
         result.put("artifacts", List.copyOf(outputRefs));
         result.put("generated_at", now.toString());
@@ -133,10 +141,100 @@ public final class ContractCompileHandler implements TaskHandler {
         return NodeResult.completed("completed", List.copyOf(outputRefs), result);
     }
 
+    private NodeResult compileExecution(TaskContext context) throws IOException {
+        if (!"reviewed_design_and_plan".equals(context.definition().config().get("required_subject")))
+            return proposalFailure("TASK_CONTRACT_SUBJECT_CONTRACT_MISSING", "EXECUTION requires reviewed design and plan", List.of());
+        var resolution = TaskContractProjectionVerifier.resolve(context.ledger(), context.workspaceRoot(),
+                context.workstreamId(), TaskContract.Phase.GOAL);
+        if (resolution.qualified().isEmpty()) return proposalFailure("GOAL_CONTRACT_NOT_QUALIFIED",
+                String.valueOf(resolution.failure()), List.of());
+        var goal = resolution.qualified().orElseThrow();
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot(), new dev.dual.core.id.DualId(context.workstreamId()));
+        var lineage = new AuthoredStageLineageResolver(context.ledger(), context.workspaceRoot(), context.workstreamId(), Long.MAX_VALUE);
+        var node = context.ledger().loadNode(paths, context.instance().nodeInstanceId());
+        var design = lineage.reviewed(AuthoredStageLineageResolver.Stage.DESIGN, node);
+        var reviewedPlan = lineage.reviewed(AuthoredStageLineageResolver.Stage.PLAN, node);
+        var planDocument = AgentOutputContractDocument.read(
+                AuthoredExecutionContext.verifiedPath(context.workspaceRoot(), reviewedPlan.candidate().sidecar()), OBJECT_MAPPER).orElseThrow();
+        var plan = planDocument.planArtifact();
+        if (plan == null || plan.missingRequiredField().isPresent())
+            return proposalFailure("PLAN_ARTIFACT_INVALID", "reviewed plan is incomplete", List.of());
+        var errors = DesignScopeValidator.proposedScopeErrors(plan.files(), goal.contract());
+        if (!errors.isEmpty()) return proposalFailure("PLAN_SCOPE_INVALID", "plan conflicts with GOAL", errors);
+        try {
+            VerificationReadiness.validateBindings(context.ledger(), context.workspaceRoot(), context.workstreamId(), goal, plan.verificationBindings());
+        } catch (IOException missing) {
+            return new NodeResult(VerificationReadiness.REQUIRED, NodeStatus.FAILED, List.of(),
+                    Map.of("readiness_reason", VerificationReadiness.REQUIRED, "reason", VerificationReadiness.REQUIRED,
+                            "message", missing.getMessage(), "goal_contract", goal.contractRef()), missing.getMessage());
+        }
+        var prior = TaskContractProjectionVerifier.approvedExecutionBoundary(context.ledger(), paths);
+        if (prior.qualified().isPresent()) {
+            var approved = prior.qualified().orElseThrow();
+            if (TaskContractProjectionVerifier.sameExecutionBoundary(context.ledger(), paths, approved.contract(), plan)) {
+                return NodeResult.completed("authorization_unchanged", List.of(approved.contractRef(), approved.resolutionRef()),
+                        Map.of("authorization_reused", true, "approved_contract_ref", approved.contractRef(),
+                                "approved_contract_sha256", approved.sha256(), "reviewed_candidates", List.of(
+                                        new TaskContract.Reference(design.decision().ref(), design.decision().sha256()),
+                                        new TaskContract.Reference(reviewedPlan.decision().ref(), reviewedPlan.decision().sha256()))));
+            }
+        }
+        var source = goal.contract();
+        var contract = new TaskContract(2, TaskContract.Phase.EXECUTION, source.epoch(),
+                "tc-" + context.workstreamId() + "-" + context.instance().nodeInstanceId(), 1, Instant.now(),
+                source.objective(), new TaskContract.Scope(plan.files(), source.scope().excluded()),
+                source.acceptanceCriteria(), source.testRequirements(), source.constraints(), source.nonGoals(),
+                source.riskAreas(), source.evidenceRefs(), List.of(), List.of(), ContractStatus.READY_FOR_REVIEW,
+                1, source.source(), new TaskContract.Reference(goal.contractRef(), goal.sha256()),
+                List.of(new TaskContract.Reference(design.decision().ref(), design.decision().sha256()),
+                        new TaskContract.Reference(reviewedPlan.decision().ref(), reviewedPlan.decision().sha256())),
+                plan.verificationBindings(), plan.authorityRefs(),
+                nonessentialDeclarations(context.ledger(), paths));
+        var validation = TaskContractValidator.validate(contract);
+        if (!validation.isEmpty()) return proposalFailure("EXECUTION_CONTRACT_INVALID", "execution contract cannot be published", validation);
+        var dir = paths.workstreamDir().resolve("artifacts/contracts/" + context.instance().nodeInstanceId());
+        var bytes = TaskContractArtifactWriter.mapper().writeValueAsBytes(contract);
+        // Requirement negotiation remains the already approved GOAL's immutable resolution.
+        var resolutionBytes = goal.rawResolutionJson().getBytes(StandardCharsets.UTF_8);
+        context.ledger().files().writeBytes(dir.resolve("task-contract.json"), bytes);
+        context.ledger().files().writeBytes(dir.resolve("task-contract.md"), TaskContractArtifactWriter.renderMarkdown(contract).getBytes(StandardCharsets.UTF_8));
+        context.ledger().files().writeBytes(dir.resolve("contract-resolution.json"), resolutionBytes);
+        var prefix = ".agent/workstreams/" + context.workstreamId() + "/artifacts/contracts/" + context.instance().nodeInstanceId() + "/";
+        return NodeResult.completed("completed", List.of(prefix + "task-contract.json", prefix + "task-contract.md", prefix + "contract-resolution.json"),
+                Map.of("contract_id", contract.id(), "contract_status", contract.status().name(), "contract_version", contract.version(),
+                        "contract_phase", contract.phase().name(), "contract_epoch", contract.epoch(), "generated_at", contract.createdAt().toString(),
+                        "task_contract_sha256", TaskContractArtifactWriter.sha256(bytes),
+                        "contract_resolution_sha256", TaskContractArtifactWriter.sha256(resolutionBytes), "compilation_pass", 1));
+    }
+
+    /** The frozen definition is the immutable container of each node's authored contract. */
+    static List<TaskContract.NonessentialOperationDeclaration> nonessentialDeclarations(
+            dev.dual.ledger.file.WorkflowFileLedger ledger, dev.dual.ledger.file.WorkstreamPaths paths) throws IOException {
+        var definition = ledger.loadDefinition(paths);
+        var ref = new TaskContract.Reference(paths.workspaceRoot().relativize(paths.workflowDefinitionJson()).toString(),
+                TaskContractArtifactWriter.sha256(ledger.files().readBytes(paths.workflowDefinitionJson())));
+        var declarations = new ArrayList<TaskContract.NonessentialOperationDeclaration>();
+        for (var node : definition.nodes()) {
+            var configured = node.config().get("nonessential_operation_declarations");
+            if (configured == null) continue;
+            if (!(configured instanceof List<?> items)) throw new IOException("nonessential declarations must be an array");
+            for (var item : items) {
+                var json = OBJECT_MAPPER.valueToTree(item);
+                if (!json.isObject() || json.has("node_contract_ref") || json.has("node_definition_id"))
+                    throw new IOException("declaration node/source identity is assigned only by the compiler");
+                ((com.fasterxml.jackson.databind.node.ObjectNode) json).put("node_definition_id", node.id());
+                ((com.fasterxml.jackson.databind.node.ObjectNode) json).set("node_contract_ref", OBJECT_MAPPER.valueToTree(ref));
+                declarations.add(OBJECT_MAPPER.treeToValue(json, TaskContract.NonessentialOperationDeclaration.class));
+            }
+        }
+        return List.copyOf(declarations);
+    }
+
     private ProposalCompileResult compileFromProposal(
             Optional<Path> sourcePath,
             TaskContext context,
-            RevisionContext revisionContext
+            RevisionContext revisionContext,
+            ResolvedGate approvedGoal
     ) {
         if (sourcePath.isEmpty()) {
             return new ProposalCompileResult(null, null, null);
@@ -151,7 +249,7 @@ public final class ContractCompileHandler implements TaskHandler {
             }
             var validated = document.get();
             if (AgentOutputLineageVerifier.violation(
-                        context.workspaceRoot(), context.workstreamId(), sourcePath.get(), validated).isPresent()
+                        context.ledger(), context.workspaceRoot(), context.workstreamId(), sourcePath.get(), validated).isPresent()
                     || !"intake.claude_brainstorm".equals(validated.nodeId())) {
                 return new ProposalCompileResult(null, null, proposalFailure(
                         "TASK_CONTRACT_PROPOSAL_INVALID",
@@ -185,6 +283,11 @@ public final class ContractCompileHandler implements TaskHandler {
                 ));
             }
             if (revisionContext.revision()) {
+                if (validated.proposalDerivation()!=null && validated.proposalDerivation().kind().equals("goal_reproposal")) {
+                    var bounded=proposalValidator.validateGoalReproposal(revisionContext.previousProposal(),proposal);
+                    if (!bounded.isEmpty()) return new ProposalCompileResult(null,proposal,proposalFailure(
+                            "TASK_CONTRACT_REVISION_DELTA_INVALID","invalid goal re-proposal",bounded));
+                }
                 var deltaErrors = proposalValidator.validateRevisionDelta(
                         revisionContext.previousProposal(), proposal);
                 if (!deltaErrors.isEmpty()) {
@@ -195,7 +298,7 @@ public final class ContractCompileHandler implements TaskHandler {
                     ));
                 }
             }
-            return new ProposalCompileResult(toTaskContract(proposal, context.workstreamId()), proposal, null);
+            return new ProposalCompileResult(toTaskContract(proposal, context, sourcePath.get(), approvedGoal), proposal, null);
         } catch (Exception e) {
             return new ProposalCompileResult(null, null, proposalFailure(
                     "TASK_CONTRACT_PROPOSAL_PARSE_FAILED",
@@ -205,18 +308,23 @@ public final class ContractCompileHandler implements TaskHandler {
         }
     }
 
-    private static TaskContract toTaskContract(TaskContractProposal proposal, String workstreamId) {
+    private static TaskContract toTaskContract(TaskContractProposal proposal, TaskContext context,
+                                              Path proposalPath, ResolvedGate approval) throws IOException {
+        var workstreamId = context.workstreamId();
+        var root = context.workspaceRoot().toAbsolutePath().normalize();
+        long epoch = nextAuthorizationEpoch(context);
         return new TaskContract(
-                "tc-" + workstreamId + "-v1",
+                2, TaskContract.Phase.GOAL, epoch,
+                "tc-" + workstreamId + "-" + context.instance().nodeInstanceId(),
                 1,
                 Instant.now(),
                 proposal.objective().trim(),
                 new TaskContract.Scope(
-                        List.copyOf(proposal.scope().included()),
+                        List.of(),
                         cleanList(proposal.scope().excluded())
                 ),
-                cleanClauseTexts(proposal.acceptanceCriteria()),
-                cleanClauseTexts(proposal.testRequirements()),
+                contractClauses(proposal.acceptanceCriteria()),
+                contractClauses(proposal.testRequirements()),
                 cleanClauseTexts(proposal.constraints()),
                 cleanClauseTexts(proposal.nonGoals()),
                 cleanClauseTexts(proposal.riskAreas()),
@@ -227,9 +335,32 @@ public final class ContractCompileHandler implements TaskHandler {
                 1,
                 new TaskContract.Source(
                         ".agent/workstreams/" + workstreamId + "/requirement.md",
-                        "task_contract_proposal"
-                )
+                        "contract.compile",
+                        new TaskContract.Reference(root.relativize(proposalPath.toAbsolutePath().normalize()).toString(),
+                                TaskContractArtifactWriter.sha256(proposalPath)),
+                        new TaskContract.Reference(approval.gateRef(), TaskContractArtifactWriter.sha256(root.resolve(approval.gateRef())))
+                ), null, List.of(), List.of(), List.of()
         );
+    }
+
+    private static long nextAuthorizationEpoch(TaskContext context) throws IOException {
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot(),
+                new dev.dual.core.id.DualId(context.workstreamId()));
+        long latest = 0;
+        for (var path : context.ledger().files().list(paths.nodesDir())) {
+            if (!path.getFileName().toString().endsWith(".json")) continue;
+            var node = context.ledger().files().read(path, NodeInstanceDocument.class);
+            if (node.status() != NodeStatus.COMPLETED || !"contract.compile".equals(node.handlerType())) continue;
+            var epoch = node.result().get("contract_epoch");
+            if (!(epoch instanceof Number number) || number.longValue() < 1)
+                throw new IOException("INVALID_CONTRACT_EPOCH: completed compile lacks an authorization identity");
+            latest = Math.max(latest, number.longValue());
+        }
+        return Math.addExact(latest, 1);
+    }
+
+    private static List<TaskContract.Clause> contractClauses(List<TaskContractProposal.ContractClause> clauses) {
+        return clauses.stream().map(c -> new TaskContract.Clause(c.id(), c.text())).toList();
     }
 
     private static List<String> cleanClauseTexts(List<TaskContractProposal.ContractClause> values) {
@@ -291,7 +422,7 @@ public final class ContractCompileHandler implements TaskHandler {
     ) {
         var workstreamDir = context.workspaceRoot().resolve(".agent/workstreams").resolve(context.workstreamId());
         try {
-            var resolved = revisionContextResolver.resolveForIteration(
+            var resolved = new TaskContractRevisionContextResolver(context.ledger()).resolveForIteration(
                     context.workspaceRoot(), context.workstreamId(), context.instance().iterationId());
             if (!resolved.valid()) {
                 return revisionContextFailure(
@@ -369,7 +500,7 @@ public final class ContractCompileHandler implements TaskHandler {
             var document = AgentOutputContractDocument.read(path, OBJECT_MAPPER);
             if (document.isEmpty()
                     || AgentOutputLineageVerifier.violation(
-                            root, context.workstreamId(), path, document.get()).isPresent()
+                            context.ledger(), root, context.workstreamId(), path, document.get()).isPresent()
                     || !"intake.codex_product_review".equals(document.get().nodeId())
                     || document.get().reviewSubject() == null) {
                 continue;
@@ -510,14 +641,13 @@ public final class ContractCompileHandler implements TaskHandler {
         if (resolution == null) {
             return List.of();
         }
-        Files.createDirectories(artifactsDir);
         var jsonPath = artifactsDir.resolve("contract-resolution.json");
         var markdownPath = artifactsDir.resolve("contract-resolution.md");
-        OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(jsonPath.toFile(), resolution);
-        Files.writeString(markdownPath, renderContractResolutionMarkdown(resolution), StandardCharsets.UTF_8);
+        context.ledger().files().writeBytes(jsonPath, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(resolution));
+        context.ledger().files().writeBytes(markdownPath, renderContractResolutionMarkdown(resolution).getBytes(StandardCharsets.UTF_8));
         return List.of(
-                ".agent/workstreams/" + context.workstreamId() + "/artifacts/contract-resolution.json",
-                ".agent/workstreams/" + context.workstreamId() + "/artifacts/contract-resolution.md"
+                ".agent/workstreams/" + context.workstreamId() + "/artifacts/contracts/" + context.instance().nodeInstanceId() + "/contract-resolution.json",
+                ".agent/workstreams/" + context.workstreamId() + "/artifacts/contracts/" + context.instance().nodeInstanceId() + "/contract-resolution.md"
         );
     }
 

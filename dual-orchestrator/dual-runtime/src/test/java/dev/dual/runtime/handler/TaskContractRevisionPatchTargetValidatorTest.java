@@ -39,7 +39,7 @@ class TaskContractRevisionPatchTargetValidatorTest {
     ) {
         return new AgentResultEnvelope.TaskContractRevisionPatchResult(
                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "revision",
-                "node-prev:0123456789abcdef", "a".repeat(64), List.of(obligations));
+                "node-prev:0123456789abcdef", List.of(obligations));
     }
 
     private static AgentResultEnvelope.ObligationPatch obligation(

@@ -1,0 +1,637 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< app.cryptoincome:ai-crypto-arbitrage >----------------
+[INFO] Building ai-crypto-arbitrage 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ ai-crypto-arbitrage ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/target
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ ai-crypto-arbitrage ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 20 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ ai-crypto-arbitrage ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 217 source files with javac [debug parameters release 25] to target/classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/main/java/app/cryptoincome/funding/infrastructure/okx/OkxPublicApiClient.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/main/java/app/cryptoincome/funding/infrastructure/okx/OkxPublicApiClient.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ ai-crypto-arbitrage ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ ai-crypto-arbitrage ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 44 source files with javac [debug parameters release 25] to target/test-classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/test/java/app/cryptoincome/assessment/MybatisFundingRateFactQueryTest.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/test/java/app/cryptoincome/assessment/MybatisFundingRateFactQueryTest.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ ai-crypto-arbitrage ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running app.cryptoincome.reporting.ReturnMetricsCalculatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in app.cryptoincome.reporting.ReturnMetricsCalculatorTest
+[INFO] Running app.cryptoincome.web.DecisionWorkbenchStaticAssetTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in app.cryptoincome.web.DecisionWorkbenchStaticAssetTest
+[INFO] Running app.cryptoincome.web.DecisionWorkbenchControllerTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (/Users/kriswang/.m2/repository/net/bytebuddy/byte-buddy-agent/1.18.10/byte-buddy-agent-1.18.10.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.458 s -- in app.cryptoincome.web.DecisionWorkbenchControllerTest
+[INFO] Running app.cryptoincome.web.MarketDataControllerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in app.cryptoincome.web.MarketDataControllerTest
+[INFO] Running app.cryptoincome.shadow.MybatisGridShadowStudyRepositoryTest
+20:44:54.748 [main] INFO org.testcontainers.images.PullPolicy -- Image pull policy will be performed by: DefaultPullPolicy()
+20:44:54.750 [main] INFO org.testcontainers.utility.ImageNameSubstitutor -- Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+20:44:54.755 [main] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 2.0.5
+20:44:54.871 [main] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Loaded org.testcontainers.dockerclient.UnixSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+20:44:55.067 [main] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Found Docker environment with local Unix socket (unix:///var/run/docker.sock)
+20:44:55.067 [main] INFO org.testcontainers.DockerClientFactory -- Docker host IP address is localhost
+20:44:55.079 [main] INFO org.testcontainers.DockerClientFactory -- Connected to docker: 
+  Server Version: 29.4.1
+  API Version: 1.54
+  Operating System: Docker Desktop
+  Total Memory: 32044 MB
+  Labels: 
+    com.docker.desktop.address=unix:///Users/kriswang/Library/Containers/com.docker.docker/Data/docker-cli.sock
+20:44:55.150 [main] INFO tc.testcontainers/ryuk:0.14.0 -- Creating container for image: testcontainers/ryuk:0.14.0
+20:45:25.665 [main] INFO org.testcontainers.utility.RegistryAuthLocator -- Failure when attempting to lookup auth config. Please ignore if you don't have images in an authenticated registry. Details: (dockerImageName: testcontainers/ryuk:0.14.0, configFile: /Users/kriswang/.docker/config.json, configEnv: DOCKER_AUTH_CONFIG). Falling back to docker-java default behaviour. Exception message: Timed out waiting for Process[pid=61719, exitValue="not exited"] to finish, timeout: 30 seconds, executed command [docker-credential-desktop, get]
+20:45:25.766 [main] INFO tc.testcontainers/ryuk:0.14.0 -- Container testcontainers/ryuk:0.14.0 is starting: 7a712a11b3e99c8a093e96a5b18c66c6ff22a1292b9c33151c57a4a07f671607
+20:45:25.927 [main] INFO tc.testcontainers/ryuk:0.14.0 -- Container testcontainers/ryuk:0.14.0 started in PT30.777724S
+20:45:25.931 [main] INFO org.testcontainers.utility.RyukResourceReaper -- Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+20:45:25.931 [main] INFO org.testcontainers.DockerClientFactory -- Checking the system...
+20:45:25.932 [main] INFO org.testcontainers.DockerClientFactory -- ✔︎ Docker server version should be at least 1.6.0
+20:45:25.934 [main] INFO tc.mysql:8.4 -- Creating container for image: mysql:8.4
+20:45:25.985 [main] INFO tc.mysql:8.4 -- Container mysql:8.4 is starting: 695cdf91102db0f49788be601a89d8e233e17b1d66ff8b2df3e4202bdd3d940d
+20:45:26.081 [main] INFO tc.mysql:8.4 -- Waiting for database connection to become available at jdbc:mysql://localhost:56244/crypto_income using query 'SELECT 1'
+20:45:30.927 [main] INFO tc.mysql:8.4 -- Container mysql:8.4 started in PT4.993181S
+20:45:30.927 [main] INFO tc.mysql:8.4 -- Container is started (JDBC URL: jdbc:mysql://localhost:56244/crypto_income)
+20:45:30.978 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [app.cryptoincome.shadow.MybatisGridShadowStudyRepositoryTest]: MybatisGridShadowStudyRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+20:45:31.040 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.shadow.MybatisGridShadowStudyRepositoryTest
+20:45:31.069 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [app.cryptoincome.shadow.MybatisGridShadowStudyRepositoryTest]: MybatisGridShadowStudyRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+20:45:31.071 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.shadow.MybatisGridShadowStudyRepositoryTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-26T20:45:31.203+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] c.s.MybatisGridShadowStudyRepositoryTest : Starting MybatisGridShadowStudyRepositoryTest using Java 25.0.3 with PID 61711 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline)
+2026-10-26T20:45:31.204+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] c.s.MybatisGridShadowStudyRepositoryTest : No active profile set, falling back to 1 default profile: "default"
+2026-10-26T20:45:31.763+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-10-26T20:45:31.846+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5e572b08
+2026-10-26T20:45:31.846+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-10-26T20:45:31.856+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:56244/crypto_income (MySQL 8.4)
+2026-10-26T20:45:31.916+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `crypto_income`.`flyway_schema_history` does not exist yet
+2026-10-26T20:45:31.919+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 11 migrations (execution time 00:00.014s)
+2026-10-26T20:45:31.932+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `crypto_income`.`flyway_schema_history` ...
+2026-10-26T20:45:31.972+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `crypto_income`: << Empty Schema >>
+2026-10-26T20:45:31.977+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "1 - baseline"
+2026-10-26T20:45:32.008+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "2 - funding rate facts"
+2026-10-26T20:45:32.043+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "3 - funding sync request"
+2026-10-26T20:45:32.123+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "4 - funding backfill"
+2026-10-26T20:45:32.227+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "5 - backfill page semantics"
+2026-10-26T20:45:32.267+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "6 - grid parameter snapshot"
+2026-10-26T20:45:32.289+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "7 - spot candle facts"
+2026-10-26T20:45:32.312+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "8 - grid configuration snapshot"
+2026-10-26T20:45:32.338+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "9 - grid shadow study"
+2026-10-26T20:45:32.371+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "10 - candle sync execution"
+2026-10-26T20:45:32.391+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "11 - btc market tick facts"
+2026-10-26T20:45:32.410+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 11 migrations to schema `crypto_income`, now at version v11 (execution time 00:00.309s)
+2026-10-26T20:45:32.594+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] b.m.s.MybatisPlusApplicationContextAware : Register ApplicationContext instances org.springframework.context.annotation.AnnotationConfigApplicationContext@257b3561
+2026-10-26T20:45:32.689+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] c.s.MybatisGridShadowStudyRepositoryTest : Started MybatisGridShadowStudyRepositoryTest in 1.595 seconds (process running for 38.868)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 38.28 s -- in app.cryptoincome.shadow.MybatisGridShadowStudyRepositoryTest
+[INFO] Running app.cryptoincome.shadow.application.GridShadowStudyServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.162 s -- in app.cryptoincome.shadow.application.GridShadowStudyServiceTest
+[INFO] Running app.cryptoincome.income.OkxSimpleEarnMarketRateClientTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in app.cryptoincome.income.OkxSimpleEarnMarketRateClientTest
+[INFO] Running app.cryptoincome.income.SimpleEarnIncomeServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in app.cryptoincome.income.SimpleEarnIncomeServiceTest
+[INFO] Running app.cryptoincome.assessment.PhaseOneAssessmentServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in app.cryptoincome.assessment.PhaseOneAssessmentServiceTest
+[INFO] Running app.cryptoincome.assessment.SmartArbitrageAllocationCalculatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in app.cryptoincome.assessment.SmartArbitrageAllocationCalculatorTest
+[INFO] Running app.cryptoincome.assessment.MybatisFundingRateFactQueryTest
+2026-10-26T20:45:34.166+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Creating container for image: mysql:8.4
+2026-10-26T20:45:34.207+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 is starting: 78d4b7c0e8ec1988370d10018c0640e1b24eac836a520921c77c257c3c68a26b
+2026-10-26T20:45:34.299+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Waiting for database connection to become available at jdbc:mysql://localhost:56309/crypto_income using query 'SELECT 1'
+2026-10-26T20:45:38.930+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 started in PT4.76349S
+2026-10-26T20:45:38.930+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container is started (JDBC URL: jdbc:mysql://localhost:56309/crypto_income)
+2026-10-26T20:45:38.932+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.assessment.MybatisFundingRateFactQueryTest]: MybatisFundingRateFactQueryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:45:38.946+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.assessment.MybatisFundingRateFactQueryTest
+2026-10-26T20:45:38.947+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.assessment.MybatisFundingRateFactQueryTest]: MybatisFundingRateFactQueryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:45:38.949+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.assessment.MybatisFundingRateFactQueryTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-26T20:45:38.972+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.a.MybatisFundingRateFactQueryTest    : Starting MybatisFundingRateFactQueryTest using Java 25.0.3 with PID 61711 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline)
+2026-10-26T20:45:38.972+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.a.MybatisFundingRateFactQueryTest    : No active profile set, falling back to 1 default profile: "default"
+2026-10-26T20:45:39.140+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-10-26T20:45:39.172+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5d0ea2af
+2026-10-26T20:45:39.172+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-10-26T20:45:39.173+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:56309/crypto_income (MySQL 8.4)
+2026-10-26T20:45:39.190+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `crypto_income`.`flyway_schema_history` does not exist yet
+2026-10-26T20:45:39.191+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 11 migrations (execution time 00:00.005s)
+2026-10-26T20:45:39.201+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `crypto_income`.`flyway_schema_history` ...
+2026-10-26T20:45:39.228+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `crypto_income`: << Empty Schema >>
+2026-10-26T20:45:39.231+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "1 - baseline"
+2026-10-26T20:45:39.253+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "2 - funding rate facts"
+2026-10-26T20:45:39.285+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "3 - funding sync request"
+2026-10-26T20:45:39.355+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "4 - funding backfill"
+2026-10-26T20:45:39.449+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "5 - backfill page semantics"
+2026-10-26T20:45:39.484+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "6 - grid parameter snapshot"
+2026-10-26T20:45:39.506+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "7 - spot candle facts"
+2026-10-26T20:45:39.527+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "8 - grid configuration snapshot"
+2026-10-26T20:45:39.549+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "9 - grid shadow study"
+2026-10-26T20:45:39.584+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "10 - candle sync execution"
+2026-10-26T20:45:39.603+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "11 - btc market tick facts"
+2026-10-26T20:45:39.619+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 11 migrations to schema `crypto_income`, now at version v11 (execution time 00:00.284s)
+2026-10-26T20:45:39.682+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] b.m.s.MybatisPlusApplicationContextAware : Register ApplicationContext instances org.springframework.context.annotation.AnnotationConfigApplicationContext@4c617143
+2026-10-26T20:45:39.704+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.a.MybatisFundingRateFactQueryTest    : Started MybatisFundingRateFactQueryTest in 0.752 seconds (process running for 45.883)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.754 s -- in app.cryptoincome.assessment.MybatisFundingRateFactQueryTest
+[INFO] Running app.cryptoincome.cli.SyncMarketCliRunnerTest
+2026-10-26T20:45:39.920+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Creating container for image: mysql:8.4
+2026-10-26T20:45:39.967+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 is starting: 1c54ecd67d06a81be13ef1bb5f92977163c398e26e6f3ba4595d41a3b23e5744
+2026-10-26T20:45:40.059+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Waiting for database connection to become available at jdbc:mysql://localhost:56367/crypto_income using query 'SELECT 1'
+2026-10-26T20:45:44.797+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 started in PT4.876586S
+2026-10-26T20:45:44.797+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container is started (JDBC URL: jdbc:mysql://localhost:56367/crypto_income)
+2026-10-26T20:45:44.805+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.cli.SyncMarketCliRunnerTest
+2026-10-26T20:45:44.807+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.cli.SyncMarketCliRunnerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-26T20:45:44.818+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.cli.SyncMarketCliRunnerTest          : Starting SyncMarketCliRunnerTest using Java 25.0.3 with PID 61711 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline)
+2026-10-26T20:45:44.818+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.cli.SyncMarketCliRunnerTest          : No active profile set, falling back to 1 default profile: "default"
+2026-10-26T20:45:44.924+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-10-26T20:45:44.932+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection com.mysql.cj.jdbc.ConnectionImpl@50d8b30
+2026-10-26T20:45:44.932+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2026-10-26T20:45:44.932+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:56367/crypto_income (MySQL 8.4)
+2026-10-26T20:45:44.950+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `crypto_income`.`flyway_schema_history` does not exist yet
+2026-10-26T20:45:44.950+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 11 migrations (execution time 00:00.003s)
+2026-10-26T20:45:44.973+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `crypto_income`.`flyway_schema_history` ...
+2026-10-26T20:45:44.996+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `crypto_income`: << Empty Schema >>
+2026-10-26T20:45:44.998+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "1 - baseline"
+2026-10-26T20:45:45.017+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "2 - funding rate facts"
+2026-10-26T20:45:45.050+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "3 - funding sync request"
+2026-10-26T20:45:45.126+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "4 - funding backfill"
+2026-10-26T20:45:45.257+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "5 - backfill page semantics"
+2026-10-26T20:45:45.295+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "6 - grid parameter snapshot"
+2026-10-26T20:45:45.316+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "7 - spot candle facts"
+2026-10-26T20:45:45.340+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "8 - grid configuration snapshot"
+2026-10-26T20:45:45.359+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "9 - grid shadow study"
+2026-10-26T20:45:45.394+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "10 - candle sync execution"
+2026-10-26T20:45:45.440+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "11 - btc market tick facts"
+2026-10-26T20:45:45.457+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 11 migrations to schema `crypto_income`, now at version v11 (execution time 00:00.359s)
+2026-10-26T20:45:45.495+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] b.m.s.MybatisPlusApplicationContextAware : Register ApplicationContext instances org.springframework.context.annotation.AnnotationConfigApplicationContext@12de62aa
+2026-10-26T20:45:45.513+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.cli.SyncMarketCliRunnerTest          : Started SyncMarketCliRunnerTest in 0.704 seconds (process running for 51.692)
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.982 s -- in app.cryptoincome.cli.SyncMarketCliRunnerTest
+[INFO] Running app.cryptoincome.cli.GridCliRunnerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.039 s -- in app.cryptoincome.cli.GridCliRunnerTest
+[INFO] Running app.cryptoincome.cli.SyncProductCliRunnerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in app.cryptoincome.cli.SyncProductCliRunnerTest
+[INFO] Running app.cryptoincome.cli.AssessIncomeCliRunnerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in app.cryptoincome.cli.AssessIncomeCliRunnerTest
+[INFO] Running app.cryptoincome.scenario.ScenarioProductCalculatorTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in app.cryptoincome.scenario.ScenarioProductCalculatorTest
+[INFO] Running app.cryptoincome.scenario.ScenarioEvaluationControllerTest
+2026-10-26T20:45:46.017+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-10-26T20:45:46.017+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-26T20:45:46.018+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-10-26T20:45:46.280+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-10-26T20:45:46.280+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-10-26T20:45:46.280+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.344 s -- in app.cryptoincome.scenario.ScenarioEvaluationControllerTest
+[INFO] Running app.cryptoincome.scenario.FrozenScenarioEvaluationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in app.cryptoincome.scenario.FrozenScenarioEvaluationTest
+[INFO] Running app.cryptoincome.scenario.ScenarioEvaluationServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.234 s -- in app.cryptoincome.scenario.ScenarioEvaluationServiceTest
+[INFO] Running app.cryptoincome.scenario.ProductQualificationPolicyTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in app.cryptoincome.scenario.ProductQualificationPolicyTest
+[INFO] Running app.cryptoincome.scenario.PortfolioCandidateGeneratorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in app.cryptoincome.scenario.PortfolioCandidateGeneratorTest
+[INFO] Running app.cryptoincome.portfolio.PhaseOnePortfolioRecommendationServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in app.cryptoincome.portfolio.PhaseOnePortfolioRecommendationServiceTest
+[INFO] Running app.cryptoincome.market.MybatisBtcMarketTickTest
+2026-10-26T20:45:46.545+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Creating container for image: mysql:8.4
+2026-10-26T20:45:46.589+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 is starting: 850935d0211d3e3fe01ea69ee6d99c1a14b4c68106f563f4671e16e034810ba5
+2026-10-26T20:45:46.664+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Waiting for database connection to become available at jdbc:mysql://localhost:56426/crypto_income using query 'SELECT 1'
+2026-10-26T20:45:51.253+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 started in PT4.707513S
+2026-10-26T20:45:51.253+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container is started (JDBC URL: jdbc:mysql://localhost:56426/crypto_income)
+2026-10-26T20:45:51.254+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.market.MybatisBtcMarketTickTest]: MybatisBtcMarketTickTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:45:51.265+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.market.MybatisBtcMarketTickTest
+2026-10-26T20:45:51.265+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.market.MybatisBtcMarketTickTest]: MybatisBtcMarketTickTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:45:51.266+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.market.MybatisBtcMarketTickTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-26T20:45:51.277+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.market.MybatisBtcMarketTickTest      : Starting MybatisBtcMarketTickTest using Java 25.0.3 with PID 61711 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline)
+2026-10-26T20:45:51.277+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.market.MybatisBtcMarketTickTest      : No active profile set, falling back to 1 default profile: "default"
+2026-10-26T20:45:51.367+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
+2026-10-26T20:45:51.374+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection com.mysql.cj.jdbc.ConnectionImpl@32f6d000
+2026-10-26T20:45:51.374+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
+2026-10-26T20:45:51.375+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:56426/crypto_income (MySQL 8.4)
+2026-10-26T20:45:51.385+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `crypto_income`.`flyway_schema_history` does not exist yet
+2026-10-26T20:45:51.385+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 11 migrations (execution time 00:00.003s)
+2026-10-26T20:45:51.392+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `crypto_income`.`flyway_schema_history` ...
+2026-10-26T20:45:51.408+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `crypto_income`: << Empty Schema >>
+2026-10-26T20:45:51.409+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "1 - baseline"
+2026-10-26T20:45:51.425+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "2 - funding rate facts"
+2026-10-26T20:45:51.453+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "3 - funding sync request"
+2026-10-26T20:45:51.521+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "4 - funding backfill"
+2026-10-26T20:45:51.604+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "5 - backfill page semantics"
+2026-10-26T20:45:51.636+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "6 - grid parameter snapshot"
+2026-10-26T20:45:51.651+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "7 - spot candle facts"
+2026-10-26T20:45:51.671+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "8 - grid configuration snapshot"
+2026-10-26T20:45:51.694+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "9 - grid shadow study"
+2026-10-26T20:45:51.733+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "10 - candle sync execution"
+2026-10-26T20:45:51.754+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "11 - btc market tick facts"
+2026-10-26T20:45:51.769+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 11 migrations to schema `crypto_income`, now at version v11 (execution time 00:00.276s)
+2026-10-26T20:45:51.805+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] b.m.s.MybatisPlusApplicationContextAware : Register ApplicationContext instances org.springframework.context.annotation.AnnotationConfigApplicationContext@38e8f9a8
+2026-10-26T20:45:51.817+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.market.MybatisBtcMarketTickTest      : Started MybatisBtcMarketTickTest in 0.549 seconds (process running for 57.996)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.489 s -- in app.cryptoincome.market.MybatisBtcMarketTickTest
+[INFO] Running app.cryptoincome.market.MarketDataStatusServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.098 s -- in app.cryptoincome.market.MarketDataStatusServiceTest
+[INFO] Running app.cryptoincome.market.OkxBtcMarketTickClientTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.046 s -- in app.cryptoincome.market.OkxBtcMarketTickClientTest
+[INFO] Running app.cryptoincome.run.AnalysisRunServiceTest
+2026-10-26T20:45:52.183+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Creating container for image: mysql:8.4
+2026-10-26T20:45:52.216+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 is starting: 2ea2522265e68e00966d75be95ba94e7a04f081f9a953452f467a1b19c1a924a
+2026-10-26T20:45:52.297+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Waiting for database connection to become available at jdbc:mysql://localhost:56486/crypto_income using query 'SELECT 1'
+2026-10-26T20:45:57.001+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 started in PT4.818006S
+2026-10-26T20:45:57.001+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container is started (JDBC URL: jdbc:mysql://localhost:56486/crypto_income)
+2026-10-26T20:45:57.002+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.run.AnalysisRunServiceTest]: AnalysisRunServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:45:57.014+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.run.AnalysisRunServiceTest
+2026-10-26T20:45:57.014+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.run.AnalysisRunServiceTest]: AnalysisRunServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:45:57.016+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.run.AnalysisRunServiceTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-26T20:45:57.026+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.run.AnalysisRunServiceTest           : Starting AnalysisRunServiceTest using Java 25.0.3 with PID 61711 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline)
+2026-10-26T20:45:57.026+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.run.AnalysisRunServiceTest           : No active profile set, falling back to 1 default profile: "default"
+2026-10-26T20:45:57.113+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Starting...
+2026-10-26T20:45:57.120+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-5 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4acdc330
+2026-10-26T20:45:57.120+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Start completed.
+2026-10-26T20:45:57.120+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:56486/crypto_income (MySQL 8.4)
+2026-10-26T20:45:57.130+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `crypto_income`.`flyway_schema_history` does not exist yet
+2026-10-26T20:45:57.130+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 11 migrations (execution time 00:00.002s)
+2026-10-26T20:45:57.138+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `crypto_income`.`flyway_schema_history` ...
+2026-10-26T20:45:57.155+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `crypto_income`: << Empty Schema >>
+2026-10-26T20:45:57.156+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "1 - baseline"
+2026-10-26T20:45:57.174+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "2 - funding rate facts"
+2026-10-26T20:45:57.204+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "3 - funding sync request"
+2026-10-26T20:45:57.267+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "4 - funding backfill"
+2026-10-26T20:45:57.364+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "5 - backfill page semantics"
+2026-10-26T20:45:57.402+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "6 - grid parameter snapshot"
+2026-10-26T20:45:57.419+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "7 - spot candle facts"
+2026-10-26T20:45:57.439+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "8 - grid configuration snapshot"
+2026-10-26T20:45:57.456+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "9 - grid shadow study"
+2026-10-26T20:45:57.483+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "10 - candle sync execution"
+2026-10-26T20:45:57.501+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "11 - btc market tick facts"
+2026-10-26T20:45:57.515+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 11 migrations to schema `crypto_income`, now at version v11 (execution time 00:00.277s)
+2026-10-26T20:45:57.546+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] b.m.s.MybatisPlusApplicationContextAware : Register ApplicationContext instances org.springframework.context.annotation.AnnotationConfigApplicationContext@a0b8f79
+2026-10-26T20:45:57.557+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.run.AnalysisRunServiceTest           : Started AnalysisRunServiceTest in 0.54 seconds (process running for 63.736)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.623 s -- in app.cryptoincome.run.AnalysisRunServiceTest
+[INFO] Running app.cryptoincome.funding.OkxPublicApiClientTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.053 s -- in app.cryptoincome.funding.OkxPublicApiClientTest
+[INFO] Running app.cryptoincome.funding.FundingRateBackfillServiceTest
+2026-10-26T20:45:57.860+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Creating container for image: mysql:8.4
+2026-10-26T20:45:57.893+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 is starting: 1044af3b399c7545f84de905c20de4c1d4ddc9f1b719dc8b12e59ef79bac18ba
+2026-10-26T20:45:57.977+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Waiting for database connection to become available at jdbc:mysql://localhost:56573/crypto_income using query 'SELECT 1'
+2026-10-26T20:46:02.555+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 started in PT4.695192S
+2026-10-26T20:46:02.556+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container is started (JDBC URL: jdbc:mysql://localhost:56573/crypto_income)
+2026-10-26T20:46:02.557+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.funding.FundingRateBackfillServiceTest]: FundingRateBackfillServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:02.562+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.funding.FundingRateBackfillServiceTest
+2026-10-26T20:46:02.563+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.funding.FundingRateBackfillServiceTest]: FundingRateBackfillServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:02.564+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.funding.FundingRateBackfillServiceTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-26T20:46:02.571+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.f.FundingRateBackfillServiceTest     : Starting FundingRateBackfillServiceTest using Java 25.0.3 with PID 61711 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline)
+2026-10-26T20:46:02.571+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.f.FundingRateBackfillServiceTest     : No active profile set, falling back to 1 default profile: "default"
+2026-10-26T20:46:02.646+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Starting...
+2026-10-26T20:46:02.653+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-6 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4d500865
+2026-10-26T20:46:02.653+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Start completed.
+2026-10-26T20:46:02.653+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:56573/crypto_income (MySQL 8.4)
+2026-10-26T20:46:02.662+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `crypto_income`.`flyway_schema_history` does not exist yet
+2026-10-26T20:46:02.663+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 11 migrations (execution time 00:00.002s)
+2026-10-26T20:46:02.670+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `crypto_income`.`flyway_schema_history` ...
+2026-10-26T20:46:02.686+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `crypto_income`: << Empty Schema >>
+2026-10-26T20:46:02.688+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "1 - baseline"
+2026-10-26T20:46:02.705+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "2 - funding rate facts"
+2026-10-26T20:46:02.734+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "3 - funding sync request"
+2026-10-26T20:46:02.791+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "4 - funding backfill"
+2026-10-26T20:46:02.878+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "5 - backfill page semantics"
+2026-10-26T20:46:02.911+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "6 - grid parameter snapshot"
+2026-10-26T20:46:02.933+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "7 - spot candle facts"
+2026-10-26T20:46:02.952+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "8 - grid configuration snapshot"
+2026-10-26T20:46:02.968+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "9 - grid shadow study"
+2026-10-26T20:46:02.996+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "10 - candle sync execution"
+2026-10-26T20:46:03.013+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "11 - btc market tick facts"
+2026-10-26T20:46:03.030+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 11 migrations to schema `crypto_income`, now at version v11 (execution time 00:00.265s)
+2026-10-26T20:46:03.063+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] b.m.s.MybatisPlusApplicationContextAware : Register ApplicationContext instances org.springframework.context.annotation.AnnotationConfigApplicationContext@12464b1c
+2026-10-26T20:46:03.073+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.f.FundingRateBackfillServiceTest     : Started FundingRateBackfillServiceTest in 0.508 seconds (process running for 69.252)
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.719 s -- in app.cryptoincome.funding.FundingRateBackfillServiceTest
+[INFO] Running app.cryptoincome.funding.FundingRateSyncServiceTest
+2026-10-26T20:46:03.583+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Creating container for image: mysql:8.4
+2026-10-26T20:46:03.628+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 is starting: e5929a4313ffe69f786276ef4757ff5af05c662baa9986e08292bcfafdb04915
+2026-10-26T20:46:03.708+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Waiting for database connection to become available at jdbc:mysql://localhost:56634/crypto_income using query 'SELECT 1'
+2026-10-26T20:46:09.043+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 started in PT5.460034S
+2026-10-26T20:46:09.043+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container is started (JDBC URL: jdbc:mysql://localhost:56634/crypto_income)
+2026-10-26T20:46:09.044+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.funding.FundingRateSyncServiceTest]: FundingRateSyncServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:09.048+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.funding.FundingRateSyncServiceTest
+2026-10-26T20:46:09.049+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.funding.FundingRateSyncServiceTest]: FundingRateSyncServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:09.050+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.funding.FundingRateSyncServiceTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-26T20:46:09.060+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.funding.FundingRateSyncServiceTest   : Starting FundingRateSyncServiceTest using Java 25.0.3 with PID 61711 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline)
+2026-10-26T20:46:09.060+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.funding.FundingRateSyncServiceTest   : No active profile set, falling back to 1 default profile: "default"
+2026-10-26T20:46:09.143+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Starting...
+2026-10-26T20:46:09.150+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-7 - Added connection com.mysql.cj.jdbc.ConnectionImpl@10b51115
+2026-10-26T20:46:09.150+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Start completed.
+2026-10-26T20:46:09.150+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:56634/crypto_income (MySQL 8.4)
+2026-10-26T20:46:09.160+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `crypto_income`.`flyway_schema_history` does not exist yet
+2026-10-26T20:46:09.161+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 11 migrations (execution time 00:00.003s)
+2026-10-26T20:46:09.168+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `crypto_income`.`flyway_schema_history` ...
+2026-10-26T20:46:09.190+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `crypto_income`: << Empty Schema >>
+2026-10-26T20:46:09.191+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "1 - baseline"
+2026-10-26T20:46:09.209+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "2 - funding rate facts"
+2026-10-26T20:46:09.237+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "3 - funding sync request"
+2026-10-26T20:46:09.304+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "4 - funding backfill"
+2026-10-26T20:46:09.399+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "5 - backfill page semantics"
+2026-10-26T20:46:09.438+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "6 - grid parameter snapshot"
+2026-10-26T20:46:09.455+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "7 - spot candle facts"
+2026-10-26T20:46:09.475+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "8 - grid configuration snapshot"
+2026-10-26T20:46:09.492+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "9 - grid shadow study"
+2026-10-26T20:46:09.518+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "10 - candle sync execution"
+2026-10-26T20:46:09.535+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "11 - btc market tick facts"
+2026-10-26T20:46:09.550+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 11 migrations to schema `crypto_income`, now at version v11 (execution time 00:00.280s)
+2026-10-26T20:46:09.587+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] b.m.s.MybatisPlusApplicationContextAware : Register ApplicationContext instances org.springframework.context.annotation.AnnotationConfigApplicationContext@1b2af5ed
+2026-10-26T20:46:09.597+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.funding.FundingRateSyncServiceTest   : Started FundingRateSyncServiceTest in 0.545 seconds (process running for 75.772)
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.479 s -- in app.cryptoincome.funding.FundingRateSyncServiceTest
+[INFO] Running app.cryptoincome.grid.CandleSyncExecutionServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.041 s -- in app.cryptoincome.grid.CandleSyncExecutionServiceTest
+[INFO] Running app.cryptoincome.grid.SpotCandleTailRefreshServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in app.cryptoincome.grid.SpotCandleTailRefreshServiceTest
+[INFO] Running app.cryptoincome.grid.MybatisGridParameterSnapshotStoreTest
+2026-10-26T20:46:10.104+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Creating container for image: mysql:8.4
+2026-10-26T20:46:10.138+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 is starting: b122e8a017fd80df6547de682eabac4d0f8cb743ef979007c007a153f18fb6cf
+2026-10-26T20:46:10.215+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Waiting for database connection to become available at jdbc:mysql://localhost:56697/crypto_income using query 'SELECT 1'
+2026-10-26T20:46:14.789+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 started in PT4.685219S
+2026-10-26T20:46:14.789+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container is started (JDBC URL: jdbc:mysql://localhost:56697/crypto_income)
+2026-10-26T20:46:14.790+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.grid.MybatisGridParameterSnapshotStoreTest]: MybatisGridParameterSnapshotStoreTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:14.803+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.grid.MybatisGridParameterSnapshotStoreTest
+2026-10-26T20:46:14.803+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.grid.MybatisGridParameterSnapshotStoreTest]: MybatisGridParameterSnapshotStoreTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:14.804+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.grid.MybatisGridParameterSnapshotStoreTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-26T20:46:14.812+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .g.MybatisGridParameterSnapshotStoreTest : Starting MybatisGridParameterSnapshotStoreTest using Java 25.0.3 with PID 61711 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline)
+2026-10-26T20:46:14.812+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .g.MybatisGridParameterSnapshotStoreTest : No active profile set, falling back to 1 default profile: "default"
+2026-10-26T20:46:14.894+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Starting...
+2026-10-26T20:46:14.900+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-8 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2b4f1b37
+2026-10-26T20:46:14.900+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Start completed.
+2026-10-26T20:46:14.900+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:56697/crypto_income (MySQL 8.4)
+2026-10-26T20:46:14.909+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `crypto_income`.`flyway_schema_history` does not exist yet
+2026-10-26T20:46:14.909+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 11 migrations (execution time 00:00.002s)
+2026-10-26T20:46:14.916+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `crypto_income`.`flyway_schema_history` ...
+2026-10-26T20:46:14.935+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `crypto_income`: << Empty Schema >>
+2026-10-26T20:46:14.937+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "1 - baseline"
+2026-10-26T20:46:14.955+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "2 - funding rate facts"
+2026-10-26T20:46:14.986+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "3 - funding sync request"
+2026-10-26T20:46:15.051+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "4 - funding backfill"
+2026-10-26T20:46:15.134+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "5 - backfill page semantics"
+2026-10-26T20:46:15.169+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "6 - grid parameter snapshot"
+2026-10-26T20:46:15.184+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "7 - spot candle facts"
+2026-10-26T20:46:15.201+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "8 - grid configuration snapshot"
+2026-10-26T20:46:15.217+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "9 - grid shadow study"
+2026-10-26T20:46:15.248+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "10 - candle sync execution"
+2026-10-26T20:46:15.266+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "11 - btc market tick facts"
+2026-10-26T20:46:15.280+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 11 migrations to schema `crypto_income`, now at version v11 (execution time 00:00.265s)
+2026-10-26T20:46:15.308+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] b.m.s.MybatisPlusApplicationContextAware : Register ApplicationContext instances org.springframework.context.annotation.AnnotationConfigApplicationContext@70ecb7f6
+2026-10-26T20:46:15.319+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .g.MybatisGridParameterSnapshotStoreTest : Started MybatisGridParameterSnapshotStoreTest in 0.513 seconds (process running for 81.49)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.472 s -- in app.cryptoincome.grid.MybatisGridParameterSnapshotStoreTest
+[INFO] Running app.cryptoincome.grid.MybatisCandleSyncExecutionRepositoryTest
+2026-10-26T20:46:15.576+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Creating container for image: mysql:8.4
+2026-10-26T20:46:15.627+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 is starting: 8751acc783b5655df18f2e1c6d8c0bc1880f3fd5b713fd40c09dcb02c61afb45
+2026-10-26T20:46:15.720+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Waiting for database connection to become available at jdbc:mysql://localhost:56757/crypto_income using query 'SELECT 1'
+2026-10-26T20:46:20.374+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 started in PT4.798098S
+2026-10-26T20:46:20.374+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container is started (JDBC URL: jdbc:mysql://localhost:56757/crypto_income)
+2026-10-26T20:46:20.375+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.grid.MybatisCandleSyncExecutionRepositoryTest]: MybatisCandleSyncExecutionRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:20.377+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.grid.MybatisCandleSyncExecutionRepositoryTest
+2026-10-26T20:46:20.377+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.grid.MybatisCandleSyncExecutionRepositoryTest]: MybatisCandleSyncExecutionRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:20.377+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.grid.MybatisCandleSyncExecutionRepositoryTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-26T20:46:20.384+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] MybatisCandleSyncExecutionRepositoryTest : Starting MybatisCandleSyncExecutionRepositoryTest using Java 25.0.3 with PID 61711 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline)
+2026-10-26T20:46:20.384+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] MybatisCandleSyncExecutionRepositoryTest : No active profile set, falling back to 1 default profile: "default"
+2026-10-26T20:46:20.467+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Starting...
+2026-10-26T20:46:20.474+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-9 - Added connection com.mysql.cj.jdbc.ConnectionImpl@b6eea98
+2026-10-26T20:46:20.474+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Start completed.
+2026-10-26T20:46:20.475+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:56757/crypto_income (MySQL 8.4)
+2026-10-26T20:46:20.484+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `crypto_income`.`flyway_schema_history` does not exist yet
+2026-10-26T20:46:20.484+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 11 migrations (execution time 00:00.002s)
+2026-10-26T20:46:20.492+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `crypto_income`.`flyway_schema_history` ...
+2026-10-26T20:46:20.512+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `crypto_income`: << Empty Schema >>
+2026-10-26T20:46:20.513+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "1 - baseline"
+2026-10-26T20:46:20.530+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "2 - funding rate facts"
+2026-10-26T20:46:20.557+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "3 - funding sync request"
+2026-10-26T20:46:20.618+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "4 - funding backfill"
+2026-10-26T20:46:20.708+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "5 - backfill page semantics"
+2026-10-26T20:46:20.744+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "6 - grid parameter snapshot"
+2026-10-26T20:46:20.759+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "7 - spot candle facts"
+2026-10-26T20:46:20.778+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "8 - grid configuration snapshot"
+2026-10-26T20:46:20.794+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "9 - grid shadow study"
+2026-10-26T20:46:20.825+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "10 - candle sync execution"
+2026-10-26T20:46:20.846+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "11 - btc market tick facts"
+2026-10-26T20:46:20.862+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 11 migrations to schema `crypto_income`, now at version v11 (execution time 00:00.272s)
+2026-10-26T20:46:20.887+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] b.m.s.MybatisPlusApplicationContextAware : Register ApplicationContext instances org.springframework.context.annotation.AnnotationConfigApplicationContext@bc85f82
+2026-10-26T20:46:20.897+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] MybatisCandleSyncExecutionRepositoryTest : Started MybatisCandleSyncExecutionRepositoryTest in 0.518 seconds (process running for 87.065)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.553 s -- in app.cryptoincome.grid.MybatisCandleSyncExecutionRepositoryTest
+[INFO] Running app.cryptoincome.grid.FixedGridAssessmentServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 25.78 s -- in app.cryptoincome.grid.FixedGridAssessmentServiceTest
+[INFO] Running app.cryptoincome.grid.GridParameterSnapshotServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in app.cryptoincome.grid.GridParameterSnapshotServiceTest
+[INFO] Running app.cryptoincome.grid.OkxGridParameterClientTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in app.cryptoincome.grid.OkxGridParameterClientTest
+[INFO] Running app.cryptoincome.grid.FixedGridBacktesterTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in app.cryptoincome.grid.FixedGridBacktesterTest
+[INFO] Running app.cryptoincome.grid.FixedGridPathSimulatorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in app.cryptoincome.grid.FixedGridPathSimulatorTest
+[INFO] Running app.cryptoincome.grid.MybatisGridConfigurationSnapshotTest
+2026-10-26T20:46:46.925+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Creating container for image: mysql:8.4
+2026-10-26T20:46:46.972+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 is starting: 8d95165725ec3fe65ba841701cebeabbd0f0f31f3f9fde9bf7b0e31f60e6e9f1
+2026-10-26T20:46:47.064+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Waiting for database connection to become available at jdbc:mysql://localhost:56853/crypto_income using query 'SELECT 1'
+2026-10-26T20:46:51.670+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 started in PT4.745365S
+2026-10-26T20:46:51.670+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container is started (JDBC URL: jdbc:mysql://localhost:56853/crypto_income)
+2026-10-26T20:46:51.672+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.grid.MybatisGridConfigurationSnapshotTest]: MybatisGridConfigurationSnapshotTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:51.678+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.grid.MybatisGridConfigurationSnapshotTest
+2026-10-26T20:46:51.678+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.grid.MybatisGridConfigurationSnapshotTest]: MybatisGridConfigurationSnapshotTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:51.681+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.grid.MybatisGridConfigurationSnapshotTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-26T20:46:51.708+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] c.g.MybatisGridConfigurationSnapshotTest : Starting MybatisGridConfigurationSnapshotTest using Java 25.0.3 with PID 61711 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline)
+2026-10-26T20:46:51.708+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] c.g.MybatisGridConfigurationSnapshotTest : No active profile set, falling back to 1 default profile: "default"
+2026-10-26T20:46:51.934+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Starting...
+2026-10-26T20:46:52.014+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-10 - Added connection com.mysql.cj.jdbc.ConnectionImpl@42b35632
+2026-10-26T20:46:52.015+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Start completed.
+2026-10-26T20:46:52.016+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:56853/crypto_income (MySQL 8.4)
+2026-10-26T20:46:52.041+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `crypto_income`.`flyway_schema_history` does not exist yet
+2026-10-26T20:46:52.043+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 11 migrations (execution time 00:00.009s)
+2026-10-26T20:46:52.063+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `crypto_income`.`flyway_schema_history` ...
+2026-10-26T20:46:52.091+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `crypto_income`: << Empty Schema >>
+2026-10-26T20:46:52.095+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "1 - baseline"
+2026-10-26T20:46:52.120+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "2 - funding rate facts"
+2026-10-26T20:46:52.155+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "3 - funding sync request"
+2026-10-26T20:46:52.224+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "4 - funding backfill"
+2026-10-26T20:46:52.325+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "5 - backfill page semantics"
+2026-10-26T20:46:52.366+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "6 - grid parameter snapshot"
+2026-10-26T20:46:52.387+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "7 - spot candle facts"
+2026-10-26T20:46:52.407+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "8 - grid configuration snapshot"
+2026-10-26T20:46:52.440+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "9 - grid shadow study"
+2026-10-26T20:46:52.475+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "10 - candle sync execution"
+2026-10-26T20:46:52.496+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "11 - btc market tick facts"
+2026-10-26T20:46:52.515+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 11 migrations to schema `crypto_income`, now at version v11 (execution time 00:00.302s)
+2026-10-26T20:46:52.581+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] b.m.s.MybatisPlusApplicationContextAware : Register ApplicationContext instances org.springframework.context.annotation.AnnotationConfigApplicationContext@239e7554
+2026-10-26T20:46:52.605+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] c.g.MybatisGridConfigurationSnapshotTest : Started MybatisGridConfigurationSnapshotTest in 0.92 seconds (process running for 118.769)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.906 s -- in app.cryptoincome.grid.MybatisGridConfigurationSnapshotTest
+[INFO] Running app.cryptoincome.grid.OkxSpotCandleClientTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in app.cryptoincome.grid.OkxSpotCandleClientTest
+[INFO] Running app.cryptoincome.grid.SpotCandleBackfillServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in app.cryptoincome.grid.SpotCandleBackfillServiceTest
+[INFO] Running app.cryptoincome.grid.MybatisSpotCandleFactTest
+2026-10-26T20:46:52.843+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Creating container for image: mysql:8.4
+2026-10-26T20:46:52.885+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 is starting: 9278d788f3899d52ee44f803d66f61e3ad94c3fddb7c8628fa27ff7b2179de3c
+2026-10-26T20:46:52.984+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Waiting for database connection to become available at jdbc:mysql://localhost:56924/crypto_income using query 'SELECT 1'
+2026-10-26T20:46:57.675+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container mysql:8.4 started in PT4.831979S
+2026-10-26T20:46:57.675+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] tc.mysql:8.4                             : Container is started (JDBC URL: jdbc:mysql://localhost:56924/crypto_income)
+2026-10-26T20:46:57.676+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.grid.MybatisSpotCandleFactTest]: MybatisSpotCandleFactTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:57.679+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.grid.MybatisSpotCandleFactTest
+2026-10-26T20:46:57.679+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.cryptoincome.grid.MybatisSpotCandleFactTest]: MybatisSpotCandleFactTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-26T20:46:57.680+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.cryptoincome.CryptoIncomeApplication for test class app.cryptoincome.grid.MybatisSpotCandleFactTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.0)
+
+2026-10-26T20:46:57.694+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.grid.MybatisSpotCandleFactTest       : Starting MybatisSpotCandleFactTest using Java 25.0.3 with PID 61711 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline)
+2026-10-26T20:46:57.694+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.grid.MybatisSpotCandleFactTest       : No active profile set, falling back to 1 default profile: "default"
+2026-10-26T20:46:57.793+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Starting...
+2026-10-26T20:46:57.802+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-11 - Added connection com.mysql.cj.jdbc.ConnectionImpl@45d93fbf
+2026-10-26T20:46:57.802+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Start completed.
+2026-10-26T20:46:57.802+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:56924/crypto_income (MySQL 8.4)
+2026-10-26T20:46:57.813+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `crypto_income`.`flyway_schema_history` does not exist yet
+2026-10-26T20:46:57.814+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 11 migrations (execution time 00:00.003s)
+2026-10-26T20:46:57.822+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `crypto_income`.`flyway_schema_history` ...
+2026-10-26T20:46:57.838+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `crypto_income`: << Empty Schema >>
+2026-10-26T20:46:57.840+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "1 - baseline"
+2026-10-26T20:46:57.857+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "2 - funding rate facts"
+2026-10-26T20:46:57.889+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "3 - funding sync request"
+2026-10-26T20:46:57.953+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "4 - funding backfill"
+2026-10-26T20:46:58.048+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "5 - backfill page semantics"
+2026-10-26T20:46:58.081+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "6 - grid parameter snapshot"
+2026-10-26T20:46:58.098+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "7 - spot candle facts"
+2026-10-26T20:46:58.119+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "8 - grid configuration snapshot"
+2026-10-26T20:46:58.136+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "9 - grid shadow study"
+2026-10-26T20:46:58.168+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "10 - candle sync execution"
+2026-10-26T20:46:58.185+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `crypto_income` to version "11 - btc market tick facts"
+2026-10-26T20:46:58.200+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 11 migrations to schema `crypto_income`, now at version v11 (execution time 00:00.271s)
+2026-10-26T20:46:58.234+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] b.m.s.MybatisPlusApplicationContextAware : Register ApplicationContext instances org.springframework.context.annotation.AnnotationConfigApplicationContext@259fabf7
+2026-10-26T20:46:58.247+08:00  INFO 61711 --- [ai-crypto-arbitrage] [           main] a.c.grid.MybatisSpotCandleFactTest       : Started MybatisSpotCandleFactTest in 0.564 seconds (process running for 124.409)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.610 s -- in app.cryptoincome.grid.MybatisSpotCandleFactTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 166, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  02:08 min
+[INFO] Finished at: 2026-10-26T20:46:59+08:00
+[INFO] ------------------------------------------------------------------------

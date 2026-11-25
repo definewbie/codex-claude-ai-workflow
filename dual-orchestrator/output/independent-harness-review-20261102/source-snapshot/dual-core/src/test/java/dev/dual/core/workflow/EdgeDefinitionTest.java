@@ -1,0 +1,100 @@
+package dev.dual.core.workflow;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class EdgeDefinitionTest {
+
+    @Test
+    void threeArgConstructor_hasUnconditionalCondition() {
+        var edge = new EdgeDefinition("a", "PASS", "b");
+        assertTrue(edge.condition().evaluate(Map.of()));
+        assertTrue(edge.condition() == EdgeCondition.unconditional());
+    }
+
+    @Test
+    void fourArgConstructor_preservesCondition() {
+        var cond = EdgeCondition.configEquals("x", "y");
+        var edge = new EdgeDefinition("a", "PASS", "b", cond);
+        assertEquals(cond, edge.condition());
+    }
+
+    @Test
+    void nullCondition_becomesUnconditional() {
+        var edge = new EdgeDefinition("a", "PASS", "b", null);
+        assertTrue(edge.condition().evaluate(Map.of()));
+    }
+
+    @Test
+    void transitionMetadataDefaultsToNormal() {
+        var edge = new EdgeDefinition("a", "PASS", "b");
+        assertEquals("normal", edge.metadata().transitionType());
+        assertTrue(edge.metadata().required());
+    }
+
+    @Test
+    void transitionMetadataCanDescribeLoopForkAndJoin() {
+        var loop = new EdgeDefinition("a", "revise", "b",
+                EdgeCondition.unconditional(), TransitionMetadata.loop("human revision"));
+        assertEquals("loop", loop.metadata().transitionType());
+        assertEquals("human revision", loop.metadata().toAttributes().get("loop_reason"));
+
+        var fork = new EdgeDefinition("a", "PASS", "b",
+                EdgeCondition.unconditional(), TransitionMetadata.fork("reviews", false, "architecture review"));
+        assertEquals("fork", fork.metadata().transitionType());
+        assertEquals("reviews", fork.metadata().toAttributes().get("branch_group_id"));
+        assertEquals(false, fork.metadata().toAttributes().get("required"));
+
+        var join = new EdgeDefinition("b", "DONE", "c",
+                EdgeCondition.unconditional(), TransitionMetadata.join("reviews", "", "join review evidence"));
+        assertEquals("join", join.metadata().transitionType());
+        assertEquals("all_terminal", join.metadata().joinStrategy());
+    }
+
+    @Test
+    void rejectsBlankFrom() {
+        assertThrows(IllegalArgumentException.class, () -> new EdgeDefinition("", "PASS", "b"));
+    }
+
+    @Test
+    void rejectsBlankOn() {
+        assertThrows(IllegalArgumentException.class, () -> new EdgeDefinition("a", "", "b"));
+    }
+
+    @Test
+    void rejectsBlankTo() {
+        assertThrows(IllegalArgumentException.class, () -> new EdgeDefinition("a", "PASS", ""));
+    }
+
+    @Test
+    void workflowDefinition_conditionalEdgeRouting() {
+        var def = new WorkflowDefinition("test", 1, "a",
+                List.of(
+                        new NodeDefinition("a", NodeKind.DECISION, "dec", Map.of()),
+                        new NodeDefinition("b", NodeKind.TASK, "t1", Map.of()),
+                        new NodeDefinition("c", NodeKind.TASK, "t2", Map.of())
+                ),
+                List.of(
+                        new EdgeDefinition("a", "PASS", "b", EdgeCondition.configEquals("mode", "strict")),
+                        new EdgeDefinition("a", "PASS", "c", EdgeCondition.configEquals("mode", "relaxed"))
+                )
+        );
+
+        var strict = def.edgesFrom("a", "PASS", Map.of("mode", "strict"));
+        assertEquals(1, strict.size());
+        assertEquals("b", strict.get(0).to());
+
+        var relaxed = def.edgesFrom("a", "PASS", Map.of("mode", "relaxed"));
+        assertEquals(1, relaxed.size());
+        assertEquals("c", relaxed.get(0).to());
+
+        var none = def.edgesFrom("a", "PASS", Map.of("mode", "unknown"));
+        assertTrue(none.isEmpty());
+    }
+}

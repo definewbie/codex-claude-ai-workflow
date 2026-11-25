@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-context-implement_claude-029",
+  "nodeDefinitionId": "context.implement_claude",
+  "kind": "TASK",
+  "handlerType": "context.build_package",
+  "status": "COMPLETED",
+  "stageId": "stage-context",
+  "iterationId": "iter-003",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.md",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json"
+  ],
+  "inputTransition": {
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256": "6ad6f74e292bceccc90ec11a229df0cc542bae89f3249ba6fb5e450ce191bf5e",
+    "source_node_instance_id": "node-gate-contract_review-028",
+    "required": true,
+    "transition_type": "normal",
+    "condition": "unconditional"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-implement_claude-029.md"
+  ],
+  "result": {
+    "context_package": ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-implement_claude-029.md",
+    "context_package_metadata": ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-implement_claude-029.json",
+    "target_node": "implement.claude_implement",
+    "profile": "implementation",
+    "sections": [
+      "input_artifacts",
+      "iteration_history",
+      "human_feedback",
+      "working_memory",
+      "recent_agent_outputs",
+      "git_evidence",
+      "ledger_pointers"
+    ],
+    "input_ref_count": 3,
+    "generated_at": "2026-10-25T22:36:14.538194Z"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1792967774282-b3d7328a",
+  "startedAt": "2026-10-25T22:36:14.294578Z",
+  "finishedAt": "2026-10-25T22:36:14.555585Z"
+}

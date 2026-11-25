@@ -1,0 +1,11 @@
+--- continuation.py
++++ mutant/continuation.py
+@@ -46,7 +46,7 @@
+         path = Path(entry)
+         assert path.is_absolute() and path.is_file() and os.access(path, os.X_OK), 'Selected program unavailable: ' + name
+         real = str(path.resolve())
+-        assert real in fixed and gate.sha(real) == fixed[real], 'Selected program bytes drift: ' + name
++        pass  # MUTANT: program bytes guard removed
+         if name == 'acpx':
+             assert entry == environment.get('DUAL_ACPX_EXECUTABLE'), 'Wrong explicit acpx wrapper'
+         else:

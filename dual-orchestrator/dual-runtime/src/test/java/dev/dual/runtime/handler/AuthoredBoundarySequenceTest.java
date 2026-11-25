@@ -58,13 +58,13 @@ class AuthoredBoundarySequenceTest {
     @ParameterizedTest
     @ValueSource(strings = {"converter/render.py", "site/home.html"})
     void approvedInputDamageAndPartialPublicationBlockTheActualConsumer(String business) throws Exception {
-        for (var damage : List.of("sidecar", "manifest", "manifest-half", "gate-source", "gate-action",
-                "gate-unresolved", "source-incomplete", "missing-execution", "unpublished-sidecar", "missing-route",
-                "sidecar-half", "gate-half", "cross-workstream", "cross-iteration")) {
+        for (var damage : List.of("sidecar", "manifest", "manifest-half", "decision-source", "decision-result",
+                "decision-incomplete", "source-incomplete", "missing-execution", "unpublished-sidecar", "missing-route",
+                "sidecar-half", "decision-half", "cross-workstream", "cross-iteration")) {
             var f = new AuthoredStageSequenceTest.Fixture(root.resolve(damage), business);
             var context = f.before("implement.claude_implement");
             var input = AuthoredExecutionContext.prepare(context, "inspect").orElseThrow();
-            var plan = input.approvedPlan();
+            var plan = input.reviewedPlan();
             var candidate = plan.candidate();
             var sidecar = f.root.resolve(candidate.sidecar().ref());
             var manifest = f.runDir(candidate.runId()).resolve("prompts/prompt.md.manifest.json");
@@ -72,16 +72,16 @@ class AuthoredBoundarySequenceTest {
             switch (damage) {
                 case "sidecar" -> Files.writeString(sidecar, Files.readString(sidecar) + " ");
                 case "sidecar-half" -> Files.writeString(sidecar, "{");
-                case "gate-half" -> Files.writeString(f.root.resolve(plan.gate().ref()), "{");
+                case "decision-half" -> Files.writeString(f.root.resolve(plan.decision().ref()), "{");
                 case "cross-workstream" -> edit(sidecar, tree -> tree.put("workstream_id", "another-workstream"));
                 case "cross-iteration" -> edit(nodePath, tree -> tree.put("iterationId", "iter-forged"));
                 case "manifest" -> Files.writeString(manifest, Files.readString(manifest) + " ");
                 case "manifest-half" -> Files.writeString(manifest, "{\"authoredContext\":");
-                case "gate-source" -> edit(f.root.resolve(plan.gate().ref()), tree ->
-                        ((ObjectNode) tree.get("result")).put("source_node_instance_id", "forged-source"));
-                case "gate-action" -> edit(f.root.resolve(plan.gate().ref()), tree ->
-                        ((ObjectNode) tree.get("result")).put("human_action", "revise"));
-                case "gate-unresolved" -> edit(f.root.resolve(plan.gate().ref()), tree -> tree.put("status", "open"));
+                case "decision-source" -> edit(f.root.resolve(plan.decision().ref()), tree ->
+                        ((ObjectNode) tree.at("/result/reviewed_candidate")).put("author_occurrence", "forged-source"));
+                case "decision-result" -> edit(f.root.resolve(plan.decision().ref()), tree ->
+                        ((ObjectNode) tree.at("/result/reviewed_candidate")).put("decision", "BLOCKED"));
+                case "decision-incomplete" -> edit(f.root.resolve(plan.decision().ref()), tree -> tree.put("status", "RUNNING"));
                 case "source-incomplete" -> edit(nodePath, tree -> tree.put("status", "RUNNING"));
                 case "unpublished-sidecar" -> edit(nodePath, tree -> tree.putArray("outputRefs"));
                 case "missing-execution" -> {
@@ -114,7 +114,7 @@ class AuthoredBoundarySequenceTest {
                 try {
                     assertTrue(process.waitFor(20, TimeUnit.SECONDS));
                     assertNotEquals(0, process.exitValue(), "a cold reader must also reject the partial manifest");
-                    assertTrue(Files.readString(stderr).contains("AUTHORED_SOURCE_HASH_MISMATCH"), Files.readString(stderr));
+                    assertTrue(Files.readString(stderr).contains("AUTHORED_CONTRACT_NOT_QUALIFIED"), Files.readString(stderr));
                 } finally { if (process.isAlive()) process.destroyForcibly(); }
             }
             f.advanceToGate();
@@ -126,25 +126,25 @@ class AuthoredBoundarySequenceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"converter/render.py", "site/home.html"})
-    void twoValidPlanCandidatesInOneApprovalCannotBeChosenByOrder(String business) throws Exception {
+    void twoValidPlanReviewsInOneApprovalCannotBeChosenByOrder(String business) throws Exception {
         var f = new AuthoredStageSequenceTest.Fixture(root, business);
         f.advanceToGate(); f.approve();
         var firstGate = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst();
-        var first = (AuthoredExecutionContext.Candidate) new AuthoredStageLineageResolver(root, f.ws, Long.MAX_VALUE)
-                .gateView(firstGate).projection().get("candidate");
+        var first = new AuthoredStageLineageResolver(dev.dual.runtime.RuntimeTestLedger.ledger(), root, f.ws, Long.MAX_VALUE)
+                .gateView(firstGate).sidecarRef();
         f.revise("Preserve the approved scope");
         var current = f.ledger.loadCurrent(f.paths);
         var gateNode = current.activeNodeInstanceIds().getFirst();
         var gatePath = f.paths.workstreamDir().resolve("gates/" + current.openGateIds().getFirst() + ".json");
         edit(f.paths.nodeJson(gateNode), tree ->
-                ((com.fasterxml.jackson.databind.node.ArrayNode) tree.get("inputRefs")).add(first.sidecar().ref()));
+                ((com.fasterxml.jackson.databind.node.ArrayNode) tree.get("inputRefs")).add(first));
         edit(gatePath, tree ->
-                ((com.fasterxml.jackson.databind.node.ArrayNode) tree.at("/result/subject_input_refs")).add(first.sidecar().ref()));
+                ((com.fasterxml.jackson.databind.node.ArrayNode) tree.at("/result/subject_input_refs")).add(first));
         var error = assertThrows(java.io.IOException.class, () ->
-                new AuthoredStageLineageResolver(root, f.ws, Long.MAX_VALUE).gateView(gateNode));
+                new AuthoredStageLineageResolver(dev.dual.runtime.RuntimeTestLedger.ledger(), root, f.ws, Long.MAX_VALUE).gateView(gateNode));
         assertTrue(error.getMessage().contains("AUTHORED_CANDIDATE_NOT_UNIQUE"), error.getMessage());
         f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths), "approve", "Candidate selection must still be verified");
-        f.advanceToGate();
+        assertThrows(java.io.IOException.class, f::advanceToGate);
         assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.ledger.loadCurrent(f.paths).status());
         assertFalse(f.calls.contains("implement.claude_implement"));
     }
@@ -179,11 +179,11 @@ class AuthoredBoundarySequenceTest {
 
     public static class ColdRead {
         public static void main(String[] args) throws Exception {
-            var ledger = new dev.dual.ledger.file.WorkflowFileLedger();
+            var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
             var root = Path.of(args[0]);
             var paths = new dev.dual.ledger.file.WorkstreamPaths(root, new dev.dual.core.id.DualId(args[1]));
             var instance = ledger.loadCoreNode(paths, args[2]);
-            var context = new TaskHandler.TaskContext(root, args[1], ledger.loadDefinition(paths).node(instance.nodeDefinitionId()), instance);
+            var context = new TaskHandler.TaskContext(root, args[1], ledger.loadDefinition(paths).node(instance.nodeDefinitionId()), instance, dev.dual.runtime.RuntimeTestLedger.ledger());
             System.out.println(JSON.writeValueAsString(AuthoredExecutionContext.prepare(context, args[3]).orElseThrow()));
         }
     }
@@ -200,25 +200,25 @@ class AuthoredBoundarySequenceTest {
         assertEquals("gate.human_design_approval", f.currentNode());
         var openFailure = assertThrows(java.io.IOException.class,
                 () -> AuthoredExecutionContext.prepare(oldPlan, "retry-run"));
-        assertTrue(openFailure.getMessage().contains("AUTHORED_APPROVAL_NOT_COMPLETED"), openFailure.toString());
+        assertTrue(openFailure.getMessage().contains("AUTHORED_NODE_NOT_CURRENT"), openFailure.toString());
         f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths), "approve", "Approve replacement design");
         var changed = assertThrows(java.io.IOException.class,
                 () -> AuthoredExecutionContext.prepare(oldPlan, "retry-run"));
-        assertTrue(changed.getMessage().contains("AUTHORED_NODE_AUTHORITY_CHANGED"), changed.toString());
+        assertTrue(changed.getMessage().contains("AUTHORED_NODE_NOT_CURRENT"), changed.toString());
         var newPlan = f.before("plan.claude_plan");
         var fresh = AuthoredExecutionContext.prepare(newPlan, "new-run").orElseThrow();
-        assertNotEquals(original.approvedDesign(), fresh.approvedDesign());
+        assertNotEquals(original.reviewedDesign(), fresh.reviewedDesign());
         assertEquals(original.contract(), fresh.contract());
         int calls = f.calls.size();
         assertEquals(NodeStatus.FAILED, f.executeProvider(oldPlan).status());
         assertEquals(calls, f.calls.size(), "old node retry cannot reach the provider substitute");
         f.advanceToGate(); f.approve();
         assertEquals(WorkflowStatus.COMPLETED, f.ledger.loadCurrent(f.paths).status());
-        assertEquals(fresh.approvedDesign(), f.inputs.get("implement.claude_implement").approvedDesign());
+        assertEquals(fresh.reviewedDesign(), f.inputs.get("implement.claude_implement").reviewedDesign());
     }
 
     @Test
-    void sameBytesReapprovalRejectsOldAuthoredChainAndFreshChainCompletes() throws Exception {
+    void sameBytesReapprovalCannotForgeANewCompileOccurrence() throws Exception {
         var f = new AuthoredStageSequenceTest.Fixture(root, "site/home.html");
         addEdge(f, "implement.claude_implement", "requalify", "contract.compile");
         var oldImplement = f.before("implement.claude_implement");
@@ -231,21 +231,14 @@ class AuthoredBoundarySequenceTest {
         f.ledger.completeAndRoute(f.paths, f.ledger.loadDefinition(f.paths), compile, NodeStatus.COMPLETED,
                 "completed", oldCompile.outputRefs(), oldCompile.result());
         f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths), "approve", "Reapprove identical contract bytes");
-        var qualified = TaskContractProjectionVerifier.resolve(root, f.ws).qualified().orElseThrow();
-        assertEquals(old.contract().contract().sha256(), qualified.sha256());
-        assertNotEquals(old.contract().compileNodeInstanceId(), qualified.compileNodeInstanceId());
+        var resolution = TaskContractProjectionVerifier.resolve(f.ledger, root, f.ws);
+        assertTrue(resolution.qualified().isEmpty(), "old occurrence bytes cannot masquerade as the new compiler output");
+        assertNotNull(resolution.failure());
         int calls = f.calls.size();
         assertEquals(NodeStatus.FAILED, f.executeProvider(oldImplement).status());
         assertEquals(calls, f.calls.size());
-        f.advanceToGate(); f.approve(); f.approve();
-        assertEquals(WorkflowStatus.COMPLETED, f.ledger.loadCurrent(f.paths).status(), f.calls.toString());
-        var fresh = f.inputs.get("implement.claude_implement");
-        assertNotEquals(old.contract(), fresh.contract());
-        assertEquals(qualified.compileNodeInstanceId(), fresh.contract().compileNodeInstanceId());
-        assertEquals(old.contract().contract().sha256(), fresh.contract().contract().sha256());
-        assertNotEquals(old.approvedDesign(), fresh.approvedDesign());
-        assertNotEquals(old.approvedPlan(), fresh.approvedPlan());
-        assertEquals(fresh.approvedPlan(), f.inputs.get("implement.claude_self_test_report").approvedPlan());
+        assertFalse(f.calls.contains("implement.claude_implement"));
+        // Fresh GOAL -> design -> plan -> EXECUTION approval is exercised in PhasedContractContinuationTest.
     }
 
     private static void addEdge(AuthoredStageSequenceTest.Fixture f, String from, String on, String to) throws Exception {
@@ -259,15 +252,17 @@ class AuthoredBoundarySequenceTest {
         var entries = full.edges().stream().filter(edge -> edge.to().equals("context.implement_claude")
                 || (edge.from().equals("acceptance.classify_failure")
                     && edge.on().equals("REJECT_VERIFICATION_INSUFFICIENT"))).toList();
-        assertEquals(8, entries.size(), "seven implementation entries and one direct self-test entry");
+        assertEquals(java.util.Set.of("gate.contract_review", "implement.self_test_decision", "gate.human_implementation_repair",
+                "contract.compile_execution", "acceptance.classify_failure", "gate.human_acceptance"),
+                entries.stream().map(EdgeDefinition::from).collect(java.util.stream.Collectors.toSet()));
         for (var entry : entries) for (boolean damaged : List.of(false, true)) {
             var f = new AuthoredStageSequenceTest.Fixture(root.resolve(entry.from() + "-" + entry.on() + "-" + damaged), "site/home.html");
             edit(f.paths.workflowDefinitionJson(), tree -> {
                 var nodes = (com.fasterxml.jackson.databind.node.ArrayNode) tree.get("nodes");
                 nodes.add(JSON.valueToTree(full.node("context.implement_claude")));
-                if (!entry.from().equals("gate.human_plan_approval")) nodes.add(JSON.valueToTree(full.node(entry.from())));
+                if (!java.util.Set.of("gate.contract_review", "contract.compile_execution").contains(entry.from())) nodes.add(JSON.valueToTree(full.node(entry.from())));
                 var edges = (com.fasterxml.jackson.databind.node.ArrayNode) tree.get("edges");
-                if (entry.from().equals("gate.human_plan_approval")) {
+                if (entry.from().equals("gate.contract_review")) {
                     for (int i = edges.size() - 1; i >= 0; i--)
                         if (edges.get(i).path("from").asText().equals(entry.from()) && edges.get(i).path("on").asText().equals("approved")) edges.remove(i);
                 }
@@ -287,8 +282,8 @@ class AuthoredBoundarySequenceTest {
             });
             var initial = f.before("implement.claude_implement");
             var expected = AuthoredExecutionContext.prepare(initial, "inspect").orElseThrow();
-            assertNotNull(expected.approvedPlan(), "Every implementation entry requires an approved plan");
-            if (!entry.from().equals("gate.human_plan_approval")) {
+            assertNotNull(expected.reviewedPlan(), "Every implementation entry requires an approved plan");
+            if (!entry.from().equals("gate.contract_review")) {
                 addEdge(f, "implement.claude_implement", "fixture_reentry", entry.from());
                 f.ledger.completeAndRoute(f.paths, f.ledger.loadDefinition(f.paths), initial.instance().nodeInstanceId(),
                         NodeStatus.COMPLETED, "fixture_reentry", initial.instance().inputRefs(), Map.of());
@@ -299,7 +294,7 @@ class AuthoredBoundarySequenceTest {
                         NodeStatus.COMPLETED, entry.on(), initial.instance().inputRefs(),
                         Map.of("decision", entry.on(), "continuation_kind", "IMPLEMENTATION_REPAIR"));
             }
-            if (damaged) Files.delete(f.runDir(expected.approvedPlan().candidate().runId()).resolve("prompts/prompt.md.manifest.json"));
+            if (damaged) Files.delete(f.runDir(expected.reviewedPlan().candidate().runId()).resolve("prompts/prompt.md.manifest.json"));
             f.advanceToGate();
             var label = entry.from() + ":" + entry.on() + " damaged=" + damaged;
             if (damaged) {
@@ -309,11 +304,11 @@ class AuthoredBoundarySequenceTest {
             } else {
                 assertEquals(WorkflowStatus.COMPLETED, f.ledger.loadCurrent(f.paths).status(), label + f.currentDocumentIfActive());
                 var consumer = f.inputs.get("implement.claude_self_test_report");
-                assertEquals(expected.approvedPlan(), consumer.approvedPlan(), label);
+                assertEquals(expected.reviewedPlan(), consumer.reviewedPlan(), label);
                 assertNull(consumer.parent(), "repair is not a design/plan revision");
                 assertTrue(consumer.obligations().isEmpty(), label);
                 if (!entry.to().equals("implement.claude_self_test_report"))
-                    assertEquals(expected.approvedPlan(), f.inputs.get("implement.claude_implement").approvedPlan(), label);
+                    assertEquals(expected.reviewedPlan(), f.inputs.get("implement.claude_implement").reviewedPlan(), label);
             }
         }
     }
@@ -353,7 +348,7 @@ class AuthoredBoundarySequenceTest {
             var packetPath = f.paths.workstreamDir().resolve("reviews/" + id + ".json");
             var markdownPath = f.paths.workstreamDir().resolve("reviews/" + id + ".md");
             var packet = JSON.readTree(packetPath.toFile());
-            var view = new AuthoredStageLineageResolver(root, f.ws, Long.MAX_VALUE).gateView(id).projection();
+            var view = new AuthoredStageLineageResolver(dev.dual.runtime.RuntimeTestLedger.ledger(), root, f.ws, Long.MAX_VALUE).gateView(id).projection();
             assertEquals(JSON.readTree(JSON.writeValueAsString(view)), packet.get("authoredStage"));
             var markdown = Files.readString(markdownPath);
             assertTrue(markdown.contains(JSON.writerWithDefaultPrettyPrinter().writeValueAsString(view)));
@@ -383,10 +378,10 @@ class AuthoredBoundarySequenceTest {
                 f.revise("Keep <img src=x onerror=alert(1)> as literal text");
             }
         }
-        var candidate = new AuthoredStageLineageResolver(root, f.ws, Long.MAX_VALUE)
+        var candidate = new AuthoredStageLineageResolver(dev.dual.runtime.RuntimeTestLedger.ledger(), root, f.ws, Long.MAX_VALUE)
                 .gateView(f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst()).projection().get("candidate");
         f.approve();
         assertEquals(WorkflowStatus.COMPLETED, f.ledger.loadCurrent(f.paths).status());
-        assertEquals(candidate, f.inputs.get("implement.claude_implement").approvedPlan().candidate());
+        assertEquals(candidate, f.inputs.get("implement.claude_implement").reviewedPlan().candidate());
     }
 }

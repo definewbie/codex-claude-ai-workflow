@@ -1,0 +1,56 @@
+--- before/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -1,6 +1,6 @@
+ # Dual 生命周期可靠性：详细设计候选
+ 
+-日期：2026-09-28。阶段：P0。状态：候选修订及 D04 静态报告获用户带回的 CC 复审 PASS（新增 1 LOW）；READY 正向表示与 BUSY/pending 设计义务已确认解决。随后用户同意优先细化现有 adapter 的强制只读绑定，保留 Claude 作者／Codex 评审，并要求成本收益偏离时停止等其确认。新增 §8.2–§8.7 为未独立评审的绑定候选；仍不是 Implementation Ready，不授权代码实施、提交或真实运行。
++日期：2026-09-28。阶段：P0。状态：D04 绑定候选 §8.2–§8.7 及接口报告已获用户带回的 CC 复审 PASS（2 LOW，无 WARN/FAIL）。本轮修订两项 LOW，并纠正读取协议归属，增量未经独立复审，处置见 §14.3。用户已同意优先细化现有 adapter 强制只读绑定、保留 Claude 作者／Codex 评审；成本收益偏离时停止等其确认。仍不是 Implementation Ready，不授权代码实施、提交或真实运行。
+ 
+ 上位契约：[R3](20260923-dual-lifecycle-reliability-design.zh-CN.md)。唯一工作索引：[主清单](20260927-dual-lifecycle-worklist.zh-CN.md)。本文展开 D01–D10，不另建工作清单或降低 R3 验收。全文“增加、迁移、必须”描述拟议目标；现状另行标明。未落实的能力不能用于当前运行准入。
+ 
+@@ -413,9 +413,9 @@
+ 
+ ### 8.7 具体待核验顺序及停止边界
+ 
+-1. 首先证明两 provider 的“必要读取可用＋写/执行面受限”能同时成立，尤其是 Codex 无 execute 条件下的读取；若必须扩围，立即按 §8.6 停止，而不是先细化大量迁移字段。
++1. 首先证明两 provider 的“必要读取可用＋写/执行面受限”能同时成立，尤其是 Codex 无 execute 条件下的读取。允许比较已有 ACP `fs/read_text_file` 宿主介导读取，调查和核验现有协议面本身不视为新增工具服务；但须追到常规 turn 的模型工具调用及 adapter→acpx 实际消费，不能把协议方法存在当成可用。此前导出的 Codex app-server `FsReadFile/FsReadDirectory`（`fs/readFile`、`fs/readDirectory`）是另一套客户端接口，不能直接作为 ACP 回调或模型工具已接通的证据。原生路径不成立时，先比较这些已有候选；若必须新增工具服务、修改引擎或改变约束，立即按 §8.6 停止，而不是先细化大量迁移字段。
+ 2. 该前提成立后，冻结 binding 版本与 Java/acpx/provider 每个消费者、session/correction 传播及实际回执来源；不把新字段存在当完成。
+-3. 将 baseline/可信 writer 归属、正常/异常收尾与 D06/D07 写集/恢复入口对齐，冻结反证和正向样例、维护及验证成本。
++3. 将 baseline/可信 writer 归属、正常/异常收尾与 D06/D07 写集/恢复入口对齐，冻结反证和正向样例、维护及验证成本。**显式登记 readOnlyBinding 不可变文档这个程序写入物**：按 §8.3 由 TaskHandler 的程序准备路径负责，冻结 canonical ref、内容 SHA、实际 writer/时点、原子写入方式、失败残留及下一消费者。D06/D07 对账须分别列出 run 准备 owner 的绑定文档写入，以及 ledger 写集中 node/task 对该文档的固定引用；不得为了纳入清单伪造跨 owner 原子事务或让两个 writer 同时拥有文档。准备中断留下的孤立文档不授予 dispatch 资格；引用提交失败、文件缺失或 SHA 漂移均阻止后续调用。程序工件盘点中显式列出该文档的归属和预期字节核验，不按路径命中自动豁免；准备、收尾、恢复与测试共同消费同一归属记录。具体写点/引用写集未冻结前，此项不能关闭。
+ 4. 交 CC 独立复审该具体方案；满足全部条件后才能建议 D04 冻结。实施仍需用户显式授权，真实 E2E 仍在全链回归和 Gate 之后。
+ 
+ 本轮没有认定成本收益已经发生不可接受偏差，也没有证明不存在偏差。已形成具体接口地图、候选契约、转移与失败切面；第一项的关键正向可用性仍未证明，故不提前扩展为工具服务或引擎开发。
+@@ -557,3 +557,13 @@
+ 本轮新增 §8.2–§8.7 及[接口证据](../../output/d04-readonly-binding-design-20260928/binding-assessment.md)。作者 Boundary Review：DESIGN GAP；新增事实来源于定点源码和离线协议导出，非真实工具行为。角色限制由程序消费，批准 authority 不变，投影无新权力；未接受“先用 prompt 顶住”的技术债。重点残余为 Codex 读取与无 execute 的共同可行性、Claude 配置实际生效、全链 session 传播和可信 writer 归属。
+ 
+ 本轮[材料校验](../../output/d04-readonly-binding-design-20260928/material-verification.json)只验证文档/指纹/引用，不代替冻结版 CC 复审或产品测试。旧评审证据保持不变；未修改源代码、安装包、用户配置或历史 ledger，未启动 session/provider，不把这些材料升格为已闭环。
++
++### 14.3 D04 绑定候选复审处置
++
++用户带回的 [CC 原始复审](../../output/d04-readonly-binding-review-20260928/cc-review.txt)为 PASS（2 LOW，无 WARN/FAIL），确认候选覆盖、职责及证据分层；不是可行性证明或实施授权。
++
++- LOW-1：采纳“比较现有宿主介导读取、避免过早扩围”的意图，补入 §8.7.1。但原报告将 Codex app-server 导出的 FsReadFile/FsReadDirectory 等同于 agent→acpx 的 ACP 读取，协议归属不准确。本轮根据 ClientRequest 的方法分派与 acpx 实际 client handler [核验纠正](../../output/d04-readonly-binding-review-20260928/protocol-boundary-check.json)。允许比较不等于已经存在模型可调用的桥接；若实际需要新增工具服务，仍触发止损，不因名字相近获得豁免。
++- LOW-2：在 §8.7.3 明列 readOnlyBinding 文档的准备 writer、内容身份、D06/D07 写入与引用桥接、失败残留及程序工件归属盘点。登记要求已补齐，具体写集和可信豁免仍待冻结，未把 run owner 合并进 ledger authority。
++- 报告把 Codex 无 execute 读取称为“唯一可能触发止损的关键未知”，口径过强。它是当前优先核验项；Claude 配置实际生效、恢复传播、writer 隔离和维护/验证成本同样可能触发 §8.6。单条原生读取路径失败也不等于立即放弃全部现有 adapter 路径，应先完成有界比较。
++
++本轮只修订材料，未发起 provider 调用、增加 agent 或进入实现。D04 仍 DESIGN GAP；绑定/回执/session 消费、正向可用性、强制反证、writer/成本及具体方案复审仍未完成。技术冻结与用户实施授权继续分列。此次[材料校验](../../output/d04-readonly-binding-review-20260928/material-verification.json)属于作者自查，不冒充独立复审。
+--- before/20260927-dual-lifecycle-worklist.zh-CN.md
++++ dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -268,4 +268,6 @@
+ 
+ 本轮已交付[绑定接口核验及成本边界](../../output/d04-readonly-binding-design-20260928/binding-assessment.md)、候选字段/消费者、完整 session 与失败路径、成对反证和核验顺序。静态接口存在不等于只读已强制；Codex 在无 execute 条件下的必要读取、Claude 有效工具/配置、恢复传播与 writer 归属仍未证明，D04 未冻结，W03/W08 未完成。
+ 
++随后用户带回该绑定候选的 CC PASS（2 LOW，无 WARN/FAIL），处置见详细设计 §14.3。§8.7 已补现有 ACP 读取比较及 readOnlyBinding 程序写点/归属盘点；同时纠正复审中 app-server FsReadFile/FsReadDirectory 与 ACP fs/read_text_file 的混同，不将现有客户端接口视为已接通模型工具。两项文字修订完成不等于可行性或写集已冻结；成本收益止损覆盖所有受影响边界，不仅 Codex 读取。
++
+ 用户明确要求：后续相关实施若发现成本与收益偏差，停止等其确认。此要求也约束设计阶段发现的扩围。按详细设计 §8.6 对照预期与实际证据，记录在当前 D04/W03 条目；需要引擎核心、额外工具服务/隔离平台，或损失读取/评审/合法续作收益等情况不得先做后报。停止受影响工作并提交成本、目标影响与选项，不能擅自切到同 provider、降低验收或覆写用户改动。其他独立且已授权的核验不受影响。
+--- before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -4,7 +4,7 @@
+ 
+ 用户已要求进入下一步：形成必要详细设计及普通核验；CC 仍由用户自行发起，不直接调用，不自动进入实现。
+ 当前契约入口：[完整生命周期可靠性设计](20260923-dual-lifecycle-reliability-design.zh-CN.md)；[D01–D10 详细设计候选](20260928-dual-lifecycle-detailed-design.zh-CN.md)修订版与 D04 报告已获用户带回的 CC 复审 PASS（新增 1 LOW，无 WARN/FAIL）。READY 正向表示、BUSY/pending 设计义务经独立确认；D03 仅移除已完成的表示复核项。本次补“限制只读 provider 集合”选项及其跨 provider 评审分工代价，增量未经独立复审；D02 关联语义和 §13 其余枚举工作仍未完成，不是冻结版通过。
+-用户已同意优先细化 D04 的现有 adapter 强制只读绑定，保留 Claude 作者／Codex 评审，并要求成本收益偏离时停等确认；具体止损见详细设计 §8.6/主清单 §8.2。本轮[接口核验与证据](../../output/d04-readonly-binding-design-20260928/binding-assessment.md)及详细设计 §8.2–§8.7 已形成，尚未独立复审。Claude tools、Codex readOnly 有接口依据，但必要读取/无 execute 的共存、实际配置、session 传播和 writer 归属未证明。未改 adapter、配置或源代码，仅离线导出协议，未启动 session/provider；D04 未冻结，实施、提交、真实运行仍未授权。
++用户已同意优先细化 D04 的现有 adapter 强制只读绑定，保留 Claude 作者／Codex 评审，并要求成本收益偏离时停等确认；具体止损见详细设计 §8.6/主清单 §8.2。[接口报告](../../output/d04-readonly-binding-design-20260928/binding-assessment.md)及详细设计 §8.2–§8.7 已获用户带回的 CC PASS（2 LOW，无 WARN/FAIL）；本次补 ACP 读取比较、readOnlyBinding 写点/归属盘点，并纠正 app-server 与 ACP 接口混同，增量未独立复审，见 §14.3。必要读取/无 execute 的共存、实际配置、session 传播和 writer 归属仍未证明；D04 未冻结，实施、提交、真实运行仍未授权。
+ 9·13 控制链设计保留为第一批参考；当前已有未提交实现及序列测试，尚未证明整体组合可靠交付。
+ 2026-09-27 补记（R3）已获用户带回的第三轮 CC 设计层 PASS：前两轮问题均确认为设计层解决，无新增 WARN/FAIL，仅余 INFO-1。本次补记其前向记录/历史不回填边界，并澄清“无记录不等于未检查”，此澄清未经独立复审。整体设计评审收口；对账材料见下，I1 字段/写序及 I3/I4/I5/I6 等详细设计缺口仍在，不能据 PASS 开工。
+ 本轮交付[主工作清单、35 个相关文件对账与测试证据地图](20260927-dual-lifecycle-worklist.zh-CN.md)，保存工作区内容指纹和本轮 10 类 / 97 项离线测试通过证据；未修改 production、测试源码或历史 ledger，未运行产品 E2E。此前误启动的只读 CLI 调用已停止，未形成评审结论，与用户带回的有效评审区分。

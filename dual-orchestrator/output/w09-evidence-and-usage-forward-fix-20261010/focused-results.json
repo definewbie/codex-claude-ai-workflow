@@ -1,0 +1,54 @@
+{
+  "exit": 0,
+  "rows": [
+    {
+      "suite": "dev.dual.runtime.handler.AgentResultPromptContractTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "dev.dual.runtime.handler.TaskContractProposalValidatorTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest",
+      "tests": 53,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "dev.dual.adapter.acpx.AcpxUsageReaderTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "dev.dual.adapter.acpx.AgentPromptRendererTest",
+      "tests": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "totals": {
+    "tests": 156,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "native_provider_runs": 0
+}

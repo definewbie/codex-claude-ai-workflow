@@ -1,0 +1,34 @@
+{
+  "verifiedAt": "2026-09-28T02:36:57.004312+00:00",
+  "baselineFileCount": 1319,
+  "changedExistingFiles": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "unchangedExistingFiles": 1316,
+  "sourceAnchorsUnchanged": 13,
+  "tablesChecked": 34,
+  "tableErrors": [],
+  "missingLinks": [],
+  "documentHashes": {
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "6e240564f54efb301129c45175f9dc6ae8e2eb2e3071ebd7fc7f595575cd903f",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "bd218ec7d1354ca072712295f304c6dfc326650d6df5312f6975d558787a1a2b",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "605e33061b4125ecc77ce4c7df5618bdf6e5a2ce4ecd6634cb08ec310b502544",
+    "dual-orchestrator/output/d04-readonly-binding-design-20260928/binding-assessment.md": "6a3e8ead4e0b304b3437d26064bc7a4d5765430d83cc638d2850f9a297e5e583"
+  },
+  "protocolShapeChecks": {
+    "threadHasSandbox": true,
+    "threadHasApprovalPolicy": true,
+    "turnHasSandboxPolicy": true,
+    "readOnlyVariantExists": true,
+    "threadResponseHasSandbox": true,
+    "threadResponseHasProfile": true,
+    "turnResponseDoesNotSupplyPolicy": true
+  },
+  "productTestsRun": false,
+  "providerInvoked": false,
+  "sessionCreated": false,
+  "implementationAuthorized": false,
+  "review": "Author static design check only; D04 feasibility remains DESIGN GAP; direction authorized, implementation not authorized; cost/benefit deviations require user confirmation."
+}

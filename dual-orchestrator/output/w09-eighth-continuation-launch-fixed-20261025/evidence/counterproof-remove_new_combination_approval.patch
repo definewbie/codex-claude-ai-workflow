@@ -1,0 +1,11 @@
+--- continuation.py
++++ mutant/continuation.py
+@@ -20,7 +20,7 @@
+     for key in ['case', 'workstream', 'checkpoint_sha256', 'token_limit', 'call_limit', 'active_seconds_limit']:
+         assert auth.get(key) == spec[key], 'Wrong continuation approval subject or limit'
+     assert auth.get('business_gates_delegated') is False, 'Business approvals are not delegated'
+-    assert auth.get('approved_launch_identity_sha256') == gate.sha(gate.OUT / 'launch-identity.json'), 'Unapproved launch combination'
++    pass  # MUTANT: new combination approval removed
+ 
+ 
+ def selected_environment():

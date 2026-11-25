@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "baselineFiles": 1319,
+  "unrelatedFilesUnchanged": 1316,
+  "changedDocuments": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "previousEvidenceFilesUnchanged": 29,
+  "diagnosticIdentityUnchanged": true,
+  "rawEvidenceIdentityUnchanged": true,
+  "newCLIStarts": 1,
+  "automaticReruns": 0,
+  "productionSourceChangesThisTurn": 0,
+  "gitDiffCheck": "PASS",
+  "independentReview": "NOT_PERFORMED"
+}

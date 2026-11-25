@@ -1,0 +1,89 @@
+{
+  "kind": "READ_ONLY_BYTES_AND_SOURCE_COMPARISON_NOT_JVM_REPLAY",
+  "production_changes": 0,
+  "model_calls": 0,
+  "registered_record": {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/verification-readiness/okx-ac-availability-20261027-01.json",
+    "sha256": "1212daf7ab19146a19336a41ac32668c60a31d76f48a6bf0292d361006129d08",
+    "method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。"
+  },
+  "candidate_plan": {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.plan.json",
+    "sha256": "e7bffc3bedbea71f685cc606341dbb07b0422a46094280d5c3c9917157822ced"
+  },
+  "actual_prompt": {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/prompts/plan-claude.md",
+    "sha256": "c5783635e5d2e5f7d5fa4ca02380b19f5815ed915dd17efb827e0f6af04df8dc",
+    "contains_generic_method_example": true,
+    "contains_fixed_method": true
+  },
+  "criterion_rows": [
+    {
+      "criterion_id": "AC-1",
+      "method_exact_equal": false,
+      "contains_complete_declared_prefix": true,
+      "added_suffix": "本条目逐项绑定 AC-1：代码审查确认分子=既有 simpleEarnIncome+knownCost（SmartArbitrageCosts.knownTotal() 口径，不重复计费）、分母=request.hedgedShortNotional()、除法显式使用 CALCULATION_CONTEXT（MathContext.DECIMAL128）；PhaseOneAssessmentServiceTest 以 BigDecimal 原值断言除不尽场景（分子 200、名义 3000）isEqualByComparingTo 独立写定字面量 0.06666666666666666666666666666666667 且 precision()==34，断言前无 setScale、期望值不经服务公式重算；结果保持整个 90 天累计资金费率口径，无 APR 化或按结算次数/假定 8 小时间隔换算。",
+      "executor_equal": true,
+      "evidence_kind_equal": true,
+      "detail_owner_equal": true,
+      "all_environment_and_feasibility_refs_match_registration": true,
+      "criterion_named_in_existing_validation_plan": true
+    },
+    {
+      "criterion_id": "AC-2",
+      "method_exact_equal": false,
+      "contains_complete_declared_prefix": true,
+      "added_suffix": "本条目逐项绑定 AC-2：独立样例（资金 20000、APR 0.0365、期限 90 天、完整成本 20、对冲名义 10000）断言对照收益 180、阈值原值 isEqualByComparingTo 0.02；累计费率 0.019/0.020/0.021 对应原值增量 -10/0/+10 与建议 PREFER_SIMPLE_EARN/PREFER_SIMPLE_EARN/MICRO_VALIDATE_ARBITRAGE；成对防绕过 0.0199999999 与 0.0200000001 展示完全相同（资金费持有收益率=2.000000%、90天累计资金费率阈值=2.000000%、相对简单赚币增量=0.00 USDT、资金费率净收益=180.00 USDT）但原始增量 -0.000001/+0.000001 分别保持 PREFER_SIMPLE_EARN（首次实盘上限为空）与 MICRO_VALIDATE_ARBITRAGE（上限 5000）语义；零已知成本（阈值 0.018）、零 APR（阈值 0.002）、负资金费率与除不尽精度场景全覆盖，不以舍入后的 CLI 数字重新决定建议。",
+      "executor_equal": true,
+      "evidence_kind_equal": true,
+      "detail_owner_equal": true,
+      "all_environment_and_feasibility_refs_match_registration": true,
+      "criterion_named_in_existing_validation_plan": true
+    },
+    {
+      "criterion_id": "AC-3",
+      "method_exact_equal": false,
+      "contains_complete_declared_prefix": true,
+      "added_suffix": "本条目逐项绑定 AC-3：成本缺失、简单赚币条款未确认、窗口内无历史结算、期末保持策略开放四类情况下 breakEvenCumulativeFundingRate 为 Optional.empty 且原因沿既有 blockers/unknowns 文案输出，CLI 显示“90天累计资金费率阈值=无法精确计算”且不打印阈值数值，不填 0、不猜数、不给可行动的精确阈值；零与负 hedgedShortNotional 沿 PhaseOneAssessmentRequest 既有校验在读取事实前抛 IllegalArgumentException，事实查询以 AssertionError 证明未被读取。",
+      "executor_equal": true,
+      "evidence_kind_equal": true,
+      "detail_owner_equal": true,
+      "all_environment_and_feasibility_refs_match_registration": true,
+      "criterion_named_in_existing_validation_plan": true
+    },
+    {
+      "criterion_id": "AC-4",
+      "method_exact_equal": false,
+      "contains_complete_declared_prefix": true,
+      "added_suffix": "本条目逐项绑定 AC-4：程序工具读取实际变更做语义检查，确认阈值仅由 PhaseOneAssessmentService 计算、经 PhaseOneAssessment typed 字段承载、AssessIncomeCliRunner 只按 percent() 格式化只读展示且无重算（既有 runnerDependsOnApplicationServiceNotInfrastructureMapper 测试钉住依赖结构）；CLI 完整证据单点 0.02 固定断言 contains(“90天累计资金费率阈值=2.000000%”) 并清楚标注不可用情况；docs/15-Funding-Rate-Break-Even-Threshold.md 为简体中文并包含 AC-2 样例、精度口径与限制；既有建议判定、首次实盘上限 5000 USDT、成本、风险与退出语义不变。",
+      "executor_equal": true,
+      "evidence_kind_equal": true,
+      "detail_owner_equal": true,
+      "all_environment_and_feasibility_refs_match_registration": true,
+      "criterion_named_in_existing_validation_plan": true
+    },
+    {
+      "criterion_id": "AC-5",
+      "method_exact_equal": false,
+      "contains_complete_declared_prefix": true,
+      "added_suffix": "本条目逐项绑定 AC-5：在固定隔离基线 codex/w09-okx-break-even-20261026 @ 7c5facc 之上实施且改动严格限于批准的六文件；本次源码对应的完整 mvn -o clean test 回归（含既有非容器回归与全部 MySQL/Testcontainers 容器回归）以 Surefire XML/日志为程序依据全部通过、既有测试不回归、产品 CLI 退出语义不回归（原生状态/reported exit/actual exit 如实区分，不造 process exit，不以跳过或降级作数）；独立验收、当前交付批准、精确候选应用、人工或另行明确委派的 commit 与原 finalize 不因测试通过而视为完成。",
+      "executor_equal": true,
+      "evidence_kind_equal": true,
+      "detail_owner_equal": true,
+      "all_environment_and_feasibility_refs_match_registration": true,
+      "criterion_named_in_existing_validation_plan": true
+    }
+  ],
+  "validation_plan": [
+    "在本隔离工作树按工作区规则（如 rtk 前缀）使用 JDK 25 与现有 Maven 执行 mvn -o clean test：完整基线回归覆盖服务/CLI 测试、既有非容器回归与全部 MySQL/Testcontainers 容器回归，以本次源码对应的 target/surefire-reports XML/日志为程序依据，核对新阈值测试与既有测试全部执行且 failures=0，不以模型“已通过”正文作数。",
+    "从同一次 Surefire 报告按 AC-1..AC-5 分类核对断言：AC-1 DECIMAL128 原值（0.02、独立字面量 0.06666666666666666666666666666666667、precision()==34、断言前无 setScale）；AC-2 独立样例、0.019/0.020/0.021 边界 -10/0/+10 与 0.0199999999/0.0200000001 成对防绕过；AC-3 四类不可用（阈值为空、沿既有 blockers/unknowns 文案、CLI 不打印数值）与零/负名义金额在读取事实前被既有校验拒绝；AC-4 CLI 固定 contains(“90天累计资金费率阈值=2.000000%”)、“无法精确计算”展示与既有四项断言不回归；AC-5 完整基线回归与既有建议/首次实盘上限 5000/退出语义不回归。",
+    "通过程序工具读取实际变更与 docs/15-Funding-Rate-Break-Even-Threshold.md 进行逐条语义检查：公式与成本口径、整个 90 天累计费率非 APR、防误用例子、可用/不可用条件、历史情景限制与指向 docs/09。",
+    "如实记录原生执行状态与 reported exit；仅当原生程序观察实际提供退出码时才记录 actual exit，不由模型或声明补造；本计划不统一强制 actual_exit 字段，任何跳过或降级（如 Docker 不可用时跳过容器回归）不得记为通过。",
+    "git status/diff 自查改动严格限于六文件，无范围外路径；确认未修改 README、迁移、采集、Web 与组合策略。"
+  ],
+  "limits": [
+    "No model behavior or semantic equivalence proven",
+    "No Java qualifier invoked",
+    "No accepted artifact changed or candidate materialized for execution"
+  ]
+}

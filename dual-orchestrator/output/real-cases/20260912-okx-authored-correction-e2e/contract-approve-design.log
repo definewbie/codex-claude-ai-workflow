@@ -1,0 +1,12 @@
+Human gate decided
+Workstream: ws-20260912T081920Z-KPPZ
+Action: approve
+Running workflow until next gate...
+Step 1: design.claude_design -> WAITING_FOR_RECOVERY (workflow stopped at FAILED)
+
+Next actions:
+  1. Inspect the recovery summary:
+     dualctl recovery show --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260912T081920Z-KPPZ ws-20260912T081920Z-KPPZ
+     summary: /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260912T081920Z-KPPZ/.agent/workstreams/ws-20260912T081920Z-KPPZ/recovery/current-failure.md
+  2. Inspect the contract diagnostic and fix the output contract before retrying.
+     dualctl retry --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260912T081920Z-KPPZ ws-20260912T081920Z-KPPZ

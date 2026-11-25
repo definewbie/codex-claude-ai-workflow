@@ -1,0 +1,12 @@
+{
+  "case": "EIGHTH_CONTINUATION",
+  "workstream": "ws-20261023T005431Z-9YYF",
+  "checkpoint_sha256": "d11003a0f43d63de8580968d6f2424d76bee5636a73b2689d8c37fc291a036ea",
+  "continuation_run_authorized": true,
+  "token_limit": 1700000,
+  "call_limit": 18,
+  "active_seconds_limit": 3600,
+  "approval_ref": "approval-eighth-continuation-20261024.json",
+  "business_gates_delegated": false,
+  "scope": "Explicit eighth-case continuation run approval. Read-only recheck must pass first; original cumulative limits and reserve admission preserved; business gates not delegated."
+}

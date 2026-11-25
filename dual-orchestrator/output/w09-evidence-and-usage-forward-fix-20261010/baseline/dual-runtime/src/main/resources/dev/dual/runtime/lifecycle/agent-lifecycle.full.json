@@ -1,0 +1,1316 @@
+{
+  "workflowId": "agent-lifecycle-full",
+  "version": 10,
+  "entryNodeId": "context.intake_claude_brainstorm",
+  "nodes": [
+    {
+      "id": "context.intake_claude_brainstorm",
+      "kind": "TASK",
+      "handlerType": "context.build_package",
+      "config": {
+        "target_node": "intake.claude_brainstorm",
+        "profile": "intake",
+        "purpose": "Seed Claude intake with user request and repository scope guidance."
+      }
+    },
+    {
+      "id": "intake.claude_brainstorm",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "agent": "claude",
+        "session": "claude-main",
+        "permission_profile": "contract_discovery",
+        "prompt_template": "intake-claude-brainstorm",
+        "expected_artifact": "task_contract_proposal",
+        "artifact_compiler": "task_contract_proposal_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "BLOCKED"
+        ]
+      }
+    },
+    {
+      "id": "context.intake_codex_product_review",
+      "kind": "TASK",
+      "handlerType": "context.build_package",
+      "config": {
+        "target_node": "intake.codex_product_review",
+        "profile": "product_review",
+        "required_input_artifact": "task_contract_proposal",
+        "purpose": "Package Claude intake output for Codex product review."
+      }
+    },
+    {
+      "id": "intake.codex_product_review",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "agent": "codex",
+        "session": "codex-reviewer",
+        "permission_profile": "review",
+        "prompt_template": "intake-codex-product-review",
+        "review_subject_artifact": "task_contract_proposal",
+        "expected_artifact": "agent_output_contract",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "NEEDS_REVISION",
+          "BLOCKED"
+        ]
+      }
+    },
+    {
+      "id": "intake.decision",
+      "kind": "DECISION",
+      "handlerType": "review.decision",
+      "config": {
+        "max_revisions": 3
+      }
+    },
+    {
+      "id": "gate.human_requirement_review",
+      "kind": "GATE",
+      "handlerType": "human.review",
+      "config": {
+        "terminal_gate": false,
+        "allowed_actions": [
+          "approve",
+          "revise"
+        ],
+        "max_revisions": 3,
+        "gate_purpose": "requirement"
+      }
+    },
+    {
+      "id": "contract.compile",
+      "kind": "TASK",
+      "handlerType": "contract.compile",
+      "config": {
+        "required_subject": "approved_task_contract_proposal",
+        "contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "gate.contract_review",
+      "kind": "GATE",
+      "handlerType": "human.review",
+      "config": {
+        "terminal_gate": false,
+        "allowed_actions": [
+          "approve",
+          "clarify",
+          "reject"
+        ],
+        "max_revisions": 3,
+        "gate_purpose": "contract",
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "design.claude_design",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "agent": "claude",
+        "session": "claude-main",
+        "permission_profile": "observe",
+        "prompt_template": "design-claude",
+        "expected_artifact": "design_result",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "BLOCKED"
+        ],
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "context.design_codex_arch_review",
+      "kind": "TASK",
+      "handlerType": "context.build_package",
+      "config": {
+        "target_node": "design.codex_arch_review",
+        "profile": "architecture_review",
+        "purpose": "Package Claude design and prior review context for Codex architecture review.",
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "design.codex_arch_review",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "agent": "codex",
+        "session": "codex-reviewer",
+        "permission_profile": "review",
+        "prompt_template": "design-codex-review",
+        "expected_artifact": "agent_output_contract",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "NEEDS_REVISION",
+          "BLOCKED"
+        ],
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "design.decision",
+      "kind": "DECISION",
+      "handlerType": "review.decision",
+      "config": {
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "gate.human_design_approval",
+      "kind": "GATE",
+      "handlerType": "human.review",
+      "config": {
+        "terminal_gate": false,
+        "allowed_actions": [
+          "approve",
+          "revise"
+        ],
+        "max_revisions": 3,
+        "gate_purpose": "design",
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "plan.claude_plan",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "agent": "claude",
+        "session": "claude-main",
+        "permission_profile": "observe",
+        "prompt_template": "plan-claude",
+        "expected_artifact": "plan_result",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "BLOCKED"
+        ],
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "context.plan_codex_plan_review",
+      "kind": "TASK",
+      "handlerType": "context.build_package",
+      "config": {
+        "target_node": "plan.codex_plan_review",
+        "profile": "plan_review",
+        "purpose": "Package Claude plan and design context for Codex plan review.",
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "plan.codex_plan_review",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "agent": "codex",
+        "session": "codex-reviewer",
+        "permission_profile": "review",
+        "prompt_template": "plan-codex-review",
+        "expected_artifact": "agent_output_contract",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "NEEDS_REVISION",
+          "BLOCKED"
+        ],
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "plan.decision",
+      "kind": "DECISION",
+      "handlerType": "review.decision",
+      "config": {
+        "max_revisions": 3,
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "gate.human_plan_approval",
+      "kind": "GATE",
+      "handlerType": "human.review",
+      "config": {
+        "terminal_gate": false,
+        "allowed_actions": [
+          "approve",
+          "revise"
+        ],
+        "max_revisions": 3,
+        "gate_purpose": "plan",
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "context.implement_claude",
+      "kind": "TASK",
+      "handlerType": "context.build_package",
+      "config": {
+        "target_node": "implement.claude_implement",
+        "profile": "implementation",
+        "purpose": "Package approved plan and review history for Claude implementation.",
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "implement.claude_implement",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "approve_all": true,
+        "permission_profile": "implement",
+        "prompt_template": "implement-claude",
+        "session": "claude-main",
+        "agent": "claude",
+        "expected_artifact": "agent_output_contract",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "BLOCKED"
+        ],
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "implement.claude_self_test_report",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "approve_all": true,
+        "permission_profile": "implement",
+        "prompt_template": "implement-claude-self-test",
+        "session": "claude-main",
+        "agent": "claude",
+        "expected_artifact": "self_test_report",
+        "artifact_compiler": "self_test_report_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "INSUFFICIENT_EVIDENCE",
+          "BLOCKED"
+        ],
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "implement.self_test_decision",
+      "kind": "DECISION",
+      "handlerType": "review.decision",
+      "config": {
+        "max_revisions": 1,
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "gate.human_implementation_repair",
+      "kind": "GATE",
+      "handlerType": "human.review",
+      "config": {
+        "allowed_actions": [
+          "revise",
+          "request_scope_revision",
+          "request_action",
+          "collect_evidence",
+          "submit_evidence"
+        ],
+        "max_revisions": 1,
+        "gate_purpose": "implementation_repair",
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "implement.artifact_validation",
+      "kind": "TASK",
+      "handlerType": "artifact.validate",
+      "config": {
+        "route_scope_violation": true,
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "context.acceptance_codex_verifier_review",
+      "kind": "TASK",
+      "handlerType": "context.build_package",
+      "config": {
+        "target_node": "acceptance.codex_verifier_review",
+        "profile": "acceptance",
+        "required_agent_evidence": {
+          "node_id": "implement.claude_self_test_report",
+          "source_artifact_type": "self_test_report",
+          "decision": "SELF_TEST_COMPLETE"
+        },
+        "purpose": "Package implementation output, self-test report, and Git evidence for Codex acceptance.",
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "acceptance.codex_verifier_review",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "agent": "codex",
+        "session": "codex-reviewer",
+        "permission_profile": "review",
+        "prompt_template": "acceptance-codex-review",
+        "expected_artifact": "acceptance_review",
+        "artifact_compiler": "acceptance_review_compiler",
+        "allowed_stage_outcomes": [
+          "ACCEPTED",
+          "ACCEPTED_WITH_NOTES",
+          "REJECTED",
+          "INSUFFICIENT_EVIDENCE",
+          "BLOCKED"
+        ],
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "acceptance.decision",
+      "kind": "DECISION",
+      "handlerType": "review.decision",
+      "config": {
+        "max_revisions": 1,
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "acceptance.classify_failure",
+      "kind": "TASK",
+      "handlerType": "acceptance.failure_classify",
+      "config": {
+        "max_revisions": 3,
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "acceptance.generate_final_report",
+      "kind": "TASK",
+      "handlerType": "report.generate_final",
+      "config": {
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "delivery.prepare_pr",
+      "kind": "TASK",
+      "handlerType": "delivery.prepare_pr",
+      "config": {
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "gate.human_acceptance",
+      "kind": "GATE",
+      "handlerType": "human.review",
+      "config": {
+        "terminal_gate": false,
+        "allowed_actions": [
+          "approve",
+          "revise"
+        ],
+        "max_revisions": 1,
+        "gate_purpose": "acceptance",
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "stage.claude_handoff",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "agent": "claude",
+        "session": "claude-main",
+        "permission_profile": "observe",
+        "prompt_template": "stage-claude-handoff",
+        "expected_artifact": "stage_handoff",
+        "artifact_compiler": "stage_handoff_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "BLOCKED"
+        ],
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "stage.generate_next_prompt",
+      "kind": "TASK",
+      "handlerType": "prompt.generate_next_stage",
+      "config": {
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "contract.compile_execution",
+      "kind": "TASK",
+      "handlerType": "contract.compile",
+      "config": {
+        "contract_phase": "EXECUTION",
+        "required_subject": "reviewed_design_and_plan",
+        "required_contract_phase": "GOAL"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "context.intake_claude_brainstorm",
+      "on": "completed",
+      "to": "intake.claude_brainstorm",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Seed the first Claude intake run with repo-scope context.",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "intake.claude_brainstorm",
+      "on": "completed",
+      "to": "context.intake_codex_product_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "context.intake_codex_product_review",
+      "on": "completed",
+      "to": "intake.codex_product_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "intake.codex_product_review",
+      "on": "completed",
+      "to": "intake.decision",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "intake.decision",
+      "on": "READY_FOR_PRODUCT_REVIEW",
+      "to": "gate.human_requirement_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "intake.decision",
+      "on": "BLOCKED",
+      "to": "gate.human_requirement_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "intake.decision",
+      "on": "NEEDS_REVISION",
+      "to": "intake.claude_brainstorm",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "gate.human_requirement_review",
+      "on": "approved",
+      "to": "contract.compile",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "gate.human_requirement_review",
+      "on": "revise",
+      "to": "intake.claude_brainstorm",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "contract.compile",
+      "on": "completed",
+      "to": "design.claude_design",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "gate.contract_review",
+      "on": "approved",
+      "to": "context.implement_claude",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "gate.contract_review",
+      "on": "clarify",
+      "to": "intake.claude_brainstorm",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Human requested a typed task-contract clarification"
+      }
+    },
+    {
+      "from": "design.claude_design",
+      "on": "completed",
+      "to": "context.design_codex_arch_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "context.design_codex_arch_review",
+      "on": "completed",
+      "to": "design.codex_arch_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "design.codex_arch_review",
+      "on": "completed",
+      "to": "design.decision",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "design.decision",
+      "on": "READY_FOR_ARCH_REVIEW",
+      "to": "plan.claude_plan",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "design.decision",
+      "on": "BLOCKED",
+      "to": "gate.human_design_approval",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "design.decision",
+      "on": "NEEDS_REVISION",
+      "to": "design.claude_design",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "gate.human_design_approval",
+      "on": "approved",
+      "to": "design.claude_design",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Human resolution requires a fresh author and independent review"
+      }
+    },
+    {
+      "from": "gate.human_design_approval",
+      "on": "revise",
+      "to": "design.claude_design",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Human resolution requires a fresh author and independent review"
+      }
+    },
+    {
+      "from": "plan.claude_plan",
+      "on": "completed",
+      "to": "context.plan_codex_plan_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "context.plan_codex_plan_review",
+      "on": "completed",
+      "to": "plan.codex_plan_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "plan.codex_plan_review",
+      "on": "completed",
+      "to": "plan.decision",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "plan.decision",
+      "on": "READY_TO_IMPLEMENT",
+      "to": "contract.compile_execution",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "plan.decision",
+      "on": "BLOCKED",
+      "to": "gate.human_plan_approval",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "plan.decision",
+      "on": "VERIFICATION_READINESS_REQUIRED",
+      "to": "gate.human_plan_approval",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "plan.decision",
+      "on": "NEEDS_REVISION",
+      "to": "plan.claude_plan",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "gate.human_plan_approval",
+      "on": "approved",
+      "to": "plan.claude_plan",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Human resolution requires a fresh author and independent review"
+      }
+    },
+    {
+      "from": "gate.human_plan_approval",
+      "on": "revise",
+      "to": "plan.claude_plan",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Human resolution requires a fresh author and independent review"
+      }
+    },
+    {
+      "from": "context.implement_claude",
+      "on": "completed",
+      "to": "implement.claude_implement",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "implement.claude_implement",
+      "on": "completed",
+      "to": "implement.claude_self_test_report",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "implement.claude_self_test_report",
+      "on": "completed",
+      "to": "implement.self_test_decision",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "implement.self_test_decision",
+      "on": "SELF_TEST_COMPLETE",
+      "to": "implement.artifact_validation",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Only verified complete self-test evidence may enter artifact validation.",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "implement.self_test_decision",
+      "on": "SELF_TEST_INCOMPLETE",
+      "to": "context.implement_claude",
+      "condition": {
+        "type": "config_equals",
+        "params": {
+          "key": "continuation_kind",
+          "value": "IMPLEMENTATION_REPAIR"
+        }
+      },
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Return incomplete self-test evidence to bounded implementation repair.",
+        "joinStrategy": "",
+        "loopReason": "Self-test identifies concrete product changes"
+      }
+    },
+    {
+      "from": "implement.self_test_decision",
+      "on": "SELF_TEST_INCOMPLETE",
+      "to": "gate.human_implementation_repair",
+      "condition": {
+        "type": "config_equals",
+        "params": {
+          "key": "continuation_kind",
+          "value": "HUMAN_REVIEW"
+        }
+      },
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Evidence-only blockers require an explicit human disposition.",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "implement.self_test_decision",
+      "on": "BLOCKED",
+      "to": "gate.human_implementation_repair",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Require a human decision before repairing a blocked implementation.",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "gate.human_implementation_repair",
+      "on": "revise",
+      "to": "context.implement_claude",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Apply the operator's explicit repair decision.",
+        "joinStrategy": "",
+        "loopReason": "Human authorized implementation repair"
+      }
+    },
+    {
+      "from": "gate.human_implementation_repair",
+      "on": "submit_evidence",
+      "to": "implement.claude_self_test_report",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal"
+      }
+    },
+    {
+      "from": "gate.human_implementation_repair",
+      "on": "collect_evidence",
+      "to": "implement.claude_self_test_report",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Collect evidence against the human-approved source baseline.",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "gate.human_implementation_repair",
+      "on": "request_scope_revision",
+      "to": "context.intake_claude_brainstorm",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Request review of bound new-file candidates, not scope approval.",
+        "joinStrategy": "",
+        "loopReason": "Human requested scope revision"
+      }
+    },
+    {
+      "from": "implement.artifact_validation",
+      "on": "CHANGE_SCOPE_VIOLATION",
+      "to": "gate.human_implementation_repair",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Require human authorization before repairing a deterministic scope violation.",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "implement.artifact_validation",
+      "on": "completed",
+      "to": "context.acceptance_codex_verifier_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "context.acceptance_codex_verifier_review",
+      "on": "completed",
+      "to": "acceptance.codex_verifier_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "acceptance.codex_verifier_review",
+      "on": "completed",
+      "to": "acceptance.decision",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "acceptance.decision",
+      "on": "ACCEPT",
+      "to": "acceptance.generate_final_report",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "acceptance.decision",
+      "on": "ACCEPT_WITH_NOTES",
+      "to": "acceptance.generate_final_report",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "acceptance.decision",
+      "on": "REJECT",
+      "to": "acceptance.classify_failure",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "acceptance.classify_failure",
+      "on": "REJECT_CONTRACT_GAP",
+      "to": "context.intake_claude_brainstorm",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Acceptance rejected because the task contract has a gap"
+      }
+    },
+    {
+      "from": "acceptance.classify_failure",
+      "on": "REJECT_CONTRACT_AMBIGUITY",
+      "to": "context.intake_claude_brainstorm",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Acceptance rejected because the task contract is ambiguous"
+      }
+    },
+    {
+      "from": "acceptance.classify_failure",
+      "on": "REJECT_IMPLEMENTATION_BUG",
+      "to": "context.implement_claude",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Acceptance rejected because implementation repair is required"
+      }
+    },
+    {
+      "from": "acceptance.classify_failure",
+      "on": "REJECT_CONTEXT_INSUFFICIENT",
+      "to": "gate.human_implementation_repair",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Require human disposition of missing context or tool prerequisites.",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "acceptance.classify_failure",
+      "on": "REJECT_VERIFICATION_INSUFFICIENT",
+      "to": "implement.claude_self_test_report",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Acceptance rejected because verification evidence is insufficient"
+      }
+    },
+    {
+      "from": "acceptance.classify_failure",
+      "on": "REJECT_TOOL_LIMITATION",
+      "to": "gate.human_implementation_repair",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "Require human disposition of missing context or tool prerequisites.",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "acceptance.classify_failure",
+      "on": "REJECT_REVIEW_NOISE",
+      "to": "context.acceptance_codex_verifier_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Acceptance rejection appears to be review noise and needs re-review"
+      }
+    },
+    {
+      "from": "acceptance.generate_final_report",
+      "on": "completed",
+      "to": "stage.claude_handoff",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "delivery.prepare_pr",
+      "on": "completed",
+      "to": "gate.human_acceptance",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "gate.human_acceptance",
+      "on": "revise",
+      "to": "context.implement_claude",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Human acceptance requested implementation repair"
+      }
+    },
+    {
+      "from": "stage.claude_handoff",
+      "on": "completed",
+      "to": "stage.generate_next_prompt",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "stage.generate_next_prompt",
+      "on": "completed",
+      "to": "delivery.prepare_pr",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "contract.compile_execution",
+      "on": "completed",
+      "to": "gate.contract_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "required": true
+      }
+    },
+    {
+      "from": "contract.compile_execution",
+      "on": "authorization_unchanged",
+      "to": "context.implement_claude",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "required": true
+      }
+    }
+  ]
+}

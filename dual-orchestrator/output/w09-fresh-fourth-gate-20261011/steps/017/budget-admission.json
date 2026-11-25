@@ -1,0 +1,547 @@
+{
+  "input": {
+    "actual_tokens": 332733,
+    "completed_calls": 7,
+    "active_seconds": 668.0500000000001,
+    "remaining_mainline": [
+      "plan.claude_plan",
+      "plan.codex_plan_review",
+      "implement.claude_implement",
+      "implement.claude_self_test_report",
+      "acceptance.codex_verifier_review"
+    ],
+    "new_extra_calls": [
+      "design.codex_arch_review"
+    ],
+    "measurement_complete": true,
+    "external_pending": false
+  },
+  "result": {
+    "result": "ALLOW_BUDGET_ONLY",
+    "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+    "required_token_reserve": 850000,
+    "required_call_reserve": 7,
+    "remaining_tokens": 1367267,
+    "remaining_calls": 11,
+    "warning": false
+  },
+  "observation": {
+    "completed_runs": [
+      {
+        "run_id": "run-1791694107574",
+        "node_id": "intake.claude_brainstorm",
+        "agent": "claude",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 10683,
+          "outputTokens": 6856,
+          "cachedReadTokens": 4864,
+          "cachedWriteTokens": 0,
+          "totalTokens": 22403,
+          "costAmount": 0.227247,
+          "costCurrency": "USD",
+          "source": "acpx_stream",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": 0.227247,
+          "sessionCostCurrency": "USD",
+          "providerId": "zhipu",
+          "model": "glm-5.3",
+          "billingMode": "subscription_token_only",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "1849028a-2e6b-4abf-8078-6c493dc1faf5",
+            "record_id": "bc943490-00c4-466e-ae58-8e9054ca69c7",
+            "request_id": "3",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 10683,
+              "outputTokens": 6856,
+              "cachedReadTokens": 4864,
+              "cachedWriteTokens": 0,
+              "totalTokens": 22403,
+              "costAmount": 0.227247,
+              "costCurrency": "USD",
+              "source": "acpx_stream",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": 0.227247,
+              "sessionCostCurrency": "USD",
+              "providerId": "zhipu",
+              "model": "glm-5.3",
+              "billingMode": "subscription_token_only",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "inputTokens": 10683,
+              "outputTokens": 6856,
+              "cachedReadTokens": 4864,
+              "cachedWriteTokens": 0,
+              "totalTokens": 22403
+            },
+            "stream_ref": "/Users/kriswang/.acpx/sessions/bc943490-00c4-466e-ae58-8e9054ca69c7.stream.ndjson",
+            "stream_prefix_sha256": "b4fb4972c98c5678865f695664895b41ec404b119a8f56557ab34bfc0a22981a"
+          }
+        ]
+      },
+      {
+        "run_id": "run-1791694259389",
+        "node_id": "intake.codex_product_review",
+        "agent": "codex",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 13455,
+          "outputTokens": 1627,
+          "cachedReadTokens": 12928,
+          "cachedWriteTokens": 0,
+          "totalTokens": 28010,
+          "costAmount": null,
+          "costCurrency": "",
+          "source": "acpx_stream",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": null,
+          "sessionCostCurrency": "",
+          "providerId": "openai",
+          "model": "GPT-6-Astra",
+          "billingMode": "metered",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "01a1294c-db11-7ef0-a76b-d06171a2666a",
+            "record_id": "01a1294c-d0dc-7711-b5ff-74b18d96e7d2",
+            "request_id": "3",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 13455,
+              "outputTokens": 1627,
+              "cachedReadTokens": 12928,
+              "cachedWriteTokens": 0,
+              "totalTokens": 28010,
+              "costAmount": null,
+              "costCurrency": "",
+              "source": "acpx_stream",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": null,
+              "sessionCostCurrency": "",
+              "providerId": "openai",
+              "model": "GPT-6-Astra",
+              "billingMode": "metered",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "totalTokens": 28010,
+              "inputTokens": 13455,
+              "cachedReadTokens": 12928,
+              "outputTokens": 1627,
+              "thoughtTokens": 627
+            },
+            "stream_ref": "/Users/kriswang/.acpx/sessions/01a1294c-d0dc-7711-b5ff-74b18d96e7d2.stream.ndjson",
+            "stream_prefix_sha256": "bd259acff7c06e4f2406b816fd29b026dae4755a959f4f7f6fadf3cc44659100"
+          }
+        ]
+      },
+      {
+        "run_id": "run-1791694532578",
+        "node_id": "intake.claude_brainstorm",
+        "agent": "claude",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 6880,
+          "outputTokens": 6237,
+          "cachedReadTokens": 0,
+          "cachedWriteTokens": 0,
+          "totalTokens": 13117,
+          "costAmount": 0.19032500000000002,
+          "costCurrency": "USD",
+          "source": "acpx_stream",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": 0.19032500000000002,
+          "sessionCostCurrency": "USD",
+          "providerId": "zhipu",
+          "model": "glm-5.3",
+          "billingMode": "subscription_token_only",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "caf7eadd-6d6d-493e-85a4-a3812560acb6",
+            "record_id": "25354bf6-942a-464e-a046-4178013baebd",
+            "request_id": "3",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 6880,
+              "outputTokens": 6237,
+              "cachedReadTokens": 0,
+              "cachedWriteTokens": 0,
+              "totalTokens": 13117,
+              "costAmount": 0.19032500000000002,
+              "costCurrency": "USD",
+              "source": "acpx_stream",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": 0.19032500000000002,
+              "sessionCostCurrency": "USD",
+              "providerId": "zhipu",
+              "model": "glm-5.3",
+              "billingMode": "subscription_token_only",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "inputTokens": 6880,
+              "outputTokens": 6237,
+              "cachedReadTokens": 0,
+              "cachedWriteTokens": 0,
+              "totalTokens": 13117
+            },
+            "stream_ref": "/Users/kriswang/.acpx/sessions/25354bf6-942a-464e-a046-4178013baebd.stream.ndjson",
+            "stream_prefix_sha256": "cc6dc773b3432680cb73eee23b1061a2f2d20b0f473690e5a65c901cca8b33ec"
+          }
+        ]
+      },
+      {
+        "run_id": "run-1791694645369",
+        "node_id": "intake.codex_product_review",
+        "agent": "codex",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 13170,
+          "outputTokens": 784,
+          "cachedReadTokens": 26240,
+          "cachedWriteTokens": 0,
+          "totalTokens": 40194,
+          "costAmount": null,
+          "costCurrency": "",
+          "source": "acpx_stream",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": null,
+          "sessionCostCurrency": "",
+          "providerId": "openai",
+          "model": "GPT-6-Astra",
+          "billingMode": "metered",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "01a1294c-db11-7ef0-a76b-d06171a2666a",
+            "record_id": "01a1294c-d0dc-7711-b5ff-74b18d96e7d2",
+            "request_id": "4",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 13170,
+              "outputTokens": 784,
+              "cachedReadTokens": 26240,
+              "cachedWriteTokens": 0,
+              "totalTokens": 40194,
+              "costAmount": null,
+              "costCurrency": "",
+              "source": "acpx_stream",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": null,
+              "sessionCostCurrency": "",
+              "providerId": "openai",
+              "model": "GPT-6-Astra",
+              "billingMode": "metered",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "totalTokens": 40194,
+              "inputTokens": 13170,
+              "cachedReadTokens": 26240,
+              "outputTokens": 784,
+              "thoughtTokens": 51
+            },
+            "stream_ref": "/Users/kriswang/.acpx/sessions/01a1294c-d0dc-7711-b5ff-74b18d96e7d2.stream.ndjson",
+            "stream_prefix_sha256": "bd259acff7c06e4f2406b816fd29b026dae4755a959f4f7f6fadf3cc44659100"
+          }
+        ]
+      },
+      {
+        "run_id": "run-1791699968740",
+        "node_id": "design.claude_design",
+        "agent": "claude",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 41587,
+          "outputTokens": 14063,
+          "cachedReadTokens": 29888,
+          "cachedWriteTokens": 0,
+          "totalTokens": 85538,
+          "costAmount": 0.574454,
+          "costCurrency": "USD",
+          "source": "acpx_stream",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": 0.574454,
+          "sessionCostCurrency": "USD",
+          "providerId": "zhipu",
+          "model": "glm-5.3",
+          "billingMode": "subscription_token_only",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "716cde0e-fe76-453e-b9ab-99f2a45481d2",
+            "record_id": "2c72e475-4f58-42e5-8377-2fa53e182c46",
+            "request_id": "3",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 41587,
+              "outputTokens": 14063,
+              "cachedReadTokens": 29888,
+              "cachedWriteTokens": 0,
+              "totalTokens": 85538,
+              "costAmount": 0.574454,
+              "costCurrency": "USD",
+              "source": "acpx_stream",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": 0.574454,
+              "sessionCostCurrency": "USD",
+              "providerId": "zhipu",
+              "model": "glm-5.3",
+              "billingMode": "subscription_token_only",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "inputTokens": 41587,
+              "outputTokens": 14063,
+              "cachedReadTokens": 29888,
+              "cachedWriteTokens": 0,
+              "totalTokens": 85538
+            },
+            "stream_ref": "/Users/kriswang/.acpx/sessions/2c72e475-4f58-42e5-8377-2fa53e182c46.stream.ndjson",
+            "stream_prefix_sha256": "9fbd17e8e7979965b01b9eb6eec5a8a801aff3c8cb0db1bc93ede3e7676cd78a"
+          }
+        ]
+      },
+      {
+        "run_id": "run-1791700195359",
+        "node_id": "design.codex_arch_review",
+        "agent": "codex",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 38979,
+          "outputTokens": 1168,
+          "cachedReadTokens": 12928,
+          "cachedWriteTokens": 0,
+          "totalTokens": 53075,
+          "costAmount": null,
+          "costCurrency": "",
+          "source": "acpx_stream",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": null,
+          "sessionCostCurrency": "",
+          "providerId": "openai",
+          "model": "GPT-6-Astra",
+          "billingMode": "metered",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "01a1294c-db11-7ef0-a76b-d06171a2666a",
+            "record_id": "01a1294c-d0dc-7711-b5ff-74b18d96e7d2",
+            "request_id": "2",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 38979,
+              "outputTokens": 1168,
+              "cachedReadTokens": 12928,
+              "cachedWriteTokens": 0,
+              "totalTokens": 53075,
+              "costAmount": null,
+              "costCurrency": "",
+              "source": "acpx_stream",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": null,
+              "sessionCostCurrency": "",
+              "providerId": "openai",
+              "model": "GPT-6-Astra",
+              "billingMode": "metered",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "totalTokens": 53075,
+              "inputTokens": 38979,
+              "cachedReadTokens": 12928,
+              "outputTokens": 1168,
+              "thoughtTokens": 188
+            },
+            "stream_ref": "/Users/kriswang/.acpx/sessions/01a1294c-d0dc-7711-b5ff-74b18d96e7d2.stream.ndjson",
+            "stream_prefix_sha256": "bd259acff7c06e4f2406b816fd29b026dae4755a959f4f7f6fadf3cc44659100"
+          }
+        ]
+      },
+      {
+        "run_id": "run-1791700286570",
+        "node_id": "design.claude_design",
+        "agent": "claude",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 18840,
+          "outputTokens": 12100,
+          "cachedReadTokens": 59456,
+          "cachedWriteTokens": 0,
+          "totalTokens": 90396,
+          "costAmount": 0.426428,
+          "costCurrency": "USD",
+          "source": "acpx_stream",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": 0.426428,
+          "sessionCostCurrency": "USD",
+          "providerId": "zhipu",
+          "model": "glm-5.3",
+          "billingMode": "subscription_token_only",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "fb665212-6fa2-4b22-832f-8fb3a01c5876",
+            "record_id": "8b971cae-40eb-4a77-b91e-5f43981b9ef4",
+            "request_id": "3",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 18840,
+              "outputTokens": 12100,
+              "cachedReadTokens": 59456,
+              "cachedWriteTokens": 0,
+              "totalTokens": 90396,
+              "costAmount": 0.426428,
+              "costCurrency": "USD",
+              "source": "acpx_stream",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": 0.426428,
+              "sessionCostCurrency": "USD",
+              "providerId": "zhipu",
+              "model": "glm-5.3",
+              "billingMode": "subscription_token_only",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "inputTokens": 18840,
+              "outputTokens": 12100,
+              "cachedReadTokens": 59456,
+              "cachedWriteTokens": 0,
+              "totalTokens": 90396
+            },
+            "stream_ref": "/Users/kriswang/.acpx/sessions/8b971cae-40eb-4a77-b91e-5f43981b9ef4.stream.ndjson",
+            "stream_prefix_sha256": "b1147664a9f9860c2070633aec1351c6b683564a9bb6800baadc7dd9240bca2e"
+          }
+        ]
+      }
+    ],
+    "actual_tokens": 332733,
+    "completed_calls": 7,
+    "measurement_complete": true,
+    "cost_note": "SDK amounts retained; not actual subscription payment. No invented mixed-provider price."
+  }
+}

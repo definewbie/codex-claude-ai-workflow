@@ -1,0 +1,23 @@
+{
+  "sourcePath": "/usr/local/lib/node_modules/npm/node_modules/libnpmexec/lib/index.js",
+  "sourceSha256": "cfb349118f1065101f399ee18cfe66d298ac88646a41aa1e19dc4f6ed202c8dc",
+  "packagePresentInNpxCache": true,
+  "emptyWorkspaceLocalTree": {
+    "manifestCalls": [
+      {
+        "spec": "@agentclientprotocol/claude-agent-acp@0.70.0",
+        "preferOnline": true
+      }
+    ],
+    "foundLocal": false
+  },
+  "exactWorkspaceLocalTree": {
+    "manifestCalls": [],
+    "foundLocal": true
+  },
+  "networkCalls": 0,
+  "nativeAgentCalls": 0,
+  "modelCalls": 0,
+  "proves": "Installed npm missing-local-tree branch consults preferOnline manifest before later npx-cache check",
+  "doesNotProve": "Which subprocess stage blocked in the historical seventh execution; historical npm bytes were not snapshotted"
+}

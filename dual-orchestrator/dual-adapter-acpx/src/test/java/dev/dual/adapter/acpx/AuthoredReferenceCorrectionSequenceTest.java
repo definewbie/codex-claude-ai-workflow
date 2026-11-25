@@ -58,10 +58,13 @@ class AuthoredReferenceCorrectionSequenceTest {
             assertEquals(f.transport.activeId, sidecar.at("/revision_responses/0/obligation_id").asText(), sidecar.toPrettyString());
             assertEquals("Frozen response", sidecar.at("/revision_responses/0/evidence").asText());
             // A new ledger/runtime instance consumes the published binding, not the failed first candidate.
-            f.runtime = f.runtime(new WorkflowFileLedger());
+            f.runtime = f.runtime(AcpxTestLedger.ledger());
             f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths), "approve", "Accept reviewed candidate");
             f.advance();
         }
+        assertEquals("gate.contract_review", f.currentNode(), "reviewed plan still requires exact EXECUTION approval");
+        f.ledger.resolveOpenGate(f.paths, f.ledger.loadDefinition(f.paths), "approve", "Approve exact execution scope");
+        f.advance();
         assertEquals(WorkflowStatus.COMPLETED, f.ledger.loadCurrent(f.paths).status());
         assertEquals(2, f.transport.corrections);
     }
@@ -128,8 +131,8 @@ class AuthoredReferenceCorrectionSequenceTest {
             assertTrue(Files.exists(f.root.resolve(acq.at("/occurrences/0/outputPath").asText())));
             if (!mutation.equals("source")) assertFalse(acq.at("/occurrences/1/contractSchemaValid").asBoolean());
             if (!mutation.equals("source")) {
-                var persisted = new WorkflowFileLedger().loadNode(f.paths, node.nodeInstanceId());
-                var replay = new ArtifactContractValidator().validate(f.root, f.ws, persisted.nodeInstanceId(),
+                var persisted = AcpxTestLedger.ledger().loadNode(f.paths, node.nodeInstanceId());
+                var replay = new ArtifactContractValidator(AcpxTestLedger.ledger()).validate(f.root, f.ws, persisted.nodeInstanceId(),
                         f.ledger.loadDefinition(f.paths).node(persisted.nodeDefinitionId()), persisted.inputRefs(),
                         new NodeResult("AGENT_OUTPUT_CONTRACT_VIOLATION", persisted.status(), persisted.outputRefs(),
                                 persisted.result(), "cold replay"));
@@ -146,7 +149,7 @@ class AuthoredReferenceCorrectionSequenceTest {
         final Path root;
         final String ws = "ws-reference-correction";
         final WorkstreamPaths paths;
-        final WorkflowFileLedger ledger = new WorkflowFileLedger();
+        final WorkflowFileLedger ledger = AcpxTestLedger.ledger();
         final Transport transport = new Transport();
         final boolean queued;
         WorkflowRuntime runtime;
@@ -160,37 +163,9 @@ class AuthoredReferenceCorrectionSequenceTest {
             git("add", "README.md");
             git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-qm", "baseline");
             paths = new WorkstreamPaths(this.root, new DualId(ws));
-            var nodes = new ArrayList<NodeDefinition>();
-            var edges = new ArrayList<EdgeDefinition>();
-            for (var stage : List.of("design", "plan")) {
-                var author = stage + ".claude_" + stage;
-                var reviewer = stage + ".codex_" + (stage.equals("design") ? "arch" : "plan") + "_review";
-                nodes.add(agent(author, stage + "-claude", stage + "_result"));
-                nodes.add(new NodeDefinition("ctx." + stage, NodeKind.TASK, "context.build_package", Map.of(
-                        "target_node", reviewer, "profile", stage.equals("design") ? "architecture_review" : "plan_review",
-                        "requires_approved_task_contract", true)));
-                nodes.add(agent(reviewer, stage + "-codex-review", "agent_output_contract"));
-                nodes.add(new NodeDefinition(stage + ".decision", NodeKind.DECISION, "review.decision", Map.of()));
-                nodes.add(gate("gate.human_" + stage + "_approval", stage));
-                edges.add(new EdgeDefinition(author, "completed", "ctx." + stage));
-                edges.add(new EdgeDefinition("ctx." + stage, "completed", reviewer));
-                edges.add(new EdgeDefinition(reviewer, "completed", stage + ".decision"));
-                edges.add(new EdgeDefinition(stage + ".decision", stage.equals("design") ? "READY_FOR_ARCH_REVIEW" : "READY_TO_IMPLEMENT",
-                        "gate.human_" + stage + "_approval"));
-                edges.add(new EdgeDefinition("gate.human_" + stage + "_approval", "revise", author));
-            }
-            nodes.add(new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of()));
-            nodes.add(gate("gate.contract_review", "contract"));
-            nodes.add(agent("implement.claude_implement", "implement-claude", "agent_output_contract"));
-            edges.add(new EdgeDefinition("contract.compile", "completed", "gate.contract_review"));
-            edges.add(new EdgeDefinition("gate.contract_review", "approved", "design.claude_design"));
-            edges.add(new EdgeDefinition("gate.human_design_approval", "approved", "plan.claude_plan"));
-            edges.add(new EdgeDefinition("gate.human_plan_approval", "approved", "implement.claude_implement"));
-            var definition = new WorkflowDefinition("reference-correction-fixture", 1, "design.claude_design", nodes, edges);
-            ledger.initialize(paths, ws, definition);
-            // Reuse the approved-contract pre-state. All subsequent authors/reviews/gates use normal runtime transitions.
-            DesignContractFixture.approve(this.root, ws);
-            Files.writeString(paths.workstreamDir().resolve("requirement.md"), "Design a file conversion tool");
+            var authored = new AuthoredStageSequenceTest.Fixture(this.root, "repo/relative/new.ext",
+                    AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, ws, null, ledger);
+            transport.bindings = authored.verificationBindings();
             runtime = runtime(ledger);
         }
 
@@ -199,8 +174,21 @@ class AuthoredReferenceCorrectionSequenceTest {
         }
 
         HandlerRegistry handlers() {
-            return new HandlerRegistry(List.of(new AcpxAgentTaskHandler(transport, false),
-                    new ContextBuildPackageHandler()), List.of(new ReviewDecisionHandler()), List.of(new HumanReviewGateHandler()));
+            return new HandlerRegistry(List.of(new TaskHandler() {
+                public String type() { return "acpx.agent_run"; }
+                public NodeResult execute(TaskContext context) throws Exception {
+                    var id = context.definition().id();
+                    var config = new java.util.LinkedHashMap<>(context.definition().config());
+                    config.put("agent", id.contains("codex") ? "codex" : "claude");
+                    config.put("session", "authored-fixture");
+                    config.put("permission_profile", "observe");
+                    config.put("prompt_template", id.startsWith("design") ? (id.contains("codex") ? "design-codex-review" : "design-claude")
+                            : id.startsWith("plan") ? (id.contains("codex") ? "plan-codex-review" : "plan-claude")
+                            : id.contains("self_test") ? "implement-claude-self-test" : "implement-claude");
+                    return new AcpxAgentTaskHandler(transport, false).execute(new TaskContext(context.workspaceRoot(), context.workstreamId(),
+                            new NodeDefinition(id, context.definition().kind(), type(), config), context.instance(), context.ledger()));
+                }
+            }, new ContextBuildPackageHandler(), new ContractCompileHandler()), List.of(new ReviewDecisionHandler()), List.of(new HumanReviewGateHandler()));
         }
 
         void advance() throws Exception {
@@ -230,16 +218,6 @@ class AuthoredReferenceCorrectionSequenceTest {
             assertEquals(0, process.waitFor(), output);
         }
 
-        NodeDefinition agent(String id, String template, String artifact) {
-            return new NodeDefinition(id, NodeKind.TASK, "acpx.agent_run", Map.of("agent", id.contains("codex") ? "codex" : "claude",
-                    "session", "authored-fixture", "prompt_template", template, "permission_profile", "observe",
-                    "expected_artifact", artifact, "requires_approved_task_contract", true));
-        }
-
-        NodeDefinition gate(String id, String purpose) {
-            return new NodeDefinition(id, NodeKind.GATE, "human.review", Map.of("gate_purpose", purpose,
-                    "allowed_actions", List.of("approved", "revise")));
-        }
     }
 
     private static final class Transport extends AcpxAgentTransport {
@@ -251,7 +229,9 @@ class AuthoredReferenceCorrectionSequenceTest {
         String revisedNode;
         Path revisedRun;
         ObjectNode valid;
+        com.fasterxml.jackson.databind.JsonNode bindings;
         AcpxRunRequest initial;
+        List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> observations = List.of();
         AuthoredExecutionContext.Snapshot snapshot;
 
         @Override public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException { return initial(request); }
@@ -261,14 +241,36 @@ class AuthoredReferenceCorrectionSequenceTest {
             var manifest = JSON.readTree(PromptManifestWriter.manifestPathFor(request.promptPath()).toFile());
             snapshot = JSON.treeToValue(manifest.get("authoredContext"), AuthoredExecutionContext.Snapshot.class);
             calls.add(snapshot.nodeId());
+            observations = List.of();
             var decision = snapshot.nodeId().equals("plan.claude_plan") ? "READY_FOR_PLAN_REVIEW"
                     : snapshot.nodeId().equals("plan.codex_plan_review") ? "READY_TO_IMPLEMENT"
-                    : snapshot.nodeId().equals("implement.claude_implement") ? "IMPLEMENTED" : "READY_FOR_ARCH_REVIEW";
+                    : snapshot.nodeId().equals("implement.claude_implement") ? "IMPLEMENTED"
+                    : snapshot.nodeId().equals("implement.claude_self_test_report") ? "SELF_TEST_COMPLETE" : "READY_FOR_ARCH_REVIEW";
             var prompt = AgentResultPromptContract.render(snapshot.workstreamId(), snapshot.runId(), snapshot.nodeId(), decision, Set.of(decision));
             valid = (ObjectNode) JSON.readTree(prompt.substring(prompt.indexOf('{')));
             var result = (ObjectNode) valid.get("result");
             if (result.has("must_fix")) result.putArray("must_fix");
-            if (result.has("plan")) ((ObjectNode) result.get("plan")).putArray("edit_files").add("repo/relative/new.ext");
+            if (result.has("plan")) {
+                var plan = (ObjectNode) result.get("plan");
+                plan.putArray("edit_files").add("repo/relative/new.ext");
+                plan.putArray("files").addObject().put("path", "repo/relative/new.ext").put("operation", "CREATE");
+                plan.set("verification_bindings", bindings.deepCopy());
+                plan.putArray("authority_refs");
+            }
+            if (result.has("verification_checks")) {
+                // Real local fixture observation, not a claim that a native test command ran.
+                var content = Files.readString(request.workdir().resolve("README.md"));
+                observations = List.of(new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation(
+                        "fixture-session", "read-readme", "fixture.read", "read",
+                        JSON.valueToTree(Map.of("path", "README.md")), JSON.valueToTree(Map.of("content", content)),
+                        "completed", null, null, "", false, List.of()));
+                var checks = result.putArray("verification_checks");
+                for (var binding : bindings) {
+                    var check = checks.addObject().put("criterion_id", binding.path("criterion_id").asText())
+                            .put("assertion", "Read the fixture README").put("execution_ref", "CURRENT");
+                    check.putArray("tool_call_ids").add("read-readme"); check.putArray("material_refs");
+                }
+            }
             if (mutation.equals("schema") && result.has("revision_responses")) {
                 revisedNode = snapshot.nodeInstanceId();
                 revisedRun = request.promptPath().getParent().getParent().resolve("run.json");
@@ -314,7 +316,7 @@ class AuthoredReferenceCorrectionSequenceTest {
             var now = Instant.now();
             return new AcpxRunResult(now, now.plusMillis(1), List.of("fixture"), List.of(), null,
                     new AcpxPromptCompletion("fixture-request", "end_turn", value),
-                    new ProcessResult("fixture", null, 0, ProcessUsability.EXITED_ZERO, 1, "", "", false, false), List.of());
+                    new ProcessResult("fixture", null, 0, ProcessUsability.EXITED_ZERO, 1, "", "", false, false), List.of(), observations);
         }
     }
 }

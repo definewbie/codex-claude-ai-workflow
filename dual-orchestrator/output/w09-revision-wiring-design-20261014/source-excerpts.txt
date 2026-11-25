@@ -1,0 +1,1901 @@
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelope.java
+SHA256 4539200d00cd99ada2302925b91b095125ecf579a6461aae037ef44d1049d679
+8: /** Strict, lineage-bound workflow result emitted as the final ACP assistant message. */
+9: public record AgentResultEnvelope(
+10:         int schemaVersion,
+11:         String workstreamId,
+12:         String runId,
+13:         String nodeId,
+14:         AgentResult result
+15: ) {
+16:     @JsonTypeInfo(
+17:             use = JsonTypeInfo.Id.NAME,
+18:             include = JsonTypeInfo.As.EXISTING_PROPERTY,
+19:             property = "artifact_type",
+20:             visible = true
+21:     )
+22:     @JsonSubTypes({
+23:             @JsonSubTypes.Type(value = TaskContractProposalResult.class, name = "task_contract_proposal"),
+24:             @JsonSubTypes.Type(value = TaskContractRevisionPatchResult.class, name = "task_contract_revision_patch"),
+25:             @JsonSubTypes.Type(value = AgentOutputResult.class, name = "agent_output_contract"),
+26:             @JsonSubTypes.Type(value = DesignResult.class, name = "design_result"),
+27:             @JsonSubTypes.Type(value = PlanResult.class, name = "plan_result"),
+28:             @JsonSubTypes.Type(value = SelfTestResult.class, name = "self_test_report"),
+29:             @JsonSubTypes.Type(value = AcceptanceReviewResult.class, name = "acceptance_review"),
+30:             @JsonSubTypes.Type(value = StageHandoffResult.class, name = "stage_handoff")
+31:     })
+32:     public sealed interface AgentResult permits
+33:             TaskContractProposalResult,
+34:             TaskContractRevisionPatchResult,
+35:             AgentOutputResult,
+36:             DesignResult,
+37:             PlanResult,
+38:             SelfTestResult,
+39:             AcceptanceReviewResult,
+40:             StageHandoffResult {
+41:         String artifactType();
+77:     public record TaskContractProposalResult(
+78:             String artifactType,
+79:             String decision,
+80:             String summary,
+81:             boolean needsHumanInput,
+82:             String objective,
+83:             ProposalScope scope,
+84:             List<ContractClause> acceptanceCriteria,
+85:             List<ContractClause> testRequirements,
+86:             List<ContractClause> constraints,
+87:             List<ContractClause> nonGoals,
+88:             List<ContractClause> riskAreas,
+89:             List<String> evidenceRefs,
+90:             List<String> openQuestions,
+91:             List<RevisionResponse> revisionResponses
+92:     ) implements AgentResult {
+93:     }
+94: 
+95:     public record ProposalScope(List<ProposalScopePath> included, List<String> excluded) {
+96:     }
+97: 
+98:     public record ProposalScopePath(String path) {
+99:     }
+100: 
+101:     public record ContractClause(String id, String text) {
+102:     }
+103: 
+104:     public record ReviewObligation(String id, String text) {
+105:     }
+106: 
+107:     public record RevisionResponse(String reviewObligationId, List<String> resolvedByClauseIds) {
+108:     }
+109: 
+110:     public record TaskContractRevisionPatchResult(
+111:             String artifactType,
+112:             String decision,
+113:             String summary,
+114:             String baseProposalId,
+115:             String baseProposalSha256,
+116:             List<ObligationPatch> obligationPatches
+117:     ) implements AgentResult {
+118:     }
+119: 
+120:     public record ObligationPatch(
+121:             String reviewObligationId,
+122:             List<String> resolvedByClauseIds,
+123:             List<ClauseChange> clauseChanges,
+124:             List<ProposalScopePath> scopeAdditions,
+125:             List<String> evidenceRefAdditions
+126:     ) {
+127:     }
+128: 
+129:     public record ClauseChange(
+130:             ClauseChangeOperation operation,
+131:             ClauseSection section,
+132:             String id,
+133:             String text
+134:     ) {
+135:     }
+136: 
+137:     public enum ClauseChangeOperation {
+138:         ADD,
+139:         REPLACE
+140:     }
+141: 
+142:     public enum ClauseSection {
+143:         ACCEPTANCE_CRITERIA,
+144:         TEST_REQUIREMENTS,
+145:         CONSTRAINTS,
+146:         NON_GOALS,
+147:         RISK_AREAS
+148:     }
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java
+SHA256 12271f14298dfd956640d45d407c2d8de915c579044739114522e0c029ccb30d
+15: 
+16:     public AgentResultEnvelopeParser() {
+17:         this.objectMapper = JsonMapper.builder(JsonFactory.builder()
+18:                 .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
+19:                 .build())
+20:                 .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+21:                 .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
+22:                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+23:                 .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+24:                 .build();
+25:     }
+26: 
+27:     public ParseResult parse(String candidate) {
+28:         if (candidate == null || candidate.isBlank()) {
+29:             return ParseResult.failed("AGENT_RESULT_MISSING", "Final ACP assistant message is empty.", null);
+30:         }
+31:         try {
+32:             return ParseResult.valid(objectMapper.readValue(candidate, AgentResultEnvelope.class));
+33:         } catch (JsonEOFException failure) {
+34:             return ParseResult.failed(
+35:                     "AGENT_RESULT_PARSE_FAILED",
+36:                     failure.getMessage(),
+37:                     ParseDiagnostic.at(ParseFailureKind.UNEXPECTED_END_OF_INPUT, failure.getLocation())
+38:             );
+39:         } catch (Exception failure) {
+40:             return ParseResult.failed(
+41:                     "AGENT_RESULT_PARSE_FAILED",
+42:                     failure.getMessage(),
+43:                     ParseDiagnostic.at(ParseFailureKind.INVALID_JSON, null)
+44:             );
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeValidator.java
+SHA256 8371cb1d941c1f573d072a31b5790db8e011160f661971f87985d9da1c247684
+20:     public ValidationResult validate(
+21:             AgentResultEnvelope envelope,
+22:             String expectedWorkstreamId,
+23:             String expectedRunId,
+24:             NodeOutputContract contract
+25:     ) {
+26:         return validate(envelope, expectedWorkstreamId, expectedRunId, contract, List.of());
+27:     }
+28: 
+29:     public ValidationResult validate(
+30:             AgentResultEnvelope envelope,
+31:             String expectedWorkstreamId,
+32:             String expectedRunId,
+33:             NodeOutputContract contract,
+34:             List<String> activeObligationIds
+35:     ) {
+36:         var errors = new ValidationErrors();
+37:         if (envelope == null) {
+38:             errors.reject("envelope is required");
+39:             return errors.result();
+40:         }
+41:         if (envelope.schemaVersion() == 0) {
+42:             errors.repairable("schema_version", CorrectionValue.SCHEMA_VERSION, "schema_version must be 1");
+43:         } else if (envelope.schemaVersion() != 1) {
+44:             errors.reject("schema_version must be 1");
+45:         }
+46:         if (envelope.workstreamId() == null || envelope.workstreamId().isBlank()) {
+47:             errors.repairable("workstream_id", CorrectionValue.WORKSTREAM_ID, "workstream_id is required");
+48:         } else if (expectedWorkstreamId == null || expectedWorkstreamId.isBlank()
+49:                 || !expectedWorkstreamId.equals(envelope.workstreamId())) {
+50:             errors.reject("workstream_id does not match current workstream");
+51:         }
+52:         if (envelope.runId() == null || envelope.runId().isBlank()) {
+53:             errors.repairable("run_id", CorrectionValue.RUN_ID, "run_id is required");
+54:         } else if (expectedRunId == null || expectedRunId.isBlank()
+55:                 || !expectedRunId.equals(envelope.runId())) {
+56:             errors.reject("run_id does not match current execution");
+57:         }
+58:         if (envelope.nodeId() == null || envelope.nodeId().isBlank()) {
+59:             errors.repairable("node_id", CorrectionValue.NODE_ID, "node_id is required");
+60:         } else if (!contract.nodeId().equals(envelope.nodeId())) {
+61:             errors.reject("node_id does not match current node");
+62:         }
+63:         if (envelope.result() == null) {
+64:             errors.reject("result is required");
+65:         } else {
+66:             if (envelope.result().artifactType() == null || envelope.result().artifactType().isBlank()) {
+67:                 errors.reject("result.artifact_type is required");
+68:             } else if (!contract.emitsArtifact(envelope.result().artifactType())) {
+69:                 errors.reject("result.artifact_type is not allowed for node " + contract.nodeId());
+70:             }
+71:             if (envelope.result().decision() == null || envelope.result().decision().isBlank()) {
+72:                 errors.reject("result.decision is required");
+73:             } else if (!contract.allowedDecisions().contains(envelope.result().decision())) {
+74:                 errors.reject("result.decision is not allowed for node " + contract.nodeId());
+75:             }
+76:             if (envelope.result().summary() == null || envelope.result().summary().isBlank()) {
+77:                 errors.reject("result.summary is required");
+78:             }
+79:             validatePayload(envelope.result(), contract.nodeId(), errors, activeObligationIds);
+80:         }
+81:         return errors.result();
+283:     private static void validateRevisionPatch(
+284:             AgentResultEnvelope.TaskContractRevisionPatchResult patch,
+285:             ValidationErrors errors
+286:     ) {
+287:         requiredText(patch.baseProposalId(), "result.base_proposal_id", errors);
+288:         requiredText(patch.baseProposalSha256(), "result.base_proposal_sha256", errors);
+289:         if (patch.baseProposalSha256() != null
+290:                 && !patch.baseProposalSha256().matches("[0-9a-f]{64}")) {
+291:             errors.reject("result.base_proposal_sha256 must be 64 lowercase hexadecimal characters");
+292:         }
+293:         requiredList(patch.obligationPatches(), "result.obligation_patches", true, errors);
+294:         if (patch.obligationPatches() == null) {
+295:             return;
+296:         }
+297:         var obligationIds = new HashSet<String>();
+298:         for (int index = 0; index < patch.obligationPatches().size(); index++) {
+299:             var value = patch.obligationPatches().get(index);
+300:             var item = "result.obligation_patches[" + index + "]";
+301:             if (value == null) {
+302:                 errors.reject(item + " is required");
+303:                 continue;
+304:             }
+305:             requiredText(value.reviewObligationId(), item + ".review_obligation_id", errors);
+306:             requiredList(value.resolvedByClauseIds(), item + ".resolved_by_clause_ids", true, errors);
+307:             requiredList(value.clauseChanges(), item + ".clause_changes", false, errors);
+308:             requiredList(value.scopeAdditions(), item + ".scope_additions", false, errors);
+309:             requiredList(value.evidenceRefAdditions(), item + ".evidence_ref_additions", false, errors);
+310:             if (value.reviewObligationId() != null && !value.reviewObligationId().isBlank()
+311:                     && !obligationIds.add(value.reviewObligationId().trim())) {
+312:                 errors.reject("result.obligation_patches contains duplicate obligation id: "
+313:                         + value.reviewObligationId().trim());
+314:             }
+315:             if (value.clauseChanges() != null) {
+316:                 for (int changeIndex = 0; changeIndex < value.clauseChanges().size(); changeIndex++) {
+317:                     var change = value.clauseChanges().get(changeIndex);
+318:                     var changeItem = item + ".clause_changes[" + changeIndex + "]";
+319:                     if (change == null) {
+320:                         errors.reject(changeItem + " is required");
+321:                         continue;
+322:                     }
+323:                     if (change.operation() == null) {
+324:                         errors.reject(changeItem + ".operation is required");
+325:                     }
+326:                     if (change.section() == null) {
+327:                         errors.reject(changeItem + ".section is required");
+328:                     }
+329:                     requiredText(change.id(), changeItem + ".id", errors);
+330:                     requiredText(change.text(), changeItem + ".text", errors);
+331:                 }
+332:             }
+333:             validateScopeEntries(value.scopeAdditions(), errors);
+334:         }
+335:         TaskContractRevisionPatchTargetValidator.validate(patch).forEach(errors::reject);
+336:     }
+337: 
+338:     private static void validateContractClauses(
+339:             AgentResultEnvelope.TaskContractProposalResult proposal,
+340:             ValidationErrors errors
+341:     ) {
+342:         var ids = new HashSet<String>();
+343:         validateContractClauses(proposal.acceptanceCriteria(), "result.acceptance_criteria", ids, errors);
+344:         validateContractClauses(proposal.testRequirements(), "result.test_requirements", ids, errors);
+345:         validateContractClauses(proposal.constraints(), "result.constraints", ids, errors);
+346:         validateContractClauses(proposal.nonGoals(), "result.non_goals", ids, errors);
+347:         validateContractClauses(proposal.riskAreas(), "result.risk_areas", ids, errors);
+348:     }
+349: 
+350:     private static void validateContractClauses(
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalRevisionMerger.java
+SHA256 6d56fa042580f7f57a16c48b0fa217e53e60356b9edd0b4e1e34a7bf5ec428b6
+15:             TaskContractRevisionContextResolver.Context context,
+16:             AgentResultEnvelope.TaskContractRevisionPatchResult patch,
+17:             Path workspaceRoot
+18:     ) {
+19:         var errors = new ArrayList<String>();
+20:         if (context == null || !context.revision()
+21:                 || context.previousProposal() == null || context.previousReference() == null) {
+22:             return MergeResult.failure("REVISION_CONTEXT_REQUIRED");
+23:         }
+24:         if (!context.previousReference().proposalId().equals(patch.baseProposalId())) {
+25:             errors.add("REVISION_BASE_PROPOSAL_ID_MISMATCH");
+26:         }
+27:         if (!context.previousReference().sha256().equals(patch.baseProposalSha256())) {
+28:             errors.add("REVISION_BASE_PROPOSAL_SHA256_MISMATCH");
+29:         }
+30: 
+31:         var expectedObligations = new LinkedHashSet<String>();
+32:         for (var obligation : context.obligations()) {
+33:             if (obligation != null && obligation.id() != null && !obligation.id().isBlank()) {
+34:                 expectedObligations.add(obligation.id().trim());
+35:             }
+36:         }
+37:         var actualObligations = new LinkedHashSet<String>();
+38:         for (var obligationPatch : safe(patch.obligationPatches())) {
+39:             if (obligationPatch == null || obligationPatch.reviewObligationId() == null) {
+40:                 continue;
+41:             }
+42:             var obligationId = obligationPatch.reviewObligationId().trim();
+43:             if (!actualObligations.add(obligationId)) {
+44:                 errors.add("DUPLICATE_REVISION_OBLIGATION: " + obligationId);
+45:             }
+46:         }
+47:         errors.addAll(TaskContractRevisionPatchTargetValidator.validate(patch));
+48:         if (context.scopeRevision()) {
+49:             for (var change : safe(patch.obligationPatches())) {
+50:                 if (!change.clauseChanges().isEmpty() || !change.evidenceRefAdditions().isEmpty()) {
+51:                     errors.add("scope review may only add bound candidate paths");
+52:                 }
+53:             }
+54:         }
+55:         for (var expected : expectedObligations) {
+56:             if (!actualObligations.contains(expected)) {
+57:                 errors.add("MISSING_REVISION_OBLIGATION: " + expected);
+58:             }
+59:         }
+60:         for (var actual : actualObligations) {
+61:             if (!expectedObligations.contains(actual)) {
+62:                 errors.add("UNKNOWN_REVISION_OBLIGATION: " + actual);
+63:             }
+64:         }
+65:         if (!errors.isEmpty()) {
+66:             return new MergeResult(null, List.copyOf(errors));
+67:         }
+68: 
+69:         var previous = context.previousProposal();
+70:         var sections = sections(previous);
+71:         var allIds = new LinkedHashSet<String>();
+72:         sections.values().forEach(values -> values.forEach(clause -> allIds.add(clause.id())));
+73:         for (var obligationPatch : patch.obligationPatches()) {
+74:             for (var change : obligationPatch.clauseChanges()) {
+75:                 var values = sections.get(change.section());
+76:                 var index = indexOf(values, change.id());
+77:                 if (change.operation() == AgentResultEnvelope.ClauseChangeOperation.REPLACE) {
+78:                     if (index < 0) {
+79:                         errors.add("UNKNOWN_CLAUSE_REPLACE_TARGET: " + change.id());
+80:                     } else {
+110:                     continue;
+111:                 }
+112:                 scope.addAll(resolvedScope.entries());
+113:             }
+114:             evidence.addAll(List.copyOf(obligationPatch.evidenceRefAdditions()));
+115:             responses.add(new TaskContractProposal.RevisionResponse(
+116:                     obligationPatch.reviewObligationId(),
+117:                     List.copyOf(obligationPatch.resolvedByClauseIds())));
+118:         }
+119:         if (!errors.isEmpty()) {
+120:             return new MergeResult(null, List.copyOf(errors));
+121:         }
+122:         var merged = new TaskContractProposal(
+123:                 "task_contract_proposal",
+124:                 TaskContractProposal.SCHEMA_VERSION,
+125:                 previous.objective(),
+126:                 new TaskContractProposal.Scope(List.copyOf(scope), List.copyOf(previous.scope().excluded())),
+127:                 List.copyOf(sections.get(AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA)),
+128:                 List.copyOf(sections.get(AgentResultEnvelope.ClauseSection.TEST_REQUIREMENTS)),
+129:                 List.copyOf(sections.get(AgentResultEnvelope.ClauseSection.CONSTRAINTS)),
+130:                 List.copyOf(sections.get(AgentResultEnvelope.ClauseSection.NON_GOALS)),
+131:                 List.copyOf(sections.get(AgentResultEnvelope.ClauseSection.RISK_AREAS)),
+132:                 List.copyOf(evidence),
+133:                 List.copyOf(previous.openQuestions()),
+134:                 List.copyOf(responses));
+135:         return new MergeResult(merged, List.of());
+136:     }
+137: 
+138:     private static Map<AgentResultEnvelope.ClauseSection, ArrayList<TaskContractProposal.ContractClause>> sections(
+139:             TaskContractProposal proposal
+140:     ) {
+141:         var result = new LinkedHashMap<AgentResultEnvelope.ClauseSection,
+142:                 ArrayList<TaskContractProposal.ContractClause>>();
+143:         result.put(AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+144:                 new ArrayList<>(List.copyOf(proposal.acceptanceCriteria())));
+145:         result.put(AgentResultEnvelope.ClauseSection.TEST_REQUIREMENTS,
+146:                 new ArrayList<>(List.copyOf(proposal.testRequirements())));
+147:         result.put(AgentResultEnvelope.ClauseSection.CONSTRAINTS,
+148:                 new ArrayList<>(List.copyOf(proposal.constraints())));
+149:         result.put(AgentResultEnvelope.ClauseSection.NON_GOALS,
+150:                 new ArrayList<>(List.copyOf(proposal.nonGoals())));
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java
+SHA256 85ed81fbbbe669bc5a7fbe9262f5308b68a63450e0d5fc529876fd32b7732427
+65:         }
+66:     }
+67: 
+68:     public Result resolveForIteration(
+69:             Path workspaceRoot,
+70:             String workstreamId,
+71:             String iterationId
+72:     ) {
+73:         if (!snapshot) return read(workspaceRoot, workstreamId, r -> r.resolveForIteration(workspaceRoot, workstreamId, iterationId));
+74:         var root = workspaceRoot.toAbsolutePath().normalize();
+75:         var workstreamDir = workstreamDir(root, workstreamId);
+76:         try {
+77:             var iterationPath = workstreamDir.resolve("iterations").resolve(iterationId + ".json");
+78:             if (!Files.isRegularFile(iterationPath)) {
+79:                 return failure("current workflow iteration is missing", iterationPath.toString());
+80:             }
+81:             var iteration = OBJECT_MAPPER.readValue(iterationPath.toFile(), WorkflowIterationDocument.class);
+82:             if (!iterationId.equals(iteration.iterationId())) {
+83:                 return failure("current workflow iteration identity is inconsistent",
+84:                         iterationId, iteration.iterationId());
+85:             }
+86:             if ("workflow_started".equals(iteration.triggerAction())) {
+87:                 return new Result(new Context(iteration, false, null, null, List.of()), List.of());
+88:             }
+89:             var ancestry = lateAncestry(root, workstreamId, iteration);
+90:             if (!ancestry.isEmpty()) {
+91:                 return new LateReader(root, workstreamId).resolve(ancestry);
+92:             }
+93:             if ("clarify".equals(iteration.triggerAction())) {
+94:                 return resolveContractClarification(
+95:                         root, workstreamId, workstreamDir, iteration);
+96:             }
+97:             if ("revise".equals(iteration.triggerAction())) {
+98:                 return resolveHumanRequirementRevision(
+99:                         root, workstreamId, workstreamDir, iteration);
+100:             }
+101:             if (!"NEEDS_REVISION".equals(iteration.triggerAction())) {
+102:                 return failure("contract revision reached an unsupported iteration trigger",
+103:                         "trigger_action=" + iteration.triggerAction());
+104:             }
+105:             if (iteration.triggerNodeInstanceId().isBlank() || iteration.parentIterationId().isBlank()) {
+106:                 return failure("revision iteration trigger lineage is incomplete", iteration.iterationId());
+107:             }
+108:             var triggerPath = workstreamDir.resolve("nodes")
+109:                     .resolve(iteration.triggerNodeInstanceId() + ".json");
+110:             if (!Files.isRegularFile(triggerPath)) {
+111:                 return failure("revision trigger decision node is missing", triggerPath.toString());
+112:             }
+113:             var trigger = OBJECT_MAPPER.readValue(triggerPath.toFile(), NodeInstanceDocument.class);
+114:             if (!"intake.decision".equals(trigger.nodeDefinitionId())
+115:                     || !iteration.parentIterationId().equals(trigger.iterationId())
+116:                     || trigger.status() != NodeStatus.COMPLETED
+117:                     || !"NEEDS_REVISION".equals(text(trigger.result().get("decision")))) {
+118:                 return failure("revision trigger is not the completed intake decision",
+119:                         iteration.triggerNodeInstanceId());
+120:             }
+121:             var baselines = verifiedBaselines(
+122:                     root, workstreamId, workstreamDir, trigger.inputRefs(), iteration.parentIterationId(),
+123:                     Set.of("NEEDS_REVISION"), true);
+124:             if (baselines.size() != 1) {
+125:                 return failure("revision trigger must reference exactly one verified rejected intake review",
+126:                         "review_count=" + baselines.size());
+127:             }
+128:             var baseline = baselines.get(0);
+129:             return new Result(new Context(
+130:                     iteration,
+131:                     true,
+132:                     baseline.previousProposal(),
+133:                     baseline.previousReference(),
+134:                     baseline.review().contractObligations()), List.of());
+135:         } catch (Exception failure) {
+136:             return failure("revision iteration lineage could not be resolved", message(failure));
+137:         }
+138:     }
+139: 
+140:     private Result resolveHumanRequirementRevision(
+141:             Path root,
+146:         if (iteration.triggerNodeInstanceId().isBlank() || iteration.parentIterationId().isBlank()) {
+147:             return failure("human requirement revision trigger lineage is incomplete", iteration.iterationId());
+148:         }
+149:         var triggerPath = workstreamDir.resolve("nodes").resolve(iteration.triggerNodeInstanceId() + ".json");
+150:         if (!Files.isRegularFile(triggerPath)) {
+151:             return failure("human requirement revision gate node is missing", triggerPath.toString());
+152:         }
+153:         var trigger = OBJECT_MAPPER.readValue(triggerPath.toFile(), NodeInstanceDocument.class);
+154:         var note = text(trigger.result().get("note"));
+155:         if (!"gate.human_requirement_review".equals(trigger.nodeDefinitionId())
+156:                 || !iteration.parentIterationId().equals(trigger.iterationId())
+157:                 || trigger.status() != NodeStatus.COMPLETED
+158:                 || !"revise".equals(text(trigger.result().get("human_action")))
+159:                 || note.isBlank()) {
+160:             return failure("revision trigger is not a completed human requirement revision gate",
+161:                     iteration.triggerNodeInstanceId());
+162:         }
+163:         var baselines = verifiedBaselines(
+164:                 root, workstreamId, workstreamDir, trigger.inputRefs(), iteration.parentIterationId(),
+165:                 Set.of("READY_FOR_PRODUCT_REVIEW", "BLOCKED"), false);
+166:         if (baselines.size() != 1) {
+167:             return failure("human requirement revision must reference exactly one verified human-reviewable intake review",
+168:                     "review_count=" + baselines.size());
+169:         }
+170:         var baseline = baselines.getFirst();
+171:         // The completed node is not sufficient authority: the durable human decision and its
+172:         // routed subject must agree, exactly as for later contract rework.
+173:         var reader = new LateReader(root, workstreamId);
+174:         var verified = reader.requirementSubject(reader.gate(trigger, "revise"),
+175:                 Set.of("READY_FOR_PRODUCT_REVIEW", "BLOCKED"));
+176:         require(verified.previousReference().equals(baseline.previousReference()),
+177:                 "human requirement revision subject mismatch");
+178:         reader.iterationRoute(iteration, trigger);
+179:         return new Result(new Context(
+180:                 iteration,
+181:                 true,
+182:                 baseline.previousProposal(),
+183:                 baseline.previousReference(),
+184:                 List.of(new AgentResultEnvelope.ReviewObligation("HUMAN-REVISE-1", note))), List.of());
+185:     }
+186: 
+187:     private Result resolveContractClarification(
+188:             Path root,
+189:             String workstreamId,
+190:             Path workstreamDir,
+191:             WorkflowIterationDocument iteration
+192:     ) throws IOException {
+193:         if (iteration.triggerNodeInstanceId().isBlank() || iteration.parentIterationId().isBlank()) {
+194:             return failure("contract clarification iteration trigger lineage is incomplete", iteration.iterationId());
+195:         }
+196:         var triggerPath = workstreamDir.resolve("nodes").resolve(iteration.triggerNodeInstanceId() + ".json");
+197:         if (!Files.isRegularFile(triggerPath)) {
+198:             return failure("contract clarification gate node is missing", triggerPath.toString());
+199:         }
+200:         var trigger = OBJECT_MAPPER.readValue(triggerPath.toFile(), NodeInstanceDocument.class);
+201:         var note = text(trigger.result().get("note"));
+202:         if (!"gate.contract_review".equals(trigger.nodeDefinitionId())
+203:                 || !iteration.parentIterationId().equals(trigger.iterationId())
+204:                 || trigger.status() != NodeStatus.COMPLETED
+205:                 || !"clarify".equals(text(trigger.result().get("human_action")))
+206:                 || note.isBlank()) {
+207:             return failure("revision trigger is not a completed contract clarification gate",
+208:                     iteration.triggerNodeInstanceId());
+209:         }
+210:         // Resolve the exact compiled occurrence. The stable contract-resolution.json is rewritten
+211:         // by the next compile and cannot be the authority for an earlier clarification.
+212:         var reader = new LateReader(root, workstreamId);
+213:         var gate = reader.gate(trigger, "clarify");
+214:         var baseline = reader.compiledBaseline(gate.source().nodeInstanceId());
+215:         reader.iterationRoute(iteration, trigger);
+216:         return new Result(new Context(
+217:                 iteration,
+218:                 true,
+219:                 baseline.previousProposal(),
+220:                 baseline.previousReference(),
+221:                 List.of(new AgentResultEnvelope.ReviewObligation("HUMAN-CLARIFY-1", note))), List.of());
+222:     }
+239: 
+240:     public Result resolveForProposal(Path root, String workstreamId, TaskContractProposalReference candidate) {
+241:         if (!snapshot) return read(root, workstreamId, r -> r.resolveForProposal(root, workstreamId, candidate));
+242:         try {
+243:             require(candidate != null && candidate.resolveArtifact(root, workstreamId, OBJECT_MAPPER).isPresent(),
+244:                     "proposal reference invalid");
+245:             var result = resolveForNode(root, workstreamId, candidate.producerNodeInstanceId());
+246:             if (result.valid() && result.context().lateRoot() != null) {
+247:                 var reader = new LateReader(root, workstreamId);
+248:                 reader.proposal(candidate);
+249:                 reader.derivedFrom(candidate, result.context().previousReference());
+250:             }
+251:             return result;
+252:         } catch (Exception failure) {
+253:             return failure("proposal revision context could not be resolved", message(failure));
+254:         }
+922:     public record Context(
+923:             WorkflowIterationDocument iteration,
+924:             boolean revision,
+925:             TaskContractProposal previousProposal,
+926:             TaskContractProposalReference previousReference,
+927:             List<AgentResultEnvelope.ReviewObligation> obligations,
+928:             TaskContractProposal approvedScopeBaseline,
+929:             LateRoot lateRoot,
+930:             List<dev.dual.core.contract.TaskContract.ScopeEntry> scopeReviewCandidates
+931:     ) {
+932:         public Context {
+933:             scopeReviewCandidates = List.copyOf(scopeReviewCandidates);
+934:         }
+935:         public Context(WorkflowIterationDocument iteration, boolean revision,
+936:                        TaskContractProposal previousProposal, TaskContractProposalReference previousReference,
+937:                        List<AgentResultEnvelope.ReviewObligation> obligations,
+938:                        TaskContractProposal approvedScopeBaseline, LateRoot lateRoot) {
+939:             this(iteration, revision, previousProposal, previousReference, obligations, approvedScopeBaseline,
+940:                     lateRoot, List.of());
+941:         }
+942:         public Context(WorkflowIterationDocument iteration, boolean revision,
+943:                        TaskContractProposal previousProposal, TaskContractProposalReference previousReference,
+944:                        List<AgentResultEnvelope.ReviewObligation> obligations) {
+945:             this(iteration, revision, previousProposal, previousReference, obligations, null, null);
+946:         }
+947: 
+948:         public String originalBaseCommit() { return lateRoot == null ? "" : lateRoot.baseCommit(); }
+949:         public boolean scopeRevision() { return lateRoot != null && !lateRoot.scopeEvaluationRef().isBlank(); }
+950:     }
+951: 
+952:     public record LateRoot(String classifierNodeInstanceId, String iterationId,
+953:                            TaskContractProposalReference approvedProposalReference,
+954:                            String acceptanceRef, String acceptanceSha256,
+955:                            String workspaceId, String baseCommit,
+956:                            AgentOutputContractDocument acceptanceEvidence,
+957:                            String scopeEvaluationRef, String scopeEvaluationSha256) {}
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalReference.java
+SHA256 dcf196af8828c02cbf6a8e1c5ebf14124eedaa76578a47034c0a03bcd800b4a0
+57:             Path sidecarPath,
+58:             AgentOutputContractDocument document,
+59:             ObjectMapper objectMapper
+60:     ) throws Exception {
+61:         if (!"task_contract_revision_patch".equals(document.sourceArtifactType())
+62:                 || document.proposalDerivation() == null) {
+63:             throw new IllegalArgumentException("revision-derived task-contract proposal lineage is required");
+64:         }
+65:         return publishVerified(workspaceRoot, workstreamId, sidecarPath, document, objectMapper);
+66:     }
+67: 
+68:     static Published preparePublication(Path workspaceRoot, String workstreamId, Path sidecarPath,
+69:                                          AgentOutputContractDocument document, byte[] bytes, ObjectMapper mapper) throws Exception {
+70:         var root = workspaceRoot.toAbsolutePath().normalize();
+71:         var sidecar = sidecarPath.toAbsolutePath().normalize();
+72:         if (!sidecar.startsWith(root) || !document.hasValidatedLineage(workstreamId, root, sidecar)
+73:                 || !"intake.claude_brainstorm".equals(document.nodeId()) || document.taskContractProposal() == null
+74:                 || !validProposalSource(root, workstreamId, document, mapper))
+75:             throw new IllegalArgumentException("validated proposal lineage required before publication");
+76:         var digest = TaskContractArtifactWriter.sha256(bytes);
+77:         var reference = new TaskContractProposalReference(SCHEMA_VERSION, document.nodeInstanceId() + ":" + digest.substring(0, 16),
+78:                 workstreamId, document.nodeId(), document.nodeInstanceId(), root.relativize(sidecar).toString(), digest);
+79:         var path = root.resolve(".agent/workstreams").resolve(workstreamId).resolve("artifacts/task-contract-proposals")
+90:     ) throws Exception {
+91:         var root = workspaceRoot.toAbsolutePath().normalize();
+92:         var sidecar = sidecarPath.toAbsolutePath().normalize();
+93:         if (!sidecar.startsWith(root)
+94:                 || !Files.isRegularFile(sidecar)
+95:                 || !document.hasValidatedLineage(workstreamId, root, sidecar)
+96:                 || !"intake.claude_brainstorm".equals(document.nodeId())
+97:                 || document.taskContractProposal() == null
+98:                 || !validProposalSource(root, workstreamId, document, objectMapper)) {
+99:             throw new IllegalArgumentException("validated task-contract proposal lineage is required");
+100:         }
+101:         var digest = sha256(sidecar);
+102:         var proposalId = document.nodeInstanceId() + ":" + digest.substring(0, 16);
+103:         var reference = new TaskContractProposalReference(
+104:                 SCHEMA_VERSION,
+105:                 proposalId,
+106:                 workstreamId,
+107:                 document.nodeId(),
+108:                 document.nodeInstanceId(),
+109:                 root.relativize(sidecar).toString(),
+110:                 digest
+111:         );
+112:         var referencePath = root.resolve(".agent/workstreams")
+113:                 .resolve(workstreamId)
+114:                 .resolve("artifacts/task-contract-proposals")
+115:                 .resolve(safeFileName(document.nodeInstanceId()) + "-" + digest.substring(0, 16) + ".ref.json")
+116:                 .normalize();
+117:         Files.createDirectories(referencePath.getParent());
+118:         objectMapper.writerWithDefaultPrettyPrinter().writeValue(referencePath.toFile(), reference);
+119:         return new Published(reference, root.relativize(referencePath).toString());
+120:     }
+121: 
+122:     private static boolean validProposalSource(
+123:             Path root,
+124:             String workstreamId,
+125:             AgentOutputContractDocument document,
+126:             ObjectMapper objectMapper
+127:     ) {
+128:         if (document.repositoryFactBinding() != null
+129:                 && !RepositoryFactBinding.verifyReference(
+130:                         root,
+131:                         workstreamId,
+132:                         document.repositoryFactBinding(),
+133:                         document.nodeInstanceId(),
+134:                         document.runId(),
+135:                         objectMapper).valid()) {
+136:             return false;
+137:         }
+138:         if ("task_contract_proposal".equals(document.sourceArtifactType())) {
+139:             return document.proposalDerivation() == null;
+140:         }
+141:         if (!"task_contract_revision_patch".equals(document.sourceArtifactType())) {
+142:             return false;
+143:         }
+144:         var derivation = document.proposalDerivation();
+145:         if (derivation == null
+146:                 || !derivation.validFor(derivation.baseProposalReference(), document.sourceOutputRef())) {
+147:             return false;
+148:         }
+149:         try {
+150:             return derivation.baseProposalReference()
+245:         if (document.isEmpty()
+246:                 || document.get().taskContractProposal() == null
+247:                 || document.get().taskContractProposal().schemaVersion() != TaskContractProposal.SCHEMA_VERSION) {
+248:             return Optional.empty();
+249:         }
+250:         return Optional.of(new ProposalArtifact(artifactPath.get(), document.get().taskContractProposal()));
+251:     }
+252: 
+253:     Optional<Path> resolveArtifact(Path workspaceRoot, String expectedWorkstreamId, ObjectMapper objectMapper) {
+254:         try {
+255:             var root = workspaceRoot.toAbsolutePath().normalize();
+256:             if (!expectedWorkstreamId.equals(workstreamId)) {
+257:                 return Optional.empty();
+258:             }
+259:             var artifactPath = root.resolve(artifactRef).normalize();
+260:             if (!artifactPath.startsWith(root)
+261:                     || !Files.isRegularFile(artifactPath)
+262:                     || !sha256.equals(sha256(artifactPath))) {
+263:                 return Optional.empty();
+264:             }
+265:             var document = AgentOutputContractDocument.read(artifactPath, objectMapper);
+266:             if (document.isEmpty()
+267:                     || !document.get().hasValidatedLineage(expectedWorkstreamId, root, artifactPath)
+268:                     || !producerNodeId.equals(document.get().nodeId())
+269:                     || !producerNodeInstanceId.equals(document.get().nodeInstanceId())
+270:                     || !validProposalSource(root, expectedWorkstreamId, document.get(), objectMapper)) {
+271:                 return Optional.empty();
+272:             }
+273:             return Optional.of(artifactPath);
+274:         } catch (Exception ignored) {
+275:             return Optional.empty();
+276:         }
+277:     }
+278: 
+279:     Map<String, Object> toMap() {
+280:         var map = new LinkedHashMap<String, Object>();
+281:         map.put("schema_version", schemaVersion);
+282:         map.put("proposal_id", proposalId);
+283:         map.put("workstream_id", workstreamId);
+284:         map.put("producer_node_id", producerNodeId);
+285:         map.put("producer_node_instance_id", producerNodeInstanceId);
+286:         map.put("artifact_ref", artifactRef);
+287:         map.put("sha256", sha256);
+288:         return Map.copyOf(map);
+182:     static Optional<Resolved> resolveFromRefs(
+183:             Path workspaceRoot,
+184:             String expectedWorkstreamId,
+185:             Iterable<String> refs,
+186:             ObjectMapper objectMapper
+187:     ) {
+188:         Resolved resolved = null;
+189:         for (var ref : refs) {
+190:             var candidate = readVerified(workspaceRoot, expectedWorkstreamId, ref, objectMapper);
+191:             if (candidate.isEmpty()) {
+192:                 continue;
+193:             }
+194:             if (resolved != null && !resolved.reference().proposalId().equals(candidate.get().proposalId())) {
+195:                 return Optional.empty();
+196:             }
+197:             resolved = new Resolved(candidate.get(), ref);
+198:         }
+199:         return Optional.ofNullable(resolved);
+200:     }
+201: 
+202:     public static Optional<ResolvedProposal> resolveProposalFromRefs(
+203:             Path workspaceRoot,
+204:             String expectedWorkstreamId,
+205:             Iterable<String> refs,
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
+SHA256 a24db51b397eef2a02f8700572b6cd541b2e0fde431d48388afde78432317abd
+211:     ) {
+212:         var isProposal = envelope.result() instanceof AgentResultEnvelope.TaskContractProposalResult;
+213:         var isPatch = envelope.result() instanceof AgentResultEnvelope.TaskContractRevisionPatchResult;
+214:         if (!isProposal && !isPatch) {
+215:             return ProposalResolution.none();
+216:         }
+217:         if (!repositoryFactBinding.valid()) {
+218:             return ProposalResolution.failure(ContractViolation.of(
+219:                     "TASK_CONTRACT_REPOSITORY_FACT_BINDING_INVALID",
+220:                     "task contract proposal has no valid repository fact occurrence binding",
+221:                     Map.of("errors", repositoryFactBinding.errors())));
+222:         }
+223:         if (!"intake.claude_brainstorm".equals(nodeDefinition.id())) {
+224:             return ProposalResolution.failure(ContractViolation.of(
+225:                     "TASK_CONTRACT_PROPOSAL_INVALID",
+226:                     "task contract proposal output is only allowed for intake",
+227:                     Map.of()));
+228:         }
+229:         var resolved = revisionContextResolver.resolveForNode(root, workstreamId, nodeInstanceId);
+230:         if (!resolved.valid()) {
+231:             return ProposalResolution.failure(ContractViolation.of(
+232:                     "TASK_CONTRACT_REVISION_CONTEXT_INVALID",
+233:                     "task contract proposal revision context could not be resolved",
+234:                     Map.of("errors", resolved.errors())));
+235:         }
+236:         var context = resolved.context();
+237:         TaskContractProposal proposal;
+238:         AgentOutputContractDocument.ProposalDerivation derivation = null;
+239:         if (isProposal) {
+240:             if (context.revision()) {
+241:                 return ProposalResolution.failure(ContractViolation.of(
+242:                         "TASK_CONTRACT_REVISION_SHAPE_INVALID",
+243:                         "revision iteration requires task_contract_revision_patch",
+244:                         Map.of()));
+245:             }
+246:             var proposalResult = (AgentResultEnvelope.TaskContractProposalResult) envelope.result();
+247:             var resolvedScope = new TaskContractScopeResolver().resolve(
+248:                     proposalResult.scope().included(), root);
+249:             if (!resolvedScope.valid()) {
+250:                 return ProposalResolution.failure(ContractViolation.of(
+251:                         "TASK_CONTRACT_SCOPE_RESOLUTION_FAILED",
+252:                         "task contract scope paths could not be resolved",
+253:                         Map.of("errors", resolvedScope.errors())));
+254:             }
+255:             proposal = resultProjector.taskContractProposal(proposalResult, resolvedScope.entries());
+256:         } else {
+257:             if (!context.revision()) {
+258:                 return ProposalResolution.failure(ContractViolation.of(
+259:                         "TASK_CONTRACT_REVISION_SHAPE_INVALID",
+260:                         "initial iteration requires task_contract_proposal",
+261:                         Map.of()));
+262:             }
+263:             var merged = revisionMerger.merge(
+264:                     context, (AgentResultEnvelope.TaskContractRevisionPatchResult) envelope.result(), root);
+265:             if (!merged.valid()) {
+266:                 return ProposalResolution.failure(ContractViolation.of(
+267:                         "TASK_CONTRACT_REVISION_PATCH_INVALID",
+268:                         "task contract revision patch could not be merged",
+269:                         Map.of("errors", merged.errors())));
+270:             }
+271:             proposal = merged.proposal();
+272:             derivation = new AgentOutputContractDocument.ProposalDerivation(
+273:                     "revision_patch_merge",
+274:                     context.previousReference().proposalId(),
+275:                     context.previousReference().sha256(),
+276:                     context.previousReference(),
+277:                     sourceOutputRef);
+278:         }
+279: 
+280:         var proposalValidator = new TaskContractProposalValidator();
+281:         var errors = proposalValidator.validate(proposal, root,
+282:                 context.approvedScopeBaseline(), context.originalBaseCommit(), context.scopeReviewCandidates());
+283:         if (!errors.isEmpty()) {
+284:             return ProposalResolution.failure(ContractViolation.of(
+285:                     "TASK_CONTRACT_PROPOSAL_VALIDATION_FAILED",
+286:                     "task_contract_proposal failed mechanical validation: " + errors,
+287:                     Map.of("errors", errors)));
+288:         }
+289:         var coverageErrors = context.revision()
+290:                 ? proposalValidator.validateRevisionCoverage(proposal, context.obligations())
+291:                 : proposalValidator.validateInitialIteration(proposal);
+292:         if (!coverageErrors.isEmpty()) {
+293:             return ProposalResolution.failure(ContractViolation.of(
+294:                     "TASK_CONTRACT_REVISION_COVERAGE_INVALID",
+295:                     "task_contract_proposal failed revision obligation coverage",
+296:                     Map.of("errors", coverageErrors)));
+297:         }
+298:         var evidenceErrors = proposalValidator.validateEvidenceTraceability(
+299:                 proposal, root, repositoryFactBinding.verified());
+300:         if (!evidenceErrors.isEmpty()) {
+301:             return ProposalResolution.failure(ContractViolation.of(
+302:                     "TASK_CONTRACT_EVIDENCE_TRACEABILITY_INVALID",
+303:                     "task_contract_proposal is not grounded in the tracked inventory",
+304:                     Map.of("errors", evidenceErrors)));
+305:         }
+306:         if (context.revision()) {
+307:             var deltaErrors = proposalValidator.validateRevisionDelta(context.previousProposal(), proposal);
+308:             if (!deltaErrors.isEmpty()) {
+309:                 return ProposalResolution.failure(ContractViolation.of(
+310:                         "TASK_CONTRACT_REVISION_DELTA_INVALID",
+311:                         "task_contract_proposal contains an invalid revision delta",
+312:                         Map.of(
+313:                                 "error_codes", deltaErrors.stream()
+314:                                         .map(TaskContractProposalValidator.RevisionDeltaError::code).distinct().toList(),
+315:                                 "errors", deltaErrors.stream()
+316:                                         .map(TaskContractProposalValidator.RevisionDeltaError::message).toList())));
+317:             }
+318:         }
+319:         return new ProposalResolution(proposal, derivation, repositoryFactBinding.verified(), null);
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputContractDocument.java
+SHA256 0ba7bb2b21a326810c6ee20c0494fa82c23a1d425f81102f706525482eff1628
+112:     public record ProposalDerivation(
+113:             String kind,
+114:             String baseProposalId,
+115:             String baseProposalSha256,
+116:             TaskContractProposalReference baseProposalReference,
+117:             String patchSourceOutputRef
+118:     ) {
+119:         static ProposalDerivation from(Map<String, Object> document) {
+120:             if (document.isEmpty()) {
+121:                 return null;
+122:             }
+123:             return new ProposalDerivation(
+124:                     text(document.get("kind")),
+125:                     text(document.get("base_proposal_id")),
+126:                     text(document.get("base_proposal_sha256")),
+127:                     TaskContractProposalReference.fromMap(
+128:                             objectMap(document.get("base_proposal_reference"))).orElse(null),
+129:                     text(document.get("patch_source_output_ref")));
+130:         }
+131: 
+132:         boolean validFor(TaskContractProposalReference reference, String sourceOutputRef) {
+133:             return "revision_patch_merge".equals(kind)
+134:                     && reference != null
+135:                     && reference.proposalId().equals(baseProposalId)
+136:                     && reference.sha256().equals(baseProposalSha256)
+137:                     && reference.equals(baseProposalReference)
+138:                     && sourceOutputRef != null
+139:                     && sourceOutputRef.equals(patchSourceOutputRef);
+140:         }
+141: 
+142:         Map<String, Object> toMap() {
+143:             var map = new LinkedHashMap<String, Object>();
+144:             map.put("kind", kind);
+145:             map.put("base_proposal_id", baseProposalId);
+146:             map.put("base_proposal_sha256", baseProposalSha256);
+147:             map.put("base_proposal_reference", baseProposalReference.toMap());
+148:             map.put("patch_source_output_ref", patchSourceOutputRef);
+149:             return Map.copyOf(map);
+150:         }
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultDocumentProjector.java
+SHA256 2e2f785e547eb06ccfac09e6f87cf21245a769aea91f3deb6073315f5d66efa1
+34:         document.put("run_id", envelope.runId());
+35:         document.put("node_id", envelope.nodeId());
+36:         document.put("node_instance_id", nodeInstanceId == null ? "" : nodeInstanceId);
+37:         document.put("handler_type", handlerType);
+38:         document.put("decision", result.decision());
+39:         document.put("summary", result.summary());
+40:         document.put("required_keys", List.copyOf(contract.requiredKeys()));
+41:         document.put("allowed_decisions", List.copyOf(contract.allowedDecisions()));
+42:         document.put("source_output_ref", sourceOutputRef);
+43:         document.put("source_artifact_type", result.artifactType());
+44:         document.put("generated_at", Instant.now().toString());
+45:         document.put("control", Map.of("decision", result.decision(), "summary", result.summary()));
+46:         document.put("control_source", Map.of("kind", "strict_agent_result_envelope"));
+47: 
+48:         switch (result) {
+49:             case AgentResultEnvelope.TaskContractProposalResult ignored -> {
+50:                 if (resolvedProposal == null) {
+51:                     throw new IllegalStateException("initial proposal must be scope-resolved before projection");
+52:                 }
+53:                 evidenceDefaults(document);
+54:                 document.put("task_contract_proposal", taskContractProposalMap(resolvedProposal));
+55:             }
+56:             case AgentResultEnvelope.TaskContractRevisionPatchResult ignored -> {
+57:                 if (resolvedProposal == null || derivation == null) {
+58:                     throw new IllegalStateException("revision patch must be merged before projection");
+59:                 }
+60:                 evidenceDefaults(document);
+61:                 document.put("task_contract_proposal", taskContractProposalMap(resolvedProposal));
+62:                 document.put("proposal_derivation", derivation.toMap());
+63:             }
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalValidator.java
+SHA256 8fc052420901198dd12874755357d9f08aa007d4ac8b2d3606a9fdaa7cc65d71
+192:     }
+193: 
+194:     List<String> validateRevisionCoverage(
+195:             TaskContractProposal proposal,
+196:             List<AgentResultEnvelope.ReviewObligation> obligations
+197:     ) {
+198:         var errors = new ArrayList<String>();
+199:         if (obligations == null || obligations.isEmpty()) {
+200:             errors.add("revision iteration requires verified contract obligations");
+201:             return errors;
+202:         }
+203:         var expected = new LinkedHashMap<String, AgentResultEnvelope.ReviewObligation>();
+204:         for (var obligation : obligations) {
+205:             if (obligation == null || isBlank(obligation.id()) || isBlank(obligation.text())) {
+206:                 errors.add("verified contract obligation must contain nonblank id and text");
+207:                 continue;
+208:             }
+209:             if (expected.putIfAbsent(obligation.id().trim(), obligation) != null) {
+210:                 errors.add("verified contract obligation id is duplicated: " + obligation.id().trim());
+211:             }
+212:         }
+213:         var actual = new LinkedHashMap<String, TaskContractProposal.RevisionResponse>();
+214:         if (proposal.revisionResponses() == null || proposal.revisionResponses().isEmpty()) {
+215:             errors.add("revision_responses is required for a revision iteration");
+216:             return errors;
+217:         }
+218:         for (var response : proposal.revisionResponses()) {
+219:             if (response == null || isBlank(response.reviewObligationId())) {
+220:                 continue;
+221:             }
+222:             var id = response.reviewObligationId().trim();
+223:             if (actual.putIfAbsent(id, response) != null) {
+224:                 errors.add("revision_responses contains duplicate obligation id: " + id);
+225:             }
+226:         }
+227:         for (var id : expected.keySet()) {
+228:             if (!actual.containsKey(id)) {
+229:                 errors.add("revision_responses does not cover obligation: " + id);
+230:             }
+231:         }
+232:         for (var id : actual.keySet()) {
+233:             if (!expected.containsKey(id)) {
+234:                 errors.add("revision_responses refers to unknown obligation: " + id);
+235:             }
+236:         }
+237:         return errors;
+238:     }
+239: 
+240:     List<RevisionDeltaError> validateRevisionDelta(
+241:             TaskContractProposal previous,
+242:             TaskContractProposal current
+243:     ) {
+244:         var errors = new ArrayList<RevisionDeltaError>();
+245:         if (previous == null) {
+246:             return List.of(new RevisionDeltaError("REVISION_BASELINE_UNRESOLVABLE", ""));
+247:         }
+248:         var previousClauses = clauseSnapshot(previous);
+249:         var currentClauses = clauseSnapshot(current);
+250:         var modified = new LinkedHashSet<String>();
+251:         var added = new LinkedHashSet<String>();
+252:         var deleted = new LinkedHashSet<String>();
+253:         for (var entry : currentClauses.entrySet()) {
+254:             var baseline = previousClauses.get(entry.getKey());
+255:             if (baseline == null) {
+256:                 added.add(entry.getKey());
+257:             } else if (!baseline.equals(entry.getValue())) {
+258:                 modified.add(entry.getKey());
+259:             }
+260:         }
+261:         for (var id : previousClauses.keySet()) {
+262:             if (!currentClauses.containsKey(id)) {
+263:                 deleted.add(id);
+264:             }
+265:         }
+266: 
+267:         var declared = new LinkedHashSet<String>();
+268:         if (current.revisionResponses() != null) {
+269:             for (var response : current.revisionResponses()) {
+270:                 if (response != null && response.resolvedByClauseIds() != null) {
+271:                     response.resolvedByClauseIds().stream()
+272:                             .filter(id -> !isBlank(id))
+273:                             .map(String::trim)
+274:                             .forEach(declared::add);
+275:                 }
+276:             }
+277:         }
+278:         modified.stream()
+279:                 .filter(id -> !declared.contains(id))
+280:                 .forEach(id -> errors.add(
+281:                         new RevisionDeltaError("UNDECLARED_CONTRACT_CLAUSE_CHANGE", id)));
+282:         added.stream()
+283:                 .filter(id -> !declared.contains(id))
+284:                 .forEach(id -> errors.add(
+285:                         new RevisionDeltaError("UNDECLARED_CONTRACT_CLAUSE_ADDITION", id)));
+286:         deleted.forEach(id -> errors.add(
+287:                 new RevisionDeltaError("CONTRACT_CLAUSE_DELETION_NOT_ALLOWED", id)));
+288: 
+289:         return List.copyOf(errors);
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java
+SHA256 c9c9efd13cd334a9b10fcdf6e670e0086195b9fb5015fc330596fd91ac409651
+240:             return new ProposalCompileResult(null, null, null);
+241:         }
+242:         try {
+243:             var document = AgentOutputContractDocument.read(sourcePath.get(), OBJECT_MAPPER);
+244:             if (document.isEmpty()) {
+245:                 return new ProposalCompileResult(null, null, proposalFailure(
+246:                         "TASK_CONTRACT_PROPOSAL_PARSE_FAILED",
+247:                         "validated task_contract_proposal sidecar could not be parsed",
+248:                         List.of(sourcePath.get().toString())));
+249:             }
+250:             var validated = document.get();
+251:             if (AgentOutputLineageVerifier.violation(
+252:                         context.ledger(), context.workspaceRoot(), context.workstreamId(), sourcePath.get(), validated).isPresent()
+253:                     || !"intake.claude_brainstorm".equals(validated.nodeId())) {
+254:                 return new ProposalCompileResult(null, null, proposalFailure(
+255:                         "TASK_CONTRACT_PROPOSAL_INVALID",
+256:                         "validated task_contract_proposal sidecar lineage is invalid",
+257:                         List.of(sourcePath.get().toString())));
+258:             }
+259:             var proposal = validated.taskContractProposal();
+260:             if (proposal == null) {
+261:                 return new ProposalCompileResult(null, null, proposalFailure(
+262:                         "TASK_CONTRACT_PROPOSAL_INVALID",
+263:                         "validated sidecar does not contain task_contract_proposal",
+264:                         List.of(sourcePath.get().toString())));
+265:             }
+266:             var errors = proposalValidator.validate(proposal, context.workspaceRoot().toAbsolutePath().normalize(),
+267:                     revisionContext.approvedScopeBaseline(), revisionContext.originalBaseCommit(), revisionContext.scopeReviewCandidates());
+268:             if (!errors.isEmpty()) {
+269:                 return new ProposalCompileResult(null, proposal, proposalFailure(
+270:                         "TASK_CONTRACT_PROPOSAL_INVALID",
+271:                         "task_contract_proposal failed mechanical validation",
+272:                         errors
+273:                 ));
+274:             }
+275:             var coverageErrors = revisionContext.revision()
+276:                     ? proposalValidator.validateRevisionCoverage(proposal, revisionContext.obligations())
+277:                     : proposalValidator.validateInitialIteration(proposal);
+278:             if (!coverageErrors.isEmpty()) {
+279:                 return new ProposalCompileResult(null, proposal, proposalFailure(
+280:                         "TASK_CONTRACT_PROPOSAL_INVALID",
+281:                         "task_contract_proposal failed revision obligation coverage",
+282:                         coverageErrors
+283:                 ));
+284:             }
+285:             if (revisionContext.revision()) {
+286:                 var deltaErrors = proposalValidator.validateRevisionDelta(
+287:                         revisionContext.previousProposal(), proposal);
+288:                 if (!deltaErrors.isEmpty()) {
+289:                     return new ProposalCompileResult(null, proposal, proposalFailure(
+290:                             "TASK_CONTRACT_REVISION_DELTA_INVALID",
+291:                             "task_contract_proposal contains an invalid revision delta",
+292:                             deltaErrors.stream().map(TaskContractProposalValidator.RevisionDeltaError::message).toList()
+293:                     ));
+294:                 }
+295:             }
+296:             return new ProposalCompileResult(toTaskContract(proposal, context, sourcePath.get(), approvedGoal), proposal, null);
+297:         } catch (Exception e) {
+298:             return new ProposalCompileResult(null, null, proposalFailure(
+299:                     "TASK_CONTRACT_PROPOSAL_PARSE_FAILED",
+300:                     "task_contract_proposal JSON could not be parsed: " + e.getMessage(),
+301:                     List.of(e.getMessage())
+302:             ));
+303:         }
+304:     }
+305: 
+306:     private static TaskContract toTaskContract(TaskContractProposal proposal, TaskContext context,
+307:                                               Path proposalPath, ResolvedGate approval) throws IOException {
+308:         var workstreamId = context.workstreamId();
+309:         var root = context.workspaceRoot().toAbsolutePath().normalize();
+310:         long epoch = nextAuthorizationEpoch(context);
+311:         return new TaskContract(
+312:                 2, TaskContract.Phase.GOAL, epoch,
+313:                 "tc-" + workstreamId + "-" + context.instance().nodeInstanceId(),
+314:                 1,
+315:                 Instant.now(),
+316:                 proposal.objective().trim(),
+317:                 new TaskContract.Scope(
+318:                         List.of(),
+319:                         cleanList(proposal.scope().excluded())
+320:                 ),
+321:                 contractClauses(proposal.acceptanceCriteria()),
+322:                 contractClauses(proposal.testRequirements()),
+323:                 cleanClauseTexts(proposal.constraints()),
+324:                 cleanClauseTexts(proposal.nonGoals()),
+413:     private RevisionContextResult resolveRevisionContext(
+414:             TaskContext context,
+415:             ReviewedProposal approvedReview,
+416:             ResolvedGate gate
+417:     ) {
+418:         var workstreamDir = context.workspaceRoot().resolve(".agent/workstreams").resolve(context.workstreamId());
+419:         try {
+420:             var resolved = new TaskContractRevisionContextResolver(context.ledger()).resolveForIteration(
+421:                     context.workspaceRoot(), context.workstreamId(), context.instance().iterationId());
+422:             if (!resolved.valid()) {
+423:                 return revisionContextFailure(
+424:                         resolved.errors().isEmpty()
+425:                                 ? "revision iteration lineage could not be resolved"
+426:                                 : resolved.errors().getFirst(),
+427:                         resolved.errors());
+428:             }
+429:             var iteration = resolved.context().iteration();
+430:             var currentLineageErrors = validateCurrentApprovedLineage(workstreamDir, iteration, approvedReview, gate);
+431:             if (!currentLineageErrors.isEmpty()) {
+432:                 return revisionContextFailure("approved review and proposal are outside the current iteration",
+433:                         currentLineageErrors);
+434:             }
+435:             return new RevisionContextResult(
+436:                     new RevisionContext(
+437:                             resolved.context().revision(),
+438:                             resolved.context().previousProposal(),
+439:                             resolved.context().obligations(), resolved.context().approvedScopeBaseline(),
+440:                             resolved.context().originalBaseCommit(), resolved.context().scopeReviewCandidates()), null);
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
+SHA256 486fc6e8a304e362e47054246d0400f3b68b462f6b1936294f6f823044024927
+126:     private static String contractRevisionInstruction(String nodeId, ProposalEmissionContext context) {
+127:         if ("intake.claude_brainstorm".equals(nodeId)) {
+128:             if (context.revision()) {
+129:                 return "Return only `task_contract_revision_patch`; do not return or copy a full proposal. "
+130:                         + "The patch is bound to base proposal id `" + context.baseProposalId()
+131:                         + "` and sha256 `" + context.baseProposalSha256() + "`. "
+132:                         + "Cover each authoritative routed obligation exactly once. Preserve its id and implement its text: "
+133:                         + json(context.obligations())
+134:                         + (context.acceptanceEvidence().isEmpty() ? "" :
+135:                             ". Original verified rework evidence (retain non-contract defects as evidence; "
+136:                             + "do not reinterpret them as contract obligations or approval): "
+137:                             + context.acceptanceEvidence())
+138:                         + ". Only clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
+139:                         + "No DELETE, section move, scope removal, objective/open-question change, JSON Pointer, "
+140:                         + "or arbitrary field patch is allowed. `scope_additions` uses exact repository-relative "
+141:                         + "paths. " + CANONICAL_SCOPE_PATH_REQUIREMENT
+142:                         + "Dual derives CREATE/MODIFY from the effective worktree. `section` is authoritative; clause IDs are opaque "
+143:                         + "and their prefixes do not determine section. "
+144:                         + "Across the entire `result.obligation_patches` array, each `clause_changes[].id`, "
+145:                         + "`scope_additions[].path`, and `evidence_ref_additions[]` target must appear at most once. "
+146:                         + "When one evidence ref supports multiple obligations, add it in one most relevant patch only; "
+147:                         + "use each obligation's `resolved_by_clause_ids` to express coverage instead of adding the ref again. "
+148:                         + closedItemFields("result.obligation_patches",
+149:                         new AgentResultEnvelope.ObligationPatch(
+150:                                 "CO-1", List.of("AC-1"),
+151:                                 List.of(new AgentResultEnvelope.ClauseChange(
+152:                                         AgentResultEnvelope.ClauseChangeOperation.REPLACE,
+153:                                         AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+154:                                         "AC-1", "replacement text")),
+155:                                 List.of(), List.of()));
+156:             }
+157:             return "Intake `result.scope.included` contains candidate paths, not write authorization. "
+158:                     + "GOAL approval fixes objective, acceptance and exclusions; exact implementation scope is approved in EXECUTION after design and plan review. "
+159:                     + "Only approved EXECUTION `scope.included` is the exhaustive authorization set for permitted repository changes; "
+160:                     + "each entry names one exact repository-relative path. " + CANONICAL_SCOPE_PATH_REQUIREMENT
+161:                     + "Dual derives CREATE/MODIFY from the effective worktree. "
+162:                     + "It does not require every declared path to be changed. Acceptance criteria, constraints, "
+163:                     + "risks, and other prose cannot authorize an undeclared path. Never describe the typed scope "
+164:                     + "as illustrative or non-exhaustive. When a revision obligation identifies a scope gap, "
+165:                     + "update the typed path entries directly and map the obligation to one or more "
+166:                     + "genuinely relevant clause IDs. "
+167:                     + "Each task-contract clause must contain stable string fields `id` and `text`. "
+168:                     + "On an initial intake, `result.revision_responses` must be `[]`. "
+439:     public static ProposalEmissionContext proposalEmissionContext(
+440:             TaskContractRevisionContextResolver.Context context
+441:     ) {
+442:         if (context == null || !context.revision()) {
+443:             return ProposalEmissionContext.initial();
+444:         }
+445:         if (context.previousReference() == null) {
+446:             throw new IllegalArgumentException("revision proposal reference is required");
+447:         }
+448:         return new ProposalEmissionContext(
+449:                 EmissionMode.REVISION_PATCH,
+450:                 context.previousReference().proposalId(),
+451:                 context.previousReference().sha256(),
+452:                 List.copyOf(context.obligations()),
+453:                 context.lateRoot() == null ? "" : json(context.lateRoot())
+454:                         + (context.scopeRevision() ? "\nSCOPE REVIEW ONLY: add only a subset of these bound CREATE candidates: "
+455:                             + json(context.scopeReviewCandidates())
+456:                             + ". Do not change clauses, evidence refs, objective, exclusions or any existing scope entry. "
+457:                             + "These files already exist but remain CREATE relative to the original Git base. "
+458:                             + "Respond to obligations using existing clause ids; keep clause_changes and evidence_ref_additions empty."
+459:                             : ""));
+460:     }
+461: 
+462:     public enum EmissionMode {
+463:         INITIAL_FULL,
+464:         REVISION_PATCH,
+465:         NOT_APPLICABLE
+466:     }
+467: 
+468:     public record ProposalEmissionContext(
+469:             EmissionMode mode,
+470:             String baseProposalId,
+471:             String baseProposalSha256,
+472:             List<AgentResultEnvelope.ReviewObligation> obligations,
+473:             String acceptanceEvidence
+474:     ) {
+475:         public ProposalEmissionContext {
+476:             obligations = obligations == null ? List.of() : List.copyOf(obligations);
+477:             acceptanceEvidence = acceptanceEvidence == null ? "" : acceptanceEvidence;
+478:         }
+479: 
+480:         public ProposalEmissionContext(EmissionMode mode, String baseProposalId, String baseProposalSha256,
+481:                                        List<AgentResultEnvelope.ReviewObligation> obligations) {
+482:             this(mode, baseProposalId, baseProposalSha256, obligations, "");
+483:         }
+484: 
+485:         public static ProposalEmissionContext initial() {
+486:             return new ProposalEmissionContext(EmissionMode.INITIAL_FULL, "", "", List.of());
+487:         }
+488: 
+489:         public static ProposalEmissionContext notApplicable() {
+490:             return new ProposalEmissionContext(EmissionMode.NOT_APPLICABLE, "", "", List.of());
+491:         }
+492: 
+493:         boolean revision() {
+494:             return mode == EmissionMode.REVISION_PATCH;
+495:         }
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java
+SHA256 ab38a97fc30e521512ef04358c61a6d02ee413e6795a04cf19f848eb67d9d754
+37:     public static Prepared prepare(TaskHandler.TaskContext context, Path runDirectory, List<Path> inputs,
+38:                                    Map<String, Object> binding) throws IOException {
+39:         var paths = paths(context);
+40:         NodeExecutionDocument execution;
+41:         try (var read = context.ledger().readSession(paths)) {
+42:             var node = read.ledger().loadNode(paths, context.instance().nodeInstanceId());
+43:             execution = read.ledger().latestNodeExecution(paths, node).orElseThrow(() -> new IOException("run has no execution claim"));
+44:             read.ledger().verifyExecutionClaim(paths, execution);
+45:         }
+46:         var run = runDirectory.toAbsolutePath().normalize();
+47:         if (!run.getParent().equals(paths.runsDir().toAbsolutePath().normalize()))
+48:             throw new IOException("run directory is outside this workstream");
+49:         var inputHashes = new java.util.TreeMap<String, String>();
+50:         for (var input : inputs) inputHashes.put(reference(paths.workspaceRoot(), input), hash(Files.readAllBytes(input)));
+51:         for (var ref : context.instance().inputRefs()) {
+52:             var path = inside(paths.workspaceRoot(), ref);
+53:             inputHashes.put(ref, hash(Files.readAllBytes(path)));
+54:         }
+55:         var document = new LinkedHashMap<String, Object>();
+56:         document.put("schema", "dual.run.prepared.v1");
+57:         document.put("workstream", context.workstreamId());
+58:         document.put("node", execution.nodeInstanceId());
+59:         document.put("task", execution.agentTaskId());
+60:         document.put("execution", execution.nodeExecutionId());
+61:         document.put("claim", execution.result().get("claim"));
+62:         document.put("runtime_identity", context.ledger().frozenRuntimeIdentity());
+63:         document.put("inputs", inputHashes);
+64:         document.put("binding", binding);
+65:         var path = run.resolve("outputs").resolve(execution.nodeExecutionId() + "-prepared.json");
+66:         Map<String, String> ref;
+67:         try (var ignored = lock(run, context.workstreamId())) {
+68:             immutable(path, document);
+69:             ref = Map.of("ref", reference(paths.workspaceRoot(), path), "sha256", hash(Files.readAllBytes(path)));
+70:         }
+71:         // Never hold R while acquiring L. Orphan R01 bytes have no execution authority.
+72:         try (var write = context.ledger().writeSession(paths, "bind prepared run", execution.nodeExecutionId())) {
+73:             write.ledger().bindPreparedRun(paths, execution, ref);
+74:             write.commit();
+75:         }
+76:         return new Prepared(execution, ref, path);
+77:     }
+78: 
+79:     /** Repeat qualification against the current claim and fixed contract, without producing new inputs. */
+80:     public static void qualifyDispatch(TaskHandler.TaskContext context, Prepared prepared) throws IOException {
+81:         try {
+82:             VerificationEvidence.verifyAcceptanceInputs(context);
+83:         } catch (IOException invalid) {
+84:             throw new AgentRunGovernanceContext.QualificationException("VERIFICATION_EVIDENCE_INVALID", invalid.getMessage());
+85:         }
+86:         var paths = paths(context);
+87:         context.ledger().inspect(paths, (scoped, files) -> {
+88:             scoped.verifyExecutionClaim(paths, prepared.execution());
+89:             var fixed = WRITER.readTree(prepared.path());
+90:             if (!hash(Files.readAllBytes(prepared.path())).equals(prepared.reference().get("sha256")))
+91:                 throw new IOException("prepared identity changed");
+92:             verifyInputs(paths.workspaceRoot(), fixed.path("inputs"));
+93:             if (TaskContractProjectionVerifier.requiresContract(context.definition())) {
+94:                 var resolution = TaskContractProjectionVerifier.resolve(scoped, paths.workspaceRoot(), context.workstreamId(),
+95:                         TaskContractProjectionVerifier.requiredPhase(context.definition()));
+96:                 if (resolution.failure() != null)
+97:                     throw AgentRunGovernanceContext.qualificationFailure(new TaskHandler.TaskContext(context.workspaceRoot(),
+98:                             context.workstreamId(), context.definition(), context.instance(), scoped),
+99:                             resolution.failure(), "AgentRunCommitProtocol.qualifyDispatch");
+100:                 var contract = resolution.qualified().orElseThrow(() -> new IOException("approved contract is absent"));
+101:                 if (!contract.contractRef().equals(fixed.path("binding").path("contract_ref").asText())
+102:                         || !contract.sha256().equals(fixed.path("binding").path("contract_sha256").asText()))
+103:                     throw new IOException("qualified contract differs from prepared contract");
+104:             }
+105:             return null;
+106:         });
+109:     /** Only a live executor may create the first durable intent. Existing intent never grants another send. */
+110:     public static void beginExternalCall(TaskHandler.TaskContext context, Prepared prepared) throws IOException {
+111:         var paths = paths(context);
+112:         try (var read = context.ledger().readSession(paths)) {
+113:             var execution = read.ledger().verifyExecutionClaim(paths, prepared.execution());
+114:             if (!prepared.reference().equals(execution.result().get("prepared_run")))
+115:                 throw new IOException("prepared run is not the current claim binding");
+116:         }
+117:         var run = prepared.path().getParent().getParent();
+118:         try (var ignored = lock(run, context.workstreamId())) {
+119:             var bytes = Files.readAllBytes(prepared.path());
+120:             if (!hash(bytes).equals(prepared.reference().get("sha256"))) throw new IOException("prepared run bytes changed");
+121:             var document = WRITER.objectMapper().readTree(bytes);
+122:             verifyInputs(paths.workspaceRoot(), document.path("inputs"));
+123:             var owner = document.path("claim");
+124:             var actual = ProcessHandle.current();
+125:             if (actual.pid() != owner.path("executor_pid").asLong()
+126:                     || !actual.info().startInstant().orElseThrow().toString().equals(owner.path("executor_started_at").asText()))
+127:                 throw new IOException("preparation belongs to another executor process");
+128:             var intent = intentPath(prepared.path());
+129:             if (Files.exists(run.resolve("outputs").resolve(prepared.execution().nodeExecutionId() + "-input-rejection.json")))
+130:                 throw new IOException("fixed input rejection cannot acquire external intent");
+131:             if (Files.exists(intent)) throw new IOException("external intent already exists; no automatic resend");
+132:             immutable(intent, Map.of("schema", "dual.run.intent.v1", "prepared", prepared.reference()));
+133:         }
+134:     }
+135: 
+136:     /** Each native command has a durable intent; telemetry alone never grants dispatch. */
+137:     public static void commandEvent(TaskHandler.TaskContext context, Prepared prepared, String kind,
+138:                                     Map<String, Object> details) throws IOException {
+247:     /** R03 fixes the validated completion, actual run observations and every published output identity. */
+248:     public static NodeResult complete(Path root, WorkflowFileLedger ledger, WorkstreamPaths paths,
+249:                                       NodeExecutionDocument expected, NodeResult result) throws IOException {
+250:         if (AgentExecutionResultFacts.inputPreparationFailed(result)) {
+251:             if (!result.result().containsKey("continuation_failure")) return result;
+252:             NodeExecutionDocument claim;
+253:             try (var read = ledger.readSession(paths)) { claim = read.ledger().verifyExecutionClaim(paths, expected); }
+254:             var diagnostic = ContractQualificationChecks.continuation(result.result().get("continuation_failure"));
+255:             if (!diagnostic.targetNodeInstanceId().equals(claim.nodeInstanceId())
+256:                     || !diagnostic.runtimeIdentitySha256().equals(ContractQualificationChecks.identity(ledger.frozenRuntimeIdentity())))
+257:                 throw new IOException("preparation diagnostic belongs to a different target/runtime");
+258:             var completion = inputRejectionPath(paths, claim);
+259:             var run = completion.getParent().getParent();
+260:             try (var ignored = lock(run, paths.workstreamId().value())) {
+261:                 if (hasPrepared(claim) && Files.exists(intentPath(preparedPath(paths, claim))))
+262:                     throw new IOException("preparation rejection cannot assert absence after an external intent");
+263:                 immutable(completion, Map.of("schema", "dual.run.input-rejection.v1", "execution", claim.nodeExecutionId(),
+264:                         "node", claim.nodeInstanceId(), "task", claim.agentTaskId(), "claim", claim.result().get("claim"),
+265:                         "runtime_identity", ledger.frozenRuntimeIdentity(), "result", result));
+266:                 return withCompletion(root, result, completion);
+267:             }
+268:         }
+269:         final Map<String, String> preparedRef;
+270:         try (var read = ledger.readSession(paths)) {
+271:             // Preserve actual completion even after cancellation; only the L03 consumer grants routing.
+272:             var execution = read.files().read(paths.nodeExecutionJson(expected.nodeExecutionId()), NodeExecutionDocument.class);
+273:             if (!execution.nodeInstanceId().equals(expected.nodeInstanceId())
+274:                     || !execution.agentTaskId().equals(expected.agentTaskId())) throw new IOException("foreign execution");
+275:             if (!(execution.result().get("prepared_run") instanceof Map<?, ?> value)) {
+276:                 if (AgentExecutionResultFacts.inputPreparationFailed(result)
+277:                         || !"acpx.agent_run".equals(execution.handlerType())
+278:                         || Boolean.TRUE.equals(result.result().get("prepared"))) return result;
+279:                 throw new IOException("external result has no prepared claim binding");
+280:             }
+281:             preparedRef = stringReference(value);
+282:         }
+283:         var preparedPath = inside(root, preparedRef.get("ref"));
+284:         var run = preparedPath.getParent().getParent();
+285:         try (var ignored = lock(run, paths.workstreamId().value())) {
+286:             if (!hash(Files.readAllBytes(preparedPath)).equals(preparedRef.get("sha256"))) throw new IOException("prepared run changed");
+287:             if (!Files.isRegularFile(intentPath(preparedPath))) throw new IOException("external result has no durable intent");
+288:             var input = WRITER.readTree(preparedPath);
+289:             if (!expected.nodeExecutionId().equals(input.path("execution").asText())) throw new IOException("foreign execution result");
+290:             var outputHashes = new java.util.TreeMap<String, String>();
+291:             for (var ref : result.outputRefs()) outputHashes.put(ref, hash(Files.readAllBytes(inside(root, ref))));
+292:             var metadata = WRITER.readTree(run.resolve("outputs/execution-outcome.json")).path("run_observations");
+293:             if (metadata.path("processResult").isMissingNode() || metadata.path("executionOutcome").isMissingNode())
+294:                 throw new IOException("run lacks typed process and execution outcome");
+295:             if (!WRITER.objectMapper().readTree(WRITER.objectMapper().writeValueAsBytes(result.result().get("agent_execution_outcome")))
+296:                     .equals(metadata.path("executionOutcome"))) throw new IOException("result contradicts the fixed outcome");
+297:             var completion = completionPath(preparedPath);
+298:             immutable(completion, Map.of("schema", "dual.run.completion.v1", "prepared", preparedRef,
+299:                     "execution", expected.nodeExecutionId(), "result", result,
+300:                     "output_hashes", outputHashes, "run_observations", metadata));
+301:             return withCompletion(root, result, completion);
+305:     /** L03 consumer reads the fixed record; mutable run.json is not a completion authority. */
+306:     public static NodeResult consume(WorkflowFileLedger scoped, WorkstreamPaths paths,
+307:                                      NodeExecutionDocument expected) throws IOException {
+308:         var execution = scoped.verifyExecutionClaim(paths, expected);
+309:         if (hasInputRejection(paths, execution)) return readCompletion(paths, execution);
+310:         verifyInputs(paths.workspaceRoot(), WRITER.readTree(preparedPath(paths, execution)).path("inputs"));
+311:         return readCompletion(paths, execution);
+312:     }
+313: 
+314:     public static NodeResult readCompletion(WorkstreamPaths paths, NodeExecutionDocument execution) throws IOException {
+315:         if (hasInputRejection(paths, execution)) {
+316:             var path = inputRejectionPath(paths, execution);
+317:             if (hasPrepared(execution) && Files.exists(intentPath(preparedPath(paths, execution))))
+318:                 throw new IOException("input rejection conflicts with external intent; absence of execution is not proven");
+319:             var record = WRITER.readTree(path);
+320:             if (!"dual.run.input-rejection.v1".equals(record.path("schema").asText())
+321:                     || !execution.nodeExecutionId().equals(record.path("execution").asText())
+322:                     || !execution.nodeInstanceId().equals(record.path("node").asText())
+323:                     || !execution.agentTaskId().equals(record.path("task").asText())
+324:                     || !WRITER.objectMapper().valueToTree(execution.result().get("claim")).equals(record.path("claim")))
+325:                 throw new IOException("input rejection belongs to a different execution claim");
+326:             var result = WRITER.objectMapper().treeToValue(record.path("result"), NodeResult.class);
+327:             if (!AgentExecutionResultFacts.inputPreparationFailed(result) || !result.result().containsKey("continuation_failure"))
+328:                 throw new IOException("input rejection lacks its closed machine-owned diagnostic");
+329:             var diagnostic = ContractQualificationChecks.continuation(result.result().get("continuation_failure"));
+330:             if (!diagnostic.targetNodeInstanceId().equals(execution.nodeInstanceId())
+331:                     || !diagnostic.runtimeIdentitySha256().equals(ContractQualificationChecks.identity(
+332:                             WRITER.objectMapper().convertValue(record.path("runtime_identity"), Map.class))))
+333:                 throw new IOException("input rejection runtime/target identity differs");
+334:             return withCompletion(paths.workspaceRoot(), result, path);
+335:         }
+336:         if (!(execution.result().get("prepared_run") instanceof Map<?, ?> value)) throw new IOException("missing prepared binding");
+337:         var ref = stringReference(value);
+338:         var prepared = inside(paths.workspaceRoot(), ref.get("ref"));
+339:         if (!hash(Files.readAllBytes(prepared)).equals(ref.get("sha256"))) throw new IOException("prepared bytes changed");
+340:         verifyInputs(paths.workspaceRoot(), WRITER.readTree(prepared).path("inputs"));
+341:         var completion = completionPath(prepared);
+342:         var doc = WRITER.readTree(completion);
+343:         if (!"dual.run.completion.v1".equals(doc.path("schema").asText())
+344:                 || !execution.nodeExecutionId().equals(doc.path("execution").asText())
+345:                 || !WRITER.objectMapper().valueToTree(ref).equals(doc.path("prepared")))
+346:             throw new IOException("completion identity mismatch");
+347:         verifyInputs(paths.workspaceRoot(), doc.path("output_hashes"));
+348:         var result = WRITER.objectMapper().treeToValue(doc.path("result"), NodeResult.class);
+349:         return withCompletion(paths.workspaceRoot(), result, completion);
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/ContractRegistry.java
+SHA256 5cdda6148c3a7d68032e8ea14e5ac6a6d7445fc3b0617c3abf268e86b4b042ad
+8: 
+9:     // --- Task nodes (agent output contracts) ---
+10:     private static final NodeOutputContract INTAKE_BRAINSTORM = new NodeOutputContract(
+11:             "intake.claude_brainstorm",
+12:             Set.of("decision", "summary"),
+13:             Set.of("READY_FOR_PRODUCT_REVIEW"),
+14:             Set.of("needs_human_input"),
+15:             Set.of("task_contract_proposal", "task_contract_revision_patch")
+16:     );
+17:     private static final NodeOutputContract INTAKE_PRODUCT_REVIEW = new NodeOutputContract(
+18:             "intake.codex_product_review",
+19:             Set.of("decision", "summary"),
+20:             Set.of("READY_FOR_PRODUCT_REVIEW", "NEEDS_REVISION", "BLOCKED"),
+21:             Set.of(),
+22:             Set.of("agent_output_contract")
+23:     );
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/ContextBuildPackageHandler.java
+SHA256 c0bdc93b05cfd36b4b67741f8e26f67fd80e65d9d676a3a7c2d1ac89f8dd78d8
+962:     static Map<String, Object> contractRevisionProjection(
+963:             dev.dual.ledger.file.WorkflowFileLedger ledger, Path root, String workstreamId, String iterationId, TaskContractProposalReference candidate
+964:     ) throws IOException {
+965:         var resolved = new TaskContractRevisionContextResolver(ledger).resolveForProposal(root, workstreamId, candidate);
+966:         if (!resolved.valid()) throw new IOException("CONTRACT_REVISION_CONTEXT_INVALID: " + resolved.errors());
+967:         var revision = resolved.context();
+968:         if (!iterationId.equals(revision.iteration().iterationId())) {
+969:             throw new IOException("CONTRACT_REVISION_CONTEXT_INVALID: candidate belongs to another iteration");
+970:         }
+971:         if (revision.lateRoot() == null) return Map.of();
+972:         var proposal = candidate.resolveVerifiedProposal(root, workstreamId, OBJECT_MAPPER)
+973:                 .orElseThrow(() -> new IOException("CONTRACT_REVISION_CONTEXT_INVALID: candidate is unverified"));
+974:         var projection = new LinkedHashMap<String, Object>();
+975:         projection.put("candidate", candidate.toMap());
+976:         projection.put("direct_parent", revision.previousReference().toMap());
+977:         projection.put("late_root", revision.lateRoot());
+978:         projection.put("obligations", revision.obligations());
+979:         projection.put("revision_responses", proposal.revisionResponses());
+980:         return projection;
+981:     }
+982: 
+983:     static String renderContractRevision(Map<String, Object> projection) throws IOException {
+984:         if (projection.isEmpty()) return "";
+985:         return "\n\n## Contract Revision Obligations And Candidate Responses\n\n"
+986:                 + "Cumulative obligations at candidate generation remain visible with their sources. "
+987:                 + "Candidate responses are claims, not verified closure or approval. "
+988:                 + "The current review is shown separately; newly raised findings enter the next revision.\n\n"
+989:                 + "```json\n" + OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(projection)
+990:                 + "\n```\n\n";
+
+## dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunGovernanceContext.java
+SHA256 f7f2510db253afb6485a16a11faa9300b36c63b8fb43a6ea559be3b6f043b7d1
+39:         var workspaceRoot = context.workspaceRoot();
+40:         var workstreamDir = workspaceRoot.resolve(".agent")
+41:                 .resolve("workstreams")
+42:                 .resolve(context.workstreamId());
+43:         var expectedArtifact = String.valueOf(
+44:                 context.definition().config().getOrDefault("expected_artifact", "")).trim();
+45:         var requiresQualification = requiresApprovedTaskContract(context);
+46:         var contractResolution = requiresQualification || "acceptance_review".equals(expectedArtifact)
+47:                 ? ("acceptance_review".equals(expectedArtifact)
+48:                         ? TaskContractProjectionVerifier.resolveRoutedAcceptance(
+49:                                 context.ledger(), workspaceRoot,
+50:                                 context.workstreamId(),
+51:                                 context.definition().id(),
+52:                                 context.instance().inputRefs())
+53:                         : TaskContractProjectionVerifier.resolve(context.ledger(), workspaceRoot, context.workstreamId(), TaskContractProjectionVerifier.requiredPhase(context.definition())))
+54:                 : TaskContractProjectionVerifier.Resolution.absent();
+55:         if (contractResolution.failure() != null) {
+56:             throw qualificationFailure(context, contractResolution.failure(), "AgentRunGovernanceContext.ensureQualified");
+57:         }
+58:         if (requiresQualification && contractResolution.qualified().isEmpty()) {
+59:             throw missingBinding(context, ContractQualificationTrace.Rule.APPROVAL_REQUIRED, "APPROVAL_BINDING_MISSING", "node requires an approved task contract");
+60:         }
+61:         if ("acceptance_review".equals(expectedArtifact) && contractResolution.qualified().isEmpty()) {
+62:             throw missingBinding(context, ContractQualificationTrace.Rule.CONTEXT_REQUIRED, "CONTEXT_BINDING_MISSING", "acceptance agent has no routed task contract binding");
+63:         }
+64:         try {
+65:             VerificationEvidence.verifyAcceptanceInputs(context);
+66:         } catch (IOException invalid) {
+67:             throw new QualificationException("VERIFICATION_EVIDENCE_INVALID", invalid.getMessage());
+68:         }
+69:         Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract =
+70:                 contractResolution.qualified();
+71:         final Optional<AuthoredExecutionContext.Snapshot> authoredContext;
+72:         try {
+73:             authoredContext = AuthoredExecutionContext.prepare(context, runId);
+74:         } catch (IOException failure) {
+75:             throw new AuthoredContextException(failure.getMessage(), failure);
+76:         }
+77: 
+78:         var contextDir = workstreamDir.resolve("context");
+79:         Files.createDirectories(contextDir);
+91:                 + ".md");
+92:         var builder = new StringBuilder();
+93:         builder.append("# Agent Run Governance Context\n\n");
+94:         builder.append("- Workstream: ").append(context.workstreamId()).append("\n");
+95:         builder.append("- Target Node: ").append(context.definition().id()).append("\n");
+96:         builder.append("- Agent Node Instance: ").append(context.instance().nodeInstanceId()).append("\n");
+97:         builder.append("- Run Id: ").append(runId == null ? "" : runId).append("\n");
+98:         builder.append("- Generated At: ").append(Instant.now()).append("\n\n");
+99:         RepoScopeGovernance.appendMarkdownGuidance(builder, governance, workspaceRoot, true);
+100:         if (qualifiedContract.isPresent() && qualifiedContract.get().contract().phase() == TaskContract.Phase.GOAL)
+101:             builder.append(VerificationReadiness.context(context.ledger(), workspaceRoot, context.workstreamId(), qualifiedContract.get()));
+102:         Files.writeString(packagePath, builder.toString(), StandardCharsets.UTF_8);
+103:         return new PreparedContext(
+104:                 workspaceRoot.relativize(packagePath).toString(),
+105:                 qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::wrappedPayload),
+106:                 governance.repositoryFactBinding(),
+107:                 qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::contract),
+108:                 qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::contractRef).orElse(""),
+109:                 qualifiedContract.map(TaskContractProjectionVerifier.QualifiedTaskContract::sha256).orElse(""),
+110:                 authoredContext);
+
+## dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+SHA256 f5f002a11bdb2638d83eae6c6474f86bf71749c3a7a593ecf281e7fcb4acc11c
+105:     public NodeResult execute(TaskContext context) throws Exception {
+106:         boolean providerDispatchStarted = false;
+107:         try {
+108:             var agent = configText(context, "agent");
+109:             if (!"claude".equals(agent) && !"codex".equals(agent)) {
+110:                 throw new IllegalArgumentException("unsupported agent: " + agent);
+111:             }
+112:             var configuredSession = configText(context, "session");
+113:             var promptTemplate = configText(context, "prompt_template");
+114:             var runId = "run-" + Instant.now().toEpochMilli();
+115:             var e1Enabled = "claude".equals(agent) && hasNamedPermissionProfile(context);
+116:             var emissionContext = proposalEmissionContext(context);
+117:             if (emissionContext.failed() != null) {
+118:                 return emissionContext.failed();
+119:             }
+120:             var agentResultContract = agentResultContractPrompt(
+121:                     context, runId, emissionContext.context());
+122:             var sessionScopeConfigValue = context.definition().config().get("session_scope");
+315:             metadataWriter.writePrepared(
+316:                     context.workspaceRoot(),
+317:                     context.workstreamId(),
+318:                     context.definition().id(),
+319:                     agent,
+320:                     session,
+321:                     promptTemplate,
+322:                     runId,
+323:                     runDir,
+324:                     promptPath,
+325:                     outputPath,
+326:                     transcriptPath,
+327:                     stderrPath,
+328:                     sessionMeta,
+329:                     compactionMeta,
+330:                     executionPolicy
+331:             );
+332:             var verificationSource = governanceContext.qualifiedTaskContract().isPresent()
+333:                     && governanceContext.qualifiedTaskContract().orElseThrow().phase() == dev.dual.core.contract.TaskContract.Phase.EXECUTION
+334:                     ? dev.dual.runtime.handler.VerificationEvidence.prepare(context)
+335:                     : null;
+336:             var preparedBinding = new java.util.LinkedHashMap<String, Object>();
+337:             preparedBinding.put("run", new com.fasterxml.jackson.databind.ObjectMapper().readTree(runDir.resolve("run.json").toFile()));
+338:             preparedBinding.put("contract_ref", governanceContext.taskContractRef());
+339:             preparedBinding.put("contract_sha256", governanceContext.taskContractSha256());
+340:             preparedBinding.put("native_invocation", transport.invocationInputs(agent, context.workspaceRoot(), session));
+341:             preparedBinding.put("allowed_request_options", List.of(
+342:                     transport.requestOptions(agent, context.workspaceRoot(), effectivePermissionProfile, executionPolicy, true),
+343:                     transport.requestOptions(agent, context.workspaceRoot(), AcpxPermissionProfile.contractCorrection(), executionPolicy)));
+344:             if (transport.permissionBudgetMillis(effectivePermissionProfile) > 0)
+345:                 preparedBinding.put("native_permission_budget_ms", transport.permissionBudgetMillis(effectivePermissionProfile));
+346:             if (verificationSource != null) preparedBinding.put("verification_source", verificationSource);
+347:             var preparedRun = dev.dual.runtime.handler.AgentRunCommitProtocol.prepare(context, runDir,
+348:                     List.of(promptPath, PromptManifestWriter.manifestPathFor(promptPath),
+349:                             context.workspaceRoot().resolve(governanceContext.repositoryFactBinding().ref())),
+350:                     preparedBinding);
+650:     private ProposalEmissionResolution proposalEmissionContext(TaskContext context) {
+651:         if (!"intake.claude_brainstorm".equals(context.definition().id())) {
+652:             return new ProposalEmissionResolution(
+653:                     AgentResultPromptContract.ProposalEmissionContext.notApplicable(), null);
+654:         }
+655:         var resolved = new TaskContractRevisionContextResolver(context.ledger()).resolveForIteration(
+656:                 context.workspaceRoot(), context.workstreamId(), context.instance().iterationId());
+657:         if (!resolved.valid()) {
+658:             return new ProposalEmissionResolution(null, AgentExecutionResultFacts.inputPreparationFailed(
+659:                     "TASK_CONTRACT_REVISION_CONTEXT_INVALID", "TASK_CONTRACT_REVISION_CONTEXT_INVALID", resolved.errors()));
+660:         }
+661:         return new ProposalEmissionResolution(
+662:                 AgentResultPromptContract.proposalEmissionContext(resolved.context()), null);
+
+## dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json
+SHA256 d9cdcf71b8974d1ed023150dc1c2146d79769d6ac6aea994b0305d2d6b895fa2
+481:       "to": "intake.decision",
+482:       "condition": null,
+483:       "metadata": {
+484:         "transitionType": "normal",
+485:         "branchGroupId": "",
+486:         "required": true,
+487:         "purpose": "",
+488:         "joinStrategy": "",
+489:         "loopReason": ""
+490:       }
+491:     },
+492:     {
+493:       "from": "intake.decision",
+494:       "on": "READY_FOR_PRODUCT_REVIEW",
+495:       "to": "gate.human_requirement_review",
+496:       "condition": null,
+497:       "metadata": {
+498:         "transitionType": "normal",
+499:         "branchGroupId": "",
+500:         "required": true,
+501:         "purpose": "",
+502:         "joinStrategy": "",
+503:         "loopReason": ""
+504:       }
+505:     },
+506:     {
+507:       "from": "intake.decision",
+508:       "on": "BLOCKED",
+509:       "to": "gate.human_requirement_review",
+510:       "condition": null,
+511:       "metadata": {
+512:         "transitionType": "normal",
+513:         "branchGroupId": "",
+514:         "required": true,
+515:         "purpose": "",
+516:         "joinStrategy": "",
+517:         "loopReason": ""
+518:       }
+519:     },
+520:     {
+521:       "from": "intake.decision",
+522:       "on": "NEEDS_REVISION",
+523:       "to": "intake.claude_brainstorm",
+524:       "condition": null,
+525:       "metadata": {
+526:         "transitionType": "normal",
+527:         "branchGroupId": "",
+528:         "required": true,
+529:         "purpose": "",
+530:         "joinStrategy": "",
+531:         "loopReason": ""
+532:       }
+533:     },
+534:     {
+535:       "from": "gate.human_requirement_review",
+536:       "on": "approved",
+537:       "to": "contract.compile",
+538:       "condition": null,
+539:       "metadata": {
+540:         "transitionType": "normal",
+541:         "branchGroupId": "",
+542:         "required": true,
+543:         "purpose": "",
+544:         "joinStrategy": "",
+545:         "loopReason": ""
+546:       }
+547:     },
+548:     {
+549:       "from": "gate.human_requirement_review",
+550:       "on": "revise",
+551:       "to": "intake.claude_brainstorm",
+552:       "condition": null,
+553:       "metadata": {
+554:         "transitionType": "normal",
+555:         "branchGroupId": "",
+556:         "required": true,
+557:         "purpose": "",
+558:         "joinStrategy": "",
+559:         "loopReason": ""
+560:       }
+
+## dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json
+SHA256 4375c8074896871bb00970b0ba8946bb4344d098800dbe060038c112a6897c0e
+507:       "to": "intake.decision",
+508:       "condition": null,
+509:       "metadata": {
+510:         "transitionType": "normal",
+511:         "branchGroupId": "",
+512:         "required": true,
+513:         "purpose": "",
+514:         "joinStrategy": "",
+515:         "loopReason": ""
+516:       }
+517:     },
+518:     {
+519:       "from": "intake.decision",
+520:       "on": "READY_FOR_PRODUCT_REVIEW",
+521:       "to": "gate.human_requirement_review",
+522:       "condition": null,
+523:       "metadata": {
+524:         "transitionType": "normal",
+525:         "branchGroupId": "",
+526:         "required": true,
+527:         "purpose": "",
+528:         "joinStrategy": "",
+529:         "loopReason": ""
+530:       }
+531:     },
+532:     {
+533:       "from": "intake.decision",
+534:       "on": "BLOCKED",
+535:       "to": "gate.human_requirement_review",
+536:       "condition": null,
+537:       "metadata": {
+538:         "transitionType": "normal",
+539:         "branchGroupId": "",
+540:         "required": true,
+541:         "purpose": "",
+542:         "joinStrategy": "",
+543:         "loopReason": ""
+544:       }
+545:     },
+546:     {
+547:       "from": "intake.decision",
+548:       "on": "NEEDS_REVISION",
+549:       "to": "intake.claude_brainstorm",
+550:       "condition": null,
+551:       "metadata": {
+552:         "transitionType": "normal",
+553:         "branchGroupId": "",
+554:         "required": true,
+555:         "purpose": "",
+556:         "joinStrategy": "",
+557:         "loopReason": ""
+558:       }
+559:     },
+560:     {
+561:       "from": "gate.human_requirement_review",
+562:       "on": "approved",
+563:       "to": "contract.compile",
+564:       "condition": null,
+565:       "metadata": {
+566:         "transitionType": "normal",
+567:         "branchGroupId": "",
+568:         "required": true,
+569:         "purpose": "",
+570:         "joinStrategy": "",
+571:         "loopReason": ""
+572:       }
+573:     },
+574:     {
+575:       "from": "gate.human_requirement_review",
+576:       "on": "revise",
+577:       "to": "intake.claude_brainstorm",
+578:       "condition": null,
+579:       "metadata": {
+580:         "transitionType": "normal",
+581:         "branchGroupId": "",
+582:         "required": true,
+583:         "purpose": "",
+584:         "joinStrategy": "",
+585:         "loopReason": ""
+586:       }
+587:     },
+588:     {
+589:       "from": "contract.compile",
+590:       "on": "completed",
+
+## dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json
+SHA256 38979a69837754cc97af6c83df2aae6a750902b704e8b730eea3fbf64d4ff79c
+507:       "to": "intake.decision",
+508:       "condition": null,
+509:       "metadata": {
+510:         "transitionType": "normal",
+511:         "branchGroupId": "",
+512:         "required": true,
+513:         "purpose": "",
+514:         "joinStrategy": "",
+515:         "loopReason": ""
+516:       }
+517:     },
+518:     {
+519:       "from": "intake.decision",
+520:       "on": "READY_FOR_PRODUCT_REVIEW",
+521:       "to": "gate.human_requirement_review",
+522:       "condition": null,
+523:       "metadata": {
+524:         "transitionType": "normal",
+525:         "branchGroupId": "",
+526:         "required": true,
+527:         "purpose": "",
+528:         "joinStrategy": "",
+529:         "loopReason": ""
+530:       }
+531:     },
+532:     {
+533:       "from": "intake.decision",
+534:       "on": "BLOCKED",
+535:       "to": "gate.human_requirement_review",
+536:       "condition": null,
+537:       "metadata": {
+538:         "transitionType": "normal",
+539:         "branchGroupId": "",
+540:         "required": true,
+541:         "purpose": "",
+542:         "joinStrategy": "",
+543:         "loopReason": ""
+544:       }
+545:     },
+546:     {
+547:       "from": "intake.decision",
+548:       "on": "NEEDS_REVISION",
+549:       "to": "intake.claude_brainstorm",
+550:       "condition": null,
+551:       "metadata": {
+552:         "transitionType": "normal",
+553:         "branchGroupId": "",
+554:         "required": true,
+555:         "purpose": "",
+556:         "joinStrategy": "",
+557:         "loopReason": ""
+558:       }
+559:     },
+560:     {
+561:       "from": "gate.human_requirement_review",
+562:       "on": "approved",
+563:       "to": "contract.compile",
+564:       "condition": null,
+565:       "metadata": {
+566:         "transitionType": "normal",
+567:         "branchGroupId": "",
+568:         "required": true,
+569:         "purpose": "",
+570:         "joinStrategy": "",
+571:         "loopReason": ""
+572:       }
+573:     },
+574:     {
+575:       "from": "gate.human_requirement_review",
+576:       "on": "revise",
+577:       "to": "intake.claude_brainstorm",
+578:       "condition": null,
+579:       "metadata": {
+580:         "transitionType": "normal",
+581:         "branchGroupId": "",
+582:         "required": true,
+583:         "purpose": "",
+584:         "joinStrategy": "",
+585:         "loopReason": ""
+586:       }
+587:     },
+588:     {
+589:       "from": "contract.compile",
+590:       "on": "completed",

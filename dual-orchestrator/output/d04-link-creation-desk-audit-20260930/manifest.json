@@ -1,0 +1,21 @@
+{
+  "application.sb.excerpt.txt": "ced7b98a7f6196522cb40d22f1a1818a7650d01932430e8b36d7c94f7b2d8e14",
+  "appsandbox-common.sb.excerpt.txt": "c650c2d72d65e579fa5fe4656a5b0a594bbd085bd4e30552c532e7a8fec51f48",
+  "assessment.md": "308de4d0b05fd483656408edfd10162dceeee31f599fa7a4f2aa7e036f1ac8d7",
+  "before.json": "20d4554ab76ad200beb76d9a10350b7aac4db3c49f5ef4a07dfd044dfa1491bd",
+  "cc-review.txt": "6e83fa7880442fc467b90b60dcefa9397d2204c22143bee8a0ea0fa470dd4dde",
+  "claude-M4.txt": "2aaab5557e894c7038078c03a9cddc910c70092db3d8fefdda77801debe97650",
+  "claude-V4.txt": "ea46f0a3a931ee5ce2ccc13be941b0d92f4c4de99ad06a05a516f73d7d3b8902",
+  "claude-la.txt": "6b750ad224510d4ebb00dec44f3f3c2cc0c81e962bfe1a51ded316e99b76650e",
+  "host.json": "db99ef71db2468a02b1f240892550d8cd22e2bdc59028fb7d09ebb723c67ddcf",
+  "local-source-index.json": "ae9402953d617db65e5a4f3022034c647ab3efe58c9d795a478ff1ec2ebca8e9",
+  "material-verification.json": "c89321816b7b18737b632a512fa1e6bf61ae73a3f1dd7477656189ee2eaf0da8",
+  "role-evidence-index.json": "7d4c6ce6eb8665d96db9d72958c20dceddb54751df217e43bbe98d15f399d8c1",
+  "sources/codex-seatbelt.rs": "34e03d38ca4ae347eb8523bb390e746e7c31d25cde6071b35c90454eb966eb70",
+  "sources/codex-seatbelt_base_policy.sbpl": "5103332ddb8885ee5e1926de6c0ef23a61f4e55e31297506ae05fa4e0b24ba74",
+  "sources/codex-seatbelt_network_policy.sbpl": "eb2bf67e7a697d954f05fbd563e5888402fde3a279ecf383832473d44831ad0a",
+  "sources/codex-seatbelt_preferences_policy.sbpl": "bfbbe3f051112c7c24dc3a61e09b54cee7e0ea33a420ff7fa9aa4dace03d52aa",
+  "sources/xnu-mac_vfs.c": "84f6edf8aec47a22676c4b0abbceb24d919b5e595b4eec488517e556c76d1efe",
+  "sources/xnu-vfs_syscalls.c": "2219b3d51cc21cf018e09af2ed4bfc66f4ff1082a81b3d1b1a5aa7010abcb35b",
+  "upstream-source-index.json": "3b5b9e601f1ea6ed1f692ba0f79bdbfbda2c28d66c066435ef955fa90ab41351"
+}

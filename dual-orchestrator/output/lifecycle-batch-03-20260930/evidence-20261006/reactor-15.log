@@ -1,0 +1,853 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] dual-cli                                                           [jar]
+[INFO] dual-server                                                        [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-orchestrator ---
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/9]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-core ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 62 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 16 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.core.contract.TaskContractTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.164 s -- in dev.dual.core.contract.TaskContractTest
+[INFO] Running dev.dual.core.contract.PhasedContractTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.029 s -- in dev.dual.core.contract.PhasedContractTest
+[INFO] Running dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Running dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Running dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Running dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Running dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Running dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Running dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Running dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Running dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Running dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Running dev.dual.core.workflow.EdgeConditionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.workflow.EdgeConditionTest
+[INFO] Running dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Running dev.dual.core.id.DualIdGeneratorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.id.DualIdGeneratorTest
+[INFO] Running dev.dual.core.domain.PromptLanguageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.core.domain.PromptLanguageTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 125, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/9]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-ledger-file ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 68 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 24 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java使用了未经检查或不安全的操作。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Running dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Running dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.093 s -- in dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Running dev.dual.ledger.file.FileLedgerStoreTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.144 s -- in dev.dual.ledger.file.FileLedgerStoreTest
+[INFO] Running dev.dual.ledger.file.IterationRefTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.ledger.file.IterationRefTest
+[INFO] Running dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.236 s -- in dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[INFO] Running dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.482 s -- in dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Running dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Running dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Running dev.dual.ledger.file.WorkflowGateResolutionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.175 s -- in dev.dual.ledger.file.WorkflowGateResolutionTest
+[INFO] Running dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.075 s -- in dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[INFO] Running dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.152 s -- in dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[INFO] Running dev.dual.ledger.file.ParallelFanOutTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.163 s -- in dev.dual.ledger.file.ParallelFanOutTest
+[INFO] Running dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Running dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Running dev.dual.ledger.file.WorkflowFileLedgerTest
+[INFO] Tests run: 50, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.322 s -- in dev.dual.ledger.file.WorkflowFileLedgerTest
+[INFO] Running dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Running dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.401 s -- in dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[INFO] Running dev.dual.ledger.file.ExecutionClaimSequenceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.072 s -- in dev.dual.ledger.file.ExecutionClaimSequenceTest
+[INFO] Running dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.170 s -- in dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Running dev.dual.ledger.file.HumanActionRequestTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.097 s -- in dev.dual.ledger.file.HumanActionRequestTest
+[INFO] Running dev.dual.ledger.file.LedgerSessionTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.498 s -- in dev.dual.ledger.file.LedgerSessionTest
+[INFO] Running dev.dual.ledger.file.RetryFailureContextTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.259 s -- in dev.dual.ledger.file.RetryFailureContextTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 153, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/9]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-flow-liteflow ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 8 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.702 s -- in dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest
+[INFO] Running dev.dual.flow.liteflow.FlowKernelProviderTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.flow.liteflow.FlowKernelProviderTest
+[INFO] Running dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest
+[INFO] Running dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest
+D08 topology: pid=13673, kernel=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, kernelLoader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, holderLoader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, holderSource=file:/Users/kriswang/.m2/repository/com/yomahub/liteflow-core/2.16.0/liteflow-core-2.16.0.jar
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.438 s -- in dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/9]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-adapter-git ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.adapter.git.GitPatchMergeServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.702 s -- in dev.dual.adapter.git.GitPatchMergeServiceTest
+[INFO] Running dev.dual.adapter.git.GitWorkspaceServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 s -- in dev.dual.adapter.git.GitWorkspaceServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/9]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-runtime ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 104 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 89 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- jar:3.4.2:test-jar (shared-lifecycle-test-fixtures) @ dual-runtime ---
+[INFO] Building jar: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/dual-runtime-0.1.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.runtime.handler.LateContractRevisionContextTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 28.88 s -- in dev.dual.runtime.handler.LateContractRevisionContextTest
+[INFO] Running dev.dual.runtime.handler.PlanArtifactDocumentTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.runtime.handler.PlanArtifactDocumentTest
+[INFO] Running dev.dual.runtime.handler.TypedDesignScopeTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.353 s -- in dev.dual.runtime.handler.TypedDesignScopeTest
+[INFO] Running dev.dual.runtime.handler.EvidenceCollectionSourceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.475 s -- in dev.dual.runtime.handler.EvidenceCollectionSourceTest
+[INFO] Running dev.dual.runtime.handler.TokenEstimatorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.handler.TokenEstimatorTest
+[INFO] Running dev.dual.runtime.handler.TypedPlanScopeTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 26.83 s -- in dev.dual.runtime.handler.TypedPlanScopeTest
+[INFO] Running dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.030 s -- in dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest
+[INFO] Running dev.dual.runtime.handler.TaskContractScopeResolverTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.handler.TaskContractScopeResolverTest
+[INFO] Running dev.dual.runtime.handler.SelfTestContinuationSequenceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.950 s -- in dev.dual.runtime.handler.SelfTestContinuationSequenceTest
+[INFO] Running dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.639 s -- in dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest
+[INFO] Running dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.266 s -- in dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest
+[INFO] Running dev.dual.runtime.handler.EvidenceCollectionSequenceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.31 s -- in dev.dual.runtime.handler.EvidenceCollectionSequenceTest
+[INFO] Running dev.dual.runtime.handler.HandlerRegistryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.HandlerRegistryTest
+[INFO] Running dev.dual.runtime.handler.AgentEvidenceIndexTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.103 s -- in dev.dual.runtime.handler.AgentEvidenceIndexTest
+[INFO] Running dev.dual.runtime.handler.FailureArbiterTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.FailureArbiterTest
+[INFO] Running dev.dual.runtime.handler.PhasedContractContinuationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.449 s -- in dev.dual.runtime.handler.PhasedContractContinuationTest
+[INFO] Running dev.dual.runtime.handler.ContractRegistryTest
+[INFO] Tests run: 50, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in dev.dual.runtime.handler.ContractRegistryTest
+[INFO] Running dev.dual.runtime.handler.TaskContractProjectionVerifierTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.86 s -- in dev.dual.runtime.handler.TaskContractProjectionVerifierTest
+[INFO] Running dev.dual.runtime.handler.LateProposalScopeTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.621 s -- in dev.dual.runtime.handler.LateProposalScopeTest
+[INFO] Running dev.dual.runtime.handler.ContractReviewGateTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.046 s -- in dev.dual.runtime.handler.ContractReviewGateTest
+[INFO] Running dev.dual.runtime.handler.AcceptanceRepairSequenceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 34.96 s -- in dev.dual.runtime.handler.AcceptanceRepairSequenceTest
+[INFO] Running dev.dual.runtime.handler.ContractRevisionDisplayTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 35.10 s -- in dev.dual.runtime.handler.ContractRevisionDisplayTest
+[INFO] Running dev.dual.runtime.handler.AuthoredRevisionCoverageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.AuthoredRevisionCoverageTest
+[INFO] Running dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.148 s -- in dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest
+[INFO] Running dev.dual.runtime.handler.TaskContractArtifactWriterTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.runtime.handler.TaskContractArtifactWriterTest
+[INFO] Running dev.dual.runtime.handler.ContextBudgetOverrideTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.runtime.handler.ContextBudgetOverrideTest
+[INFO] Running dev.dual.runtime.handler.StageOutcomeCompilerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.StageOutcomeCompilerTest
+[INFO] Running dev.dual.runtime.handler.ExternalVerificationEvidenceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 27.72 s -- in dev.dual.runtime.handler.ExternalVerificationEvidenceTest
+[INFO] Running dev.dual.runtime.handler.ReadinessRoutingDefinitionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.runtime.handler.ReadinessRoutingDefinitionTest
+[INFO] Running dev.dual.runtime.handler.AuthoredBoundarySequenceTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 38.03 s -- in dev.dual.runtime.handler.AuthoredBoundarySequenceTest
+[INFO] Running dev.dual.runtime.handler.ChangeScopeEvaluationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.ChangeScopeEvaluationTest
+[INFO] Running dev.dual.runtime.handler.WorkflowIntegrationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.166 s -- in dev.dual.runtime.handler.WorkflowIntegrationTest
+[INFO] Running dev.dual.runtime.handler.AgentResultEnvelopeParserTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.runtime.handler.AgentResultEnvelopeParserTest
+[INFO] Running dev.dual.runtime.handler.VerificationReadinessTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.441 s -- in dev.dual.runtime.handler.VerificationReadinessTest
+[INFO] Running dev.dual.runtime.handler.AgentRunCommitProtocolTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.520 s -- in dev.dual.runtime.handler.AgentRunCommitProtocolTest
+[INFO] Running dev.dual.runtime.handler.ContractLifecycleLedgerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.566 s -- in dev.dual.runtime.handler.ContractLifecycleLedgerTest
+[INFO] Running dev.dual.runtime.handler.VerificationEvidenceSequenceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.38 s -- in dev.dual.runtime.handler.VerificationEvidenceSequenceTest
+[INFO] Running dev.dual.runtime.handler.AcceptanceRepairInterruptionTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.428 s -- in dev.dual.runtime.handler.AcceptanceRepairInterruptionTest
+[INFO] Running dev.dual.runtime.handler.AgentRunMetadataFinalizerTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 s -- in dev.dual.runtime.handler.AgentRunMetadataFinalizerTest
+[INFO] Running dev.dual.runtime.handler.FailureClassifyHandlerTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.565 s -- in dev.dual.runtime.handler.FailureClassifyHandlerTest
+[INFO] Running dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest
+[INFO] Running dev.dual.runtime.handler.ContextBuildPackageHandlerTest
+[INFO] Tests run: 61, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.599 s -- in dev.dual.runtime.handler.ContextBuildPackageHandlerTest
+[INFO] Running dev.dual.runtime.handler.LegacyContractConsumerRejectionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.792 s -- in dev.dual.runtime.handler.LegacyContractConsumerRejectionTest
+[INFO] Running dev.dual.runtime.handler.ContractCompileHandlerTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.464 s -- in dev.dual.runtime.handler.ContractCompileHandlerTest
+[INFO] Running dev.dual.runtime.handler.AuthoredStageSequenceTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.35 s -- in dev.dual.runtime.handler.AuthoredStageSequenceTest
+[INFO] Running dev.dual.runtime.handler.ReportGenerateFinalHandlerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 19.33 s -- in dev.dual.runtime.handler.ReportGenerateFinalHandlerTest
+[INFO] Running dev.dual.runtime.handler.ContextTaskContractSectionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.534 s -- in dev.dual.runtime.handler.ContextTaskContractSectionTest
+[INFO] Running dev.dual.runtime.handler.ReportTaskContractTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.896 s -- in dev.dual.runtime.handler.ReportTaskContractTest
+[INFO] Running dev.dual.runtime.handler.TypedContextPayloadBoundaryTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.TypedContextPayloadBoundaryTest
+[INFO] Running dev.dual.runtime.handler.AuthoredDefinitionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.runtime.handler.AuthoredDefinitionTest
+[INFO] Running dev.dual.runtime.handler.BuiltinHandlerTest
+[INFO] Tests run: 67, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.50 s -- in dev.dual.runtime.handler.BuiltinHandlerTest
+[INFO] Running dev.dual.runtime.handler.TaskContractProposalValidatorTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.079 s -- in dev.dual.runtime.handler.TaskContractProposalValidatorTest
+[INFO] Running dev.dual.runtime.handler.AgentContractSemanticsTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.AgentContractSemanticsTest
+[INFO] Running dev.dual.runtime.handler.AgentResultPromptContractTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.runtime.handler.AgentResultPromptContractTest
+[INFO] Running dev.dual.runtime.handler.ReportFailureClassificationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.836 s -- in dev.dual.runtime.handler.ReportFailureClassificationTest
+[INFO] Running dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.059 s -- in dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest
+[INFO] Running dev.dual.runtime.handler.ArtifactContractValidatorTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.309 s -- in dev.dual.runtime.handler.ArtifactContractValidatorTest
+[INFO] Running dev.dual.runtime.handler.AuthoredRevisionContractTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in dev.dual.runtime.handler.AuthoredRevisionContractTest
+[INFO] Running dev.dual.runtime.handler.WorkstreamMemoryProjectionTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.runtime.handler.WorkstreamMemoryProjectionTest
+[INFO] Running dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest
+[INFO] Running dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest
+[INFO] Running dev.dual.runtime.handler.FailureClassifyRegistryTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.runtime.handler.FailureClassifyRegistryTest
+[INFO] Running dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest
+[INFO] Running dev.dual.runtime.WorkflowRuntimeTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.718 s -- in dev.dual.runtime.WorkflowRuntimeTest
+[INFO] Running dev.dual.runtime.FrozenRuntimeIdentityTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.runtime.FrozenRuntimeIdentityTest
+[INFO] Running dev.dual.runtime.WorkflowRuntimeEventTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.619 s -- in dev.dual.runtime.WorkflowRuntimeEventTest
+[INFO] Running dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.923 s -- in dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest
+[INFO] Running dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest
+[INFO] Running dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest
+[INFO] Running dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest
+[INFO] Running dev.dual.runtime.RunningStateGuardTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 57.15 s -- in dev.dual.runtime.RunningStateGuardTest
+[INFO] Running dev.dual.runtime.StaleRunningRecoveryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.114 s -- in dev.dual.runtime.StaleRunningRecoveryTest
+[INFO] Running dev.dual.runtime.governance.AgentCapabilityCatalogTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.governance.AgentCapabilityCatalogTest
+[INFO] Running dev.dual.runtime.delivery.DeliveryApplicationServiceTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.084 s -- in dev.dual.runtime.delivery.DeliveryApplicationServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 712, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-acpx >---------------------
+[INFO] Building dual-adapter-acpx 0.1.0-SNAPSHOT                          [7/9]
+[INFO]   from dual-adapter-acpx/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-adapter-acpx ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-acpx ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 11 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-acpx ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 49 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-acpx ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-acpx ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 38 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-acpx ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.adapter.acpx.AcpxNativeCommandSequenceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.947 s -- in dev.dual.adapter.acpx.AcpxNativeCommandSequenceTest
+[INFO] Running dev.dual.adapter.acpx.AcpxTranscriptToolUsageReaderTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.dual.adapter.acpx.AcpxTranscriptToolUsageReaderTest
+[INFO] Running dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.98 s -- in dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest
+[INFO] Running dev.dual.adapter.acpx.PromptManifestWriterTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.adapter.acpx.PromptManifestWriterTest
+[INFO] Running dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest
+[INFO] Tests run: 49, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.52 s -- in dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest
+[INFO] Running dev.dual.adapter.acpx.AuthoredManifestDispatchTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.188 s -- in dev.dual.adapter.acpx.AuthoredManifestDispatchTest
+[INFO] Running dev.dual.adapter.acpx.AcpxProcessCleanupPolicyTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.adapter.acpx.AcpxProcessCleanupPolicyTest
+[INFO] Running dev.dual.adapter.acpx.AgentRunnerKindTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.adapter.acpx.AgentRunnerKindTest
+[INFO] Running dev.dual.adapter.acpx.ContextGovernanceActualReportWriterTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in dev.dual.adapter.acpx.ContextGovernanceActualReportWriterTest
+[INFO] Running dev.dual.adapter.acpx.AcpxExecutionFactOwnershipBoundaryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.adapter.acpx.AcpxExecutionFactOwnershipBoundaryTest
+[INFO] Running dev.dual.adapter.acpx.AcpxProviderMetadataTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.adapter.acpx.AcpxProviderMetadataTest
+[INFO] Running dev.dual.adapter.acpx.ClaudeExecutionPolicyTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.adapter.acpx.ClaudeExecutionPolicyTest
+[INFO] Running dev.dual.adapter.acpx.AcpxUsageReaderTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.089 s -- in dev.dual.adapter.acpx.AcpxUsageReaderTest
+[INFO] Running dev.dual.adapter.acpx.AcpxAgentTransportTest
+[INFO] Tests run: 44, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 163.5 s -- in dev.dual.adapter.acpx.AcpxAgentTransportTest
+[INFO] Running dev.dual.adapter.acpx.ToolUsageCapabilityClassifierTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.adapter.acpx.ToolUsageCapabilityClassifierTest
+[INFO] Running dev.dual.adapter.acpx.AcpxSessionLifecycleTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.dual.adapter.acpx.AcpxSessionLifecycleTest
+[INFO] Running dev.dual.adapter.acpx.SessionCompactionSignalTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.adapter.acpx.SessionCompactionSignalTest
+[INFO] Running dev.dual.adapter.acpx.AgentLifecycleEventReaderTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.dual.adapter.acpx.AgentLifecycleEventReaderTest
+[INFO] Running dev.dual.adapter.acpx.PromptTemplateConsistencyTest
+[INFO] Tests run: 53, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.adapter.acpx.PromptTemplateConsistencyTest
+[INFO] Running dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest
+[INFO] Running dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest
+[INFO] Tests run: 31, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.058 s -- in dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest
+[INFO] Running dev.dual.adapter.acpx.SessionScopePolicyTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.adapter.acpx.SessionScopePolicyTest
+[INFO] Running dev.dual.adapter.acpx.AgentExecutionHealthTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.adapter.acpx.AgentExecutionHealthTest
+[INFO] Running dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 207.8 s -- in dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest
+[INFO] Running dev.dual.adapter.acpx.AcpxFailureSignalCatalogTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.adapter.acpx.AcpxFailureSignalCatalogTest
+[INFO] Running dev.dual.adapter.acpx.AcpxToolObservationsTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.adapter.acpx.AcpxToolObservationsTest
+[INFO] Running dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.126 s -- in dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest
+[INFO] Running dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactoryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactoryTest
+[INFO] Running dev.dual.adapter.acpx.AcpxExecutionEventTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.adapter.acpx.AcpxExecutionEventTest
+[INFO] Running dev.dual.adapter.acpx.RetryFailureContextSequenceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.45 s -- in dev.dual.adapter.acpx.RetryFailureContextSequenceTest
+[INFO] Running dev.dual.adapter.acpx.AgentPromptRendererTest
+[INFO] Tests run: 36, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.118 s -- in dev.dual.adapter.acpx.AgentPromptRendererTest
+[INFO] Running dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 29.06 s -- in dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest
+[INFO] Running dev.dual.adapter.acpx.ReadFileSummaryTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.adapter.acpx.ReadFileSummaryTest
+[INFO] Running dev.dual.adapter.acpx.SessionCompactionPolicyTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in dev.dual.adapter.acpx.SessionCompactionPolicyTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 431, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-cli >--------------------------
+[INFO] Building dual-cli 0.1.0-SNAPSHOT                                   [8/9]
+[INFO]   from dual-cli/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-cli ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-cli ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-cli ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 67 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-cli ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-cli ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 27 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-cli ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.cli.WorkflowPrintDefaultCommandTest
+Default workflow written.
+Path: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-4028667178958541749/workflow.json
+Workflow: agent-lifecycle-full@10
+Nodes: 34
+Edges: 61
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.162 s -- in dev.dual.cli.WorkflowPrintDefaultCommandTest
+[INFO] Running dev.dual.cli.RetryCommandTest
+Active node marked ready for retry
+Workstream: ws-cli-retry-diagnostic
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-1670302750345980525 ws-cli-retry-diagnostic
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.346 s -- in dev.dual.cli.RetryCommandTest
+[INFO] Running dev.dual.cli.ResumeCommandTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.032 s -- in dev.dual.cli.ResumeCommandTest
+[INFO] Running dev.dual.cli.CliLedgerFactoryTest
+D08 CliLedgerFactory: property=null, environment=null, effective=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=41956
+D08 CliLedgerFactory: property=liteflow, environment=null, effective=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=41956
+D08 CliLedgerFactory: property=builtin, environment=null, effective=dev.dual.core.flow.BuiltInFlowOrchestrationKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=41956
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.437 s -- in dev.dual.cli.CliLedgerFactoryTest
+[INFO] Running dev.dual.cli.RecoveryShowCommandTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.887 s -- in dev.dual.cli.RecoveryShowCommandTest
+[INFO] Running dev.dual.cli.RecoveryCommandTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.cli.RecoveryCommandTest
+[INFO] Running dev.dual.cli.CalibrationCommandTest
+Calibration candidate decided
+Workstream: ws-cal
+Candidate: candidate-3
+Status: ACCEPTED
+Path: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-17233287445659478905/.agent/workstreams/ws-cal/calibration/candidates/candidate-3.json
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.087 s -- in dev.dual.cli.CalibrationCommandTest
+[INFO] Running dev.dual.cli.DeliveryMergeCommandTest
+Delivery: BLOCKED
+Reason: final acceptance occurrence is missing
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.291 s -- in dev.dual.cli.DeliveryMergeCommandTest
+[INFO] Running dev.dual.cli.ReviewShowCommandTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.113 s -- in dev.dual.cli.ReviewShowCommandTest
+[INFO] Running dev.dual.cli.RecoveryNetworkCommandTest
+{
+  "canCancel" : true,
+  "canApprove" : false,
+  "scope" : "one_execution",
+  "grantRef" : ".agent/workstreams/ws-cli-network/execution-authority/network-grants/grant-af088fd6-71bb-40a8-8b2b-77b5faf76efe.json",
+  "targets" : [ "verify.tests" ],
+  "grant" : {
+    "schemaVersion" : 1,
+    "workstreamId" : "ws-cli-network",
+    "sourceNodeInstanceId" : "node-verify-tests-001",
+    "targetNodeDefinitionId" : "verify.tests",
+    "definitionSha256" : "e00dda3709007990cb5de7a3edbb6d822e60f2ca413a62393573bb8731e56ea4",
+    "domains" : [ "api.example.org", "packages.example.org" ],
+    "note" : "approved tests",
+    "approvedAt" : "2026-10-06T15:48:55.142644Z",
+    "state" : "PENDING",
+    "claimedNodeInstanceId" : "",
+    "claimedRunId" : ""
+  }
+}
+{
+  "canCancel" : false,
+  "canApprove" : true,
+  "scope" : "one_execution",
+  "grantRef" : ".agent/workstreams/ws-cli-network/execution-authority/network-grants/grant-af088fd6-71bb-40a8-8b2b-77b5faf76efe.json",
+  "targets" : [ "verify.tests" ],
+  "grant" : {
+    "schemaVersion" : 1,
+    "workstreamId" : "ws-cli-network",
+    "sourceNodeInstanceId" : "node-verify-tests-001",
+    "targetNodeDefinitionId" : "verify.tests",
+    "definitionSha256" : "e00dda3709007990cb5de7a3edbb6d822e60f2ca413a62393573bb8731e56ea4",
+    "domains" : [ "api.example.org", "packages.example.org" ],
+    "note" : "approved tests",
+    "approvedAt" : "2026-10-06T15:48:55.142644Z",
+    "state" : "CANCELLED",
+    "claimedNodeInstanceId" : "",
+    "claimedRunId" : ""
+  }
+}
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.197 s -- in dev.dual.cli.RecoveryNetworkCommandTest
+[INFO] Running dev.dual.cli.TraceCommandTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.041 s -- in dev.dual.cli.TraceCommandTest
+[INFO] Running dev.dual.cli.InspectRunnerKindConsistencyTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.cli.InspectRunnerKindConsistencyTest
+[INFO] Running dev.dual.cli.StartCommandVariantTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.cli.StartCommandVariantTest
+[INFO] Running dev.dual.cli.CliNextActionHintsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.173 s -- in dev.dual.cli.CliNextActionHintsTest
+[INFO] Running dev.dual.cli.DoctorCommandTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.cli.DoctorCommandTest
+[INFO] Running dev.dual.cli.ReviewDecideCommandTest
+Human gate decided
+Workstream: ws-review-decide-approve
+Action: approve
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-5143953087536370499 ws-review-decide-approve
+Human gate decided
+Workstream: ws-review-decide
+Action: reject
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-1307955884288076320 ws-review-decide
+Human gate approved
+Workstream: ws-review-approve-terminal
+Resume: dualctl resume --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-1109173776735508529 ws-review-approve-terminal
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.386 s -- in dev.dual.cli.ReviewDecideCommandTest
+[INFO] Running dev.dual.cli.ReviewRequestActionCommandTest
+Action need recorded. Gate remains waiting; no execution was authorized.
+Action need recorded. Gate remains waiting; no execution was authorized.
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.290 s -- in dev.dual.cli.ReviewRequestActionCommandTest
+[INFO] Running dev.dual.cli.AutoRunCommandTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.cli.AutoRunCommandTest
+[INFO] Running dev.dual.cli.StatusCommandTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.220 s -- in dev.dual.cli.StatusCommandTest
+[INFO] Running dev.dual.cli.RecoveryStaleCommandTest
+Recovery state: WAITING_FOR_RECOVERY
+Workstream: ws-stale-command
+Next: inspect recovery; UNKNOWN requires a structured decision and does not permit ordinary retry.
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.212 s -- in dev.dual.cli.RecoveryStaleCommandTest
+[INFO] Running dev.dual.cli.SessionsReapCommandTest
+reap ws=ws-done status=COMPLETED distinct=0 closed=0 failed=0
+skip ws=ws-running status=RUNNING (not terminal)
+reaped=1 skipped=1 statusFailed=0 closeFailed=0
+reap ws=ws-close-failed status=WAITING_FOR_RECOVERY explicit=true distinct=1 closed=0 failed=1
+No workstreams found at /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-13289856304409611751/.agent/workstreams
+reap ws=ws-recoverable status=WAITING_FOR_RECOVERY explicit=true distinct=1 closed=1 failed=0
+skip ws=ws-running-selected status=RUNNING (not stopped or recoverable)
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.849 s -- in dev.dual.cli.SessionsReapCommandTest
+[INFO] Running dev.dual.cli.SummaryCommandTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.888 s -- in dev.dual.cli.SummaryCommandTest
+[INFO] Running dev.dual.cli.ProjectionsRefreshCommandTest
+Workstream ledger not found: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-14634630088960718808/.agent/workstreams/ws-missing/workflow/current.json
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.585 s -- in dev.dual.cli.ProjectionsRefreshCommandTest
+[INFO] Running dev.dual.cli.WatchCommandTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.076 s -- in dev.dual.cli.WatchCommandTest
+[INFO] Running dev.dual.cli.ReviewPacketCliHintsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.555 s -- in dev.dual.cli.ReviewPacketCliHintsTest
+[INFO] Running dev.dual.cli.TimelineCommandTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.112 s -- in dev.dual.cli.TimelineCommandTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 94, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ------------------------< dev.dual:dual-server >------------------------
+[INFO] Building dual-server 0.1.0-SNAPSHOT                                [9/9]
+[INFO]   from dual-server/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-server ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-server ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 7 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-server ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 20 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-server ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-server ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 14 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-server ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.server.DualServerApplicationContextTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.4)
+
+2026-10-06T23:49:00.330+08:00  INFO 42012 --- [           main] o.a.maven.surefire.booter.ForkedBooter   : Starting ForkedBooter v3.5.2 using Java 25.0.3 with PID 42012 (started by kriswang in /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server)
+2026-10-06T23:49:00.331+08:00  INFO 42012 --- [           main] o.a.maven.surefire.booter.ForkedBooter   : No active profile set, falling back to 1 default profile: "default"
+2026-10-06T23:49:00.826+08:00  INFO 42012 --- [           main] o.a.maven.surefire.booter.ForkedBooter   : Started ForkedBooter in 0.622 seconds (process running for 0.897)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.692 s -- in dev.dual.server.DualServerApplicationContextTest
+[INFO] Running dev.dual.server.DeliveryViewServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.631 s -- in dev.dual.server.DeliveryViewServiceTest
+[INFO] Running dev.dual.server.BackgroundSchedulerServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.server.BackgroundSchedulerServiceTest
+[INFO] Running dev.dual.server.WorkstreamActionServiceTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.942 s -- in dev.dual.server.WorkstreamActionServiceTest
+[INFO] Running dev.dual.server.WorkspaceRegistryServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.093 s -- in dev.dual.server.WorkspaceRegistryServiceTest
+[INFO] Running dev.dual.server.WorkspaceBrowseControllerTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.server.WorkspaceBrowseControllerTest
+[INFO] Running dev.dual.server.SchedulerApiControllerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.server.SchedulerApiControllerTest
+[INFO] Running dev.dual.server.ServerLedgerFactoryTest
+D08 ServerLedgerFactory: property=null, environment=null, effective=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=42012
+D08 ServerLedgerFactory: property=liteflow, environment=null, effective=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=42012
+D08 ServerLedgerFactory: property=builtin, environment=null, effective=dev.dual.core.flow.BuiltInFlowOrchestrationKernel, loader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, pid=42012
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.207 s -- in dev.dual.server.ServerLedgerFactoryTest
+[INFO] Running dev.dual.server.StaticConsoleProjectionBoundaryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in dev.dual.server.StaticConsoleProjectionBoundaryTest
+[INFO] Running dev.dual.server.SchedulerPolicyTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.server.SchedulerPolicyTest
+[INFO] Running dev.dual.server.SchedulerServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.159 s -- in dev.dual.server.SchedulerServiceTest
+[INFO] Running dev.dual.server.WorkstreamApiControllerTest
+[ERROR] Tests run: 29, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 5.918 s <<< FAILURE! -- in dev.dual.server.WorkstreamApiControllerTest
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.overviewReturnsTraceSummary -- Time elapsed: 0.208 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <ACCEPT_WITH_NOTES> but was: <none>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.server.WorkstreamApiControllerTest.overviewReturnsTraceSummary(WorkstreamApiControllerTest.java:238)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.server.NotificationServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.server.NotificationServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   WorkstreamApiControllerTest.overviewReturnsTraceSummary:238 expected: <ACCEPT_WITH_NOTES> but was: <none>
+[INFO] 
+[ERROR] Tests run: 77, Failures: 1, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.050 s]
+[INFO] dual-core .......................................... SUCCESS [  1.580 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  8.445 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  1.539 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  1.024 s]
+[INFO] dual-runtime ....................................... SUCCESS [06:53 min]
+[INFO] dual-adapter-acpx .................................. SUCCESS [07:40 min]
+[INFO] dual-cli ........................................... SUCCESS [  7.548 s]
+[INFO] dual-server ........................................ FAILURE [ 12.177 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  15:06 min
+[INFO] Finished at: 2026-10-06T23:49:11+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project dual-server: There are test failures.
+[ERROR] 
+[ERROR] See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-server

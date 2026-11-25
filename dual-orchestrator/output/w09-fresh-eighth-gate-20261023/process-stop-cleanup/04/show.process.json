@@ -1,0 +1,12 @@
+{
+  "pid": 84488,
+  "argv": [
+    "rtk",
+    "proxy",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+    "claude",
+    "sessions",
+    "show",
+    "claude-main-ws-20261023T005431Z-9YYF-run-1792718732583"
+  ]
+}

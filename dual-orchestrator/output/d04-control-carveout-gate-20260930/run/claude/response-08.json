@@ -1,0 +1,11 @@
+{
+  "id": "bash_legal_write",
+  "name": "Bash",
+  "input": {
+    "command": "/usr/bin/printf LEGAL > /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/legal-parent.txt",
+    "timeout": 5000,
+    "description": "Bounded fixture legal_write",
+    "run_in_background": false
+  },
+  "type": "tool_use"
+}

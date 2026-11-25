@@ -1,0 +1,25 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-context-design_codex_arch_review-014",
+  "nodeDefinitionId" : "context.design_codex_arch_review",
+  "kind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "READY",
+  "stageId" : "stage-context",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/design-claude.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/design-claude.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/design-claude.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-design-claude_design-013-run-1791641578962/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/design-claude.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "required" : true,
+    "source_node_instance_id" : "node-design-claude_design-013",
+    "source_node_sha256" : "2ff147197ecb2d0003f6087a1bb3ef37e8fcc69f74145347a8f0f99394f6ae3f",
+    "purpose" : "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs" : [ ],
+  "result" : { },
+  "runRef" : null,
+  "latestExecutionId" : "",
+  "startedAt" : null,
+  "finishedAt" : null
+}

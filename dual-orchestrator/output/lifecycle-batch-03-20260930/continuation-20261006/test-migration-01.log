@@ -1,0 +1,157 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] dual-cli                                                           [jar]
+[INFO] dual-server                                                        [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/9]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/9]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 68 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 24 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java使用了未经检查或不安全的操作。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/9]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/LiteFlowLedgerBoundaryTest.java:[202,16] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+      (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/LiteFlowLifecycleIsolationTest.java:[136,21] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+      (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/LiteFlowLifecycleIsolationTest.java:[137,21] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+      (实际参数列表和形式参数列表长度不同)
+[INFO] 3 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.168 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  1.325 s]
+[INFO] dual-flow-liteflow ................................. FAILURE [  0.135 s]
+[INFO] dual-adapter-git ................................... SKIPPED
+[INFO] dual-runtime ....................................... SKIPPED
+[INFO] dual-adapter-acpx .................................. SKIPPED
+[INFO] dual-cli ........................................... SKIPPED
+[INFO] dual-server ........................................ SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.776 s
+[INFO] Finished at: 2026-10-06T17:09:38+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile (default-testCompile) on project dual-flow-liteflow: Compilation failure: Compilation failure: 
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/LiteFlowLedgerBoundaryTest.java:[202,16] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/LiteFlowLifecycleIsolationTest.java:[136,21] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/LiteFlowLifecycleIsolationTest.java:[137,21] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-flow-liteflow

@@ -1,0 +1,45 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261022T150557Z-Y2KB",
+    "workflowInstanceId": "wf-ws-20261022T150557Z-Y2KB",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-intake-claude_brainstorm-002"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000002",
+    "updatedAt": "2026-10-22T15:19:47.472067Z",
+    "commitSequence": 5
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-intake-claude_brainstorm-002",
+    "nodeDefinitionId": "intake.claude_brainstorm",
+    "kind": "TASK",
+    "handlerType": "acpx.agent_run",
+    "status": "READY",
+    "stageId": "stage-intake",
+    "iterationId": "iter-001",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261022T150557Z-Y2KB/context/node-context-intake_claude_brainstorm-001.md"
+    ],
+    "inputTransition": {
+      "purpose": "Seed the first Claude intake run with repo-scope context.",
+      "source_node_sha256": "09f6576c6552df54198a4a9dd6b06ccb5cbf6599181b845fe716a616c32342c2",
+      "source_node_instance_id": "node-context-intake_claude_brainstorm-001",
+      "required": true,
+      "transition_type": "normal",
+      "condition": "unconditional"
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 1.604
+}

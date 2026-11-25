@@ -1,0 +1,102 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261010T085617Z-8SVF",
+  "runId" : "run-1791622684632",
+  "nodeId" : "intake.claude_brainstorm",
+  "agent" : "claude",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "promptPath" : "/private/tmp/dual-w09-newlines-20261010-fresh-02/worktree/.agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/prompts/intake-claude-brainstorm.md",
+  "totalBytes" : 16748,
+  "totalEstimatedTokens" : 4187,
+  "sections" : [ {
+    "name" : "workspace_guard",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "workspace-guard",
+    "bytes" : 562,
+    "estimatedTokens" : 141,
+    "sha256" : "c3dc9ee8fc416374552198d994b3e26111ad13dbefaee60d5b374bd1e7c25c09",
+    "includedReason" : "execution safety boundary",
+    "required" : true
+  }, {
+    "name" : "language_policy",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "language-policy",
+    "bytes" : 244,
+    "estimatedTokens" : 61,
+    "sha256" : "d20252d3644a0521308cb5b24f421c899463b6078aece0141858ed2ed32f50d5",
+    "includedReason" : "output language policy",
+    "required" : true
+  }, {
+    "name" : "structured_artifact_field_semantics",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "structured-artifact-field-semantics",
+    "bytes" : 0,
+    "estimatedTokens" : 0,
+    "sha256" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "includedReason" : "structured artifact field semantics",
+    "required" : false
+  }, {
+    "name" : "template_static_frame",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "dev/dual/adapter/acpx/prompts/intake-claude-brainstorm.md",
+    "bytes" : 4745,
+    "estimatedTokens" : 1187,
+    "sha256" : "aa15f612101fec91643e085649eaa774795ef5e1641405bf3ed43e7594ddb3f8",
+    "includedReason" : "prompt skeleton instructions",
+    "required" : true
+  }, {
+    "name" : "requirement",
+    "sourceType" : "requirement",
+    "sourceRef" : ".agent/workstreams/ws-20261010T085617Z-8SVF/requirement.md",
+    "bytes" : 1190,
+    "estimatedTokens" : 298,
+    "sha256" : "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+    "includedReason" : "task requirement",
+    "required" : true
+  }, {
+    "name" : "context_package",
+    "sourceType" : "context_package",
+    "sourceRef" : ".agent/workstreams/ws-20261010T085617Z-8SVF/context/node-context-intake_claude_brainstorm-001.md,.agent/workstreams/ws-20261010T085617Z-8SVF/context/agent-governance-node-intake-claude_brainstorm-002-run-1791622684632.md",
+    "bytes" : 5678,
+    "estimatedTokens" : 1420,
+    "sha256" : "bc56de97f79f9dfcb1d0e246815bf75539931933bfeaa87d75662eb435740b62",
+    "includedReason" : "prior artifacts / assembled context",
+    "required" : true
+  }, {
+    "name" : "read_reuse_contract",
+    "sourceType" : "read_reuse_contract",
+    "sourceRef" : ".agent/workstreams/ws-20261010T085617Z-8SVF/context/node-context-intake_claude_brainstorm-001.md,.agent/workstreams/ws-20261010T085617Z-8SVF/context/agent-governance-node-intake-claude_brainstorm-002-run-1791622684632.md",
+    "bytes" : 1049,
+    "estimatedTokens" : 263,
+    "sha256" : "dc80308c2d482cdc7f6308ef25a8c51c97b0d727b9f73fa15abbf293128c14c1",
+    "includedReason" : "typed memory read-reuse projection",
+    "required" : true
+  }, {
+    "name" : "contract_review_principles",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "contract-review-principles.md",
+    "bytes" : 1996,
+    "estimatedTokens" : 499,
+    "sha256" : "255a1af39f7d8cc79006c28508b0833b7f25c8a60ef50ec52fbd956a5947a5f8",
+    "includedReason" : "review principles",
+    "required" : true
+  }, {
+    "name" : "prompt_contract",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "ContractRegistry:intake.claude_brainstorm",
+    "bytes" : 3685,
+    "estimatedTokens" : 922,
+    "sha256" : "84ef7005abd4062a837358fa01580bb413def678b806f484fadee0bbea4a7482",
+    "includedReason" : "strict agent result envelope",
+    "required" : true
+  }, {
+    "name" : "external_research_discipline",
+    "sourceType" : "permission_policy_projection",
+    "sourceRef" : "contract_discovery",
+    "bytes" : 521,
+    "estimatedTokens" : 131,
+    "sha256" : "518335f6aed4ae3d471ead53c2a92286330b234a02bc3fd4cbdd7a5b3cf27867",
+    "includedReason" : "guide provider behavior without replacing adapter enforcement",
+    "required" : true
+  } ]
+}

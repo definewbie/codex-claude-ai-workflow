@@ -1,0 +1,28 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-implement-self_test_decision-022",
+  "nodeDefinitionId" : "implement.self_test_decision",
+  "kind" : "DECISION",
+  "handlerType" : "review.decision",
+  "status" : "COMPLETED",
+  "stageId" : "stage-implement",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-021-run-1789315563945/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-021-run-1789315563945/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315563945/outputs/implement-claude-self-test.contract.json" ],
+  "result" : {
+    "decision" : "SELF_TEST_COMPLETE",
+    "source" : "contract-sidecar",
+    "summary" : "Self-test passed.",
+    "continuation_kind" : "COMPLETE"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315574413-459210d3",
+  "startedAt" : "2026-09-13T16:06:14.423782Z",
+  "finishedAt" : "2026-09-13T16:06:14.441818Z"
+}

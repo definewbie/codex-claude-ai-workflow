@@ -1,0 +1,76 @@
+{
+  "scope": "Read-only option assessment, not an assembled Gate or run authorization",
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-plan-decision-026"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000026",
+    "updatedAt": "2026-10-23T03:02:20.392823Z",
+    "commitSequence": 100
+  },
+  "active_nodes": [
+    {
+      "nodeInstanceId": "node-plan-decision-026",
+      "nodeDefinitionId": "plan.decision",
+      "status": "READY"
+    }
+  ],
+  "pending_mutations": 0,
+  "frozen_identity": {
+    "result": "PASS_READ_ONLY",
+    "source_inputs": 659,
+    "application_jars": 2
+  },
+  "accounting": {
+    "actual_tokens": 848242,
+    "completed_requests": 10,
+    "all_completed_runs_may_succeed": true,
+    "recorded_step_active_seconds": 1253.416,
+    "time_scope": "Step receipt subtotal only; assembly must account for other chargeable active operations and continuation preparation, never reset timer"
+  },
+  "next_model_planning": {
+    "input": {
+      "actual_tokens": 848242,
+      "completed_calls": 10,
+      "active_seconds": 1253.416,
+      "remaining_mainline": [
+        "implement.claude_implement",
+        "implement.claude_self_test_report",
+        "acceptance.codex_verifier_review"
+      ],
+      "new_extra_calls": [],
+      "measurement_complete": true,
+      "external_pending": false
+    },
+    "result": {
+      "result": "ALLOW_BUDGET_ONLY",
+      "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+      "required_token_reserve": 600000,
+      "required_call_reserve": 4,
+      "remaining_tokens": 851758,
+      "remaining_calls": 8,
+      "warning": false
+    },
+    "headroom_after_reserved_tail": 251758,
+    "not_authority": "Next actual node is plan.decision, not implement. Normal qualification/contract/approval and actual path still apply."
+  },
+  "original_stop_marker": {
+    "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/stop-required.json",
+    "sha256": "b0d1e123671e6f220469254109de3065a823eecf93dbc060be623b26d594fbcc",
+    "unchanged": true
+  },
+  "original_launch_identity": {
+    "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/launch-identity.json",
+    "sha256": "0ea44203e4f0d61b5025cebd0c7213261833279cf58fd7a3d22282164f287948"
+  },
+  "no_launch": true,
+  "no_ledger_writes": true,
+  "no_case_created": true
+}

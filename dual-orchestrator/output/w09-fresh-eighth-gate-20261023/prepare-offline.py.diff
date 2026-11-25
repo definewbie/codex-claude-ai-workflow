@@ -1,0 +1,85 @@
+--- /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-startup-offline-fix-20261023/prepare-offline.py.candidate
++++ /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/prepare-offline.py
+@@ -17,21 +17,24 @@
+ from gate_support import OUT, ROOT, read, write, sha, frozen_check, measure, planning
+ from check_budget import check
+ 
+-OLD = ROOT / 'output/w09-fresh-seventh-gate-20261016'
+-PARENT = Path('/private/tmp/dual-w09-newlines-20261022-offline-07')
++OLD = ROOT / 'output/w09-seventh-gate-calibrated-20261022'
++PARENT = Path('/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023')
+ auth = read(OUT / 'run-authorization.json')
+ assert auth['offline_preparation_authorized'] and auth['fresh_run_authorized'] is False
+ assert not PARENT.exists(), 'Do not overwrite or restore an old fixture'
+ release = frozen_check()
+ assert len(release['source_inputs']) == 659
+-old_manifest = read(OLD / 'material-sha256.json')['files']
+-assert all(sha(OLD / p) == h for p, h in old_manifest.items())
++old_manifest = read(OUT / 'history-before-sha256.json')['files']
++assert all(sha(p) == h for p, h in old_manifest.items())
+ write(OUT / 'before-source-sha256.json', {p: sha(ROOT / p) for p in release['source_inputs']})
+ 
+-# Current candidates are recorded as observations, not silently declared
+-# equivalent to changed old bytes. CC must assess the two reported differences.
+-prior = read(OLD / 'launch-identity.json')['config_and_installed_sources']
++# Preserve the reviewed launch baseline and add the actually observed SDK.
++prior = dict(read(OLD / 'launch-identity.json')['config_and_installed_sources'])
++sdk = read(OUT / 'observed-sdk-identity.json')
++prior[sdk['observed_sdk_executable']['path']] = sdk['observed_sdk_executable']['sha256']
++prior[sdk['package']['path']] = sdk['package']['sha256']
+ current_candidates = {p: sha(p) for p in prior}
++assert current_candidates == prior, 'Selected configuration/installed bytes drifted'
+ explicit = dict(read(OLD / 'local-launch-selection.json')['explicit_child_environment'])
+ explicit['DUAL_OPERATOR_REGISTRY'] = str(PARENT / 'operator-workspaces.json')
+ environment = os.environ.copy()
+@@ -61,10 +64,10 @@
+ # before instance lookup, step creation or any Java/provider execution.
+ command('unauthorized-runner', [sys.executable, '-B', str(OUT/'run-one-step.py'),
+                                'unauthorized-offline', 'intake.claude_brainstorm'], OUT, 1)
+-assert 'Fresh seventh requires new human authorization' in (OUT/'unauthorized-runner.stderr.txt').read_text()
++assert 'Fresh eighth requires new human authorization' in (OUT/'unauthorized-runner.stderr.txt').read_text()
+ assert not (OUT/'steps').exists() and not PARENT.exists()
+ 
+-old_execution = read(OLD/'old-execution-recheck.json')
++old_execution = read(OUT/'prior-executions.json')
+ session_checks = []
+ for row in old_execution['sessions']:
+     path = Path.home()/'.acpx/sessions'/(row['record_id']+'.json')
+@@ -74,10 +77,11 @@
+ pid_checks = []
+ process_observation = require_known_pids_absent([row['pid'] for row in old_execution['known_pids']])
+ pid_checks = [dict(pid=pid, absent=True) for pid in process_observation['checked_pids']]
++write(OUT/'prepare-process-observation.json', process_observation)
+ write(OUT/'old-execution-recheck.json', dict(sessions=session_checks, known_pids=pid_checks,
+     scope='Known names/PIDs only; no native session command or arbitrary child-stop claim'))
+ 
+-PARENT.mkdir()
++PARENT.mkdir(parents=True)
+ target, workspace = PARENT/'target', PARENT/'worktree'
+ target.mkdir()
+ command('git-init', ['git','init','-b','main'], target)
+@@ -85,7 +89,7 @@
+         'commit','--allow-empty','-m','Initialize offline Dual verification fixture'], target)
+ command('start', ['java','-Xlog:class+load=debug:file='+str(OUT/'start-classloading.log')+':uptime,level,tags',
+     '-jar',release['application_jars']['dual-cli']['path'],'start','--workdir='+str(target),
+-    '--worktree-dir='+str(workspace),'--branch=codex/w09-newlines-20261022-offline-07',
++    '--worktree-dir='+str(workspace),'--branch=codex/w09-newlines-20261023-offline-08',
+     '--workflow-variant=terminal-delivery','--prompt-language=zh-CN',
+     '--task-file='+str(OUT/'task-requirement.md')])
+ ledgers = list((workspace/'.agent/workstreams').iterdir())
+@@ -129,12 +133,12 @@
+     status='PASS_OFFLINE_PRECONDITIONS_AWAITING_RUN_APPROVAL',
+     run_authorized=False, source_inputs_match=659, fresh_initialization='PASS', location=location,
+     runtime_identity=identity, actual_router_execution='NOT_RUN', native_tool_execution='NOT_RUN',
+-    selected_client_config_drift='REQUIRES_CC_AFFECTED_REVIEW; not an equivalence or compatibility claim',
++    selected_client_config_drift='NO_BYTE_DRIFT; SDK identity added from actual prior observation, future selection/compatibility NOT_RUN',
+     native_model_calls=0,native_sessions_created=0,business_approvals=0))
+ assert all(sha(p) == h for p, h in current_candidates.items()), 'Selected configuration changed during preparation'
+ write(OUT/'current-config-and-installed-sources.json', current_candidates)
+ after = {p:sha(ROOT/p) for p in release['source_inputs']}
+ assert read(OUT/'before-source-sha256.json') == after
+ write(OUT/'after-source-sha256.json', after)
+-assert all(sha(OLD/p) == h for p,h in old_manifest.items()), 'Original prepared material changed'
+-print('Offline initialization/checks complete; client/config differences need review; zero provider dispatch; authorization FALSE')
++assert all(sha(p) == h for p,h in old_manifest.items()), 'Original prepared material changed'
++print('Offline initialization/checks complete; actual SDK baseline recorded; zero provider dispatch; authorization FALSE')

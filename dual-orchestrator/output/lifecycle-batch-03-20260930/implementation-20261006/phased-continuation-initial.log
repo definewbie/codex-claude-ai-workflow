@@ -1,0 +1,53 @@
+
+Test run finished after 1138 ms
+[         4 containers found      ]
+[         0 containers skipped    ]
+[         4 containers started    ]
+[         0 containers aborted    ]
+[         4 containers successful ]
+[         0 containers failed     ]
+[        10 tests found           ]
+[         0 tests skipped         ]
+[        10 tests started         ]
+[         0 tests aborted         ]
+[         8 tests successful      ]
+[         2 tests failed          ]
+
+
+Failures (2):
+  JUnit Jupiter:PhasedContractContinuationTest:missingReadinessCanBeRecordedRevisedReviewedApprovedAndConsumed()
+    MethodSource [className = 'dev.dual.runtime.handler.PhasedContractContinuationTest', methodName = 'missingReadinessCanBeRecordedRevisedReviewedApprovedAndConsumed', methodParameterTypes = '']
+    => java.io.IOException: AUTHORED_CONTEXT_INVALID
+       dev.dual.runtime.handler.AuthoredExecutionContext.prepare(AuthoredExecutionContext.java:37)
+       dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.output(PhasedContractContinuationTest.java:102)
+       dev.dual.runtime.handler.PhasedContractContinuationTest$Flow$1.execute(PhasedContractContinuationTest.java:87)
+       dev.dual.runtime.WorkflowRuntime.executeNode(WorkflowRuntime.java:374)
+       dev.dual.runtime.WorkflowRuntime.lambda$executeAndRecordNode$0(WorkflowRuntime.java:346)
+       [...]
+     Caused by: java.lang.IllegalArgumentException: required_contract_phase is missing: design.claude_design
+       dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+       dev.dual.runtime.handler.AuthoredStageLineageResolver.prepare(AuthoredStageLineageResolver.java:139)
+       dev.dual.runtime.handler.AuthoredExecutionContext.prepare(AuthoredExecutionContext.java:31)
+       [...]
+  JUnit Jupiter:PhasedContractContinuationTest:dependencyDriftBeforeApprovalRejectsWithoutDecisionOrDispatch()
+    MethodSource [className = 'dev.dual.runtime.handler.PhasedContractContinuationTest', methodName = 'dependencyDriftBeforeApprovalRejectsWithoutDecisionOrDispatch', methodParameterTypes = '']
+    => java.io.IOException: AUTHORED_CONTEXT_INVALID
+       dev.dual.runtime.handler.AuthoredExecutionContext.prepare(AuthoredExecutionContext.java:37)
+       dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.output(PhasedContractContinuationTest.java:102)
+       dev.dual.runtime.handler.PhasedContractContinuationTest$Flow$1.execute(PhasedContractContinuationTest.java:87)
+       dev.dual.runtime.WorkflowRuntime.executeNode(WorkflowRuntime.java:374)
+       dev.dual.runtime.WorkflowRuntime.lambda$executeAndRecordNode$0(WorkflowRuntime.java:346)
+       [...]
+     Caused by: java.lang.IllegalArgumentException: required_contract_phase is missing: design.claude_design
+       dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase(TaskContractProjectionVerifier.java:48)
+       dev.dual.runtime.handler.AuthoredStageLineageResolver.prepare(AuthoredStageLineageResolver.java:139)
+       dev.dual.runtime.handler.AuthoredExecutionContext.prepare(AuthoredExecutionContext.java:31)
+       [...]
+Traceback (most recent call last):
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/implementation-20261006/run-focused-tests.py", line 19, in <module>
+    subprocess.run(['java','-cp',cp,'FocusedTests','dev.dual.runtime.handler.VerificationReadinessTest','dev.dual.runtime.handler.ReadinessRoutingDefinitionTest','dev.dual.runtime.handler.PhasedContractContinuationTest'],check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['java', '-cp', '/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/lifecycle-batch-03-20260930/implementation-20261006/focused-classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target/test-classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target/classes:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/target/classes:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.18.3/jackson-databind-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.18.3/jackson-annotations-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.3/jackson-core-2.18.3.jar:/Users/kriswang/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.3/jackson-datatype-jsr310-2.18.3.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter/5.11.4/junit-jupiter-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.11.4/junit-jupiter-api-5.11.4.jar:/Users/kriswang/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-commons/1.11.4/junit-platform-commons-1.11.4.jar:/Users/kriswang/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.11.4/junit-jupiter-params-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.11.4/junit-jupiter-engine-5.11.4.jar:/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-engine/1.11.4/junit-platform-engine-1.11.4.jar::/Users/kriswang/.m2/repository/org/junit/platform/junit-platform-launcher/1.11.4/junit-platform-launcher-1.11.4.jar', 'FocusedTests', 'dev.dual.runtime.handler.VerificationReadinessTest', 'dev.dual.runtime.handler.ReadinessRoutingDefinitionTest', 'dev.dual.runtime.handler.PhasedContractContinuationTest']' returned non-zero exit status 1.

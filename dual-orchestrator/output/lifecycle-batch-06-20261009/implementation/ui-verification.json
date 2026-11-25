@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "kind": "Node VM projection and form probes, not browser visual proof",
+  "checks": [
+    {
+      "surface": "console",
+      "tests": [
+        "no-current-action-zero-post",
+        "cancelled-stop-zero-post",
+        "explicit-authorize-keeps-owner-binding",
+        "close-only-does-not-assert-stop"
+      ],
+      "pass": true
+    },
+    {
+      "surface": "mgt",
+      "tests": [
+        "no-current-action-zero-post",
+        "cancelled-stop-zero-post",
+        "explicit-authorize-keeps-owner-binding",
+        "close-only-does-not-assert-stop"
+      ],
+      "pass": true
+    }
+  ]
+}

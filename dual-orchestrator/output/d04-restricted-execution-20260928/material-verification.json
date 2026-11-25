@@ -1,0 +1,27 @@
+{
+  "baselineFiles": 1319,
+  "unchangedFiles": 1316,
+  "changed": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "addedOutsideEvidence": [],
+  "nativeCases": 16,
+  "nativeStatus": "PASS_NATIVE_SLICE",
+  "modelStatus": "INVALID_TOOL_RUNTIME",
+  "modelCommandEvents": 0,
+  "modelUsage": [
+    {
+      "input_tokens": 27376,
+      "cached_input_tokens": 13440,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 236,
+      "reasoning_output_tokens": 72
+    }
+  ],
+  "identitiesUnchanged": true,
+  "localLinksValid": true,
+  "productImplementation": false,
+  "D04Frozen": false
+}

@@ -1,0 +1,35 @@
+{
+  "preparation_date": "2026-10-16 Asia/Shanghai",
+  "release_source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015",
+  "observer_source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015/observer-candidate",
+  "budget_and_runner_source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-sixth-gate-20261015",
+  "product_requirement_sha256": "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+  "copies": [
+    {
+      "path": "gate_support.py",
+      "sha256": "22b709c9e5fa22abd7fdc9059ad9a988a8b8923d1600aa477f91f3f191ec09d5"
+    },
+    {
+      "path": "test_gate_observer.py",
+      "sha256": "5d6a067af41aa8944b4dbd482dac43e9c017920376223d1fe662f2d03e580232"
+    },
+    {
+      "path": "check_budget.py",
+      "sha256": "a10c4c098d4d00f4a7f84d5dba1b6baf8b3b6ea8f76fbd7277c7de66e639d5c6"
+    },
+    {
+      "path": "run-one-step.py",
+      "sha256": "a4ce16d7999624dc86a329db32aac460dfd63ad71e5bcc686ab4d653781bcfdb"
+    }
+  ],
+  "production_changes": false,
+  "native_patch_changes": false,
+  "extra_agents": 0,
+  "real_provider_calls": 0,
+  "sixth_recovered": false,
+  "seventh_real_run_authorized": false,
+  "runner_adaptations": [
+    "sixth to seventh authority identity",
+    "accept actual offline-ready preflight status; authorization stays independent"
+  ]
+}

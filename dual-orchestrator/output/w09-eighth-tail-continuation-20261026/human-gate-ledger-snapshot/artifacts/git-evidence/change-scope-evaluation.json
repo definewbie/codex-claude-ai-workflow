@@ -1,0 +1,24 @@
+{
+  "schemaVersion" : 1,
+  "status" : "PASS",
+  "actualChanges" : [ {
+    "path" : "README.md",
+    "operation" : "CREATE",
+    "previousPath" : null,
+    "rawStatus" : "A"
+  }, {
+    "path" : "src/normalize_text.py",
+    "operation" : "CREATE",
+    "previousPath" : null,
+    "rawStatus" : "A"
+  }, {
+    "path" : "tests/test_normalize_text.py",
+    "operation" : "CREATE",
+    "previousPath" : null,
+    "rawStatus" : "A"
+  } ],
+  "matchedPaths" : [ "README.md", "src/normalize_text.py", "tests/test_normalize_text.py" ],
+  "missingDeclared" : [ ],
+  "violations" : [ ],
+  "error" : null
+}

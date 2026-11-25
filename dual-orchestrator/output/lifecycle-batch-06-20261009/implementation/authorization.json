@@ -1,0 +1,12 @@
+{
+  "recorded_at": "2026-10-09T18:33:14.282907+08:00",
+  "source": "Current human message: 授权, in response to B06 implementation/offline-verification scope",
+  "target": "P0 W06 complete delivery/recovery path",
+  "definition": "Frozen D09 protocol plus review LOW dispositions",
+  "status": "AUTHORIZED_IN_PROGRESS",
+  "source_inputs": 653,
+  "native_provider_authorized": false,
+  "git_target_deployment_authorized": false,
+  "commits_authorized": false,
+  "agents_authorized": false
+}

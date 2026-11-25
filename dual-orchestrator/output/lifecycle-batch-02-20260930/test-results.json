@@ -1,0 +1,1937 @@
+{
+  "started_at_epoch": 1790772259.787704,
+  "command": "rtk proxy mvn -o test",
+  "execution_sandbox": "outside to permit existing test-owned process enumeration (same as B01)",
+  "live_provider_runs": 0,
+  "exit_code": 0,
+  "result": "PASS_OFFLINE_REACTOR",
+  "totals": {
+    "tests": 1559,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suite_count": 186,
+  "modules": {
+    "dual-adapter-acpx": {
+      "tests": 422,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-adapter-git": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-cli": {
+      "tests": 91,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-core": {
+      "tests": 118,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-flow-liteflow": {
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-ledger-file": {
+      "tests": 139,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-runtime": {
+      "tests": 690,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "dual-server": {
+      "tests": 76,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "tested_source_snapshot": "tested-source-sha256.json",
+  "tested_source_snapshot_sha256": "ab339972d07f77ddc1e3827ffa1726ab29c417ff6ed3957043e847e4f9486ee8",
+  "source_drift_after_run": [],
+  "independent_review": "PENDING",
+  "limitations": [
+    "Actual offline test JVM/factories, not production deployment topology attestation.",
+    "D06/D07 sessions, implicit constructors and runtime identity still incomplete; D08/W05 not closed.",
+    "No live provider/native run, no history recovery or commit.",
+    "Load/temporary-file I/O and holder.clean internal failure paths statically inspected, not individually fault-injected."
+  ],
+  "suites": [
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest.xml",
+      "sha256": "a1d96c6f144f0ea5a68f3b89b35b262ef59a38e154b7a57cfd79cbc358908917",
+      "name": "dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest",
+      "tests": 31,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.xml",
+      "sha256": "a4c738a0ee32f09fa9131c81422a6024ca91edf3653c3c58c127aec7eac17935",
+      "name": "dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest",
+      "tests": 49,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxAgentTransportTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxAgentTransportTest.xml",
+      "sha256": "07c8987133521bf70838b5b226990e22bd73cfb089a26b18c698ece5e3be8883",
+      "name": "dev.dual.adapter.acpx.AcpxAgentTransportTest",
+      "tests": 44,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxExecutionEventTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxExecutionEventTest.xml",
+      "sha256": "a23ea374778c291e61aee430fd6cbe7e270332faa8fa5139a00c4ce56ad47d8a",
+      "name": "dev.dual.adapter.acpx.AcpxExecutionEventTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxExecutionFactOwnershipBoundaryTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxExecutionFactOwnershipBoundaryTest.xml",
+      "sha256": "3678440d174758baa89816d3cd6c514576205bb82d7102d111c096ec272e9616",
+      "name": "dev.dual.adapter.acpx.AcpxExecutionFactOwnershipBoundaryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxFailureSignalCatalogTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxFailureSignalCatalogTest.xml",
+      "sha256": "06c839886dc1a6e223a3be9ba0488c3615e40f619c061b31fefd3fc6b1b83d24",
+      "name": "dev.dual.adapter.acpx.AcpxFailureSignalCatalogTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxProcessCleanupPolicyTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxProcessCleanupPolicyTest.xml",
+      "sha256": "03343484bab8f6e83f58dd6c7aa4bdb051e9b687d071456321552d648a44a758",
+      "name": "dev.dual.adapter.acpx.AcpxProcessCleanupPolicyTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxProviderMetadataTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxProviderMetadataTest.xml",
+      "sha256": "fbb7146cffa0dc22e56731a1b3b0e80884e221c5dcd73e14d9cc7e0916a35141",
+      "name": "dev.dual.adapter.acpx.AcpxProviderMetadataTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxSessionLifecycleTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxSessionLifecycleTest.xml",
+      "sha256": "5890a7b5818c5954eef4141b333c5af0f065901e2824597b319b3194445537a1",
+      "name": "dev.dual.adapter.acpx.AcpxSessionLifecycleTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest.xml",
+      "sha256": "4438487128865ed54ae34532d7ea2e69f384791cb470b050b2bddfd61278b3c1",
+      "name": "dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxTranscriptToolUsageReaderTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxTranscriptToolUsageReaderTest.xml",
+      "sha256": "bc125c4dbc38b73c68827c5e6b2c1ab0488662fa88619e4f40320c4e419a68aa",
+      "name": "dev.dual.adapter.acpx.AcpxTranscriptToolUsageReaderTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxUsageReaderTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxUsageReaderTest.xml",
+      "sha256": "a2a462b505b255cf0b075114a2509a298d53681b3fdb33e0cab9607e9863d5a1",
+      "name": "dev.dual.adapter.acpx.AcpxUsageReaderTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactoryTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactoryTest.xml",
+      "sha256": "dfefab8b7535e5d8f5be12326a4257acf320d443447052c00235f982dcebd8e6",
+      "name": "dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactoryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AgentExecutionHealthTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentExecutionHealthTest.xml",
+      "sha256": "48911584923e98c3fb4b5b186141291119e98ca1a677820a4757cd6fd832dd4e",
+      "name": "dev.dual.adapter.acpx.AgentExecutionHealthTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AgentLifecycleEventReaderTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentLifecycleEventReaderTest.xml",
+      "sha256": "8bb2835d258a7dfcc48835756d27f6f2dd909b7269eba2d3b4218c87d53f2eb5",
+      "name": "dev.dual.adapter.acpx.AgentLifecycleEventReaderTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AgentPromptRendererTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentPromptRendererTest.xml",
+      "sha256": "9e0ffee4c6550d66bc86886dfc2bc3080090fd442b0d72a7296d155b0365232a",
+      "name": "dev.dual.adapter.acpx.AgentPromptRendererTest",
+      "tests": 36,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AgentRunnerKindTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentRunnerKindTest.xml",
+      "sha256": "ce9b198cc23c4f50cf9b1aca1356b92eda6bc9c9df09f56e632b8dc8c01140bc",
+      "name": "dev.dual.adapter.acpx.AgentRunnerKindTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AuthoredManifestDispatchTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AuthoredManifestDispatchTest.xml",
+      "sha256": "8d2193ccf7cfb93522f24d128ef5e170e834094b3b53305df392eac70ef9ebce",
+      "name": "dev.dual.adapter.acpx.AuthoredManifestDispatchTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.xml",
+      "sha256": "e76a19fbd1bc95cc45e015842659cb43999664ad09e202bbf6c94e9b5c865eac",
+      "name": "dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.ClaudeExecutionPolicyTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ClaudeExecutionPolicyTest.xml",
+      "sha256": "b5e49e7f21d63c6b79c27ca847af13804fe975a6e5fb24f082717fbb5a167270",
+      "name": "dev.dual.adapter.acpx.ClaudeExecutionPolicyTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.ContextGovernanceActualReportWriterTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ContextGovernanceActualReportWriterTest.xml",
+      "sha256": "3c18567d47745dd86a0b5edcae4ddc9dcbcc44458ff2f0cde54515afc1d5ed6d",
+      "name": "dev.dual.adapter.acpx.ContextGovernanceActualReportWriterTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest.xml",
+      "sha256": "068af128bbda1be80fabc34d444d8eb7108e529b59bde8214d8e9b81b514dfc0",
+      "name": "dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.PromptManifestWriterTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.PromptManifestWriterTest.xml",
+      "sha256": "12afa34b854a65f7e1bf857e7c9e1ca29785d56fb551d4979508e18616d7163e",
+      "name": "dev.dual.adapter.acpx.PromptManifestWriterTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.PromptTemplateConsistencyTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.PromptTemplateConsistencyTest.xml",
+      "sha256": "66dff1b526a9407d0527abbe3d2ef3f8d096bacfb3199a4324c26a652b321e50",
+      "name": "dev.dual.adapter.acpx.PromptTemplateConsistencyTest",
+      "tests": 53,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.ReadFileSummaryTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ReadFileSummaryTest.xml",
+      "sha256": "e21ef988d124ffdbddd7412342fdbf3b2bb03e1b90ea54552548cf9d70483e7b",
+      "name": "dev.dual.adapter.acpx.ReadFileSummaryTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.RetryFailureContextSequenceTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.RetryFailureContextSequenceTest.xml",
+      "sha256": "279c72eda548ff643ed4bb728737e27855976cc52b0aa704e8f52a579f9da15f",
+      "name": "dev.dual.adapter.acpx.RetryFailureContextSequenceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.SessionCompactionPolicyTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.SessionCompactionPolicyTest.xml",
+      "sha256": "7b55ed390fa3c3c9c6a583ea66752ce275e958d6a855331c5319a16a340f851c",
+      "name": "dev.dual.adapter.acpx.SessionCompactionPolicyTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.SessionCompactionSignalTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.SessionCompactionSignalTest.xml",
+      "sha256": "6a7de3691ad179e2a383864e3f42cc2f5e7a56a6dd6b5319f0ad6aeb326a43be",
+      "name": "dev.dual.adapter.acpx.SessionCompactionSignalTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.SessionScopePolicyTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.SessionScopePolicyTest.xml",
+      "sha256": "b14f6fb5cd19f124f34e205f8fc2f4fb6f0b292d3463cc0da7908da54ae46d72",
+      "name": "dev.dual.adapter.acpx.SessionScopePolicyTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.ToolUsageCapabilityClassifierTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ToolUsageCapabilityClassifierTest.xml",
+      "sha256": "be893f1d0d745fc21b026e4492fd610ddc87f10cca373082d5ac1eab6b39bb1a",
+      "name": "dev.dual.adapter.acpx.ToolUsageCapabilityClassifierTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.xml",
+      "sha256": "c0f80f97f88ef8d52eec1f3374cb6698168f1986bcc6a31e2a66dfc4bd152670",
+      "name": "dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.xml",
+      "copy": "reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.xml",
+      "sha256": "45c42ca2408dc0bc41c7e0842963896a782b0e092e0c6eec84ef260f08a384bd",
+      "name": "dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-git/target/surefire-reports/TEST-dev.dual.adapter.git.GitPatchMergeServiceTest.xml",
+      "copy": "reports/dual-adapter-git/TEST-dev.dual.adapter.git.GitPatchMergeServiceTest.xml",
+      "sha256": "d947c5734d4db6c95f1963f036515b46bcc41ac3b48f5e0235ed7e1656b1799f",
+      "name": "dev.dual.adapter.git.GitPatchMergeServiceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-adapter-git/target/surefire-reports/TEST-dev.dual.adapter.git.GitWorkspaceServiceTest.xml",
+      "copy": "reports/dual-adapter-git/TEST-dev.dual.adapter.git.GitWorkspaceServiceTest.xml",
+      "sha256": "4e7e2164f1f25ad01908c03259e2fe98daaeda183c82377c9fd567d02708235e",
+      "name": "dev.dual.adapter.git.GitWorkspaceServiceTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.AutoRunCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.AutoRunCommandTest.xml",
+      "sha256": "e69721ff658a3eb2ff4ed967dbff6be971dd563a55d4f572ebe95c2119271b31",
+      "name": "dev.dual.cli.AutoRunCommandTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.CalibrationCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.CalibrationCommandTest.xml",
+      "sha256": "29a31006a42dd273336a7d87b71b36f7304ab54fbf4cc715dc8744ec63b1e715",
+      "name": "dev.dual.cli.CalibrationCommandTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.CliLedgerFactoryTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.CliLedgerFactoryTest.xml",
+      "sha256": "32e0ae5bd651dcdfac2575e1a862e87dd4a3fed0f9481073e8fbba41c878d396",
+      "name": "dev.dual.cli.CliLedgerFactoryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.CliNextActionHintsTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.CliNextActionHintsTest.xml",
+      "sha256": "e540f6182393038cbba8c00575a5720e0ea77b4e62f763c6c3296c989d0d5c58",
+      "name": "dev.dual.cli.CliNextActionHintsTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.DeliveryMergeCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.DeliveryMergeCommandTest.xml",
+      "sha256": "7d8af95273d75c483d91b2e24f031fae8d9b909a8fd76b4f84314916cc0d4f45",
+      "name": "dev.dual.cli.DeliveryMergeCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.DoctorCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.DoctorCommandTest.xml",
+      "sha256": "8234a2e9417434349d4a0a35bd98b2d41c4a205139c17f86f6477f20b625197a",
+      "name": "dev.dual.cli.DoctorCommandTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.InspectRunnerKindConsistencyTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.InspectRunnerKindConsistencyTest.xml",
+      "sha256": "f5a5dc5aec87104592230e7b95de876acfbac454fe40e042b2d61c10925ef2d6",
+      "name": "dev.dual.cli.InspectRunnerKindConsistencyTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.ProjectionsRefreshCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.ProjectionsRefreshCommandTest.xml",
+      "sha256": "6c2b3c851fdf4ddd0d4ceaa076677abd4eaf736df1752bf2cbe14e33dcc32b45",
+      "name": "dev.dual.cli.ProjectionsRefreshCommandTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.RecoveryCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.RecoveryCommandTest.xml",
+      "sha256": "ac066f0a39dbd67ca9976d4005a9ca5e07bddac3a34cac0a3bf953a57796e640",
+      "name": "dev.dual.cli.RecoveryCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.RecoveryNetworkCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.RecoveryNetworkCommandTest.xml",
+      "sha256": "974c2405776b6f437c09bec8cdc5633da7ce6f74c10478ee914409ceb13f9366",
+      "name": "dev.dual.cli.RecoveryNetworkCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.RecoveryShowCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.RecoveryShowCommandTest.xml",
+      "sha256": "e4dd15bdb33a2098ce3e535387b77b42621996f24fe580eeab711d835f9ce0e3",
+      "name": "dev.dual.cli.RecoveryShowCommandTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.RecoveryStaleCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.RecoveryStaleCommandTest.xml",
+      "sha256": "afbf5627f1711397e234325bf4214fb6746211fa6553e7c766ee1f596de584bd",
+      "name": "dev.dual.cli.RecoveryStaleCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.ResumeCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.ResumeCommandTest.xml",
+      "sha256": "aa3ac64947cc46f445b0dbe07072c0a20b9b7b507bbb41233e5e3c33a92e38b4",
+      "name": "dev.dual.cli.ResumeCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.RetryCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.RetryCommandTest.xml",
+      "sha256": "f13ee7c3a9b81c96b35ce9ca8ac78c2a5392678bf0958de052eaaaeeb6f05544",
+      "name": "dev.dual.cli.RetryCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.ReviewDecideCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.ReviewDecideCommandTest.xml",
+      "sha256": "d5a16e7a7958e19d249da4cbd1571f34eb4758080f9edf448986ab6a67d3f470",
+      "name": "dev.dual.cli.ReviewDecideCommandTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.ReviewPacketCliHintsTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.ReviewPacketCliHintsTest.xml",
+      "sha256": "d769ba29992ad38bbe5187ee06c233fd7cecdfa39ece1c1234f3f97886fb00f9",
+      "name": "dev.dual.cli.ReviewPacketCliHintsTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.ReviewRequestActionCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.ReviewRequestActionCommandTest.xml",
+      "sha256": "0e621d1760a41bf0c20eee071e415e2c37e80c44a2d5572cd0645b9e087e327d",
+      "name": "dev.dual.cli.ReviewRequestActionCommandTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.ReviewShowCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.ReviewShowCommandTest.xml",
+      "sha256": "92212b63e56434c0853861ec4ea9e75095f08c090f1d6176f4b67cbc63591771",
+      "name": "dev.dual.cli.ReviewShowCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.SessionsReapCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.SessionsReapCommandTest.xml",
+      "sha256": "7c177dd5cff1760ef2577679459679e27d65a0363d193873985ec570318829fa",
+      "name": "dev.dual.cli.SessionsReapCommandTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.StartCommandVariantTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.StartCommandVariantTest.xml",
+      "sha256": "5a765f310c759b56c6a9f243a0dd0e7342ba2f6ef22094360600b29c17725743",
+      "name": "dev.dual.cli.StartCommandVariantTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.StatusCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.StatusCommandTest.xml",
+      "sha256": "53cf0f2a72b787102c5f8e1c9d490010ffa7f34f6bffc1fc977bd500e7f0f5e9",
+      "name": "dev.dual.cli.StatusCommandTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.SummaryCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.SummaryCommandTest.xml",
+      "sha256": "471dbd640d7b124e7f7a80df5b6e557673c4347ed0c12a87b060070bc38b4287",
+      "name": "dev.dual.cli.SummaryCommandTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.TimelineCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.TimelineCommandTest.xml",
+      "sha256": "99b4b86e02305940b8291e474cf48fb7fefd3ccfa90aa7b21442f4ae2c194fe6",
+      "name": "dev.dual.cli.TimelineCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.TraceCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.TraceCommandTest.xml",
+      "sha256": "68b57fa2f32340da39123785956c81cc2087b063ceeb57aca1ac4d5f736c3fcc",
+      "name": "dev.dual.cli.TraceCommandTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.WatchCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.WatchCommandTest.xml",
+      "sha256": "a80c20d26dc9f006cb5c41bb8b06baaf6b65395e57c53acca442a8b4845a4439",
+      "name": "dev.dual.cli.WatchCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-cli/target/surefire-reports/TEST-dev.dual.cli.WorkflowPrintDefaultCommandTest.xml",
+      "copy": "reports/dual-cli/TEST-dev.dual.cli.WorkflowPrintDefaultCommandTest.xml",
+      "sha256": "5ac87914be6d76187ba572a275647c8cd6f89cb20e94e57f2f901856f6e98579",
+      "name": "dev.dual.cli.WorkflowPrintDefaultCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.arbitration.FailureClassificationTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.arbitration.FailureClassificationTest.xml",
+      "sha256": "886a25a66331a185201fa01ce572fa3c14a9ef7be3d2ea4e71649e390dbbc848",
+      "name": "dev.dual.core.arbitration.FailureClassificationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.contract.TaskContractTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.contract.TaskContractTest.xml",
+      "sha256": "6e0aee1f32203f2fad6df39ee01669fa81757fe46dc9834a47b5aca1ea2cab6e",
+      "name": "dev.dual.core.contract.TaskContractTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.domain.PromptLanguageTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.domain.PromptLanguageTest.xml",
+      "sha256": "7b77d22d3d10460c6eadfe0530a6dc6668e2f6dcc7e23bb350d3b25cd36e6ad7",
+      "name": "dev.dual.core.domain.PromptLanguageTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.execution.AgentExecutionAttemptTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionAttemptTest.xml",
+      "sha256": "ba86a29c7894619b5742bef3eb8c975840dea7ef543a3c30d1e66a2336e941d3",
+      "name": "dev.dual.core.execution.AgentExecutionAttemptTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.execution.AgentExecutionFinalizerTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionFinalizerTest.xml",
+      "sha256": "cb5b4a15fb539ebb19b6227cbd7547f1523b561ab762b049eb5e50fca4b68877",
+      "name": "dev.dual.core.execution.AgentExecutionFinalizerTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.execution.AgentExecutionOutcomeResolverTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionOutcomeResolverTest.xml",
+      "sha256": "8a324bfec763093d7f7129e2da5e6c1da3b4bf85a1d29745f24dead532b12b74",
+      "name": "dev.dual.core.execution.AgentExecutionOutcomeResolverTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.id.DualIdGeneratorTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.id.DualIdGeneratorTest.xml",
+      "sha256": "0f956cbeca46b4fdbae5358292c47cfee65a13d4dad752b969f09778abacf8ae",
+      "name": "dev.dual.core.id.DualIdGeneratorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.provider.ProviderBillingCsvCalibrationTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.provider.ProviderBillingCsvCalibrationTest.xml",
+      "sha256": "bbb4ac80fd1ce16ed6837e656f4cf94a3fe45f1d762c0fdb1ff37e1edbef1deb",
+      "name": "dev.dual.core.provider.ProviderBillingCsvCalibrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.provider.ProviderCachePolicyTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.provider.ProviderCachePolicyTest.xml",
+      "sha256": "9adeeb077b8102f66680736a111715f19ec652e3d8c7ac092d6f3ef2d8556430",
+      "name": "dev.dual.core.provider.ProviderCachePolicyTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.provider.ProviderPricingCatalogTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.provider.ProviderPricingCatalogTest.xml",
+      "sha256": "acf13b801e4cbb97efd3a172b08f09d0056c707fb335607dc8849db18c3bae33",
+      "name": "dev.dual.core.provider.ProviderPricingCatalogTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest.xml",
+      "sha256": "78aa7130b52acd4fe3e5cafae478f1baddac3a226e92ac4ba8c096accc731234",
+      "name": "dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.workflow.EdgeConditionTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.workflow.EdgeConditionTest.xml",
+      "sha256": "20f72d6dd7d027ce0c9352ba564a9cca19537d03c3b80f9ceb5c06bd9d535773",
+      "name": "dev.dual.core.workflow.EdgeConditionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.workflow.EdgeDefinitionTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.workflow.EdgeDefinitionTest.xml",
+      "sha256": "150736ae51f75533e802208be9c3bcfc86e40a8cedc5fc89620473b28e07a632",
+      "name": "dev.dual.core.workflow.EdgeDefinitionTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.workflow.HumanGateActionSemanticsTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.workflow.HumanGateActionSemanticsTest.xml",
+      "sha256": "95a15fce56b4d0bd3dbf8c5d7e98f815e5e5bfa1dc9b429921f5b34748b75a9d",
+      "name": "dev.dual.core.workflow.HumanGateActionSemanticsTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-core/target/surefire-reports/TEST-dev.dual.core.workflow.WorkflowDefinitionTest.xml",
+      "copy": "reports/dual-core/TEST-dev.dual.core.workflow.WorkflowDefinitionTest.xml",
+      "sha256": "0d379be1c27dd269f6bc802ffb0dd9e96b1ea55475a7c786d19f2053946612f6",
+      "name": "dev.dual.core.workflow.WorkflowDefinitionTest",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-flow-liteflow/target/surefire-reports/TEST-dev.dual.flow.liteflow.FlowKernelProviderTest.xml",
+      "copy": "reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.FlowKernelProviderTest.xml",
+      "sha256": "21c1cee5694619eaa43fef18d6d548981f99d4c23e4e7080a5199e7061c46a22",
+      "name": "dev.dual.flow.liteflow.FlowKernelProviderTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-flow-liteflow/target/surefire-reports/TEST-dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest.xml",
+      "copy": "reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest.xml",
+      "sha256": "51b34d56399b8ea16282f5badcb065ef04a932394005efcb43cb035cf844cb5c",
+      "name": "dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-flow-liteflow/target/surefire-reports/TEST-dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest.xml",
+      "copy": "reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest.xml",
+      "sha256": "7a9b1a5565fddc611153a5e9c9f966b6bc8e64932d434297d9c956dff25592be",
+      "name": "dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-flow-liteflow/target/surefire-reports/TEST-dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest.xml",
+      "copy": "reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest.xml",
+      "sha256": "ba7dae3d23e7c81d3ebaf7f7ee14d3d19b0cae82030bff67444ca937b1987c77",
+      "name": "dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.CheckpointDocumentTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.CheckpointDocumentTest.xml",
+      "sha256": "6c60157b5ea21ba014e02f5341a22c37fb232dee3168de87cf493590a33ac097",
+      "name": "dev.dual.ledger.file.CheckpointDocumentTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.ConditionalEdgeRoutingTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.ConditionalEdgeRoutingTest.xml",
+      "sha256": "8ba137bcafd22a1e47200e9646e8012e9cb0139f460f902229d9aa5baca14cec",
+      "name": "dev.dual.ledger.file.ConditionalEdgeRoutingTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.DeliveryCandidateWriterTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.DeliveryCandidateWriterTest.xml",
+      "sha256": "60c2435127db8e5e51bfb803c7440c3c5896e2016df409bde0c4b98f2cbd2072",
+      "name": "dev.dual.ledger.file.DeliveryCandidateWriterTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.DeliveryMergePlanTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.DeliveryMergePlanTest.xml",
+      "sha256": "12b6635bc9740178faca1986e5dca2e8da134dfee05a374d61ff140e7a9c383d",
+      "name": "dev.dual.ledger.file.DeliveryMergePlanTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.ExecutionConsistencyClassifierTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.ExecutionConsistencyClassifierTest.xml",
+      "sha256": "db2d5bd4e8022a00fa1924580c09afc763e4cf96d392b2eb6bb311c63923f2bc",
+      "name": "dev.dual.ledger.file.ExecutionConsistencyClassifierTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.xml",
+      "sha256": "ef2b06343ed9f3b5069d6b58ef7f58ea509dc514653475333bdab56b62862f3c",
+      "name": "dev.dual.ledger.file.ExecutionNetworkGrantStoreTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.FileLedgerStoreTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.FileLedgerStoreTest.xml",
+      "sha256": "d60170fbd43d944a8044f71615c7543e3a1d0c7334e25845271e29c380cdc0e4",
+      "name": "dev.dual.ledger.file.FileLedgerStoreTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.HumanActionRequestTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.HumanActionRequestTest.xml",
+      "sha256": "41dcecfec38c84591e9bf96b0f22888d7ee4945ec3a3a7ad0e1a5512919d17d7",
+      "name": "dev.dual.ledger.file.HumanActionRequestTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.IterationRefTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.IterationRefTest.xml",
+      "sha256": "fb7a1161a783b812c862ac1f8b0f3a4626a7be2e9dd4148affca2f7ae90dab90",
+      "name": "dev.dual.ledger.file.IterationRefTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.LedgerMigratorTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.LedgerMigratorTest.xml",
+      "sha256": "010aea5ad37858bb0f8698b1390acf67c263b4130c8675ff892de4b810f21556",
+      "name": "dev.dual.ledger.file.LedgerMigratorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.MetricsProjectionWriterTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.MetricsProjectionWriterTest.xml",
+      "sha256": "dc50fb95bc8bb930ddb29d05b8bc75a5158fe9c38d02b04db3e4cead5aa9b1f4",
+      "name": "dev.dual.ledger.file.MetricsProjectionWriterTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.xml",
+      "sha256": "d2987b4bf5e3483a0cf18f65b96cda6eda8ef362fa0565def87c031660985987",
+      "name": "dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.OperatorWorkspaceRegistryTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.OperatorWorkspaceRegistryTest.xml",
+      "sha256": "5276a447bb64fc1774d7133e1a791790db4c540bcfe596c75541db45adec0fac",
+      "name": "dev.dual.ledger.file.OperatorWorkspaceRegistryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.ParallelFanOutTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.ParallelFanOutTest.xml",
+      "sha256": "455624429e01417e31be03f463a12cd821412b61c48887404714f92a635145fa",
+      "name": "dev.dual.ledger.file.ParallelFanOutTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.RecoveryAssessmentTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.RecoveryAssessmentTest.xml",
+      "sha256": "ab449071c5dbfd177eb428f9146bfdf0f9b93f240ece69192dfffc1fb63c9a97",
+      "name": "dev.dual.ledger.file.RecoveryAssessmentTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.RetryFailureContextTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.RetryFailureContextTest.xml",
+      "sha256": "83caf5b1f424d18315433155b2a7901f379b3075e3929b75df015d70149699c0",
+      "name": "dev.dual.ledger.file.RetryFailureContextTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.WorkflowFileLedgerTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkflowFileLedgerTest.xml",
+      "sha256": "1e7e39a150d967251b39cd0aceea8b4e2d5bb110971a520e58dc7dcb51e62017",
+      "name": "dev.dual.ledger.file.WorkflowFileLedgerTest",
+      "tests": 50,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.WorkflowGateResolutionTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkflowGateResolutionTest.xml",
+      "sha256": "235534843910e5a7e8fc76016f822cb363505c84adca22040ab6d10746cdee3b",
+      "name": "dev.dual.ledger.file.WorkflowGateResolutionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.xml",
+      "sha256": "d9a6923abd031e9064206ea9677b1811b9426e84c7f3caa09b13b9a8ecf6d367",
+      "name": "dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-ledger-file/target/surefire-reports/TEST-dev.dual.ledger.file.WorkstreamLockTest.xml",
+      "copy": "reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkstreamLockTest.xml",
+      "sha256": "2ead90a4114919d5e41b6c38f61a27e5acafbad0600d467203cbc6ad3ba168ac",
+      "name": "dev.dual.ledger.file.WorkstreamLockTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.RunningStateGuardTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.RunningStateGuardTest.xml",
+      "sha256": "0928a9ef399c19d9a375841cc56257a8f2f445a31f2ed763324e0e08a2485fbd",
+      "name": "dev.dual.runtime.RunningStateGuardTest",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.StaleRunningRecoveryTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.StaleRunningRecoveryTest.xml",
+      "sha256": "1b2ace86c0654683a3ab5724b816d7a2d212f8ff98a25cf9209c43fc066baca6",
+      "name": "dev.dual.runtime.StaleRunningRecoveryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.WorkflowRuntimeEventTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.WorkflowRuntimeEventTest.xml",
+      "sha256": "94a2a494c70dbf3083d92ef96fc897a4591795ff6de8b1c58225bfa0caafa6d5",
+      "name": "dev.dual.runtime.WorkflowRuntimeEventTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.WorkflowRuntimeTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.WorkflowRuntimeTest.xml",
+      "sha256": "cb3b4f92ed05cb25a8941a0872e2b9351edf2a331f14a42df2f525aa856eb208",
+      "name": "dev.dual.runtime.WorkflowRuntimeTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.delivery.DeliveryApplicationServiceTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.delivery.DeliveryApplicationServiceTest.xml",
+      "sha256": "8f760c70db2d3ffadddcaa93303065d65f392fb4dcd79616cea09e66bb873839",
+      "name": "dev.dual.runtime.delivery.DeliveryApplicationServiceTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.governance.AgentCapabilityCatalogTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.governance.AgentCapabilityCatalogTest.xml",
+      "sha256": "24b01153de91c51b1993431f90945262385c1ab4e01152fbfe5118eee4a05efa",
+      "name": "dev.dual.runtime.governance.AgentCapabilityCatalogTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AcceptanceRepairInterruptionTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AcceptanceRepairInterruptionTest.xml",
+      "sha256": "fba259ab633a539da4cef37e5005904f2f0baac291ca63d31065539256b142c7",
+      "name": "dev.dual.runtime.handler.AcceptanceRepairInterruptionTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AcceptanceRepairSequenceTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AcceptanceRepairSequenceTest.xml",
+      "sha256": "913ff2fb23e32ebcc4f10b32186bc3eb4c4febe17334d195e44c3b3ee6a57455",
+      "name": "dev.dual.runtime.handler.AcceptanceRepairSequenceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AgentContractSemanticsTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentContractSemanticsTest.xml",
+      "sha256": "535c269d621ad645dcb69be11815eced9c94b0f5ca9be54dadf18bc90b1fa6a1",
+      "name": "dev.dual.runtime.handler.AgentContractSemanticsTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AgentEvidenceIndexTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentEvidenceIndexTest.xml",
+      "sha256": "61e2e5e03772273a355bba774f01d1b51752f49d877b234f498d5e7aae8aa794",
+      "name": "dev.dual.runtime.handler.AgentEvidenceIndexTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AgentExecutionAttemptReconcilerTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentExecutionAttemptReconcilerTest.xml",
+      "sha256": "31345460787f7a64fd31bcd08b0d837cea21a5ac910dc509f58fe17d7f7b8dd1",
+      "name": "dev.dual.runtime.handler.AgentExecutionAttemptReconcilerTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AgentExecutionAttemptTimeoutPolicyTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentExecutionAttemptTimeoutPolicyTest.xml",
+      "sha256": "af883cc0a91ac17897a8b7988ff302fa96a2f8f8d653da08dc705f933b71047d",
+      "name": "dev.dual.runtime.handler.AgentExecutionAttemptTimeoutPolicyTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AgentResultEnvelopeParserTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultEnvelopeParserTest.xml",
+      "sha256": "e3f93cb9899090d6a36f9cec77c08a611ba60d101dff727bba36af6abb60e928",
+      "name": "dev.dual.runtime.handler.AgentResultEnvelopeParserTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest.xml",
+      "sha256": "160749c68dadf6710e3a585a407c2312099e867e710664a3b7b05b6dc54f8228",
+      "name": "dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AgentResultPromptContractTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultPromptContractTest.xml",
+      "sha256": "38b0970dd646dd17854b0d885d1bc641e12e7686396814f8ec20773cb6a96a21",
+      "name": "dev.dual.runtime.handler.AgentResultPromptContractTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AgentRunMetadataFinalizerTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentRunMetadataFinalizerTest.xml",
+      "sha256": "53d0ec0feeb1b4b22ecc03770c461c5cb1c1186805cb20e82db56d0380c29bc7",
+      "name": "dev.dual.runtime.handler.AgentRunMetadataFinalizerTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest.xml",
+      "sha256": "a915b9cb764192a69203d7b5c3d8ecd7c053107a2445f1ad57b815a24c4df378",
+      "name": "dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ArtifactContractValidatorTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ArtifactContractValidatorTest.xml",
+      "sha256": "4557d97295fc4a92d40654770d5cb76d085fd84966a1a6d813fc7650dce1c1c0",
+      "name": "dev.dual.runtime.handler.ArtifactContractValidatorTest",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AuthoredBoundarySequenceTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredBoundarySequenceTest.xml",
+      "sha256": "d21cf8dec2e7942b826fb6c3521890fb3a9f01a2d1b59f2175477bb790da97a9",
+      "name": "dev.dual.runtime.handler.AuthoredBoundarySequenceTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AuthoredDefinitionTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredDefinitionTest.xml",
+      "sha256": "ce630653ccd67419c7ac4689ae023a3a3b81f0ebc70596c8a2c7139f68587918",
+      "name": "dev.dual.runtime.handler.AuthoredDefinitionTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AuthoredRevisionContractTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredRevisionContractTest.xml",
+      "sha256": "7ac71c0a81eb54100fc71a34049e9ce48c41051b5b69985461cbc20406e57067",
+      "name": "dev.dual.runtime.handler.AuthoredRevisionContractTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AuthoredRevisionCoverageTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredRevisionCoverageTest.xml",
+      "sha256": "5070fd0182d994c12d64983a4e9d340950876a861721504f62ca22d7a91e4f92",
+      "name": "dev.dual.runtime.handler.AuthoredRevisionCoverageTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AuthoredStageSequenceTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredStageSequenceTest.xml",
+      "sha256": "1aa5dae22b8c1b7d4112201015444462e54539d58cd3415408f43978849280a2",
+      "name": "dev.dual.runtime.handler.AuthoredStageSequenceTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.BuiltinHandlerTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.BuiltinHandlerTest.xml",
+      "sha256": "6352abcdb938d9afb7570e3da9384cb89a0947d9d6707a60177fc14322461715",
+      "name": "dev.dual.runtime.handler.BuiltinHandlerTest",
+      "tests": 67,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest.xml",
+      "sha256": "187eb7b805c6180405563457613afa0da78404cd97c4581611fb90b2355f6d50",
+      "name": "dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ChangeScopeEvaluationTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ChangeScopeEvaluationTest.xml",
+      "sha256": "e391affd9be7e8daaf636f91fc5f09d42a1d5d07196fe17e9dfdde401195ee00",
+      "name": "dev.dual.runtime.handler.ChangeScopeEvaluationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest.xml",
+      "sha256": "d4c959d4a10261fa4cfcc0f81927911c011ec54c89b17a3f9ca2da9604b5c1fc",
+      "name": "dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ContextBudgetOverrideTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ContextBudgetOverrideTest.xml",
+      "sha256": "c07bb4b6eda9958c49a2a7399362965f7163728d9cecb2e06c5e2f59a9906388",
+      "name": "dev.dual.runtime.handler.ContextBudgetOverrideTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ContextBuildPackageHandlerTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ContextBuildPackageHandlerTest.xml",
+      "sha256": "08485bbdb2f88c6338a8c8afe75eb574f66264fe9fa5a7a55b6eeb73ef4a03af",
+      "name": "dev.dual.runtime.handler.ContextBuildPackageHandlerTest",
+      "tests": 61,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ContextTaskContractSectionTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ContextTaskContractSectionTest.xml",
+      "sha256": "4c5aaa7f34ca6a7bbdafc260c4a056382e001a8f67da174852f6dc8fc94b5f21",
+      "name": "dev.dual.runtime.handler.ContextTaskContractSectionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ContractCompileHandlerTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractCompileHandlerTest.xml",
+      "sha256": "0a2169258a7775b391fb480e2f9f0e285191e56d9ebd005dfaf072785381b827",
+      "name": "dev.dual.runtime.handler.ContractCompileHandlerTest",
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ContractLifecycleLedgerTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractLifecycleLedgerTest.xml",
+      "sha256": "2e13dd90a120072e98ceaaaed2d4e45fb2c4a4dcfe43ed8b23770646a84b3800",
+      "name": "dev.dual.runtime.handler.ContractLifecycleLedgerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ContractRegistryTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractRegistryTest.xml",
+      "sha256": "12f6d29c7260abc08c546cc910b0d8845bc9a2c401d561ec5f41fdb6ea465058",
+      "name": "dev.dual.runtime.handler.ContractRegistryTest",
+      "tests": 50,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ContractReviewGateTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractReviewGateTest.xml",
+      "sha256": "c5e53253a66e54c1fde40c63831b4a117b94f6aeffd78d09b58946113ff2440f",
+      "name": "dev.dual.runtime.handler.ContractReviewGateTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ContractRevisionDisplayTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractRevisionDisplayTest.xml",
+      "sha256": "521a78ef8222c35a4847fed8229db1d6841465e083f6e56b0b814b24dbb74ae8",
+      "name": "dev.dual.runtime.handler.ContractRevisionDisplayTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.EvidenceCollectionSequenceTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.EvidenceCollectionSequenceTest.xml",
+      "sha256": "b9c48dcb0ddca294e506426dcbb9574e3659378a2dd275cb68cf56d051c41524",
+      "name": "dev.dual.runtime.handler.EvidenceCollectionSequenceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.EvidenceCollectionSourceTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.EvidenceCollectionSourceTest.xml",
+      "sha256": "775eefae51627e4ff18c5e722eeb774dc0299d6cc75226c144a9b02ba4353074",
+      "name": "dev.dual.runtime.handler.EvidenceCollectionSourceTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ExternalVerificationEvidenceTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ExternalVerificationEvidenceTest.xml",
+      "sha256": "97c137aa9a1b32b56be3894898aa45b42e2807d8b636175a6f3c9d88ca654fe0",
+      "name": "dev.dual.runtime.handler.ExternalVerificationEvidenceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.FailureArbiterTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.FailureArbiterTest.xml",
+      "sha256": "c61381110b3d37dcc90a99a12e94c97cb4fe25f2d889cb59ab172f95ad54676f",
+      "name": "dev.dual.runtime.handler.FailureArbiterTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.FailureClassifyHandlerTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.FailureClassifyHandlerTest.xml",
+      "sha256": "1c4aa1090b82afeaf58beae24b312ba66ff2554f45407f71e2c67c8c8b12ad81",
+      "name": "dev.dual.runtime.handler.FailureClassifyHandlerTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.FailureClassifyRegistryTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.FailureClassifyRegistryTest.xml",
+      "sha256": "82aa9c79a265de72ac58a4736a3924bde983a780369275538f5e4b814654dd64",
+      "name": "dev.dual.runtime.handler.FailureClassifyRegistryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.HandlerRegistryTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.HandlerRegistryTest.xml",
+      "sha256": "52c1cf6f5abf444fbe6b61136f1f03ffbb4789f1dd54f923797a899887f8fd42",
+      "name": "dev.dual.runtime.handler.HandlerRegistryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.LateContractRevisionContextTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.LateContractRevisionContextTest.xml",
+      "sha256": "9548c55cc2c74ab4c7d9b3f6792705fad0681f00fc83e0cc4734a79f500080c1",
+      "name": "dev.dual.runtime.handler.LateContractRevisionContextTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.LateProposalScopeTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.LateProposalScopeTest.xml",
+      "sha256": "468430682f83b7a2bf7137adbe2c577bfb51e43bde3e50056d6305c6d22a2183",
+      "name": "dev.dual.runtime.handler.LateProposalScopeTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.PlanArtifactDocumentTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.PlanArtifactDocumentTest.xml",
+      "sha256": "9ee74c4195b2133e18f8150451c1bfb608a76c343fc57e7118ecb9b9902f680a",
+      "name": "dev.dual.runtime.handler.PlanArtifactDocumentTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest.xml",
+      "sha256": "025d1236d801b3a1d32aa426d74ee219fa0a0ab6400ad3fb6dcd0ada0ee56baf",
+      "name": "dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest.xml",
+      "sha256": "7dd45f93a5121faee1d141240af37883163158a5a44a30cc4f046b00c7669843",
+      "name": "dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ReportFailureClassificationTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ReportFailureClassificationTest.xml",
+      "sha256": "b71a1fa59fd50b3519ec75faa765cd066d61624deeee326940815ce9a36dd3a9",
+      "name": "dev.dual.runtime.handler.ReportFailureClassificationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ReportGenerateFinalHandlerTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ReportGenerateFinalHandlerTest.xml",
+      "sha256": "bd0532183b14d78f0c038799dc66882573fa764dcc41c1349e98fbd9d403089f",
+      "name": "dev.dual.runtime.handler.ReportGenerateFinalHandlerTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.ReportTaskContractTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.ReportTaskContractTest.xml",
+      "sha256": "8a98f585ec5ecf050399f8e1044a937addce36f9b47b2cf2b24064ccf8aed71d",
+      "name": "dev.dual.runtime.handler.ReportTaskContractTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.SelfTestContinuationSequenceTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.SelfTestContinuationSequenceTest.xml",
+      "sha256": "284e9e4a9478ecad063766e7c928930014db6f1df1e3631f11a2ef36f974efad",
+      "name": "dev.dual.runtime.handler.SelfTestContinuationSequenceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest.xml",
+      "sha256": "b102b64491a5204d6dc50dd022843cc2aea9f72374ce1f6308cfbc7bc39bcae4",
+      "name": "dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.StageOutcomeCompilerTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.StageOutcomeCompilerTest.xml",
+      "sha256": "1f89419b78ff6ebec16996a50de80a455848426ee0d82415b3008a33140d80b4",
+      "name": "dev.dual.runtime.handler.StageOutcomeCompilerTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TaskContractArtifactWriterTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractArtifactWriterTest.xml",
+      "sha256": "0bc39b82e4f5e97c9519f8901c1b3cc21b164ee512b13d1138484251a986fa55",
+      "name": "dev.dual.runtime.handler.TaskContractArtifactWriterTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TaskContractProjectionVerifierTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractProjectionVerifierTest.xml",
+      "sha256": "c6060cd08a48bae63443bfa8a25bc31cddedd32ee287283582dd7578dd7c419b",
+      "name": "dev.dual.runtime.handler.TaskContractProjectionVerifierTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest.xml",
+      "sha256": "2ac05fbf9830121746341351a5993c2ec8a5ad103f4c7f774c12607bfa15e7ef",
+      "name": "dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TaskContractProposalValidatorTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractProposalValidatorTest.xml",
+      "sha256": "cac35a6d8d46614e4c12b2187da5ce2e433aa2b3df627518e4ac7cf8a3888959",
+      "name": "dev.dual.runtime.handler.TaskContractProposalValidatorTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest.xml",
+      "sha256": "343a159003581545de75da4d6468590a62a5ea228051aad09c7aedc136bef34a",
+      "name": "dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TaskContractScopeResolverTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractScopeResolverTest.xml",
+      "sha256": "26fd782048b226aa9469697e01e5cb369969fbbf5c62a3eb63e2a76b2276491a",
+      "name": "dev.dual.runtime.handler.TaskContractScopeResolverTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TokenEstimatorTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.TokenEstimatorTest.xml",
+      "sha256": "4fb5ed0d8356c0270746d4e7c3e8c63b36d12766bd625523a900d0e4608f45dd",
+      "name": "dev.dual.runtime.handler.TokenEstimatorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TypedContextPayloadBoundaryTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.TypedContextPayloadBoundaryTest.xml",
+      "sha256": "190b0121afa39bc5a173de1b018ffcd93785c4948c4b29ed32c96fa2310230e9",
+      "name": "dev.dual.runtime.handler.TypedContextPayloadBoundaryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TypedDesignScopeTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.TypedDesignScopeTest.xml",
+      "sha256": "d75c04949d7af0e651b5c8e785021a2f772ac03823299416e8b937dec7dc9edc",
+      "name": "dev.dual.runtime.handler.TypedDesignScopeTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TypedPlanScopeTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.TypedPlanScopeTest.xml",
+      "sha256": "582d160d6dd461ced883a2d0e00d073cd851318f61dd06d704ace366b180c4c1",
+      "name": "dev.dual.runtime.handler.TypedPlanScopeTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.WorkflowIntegrationTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.WorkflowIntegrationTest.xml",
+      "sha256": "a7dbe86a0230236cb21f3929dd9515d18f41557a41994bb033ce682c310e612d",
+      "name": "dev.dual.runtime.handler.WorkflowIntegrationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.WorkstreamMemoryProjectionTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.handler.WorkstreamMemoryProjectionTest.xml",
+      "sha256": "71e4137ac694f40d16ea232fec8d660cce7ade5eebda4d2e2e5f1c42ec14be50",
+      "name": "dev.dual.runtime.handler.WorkstreamMemoryProjectionTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest.xml",
+      "sha256": "8c6ee808f8995b5b69170386753383fbdbba1cf841d3d05d33f077c39aaf3982",
+      "name": "dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest.xml",
+      "sha256": "ac8eb31c1b6a1e8aa6bcf2428f21e169587bc291fd6c8af3dcb3c9b3f9e85053",
+      "name": "dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest.xml",
+      "sha256": "58caa805a890947a1677d910f44c8c3224d426087acc4881dd808627e7389f50",
+      "name": "dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest.xml",
+      "sha256": "912ccc94e5f7824e348cc57adafb9999a93b69d292219d9be1e8c23df1fb16d1",
+      "name": "dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest.xml",
+      "sha256": "6aea8dae0469739d3fd169ef6ec09e54e818f221d96e58eccb062c77ea57fc6b",
+      "name": "dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest.xml",
+      "sha256": "5ecaa28946a26149b56cffe06daea3dc13ff3f42578551f11e904887508bffb2",
+      "name": "dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest.xml",
+      "sha256": "d865f68e441c44472bc79c5e793882a6f9fcd1901eb1c595c43499f4e4aff33f",
+      "name": "dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest.xml",
+      "sha256": "c36afd360924157b567b590c4fc775a4bc8db36aeed8703a349e1a81f17456a4",
+      "name": "dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest.xml",
+      "copy": "reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest.xml",
+      "sha256": "ee778b94f7c6c5294f1e0e48769ad9851c86f16f8ab0061975e9b91460599a22",
+      "name": "dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.BackgroundSchedulerServiceTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.BackgroundSchedulerServiceTest.xml",
+      "sha256": "f76a1dd645b37656fec50d6eb8e613230a64150d59fea5824eed042eb704fcc5",
+      "name": "dev.dual.server.BackgroundSchedulerServiceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.DeliveryViewServiceTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.DeliveryViewServiceTest.xml",
+      "sha256": "66e11ed78f7003a8172e262ef42a8c8a3073d05561371e71c39ad127e4c85171",
+      "name": "dev.dual.server.DeliveryViewServiceTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.DualServerApplicationContextTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.DualServerApplicationContextTest.xml",
+      "sha256": "8261ccca2ed9b823767926f70a3d0af349880074b072bcab3a74a39b1edfa530",
+      "name": "dev.dual.server.DualServerApplicationContextTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.NotificationServiceTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.NotificationServiceTest.xml",
+      "sha256": "1e7d168ca35e3a184bc808f3d5321e8b9978abfd3cb7cf11f4f095e34987d7f8",
+      "name": "dev.dual.server.NotificationServiceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.SchedulerApiControllerTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.SchedulerApiControllerTest.xml",
+      "sha256": "97f3c4eb279f6c24ce6678e3484c1c44c9cf262b6d2588437985993a794bf76e",
+      "name": "dev.dual.server.SchedulerApiControllerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.SchedulerPolicyTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.SchedulerPolicyTest.xml",
+      "sha256": "a28edc229a98f46f1a8e508365e8f2c1f66b9b8e6bf566b4667fb477bd0aa73b",
+      "name": "dev.dual.server.SchedulerPolicyTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.SchedulerServiceTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.SchedulerServiceTest.xml",
+      "sha256": "1e31437d1fc0a8476b6d435b33aeec2d6891020a7c7acd9a4ff266e86f904f85",
+      "name": "dev.dual.server.SchedulerServiceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.ServerLedgerFactoryTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.ServerLedgerFactoryTest.xml",
+      "sha256": "69ee9f20ed1b90b1e1b1d6219a08d98bb5100e7c6b2bb309120c442dc481be1f",
+      "name": "dev.dual.server.ServerLedgerFactoryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.StaticConsoleProjectionBoundaryTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.StaticConsoleProjectionBoundaryTest.xml",
+      "sha256": "c9fb642a7bc34252a9cf8709614659fec89ac83d475eae1bec3a89493cfb1fd9",
+      "name": "dev.dual.server.StaticConsoleProjectionBoundaryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.WorkspaceBrowseControllerTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.WorkspaceBrowseControllerTest.xml",
+      "sha256": "f550b744a77a1b781de538c29193fc2bba03948f4318ce1b7ab9abd64d3799aa",
+      "name": "dev.dual.server.WorkspaceBrowseControllerTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.WorkspaceRegistryServiceTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.WorkspaceRegistryServiceTest.xml",
+      "sha256": "53bc92807a3f5ff03b9019dabbf2bc39a3f2e80e99cb96ecc40e37437ade38d4",
+      "name": "dev.dual.server.WorkspaceRegistryServiceTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.WorkstreamActionServiceTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.WorkstreamActionServiceTest.xml",
+      "sha256": "a63448bd612d9d584843a0b600af6b0e7a03f68015ebd7c4126653da9f6642fe",
+      "name": "dev.dual.server.WorkstreamActionServiceTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "source": "dual-server/target/surefire-reports/TEST-dev.dual.server.WorkstreamApiControllerTest.xml",
+      "copy": "reports/dual-server/TEST-dev.dual.server.WorkstreamApiControllerTest.xml",
+      "sha256": "4fad021ef609352e68205085cc7bceb1374ea5f9e4aa06a121e4a49d3728c2dc",
+      "name": "dev.dual.server.WorkstreamApiControllerTest",
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ]
+}

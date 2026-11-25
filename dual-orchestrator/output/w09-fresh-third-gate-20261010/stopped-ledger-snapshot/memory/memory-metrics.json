@@ -1,0 +1,15 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "memory_metrics",
+  "workstreamId" : "ws-20261010T124812Z-XCZL",
+  "nodeDefinitionId" : "design.claude_design",
+  "runId" : "run-1791641578962",
+  "readCount" : 0,
+  "uniqueReadCount" : 0,
+  "repeatedReadCount" : 0,
+  "allowedRepeatedReadCount" : 0,
+  "unexplainedRepeatedReadCount" : 0,
+  "workingSetHitCount" : 0,
+  "workingSetHitRate" : 0.0,
+  "generatedAt" : "2026-10-10T14:16:16.042537Z"
+}

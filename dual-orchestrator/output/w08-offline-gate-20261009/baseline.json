@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-09",
+  "target": "W08 P0 offline reconciliation and fresh real Verification Gate draft",
+  "authorization": "User requests W08 offline reconciliation/Gate draft; no live provider/native, installer, real target, commit or agents",
+  "source_inputs": 654,
+  "initial_dirty_paths": 356,
+  "allowed_test_modify": "dual-server/src/test/java/dev/dual/server/DeliveryViewServiceTest.java",
+  "production_source_changes": false,
+  "live_native_provider_runs": 0
+}

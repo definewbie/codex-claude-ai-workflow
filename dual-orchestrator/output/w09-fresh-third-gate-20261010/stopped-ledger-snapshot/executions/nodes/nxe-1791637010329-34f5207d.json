@@ -1,0 +1,81 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1791637010329-34f5207d",
+  "agentTaskId" : "agt-1791637010324-8086f066",
+  "workflowExecutionId" : "wfe-1791637010248-225c3013",
+  "nodeInstanceId" : "node-intake-codex_product_review-009",
+  "nodeDefinitionId" : "intake.codex_product_review",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "pid" : 50120,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_pid" : 50120,
+      "input_identity" : "b7a97ff90b7e46c17296997c2c0eecbe5bd0b91afd473e3c5a7903f284b9ca3c",
+      "executor_started_at" : "2026-10-10T12:56:49.085Z"
+    },
+    "prepared_run" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/nxe-1791637010329-34f5207d-prepared.json",
+      "sha256" : "367f03e8b6b0e05791b93f39ddd3b0c7b8a464e4d7e15010b9456dac3937c8e4"
+    },
+    "adapter_signals" : [ ],
+    "agent" : "codex",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "agent_output_contract",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "READY_FOR_PRODUCT_REVIEW",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json",
+    "contract_sidecar_sha256" : "ec8a0eae3786f8c0f86ec52568587fb5756a222f4a97208030c3366045d646c0",
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json",
+    "repository_fact_binding_sha256" : "356a44be480ef1602d9df58fb40dcf7d3bed39bd80286580ae4868aa92b95d88",
+    "reread_reasons" : [ ],
+    "run_id" : "run-1791637010369",
+    "run_metadata" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/run.json",
+    "session" : "codex-reviewer-ws-20261010T124812Z-XCZL",
+    "summary" : "修订已解决文件范围授权问题，功能、限制与验收要求完整，可以继续后续流程。",
+    "transcript_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/nxe-1791637010329-34f5207d-completion.json",
+    "completion_sha256" : "7242054038d0a386e93d174c46a18d47e1b1bc982fcf277d297d1ebe501b8832",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "run-1791637010369",
+  "agentRunRef" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/run.json",
+  "agent" : "codex",
+  "session" : "codex-reviewer-ws-20261010T124812Z-XCZL",
+  "exitCode" : 0,
+  "startedAt" : "2026-10-10T12:56:50.329644Z",
+  "finishedAt" : "2026-10-10T12:57:10.547731Z",
+  "durationMs" : 20218
+}

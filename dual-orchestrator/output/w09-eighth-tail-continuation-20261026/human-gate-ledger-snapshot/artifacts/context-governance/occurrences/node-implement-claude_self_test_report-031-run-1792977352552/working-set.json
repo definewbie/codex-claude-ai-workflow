@@ -1,0 +1,30 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "working_set",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "implement",
+  "nodeInstanceId" : "node-implement-claude_self_test_report-031",
+  "nodeDefinitionId" : "implement.claude_self_test_report",
+  "targetNodeDefinitionId" : "implement.claude_self_test_report",
+  "iterationId" : "iter-003",
+  "coreFiles" : [ {
+    "path" : "src/normalize_text.py",
+    "reason" : "Read candidate from task contract, evidence, git, or repo map.",
+    "previousReadCount" : 0,
+    "evidenceKnown" : false
+  }, {
+    "path" : "tests/test_normalize_text.py",
+    "reason" : "Read candidate from task contract, evidence, git, or repo map.",
+    "previousReadCount" : 0,
+    "evidenceKnown" : false
+  }, {
+    "path" : "README.md",
+    "reason" : "Read candidate from task contract, evidence, git, or repo map.",
+    "previousReadCount" : 0,
+    "evidenceKnown" : false
+  } ],
+  "supportingFiles" : [ ],
+  "allowedWriteFiles" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "forbiddenScope" : [ ".git/**", ".agent/workstreams/**/workflow/**", ".agent/workstreams/**/nodes/**" ],
+  "generatedAt" : "2026-10-26T01:15:52.778436Z"
+}

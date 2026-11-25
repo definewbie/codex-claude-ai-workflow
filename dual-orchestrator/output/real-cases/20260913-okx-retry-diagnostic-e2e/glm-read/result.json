@@ -1,0 +1,79 @@
+{
+  "startedAt" : 1789260323.055712000,
+  "finishedAt" : 1789260335.356217000,
+  "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--ttl", "1800", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "--claude-execution-policy-ref", ".agent/workstreams/probe/runs/run-250af233-15ab-4831-a833-3fa4aef1081a/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "655fe4bc90d65744e2359395f633228fc6c630e71bbf732d60b683fa3013a189", "claude", "-s", "read-probe-250af233-15ab-4831-a833-3fa4aef1081a", "-f", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/real-cases/20260913-okx-retry-diagnostic-e2e/glm-read/prompt.md" ],
+  "executionTimeline" : [ {
+    "kind" : "PROCESS_STARTED",
+    "source" : "adapter",
+    "sequence" : 0,
+    "observedAt" : 1789260323.058823000,
+    "elapsedMs" : 3,
+    "details" : {
+      "pid" : 11546
+    }
+  }, {
+    "kind" : "PROCESS_WAIT_STARTED",
+    "source" : "adapter",
+    "sequence" : 0,
+    "observedAt" : 1789260323.058858000,
+    "elapsedMs" : 0,
+    "details" : {
+      "pid" : 11546
+    }
+  }, {
+    "kind" : "PROMPT_ACCEPTED",
+    "source" : "acpx_stream",
+    "sequence" : 11,
+    "observedAt" : 1789260327.090384000,
+    "elapsedMs" : 4031,
+    "details" : {
+      "lifecycleSequence" : 11
+    }
+  }, {
+    "kind" : "PROMPT_COMPLETED",
+    "source" : "acpx_stream",
+    "sequence" : 106,
+    "observedAt" : 1789260335.127223000,
+    "elapsedMs" : 12068,
+    "details" : {
+      "lifecycleSequence" : 106
+    }
+  }, {
+    "kind" : "PROCESS_WAIT_COMPLETED",
+    "source" : "adapter",
+    "sequence" : 108,
+    "observedAt" : 1789260335.355477000,
+    "elapsedMs" : 12296,
+    "details" : {
+      "waitMode" : "process_exit",
+      "exitCode" : 0
+    }
+  }, {
+    "kind" : "PROCESS_EXITED",
+    "source" : "adapter",
+    "sequence" : 5,
+    "observedAt" : 1789260335.356212000,
+    "elapsedMs" : 12300,
+    "details" : {
+      "exitCode" : 0
+    }
+  } ],
+  "usage" : null,
+  "promptCompletion" : {
+    "requestId" : "3",
+    "stopReason" : "end_turn",
+    "finalAssistantMessage" : "{\"nonce\":\"75778d59-b7b6-450c-aeb5-da0e771955df\"}"
+  },
+  "processResult" : {
+    "command" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx --ttl 1800 --approve-reads --non-interactive-permissions fail --permission-policy {\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"} --allowed-tools Read,Grep,Glob --claude-execution-policy-ref .agent/workstreams/probe/runs/run-250af233-15ab-4831-a833-3fa4aef1081a/execution-authority/claude-execution-policy.json --claude-execution-policy-sha256 655fe4bc90d65744e2359395f633228fc6c630e71bbf732d60b683fa3013a189 claude -s read-probe-250af233-15ab-4831-a833-3fa4aef1081a -f /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/real-cases/20260913-okx-retry-diagnostic-e2e/glm-read/prompt.md",
+    "pid" : 11546,
+    "exitCode" : 0,
+    "usability" : "EXITED_ZERO",
+    "durationMs" : 12300,
+    "stdoutPath" : "stream.jsonl",
+    "stderrPath" : "stderr.log",
+    "interrupted" : false,
+    "timedOut" : false
+  },
+  "adapterSignals" : [ ]
+}

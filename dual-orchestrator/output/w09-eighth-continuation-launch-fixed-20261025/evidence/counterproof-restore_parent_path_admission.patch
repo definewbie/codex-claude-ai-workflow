@@ -1,0 +1,10 @@
+--- continuation.py
++++ mutant/continuation.py
+@@ -37,6 +37,7 @@
+     assert isinstance(explicit.get('PATH'), str) and explicit['PATH'], 'Missing selected child PATH'
+     environment = os.environ.copy()
+     environment.update(explicit)
++    assert os.environ.get('PATH') == explicit['PATH'], 'Mutant parent PATH admission'
+     for name, expected in identity.get('client_environment_overrides', {}).items():
+         assert (name in environment) == expected['present'] and hashlib.sha256(
+             environment.get(name, '').encode()).hexdigest() == expected['value_sha256'], 'Client override drift: ' + name

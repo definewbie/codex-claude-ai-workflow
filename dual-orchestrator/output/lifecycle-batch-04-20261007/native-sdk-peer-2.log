@@ -1,0 +1,37 @@
+✔ exact permission ask returns the offered option and exposes the original RPC signal (1.538333ms)
+✔ exact permission ask never falls back after callback failure or invalid choice (0.450417ms)
+✔ exact lane retains auto reads and explicit denial without asking a human (0.150208ms)
+✔ exact lane refuses stale RPCs, unowned sessions and replies after cancellation (0.194ms)
+✖ host write and terminal confirmation use exact RPC choices before their effects (2.001125ms)
+✔ actual local ACP peer receives the exact offered permission response (82.265792ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 176.620541
+
+✖ failing tests:
+
+test at dist-test/test/client.test.js:1483:1
+✖ host write and terminal confirmation use exact RPC choices before their effects (2.001125ms)
+  AssertionError [ERR_ASSERTION]: The error is expected to be an instance of "PermissionDeniedError". Received "TypeError"
+  
+  Error message:
+  
+  Cannot read properties of undefined (reading 'recordPermissionError')
+      at async TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1504:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: TypeError: Cannot read properties of undefined (reading 'recordPermissionError')
+        at handleWriteTextFile (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/src/acp/client.js:1675:18)
+        at TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/client.test.js:1504:26)
+        at async Test.run (node:internal/test_runner/test:1389:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:960:7),
+    operator: 'rejects',
+    diff: 'simple'
+  }

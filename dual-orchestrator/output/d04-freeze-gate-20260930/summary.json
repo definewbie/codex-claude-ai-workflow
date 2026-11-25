@@ -1,0 +1,20 @@
+{
+  "status": "EXECUTED_EVIDENCE_REQUIRES_FREEZE_REVIEW",
+  "D04": "NOT_FROZEN",
+  "nativeSessions": 3,
+  "nativeChildTasks": 3,
+  "localResponsesRequests": 20,
+  "nativeRunnerElapsedSeconds": 28.937319999968167,
+  "elapsedMeaning": "sum of native case launch/observation/cleanup, excluding human-readable evidence review between cases",
+  "realModelCalls": 0,
+  "realModelTokens": 0,
+  "syntheticUsageExcluded": true,
+  "caseVerdicts": {
+    "read_only": "PASS_NATIVE_PERMISSION_SLICE",
+    "implement": "PASS_NATIVE_PERMISSION_SLICE",
+    "cancel": "VALID_CANCELLATION_OBSERVATION_ALL_STOPPED_UNKNOWN"
+  },
+  "retries": 0,
+  "remainingBudgetDisposition": "CLOSED_NO_AUTOMATIC_RERUN",
+  "createdAt": "2026-09-30T02:39:36.577505+00:00"
+}

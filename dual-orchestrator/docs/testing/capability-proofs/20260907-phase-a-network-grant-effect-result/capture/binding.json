@@ -1,0 +1,11 @@
+{
+  "policySha256" : "3b1491cd2b7d5a5266fa57d1c1ea35f6d051310ced659bf6d6992bd3a3a6135e",
+  "transportDisposition" : "run",
+  "policyRef" : ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/runs/run-e79ad304-ae11-4b0b-ab78-e92a75434b6d/execution-authority/claude-execution-policy.json",
+  "schema" : "claude_execution_policy.v2",
+  "networkGrant" : {
+    "allowedDomains" : [ "example.com" ],
+    "grantRef" : ".agent/workstreams/ws-40f2ccd4-c332-4842-a25b-66cd510f34d4/execution-authority/network-grants/grant-c7f2e9b3-a080-4b40-9eee-ed58e5e509c4.json",
+    "grantSha256" : "2c18ea4e0e761f132c36eed0cfbf49d3713e7f4decb217ec8bfcb06e0380ced6"
+  }
+}

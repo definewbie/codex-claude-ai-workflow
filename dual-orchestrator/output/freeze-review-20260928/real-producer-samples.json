@@ -1,0 +1,23 @@
+[
+  {
+    "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-retest-preparation-20260928/model-events.jsonl",
+    "sha256": "af604918215eb4d04da1716fcec523fe269ecaea667479823b2426569351679b",
+    "producer": "Codex CLI native",
+    "kind": "NATIVE_TOOL_EVENTS",
+    "trustMeaning": "实际命令/系统拒绝；本次诊断身份，非 Dual task 验收"
+  },
+  {
+    "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-retest-preparation-20260928/model-result.json",
+    "sha256": "088bbc6b69f41c69566bed1e1b94afdc21b384a193a2fe378f8b3160a12244d6",
+    "producer": "diagnostic driver",
+    "kind": "DIAGNOSTIC_RUN",
+    "trustMeaning": "完整随机 oracle、指纹、usage；不是产品 run metadata"
+  },
+  {
+    "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/freeze-review-20260928/storage-probe.json",
+    "sha256": "03c30ff1ec20e498dc017b118522937d8fcc559c22668f547e3f83716ecd8d88",
+    "producer": "Java NIO + diagnostic process capture",
+    "kind": "LOCAL_COMMAND_RESULT",
+    "trustMeaning": "本机原子替换/锁原语；不是 D06 完成证据"
+  }
+]

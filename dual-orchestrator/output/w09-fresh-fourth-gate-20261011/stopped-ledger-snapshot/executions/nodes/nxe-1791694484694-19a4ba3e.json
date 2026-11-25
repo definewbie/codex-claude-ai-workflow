@@ -1,0 +1,36 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1791694484694-19a4ba3e",
+  "agentTaskId" : "agt-1791694484690-6cdd7aae",
+  "workflowExecutionId" : "wfe-1791694484616-447c8114",
+  "nodeInstanceId" : "node-intake-decision-005",
+  "nodeDefinitionId" : "intake.decision",
+  "handlerType" : "review.decision",
+  "status" : "SUCCEEDED",
+  "pid" : 76217,
+  "outcome" : "NEEDS_REVISION",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/binding.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_pid" : 76217,
+      "input_identity" : "4e319d2bbbbede395ccda173380475f5d1ec65da3e76d12822e7e80a7f904918",
+      "executor_started_at" : "2026-10-11T04:54:43.485Z"
+    },
+    "summary" : "函数行为与标准库约束已完整保留，但实际输入输出证据要求和候选文件的审批边界需要修订。",
+    "source" : "contract-sidecar",
+    "decision" : "NEEDS_REVISION",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-11T04:54:44.694271Z",
+  "finishedAt" : "2026-10-11T04:54:44.742317Z",
+  "durationMs" : 48
+}

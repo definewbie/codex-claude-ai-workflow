@@ -1,0 +1,14 @@
+{
+  "client": "Claude Code",
+  "nativeVersion": "2.1.277",
+  "nativePath": "/opt/homebrew/Caskroom/claude-code/2.1.277/claude",
+  "sdkVersion": "0.3.232",
+  "settingsSource": "/Users/kriswang/.claude/settings.json",
+  "endpoint": "https://open.bigmodel.cn/api/anthropic",
+  "model": "glm-5.3",
+  "credentialSource": "existing settings env.ANTHROPIC_AUTH_TOKEN; runtime only; never copied to artifacts",
+  "userDecision": "沿用一直使用的 Claude Code＋GLM；纠正实验对象，不是更换 Dual provider/model 方案",
+  "profile": "restricted + safe-mode + settingSources=[] + strict MCP + Read/Grep/Glob + dontAsk",
+  "billingMode": "provider_configured_unpriced",
+  "modelAgnosticScope": "No production provider/model-specific routing logic"
+}

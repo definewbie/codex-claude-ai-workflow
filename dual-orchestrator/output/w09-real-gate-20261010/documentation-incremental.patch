@@ -1,0 +1,40 @@
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -6,7 +6,7 @@
+ 
+ 2026-10-09 当前补记：B01–B04 以各批末记录为准；B05 首版 C 已获用户带回的 CC 批末独立 PASS，按合同资格单族收口（CLOSED / PASS），见 §21.2–§21.3。时钟判别尚未常驻的 LOW 已登记。B06 W06/D09 具体接线已获 CC 合并设计 PASS，并获用户明确授权；实施与离线验证完成，随后用户带回 CC 批末独立 PASS，本批 CLOSED / PASS（离线范围），见 §22.4。两设计 LOW 的理由和常驻反证已落实；原预检/候选/授权前状态作为历史保留。未覆盖族 UNKNOWN，D01/I1.a/W01 与其他 W 项、真实 NO-GO 均不因此关闭，不自动启动下一批。
+ 
+-2026-10-09 W08 历史检查点（当前见 §23.2）：用户授权离线对账与真实 Gate 草案；本轮材料完成，作者自查 WARN / 技术 NO-GO。查询锁序 LOW 已常驻并有隔离反证；W07 确认设计提示要求复制已批精确 scope 与 GOAL 分期冲突，尚未纠正。见 §23。真实 Gate、预算、安装/提交未授权；历史待办须以本次对账重新解释，不能据 B01–B06 PASS 自动开跑。
++2026-10-09 W08 历史检查点（当前见 §23.4）：用户授权离线对账与真实 Gate 草案；本轮材料完成，作者自查 WARN / 技术 NO-GO。查询锁序 LOW 已常驻并有隔离反证；W07 确认设计提示要求复制已批精确 scope 与 GOAL 分期冲突，尚未纠正。见 §23。真实 Gate、预算、安装/提交未授权；历史待办须以本次对账重新解释，不能据 B01–B06 PASS 自动开跑。
+ 
+ ## 1. 当前结论、工作区身份和核验范围
+ 
+@@ -40,8 +40,8 @@
+ | W05 同冻结身份中断恢复；外部未知人工裁定；终态不重开 | I5/I1；D06/D07 ledger/runtime/worker/kernel | B02 holder、B03 本地协议/构造与身份、B04/B05/B06 写点/冷 JVM 独立 PASS，见 §23 | kernel 内部 I/O 专项与部署拓扑未全证，保留；首 Gate 限单 JVM 路由/ClassLoader，实际身份/停止核验不能以测试 JVM 代替 | 具名协议离线有据；I5 全故障/部署普适性未关闭 |
+ | W06 验收满足→候选批准→目标 Git 应用→实际提交→交付确认/中断处置 | I6，§4 交付行；candidate、DeliveryApplicationService、Git、query | T12；B06 四变体×inline/worker 受控完整批准链接临时真实 Git apply/人工实际 commit/finalize；写点、冷 JVM、拒绝/续作与同源投影证据见 §22.3；CC 批末独立 PASS 见 §22.4 | 本批实施/离线接线范围收口；LOW-1 查询锁序常驻化已登记，现有一次性反证仍有效；真实目标 Git、浏览器视觉与真实客户端未证，归组合准入/Gate；不自动 commit 或盲目重 apply | W04 验收/批准；W05 本地边界；B06/W06/D09 批次 CLOSED / PASS（离线范围）；真实交付证明未关闭，NO-GO 保持 |
+ | W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | 单一示例/typed 去重/受限 correction 已有；本轮逐字段案头表完成，见 §23 | G01 已在既有 prompt/template owner 修正并扫 intake/design/plan/reviewer/implement，共同保留严格身份；实际模型负担待真实 Gate，不承诺 token 节省 | 案头审计和 G01 离线修正已获 CC 合并独立 PASS；真实回应负担 NOT PROVEN |
+-| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 历史查询 LOW 常驻 6/0 与隔离反证；§23.1 本轮单轮 1755/206/0、654 输入同一性及新发行核验；CC PASS 接收见 §23.2 | 本轮 G01/G02–G04 见 §23.1；G05 本地批准/实际初始化前提见 §23.3；真实握手、业务 occurrence/工具证据在获准运行内核验；browser/真实 worker 未证，首个 CLI/INLINE 不关闭整体 W08 | 准备批次 CLOSED/PASS（离线）；CC 合并独立 PASS 见 §23.2；G05 本地准备批准及前提核验见 §23.3；真实运行仍未授权 |
+-| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh Python 任务与 Gate 已受审；§23.3 G05 本地准备已批准并建立新实例，真实流程未执行 | CC 已合并核对本轮 G01/发行/Gate；G05 当次前提/需求/目标/预算及真实运行明确批准后才运行；自然未触发分支 NOT EXERCISED、不恢复旧样本 | 本地准备 PASS / 新实例已建立；真实流程 NOT RUN / NOT AUTHORIZED，见 §23.3 |
++| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 历史查询 LOW 常驻 6/0 与隔离反证；§23.1 本轮单轮 1755/206/0、654 输入同一性及新发行核验；CC PASS 接收见 §23.2 | 本轮 G01/G02–G04 见 §23.1；G05 本地批准/实际初始化前提见 §23.3；真实握手、业务 occurrence/工具证据在获准运行内核验；browser/真实 worker 未证，首个 CLI/INLINE 不关闭整体 W08 | 准备批次 CLOSED/PASS（离线）；CC 合并独立 PASS 见 §23.2；G05 本地准备见 §23.3；首次真实运行已授权并在接口核验处停止，见 §23.4 |
++| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh Python 任务与 Gate 已受审；§23.3 G05 本地准备已批准并建立新实例，真实流程未执行 | 首次真实运行授权及停止证据见 §23.4；会话identity可选/必填冲突与旧失败报告漂移待受影响评审/修复；不自动retry/第二样本，未触发分支不冒填PASS | 本地准备 PASS；首次真实 Gate FAIL / WAITING_FOR_RECOVERY，见 §23.4；没有模型 prompt 或产品交付 |
+ 
+ ### 2.1 次序、依赖与独立评审触发
+ 
+@@ -763,3 +763,17 @@
+ 本地核验脚本一次误用绝对 Path.parts[0]，结果 INVALID；已保留错误及实际目录清单，改成 entry name 后只读重核通过，未修改生产或账本、未重新 init。原回归未重跑，不拼接或增加测试数量。
+ 
+ **下一步**：明确授权真实运行后，在此新实例按原 Gate 单 INLINE、逐段执行，每段前核身份/状态/预算，真实 GOAL 门先交用户；外部 UNKNOWN/新 authority/范围或成本偏差继续按原止损，真实 NO-GO在取得当次运行授权前保持。
++
++### 23.4 首次真实 Gate 已授权：会话接口核验阻塞（2026-10-10）
++
++用户明确“授权按已批准 Gate 开始真实运行”；同一 fresh 实例原冻结输入/config/clean/宿主前置再核通过，执行context内部段与一次Claude intake attempt。**本次 Gate FAIL / 主流程未闭合**；原 execution outcome为 `RECOVERABLE_ADAPTER_FAILURE / adapter_incompatible`，实例 `WAITING_FOR_RECOVERY`。证据见[停止评估](../../output/w09-real-gate-20261010/assessment.md)、[原执行索引](../../output/w09-real-gate-20261010/execution-observation.json)与[CC受影响只读提示](../../output/w09-real-gate-20261010/cc-review-prompt.txt)。
++
++实际命令：build identity→session new（成功）→sessions show（成功但compatibility拒）。会话具有正确 acpxRecordId/acpSessionId/name/cwd/protocolVersion=1，缺 agentSessionId；同版 acpx producer将该字段设为可选，Dual consumer强制必填。prompt intent未产生，不能说模型未返回JSON，也不证明GLM连接/业务能力。原active node `node-intake-claude_brainstorm-002` FAILED、execution `nxe-1791614610553-b1df99de`、run `run-1791614610585`；无sidecar/关键门批准/交付。
++
++兄弟投影缺口：核心唯一原因与RecoveryAssessment保留adapter不兼容，但current-failure.md仍从旧result.reason显示输出合同违规/AGENT_RESULT_MISSING。该投影不改控制主因；修复应同源消费，不产生第二原因。现有合法session fixture一律补有agentSessionId，未覆盖此次真实缺字段正向。只读锚点见source-checks.json；本轮源代码/冻结发行未改、无测试复跑。
++
++一次agent attempt保守占调用池1次，零prompt/零correction；usage为UNAVAILABLE，原数字0不得当真实零token/金额。zhipu/glm-5.3/billing来自配置观察，实际provider响应未证；CLI段4.965s与run末端113ms不同口径，不能只报后者冒称总耗时。原18调用/60min/160k预算不增加，停止后不继续调度。
++
++仅本次具名原生session经既有close通道关闭，show确认closed=true，连接关闭有记录；无真实exit_code/PID子树闭合证据，不把记录关闭说成物理全停或新attempt资格。原账本及77文件快照保留，target/worktree未写产品、未apply/产品commit；未启动Codex/额外agent、不自动retry、不救样本。
++
++**下一步**：CC独立核会话identity语义、原生合法形态与投影来源/同族影响，再明确有界根因修复和成对回归，重新冻结发行及受影响Gate。不能直接删校验、复制acpSessionId假造agentSessionId或手改ledger；本次Gate已停止，修复/后续fresh运行不由本次授权自动延伸。

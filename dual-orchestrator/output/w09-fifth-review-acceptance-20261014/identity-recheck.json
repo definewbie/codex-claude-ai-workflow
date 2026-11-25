@@ -1,0 +1,18 @@
+{
+  "case_files": 326,
+  "case_material_changes": [],
+  "original_source_inputs": 656,
+  "source_changes_since_frozen_release": [],
+  "fifth_stop_still_recorded": {
+    "reason": "REQUIRED_ARTIFACT_CONTRACT_FAILED",
+    "error_code": "TASK_CONTRACT_REVISION_PATCH_INVALID",
+    "detail": "REVISION_BASE_PROPOSAL_SHA256_MISMATCH",
+    "gate_classification": "FAIL_PENDING_STOP_AND_AFFECTED_REVIEW",
+    "new_dispatch": "FORBIDDEN",
+    "automatic_retry": false
+  },
+  "run_calls_this_receipt": 0,
+  "tests_this_receipt": 0,
+  "code_changes_this_receipt": 0,
+  "review_source": "Human supplied CC report in current conversation; no new reviewer agent"
+}

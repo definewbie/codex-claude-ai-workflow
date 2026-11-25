@@ -1,0 +1,56 @@
+{
+  "baseline": "before/ and baseline.json; dirty workspace before this batch, not HEAD",
+  "files": [
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java",
+      "before_sha256": "240c007625d039a19d60fb62a810107769dc73742e2a7ec925b7495ce9ae11ab",
+      "after_sha256": "248cb1cb41bea137a1eb0c557df1904ddaa533e1702e5e2487cbdbf079b7702d",
+      "kind": "production",
+      "added_lines": 11,
+      "removed_lines": 0
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+      "before_sha256": "0ae8fda308de8eff0690d1eaaf60d5c26f51902f2ebeb9c81aaefd14007590fe",
+      "after_sha256": "37871f637fbf03fa0d2c435dbf028a1d98533320fa1c1cbd8dff35c609b0e2cd",
+      "kind": "production",
+      "added_lines": 2,
+      "removed_lines": 1
+    },
+    {
+      "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java",
+      "before_sha256": "cc94e3af402c76a72f2e2d47d28ba648b467f3db6c41d9a874bdb5fcf51723f0",
+      "after_sha256": "485734a8d7f34a571da0894784e4f192fa8b4651e374e2493e667dfa6e821132",
+      "kind": "test",
+      "added_lines": 15,
+      "removed_lines": 0
+    },
+    {
+      "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/VerificationReadinessTest.java",
+      "before_sha256": "14a191181530e0ebbbaccdd9b9f07190d3950a4ef246be748943f6e02b2290eb",
+      "after_sha256": "6c8c4c9fc6bd917f62f04b2cf86a66dad36ef0ebd1aca6667290c6882315cd65",
+      "kind": "test",
+      "added_lines": 36,
+      "removed_lines": 0
+    },
+    {
+      "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java",
+      "before_sha256": "a2133721c117f7fd2fb7ffed954e98a96f5d844827757a67426bd5ef4b2bd882",
+      "after_sha256": "eff4765ae8b7317ff5fce3cf1c738fc6a9e664f3ef2fdc7091bf29ae55d277fb",
+      "kind": "test",
+      "added_lines": 36,
+      "removed_lines": 1
+    },
+    {
+      "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java",
+      "before_sha256": "0e96cc0058922ec8e585fdd0d8eb166bf8047ffc9360c5ca90db9c95d10866c4",
+      "after_sha256": "27ac6688a1816dc9c8b12f30fc6bc07853a1520e5a909b1dc3317e88704dcacc",
+      "kind": "test",
+      "added_lines": 21,
+      "removed_lines": 0
+    }
+  ],
+  "production_files": 2,
+  "test_files": 4,
+  "unplanned_module_source_changes": []
+}

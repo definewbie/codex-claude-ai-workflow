@@ -1,0 +1,6 @@
+{
+  "kind": "SYNTHETIC_DESIGN_EXAMPLES",
+  "notExecutionAuthority": true,
+  "contractSchema": 2,
+  "purpose": "完整拟议边界 JSON 及引用一致性；非运行过的 ledger、批准或环境证据。"
+}

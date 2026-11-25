@@ -1,0 +1,15 @@
+{
+  "output/lifecycle-batch-06-20261009/source-before-sha256.json": "717e20d22dcd7d3bcbf81a7809ba8966de3b65b7f697372032bac46e62d13fd0",
+  "output/lifecycle-batch-06-20261009/documentation-incremental.patch": "d2b76ab5e1aa93d6353c92bf09bfa83edd2bc98326d2a014451afd8ae8117e3f",
+  "output/lifecycle-batch-06-20261009/preflight.md": "cc1bf8686cbea6a6a88da7321462632d3e6b64d49f3affd47e1491bce1c5c7e1",
+  "output/lifecycle-batch-06-20261009/scope-candidates.json": "ca2f8a2777a0e0ed8b88efeff240861ebf22a1a0ae12046a00c5c92d27c9cb27",
+  "output/lifecycle-batch-06-20261009/status-before.txt": "1cfdcd119cf9288c679facf586892ecc532b7cf735c4e18c7b98182ec800d8d0",
+  "output/lifecycle-batch-06-20261009/documentation-changes.json": "1fbc71b252d5188a9f48c2353f057513510b9f6088b91b37d30a66d2dad5560c",
+  "output/lifecycle-batch-06-20261009/baseline.json": "9740f955babcd2221aab6142a908e68d50da1855ca7eb7a06cbe0b342cbdccdc",
+  "output/lifecycle-batch-06-20261009/source-before-text.json": "03b82bd267c858e340302dcc190de2246de49c8f65d41353fd766441fc95113f",
+  "output/lifecycle-batch-06-20261009/source-checks.json": "9526901b3a47e5bd0919af0098fa7c7fddad3f8ac3c8fd79b6f56fcaebade323",
+  "output/lifecycle-batch-06-20261009/verification.json": "228196a0f1b7f6963e3846bd34e9a0815f8aa5b643e769d9dc745548a923e1ec",
+  "output/lifecycle-batch-06-20261009/prior-test-receipts.json": "6859f36f43eaa1bea7599e04aa8cd8f88f826534eee7b20abf80d71c6dfb1ba3",
+  "output/lifecycle-batch-06-20261009/documents-before-text.json": "9993e8c2534568cbbb1b8eb50d1213c03c33b5b3adc220b27308d60a695db951",
+  "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "9d109f8a49df53d2ec50026d263f83ae25392c02bb4b4ecb3d6c82fdc314fa57"
+}

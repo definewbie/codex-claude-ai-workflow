@@ -30,12 +30,69 @@ class AgentPromptRendererTest {
     Path tempDir;
 
     @Test
+    void qualifiedGoalPromptsPermitFileProposalsWithoutPretendingExactScopeWasApproved() throws Exception {
+        for (var topology : dev.dual.runtime.handler.AuthoredStageSequenceTest.PlanTopology.values()) {
+            var ledger = AcpxTestLedger.ledger();
+            var root = tempDir.resolve(topology.name());
+            var fixture = new dev.dual.runtime.handler.AuthoredStageSequenceTest.Fixture(
+                    root, "src/new_product.py", topology, "ws-phase", null, ledger);
+            for (var target : List.of(
+                    Map.entry("design.claude_design", "design-claude"),
+                    Map.entry("design.codex_arch_review", "design-codex-review"),
+                    Map.entry("plan.claude_plan", "plan-claude"),
+                    Map.entry("plan.codex_plan_review", "plan-codex-review"))) {
+                var context = fixture.before(target.getKey());
+                var prepared = dev.dual.runtime.handler.AgentRunGovernanceContext.ensureQualified(context, "render-proof");
+                assertEquals(dev.dual.core.contract.TaskContract.Phase.GOAL,
+                        prepared.qualifiedTaskContract().orElseThrow().phase());
+                assertTrue(prepared.qualifiedTaskContract().orElseThrow().scope().included().isEmpty());
+                var refs = new java.util.ArrayList<>(context.instance().inputRefs());
+                refs.add(prepared.contextRef());
+                var prompt = new AgentPromptRenderer(ledger).renderWithSections(
+                        root, "ws-phase", "render-proof", target.getKey(), target.getValue(), refs, null,
+                        prepared.trustedTaskContractPayload().orElseThrow()).content();
+                assertFalse(prompt.contains("Copy exact canonical paths and operations from the approved TaskContract scope"), target.toString());
+                assertFalse(prompt.contains("exact paths and operations must be authorized by the approved TaskContract"), target.toString());
+                assertTrue(prompt.contains("GOAL"), target.toString());
+                assertTrue(prompt.contains("proposals, not authorization"), target.toString());
+                assertTrue(prompt.contains("EXECUTION"), target.toString());
+                assertFalse(Files.exists(root.resolve("src/new_product.py")), "a proposed path is not an implementation");
+            }
+        }
+    }
+
+    @Test
+    void qualifiedExecutionPromptRetainsExactPathAndOperationApprovalBeforeImplementation() throws Exception {
+        var ledger = AcpxTestLedger.ledger();
+        var root = tempDir.resolve("execution");
+        var fixture = new dev.dual.runtime.handler.AuthoredStageSequenceTest.Fixture(
+                root, "src/new_product.py",
+                dev.dual.runtime.handler.AuthoredStageSequenceTest.PlanTopology.AUTOMATIC,
+                "ws-phase", null, ledger);
+        var context = fixture.before("implement.claude_implement");
+        var prepared = dev.dual.runtime.handler.AgentRunGovernanceContext.ensureQualified(context, "render-proof");
+        assertEquals(dev.dual.core.contract.TaskContract.Phase.EXECUTION,
+                prepared.qualifiedTaskContract().orElseThrow().phase());
+        assertTrue(prepared.qualifiedTaskContract().orElseThrow().scope().included().stream()
+                .anyMatch(entry -> entry.path().equals("src/new_product.py")));
+        var refs = new java.util.ArrayList<>(context.instance().inputRefs());
+        refs.add(prepared.contextRef());
+        var prompt = new AgentPromptRenderer(ledger).renderWithSections(
+                root, "ws-phase", "render-proof", "implement.claude_implement", "implement-claude", refs, null,
+                prepared.trustedTaskContractPayload().orElseThrow()).content();
+        assertTrue(prompt.contains("Copy exact canonical paths and operations from the approved EXECUTION TaskContract scope"));
+        assertTrue(prompt.contains("Neither a reviewed design nor a reviewed plan authorizes an additional path or operation"));
+        assertTrue(prompt.contains("src/new_product.py"));
+        assertFalse(Files.exists(root.resolve("src/new_product.py")), "rendering cannot execute the approved implementation");
+    }
+
+    @Test
     void renderWithSectionsProducesContentAndProvenance() throws Exception {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-test");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.");
 
-        var renderer = new AgentPromptRenderer();
+        var renderer = new AgentPromptRenderer(AcpxTestLedger.ledger());
         var rendered = renderer.renderWithSections(tempDir, "ws-test", "intake.claude_brainstorm",
                 "intake-claude-brainstorm", List.of());
 
@@ -63,7 +120,7 @@ class AgentPromptRendererTest {
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
 
         assertTrue(prompt.contains("Workstream: ws-test"));
@@ -95,12 +152,28 @@ class AgentPromptRendererTest {
     }
 
     @Test
+    void intakeRenderingDistinguishesProductEvidenceFromControlBindings() throws Exception {
+        var workstreamDir = tempDir.resolve(".agent/workstreams/ws-evidence");
+        Files.createDirectories(workstreamDir);
+        Files.writeString(workstreamDir.resolve("requirement.md"), "Create a small product in an empty repository.");
+        var renderer = new AgentPromptRenderer(AcpxTestLedger.ledger());
+        for (var pair : List.of(new String[]{"intake.claude_brainstorm", "intake-claude-brainstorm"},
+                new String[]{"intake.codex_product_review", "intake-codex-product-review"})) {
+            var prompt = renderer.render(tempDir, "ws-evidence", pair[0], pair[1], List.of());
+            assertTrue(prompt.contains("evidence_refs are canonical product-tree file paths"));
+            assertTrue(prompt.contains("empty tracked-path inventory permits evidence_refs=[]"));
+            assertTrue(prompt.contains("Never copy .agent/ or .git/ references into evidence_refs"));
+            assertFalse(prompt.contains("additional durable evidence references remain allowed"));
+        }
+    }
+
+    @Test
     void nonIntakePromptsKeepShellWorkspaceGuard() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "implement.claude_implement", "implement-claude", List.of());
 
         assertTrue(prompt.contains("Run all shell commands from the effective workspace above."));
@@ -119,7 +192,7 @@ class AgentPromptRendererTest {
                 """);
         Files.writeString(workstreamDir.resolve("requirement.md"), "给 README 增加一段项目说明。\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
 
         assertTrue(prompt.contains("Use Simplified Chinese for human-readable string values inside the final JSON result."));
@@ -139,7 +212,7 @@ class AgentPromptRendererTest {
                 """);
         Files.writeString(workstreamDir.resolve("requirement.md"), "给 README 增加一段项目说明。\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
 
         assertTrue(prompt.contains("Use English for human-readable string values inside the final JSON result."));
@@ -152,7 +225,7 @@ class AgentPromptRendererTest {
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
 
         assertTrue(prompt.contains("Use English for human-readable string values inside the final JSON result."));
@@ -176,7 +249,7 @@ class AgentPromptRendererTest {
         );
 
         for (var target : targets.entrySet()) {
-            var prompt = new AgentPromptRenderer().render(
+            var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger()).render(
                     tempDir,
                     "ws-test",
                     target.getKey(),
@@ -210,7 +283,7 @@ class AgentPromptRendererTest {
                 Edit /private/projects/internal-product/src/main.py
                 """);
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(
                         tempDir,
                         "ws-test",
@@ -238,7 +311,7 @@ class AgentPromptRendererTest {
                 External file: /private/projects/internal-product/src/main.py
                 """);
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(
                         tempDir,
                         "ws-test",
@@ -265,7 +338,7 @@ class AgentPromptRendererTest {
                 External file: /private/projects/internal-product/src/main.py
                 """);
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(
                         tempDir,
                         "ws-test",
@@ -294,7 +367,7 @@ class AgentPromptRendererTest {
                 External file: /private/projects/internal-product/src/main.py
                 """);
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(
                         tempDir,
                         "ws-test",
@@ -317,7 +390,7 @@ class AgentPromptRendererTest {
         var insidePath = tempDir.resolve(".agent/workstreams/ws-test/context/node-context.md").toAbsolutePath().normalize();
         Files.writeString(contextPath, "Read full artifact at " + insidePath + "\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(
                         tempDir,
                         "ws-test",
@@ -335,7 +408,7 @@ class AgentPromptRendererTest {
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "intake.codex_product_review", "intake-codex-product-review", List.of());
 
         assertTrue(prompt.contains("READY_FOR_PRODUCT_REVIEW"));
@@ -348,7 +421,9 @@ class AgentPromptRendererTest {
                 "`scope.included` is the exhaustive authorization set for permitted repository changes"));
         assertTrue(prompt.contains(
                 "Acceptance criteria, constraints, risks, and other prose cannot authorize an undeclared path"));
-        assertTrue(prompt.contains("Never request an illustrative or non-exhaustive scope"));
+        assertTrue(prompt.contains("Never request an illustrative or non-exhaustive EXECUTION scope"));
+        assertTrue(prompt.contains("intake file entries are proposals, not authorization"));
+        assertTrue(prompt.contains("GOAL approval fixes the objective, acceptance and exclusions, not an implementation file set"));
         assertTrue(prompt.contains("A scope gap must request concrete typed path-and-operation changes"));
         assertTrue(prompt.contains("must not broaden or narrow accepted input"));
         assertTrue(prompt.contains("Do not require the task proposal to duplicate those harness protocols"));
@@ -366,14 +441,16 @@ class AgentPromptRendererTest {
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "intake.claude_brainstorm", "intake-claude-brainstorm", List.of());
 
         assertTrue(prompt.contains(
-                "Treat the typed scope projected by the Output Contract as the exhaustive authorization set"));
+                "Treat intake file entries as proposals, not authorization"));
+        assertTrue(prompt.contains("GOAL approval confirms the objective, acceptance and exclusions"));
+        assertTrue(prompt.contains("approved EXECUTION `scope.included` is the exhaustive authorization set"));
         assertTrue(prompt.contains(
                 "Do not use acceptance criteria, constraints, risks, or other prose to authorize undeclared paths"));
-        assertTrue(prompt.contains("never describe typed scope as illustrative or non-exhaustive"));
+        assertFalse(prompt.contains("Treat the typed scope projected by the Output Contract as the exhaustive authorization set"));
         assertTrue(prompt.contains(
                 "When a revision obligation identifies a scope gap, use only the exact typed scope-addition field"));
     }
@@ -390,7 +467,7 @@ class AgentPromptRendererTest {
                 "- Project principle: never introduce medical assurance wording.\n"
         );
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "intake.codex_product_review", "intake-codex-product-review", List.of());
 
         assertTrue(prompt.contains("Project principle: never introduce medical assurance wording."));
@@ -402,7 +479,7 @@ class AgentPromptRendererTest {
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "plan.claude_plan", "plan-claude", List.of());
 
         assertTrue(prompt.contains("Structured Artifact Field Semantics"));
@@ -416,7 +493,7 @@ class AgentPromptRendererTest {
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "plan.claude_plan", "plan-claude", List.of());
 
         assertFalse(prompt.contains("Read Reuse Contract Semantics"), prompt);
@@ -431,7 +508,7 @@ class AgentPromptRendererTest {
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
 
-        var rendered = new AgentPromptRenderer()
+        var rendered = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .renderWithSections(tempDir, "ws-test", "intake.claude_brainstorm",
                         "intake-claude-brainstorm", List.of());
 
@@ -465,7 +542,7 @@ class AgentPromptRendererTest {
                 Do the task.
                 """);
 
-        var rendered = new AgentPromptRenderer()
+        var rendered = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .renderWithSections(
                         tempDir,
                         "ws-test",
@@ -489,7 +566,7 @@ class AgentPromptRendererTest {
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "design.codex_arch_review", "design-codex-review", List.of());
 
         assertTrue(prompt.contains("READY_FOR_ARCH_REVIEW"));
@@ -526,7 +603,7 @@ class AgentPromptRendererTest {
                 - %s
                 """.formatted(capturedScaleEvidence));
 
-        var prompt = new AgentPromptRenderer().render(
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger()).render(
                 tempDir,
                 "ws-test",
                 "design.codex_arch_review",
@@ -547,7 +624,7 @@ class AgentPromptRendererTest {
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "acceptance.codex_verifier_review", "acceptance-codex-review", List.of());
 
         assertTrue(prompt.contains("Allowed `result.decision` values:"));
@@ -567,9 +644,9 @@ class AgentPromptRendererTest {
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Add one small function.\n");
 
-        var implementPrompt = new AgentPromptRenderer()
+        var implementPrompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "implement.claude_implement", "implement-claude", List.of());
-        var selfTestPrompt = new AgentPromptRenderer()
+        var selfTestPrompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "implement.claude_self_test_report", "implement-claude-self-test", List.of());
 
         assertTrue(implementPrompt.contains("Clean up self-test byproducts"));
@@ -590,7 +667,7 @@ class AgentPromptRendererTest {
         Files.writeString(workstreamDir.resolve("requirement.md"), "Build a safer agent workflow.\n");
         Files.writeString(nextPromptPath, "# Next Stage Prompt\n\nImplement the approved follow-up.\n");
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(
                         tempDir,
                         "ws-test",
@@ -614,7 +691,7 @@ class AgentPromptRendererTest {
                 tempDir.resolve(".agent/workstreams/ws-test/artifacts/task-contract.json"),
                 "{\"tampered\":true}");
 
-        var prompt = new AgentPromptRenderer().renderWithSections(
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger()).renderWithSections(
                 tempDir,
                 "ws-test",
                 "run-acceptance",
@@ -651,7 +728,7 @@ class AgentPromptRendererTest {
                 tempDir.relativize(unknown).toString()
         );
 
-        var prompt = new AgentPromptRenderer()
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger())
                 .render(tempDir, "ws-test", "plan.claude_plan", "plan-claude", refs);
 
         assertFalse(prompt.contains("STDERR_INJECTION"));
@@ -668,7 +745,7 @@ class AgentPromptRendererTest {
         Files.writeString(workstreamDir.resolve("requirement.md"), "Review only validated evidence.\n");
         Files.writeString(sidecar, "{\"summary\":\"FORGED_CONTRACT_INJECTION\"}");
 
-        assertThrows(IllegalStateException.class, () -> new AgentPromptRenderer().render(
+        assertThrows(IllegalStateException.class, () -> new AgentPromptRenderer(AcpxTestLedger.ledger()).render(
                 tempDir,
                 "ws-test",
                 "plan.claude_plan",
@@ -703,7 +780,7 @@ class AgentPromptRendererTest {
                 """);
         publishAgentEvidenceOccurrence(sidecar, output);
 
-        var prompt = new AgentPromptRenderer().render(
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger()).render(
                 tempDir,
                 "ws-test",
                 "plan.claude_plan",
@@ -724,7 +801,7 @@ class AgentPromptRendererTest {
         Files.writeString(workstreamDir.resolve("requirement.md"), "Use the canonical task contract.\n");
         Files.writeString(lookalike, "KNOWN_ARTIFACT_LOOKALIKE_INJECTION");
 
-        var prompt = new AgentPromptRenderer().render(
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger()).render(
                 tempDir,
                 "ws-test",
                 "plan.claude_plan",
@@ -746,7 +823,7 @@ class AgentPromptRendererTest {
         Files.writeString(target, "SYMLINK_CONTEXT_INJECTION");
         Files.createSymbolicLink(link, target);
 
-        var prompt = new AgentPromptRenderer().render(
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger()).render(
                 tempDir,
                 "ws-test",
                 "plan.claude_plan",
@@ -776,7 +853,7 @@ class AgentPromptRendererTest {
                 - Read reuse contract: NESTED_REUSE_INJECTION
                 """);
 
-        var prompt = new AgentPromptRenderer().render(
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger()).render(
                 tempDir,
                 "ws-test",
                 "plan.claude_plan",
@@ -820,7 +897,7 @@ class AgentPromptRendererTest {
                 ```
                 """.formatted("x".repeat(7_000)));
 
-        var rendered = new AgentPromptRenderer().renderWithSections(
+        var rendered = new AgentPromptRenderer(AcpxTestLedger.ledger()).renderWithSections(
                 tempDir,
                 "ws-test",
                 "run-review",
@@ -905,7 +982,7 @@ class AgentPromptRendererTest {
                 %s
                 """.formatted(TypedContextPayloadBoundary.wrap(typedProposal)));
 
-        var prompt = new AgentPromptRenderer().render(
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger()).render(
                 tempDir,
                 "ws-test",
                 "intake.codex_product_review",
@@ -928,7 +1005,7 @@ class AgentPromptRendererTest {
                 tempDir, "ws-test", List.of(fixture.referenceRef()), mapper).orElseThrow().proposal();
         var expectedBaseline = TypedContextPayloadBoundary.wrapJson(proposal);
 
-        var prompt = new AgentPromptRenderer().render(
+        var prompt = new AgentPromptRenderer(AcpxTestLedger.ledger()).render(
                 tempDir,
                 "ws-test",
                 "intake.claude_brainstorm",
@@ -950,7 +1027,7 @@ class AgentPromptRendererTest {
                 Files.readString(fixture.proposalSidecar())
                         .replace("BASELINE_CLAUSE_MUST_REMAIN_BYTE_STABLE", "TAMPERED_BASELINE"));
 
-        var error = assertThrows(IllegalArgumentException.class, () -> new AgentPromptRenderer().render(
+        var error = assertThrows(IllegalArgumentException.class, () -> new AgentPromptRenderer(AcpxTestLedger.ledger()).render(
                 tempDir,
                 "ws-test",
                 "intake.claude_brainstorm",
@@ -965,7 +1042,7 @@ class AgentPromptRendererTest {
     @Test
     void failsClearlyWhenTemplateIsMissing() {
         var error = assertThrows(IllegalArgumentException.class, () ->
-                new AgentPromptRenderer().render(tempDir, "ws-test", "bad.node", "missing-template", List.of()));
+                new AgentPromptRenderer(AcpxTestLedger.ledger()).render(tempDir, "ws-test", "bad.node", "missing-template", List.of()));
 
         assertTrue(error.getMessage().contains("missing prompt template resource"));
     }
@@ -981,7 +1058,26 @@ class AgentPromptRendererTest {
             String nodeInstanceId,
             String decision
     ) throws Exception {
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(tempDir, new dev.dual.core.id.DualId("ws-test"));
+        if (!Files.exists(paths.workflowCurrentJson())) {
+            var definition = new dev.dual.core.workflow.WorkflowDefinition("prompt-evidence", 1, nodeId,
+                    List.of(new dev.dual.core.workflow.NodeDefinition(nodeId, NodeKind.TASK, "acpx.agent_run", Map.of())), List.of());
+            AcpxTestLedger.initialize(AcpxTestLedger.ledger(), paths, "ws-test", definition);
+        }
         var objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        var sidecarDocument = objectMapper.readTree(sidecar.toFile());
+        if ("task_contract_proposal".equals(sidecarDocument.path("source_artifact_type").asText())) {
+            // A verified initial proposal needs its typed authored source, not an empty placeholder.
+            var raw = (com.fasterxml.jackson.databind.node.ObjectNode)
+                    sidecarDocument.path("task_contract_proposal").deepCopy();
+            raw.remove("schema_version");
+            raw.put("decision", decision).put("summary", "Typed prompt fixture").put("needs_human_input", false);
+            raw.path("scope").path("included").forEach(entry ->
+                    ((com.fasterxml.jackson.databind.node.ObjectNode) entry).remove("operation"));
+            objectMapper.writeValue(output.toFile(), Map.of(
+                    "schema_version", 1, "workstream_id", "ws-test", "run_id", "run-typed",
+                    "node_id", nodeId, "result", raw));
+        }
         var sidecarRef = tempDir.relativize(sidecar).toString();
         var outputRef = tempDir.relativize(output).toString();
         var outputs = List.of(outputRef, sidecarRef);

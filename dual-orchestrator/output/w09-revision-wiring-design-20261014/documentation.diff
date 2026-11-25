@@ -1,0 +1,66 @@
+--- before/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ after/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -1007,6 +1007,18 @@
+ 2026-10-10 W08 独立复审接收：G01 提示修正与 G02–G04 材料获用户带回 CC PASS，准备批次按主清单 §23.2 离线收口；原正文/交评材料的待审状态为当时快照。真实 NO-GO 保持，G05 及真实运行授权未取得。接收核验和审批提案见 [记录](../../output/w08-preparation-review-acceptance-20261010/disposition.md)，不扩大设计或验收。
+ 
+ 
++### 10.1 W09 身份减负与初次 GOAL 前目标级返修候选（2026-10-14）
++
++第五例真实一字符SHA转录失败后，用户授权**只补接线设计与验证材料，合并CC复审；暂不编码或启动第六例**。入口为[合并设计](../../output/w09-revision-wiring-design-20261014/assessment.md)、[验证义务](../../output/w09-revision-wiring-design-20261014/verification-plan.md)、[合成字段样例](../../output/w09-revision-wiring-design-20261014/examples.json)。状态DESIGN_CANDIDATE / AWAITING_CC；不是新的冻结、实施或运行批准。
++
++候选修订D10中base字段分工：模型保留当前base proposal ID、移除patch的SHA回显义务；完整reference/SHA由本次R01固定并在dispatch/publisher/reference/compile强制重核。ID不是完整内容身份，不能从完成时latest context补盖。现有wire字段集合需局部调整，旧SHA键不静默忽略，原始模型输出不改写；schema/workstream/run/node、义务回应、review subject与批准引用仍保持各自严格规则。
++
++候选具体化D03目标变更出口：普通条款/范围增补仍用有限patch；初次GOAL形成前、精确review/human revise上下文中objective或excluded实变，允许带base ID的既有full proposal，程序固定goal_reproposal派生，保留条款ADD/REPLACE、义务覆盖与领域校验，再走独立复评→当前需求人门→新GOAL compile（included=[]）。不是直接采纳模型的批准。历史已compile/授EXECUTION、late/scope-rework不由本候选放开；若需重新定义已批准目标，停止旧流程、交用户经现有start新workstream和新批准，不宣称原实例在线迁移已闭合。
++
++R01输入与同基准绑定、唯一派生消费、原R03/L03、复评/人批/compile、每写点/冷启动/旧runtime与四变体兄弟的完整transition见合并设计§3–§5。局部输入字段与派生kind复用现有owner，没有新增artifact type、图节点/边、gate action、锁、服务、通用字段DSL。若实现发现需跨GOAL自动迁移、独立基准平台或广泛重构，按原ROI止损交用户。
++
++§10“先不改wire”的原结论保留为当时冻结基线；新真实代价支持本次有界候选，**未经CC与实施授权不改写原冻结效力**。新能力全部NOT_IMPLEMENTED/NOT_RUN，不借旧1790绿灯或材料JSON检查称ENFORCED/PROVEN；不关闭D10/W07/W08/W09，不恢复第五例、沿用旧余额或修改旧发行。下一步仅一次合并受影响CC设计复审，必要处置后再交用户批准实施。
++
+ ## 11. 整链 transition 与失败组合
+ 
+ 以下是目标序列，所有本地多写点均展开为 §6 的每个前缀；包含外部行为的行再叠加 §7/§9，不能用统一模板跳过外部窗口。角色许可沿现有 operator/agent 边界；模型不得代作人决定。
+@@ -1068,7 +1080,7 @@
+ | D07 | 附录 §7：M6 函数桥接、identity、恢复 payload/入口、未知裁定 | DESIGN_FROZEN（含 §7.2 权限回复增量）；CC 设计 PASS 与用户语义确认已齐；实现后证明恢复/终态及人裁定不冒充机器事实 |
+ | D08 | 附录 §8 + 补记 LOW-1：删除隐式 builtin 构造、显式装配、holder monitor | DESIGN_FROZEN；实施后证明入口/会话/并发。验证前同 JVM 多 workstream 路由仍禁止并发 |
+ | D09 | 附录 §9：逐窗 Git 事实、恢复/no-change | DESIGN_FROZEN；实现后证明观察充分性与真实交付，不新增空交付/自动 commit |
+-| D10 | 附录 §10：严格机器字段保留，仅去重复 prompt 来源 | DESIGN_FROZEN；W07 修改与减负效果仍待验收，不承诺 token 已下降 |
++| D10 | 附录 §10：严格机器字段保留，仅去重复 prompt 来源；第五例后有界候选见§10.1 | 原基线DESIGN_FROZEN；新base字段分工候选待CC，尚未替代冻结验收或授权实施；W07/减负仍待验收，不承诺token下降 |
+ 
+ 全案仍非 Implementation Ready。D04 可行性、整版实施范围与已有改动对账、用户实施授权仍须分别满足；142 个候选文件不是批准修改清单。设计冻结后发现反例按 R3 §7.1 回到对应决策纠偏，不以局部实现掩盖，也不默认重新开启全部设计。唯一工作索引及实施组织见主清单 §2/§9。
+ 
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -33,15 +33,15 @@
+ | ID / 完整用户流程 | 契约依据 / 领域 owner | 现有事实与证据 | 剩余工作与必要设计决策 | 依赖 / 状态 |
+ |---|---|---|---|---|
+ | W00 对账与建立完整覆盖地图 | R3 §7.1；文档索引不持有运行 authority | 本文 §3 覆盖所有相关 dirty 文件；§4 映射测试与缺口；冻结身份可复核；CC 材料层 PASS | 2 LOW 处置及限制见 §8；后续材料实质变化重核受影响结论，不以本次抽样代替产品证明 | 材料任务收口；独立评审与作者修订核验分列，不是产品能力完成 |
+-| W01 人工决定→作者修订→复评→重新批准；失败原因→合法补足后续作 | I1/I1.a；core/ledger/revision/recovery | B03 合法续作与返修/重批，B05 C 单族独立 PASS，最新受控序列见 §23 | 其余诊断族 UNKNOWN，按用户 C/真实反复阻塞触发，不自动第二族；单族及合法离线流程不外推 I1.a 全体 | 本族 CLOSED/PASS；完整 W01 未关闭，真实能力按 Gate |
++| W01 人工决定→作者修订→复评→重新批准；失败原因→合法补足后续作 | I1/I1.a；core/ledger/revision/recovery | B03 合法续作与返修/重批，B05 C 单族独立 PASS，最新受控序列见 §23 | 其余诊断族 UNKNOWN，按用户 C/真实反复阻塞触发，不自动第二族；第五例后的初次GOAL前目标级新提案接线候选见§23.21，待CC，不外推全生命周期出口 | 本族 CLOSED/PASS；完整 W01 未关闭，真实能力按 Gate |
+ | W02 输入准备→provider→验证→发布→node/run/recovery | I2；adapter、唯一 outcome/finalizer、恢复 read model | B01/B03/B04 离线与独立 PASS；E02 常驻、权限双通道/固定完成/失败保真；首例后的兼容性/摘要前向修复与新凭证见 §23.5 | 真实 native/工具能力待 Gate；首版全量声明已接受，具体运行中补声明入口未证，真实反复阻塞才重评 | 实施/具名离线链有据；总体真实能力未证 |
+ | W03 目标批准→只读设计/计划/复评→精确执行批准→首次实现 | I3/I1；TaskContract/proposal/qualification/adapter | B03 分期合同、B04 原生 C/X 接线与独立 PASS，见 §23 | G01 分期提示已纠正并配对验证，见 §23.1；实际选定 native 装配/合法请求续作按 Gate 核验 | 编译/控制链与提示修正离线有据；CC 受影响独立 PASS 已接收，真实 NO-GO |
+ | W04 必需验证可行→实现→自测→独立验收；缺材料补证据 | I4/I1/I2；D05、EvidenceCollection、ExternalVerificationEvidence | B03 D05 程序/模型/人工分立、实际退出码按批准条款、漂移与合法复用、返修/补证据离线有据，见 §23 | fresh 各验收项绑定实际方法/环境/权限/责任/证据出口，未知工具不假装可用，不默认通用环境认证 | D05 接线离线有据；具体 fresh 出口 Gate 前核齐 |
+ | W05 同冻结身份中断恢复；外部未知人工裁定；终态不重开 | I5/I1；D06/D07 ledger/runtime/worker/kernel | B02 holder、B03 本地协议/构造与身份、B04/B05/B06 写点/冷 JVM 独立 PASS，见 §23 | kernel 内部 I/O 专项与部署拓扑未全证，保留；首 Gate 限单 JVM 路由/ClassLoader，实际身份/停止核验不能以测试 JVM 代替 | 具名协议离线有据；I5 全故障/部署普适性未关闭 |
+ | W06 验收满足→候选批准→目标 Git 应用→实际提交→交付确认/中断处置 | I6，§4 交付行；candidate、DeliveryApplicationService、Git、query | T12；B06 四变体×inline/worker 受控完整批准链接临时真实 Git apply/人工实际 commit/finalize；写点、冷 JVM、拒绝/续作与同源投影证据见 §22.3；CC 批末独立 PASS 见 §22.4 | 本批实施/离线接线范围收口；LOW-1 查询锁序常驻化已登记，现有一次性反证仍有效；真实目标 Git、浏览器视觉与真实客户端未证，归组合准入/Gate；不自动 commit 或盲目重 apply | W04 验收/批准；W05 本地边界；B06/W06/D09 批次 CLOSED / PASS（离线范围）；真实交付证明未关闭，NO-GO 保持 |
+-| W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | 单一示例/typed 去重/受限 correction 已有；本轮逐字段案头表完成，见 §23 | G01 已在既有 prompt/template owner 修正并扫 intake/design/plan/reviewer/implement，共同保留严格身份；实际模型负担待真实 Gate，不承诺 token 节省 | 案头审计和 G01 离线修正已获 CC 合并独立 PASS；真实回应负担 NOT PROVEN |
+-| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23.17 A修复发行CC认可；§23.18第五例已授权/启动前核齐；§23.19实际停止 | 返修基础SHA错字拒绝与表达能力候选缺口待受影响CC；browser/真实worker未证 | 发行保持；不关闭整体W08 |
+-| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实evidence/candidate/目标Git | §23.19第五例3真实请求/62136 token全部可归因，原SHA守卫拒绝返修 | 五例停止；返修接口/身份负担待CC；计划/实施/自测/验收/交付仍未真实证明 | 第五Gate FAIL/领域WAITING_FOR_RECOVERY；W09未完成，零第六例 |
++| W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | 单一示例/typed 去重/受限 correction、G01离线修正已获CC认可；第五例发生真实SHA转录误拒 | §23.21身份减负候选：ID由模型引用、完整基准R01固定并强制消费；接线设计待CC，未实施/未证节省；其余身份与语义义务保留 | 原案头/G01认可不外推新候选；W07未关闭 |
++| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23.17 A修复发行CC认可；§23.19第五例实际停止；§23.20评审接收 | §23.21两项具体接线设计合并待CC，实施/新发行/Gate另待授权；browser/真实worker未证 | 发行保持原字节；不关闭整体W08 |
++| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实evidence/candidate/目标Git | §23.19第五例3真实请求/62136 token全部可归因，原SHA守卫拒绝返修；评审接收见§23.20 | 五例停止；§23.21前向设计候选待CC，不恢复旧例；计划/实施/自测/验收/交付仍未真实证明 | 第五Gate FAIL/领域WAITING_FOR_RECOVERY；W09未完成，零第六例 |
+ 
+ ### 2.1 次序、依赖与独立评审触发
+ 
+@@ -938,3 +938,13 @@
+ 用户带回CC：第五Gate FAIL/严格SHA拒绝正确；3请求归因双路正向，F1模型侧SHA负担由用户决定，F2目标级返修出口待核。接收见[receipt](../../output/w09-fifth-review-acceptance-20261014/cc-review-receipt.md)。案头核对发现full proposal在revision context下被ArtifactContractValidator:240–244明确拒绝，不能把语义出口当已接通；模型SHA必填字段已有validator契约，减负需现有wire/validator/渲染和程序绑定共同调整，而非只删SHA守卫。程序侧完整ref/SHA与谱系不能降级。约77万混入历史诊断量，不作已固定可归因或预算authority总量。
+ 
+ **下一步建议动作**：用户取舍采纳后，在现有owner内补身份减负与目标级重提案具体接线设计，合并一次受影响CC评审；实现与第六例分别待决。第五例不恢复，旧余额不继承，不开启额外agent/通用DSL/平台；当前未实施新修复。
++
++### 23.21 W09 身份减负与目标级返修接线设计待审（2026-10-14）
++
++用户同意先补具体接线设计/验证材料，明确暂不编码或启动第六例、控制复杂度ROI。本轮入口[assessment](../../output/w09-revision-wiring-design-20261014/assessment.md)、[验证义务](../../output/w09-revision-wiring-design-20261014/verification-plan.md)、[CC提示](../../output/w09-revision-wiring-design-20261014/cc-review-prompt.txt)；详设§10.1同步。状态DESIGN_CANDIDATE / AWAITING_CC / IMPLEMENTATION_NOT_AUTHORIZED / SIXTH_NOT_RUN。只改两份当前规划文档并新增设计材料，无生产/测试/配置/发行/历史实例修改，无测试/native/provider/额外agent。
++
++W07/D10首版候选：模型只引用确切base ID，完整reference/SHA由本次R01固定、dispatch/publisher/派生reader/compile唯一强制消费；不是删除SHA防护或完成时补latest。D03/W01受影响候选：初次GOAL形成前、可信返修上下文的目标/禁区实变，可提交带base ID的full proposal，再复评→当前人门→GOAL included=[]；普通patch的有限delta/义务覆盖不放宽。已compile/授EXECUTION或late/scope-rework不新增在线重写，真正新目标交用户停止旧流程后用现有start开启新workstream、重新批准；不冒称所有目标变化出口已自动接通。
++
++完整transition、失败前缀、旧runtime拒绝、写序/冷启动、四变体inline/worker/人工revise/correction及registry兄弟见本包。来源索引/合成样例/材料检查只证可复核，不证新能力落码或运行。第五例326条目、A修复包398条目和656冻结输入前后重核；结果以本包material-verification为准，历史事故与发行保持原字节。
++
++**下一步动作**：交一次合并CC只读设计复审，核完整身份仍强制、目标级合法出口及本首版范围/ROI；必要问题处置后，用户批准有界实施才改代码。此后回归/重冻/受影响Gate与fresh第六例授权各有原判据，不凭本次材料自动开跑、不沿用旧预算，不关闭任何整体W项。

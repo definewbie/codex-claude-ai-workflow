@@ -25,8 +25,9 @@ class FileLedgerStoreTest {
         var workspace = workspace(workstreamId, workspaceId);
 
         var paths = new WorkstreamPaths(tempDir, workstreamId);
-        var store = new FileLedgerStore();
-        store.initializeWorkstream(paths, workstream, workspace, "# Requirement\n");
+        var ledger = LedgerTestFixture.ledger();
+        ledger.initialize(paths, workstream, workspace, "# Requirement\n", WorkstreamSettingsDocument.of("auto"),
+                "wf-store", definition());
 
         assertTrue(Files.exists(paths.workstreamJson()));
         assertTrue(Files.exists(paths.workspaceJson(workspaceId)));
@@ -34,7 +35,9 @@ class FileLedgerStoreTest {
         assertTrue(Files.readString(paths.settingsJson()).contains("\"promptLanguage\" : \"auto\""));
         assertTrue(Files.exists(paths.requirementMarkdown()));
         assertTrue(Files.readString(paths.timelineJsonl()).contains("workstream_created"));
-        assertEquals(workstreamId.value(), store.loadStatus(tempDir, workstreamId.value()).workstream().workstreamId());
+        try (var read = ledger.readSession(paths)) {
+            assertEquals(workstreamId.value(), read.store().loadStatus(tempDir, workstreamId.value()).workstream().workstreamId());
+        }
     }
 
     @Test
@@ -43,15 +46,21 @@ class FileLedgerStoreTest {
         var workspaceId = new DualId("wsp-20260522T101500Z-4F8D");
         var paths = new WorkstreamPaths(tempDir, workstreamId);
 
-        new FileLedgerStore().initializeWorkstream(
+        LedgerTestFixture.ledger().initialize(
                 paths,
                 workstream(workstreamId, workspaceId),
                 workspace(workstreamId, workspaceId),
                 "# Requirement\n",
-                WorkstreamSettingsDocument.of("zh")
+                WorkstreamSettingsDocument.of("zh"), "wf-store", definition()
         );
 
         assertTrue(Files.readString(paths.settingsJson()).contains("\"promptLanguage\" : \"zh-CN\""));
+    }
+
+    private dev.dual.core.workflow.WorkflowDefinition definition() {
+        return new dev.dual.core.workflow.WorkflowDefinition("store", 1, "first", java.util.List.of(
+                new dev.dual.core.workflow.NodeDefinition("first", dev.dual.core.workflow.NodeKind.TASK,
+                        "noop.task", java.util.Map.of())), java.util.List.of());
     }
 
     private Workstream workstream(DualId workstreamId, DualId workspaceId) {

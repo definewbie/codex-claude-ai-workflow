@@ -1,0 +1,42 @@
+{
+  "review_status": "AFFECTED_CC_ACCEPTED",
+  "real_run_authorized": false,
+  "source_inputs_count": 654,
+  "source_inputs_equal": true,
+  "byte_checks": [
+    {
+      "name": "dual-cli",
+      "matches": true
+    },
+    {
+      "name": "dual-server",
+      "matches": true
+    },
+    {
+      "name": "wrapper",
+      "matches": true
+    },
+    {
+      "name": "dist",
+      "matches": true
+    },
+    {
+      "name": "global_config",
+      "matches": true
+    },
+    {
+      "name": "project_config",
+      "matches": true
+    },
+    {
+      "name": "gate_env",
+      "matches": true
+    }
+  ],
+  "fresh_parent_exists": false,
+  "worklist_before_sha256": "936948f1ad665ee1d75e6e5d573c827060f1e98f032aad12d8e7363e53eb557a",
+  "worklist_after_sha256": "5d01681de71cfb04ad65265d5ea6cff8069213a303da9e908e7b0f6e3d8a0d7b",
+  "receipt_sha256": "e9860508350d7369d8bf5d536998d49e86d1bf62b7b41d62b8f90fcf4e38626a",
+  "original_submission_snapshots_preserved": true,
+  "new_native_provider_calls": 0
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20260913T160441Z-H55W",
+  "producerNodeInstanceId" : "node-delivery-prepare_pr-038",
+  "iterationId" : "iter-002",
+  "sourceWorkspaceId" : "wsp-20260913T160441Z-T3SD",
+  "sourceEffectiveWorkdir" : "/private/tmp/dual-smoke-reject-repair-reaccept-75129-agent-runs/ws-20260913T160441Z-H55W",
+  "baseCommit" : "81eab395c6fe108afa2b0af3d6e13dc60c2d2393",
+  "baseTree" : "aa28380a570d95e04f611146e54ec3de9aa12440",
+  "acceptedFiles" : [ "README.md", "main.py" ],
+  "excludedFiles" : [ ],
+  "patch" : {
+    "ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/delivery/candidates/node-delivery-prepare_pr-038/merge.patch",
+    "sha256" : "ad72365e513d54de6ef26d9923168f490f16f64517c4c260c3ab12b52bc96594"
+  },
+  "expectedResultTree" : "8f0721d88fe20e77c1dbcf8e9d5082d0fc04ac36",
+  "commitMessage" : {
+    "ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/delivery/candidates/node-delivery-prepare_pr-038/commit-message.txt",
+    "sha256" : "2c17a68fc6f8865233042bc5ffb178421b07ac22af1d38e8538e41f48faf73e9"
+  },
+  "prBody" : {
+    "ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/delivery/candidates/node-delivery-prepare_pr-038/pr-body.md",
+    "sha256" : "c0db8db33e00317735e9b9cc5a698ef03c09df5579788b0dce684928daff68bb"
+  },
+  "createdAt" : "2026-09-13T16:06:56.985054Z"
+}

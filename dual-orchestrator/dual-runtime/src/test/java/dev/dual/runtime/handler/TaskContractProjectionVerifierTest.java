@@ -28,209 +28,128 @@ class TaskContractProjectionVerifierTest {
 
     private Path workstreamDir;
 
+    private AuthoredStageSequenceTest.Fixture fixture;
+    private TaskContractProjectionVerifier.QualifiedTaskContract qualified;
+    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
     @BeforeEach
     void setUp() throws Exception {
-        workstreamDir = root.resolve(".agent/workstreams/ws-test");
-        Files.createDirectories(workstreamDir.resolve("artifacts"));
-        Files.writeString(workstreamDir.resolve("artifacts/task-contract.json"), """
-                {
-                  "id":"tc-1","version":1,"created_at":"2026-08-26T00:00:00Z",
-                  "objective":"Build authentication","status":"READY_FOR_REVIEW",
-                  "scope":{"included":[{"path":"src/Auth.java","operation":"CREATE"}],"excluded":[]},
-                  "acceptance_criteria":["registration works","login works"],
-                  "test_requirements":["Run auth tests"],"constraints":["Keep scope narrow"],
-                  "non_goals":[],"risk_areas":[],"evidence_refs":["src/Auth.java"],
-                  "ambiguity_notes":[],"human_questions":[],"compilation_pass":1,
-                  "source":{"raw_request_ref":"requirement.md","created_by":"contract_compiler"}
-                }
-                """);
-        TaskContractProjectionFixture.seedCompileBinding(root, "ws-test");
+        fixture = new AuthoredStageSequenceTest.Fixture(root, "src/Auth.java",
+                AuthoredStageSequenceTest.PlanTopology.AUTOMATIC, "ws-test");
+        fixture.before("implement.claude_implement");
+        root = fixture.root;
+        workstreamDir = fixture.paths.workstreamDir();
+        qualified = resolve().qualified().orElseThrow();
+    }
+
+    private TaskContractProjectionVerifier.Resolution resolve() {
+        return TaskContractProjectionVerifier.resolve(fixture.ledger, root, fixture.ws);
     }
 
     @Test
-    void resolvesOneQualifiedSnapshotFromLatestCompileBinding() throws Exception {
-        var resolution = TaskContractProjectionVerifier.resolve(root, "ws-test");
-
-        assertTrue(resolution.qualified().isPresent());
-        assertEquals("tc-1", resolution.qualified().orElseThrow().contract().id());
-        assertEquals(TaskContractArtifactWriter.sha256(
-                        workstreamDir.resolve("artifacts/task-contract.json")),
-                resolution.qualified().orElseThrow().sha256());
+    void resolvesOneQualifiedSnapshotFromActualReviewedAndApprovedSequence() throws Exception {
+        assertEquals(dev.dual.core.contract.TaskContract.Phase.EXECUTION, qualified.contract().phase());
+        assertTrue(qualified.contractRef().contains("/contracts/" + qualified.compileNodeInstanceId() + "/"));
+        assertEquals(TaskContractArtifactWriter.sha256(root.resolve(qualified.contractRef())), qualified.sha256());
+        assertTrue(qualified.contract().scope().included().stream().anyMatch(e -> e.path().equals("src/Auth.java")));
+        assertTrue(fixture.calls.containsAll(List.of("design.codex_arch_review", "plan.codex_plan_review")));
+        assertTrue(!fixture.calls.contains("implement.claude_implement"));
     }
 
     @Test
     void rejectsContractMutationAfterCompile() throws Exception {
-        var path = workstreamDir.resolve("artifacts/task-contract.json");
-        Files.writeString(path, Files.readString(path).replace("Build authentication", "Mutated objective"));
-
-        var resolution = TaskContractProjectionVerifier.resolve(root, "ws-test");
-
-        assertEquals("HASH_MISMATCH", resolution.failure().reason());
+        var path = root.resolve(qualified.contractRef());
+        Files.writeString(path, Files.readString(path).replace("Verify output", "Mutated objective"));
+        assertEquals("HASH_MISMATCH", resolve().failure().reason());
     }
 
     @Test
     void rejectsArtifactWithoutCompletedCompileBinding() throws Exception {
-        Files.delete(workstreamDir.resolve("nodes/node-contract-compile.json"));
-
-        var resolution = TaskContractProjectionVerifier.resolve(root, "ws-test");
-
-        assertEquals("COMPILE_BINDING_MISSING", resolution.failure().reason());
+        Files.delete(fixture.paths.nodeJson(qualified.compileNodeInstanceId()));
+        assertEquals("COMPILE_BINDING_MISSING", resolve().failure().reason());
     }
 
     @Test
     void rejectsUnreadableNodeLedgerInsteadOfSelectingPartialHistory() throws Exception {
         Files.writeString(workstreamDir.resolve("nodes/broken.json"), "{");
-
-        var resolution = TaskContractProjectionVerifier.resolve(root, "ws-test");
-
-        assertEquals("NODE_LEDGER_UNREADABLE", resolution.failure().reason());
+        assertEquals("NODE_LEDGER_UNREADABLE", resolve().failure().reason());
     }
 
     @Test
-    void resolvedClarifyOrRejectIsNotContractApproval() throws Exception {
-        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        var gatePath = workstreamDir.resolve("gates/gate-node-gate-contract-review.json");
-        var nodePath = workstreamDir.resolve("nodes/node-gate-contract-review.json");
+    void resolvedClarifyOrRejectCannotBeUsedAsApproval() throws Exception {
+        var gatePath = root.resolve(qualified.approvalGateRef());
+        var gate = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(gatePath.toFile());
+        var nodePath = fixture.paths.nodeJson(gate.path("nodeInstanceId").asText());
+        var node = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(nodePath.toFile());
         for (var action : List.of("clarify", "reject")) {
-            var gate = mapper.readValue(gatePath.toFile(), dev.dual.ledger.file.GateDocument.class);
-            var gateResult = new LinkedHashMap<String, Object>(gate.result());
-            gateResult.put("human_action", action);
-            mapper.writeValue(gatePath.toFile(), new dev.dual.ledger.file.GateDocument(
-                    gate.schemaVersion(), gate.gateId(), gate.nodeInstanceId(), gate.gateType(), gate.status(),
-                    gate.allowedActions(), gate.openedAt(), gate.resolvedAt(), gateResult));
-
-            var node = mapper.readValue(nodePath.toFile(), NodeInstanceDocument.class);
-            var nodeResult = new LinkedHashMap<String, Object>(node.result());
-            nodeResult.put("human_action", action);
-            mapper.writeValue(nodePath.toFile(), new NodeInstanceDocument(
-                    node.schemaVersion(), node.nodeInstanceId(), node.nodeDefinitionId(), node.kind(),
-                    node.handlerType(), node.status(), node.stageId(), node.iterationId(), node.inputRefs(),
-                    node.inputTransition(), node.outputRefs(), nodeResult, node.runRef(), node.latestExecutionId(),
-                    node.startedAt(), node.finishedAt()));
-
-            assertEquals("CONTRACT_NOT_APPROVED",
-                    TaskContractProjectionVerifier.resolve(root, "ws-test").failure().reason());
+            ((com.fasterxml.jackson.databind.node.ObjectNode)gate.path("result")).put("human_action", action);
+            ((com.fasterxml.jackson.databind.node.ObjectNode)node.path("result")).put("human_action", action);
+            mapper.writeValue(gatePath.toFile(), gate); mapper.writeValue(nodePath.toFile(), node);
+            assertEquals("CONTRACT_NOT_APPROVED", resolve().failure().reason());
         }
     }
 
     @Test
     void rejectsGateSourceIdentityMismatch() throws Exception {
-        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        var gatePath = workstreamDir.resolve("gates/gate-node-gate-contract-review.json");
-        var gate = mapper.readValue(gatePath.toFile(), dev.dual.ledger.file.GateDocument.class);
-        var result = new LinkedHashMap<String, Object>(gate.result());
-        result.put("source_node_instance_id", "node-forged");
-        mapper.writeValue(gatePath.toFile(), new dev.dual.ledger.file.GateDocument(
-                gate.schemaVersion(), gate.gateId(), gate.nodeInstanceId(), gate.gateType(), gate.status(),
-                gate.allowedActions(), gate.openedAt(), gate.resolvedAt(), result));
-
-        assertEquals("GATE_SOURCE_MISMATCH",
-                TaskContractProjectionVerifier.resolve(root, "ws-test").failure().reason());
+        var gatePath = root.resolve(qualified.approvalGateRef());
+        var gate = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(gatePath.toFile());
+        ((com.fasterxml.jackson.databind.node.ObjectNode) gate.path("result")).put("source_node_instance_id", "node-forged");
+        mapper.writeValue(gatePath.toFile(), gate);
+        assertEquals("GATE_SOURCE_MISMATCH", resolve().failure().reason());
     }
 
     @Test
-    void rejectsCompletedRecompileUntilItIsApproved() throws Exception {
-        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        var original = mapper.readValue(
-                workstreamDir.resolve("nodes/node-contract-compile.json").toFile(), NodeInstanceDocument.class);
-        mapper.writeValue(workstreamDir.resolve("nodes/node-contract-recompile.json").toFile(), new NodeInstanceDocument(
-                original.schemaVersion(), "node-contract-recompile", original.nodeDefinitionId(), original.kind(),
-                original.handlerType(), original.status(), original.stageId(), "iter-002", original.inputRefs(),
-                original.inputTransition(), original.outputRefs(), original.result(), original.runRef(),
-                original.latestExecutionId(), Instant.parse("2026-08-26T00:01:01Z"),
-                Instant.parse("2026-08-26T00:01:02Z")));
-
-        assertEquals("UNAPPROVED_RECOMPILE",
-                TaskContractProjectionVerifier.resolve(root, "ws-test").failure().reason());
+    void copiedNewerCompilerCannotBorrowTheOriginalApproval() throws Exception {
+        var original = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(fixture.paths.nodeJson(qualified.compileNodeInstanceId()).toFile());
+        original.put("nodeInstanceId", "node-unapproved-recompile");
+        original.put("startedAt", Instant.now().plusSeconds(1).toString());
+        original.put("finishedAt", Instant.now().plusSeconds(2).toString());
+        mapper.writeValue(fixture.paths.nodeJson("node-unapproved-recompile").toFile(), original);
+        assertEquals("UNAPPROVED_RECOMPILE", resolve().failure().reason());
     }
 
     @Test
-    void reapprovalSwitchesQualificationToTheNewCompileOccurrence() throws Exception {
-        var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        var originalCompile = mapper.readValue(
-                workstreamDir.resolve("nodes/node-contract-compile.json").toFile(), NodeInstanceDocument.class);
-        var newCompileId = "node-contract-recompile";
-        mapper.writeValue(workstreamDir.resolve("nodes/" + newCompileId + ".json").toFile(), new NodeInstanceDocument(
-                originalCompile.schemaVersion(), newCompileId, originalCompile.nodeDefinitionId(), originalCompile.kind(),
-                originalCompile.handlerType(), originalCompile.status(), originalCompile.stageId(), "iter-002",
-                originalCompile.inputRefs(), originalCompile.inputTransition(), originalCompile.outputRefs(),
-                originalCompile.result(), originalCompile.runRef(), originalCompile.latestExecutionId(),
-                Instant.parse("2026-08-26T00:01:01Z"), Instant.parse("2026-08-26T00:01:02Z")));
-
-        var oldGate = mapper.readValue(
-                workstreamDir.resolve("gates/gate-node-gate-contract-review.json").toFile(),
-                dev.dual.ledger.file.GateDocument.class);
-        var newGateNodeId = "node-gate-contract-reapproval";
-        var newGateId = "gate-" + newGateNodeId;
-        var gateNodeResult = new LinkedHashMap<String, Object>();
-        gateNodeResult.put("source_node_instance_id", newCompileId);
-        gateNodeResult.put("human_action", "approved");
-        gateNodeResult.put("requested_action", "approve");
-        gateNodeResult.put("note", "reapproved");
-        mapper.writeValue(workstreamDir.resolve("nodes/" + newGateNodeId + ".json").toFile(), new NodeInstanceDocument(
-                1, newGateNodeId, "gate.contract_review", NodeKind.GATE, "human.review", NodeStatus.COMPLETED,
-                "gate", "iter-002", originalCompile.outputRefs(), Map.of(), originalCompile.outputRefs(),
-                Map.copyOf(gateNodeResult), null, "", Instant.parse("2026-08-26T00:01:03Z"),
-                Instant.parse("2026-08-26T00:01:04Z")));
-        mapper.writeValue(workstreamDir.resolve("gates/" + newGateId + ".json").toFile(),
-                new dev.dual.ledger.file.GateDocument(
-                        1, newGateId, newGateNodeId, oldGate.gateType(), "resolved", oldGate.allowedActions(),
-                        Instant.parse("2026-08-26T00:01:03Z"), Instant.parse("2026-08-26T00:01:04Z"),
-                        Map.of(
-                                "subject_input_refs", originalCompile.outputRefs(),
-                                "source_outcome", "completed",
-                                "source_node_instance_id", newCompileId,
-                                "human_action", "approved",
-                                "note", "reapproved")));
-        Files.writeString(workstreamDir.resolve("events.jsonl"), mapper.writeValueAsString(Map.of(
-                "event_id", "evt-000002",
-                "ts", "2026-08-26T00:01:03Z",
-                "event_type", "node_routed",
-                "payload", Map.of(
-                        "from", "contract.compile",
-                        "outcome", "completed",
-                        "to", "gate.contract_review",
-                        "node_instance_id", newGateNodeId,
-                        "gate_id", newGateId,
-                        "source_node_instance_id", newCompileId))) + System.lineSeparator(),
-                java.nio.file.StandardOpenOption.APPEND);
-
-        var qualified = TaskContractProjectionVerifier.resolve(root, "ws-test").qualified().orElseThrow();
-
-        assertEquals(newCompileId, qualified.compileNodeInstanceId());
-        assertEquals("evt-000002", qualified.approvalEventId());
+    void realContractRepairSwitchesQualificationOnlyAfterTheNewApproval() throws Exception {
+        var f = new AcceptanceRepairSequenceTest.Fixture(root.resolve("repair"), "CONTRACT_GAP", "site/home.html");
+        f.until("acceptance.classify_failure");
+        var old = TaskContractProjectionVerifier.resolve(f.ledger, f.root, f.ws).qualified().orElseThrow();
+        f.step(); f.until("gate.human_requirement_review");
+        assertEquals(old.sha256(), TaskContractProjectionVerifier.resolve(f.ledger, f.root, f.ws).qualified().orElseThrow().sha256());
+        f.approve(); f.until("gate.contract_review");
+        assertTrue(TaskContractProjectionVerifier.resolve(f.ledger, f.root, f.ws).qualified().isEmpty());
+        f.approve();
+        var fresh = TaskContractProjectionVerifier.resolve(f.ledger, f.root, f.ws).qualified().orElseThrow();
+        org.junit.jupiter.api.Assertions.assertNotEquals(old.compileNodeInstanceId(), fresh.compileNodeInstanceId());
+        org.junit.jupiter.api.Assertions.assertNotEquals(old.approvalEventId(), fresh.approvalEventId());
+        assertTrue(Files.isRegularFile(f.root.resolve(old.contractRef())), "historical contract remains immutable");
     }
 
     @Test
     void qualifiedSnapshotFeedsAllContextConsumersAfterDiskMutation() throws Exception {
-        var qualified = TaskContractProjectionVerifier.resolve(root, "ws-test").qualified().orElseThrow();
-        var contractPath = workstreamDir.resolve("artifacts/task-contract.json");
+        var qualified = TaskContractProjectionVerifier.resolve(fixture.ledger, root, "ws-test").qualified().orElseThrow();
+        var contractPath = root.resolve(qualified.contractRef());
         Files.writeString(contractPath, Files.readString(contractPath)
-                .replace("Build authentication", "MUTATED-DISK-OBJECTIVE")
+                .replace("Verify output", "MUTATED-DISK-OBJECTIVE")
                 .replace("src/Auth.java", "src/Mutated.java"));
         var mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         var definition = new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", Map.of(
                 "profile", "acceptance", "target_node", "acceptance.codex_verifier_review"));
-        var context = new TaskHandler.TaskContext(
-                root,
-                "ws-test",
-                definition,
-                new NodeInstance("node-context", definition.id(), NodeKind.TASK, definition.handlerType(),
+        var context = new TaskHandler.TaskContext(root, "ws-test", definition, new NodeInstance("node-context", definition.id(), NodeKind.TASK, definition.handlerType(),
                         NodeStatus.READY, "acceptance", "iter-001", List.of(), List.of(), Map.of(),
-                        null, null, null));
+                        null, null, null), fixture.ledger);
         var snapshot = Optional.of(qualified);
 
-        var manifest = EvidenceManifest.rebuild(root, workstreamDir, "ws-test", List.of(), mapper, snapshot);
+        var manifest = EvidenceManifest.rebuild(fixture.ledger, root, workstreamDir, "ws-test", List.of(), mapper, snapshot);
         var governance = RepoScopeGovernance.build(root, workstreamDir, context, mapper, snapshot);
         var stateEvidence = new StringBuilder();
         ContextStateEvidenceBoundaryRenderer.append(stateEvidence, context, workstreamDir, mapper, snapshot);
         var contractSection = new StringBuilder();
         ContextPackageSectionRenderer.appendQualifiedTaskContract(contractSection, qualified);
 
-        assertTrue(manifest.items().stream().anyMatch(item -> item.summary().contains("Build authentication")));
+        assertTrue(manifest.items().stream().anyMatch(item -> item.summary().contains("Verify output")));
         assertTrue(governance.plan().toString().contains("src/Auth.java"));
-        assertTrue(stateEvidence.toString().contains("Build authentication"));
-        assertTrue(contractSection.toString().contains("Build authentication"));
+        assertTrue(stateEvidence.toString().contains("Verify output"));
+        assertTrue(contractSection.toString().contains("Verify output"));
         assertTrue(!manifest.toMap().toString().contains("MUTATED-DISK-OBJECTIVE"));
         assertTrue(!governance.plan().toString().contains("src/Mutated.java"));
     }

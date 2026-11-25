@@ -1,0 +1,50 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261010T124812Z-XCZL",
+    "workflowInstanceId": "wf-ws-20261010T124812Z-XCZL",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-intake-decision-005"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000005",
+    "updatedAt": "2026-10-10T12:52:26.280223Z",
+    "commitSequence": 19
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-intake-decision-005",
+    "nodeDefinitionId": "intake.decision",
+    "kind": "DECISION",
+    "handlerType": "review.decision",
+    "status": "READY",
+    "stageId": "stage-intake",
+    "iterationId": "iter-001",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.stderr.log",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.transcript.log",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.json",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791636690133/binding.json",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.contract.json"
+    ],
+    "inputTransition": {
+      "condition": "unconditional",
+      "transition_type": "normal",
+      "required": true,
+      "source_node_instance_id": "node-intake-codex_product_review-004",
+      "source_node_sha256": "6a5dc0ce3bf2a3420cf3ab6349bf64bca2a73212f818198a90fffb5d97a185da",
+      "purpose": "Seed the first Claude intake run with repo-scope context."
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 149.605,
+  "prior_run_count": 2
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-gate-human_requirement_review-006",
+  "nodeDefinitionId" : "gate.human_requirement_review",
+  "kind" : "GATE",
+  "handlerType" : "human.review",
+  "status" : "COMPLETED",
+  "stageId" : "stage-gate",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1789315433868/binding.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.contract.json" ],
+  "inputTransition" : {
+    "transition_type" : "normal",
+    "condition" : "unconditional",
+    "required" : true,
+    "purpose" : "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1789315433868/binding.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315433868/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "requested_action" : "approve",
+    "human_action" : "approved",
+    "note" : "",
+    "source_node_instance_id" : "node-intake-decision-005"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "",
+  "startedAt" : null,
+  "finishedAt" : "2026-09-13T16:04:05.993185Z"
+}

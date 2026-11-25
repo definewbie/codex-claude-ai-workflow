@@ -1,0 +1,28 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-gate-human_plan_approval-018",
+  "nodeDefinitionId" : "gate.human_plan_approval",
+  "kind" : "GATE",
+  "handlerType" : "human.review",
+  "status" : "COMPLETED",
+  "stageId" : "stage-gate",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-plan-codex_plan_review-016-run-1789315540711/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.contract.json" ],
+  "inputTransition" : {
+    "required" : true,
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "transition_type" : "normal",
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-plan-codex_plan_review-016-run-1789315540711/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315540711/outputs/plan-codex-review.contract.json" ],
+  "result" : {
+    "note" : "",
+    "source_node_instance_id" : "node-plan-decision-017",
+    "requested_action" : "approve",
+    "human_action" : "approved"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "",
+  "startedAt" : null,
+  "finishedAt" : "2026-09-13T16:05:52.880505Z"
+}

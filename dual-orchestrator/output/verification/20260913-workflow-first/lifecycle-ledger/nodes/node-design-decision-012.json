@@ -1,0 +1,27 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-design-decision-012",
+  "nodeDefinitionId" : "design.decision",
+  "kind" : "DECISION",
+  "handlerType" : "review.decision",
+  "status" : "COMPLETED",
+  "stageId" : "stage-design",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315459022/outputs/design-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315459022/outputs/design-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315459022/outputs/design-codex-review.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-design-codex_arch_review-011-run-1789315459022/binding.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315459022/outputs/design-codex-review.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315459022/outputs/design-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315459022/outputs/design-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315459022/outputs/design-codex-review.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-design-codex_arch_review-011-run-1789315459022/binding.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315459022/outputs/design-codex-review.contract.json" ],
+  "result" : {
+    "decision" : "READY_FOR_ARCH_REVIEW",
+    "source" : "contract-sidecar",
+    "summary" : "Architecture review passed for controlled smoke."
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315469435-d70b135b",
+  "startedAt" : "2026-09-13T16:04:29.449725Z",
+  "finishedAt" : "2026-09-13T16:04:29.467947Z"
+}

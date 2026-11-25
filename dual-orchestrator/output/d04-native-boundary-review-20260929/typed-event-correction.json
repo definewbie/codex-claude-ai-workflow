@@ -1,0 +1,15 @@
+{
+  "status": "PASS_OFFLINE_REASSESSMENT",
+  "priorSummariesPreserved": true,
+  "cause": "Both initial summary errors were diagnostic assumptions about the SDK message union/optional is_error; no product or native failure inferred.",
+  "source": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/sdk/src/resources/messages/messages.ts",
+  "sourceSha256": "63edc66ad2d37fb39d3bddf455a7efa1cd1f04dff6aa9b937c98ab80073d895a",
+  "declaration": "export interface ToolResultBlockParam {\n  tool_use_id: string;\n\n  type: 'tool_result';\n\n  /**\n   * Create a cache control breakpoint at this content block.\n   */\n  cache_control?: CacheControlEphemeral | null;\n\n  content?:\n    | string\n    | Array<\n        | TextBlockParam\n        | ImageBlockParam\n        | SearchResultBlockParam\n        | DocumentBlockParam\n        | ToolReferenceBlockParam\n        | BrowserStateBlockParam\n      >;\n\n  is_error?: boolean;\n\n  /**\n   * For a toolset member tool_result, the toolset family of the paired tool_use.\n   */\n  toolset_name?: string | null;\n}\n\nexport interface ToolSearchToolBm25_20251119 {\n  /**\n   * Name of the tool.\n   *\n   * This is how the tool will be called by the model and in `tool_use` blocks.\n   */\n  name: 'tool_search_tool_bm25';\n\n  type: 'tool_search_tool_bm25_20251119' | 'tool_search_tool_bm25';\n\n  allowed_callers?: Array<\n    'direct' | 'code_execution_20250825' | 'code_execution_20260120' | 'code_execution_20260521'\n  >;\n\n  /**\n   * Create a cache control breakpoint at this content block.\n   */\n  cache_control?: CacheControlEphemeral | null;\n\n  /**\n   * If true, tool will not be included in initial system prompt. Only loaded when\n   * returned via tool_reference from tool search.\n   */\n  defer_loading?: boolean;\n\n  /**\n   * W",
+  "positiveRead": "PASS_NATIVE_ACTUAL_RESULT",
+  "negativeCalls": 11,
+  "allNegativeNativeErrors": true,
+  "fixtureUnchanged": true,
+  "eventSha256": "6b74d21f4c04718ac9541df74271350e0d976924ce98adae649794f695ece912",
+  "casesNotRerun": true,
+  "openCounterproof": "PENDING"
+}

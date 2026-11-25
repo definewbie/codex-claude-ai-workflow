@@ -1,0 +1,50 @@
+[
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts",
+    "sha256": "d727f05adfa38beadbc4214fbbc5a14c864dfa1eead4dd5e2a0a734a63e65a88"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/filesystem.ts",
+    "sha256": "46e7eee0d04ff262029958a232ea68acc4279c84f3e10c4941dc0a12013d5bba"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/permission-prompt.ts",
+    "sha256": "6f86467b09ac08f2b560127eedae43c71d15775280c23a99e95f26be5ae931e1"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/terminal-manager.ts",
+    "sha256": "cfc45722970c870175f1534335dd79d8b7f9b4e26b748746f097d282986c5196"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/agent-command.ts",
+    "sha256": "ccaaf63f555803452ff27a3c8fabb1ea5ec9fefe72d59876b5b0111446a8d91d"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/runtime/engine/session-options.ts",
+    "sha256": "35c82adba710abba47d026c21109197fd9b1452c7e3ff1ca02282c40443c2fd9"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/package.json",
+    "sha256": "365d2b9f3e260f03517e45cc7e207931644e91bfe7f66143d9aea47c95b64587"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js",
+    "sha256": "4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/package.json",
+    "sha256": "7addfe1ad54d5a39a6961dd9918b9256fcc22c5a1dbdd4c83f91a41dda182965"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js",
+    "sha256": "f0cbbe408bb758cc4bacdae9a244bcac6efbdb6413f680195d017648abc6d816"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts",
+    "sha256": "65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+    "sha256": "b973d440acac501fd2594a43e7ca9ce41e0a65b9dfb28d0d7a7837c99e1261e3"
+  }
+]

@@ -1,0 +1,7 @@
+{
+  "category": "OPERATOR_PATH_INSPECTION_ERROR",
+  "initial_error": "first case manifest uses repo-relative files; initially treated non-output docs path as case-relative",
+  "correction": "use manifest declared files mapping rooted at repository, filter immutable case bundle only",
+  "actual_previous_case_changes": false,
+  "not_gate_fault": true
+}

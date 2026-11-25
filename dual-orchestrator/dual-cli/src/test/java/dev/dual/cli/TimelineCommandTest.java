@@ -41,8 +41,8 @@ class TimelineCommandTest {
                 ),
                 List.of(new EdgeDefinition("first", "completed", "second"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-timeline-cli", definition);
+        var ledger = CliLedgerFactory.create();
+        CliTestLedger.initialize(ledger, paths, "wf-timeline-cli", definition);
         var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
                 "completed", List.of("first-output.md"), Map.of("ok", true));

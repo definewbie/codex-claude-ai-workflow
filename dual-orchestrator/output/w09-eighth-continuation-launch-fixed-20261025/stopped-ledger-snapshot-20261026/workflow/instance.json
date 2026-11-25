@@ -1,0 +1,11 @@
+{
+  "schemaVersion" : 1,
+  "workflowInstanceId" : "wf-ws-20261023T005431Z-9YYF",
+  "workflowId" : "agent-lifecycle-terminal-delivery",
+  "definitionVersion" : 5,
+  "status" : "RUNNING",
+  "activeNodeInstanceIds" : [ "node-implement-claude_self_test_report-031" ],
+  "lastEventId" : "evt-000031",
+  "createdAt" : "2026-10-23T00:54:32.016983Z",
+  "updatedAt" : "2026-10-25T22:45:12.636598Z"
+}

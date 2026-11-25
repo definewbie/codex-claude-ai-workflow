@@ -1,0 +1,37 @@
+{
+  "decision": "DESIGN_GAP_NOT_READY_FOR_FREEZE",
+  "checks": [
+    {
+      "variant": "structured",
+      "captureValidity": "PASS",
+      "registrationTarget": "FAIL_COLLABORATION_STILL_ADVERTISED",
+      "nativeHardDenial": "NOT_TESTED",
+      "networkToolExposure": "NONE_OBSERVED",
+      "nativeNetworkHardDenial": "NOT_TESTED",
+      "necessaryReadEntry": "exec_command advertised; no new read action",
+      "toolCommandsEmitted": 0,
+      "fixtureUnchanged": true,
+      "nativeSessions": 1
+    },
+    {
+      "variant": "exclusions",
+      "captureValidity": "PASS",
+      "registrationTarget": "FAIL_COLLABORATION_STILL_ADVERTISED",
+      "nativeHardDenial": "NOT_TESTED",
+      "networkToolExposure": "NONE_OBSERVED",
+      "nativeNetworkHardDenial": "NOT_TESTED",
+      "necessaryReadEntry": "exec_command advertised; no new read action",
+      "toolCommandsEmitted": 0,
+      "fixtureUnchanged": true,
+      "nativeSessions": 1
+    }
+  ],
+  "nativeSessions": 2,
+  "realProviderCalls": 0,
+  "agentsSpawned": 0,
+  "additionalNativeBudgetRemaining": 0,
+  "offlineResponseGuardChecks": 6,
+  "configInspectionInvocations": 12,
+  "invalidSetupBeforeNative": 1,
+  "scopeLimit": "exact installed binary and captured CLI configuration; native dispatcher source and administrator requirement consumption not proved"
+}

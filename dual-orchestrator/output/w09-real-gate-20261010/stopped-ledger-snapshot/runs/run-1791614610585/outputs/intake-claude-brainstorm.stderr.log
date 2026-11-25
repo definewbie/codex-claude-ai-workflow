@@ -1,0 +1,3 @@
+
+[dual] acpx session compatibility failed agent=claude session=claude-main-ws-20261010T055644Z-6QCS-run-1791614610585 timed_out=false exit_code=4
+{"source":"acpx.sessions.show","native_version":"UNKNOWN","schema":"acpx.session.v1","acpxRecordId":"1d507713-7c39-44bd-9010-2a15019a4f1e","acpSessionId":"1d507713-7c39-44bd-9010-2a15019a4f1e","cwd":"/private/tmp/dual-w09-newlines-20261010/worktree","name":"claude-main-ws-20261010T055644Z-6QCS-run-1791614610585","protocolVersion":1,"closed":false,"agentCapabilities":{"loadSession":true,"promptCapabilities":{"image":true,"embeddedContext":true}},"compatible":false,"failure":"missing session identity: agentSessionId"}

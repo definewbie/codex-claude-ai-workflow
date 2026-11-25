@@ -1,0 +1,8 @@
+{
+  "owned_tracked_diff_check_exit": 0,
+  "incremental_added_whitespace_errors": [],
+  "global_diff_check": "WARN_UNRELATED_EXISTING_NATIVE_PATCH_WHITESPACE",
+  "native_patch_sha256": "1517f828d303ea720a7a153e6dc8c33265ba1ea100d2b9260c98327b5604468c",
+  "equals_preexisting_reviewed_patch_identity": true,
+  "unrelated_patch_not_modified": true
+}

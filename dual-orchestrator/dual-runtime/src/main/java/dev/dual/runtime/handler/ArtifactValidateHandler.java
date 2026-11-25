@@ -32,7 +32,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
     public NodeResult execute(TaskContext context) throws Exception {
         var qualified = qualifiedContract(context);
         if (qualified.failure() != null) {
-            return qualificationFailure(qualified.failure());
+            return qualificationFailure(context, qualified.failure());
         }
         var evidenceDir = context.workspaceRoot()
                 .resolve(".agent")
@@ -55,7 +55,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
 
         var outputRefs = new ArrayList<String>();
         outputRefs.addAll(AgentEvidenceIndex.fromRefs(
-                        context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER)
+                        context.ledger(), context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER)
                 .validatedSidecarRefs(context.workspaceRoot()));
         for (String fileName : List.of(
                 "git-evidence.json",
@@ -106,7 +106,7 @@ public final class ArtifactValidateHandler implements TaskHandler {
                     : evaluation.error();
             if (evaluation.status() == ChangeScopeEvaluation.Status.FAIL && routesScopeViolation(context)) {
                 if (qualified.reference() != null) {
-                    result.putAll(TaskContractRevisionContextResolver.captureScopeReworkBaseline(
+                    result.putAll(new TaskContractRevisionContextResolver(context.ledger()).captureScopeReworkBaseline(
                             context.workspaceRoot(), context.workstreamId(), qualified.reference(), occurrence));
                 }
                 result.put("change_scope_disposition", "CHANGE_SCOPE_VIOLATION");
@@ -510,25 +510,10 @@ public final class ArtifactValidateHandler implements TaskHandler {
     }
 
     private static QualifiedContract qualifiedContract(TaskContext context) {
-        if (!AgentRunGovernanceContext.requiresApprovedTaskContract(context)) {
-            var legacy = TaskContractProjectionVerifier.readLegacyProjection(
-                    context.workspaceRoot(), context.workstreamId());
-            if (legacy.projection().isPresent()
-                    && legacy.projection().orElseThrow().contract() != null) {
-                var contract = legacy.projection().orElseThrow().contract();
-                var errors = dev.dual.core.contract.TaskContractValidator.validate(contract);
-                if (!errors.isEmpty()) {
-                    return new QualifiedContract(null, TaskContractProjectionVerifier.Failure.of(
-                            "CONTRACT_INVALID", String.join("; ", errors)));
-                }
-            }
-            return legacy.failure() != null
-                    ? new QualifiedContract(null, legacy.failure())
-                    : new QualifiedContract(
-                            legacy.projection().map(TaskContractProjectionVerifier.LegacyProjection::contract).orElse(null),
-                            null);
-        }
-        var resolution = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());
+        if (!AgentRunGovernanceContext.requiresApprovedTaskContract(context))
+            return new QualifiedContract(null, TaskContractProjectionVerifier.Failure.of(
+                    "CONTRACT_PHASE_MISSING", "change-scope validation requires an explicit EXECUTION phase"));
+        var resolution = TaskContractProjectionVerifier.resolve(context.ledger(), context.workspaceRoot(), context.workstreamId(), TaskContractProjectionVerifier.requiredPhase(context.definition()));
         if (resolution.failure() != null) {
             return new QualifiedContract(null, resolution.failure());
         }
@@ -538,16 +523,8 @@ public final class ArtifactValidateHandler implements TaskHandler {
                         "APPROVAL_BINDING_MISSING", "change-scope validation requires an approved task contract")));
     }
 
-    private static NodeResult qualificationFailure(TaskContractProjectionVerifier.Failure failure) {
-        return new NodeResult(
-                TaskContractProjectionVerifier.FAILURE_OUTCOME,
-                NodeStatus.FAILED,
-                List.of(),
-                Map.of(
-                        "failure_code", TaskContractProjectionVerifier.FAILURE_OUTCOME,
-                        "reason", failure.reason(),
-                        "error", failure.message()),
-                failure.message());
+    private static NodeResult qualificationFailure(TaskContext context, TaskContractProjectionVerifier.Failure failure) {
+        return TaskContractProjectionVerifier.failureResult(context, failure, failure.message());
     }
 
     private static String toWorkspaceRef(Path workspaceRoot, Path path) {

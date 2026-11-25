@@ -1,0 +1,11 @@
+{
+  "entries": 399,
+  "manifest_sha256": "2e87c9f7a0e7d18345d060a242732a93f8934ade311d7c5d8d775327b38f46db",
+  "all_entries_verified": true,
+  "all_659_source_inputs_still_match": true,
+  "protected_735_files_still_match": true,
+  "both_candidate_jars_match": true,
+  "independent_CC_review": "PENDING",
+  "real_model_calls": 0,
+  "current_case_resumed": false
+}

@@ -1,0 +1,16 @@
+{
+  "exit": 0,
+  "timed_out": false,
+  "elapsed_seconds": 0.13494658283889294,
+  "command": [
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+    "--format",
+    "json",
+    "codex",
+    "sessions",
+    "show",
+    "codex-reviewer-ws-20261026T142203Z-7SNA"
+  ],
+  "stdout_sha256": "87a10d73494a2382e1518025756e5611a07871d22b3db0797c773a2cb28d3697",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

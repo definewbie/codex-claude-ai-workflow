@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+    "--format",
+    "json",
+    "codex",
+    "sessions",
+    "show",
+    "codex-reviewer-ws-20261026T142203Z-7SNA"
+  ],
+  "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree",
+  "started_at": "2026-10-26T15:23:07.541777+00:00",
+  "purpose": "named session cleanup only; no prompt"
+}

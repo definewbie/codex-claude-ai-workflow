@@ -1,0 +1,28 @@
+{
+  "generated_at" : "2026-10-23T01:20:01.232816Z",
+  "network_transport_owner" : "claude_sandbox",
+  "node_instance_id" : "node-design-claude_design-008",
+  "provider_subprocess_denied_env_names" : [ "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL" ],
+  "run_id" : "run-1792718401135",
+  "sandbox" : {
+    "allow_unsandboxed_commands" : false,
+    "auto_allow_sandboxed_bash" : false,
+    "enabled" : true,
+    "fail_if_unavailable" : true,
+    "filesystem" : {
+      "allow_read" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree", "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T" ],
+      "allow_write" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree", "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T" ],
+      "deny_read" : [ ],
+      "deny_write" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/nodes", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/execution-authority" ]
+    },
+    "network" : {
+      "allow_local_binding" : false,
+      "allow_unix_sockets" : [ ],
+      "allowed_domains" : [ ],
+      "strict_allowlist" : true
+    }
+  },
+  "schema_version" : "claude_execution_policy.v2",
+  "setting_sources" : [ ],
+  "workstream_id" : "ws-20261023T005431Z-9YYF"
+}

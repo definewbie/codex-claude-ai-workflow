@@ -1,0 +1,12 @@
+This shift from token-level to sequence-level optimization has a profound effect. It
+removes the instability that can emerge when token-level corrections introduce
+noise, especially in long responses or very large models. By clipping and
+rewarding entire responses instead of individual tokens, GSPO makes learning
+smoother, more reliable, and better aligned with how rewards are assigned in
+practice.
+
+It also simplifies reinforcement learning infrastructure. Because GSPO operates on
+sequence likelihoods, it can often reuse probabilities already computed during
+inference rather than recomputing token-level likelihoods during training. This
+makes it both computationally efficient and stable across large-scale systems.
+Table 3-6 compares both methods.

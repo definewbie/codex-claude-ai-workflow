@@ -1,0 +1,36 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792718702930-ebe15266",
+  "agentTaskId" : "agt-1792718702925-8935fb8b",
+  "workflowExecutionId" : "wfe-1792718702853-3f51c0bf",
+  "nodeInstanceId" : "node-design-decision-011",
+  "nodeDefinitionId" : "design.decision",
+  "handlerType" : "review.decision",
+  "status" : "SUCCEEDED",
+  "pid" : 76323,
+  "outcome" : "NEEDS_REVISION",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-codex_arch_review-010-run-1792718638529/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-23T01:25:01.766Z",
+      "input_identity" : "70ed7bac1dc3f9a2250156cb69780e8f4ba4a23c05393b10c3f9e3c62f10f604",
+      "executor_pid" : 76323
+    },
+    "summary" : "整体方案与范围适配，但混合换行案例的期望值错误，且测试输出采集方案遗漏 stderr，需修正后继续。",
+    "decision" : "NEEDS_REVISION",
+    "source" : "contract-sidecar",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-23T01:25:02.929982Z",
+  "finishedAt" : "2026-10-23T01:25:02.979182Z",
+  "durationMs" : 49
+}

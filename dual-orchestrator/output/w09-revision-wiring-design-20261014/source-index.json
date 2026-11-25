@@ -1,0 +1,334 @@
+{
+  "status": "READ_ONLY_SOURCE_ANCHORS",
+  "files": [
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelope.java",
+      "sha256": "4539200d00cd99ada2302925b91b095125ecf579a6461aae037ef44d1049d679",
+      "line_count": 301,
+      "inspected_ranges": [
+        [
+          8,
+          41
+        ],
+        [
+          77,
+          148
+        ]
+      ],
+      "role": "scoped model result fields; current producer schema",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java",
+      "sha256": "12271f14298dfd956640d45d407c2d8de915c579044739114522e0c029ccb30d",
+      "line_count": 82,
+      "inspected_ranges": [
+        [
+          15,
+          44
+        ]
+      ],
+      "role": "sole strict grammar",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeValidator.java",
+      "sha256": "8371cb1d941c1f573d072a31b5790db8e011160f661971f87985d9da1c247684",
+      "line_count": 657,
+      "inspected_ranges": [
+        [
+          20,
+          81
+        ],
+        [
+          283,
+          350
+        ]
+      ],
+      "role": "model SHA required today",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalRevisionMerger.java",
+      "sha256": "6d56fa042580f7f57a16c48b0fa217e53e60356b9edd0b4e1e34a7bf5ec428b6",
+      "line_count": 178,
+      "inspected_ranges": [
+        [
+          15,
+          80
+        ],
+        [
+          110,
+          150
+        ]
+      ],
+      "role": "ID/SHA guards, finite merge, immutable goal fields",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "sha256": "85ed81fbbbe669bc5a7fbe9262f5308b68a63450e0d5fc529876fd32b7732427",
+      "line_count": 970,
+      "inspected_ranges": [
+        [
+          65,
+          141
+        ],
+        [
+          146,
+          222
+        ],
+        [
+          239,
+          254
+        ],
+        [
+          922,
+          957
+        ]
+      ],
+      "role": "exact baseline, trigger ancestry and late separation",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalReference.java",
+      "sha256": "dcf196af8828c02cbf6a8e1c5ebf14124eedaa76578a47034c0a03bcd800b4a0",
+      "line_count": 341,
+      "inspected_ranges": [
+        [
+          57,
+          79
+        ],
+        [
+          90,
+          150
+        ],
+        [
+          245,
+          288
+        ],
+        [
+          182,
+          205
+        ]
+      ],
+      "role": "full content identity and source/derivation consumer; full-reference disambiguation (current ID-only comparison)",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java",
+      "sha256": "a24db51b397eef2a02f8700572b6cd541b2e0fde431d48388afde78432317abd",
+      "line_count": 738,
+      "inspected_ranges": [
+        [
+          211,
+          319
+        ]
+      ],
+      "role": "revision full proposal rejection and publication guards",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputContractDocument.java",
+      "sha256": "0ba7bb2b21a326810c6ee20c0494fa82c23a1d425f81102f706525482eff1628",
+      "line_count": 519,
+      "inspected_ranges": [
+        [
+          112,
+          150
+        ]
+      ],
+      "role": "existing program derivation",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultDocumentProjector.java",
+      "sha256": "2e2f785e547eb06ccfac09e6f87cf21245a769aea91f3deb6073315f5d66efa1",
+      "line_count": 315,
+      "inspected_ranges": [
+        [
+          34,
+          63
+        ]
+      ],
+      "role": "full proposal branch currently omits derivation",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalValidator.java",
+      "sha256": "8fc052420901198dd12874755357d9f08aa007d4ac8b2d3606a9fdaa7cc65d71",
+      "line_count": 537,
+      "inspected_ranges": [
+        [
+          192,
+          289
+        ]
+      ],
+      "role": "coverage and bounded clause delta",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java",
+      "sha256": "c9c9efd13cd334a9b10fcdf6e670e0086195b9fb5015fc330596fd91ac409651",
+      "line_count": 719,
+      "inspected_ranges": [
+        [
+          240,
+          324
+        ],
+        [
+          413,
+          440
+        ]
+      ],
+      "role": "repeat consumers and GOAL conversion",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+      "sha256": "486fc6e8a304e362e47054246d0400f3b68b462f6b1936294f6f823044024927",
+      "line_count": 502,
+      "inspected_ranges": [
+        [
+          126,
+          168
+        ],
+        [
+          439,
+          495
+        ]
+      ],
+      "role": "current copied SHA and patch-only prompt",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java",
+      "sha256": "ab38a97fc30e521512ef04358c61a6d02ee413e6795a04cf19f848eb67d9d754",
+      "line_count": 517,
+      "inspected_ranges": [
+        [
+          37,
+          106
+        ],
+        [
+          109,
+          138
+        ],
+        [
+          247,
+          301
+        ],
+        [
+          305,
+          349
+        ]
+      ],
+      "role": "existing prepare binding and fixed completion",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ContractRegistry.java",
+      "sha256": "5cdda6148c3a7d68032e8ea14e5ac6a6d7445fc3b0617c3abf268e86b4b042ad",
+      "line_count": 173,
+      "inspected_ranges": [
+        [
+          8,
+          23
+        ]
+      ],
+      "role": "already two intake artifact types",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ContextBuildPackageHandler.java",
+      "sha256": "c0bdc93b05cfd36b4b67741f8e26f67fd80e65d9d676a3a7c2d1ac89f8dd78d8",
+      "line_count": 1279,
+      "inspected_ranges": [
+        [
+          962,
+          990
+        ]
+      ],
+      "role": "late projection not universal baseline proof",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunGovernanceContext.java",
+      "sha256": "f7f2510db253afb6485a16a11faa9300b36c63b8fb43a6ea559be3b6f043b7d1",
+      "line_count": 171,
+      "inspected_ranges": [
+        [
+          39,
+          79
+        ],
+        [
+          91,
+          110
+        ]
+      ],
+      "role": "current qualification and per-run context",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+      "sha256": "f5f002a11bdb2638d83eae6c6474f86bf71749c3a7a593ecf281e7fcb4acc11c",
+      "line_count": 830,
+      "inspected_ranges": [
+        [
+          105,
+          122
+        ],
+        [
+          315,
+          350
+        ],
+        [
+          650,
+          662
+        ]
+      ],
+      "role": "context resolution and R01 caller",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json",
+      "sha256": "d9cdcf71b8974d1ed023150dc1c2146d79769d6ac6aea994b0305d2d6b895fa2",
+      "line_count": 1262,
+      "inspected_ranges": [
+        [
+          481,
+          560
+        ]
+      ],
+      "role": "existing review/decision/gate route",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json",
+      "sha256": "4375c8074896871bb00970b0ba8946bb4344d098800dbe060038c112a6897c0e",
+      "line_count": 1316,
+      "inspected_ranges": [
+        [
+          507,
+          590
+        ]
+      ],
+      "role": "full sibling definition",
+      "scope": "selected excerpts, not full-file independent review"
+    },
+    {
+      "path": "dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json",
+      "sha256": "38979a69837754cc97af6c83df2aae6a750902b704e8b730eea3fbf64d4ff79c",
+      "line_count": 1316,
+      "inspected_ranges": [
+        [
+          507,
+          590
+        ]
+      ],
+      "role": "contract sibling definition",
+      "scope": "selected excerpts, not full-file independent review"
+    }
+  ],
+  "small_variant": "derived sibling requires loader/factory verification during implementation; not a fourth standalone JSON here"
+}

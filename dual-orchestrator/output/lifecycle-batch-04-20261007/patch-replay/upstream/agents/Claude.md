@@ -1,0 +1,30 @@
+# Claude
+
+- Built-in name: `claude`
+- Default command: `npx -y @agentclientprotocol/claude-agent-acp`
+- Upstream: https://github.com/agentclientprotocol/claude-agent-acp
+- ACPX pins the built-in package range so fresh installs pick up Claude model and ACP adapter fixes without depending on a global adapter binary.
+- Model switches can change the available effort controls. ACPX updates existing saved effort selections from the accepted response and removes selections whose controls disappear.
+- Saved model and config selections are restored after reconnect, without replacing the conversation.
+
+## Settings isolation
+
+Built-in `acpx claude` sessions load Claude project and local settings, but not
+user settings. This prevents globally enabled channel and daemon plugins from
+claiming singleton external resources in an ACP-spawned session.
+
+Set `ACPX_CLAUDE_INCLUDE_USER_SETTINGS=1` only when the spawned session needs
+the user's global Claude settings and no such plugin conflict exists. Ambient
+credentials and other environment variables are still inherited normally.
+
+## Dual online permission replies (maintained adapter patch)
+
+Use `--permission-replies` only for persisted JSON prompt calls with an explicit
+finite `--timeout` and zero prompt retries. Existing automatic allow/deny rules
+still apply. A genuine ask emits `dual/permission/request` with exact raw request,
+RPC/session/prompt/owner generation, SHA-256 and deadline. Only the original live
+queue callback accepts `permission-reply -s <name> --reply <json>` once; replies
+must identify an offered once option and a committed Dual decision. Do not retry
+this command, recreate a callback after restart, or infer tool completion from
+`consumed: true`. Cancel, mode/model/config changes and expiry close old callbacks.
+Native selection does not approve business scope, independent review or delivery.

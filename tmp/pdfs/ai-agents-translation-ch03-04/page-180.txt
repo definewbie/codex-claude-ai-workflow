@@ -1,0 +1,34 @@
+Data security and compliance
+
+   When self-hosted or deployed on private cloud infrastructure, open
+   models ensure full data ownership and compliance control, important
+    for regulated industries like finance or healthcare. Organizations can
+   implement granular access control, audit mechanisms, and on-prem
+    encryption layers. With managed models, either via closed or open
+   models, you rely on vendor-managed security and compliance
+    certifications (SOC-2, ISO-27001, etc.). This can simplify procurement
+    but at the cost of reduced visibility and dependence on vendor diligence.
+
+Given all of this, a hybrid strategy often makes the most sense. When you
+start building an agentic system, managed closed APIs or managed open
+source providers can help you move quickly and focus on the application
+rather than infrastructure. This keeps things simple while workflows and
+responsibilities are still forming. In regulated environments, however, the
+managed route still requires careful procurement and governance, including
+data-processing agreements, security reviews, retention policies, inference-
+region controls, and audit requirements.
+
+However, over time, as your team grows and your use cases begin to require
+more control, customization, or data isolation, it becomes more practical to
+bring open source deployments in-house. This gives you more control over
+model versions, deployment boundaries, and data handling, but it also shifts
+more operational responsibility onto your team. With clearer ownership of
+responsibilities, moving infrastructure and model management under your
+own roof often becomes the more effective path.
+
+Optimizing Open Source Models
+
+When you decide to go the open source route, there are several ways to
+optimize both performance and cost. Traditionally, fine-tuning a large
+model meant updating all of its parameters as a continuation of the original
+training process. For models with billions of parameters, this becomes

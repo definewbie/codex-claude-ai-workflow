@@ -1,0 +1,101 @@
+[
+  {
+    "identity": "761d89f3702231c478524c6f0006891a48a66f3a 2026-06-11T17:53:30+08:00 refactor: remove natural language contract fallback",
+    "disciplineFiles": {
+      "AGENTS.md": {
+        "lines": 32
+      },
+      "dual-orchestrator/docs/engineering-checklist.md": {
+        "lines": 90
+      }
+    }
+  },
+  {
+    "identity": "0dcf1720c77ea872d1a0ba945e003d4c2777ea2a 2026-06-19T15:02:42+08:00 feat: close orchestrator mainline lifecycle",
+    "disciplineFiles": {
+      "AGENTS.md": {
+        "lines": 46
+      },
+      "dual-orchestrator/docs/engineering-checklist.md": {
+        "lines": 253
+      }
+    }
+  },
+  {
+    "identity": "f1c680b11926a48688818da93ddcd9443ad13840 2026-06-22T23:07:28+08:00 feat: add agent execution outcome boundary",
+    "disciplineFiles": {
+      "AGENTS.md": {
+        "lines": 46
+      },
+      "dual-orchestrator/docs/engineering-checklist.md": {
+        "lines": 253
+      }
+    }
+  },
+  {
+    "identity": "c05283d4f821f3fa70398d5a30580540408433a4 2026-07-22T02:18:03+08:00 refactor(agent-output): replace markdown control with strict json",
+    "disciplineFiles": {
+      "AGENTS.md": {
+        "lines": 111
+      },
+      "dual-orchestrator/docs/engineering-checklist.md": {
+        "lines": 313
+      }
+    }
+  },
+  {
+    "identity": "909317a23e1864f7e4a0684b881664f70b3ef3bb 2026-08-02T08:07:57+08:00 refactor(acpx): converge execution fact ownership",
+    "disciplineFiles": {
+      "AGENTS.md": {
+        "lines": 111
+      },
+      "dual-orchestrator/docs/engineering-checklist.md": {
+        "lines": 313
+      }
+    }
+  },
+  {
+    "identity": "1db620880c9fd8e795332ba51b92804a0b05262b 2026-08-14T16:39:36+08:00 fix(acpx): enforce turn-scoped permission facts",
+    "disciplineFiles": {
+      "AGENTS.md": {
+        "lines": 111
+      },
+      "dual-orchestrator/docs/engineering-checklist.md": {
+        "lines": 313
+      }
+    }
+  },
+  {
+    "identity": "88107d42c2230c0eadb836e427c2d0dd6714fc85 2026-09-10T22:47:29+08:00 fix(workflow): bind human evidence continuation to approved source",
+    "disciplineFiles": {
+      "AGENTS.md": {
+        "lines": 145
+      },
+      "dual-orchestrator/docs/engineering-checklist.md": {
+        "lines": 313
+      }
+    }
+  },
+  {
+    "identity": "a1a70d9de31317902e6b3621a22e2f933773d925 2026-09-04T19:13:30+08:00 docs(agent): require end-to-end transition closure",
+    "disciplineFiles": {
+      "AGENTS.md": {
+        "lines": 137
+      },
+      "dual-orchestrator/docs/engineering-checklist.md": {
+        "lines": 313
+      }
+    }
+  },
+  {
+    "identity": "b197ce90ebf2cb4d094c4fdeb388e015e208aafa 2026-09-12T07:10:48+08:00 feat(workflow): bind external verification evidence through acceptance",
+    "disciplineFiles": {
+      "AGENTS.md": {
+        "lines": 145
+      },
+      "dual-orchestrator/docs/engineering-checklist.md": {
+        "lines": 316
+      }
+    }
+  }
+]

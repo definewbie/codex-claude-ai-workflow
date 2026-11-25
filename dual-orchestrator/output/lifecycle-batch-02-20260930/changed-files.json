@@ -1,0 +1,22 @@
+[
+  {
+    "path": "dual-cli/src/test/java/dev/dual/cli/CliLedgerFactoryTest.java",
+    "before_sha256": null,
+    "after_sha256": "aa470b2d5a72336538c1fca7a86ff795d21254cd0decb2eabb80e51ac985cbfa"
+  },
+  {
+    "path": "dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java",
+    "before_sha256": "ee0a535e99fd1fcf1870b3ef97651d603f48c88c5b4f5e18f88e9f8b81af14dc",
+    "after_sha256": "0931ce1cfe919b4c269e012a81afa1d5bdebc6fcb5e7c28132e16429735741ff"
+  },
+  {
+    "path": "dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/LiteFlowLifecycleIsolationTest.java",
+    "before_sha256": null,
+    "after_sha256": "110afd36c90bd486ec03ab1e4fb2cdc1bd7f9c74d36f6f23cebf736f4f0bf2fe"
+  },
+  {
+    "path": "dual-server/src/test/java/dev/dual/server/ServerLedgerFactoryTest.java",
+    "before_sha256": null,
+    "after_sha256": "1cea787e5e9c6210b55b515e19a9b2aefa1afb0efee6258493f3ca28350eab43"
+  }
+]

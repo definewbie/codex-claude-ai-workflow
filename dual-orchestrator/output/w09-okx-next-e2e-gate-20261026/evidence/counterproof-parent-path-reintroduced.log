@@ -1,0 +1,29 @@
+test_positive_whole_runner_same_environment (test_fresh_assembly.FreshAssemblyTest.test_positive_whole_runner_same_environment) ... FAIL
+
+======================================================================
+FAIL: test_positive_whole_runner_same_environment (test_fresh_assembly.FreshAssemblyTest.test_positive_whole_runner_same_environment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmpnf596rto/test_fresh_assembly.py", line 71, in test_positive_whole_runner_same_environment
+    with patch.object(g,'measure',side_effect=[empty,empty,measured]),patch.dict(os.environ,{'PATH':'/parent-is-not-authority'}):self.run_step()
+                                                                                                                                 ~~~~~~~~~~~~~^^
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmpnf596rto/test_fresh_assembly.py", line 66, in run_step
+    runpy.run_path(str(HERE/'run-one-step.py'),run_name='__main__')
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmpnf596rto/run-one-step.py", line 20, in <module>
+    release, initial_measurement, active, process_observation, launch = inspect()
+                                                                        ~~~~~~~^^
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmpnf596rto/admission.py", line 81, in inspect
+    launch = selected_environment()
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmpnf596rto/admission.py", line 55, in selected_environment
+    assert resolved and Path(resolved).resolve() == path.resolve(), 'Selected resolution drift: ' + name
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Selected resolution drift: java
+
+----------------------------------------------------------------------
+Ran 1 test in 0.552s
+
+FAILED (failures=1)

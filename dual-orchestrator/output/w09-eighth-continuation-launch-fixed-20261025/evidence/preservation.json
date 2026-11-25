@@ -1,0 +1,19 @@
+{
+  "status": "PASS_READONLY_PRESERVATION",
+  "original_package_files": 402,
+  "prior_stopped_continuation_files": 52,
+  "stopped_ledger_files": 541,
+  "source_inputs": 659,
+  "application_jars": 2,
+  "confirmed_process_records": 83,
+  "observation_links_verified": true,
+  "original_2_stops_preserved": true,
+  "frozen_inputs_pass": true,
+  "source_code_rebuilt": false,
+  "real_steps_created": false,
+  "new_model_calls": 0,
+  "private_config_permissions": {
+    "directory": "0o700",
+    "file": "0o600"
+  }
+}

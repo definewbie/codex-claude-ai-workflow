@@ -1,0 +1,42 @@
+   Defines the reverse tool so the writer can send control back to the
+    research assistant
+
+Once you have the handoff helpers in place, you can move on to defining
+your agents. It’s helpful to keep the roles very distinct. In this setup you
+want one agent focused purely on research, and the other focused on
+writing. The handoff tools ensure that the workflow can bounce back and
+forth when more sources are needed or when it’s time to synthesize. The
+roles are shown in Example 2-32.
+
+Example 2-32. Assign roles to research and writing assistants
+research_assistant = create_react_agent(
+    model=llm,
+    tools=[tavily_tool, scrape_webpages, to_writer],
+    prompt=(
+        """You are a research assistant. Search the web with
+Tavily.
+        When you have 3 to 5 solid sources, scrape key pages for
+details,
+        then hand off to the writer assistant."""
+    ),
+    name="research_assistant",
+)
+
+writer_assistant = create_react_agent(
+    model=llm,
+    tools=[to_research],
+    prompt=(
+        """You are a writing assistant. Read the provided documents
+and messages.
+        Synthesize a concise answer with citations by site name in
+brackets. If
+        sources are thin or unclear, hand back to research with a
+short request."""
+    ),
+    name="writer_assistant",
+)
+
+   Defines the research assistant, responsible for web search and scraping
+
+   Grants the research assistant access to its tools, including the handoff to
+    the writer

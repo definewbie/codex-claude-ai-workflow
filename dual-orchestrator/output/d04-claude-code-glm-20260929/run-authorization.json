@@ -1,0 +1,18 @@
+{
+  "existingConfiguredRouteConfirmedByUser": true,
+  "userMessages": [
+    "进入下一步",
+    "是，作者侧使用现有 GLM-5.3",
+    "dual应该不关心claude绑定哪个模型",
+    "一直以来claude都是绑定的glm"
+  ],
+  "interpretation": "Correct experimental route to existing configuration; no product/provider architecture change",
+  "modelTasks": 1,
+  "automaticReruns": 0,
+  "wallSeconds": 90,
+  "maxTurns": 5,
+  "guardSha256": "9e2f8aa0acfa1c88c1ff02197b67943ee1e40b9120adc7e188b220dc57af3a44",
+  "gateSha256": "4cc9b9819f95339ee23deb0f74f88fb5b19a59ba751b2d08d519c9eca1e8c1ac",
+  "billingMode": "provider_configured_unpriced",
+  "monetaryHardCap": null
+}

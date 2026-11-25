@@ -1,0 +1,20 @@
+{
+  "confirmedByUser": true,
+  "userMessage": "\u540c\u610f",
+  "confirmedAt": "2026-09-28T05:13:03.952308+00:00",
+  "gateSha256": "15f88851f96ab913d4f43b90427f2067dfef4864b1b8b9de7ce0014b4aa19303",
+  "probeSha256": "3a9e72d87666de157447466940e2369a5df2f5ad86ff19167f487e3c2996a283",
+  "guardSha256": "89ae562560f07d9da15f77634c1f9b218df5f37c4360003f0a11c58a9470fa86",
+  "scope": "One bounded native Codex retest; no product or adapter implementation",
+  "budget": {
+    "model": "gpt-6-astra",
+    "reasoningEffort": "low",
+    "cliStarts": 1,
+    "userTasks": 1,
+    "wallSeconds": 90,
+    "observedCommandStopThreshold": 6,
+    "automaticReruns": 0,
+    "billingMode": "subscription_unpriced",
+    "tokenOrDollarHardCap": null
+  }
+}

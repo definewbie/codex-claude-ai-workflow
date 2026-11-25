@@ -1,0 +1,11 @@
+{
+  "user_reply": "授权，继续",
+  "recorded_at": "2026-10-11T18:44:34.886948+08:00",
+  "scope": "A: current-command transcript usage + Gate observer, paired regression, release freeze, CC prompt",
+  "not_authorized": [
+    "restore fourth case",
+    "start fifth Gate",
+    "new platform or acpx patch"
+  ],
+  "phase": "P0.5 attribution; directly unblocks P0 mainline proof"
+}

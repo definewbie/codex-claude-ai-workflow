@@ -1,0 +1,2 @@
+Exception in thread "main" java.lang.AssertionError: fault did not fire: plan1false
+	at dev.dual.runtime.delivery.DeliveryWriteTargetsProof.main(DeliveryWriteTargetsProof.java:30)

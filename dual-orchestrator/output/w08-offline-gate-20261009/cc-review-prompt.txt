@@ -1,0 +1,5 @@
+请对 `/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator` 的 W08 离线对账与真实 Gate 草案做独立评审，遵守 AGENTS.md。
+
+入口：`output/w08-offline-gate-20261009/assessment.md`，关联 W07 字段核对、Gate 草案、保留序列索引和本轮原始验证。自行核对剩余工作是否必要、延期是否有据，尤其提示词与 GOAL/EXECUTION 分期是否一致、实际 native 装配核验是否足够，以及预算/停止与合法批准→验收→交付/恢复链能否执行。不要预设作者 NO-GO 或缺口分类正确。
+
+按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给分级发现、证据、未核验范围和真正下一步；区分历史全模块凭证、新聚焦回归、一次性证明与真实能力未证。只读，不修改、启动额外 agent、运行 native/provider、installer、真实目标 Git；不扩大成安全/预算平台，PASS 不授权实施或真实运行。

@@ -1,0 +1,94 @@
+{
+  "request_count": 22,
+  "analysis_tokens_cases_2_to_6": 835216,
+  "case_totals": {
+    "2": 63493,
+    "3": 235366,
+    "4": 403420,
+    "5": 62136,
+    "6": 70801
+  },
+  "case_1": [
+    {
+      "case": 1,
+      "run": "run-1791614610585",
+      "tokens": null,
+      "reason": "NO_PROMPT_DISPATCH; usage UNAVAILABLE, not measured zero"
+    }
+  ],
+  "raw_current_usage_crosschecked_occurrences": 11,
+  "per_role": [
+    {
+      "node": "intake.claude_brainstorm",
+      "role": "INITIAL",
+      "n": 5,
+      "min": 8659,
+      "median": 20590,
+      "max": 36945
+    },
+    {
+      "node": "intake.claude_brainstorm",
+      "role": "FORMAT_CORRECTION",
+      "n": 2,
+      "min": 19570,
+      "median": 23059.0,
+      "max": 26548
+    },
+    {
+      "node": "intake.codex_product_review",
+      "role": "INITIAL",
+      "n": 4,
+      "min": 27428,
+      "median": 27675.5,
+      "max": 28010
+    },
+    {
+      "node": "intake.claude_brainstorm",
+      "role": "SEMANTIC_REENTRY",
+      "n": 4,
+      "min": 13117,
+      "median": 14498.0,
+      "max": 16911
+    },
+    {
+      "node": "intake.codex_product_review",
+      "role": "SEMANTIC_REENTRY",
+      "n": 2,
+      "min": 39574,
+      "median": 39884.0,
+      "max": 40194
+    },
+    {
+      "node": "design.claude_design",
+      "role": "INITIAL",
+      "n": 2,
+      "min": 85538,
+      "median": 108134.5,
+      "max": 130731
+    },
+    {
+      "node": "design.codex_arch_review",
+      "role": "INITIAL",
+      "n": 1,
+      "min": 53075,
+      "median": 53075,
+      "max": 53075
+    },
+    {
+      "node": "design.claude_design",
+      "role": "SEMANTIC_REENTRY",
+      "n": 1,
+      "min": 90396,
+      "median": 90396,
+      "max": 90396
+    },
+    {
+      "node": "design.codex_arch_review",
+      "role": "SEMANTIC_REENTRY",
+      "n": 1,
+      "min": 70687,
+      "median": 70687,
+      "max": 70687
+    }
+  ]
+}

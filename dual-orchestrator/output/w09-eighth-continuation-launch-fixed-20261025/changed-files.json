@@ -1,0 +1,26 @@
+{
+  "operator_scripts_changed": [
+    "continuation.py",
+    "pre-dispatch-recheck.py",
+    "process_check.py",
+    "run-one-step.py"
+  ],
+  "test_suites_changed": [
+    "test_continuation.py"
+  ],
+  "unchanged_code": [
+    "check_budget.py",
+    "gate_support.py",
+    "test_gate_observer.py"
+  ],
+  "java_acpx_product_source_changed": false,
+  "new_operator_source_classes_or_services": 0,
+  "before_package": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024",
+  "after_sha256": {
+    "continuation.py": "00a9676dc147a1442b3801944d07e8e1997c57ab7e40c0c512d1d2cbf7823082",
+    "pre-dispatch-recheck.py": "5a65641cfa07e3b12613dfb1c16d3ac6da40de6d68e998da026a539542c9ba7f",
+    "process_check.py": "4e3fdc7e9aad73124fe5050929d94a3cace3852afd78e9ac7e5f694e2cedad33",
+    "run-one-step.py": "fb337087a18c6755ea8ca1787234bfc59b76ea650a36dfd097c475be5b2407b0",
+    "test_continuation.py": "2609973b100ad6501f4ffd69405b54297e72a78d773c6af31630e860c8aa10e8"
+  }
+}

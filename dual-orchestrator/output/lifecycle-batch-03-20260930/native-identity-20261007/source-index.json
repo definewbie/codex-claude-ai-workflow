@@ -1,0 +1,90 @@
+{
+  "captured_at": "2026-10-07T05:34:56.478263+00:00",
+  "scope": "Named entrypoint audit, not exhaustive native dependency audit",
+  "files": {
+    "scripts/configure-acpx.sh": {
+      "sha256": "280ec1c4372d2f1fac9ea20ef9fbcac9ee00dcbaee713af1cd508b9989105938",
+      "bytes": 3616
+    },
+    "scripts/install-acpx-e1.sh": {
+      "sha256": "1de54ba5f5f0aafd57b245061cc2305864ad2c2f192bfcb5329f0b05824855c3",
+      "bytes": 3737
+    },
+    "scripts/acpx-claude-agent-env.sh": {
+      "sha256": "cfd47f649d0f940f3d5c4fb4a8808b34264dbd017f58cd4a5ada4fec07eb6c9f",
+      "bytes": 2683
+    },
+    "tools/acpx-e1/manifest.json": {
+      "sha256": "d75e2ab35d1e518319f12cf748da830616ad649efa427ce17d1296f2bfc7889f",
+      "bytes": 675
+    },
+    ".tools/acpx-e1/source/src/agent-registry.ts": {
+      "sha256": "ddc69460b85ca6af098ea1f7fc5467e808e85b207dde47639a15026ca7323f7d",
+      "bytes": 10253
+    },
+    ".tools/acpx-e1/source/src/acp/client.ts": {
+      "sha256": "d727f05adfa38beadbc4214fbbc5a14c864dfa1eead4dd5e2a0a734a63e65a88",
+      "bytes": 78691
+    },
+    ".tools/acpx-e1/source/src/acp/agent-command.ts": {
+      "sha256": "ccaaf63f555803452ff27a3c8fabb1ea5ec9fefe72d59876b5b0111446a8d91d",
+      "bytes": 13155
+    },
+    ".tools/acpx-e1/source/src/cli/config.ts": {
+      "sha256": "766aabaa37a9f06be434c2eca7e3b7b33eeac3bee2c45654d4a5a9e89d211aee",
+      "bytes": 21576
+    },
+    ".tools/acpx-e1/source/src/cli/config-command.ts": {
+      "sha256": "347864a6a8c275f42cf50249df28cd19f30ad2fd9e32f99f6875f67b10b25294",
+      "bytes": 2355
+    },
+    ".tools/acpx-e1/source/src/cli/session/queue-owner-runtime.ts": {
+      "sha256": "41bfb42527fe043ff921550b21758443fdf4f1e73f8aa3b3056239be3e3b3c87",
+      "bytes": 18634
+    },
+    ".tools/acpx-e1/source/src/runtime/engine/connected-session.ts": {
+      "sha256": "6ef739b12327e159bec78b57ac76e0d499625c3cecb1b05a2b96062eae5970a7",
+      "bytes": 7221
+    },
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java": {
+      "sha256": "14058a0f5963fdb18284e57afe95b0aae238948664e6326b69272ff3d634639f",
+      "bytes": 43335
+    },
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java": {
+      "sha256": "f91df23fcfef1218e793942fd710286d10488379cb0f374fef4ac25686cc41cc",
+      "bytes": 56923
+    },
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxExecutionRecovery.java": {
+      "sha256": "18e4739a5362f21953267f1fe75c9303505e93c19c71417081b97afcae5ced19",
+      "bytes": 3324
+    },
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ReviewedAcpxBuildIdentity.java": {
+      "sha256": "74cf3bbf7bcc6f2c8e557c83fc692b52d9488b4b7fad7df0db5ec0b23fcdf96b",
+      "bytes": 3602
+    },
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java": {
+      "sha256": "90299628c5ccbc4e5c4a7fad5dca9fa43940f1a62ce8b2e46be733034b34ec28",
+      "bytes": 29215
+    },
+    "dual-runtime/src/main/java/dev/dual/runtime/FrozenRuntimeIdentity.java": {
+      "sha256": "b2f8769687420954eef19d62f97eb25f3b329615561655edb4fda5c2b3997450",
+      "bytes": 7333
+    },
+    "dual-cli/src/main/java/dev/dual/cli/CliLedgerFactory.java": {
+      "sha256": "4a6b3834cc50297f4eb412a8ec1042a146e345e8a43fc7e3a9c25c2ed0638bf7",
+      "bytes": 1137
+    },
+    "dual-server/src/main/java/dev/dual/server/ServerLedgerFactory.java": {
+      "sha256": "71b128cc6abbfe1206b766b786bd60f769da48d9132d09eafe911ab63596d885",
+      "bytes": 1149
+    },
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": {
+      "sha256": "41226b6c70e399067685e5f68ddde4481a6455b4751e6aeaba563b8d24100e1f",
+      "bytes": 104600
+    },
+    "output/lifecycle-batch-03-20260930/progress-and-decision.md": {
+      "sha256": "a0d7992d0d0f88c058c01791d81dd52504ab3b9279ebee2ba76ba35007655a20",
+      "bytes": 12041
+    }
+  }
+}

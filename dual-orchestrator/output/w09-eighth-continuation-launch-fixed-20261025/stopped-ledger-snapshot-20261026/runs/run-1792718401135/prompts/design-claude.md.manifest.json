@@ -1,0 +1,137 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "runId" : "run-1792718401135",
+  "nodeId" : "design.claude_design",
+  "agent" : "claude",
+  "promptTemplate" : "design-claude",
+  "promptPath" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718401135/prompts/design-claude.md",
+  "totalBytes" : 10397,
+  "totalEstimatedTokens" : 2600,
+  "sections" : [ {
+    "name" : "workspace_guard",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "workspace-guard",
+    "bytes" : 465,
+    "estimatedTokens" : 117,
+    "sha256" : "1c38a82cdfe20fcb44d80188b584a111fe711b8858f569240c8fdd68c835b4e7",
+    "includedReason" : "execution safety boundary",
+    "required" : true
+  }, {
+    "name" : "language_policy",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "language-policy",
+    "bytes" : 244,
+    "estimatedTokens" : 61,
+    "sha256" : "d20252d3644a0521308cb5b24f421c899463b6078aece0141858ed2ed32f50d5",
+    "includedReason" : "output language policy",
+    "required" : true
+  }, {
+    "name" : "structured_artifact_field_semantics",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "structured-artifact-field-semantics",
+    "bytes" : 564,
+    "estimatedTokens" : 141,
+    "sha256" : "33c470e70a46bf078390426d11af1f0f0057372699f1c7287da6499939aaa438",
+    "includedReason" : "structured artifact field semantics",
+    "required" : true
+  }, {
+    "name" : "template_static_frame",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "dev/dual/adapter/acpx/prompts/design-claude.md",
+    "bytes" : 2715,
+    "estimatedTokens" : 679,
+    "sha256" : "2e8fe948aa52786983ce0034ad8270cc59d158826a87c1c2ee6fc9f5b7321eda",
+    "includedReason" : "prompt skeleton instructions",
+    "required" : true
+  }, {
+    "name" : "requirement",
+    "sourceType" : "requirement",
+    "sourceRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/requirement.md",
+    "bytes" : 1190,
+    "estimatedTokens" : 298,
+    "sha256" : "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+    "includedReason" : "task requirement",
+    "required" : true
+  }, {
+    "name" : "context_package",
+    "sourceType" : "context_package",
+    "sourceRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json,.agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.md,.agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json,.agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.md,.agent/workstreams/ws-20261023T005431Z-9YYF/context/agent-governance-node-design-claude_design-008-run-1792718401135.md",
+    "bytes" : 2438,
+    "estimatedTokens" : 610,
+    "sha256" : "556a61d30ba50c8032cfd7156412f9d07ce916af368cf50927f0c22ef5328a7b",
+    "includedReason" : "prior artifacts / assembled context",
+    "required" : true
+  }, {
+    "name" : "read_reuse_contract",
+    "sourceType" : "read_reuse_contract",
+    "sourceRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json,.agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.md,.agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json,.agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.md,.agent/workstreams/ws-20261023T005431Z-9YYF/context/agent-governance-node-design-claude_design-008-run-1792718401135.md",
+    "bytes" : 0,
+    "estimatedTokens" : 0,
+    "sha256" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "includedReason" : "typed memory read-reuse projection",
+    "required" : false
+  }, {
+    "name" : "contract_review_principles",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "contract-review-principles.md",
+    "bytes" : 1996,
+    "estimatedTokens" : 499,
+    "sha256" : "255a1af39f7d8cc79006c28508b0833b7f25c8a60ef50ec52fbd956a5947a5f8",
+    "includedReason" : "review principles",
+    "required" : true
+  }, {
+    "name" : "prompt_contract",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "ContractRegistry:design.claude_design",
+    "bytes" : 1928,
+    "estimatedTokens" : 482,
+    "sha256" : "0c2f11e55b67fd7d2706ca14ec31f3757e81a0664ce504085229c8a0d6ba09f6",
+    "includedReason" : "strict agent result envelope",
+    "required" : true
+  }, {
+    "name" : "external_research_discipline",
+    "sourceType" : "permission_policy_projection",
+    "sourceRef" : "observe",
+    "bytes" : 521,
+    "estimatedTokens" : 131,
+    "sha256" : "518335f6aed4ae3d471ead53c2a92286330b234a02bc3fd4cbdd7a5b3cf27867",
+    "includedReason" : "guide provider behavior without replacing adapter enforcement",
+    "required" : true
+  }, {
+    "name" : "authored-context",
+    "sourceType" : "typed_authored_context",
+    "sourceRef" : "node-design-claude_design-008",
+    "bytes" : 222,
+    "estimatedTokens" : 56,
+    "sha256" : "20eb6f893da92ee96986e395f10a45ec2090da7897295303b917d6520e1217c1",
+    "includedReason" : "required approved and revision inputs",
+    "required" : true
+  } ],
+  "authoredContext" : {
+    "workstreamId" : "ws-20261023T005431Z-9YYF",
+    "nodeInstanceId" : "node-design-claude_design-008",
+    "nodeId" : "design.claude_design",
+    "runId" : "run-1792718401135",
+    "historyThrough" : 8,
+    "contract" : {
+      "compileNodeInstanceId" : "node-contract-compile-007",
+      "approvalGateRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+      "approvalEventId" : "evt-000007",
+      "contract" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+        "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+      },
+      "resolution" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json",
+        "sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417"
+      }
+    },
+    "reviewedDesign" : null,
+    "reviewedPlan" : null,
+    "parent" : null,
+    "subject" : null,
+    "trigger" : null,
+    "obligations" : [ ]
+  }
+}

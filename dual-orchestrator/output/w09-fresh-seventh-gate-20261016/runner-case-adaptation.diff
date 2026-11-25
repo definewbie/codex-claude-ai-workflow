@@ -1,0 +1,13 @@
+--- sixth/run-one-step.py
++++ seventh/run-one-step.py
+@@ -10,8 +10,8 @@
+ 
+ # This is a candidate runner, not permission to reuse a prior case or budget.
+ authorization = read(OUT / 'run-authorization.json')
+-assert authorization.get('fresh_run_authorized') is True and authorization.get('case') == 'FRESH_SIXTH', 'Fresh sixth requires new human authorization'
+-assert read(OUT / 'gate-local-preflight.json').get('status') == 'PASS_LOCAL_PRECONDITIONS', 'Fresh local preflight required'
++assert authorization.get('fresh_run_authorized') is True and authorization.get('case') == 'FRESH_SEVENTH', 'Fresh seventh requires new human authorization'
++assert read(OUT / 'gate-local-preflight.json').get('status') == 'PASS_OFFLINE_PRECONDITIONS_AWAITING_RUN_APPROVAL', 'Fresh local preflight required'
+ step, expected = sys.argv[1:]
+ assert not (OUT / 'stop-required.json').exists(), 'Gate already stopped; no automatic continuation'
+ folder = OUT / 'steps' / step

@@ -1,0 +1,17 @@
+{
+  "received_at": "2026-10-10T14:42:18.857363+08:00",
+  "user_text": "授权按已批准 Gate 开始真实运行",
+  "scope": "same fresh workstream, one terminal-delivery INLINE sample under reviewed Gate",
+  "budgets": {
+    "top_level_calls_max": 18,
+    "active_minutes_max": 60,
+    "command_timeout_seconds": 600,
+    "visible_actual_token_warning": 120000,
+    "visible_actual_token_stop": 160000,
+    "semantic_revision_loops_max": 2
+  },
+  "critical_approvals": "user GOAL, exact EXECUTION, final delivery; each actual native once choice",
+  "final_product_commit_actor": "user",
+  "new_authority_or_scope": "stop and present evidence/options",
+  "independent_agents_spawned": 0
+}

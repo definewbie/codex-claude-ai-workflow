@@ -1,0 +1,13 @@
+[
+  {
+    "attempt": "focused-01",
+    "exit": 1,
+    "classification": "AUTHOR_ERROR",
+    "cause": "IndentationError while editing duplicate-receipt assertion; discovery did not run; not red production evidence"
+  },
+  {
+    "attempt": "counterproof-01 fourth mutant",
+    "classification": "COUNTERPROOF_HARNESS_ERROR",
+    "cause": "Deleting authorization guard reached generic MagicMock Popen and failed with JSON TypeError; not accepted as cannot-bypass proof. Strengthened sentinel to explicit unauthorized-launch assertion. First three mutant outcomes remain separate; rerun all four."
+  }
+]

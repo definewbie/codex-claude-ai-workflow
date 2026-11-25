@@ -1,0 +1,42 @@
+--- before/output/lifecycle-batch-03-20260930/batch.md
++++ after/output/lifecycle-batch-03-20260930/batch.md
+@@ -48,3 +48,7 @@
+ ## 2026-10-06 D05 接线决定补记
+ 
+ 上一段“待明确”为 9 月 30 日状态。经 CC 中间评审和用户继续指令，已产出 [事前可行性接线决定](d05-readiness-wiring.md)，含 LOW-1/LOW-2、具名入口与真实生产者限制、L04/L06 写序、编译/dispatch 消费、缺项恢复及回计划复评。新增设计随本批末一并独立审查；未实施、未新增测试证据。范围仍为已授权 B03，不增加环境平台/权限/runner；D07 的资格与 epoch 消费仍依赖联合合同链，不按独立切片提前关闭。
++
++## 2026-10-06 联合实施检查点
++
++接线决定后已继续编码及离线验证，见 [checkpoint](implementation-20261006/checkpoint.md)。readiness 保存/资格消费与 plan 门合法续作已有切片证据；全模块生产编译通过，core 123、ledger 151 通过，runtime 13 项为单独编译的定向测试。旧 runtime 测试整体编译仍失败，整链、运行身份与 R01–R03 等仍未完成。此前“全部 NOT RUN/未实施”为开工或补记时点，当前证据以本检查点为准；B03 IN_PROGRESS、W 项未关闭、真实 NO-GO 保持。
+--- before/output/lifecycle-batch-03-20260930/progress-and-decision.md
++++ after/output/lifecycle-batch-03-20260930/progress-and-decision.md
+@@ -47,3 +47,11 @@
+ 新增设计尚未独立复审，随 B03 批末合并；本轮不编码、不跑测试/native/provider、不启动 agent、不提交。旧 12 项仅为既有本地切片证据，不因本补记新增 Proven。本目录 verification.json 为开工前历史快照，不代表当前状态；ledger-sequences-recheck-reports 包含非本次执行的其他 XML，12 项以 ledger-sequences-recheck.log 指定三类及对应 XML 为准，不汇总整个目录冒称本轮执行。
+ 
+ 后续按既有联合范围继续：测试 fixture/构造迁移和适用本地协议切片可推进；EXECUTION 编译、资格/epoch 与相关 D07 裁定仍须联合接线，不因本地存储可独立测试就称全部恢复工作独立。原“仍需完成”清单一项不减，加本决定的正反与失败序列；整链及全模块回归、批末独立判断前，B03 仍 IN_PROGRESS、真实运行 NO-GO。
++
++## 2026-10-06 后续：联合实施已推进，B03 仍 IN_PROGRESS
++
++用户在接线决定后批准继续。本轮新增 readiness 人工登记及 L04 保存、plan 缺项路由、EXECUTION 编译/批准/准备消费，并修复实际续作中暴露的 reviewed 事实整数表示误判与批准页误用计划 iteration 两项迁移缺陷。完整范围、transition、失败记录、六维与剩余项见 [本轮检查点](implementation-20261006/checkpoint.md)。前一节“尚未实施”保留为当时时点，不能再作为本轮末状态。
++
++本轮全模块生产编译通过；core 123 / ledger 151 Maven 测试通过；runtime 定向 13 项经选定源码编译/JUnit 通过，包含从 fixture-approved GOAL 到补齐、作者/独立复评、EXECUTION 批准及实现的离线序列。旧 runtime 测试迁移未完成，clean test-compile 失败记录保留，**全模块测试仍未通过**。详细计数与边界见 implementation-20261006/verification.json；不挪用 B01/B02 历史绿色，不称真实模型验证。
++
++剩余工作不减：程序工具事实、readiness recovery 返修/同授权补充引用、当前 occurrence/epoch、R01–R03/外部未知裁定、运行身份/隐式构造/全读写会话、完整测试迁移和兄弟整链。CLI/API 新入口虽编译通过，实际 factory 的运行身份装配仍待完成，当前工作区不可作为可运行交付物。未提交、零真实调用、零额外 agent；批末 CC 条件尚未满足，既有实施授权继续有效，NO-GO 不变。
+--- before/output/lifecycle-batch-03-20260930/d05-readiness-wiring.md
++++ after/output/lifecycle-batch-03-20260930/d05-readiness-wiring.md
+@@ -112,3 +112,7 @@
+ 收益是让首次任务有真实合法出口，同时保留独立评审和最终证据要求。成本集中在同一材料入口、引用/身份校验、资格消费和现有回归；不预估工期或称成本近零。若需要持续监控、通用 parser/命令 DSL、环境 registry、新权限类型、runner 或改变验收标准，停止并提交取舍，不扩大本决定。
+ 
+ B03 仍须完成 progress-and-decision.md 的全部剩余项；本地存储切片可推进，不把依赖合同/epoch 的 D07 当独立闭合。此次不运行 native/provider、不恢复旧样本、不提交、不解除 NO-GO；用户既有联合实施授权不撤销。本补记随 B03 批末一起评审，无须单独调用 CC。
++
++## 8. 实施进度补记（2026-10-06，非设计收口）
++
++以上“未实施/NOT RUN”为接线决定产出时点。用户批准继续后，operator 声明入口、登记写集、plan 缺项分支与 EXECUTION 编译/批准/准备消费已有实现；限定离线续作序列通过。程序事实自动复用、失败 recovery 回计划及同授权补充证明等仍未完成，不能把一个合法 plan 门路径扩称全部义务闭合。详见 [检查点](implementation-20261006/checkpoint.md) 与明确未通过的全模块测试状态。设计补记随 B03 批末评审，未授权真实运行或提交。
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -502,3 +502,5 @@
+ §12 联合实施中间登记：B03 已有代码增量但未完成。相应本地 ledger 序列 12 项通过，完整测试源码迁移/整链回归尚未通过。D05 事前环境可用性声明的具体生产入口在接线中发现未明确，不能复用要求既有 EXECUTION 的实施后补证据入口；详见 [进展、证据和待决范围](../../output/lifecycle-batch-03-20260930/progress-and-decision.md)。不得将此状态当作批次收口或开跑准入。
+ 
+ §12 D05 接线决定（2026-10-06）：用户带回 CC 中间评审后要求进入下一步，已完成 [readiness 接线决定](../../output/lifecycle-batch-03-20260930/d05-readiness-wiring.md)，承接 LOW-1 的环境身份/调用前复核/缺项续作及 LOW-2 的程序事实正向清单。新增入口沿 review 人工操作面、runtime 唯一校验和 ledger L04/L06，不新建环境认证平台；现有工具使用统计不冒充工具成功。详设 §3.2 与冻结附录 §5 已同步，新增设计与 B03 批末合并独立评审，不单开轮次。本轮仅材料，所有验证仍按原真实证据限度；W03/W04/W05/W08 不关闭，真实 NO-GO 不变。后续合同/资格/恢复联合实施与测试迁移继续按原 B03 全清单验收。
++
++§12 联合实施后续（2026-10-06）：用户批准继续后，本轮已实现 readiness 人工入口与 L04、plan 缺项到原人工门、EXECUTION 编译/批准/准备消费，并完成限定合法续作反证，见 [本轮检查点](../../output/lifecycle-batch-03-20260930/implementation-20261006/checkpoint.md)。全模块生产编译通过；core 123/ledger 151 通过；runtime 13 项为选定测试源码的独立 JUnit 执行，不是 runtime/Maven 全套通过。旧 fixture/test-compile 仍失败，程序工具事实、recovery 返修、R01–R03、运行身份及会话全迁移、四变体/双入口整链仍未完成。W03/W04/W05/W08 不前移为完成；B03 IN_PROGRESS，真实 NO-GO 保持，尚不交批末 PASS 评审。源码增量对本轮前真实 dirty 内容单列，不覆盖既有改动。

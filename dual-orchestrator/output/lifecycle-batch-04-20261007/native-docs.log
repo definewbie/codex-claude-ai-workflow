@@ -1,0 +1,25 @@
+
+> acpx@0.13.2 check:docs /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source
+> pnpm run format:docs:check && pnpm run lint:docs && pnpm run docs:site
+
+
+> acpx@0.13.2 format:docs:check /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source
+> git ls-files 'docs/**/*.md' 'examples/flows/**/*.md' 'README.md' | xargs oxfmt --check
+
+Checking formatting...
+
+All matched files use the correct format.
+Finished in 129ms on 4 files using 16 threads.
+
+> acpx@0.13.2 lint:docs /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source
+> markdownlint-cli2 README.md docs/**/*.md examples/flows/**/*.md
+
+markdownlint-cli2 v0.23.2 (markdownlint v0.41.1)
+Finding: README.md docs/**/*.md examples/flows/pr-triage/README.md examples/flows/pr-triage/TUNING.md examples/flows/replay-viewer/README.md
+Linting: 38 files
+Summary: 0 issues in 0 files
+
+> acpx@0.13.2 docs:site /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source
+> node scripts/build-docs-site.mjs
+
+built docs site: dist/docs-site

@@ -11,7 +11,12 @@ final class CliLedgerFactory {
     }
 
     static WorkflowFileLedger create() {
-        return new WorkflowFileLedger(FlowKernelProvider.create(configuredKernel()));
+        var configured = configuredKernel();
+        var kernel = FlowKernelProvider.create(configured);
+        var identity = dev.dual.runtime.FrozenRuntimeIdentity.capture(DualCtlApplication.class, configured,
+                FlowKernelProvider.normalize(configured),
+                dev.dual.adapter.acpx.ReviewedAcpxBuildIdentity.runtimeBehavior());
+        return new WorkflowFileLedger(kernel, identity);
     }
 
     private static String configuredKernel() {

@@ -1,0 +1,10 @@
+{
+  "scope": "IMPLEMENTATION_AND_OFFLINE_ASSEMBLY_ONLY",
+  "implementation_authorized": true,
+  "real_run_authorized": false,
+  "old_package": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024",
+  "source_design": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-launch-reconciliation-design-20261025/wiring-design.zh-CN.txt",
+  "case_not_incremented": true,
+  "new_model_calls": 0,
+  "workflow_calls": 0
+}

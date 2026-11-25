@@ -1,0 +1,9 @@
+{
+  "classification": "FAIL",
+  "exit_code": 1,
+  "failed_test": "WorkflowIntegrationTest.chain7_multiProfileGovernance",
+  "reason": "acceptance context 6555 chars exceeds unchanged 6500 budget",
+  "correction": "Shortened repeated passive guidance; no budget/guard/test weakening",
+  "characters_saved": 67,
+  "not_final_evidence": true
+}

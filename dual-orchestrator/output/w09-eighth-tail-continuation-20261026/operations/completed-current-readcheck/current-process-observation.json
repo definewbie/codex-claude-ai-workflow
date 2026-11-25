@@ -1,0 +1,22 @@
+{
+  "successful_complete_table": true,
+  "exit": 0,
+  "stderr": "",
+  "known_pids": [
+    42064,
+    45027,
+    40955,
+    45058,
+    42000,
+    45120,
+    42119,
+    41966,
+    41050,
+    42996
+  ],
+  "known_pids_present": [],
+  "matching_rows": [],
+  "table_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/operations/completed-current-readcheck/process-table.stdout.log",
+  "table_sha256": "ab73842d5e67a38c19a52a699de5d5b25876fa541494cec8a93a18e16eb390c4",
+  "scope": "Successful observation of recorded execution/session main PIDs and case identifiers; not arbitrary subtree-stop proof"
+}

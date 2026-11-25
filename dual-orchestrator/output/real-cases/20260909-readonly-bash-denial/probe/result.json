@@ -1,0 +1,79 @@
+{
+  "startedAt" : 1788922612.717698000,
+  "finishedAt" : 1788922622.669389000,
+  "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--ttl", "1800", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "--no-terminal", "--claude-execution-policy-ref", ".agent/workstreams/probe/runs/run-1de57129-66b5-405d-a6cb-695a0b1f0449/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "10ef60c618a8bb480619fff5d71c48c9f22c063c00a6960e52460c873f4412e5", "claude", "-s", "readonly-bash-1de57129-66b5-405d-a6cb-695a0b1f0449", "-f", "/private/tmp/dual-readonly-bash-20260909-01/prompt.md" ],
+  "executionTimeline" : [ {
+    "kind" : "PROCESS_STARTED",
+    "source" : "adapter",
+    "sequence" : 0,
+    "observedAt" : 1788922612.721374000,
+    "elapsedMs" : 3,
+    "details" : {
+      "pid" : 38229
+    }
+  }, {
+    "kind" : "PROCESS_WAIT_STARTED",
+    "source" : "adapter",
+    "sequence" : 0,
+    "observedAt" : 1788922612.721423000,
+    "elapsedMs" : 0,
+    "details" : {
+      "pid" : 38229
+    }
+  }, {
+    "kind" : "PROMPT_ACCEPTED",
+    "source" : "acpx_stream",
+    "sequence" : 11,
+    "observedAt" : 1788922616.759349000,
+    "elapsedMs" : 4037,
+    "details" : {
+      "lifecycleSequence" : 11
+    }
+  }, {
+    "kind" : "PROMPT_COMPLETED",
+    "source" : "acpx_stream",
+    "sequence" : 415,
+    "observedAt" : 1788922622.668978000,
+    "elapsedMs" : 9947,
+    "details" : {
+      "lifecycleSequence" : 415
+    }
+  }, {
+    "kind" : "PROCESS_WAIT_COMPLETED",
+    "source" : "adapter",
+    "sequence" : 417,
+    "observedAt" : 1788922622.669019000,
+    "elapsedMs" : 9947,
+    "details" : {
+      "exitCode" : 0,
+      "waitMode" : "process_exit"
+    }
+  }, {
+    "kind" : "PROCESS_EXITED",
+    "source" : "adapter",
+    "sequence" : 5,
+    "observedAt" : 1788922622.669386000,
+    "elapsedMs" : 9951,
+    "details" : {
+      "exitCode" : 0
+    }
+  } ],
+  "usage" : null,
+  "promptCompletion" : {
+    "requestId" : "3",
+    "stopReason" : "end_turn",
+    "finalAssistantMessage" : "Bash is unavailable in my available toolset, so I cannot attempt the command. I will not use another tool or repeat a call.\n\n```json\n{\n  \"nonce\": \"a8f8c60c-125e-4a8d-b52c-d92c37d7fa39\",\n  \"bash_outcome\": \"unavailable\"\n}\n```"
+  },
+  "processResult" : {
+    "command" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx --ttl 1800 --approve-reads --non-interactive-permissions fail --permission-policy {\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"} --allowed-tools Read,Grep,Glob --no-terminal --claude-execution-policy-ref .agent/workstreams/probe/runs/run-1de57129-66b5-405d-a6cb-695a0b1f0449/execution-authority/claude-execution-policy.json --claude-execution-policy-sha256 10ef60c618a8bb480619fff5d71c48c9f22c063c00a6960e52460c873f4412e5 claude -s readonly-bash-1de57129-66b5-405d-a6cb-695a0b1f0449 -f /private/tmp/dual-readonly-bash-20260909-01/prompt.md",
+    "pid" : 38229,
+    "exitCode" : 0,
+    "usability" : "EXITED_ZERO",
+    "durationMs" : 9951,
+    "stdoutPath" : "stream.txt",
+    "stderrPath" : "stderr.log",
+    "interrupted" : false,
+    "timedOut" : false
+  },
+  "adapterSignals" : [ ]
+}

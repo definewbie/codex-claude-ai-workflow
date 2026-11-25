@@ -1,0 +1,31 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-context-intake_codex_product_review-003",
+  "nodeDefinitionId" : "context.intake_codex_product_review",
+  "kind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "COMPLETED",
+  "stageId" : "stage-context",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315481836/outputs/intake-claude-brainstorm.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315481836/outputs/intake-claude-brainstorm.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315481836/outputs/intake-claude-brainstorm.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789315481836/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315481836/outputs/intake-claude-brainstorm.contract.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-239228e6e789729a.ref.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-intake_codex_product_review-003.md", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-239228e6e789729a.ref.json" ],
+  "result" : {
+    "context_package" : ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-intake_codex_product_review-003.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20260913T160441Z-H55W/context/node-context-intake_codex_product_review-003.json",
+    "target_node" : "intake.codex_product_review",
+    "profile" : "product_review",
+    "sections" : [ "input_artifacts", "review_evidence", "recent_agent_outputs", "ledger_pointers" ],
+    "input_ref_count" : 6,
+    "generated_at" : "2026-09-13T16:04:52.404263Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315492372-93d0bec3",
+  "startedAt" : "2026-09-13T16:04:52.378742Z",
+  "finishedAt" : "2026-09-13T16:04:52.411344Z"
+}

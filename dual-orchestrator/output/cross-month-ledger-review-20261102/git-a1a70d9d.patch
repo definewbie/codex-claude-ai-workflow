@@ -1,0 +1,43 @@
+commit a1a70d9de31317902e6b3621a22e2f933773d925
+Author: kris <kris@tokyoksc.com>
+Date:   Fri Sep 4 19:13:30 2026 +0800
+
+    docs(agent): require end-to-end transition closure
+
+diff --git a/AGENTS.md b/AGENTS.md
+index 6dc66dd4..dc86f6f2 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -10,6 +10,32 @@
+ 
+ 必须优先从鲁棒性、完整性、职责边界和状态模型角度重新审视设计；只有确认是局部实现缺陷时，才做小范围修复。
+ 
++## End-to-End State Transition Closure Principle
++
++涉及 workflow、human gate、revision、retry、recovery、delivery 或其他多步状态转换时，不得把单个方法正确、字段存在、局部 diff 合理或单元测试绿色视为边界闭合。分析、设计、实现和评审必须沿真实生命周期从触发条件走到下一消费者、外部副作用和恢复出口；review agent 必须自行重建这条控制链，不能只核对实现说明列出的局部断言。
++
++修改前必须明确并记录完整 transition table：
++
++- authoritative pre-state 及其 source of truth；
++- 触发 action、decision owner 和允许执行者；
++- 每一次 durable write / event append / external side effect 的顺序；
++- 成功后的 authoritative post-state，以及唯一消费它的下一组件；
++- 在每个写入点之前、之间和之后失败时会留下什么状态；
++- retry、resume、abort、replay 和进程重启分别如何解释该状态；
++- 新旧 binary、旧 ledger 或旧 artifact 是否仍在支持范围，若不支持必须显式判为 INVALID，而不是静默兼容。
++
++边界评审必须检查完整 end-to-end invariant：`Declared by`、`Proven by`、`Consumed by`、`Enforced before`、`Failure route`、`Cannot-bypass test`。缺少任一项时只能标记为未闭合，不得因局部测试通过而给出 PASS。测试至少覆盖正常序列、拒绝序列、关键 durable-write 间失败、冷启动重放，以及同边界 sibling；只验证当前函数返回值的测试不足以证明状态转换。
++
++真实 case 发现问题后，必须先区分：
++
++- root-cause forward fix：修复所有未来合法状态；
++- backward recovery：处理仍受支持的历史状态；
++- single-case rescue：只为挽救当前样本而增加的兼容解释。
++
++不得把 single-case rescue 默认写入 production。只有该历史状态仍被正式支持、存在重复事故证据，且永久复杂度低于可观察损失时，才允许实施 backward recovery。若恢复代码接近或超过根因修复的复杂度，必须主动止损，比较“保留事故证据并启动 fresh case”“一次性离线迁移”“永久 production 兼容”三种选择；Agent 必须在实现前提出该判断，不能等待用户发现方向已经偏离。
++
++同行评审 prompt 必须要求评审完整 transition 和失败切面，但不得预填期望结论或给出逐行答案，以保留独立发现问题的空间。
++
+ ## Technical Debt Principle
+ 
+ 原则上不保留技术债务。只有在非常有必要时才允许记录技术债，例如未来方向存在真实不确定性、当前修复会明显干扰主流程、或修复成本和当前收益严重不匹配。

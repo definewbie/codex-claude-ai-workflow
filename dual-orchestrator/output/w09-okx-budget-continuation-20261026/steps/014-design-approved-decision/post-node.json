@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-design-decision-016",
+  "nodeDefinitionId": "design.decision",
+  "kind": "DECISION",
+  "handlerType": "review.decision",
+  "status": "COMPLETED",
+  "stageId": "stage-design",
+  "iterationId": "iter-002",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030419328/outputs/design-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030419328/outputs/design-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030419328/outputs/design-codex-review.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-design-codex_arch_review-015-run-1793030419328/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030419328/outputs/design-codex-review.contract.json"
+  ],
+  "inputTransition": {
+    "required": true,
+    "source_node_instance_id": "node-design-codex_arch_review-015",
+    "source_node_sha256": "9ab1a18eb6146efc74382e4c39d2ed6bc0b916f6e0385bb6419b65da08d95911",
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "condition": "unconditional",
+    "transition_type": "normal"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030419328/outputs/design-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030419328/outputs/design-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030419328/outputs/design-codex-review.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-design-codex_arch_review-015-run-1793030419328/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030419328/outputs/design-codex-review.contract.json"
+  ],
+  "result": {
+    "summary": "完整替换设计符合既定范围，R1、R2 的设计缺口均已解决，可进入后续计划与实现范围审批。",
+    "source": "contract-sidecar",
+    "decision": "READY_FOR_ARCH_REVIEW",
+    "reviewed_candidate": {
+      "reviewer_occurrence": "node-design-codex_arch_review-015",
+      "decision_occurrence": "node-design-decision-016",
+      "stage": "design",
+      "review_artifact": {
+        "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030419328/outputs/design-codex-review.contract.json",
+        "sha256": "13002eacd6c81e73922845b1c8230eccb929ba3c410d487885eaa9fcc1ff1882"
+      },
+      "checks": [
+        {
+          "input_refs": [
+            {
+              "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029979831/outputs/design-claude.contract.json",
+              "sha256": "2c20a9e9f7c590f0fc105dff400b165756d369728b58ffeee4d02c9ffecaa3b8"
+            },
+            {
+              "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030419328/outputs/design-codex-review.contract.json",
+              "sha256": "13002eacd6c81e73922845b1c8230eccb929ba3c410d487885eaa9fcc1ff1882"
+            }
+          ],
+          "result": "PASSED",
+          "rule_id": "review.subject.and.route",
+          "rule_version": "2"
+        }
+      ],
+      "review_decision": "READY_FOR_ARCH_REVIEW",
+      "author_occurrence": "node-design-claude_design-012",
+      "contract": {
+        "phase": "GOAL",
+        "epoch": 1,
+        "sha256": "41f643f07f822573dfa2a13e8f5ede75aa2efd83fdca3efa20130ca0ae2bf04f",
+        "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/task-contract.json"
+      },
+      "author_artifact": {
+        "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793029979831/outputs/design-claude.contract.json",
+        "sha256": "2c20a9e9f7c590f0fc105dff400b165756d369728b58ffeee4d02c9ffecaa3b8"
+      },
+      "schema_version": 1
+    }
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1793030500191-c656e260",
+  "startedAt": "2026-10-26T16:01:40.200981Z",
+  "finishedAt": "2026-10-26T16:01:40.275970Z"
+}

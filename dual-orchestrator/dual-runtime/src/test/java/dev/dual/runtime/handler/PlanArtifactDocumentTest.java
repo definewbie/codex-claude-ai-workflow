@@ -19,7 +19,12 @@ class PlanArtifactDocumentTest {
     private static Map<String, Object> fullMap() {
         var m = new LinkedHashMap<String, Object>();
         m.put("artifact_type", "plan_artifact");
-        m.put("schema_version", 1);
+        m.put("schema_version", 2);
+        m.put("files", List.of(Map.of("path", "src/a.js", "operation", "MODIFY")));
+        m.put("verification_bindings", List.of(Map.of("criterion_id", "A1", "method", "npm test",
+                "executor", "AGENT", "environment_refs", List.of(), "authority_refs", List.of(),
+                "evidence_kind", "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS", "feasibility_refs", List.of(), "detail_owner", "project tests")));
+        m.put("authority_refs", List.of());
         m.put("implementation_steps", List.of("step 1", "step 2"));
         m.put("edit_files", List.of("src/a.js"));
         m.put("reference_files", List.of("src/api.js"));
@@ -35,7 +40,7 @@ class PlanArtifactDocumentTest {
     void fromReadsAllFields() {
         var doc = PlanArtifactDocument.from(fullMap());
         assertEquals("plan_artifact", doc.artifactType());
-        assertEquals(1, doc.schemaVersion());
+        assertEquals(2, doc.schemaVersion());
         assertEquals(List.of("step 1", "step 2"), doc.implementationSteps());
         assertEquals(List.of("src/a.js"), doc.editFiles());
         assertEquals(List.of("src/api.js"), doc.referenceFiles());
@@ -75,13 +80,14 @@ class PlanArtifactDocumentTest {
     }
 
     @Test
-    void fromToleratesMissingKeysAsEmptyAndReportsFirstMissing() {
-        var doc = PlanArtifactDocument.from(Map.of("artifact_type", "plan_artifact"));
-        assertEquals("plan_artifact", doc.artifactType());
-        assertTrue(doc.implementationSteps().isEmpty());
-        assertTrue(doc.rollbackNotes().isBlank());
-        var missing = doc.missingRequiredField();
-        assertTrue(missing.isPresent());
-        assertEquals("implementation_steps", missing.get());
+    void missingTypedListsAndOldSchemaCannotMasqueradeAsACompletePlan() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> PlanArtifactDocument.from(Map.of("artifact_type", "plan_artifact")));
+        for (var key : List.of("files", "verification_bindings", "authority_refs")) {
+            var missing = fullMap(); missing.remove(key);
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> PlanArtifactDocument.from(missing));
+        }
+        var old = fullMap(); old.put("schema_version", 1);
+        assertEquals("schema_version", PlanArtifactDocument.from(old).missingRequiredField().orElseThrow());
     }
 }

@@ -1,0 +1,17 @@
+{
+  "pid": 67924,
+  "argv": [
+    "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+    "-c",
+    "user.name=Dual Gate",
+    "-c",
+    "user.email=dual-gate@localhost",
+    "-c",
+    "core.hooksPath=/dev/null",
+    "-c",
+    "commit.gpgSign=false",
+    "commit",
+    "-m",
+    "Fixed committed baseline for isolated Java MODIFY Gate"
+  ]
+}

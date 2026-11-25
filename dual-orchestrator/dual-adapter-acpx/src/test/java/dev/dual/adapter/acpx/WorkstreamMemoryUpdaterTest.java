@@ -36,7 +36,7 @@ class WorkstreamMemoryUpdaterTest {
         var context = AuthoredAdapterFixture.before(new dev.dual.runtime.handler.TaskHandler.TaskContext(
                 tempDir, "ws-design", definition, new dev.dual.core.workflow.NodeInstance(
                 "node-design", definition.id(), NodeKind.TASK, definition.handlerType(), NodeStatus.READY,
-                "design", "iter-001", List.of(), List.of(), Map.of(), null, null, null)));
+                "design", "iter-001", List.of(), List.of(), Map.of(), null, null, null), AcpxTestLedger.ledger()));
         var prepared = new AcpxAgentTaskHandler(new AcpxAgentTransport(), true).execute(context);
         assertEquals(NodeStatus.COMPLETED, prepared.status(), prepared.result().toString());
         var run = (String) prepared.result().get("run_id");
@@ -45,9 +45,15 @@ class WorkstreamMemoryUpdaterTest {
         var prompt = AgentResultPromptContract.render("ws-design", run, "design.claude_design",
                 "READY_FOR_ARCH_REVIEW", java.util.Set.of("READY_FOR_ARCH_REVIEW"));
         Files.writeString(output, prompt.substring(prompt.indexOf('{')).replace("one short sentence", "Document conversion design"));
-        var validated = new ArtifactContractValidator().validate(tempDir, "ws-design", "node-design",
+        var metadataPath = tempDir.resolve((String) prepared.result().get("run_metadata"));
+        var metadata = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(metadataPath.toFile());
+        metadata.put("status", "process_exited");
+        metadata.set("processResult", objectMapper.valueToTree(dev.dual.core.execution.ProcessResult.exitedZero()));
+        metadata.putArray("adapterSignals");
+        objectMapper.writeValue(metadataPath.toFile(), metadata);
+        var validated = new ArtifactContractValidator(AcpxTestLedger.ledger()).validate(tempDir, "ws-design", context.instance().nodeInstanceId(),
                 definition,
-                NodeResult.completed("completed", List.of(tempDir.relativize(output).toString()), Map.of("run_id", run)));
+                NodeResult.completed("completed", List.of(tempDir.relativize(output).toString()), Map.of("run_id", run, "run_metadata", (String) prepared.result().get("run_metadata"))));
         assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
         var updater = new WorkstreamMemoryUpdater();
         updater.updateMemory(tempDir, "ws-design", run, "design.claude_design",
@@ -145,6 +151,7 @@ class WorkstreamMemoryUpdaterTest {
         Files.createDirectories(workstreamDir.resolve("artifacts"));
         Files.writeString(workstreamDir.resolve("artifacts/task-contract.json"), """
                 {
+                  "schema_version":2,"phase":"EXECUTION","epoch":1,
                   "id":"task-ws-scope","version":1,"created_at":"2026-07-23T00:00:00Z",
                   "objective":"o","status":"READY_FOR_REVIEW",
                   "scope":{"included":[
@@ -272,10 +279,11 @@ class WorkstreamMemoryUpdaterTest {
         Files.createDirectories(workstreamDir.resolve("artifacts"));
         Files.writeString(workstreamDir.resolve("artifacts/task-contract.json"), """
                 {
+                  "schema_version":2,"phase":"EXECUTION","epoch":1,
                   "id":"task-ws-summary","version":1,"created_at":"2026-07-23T00:00:00Z",
                   "objective":"o","status":"READY_FOR_REVIEW",
                   "scope":{"included":[{"path":"src/auth.js","operation":"MODIFY"}],"excluded":[]},
-                  "non_goals":[],"acceptance_criteria":["refresh token on expiry"],
+                  "non_goals":[],"acceptance_criteria":[{"id":"AC-1","text":"refresh token on expiry"}],
                   "test_requirements":[],"constraints":[],"risk_areas":[],
                   "ambiguity_notes":[],"human_questions":[],"compilation_pass":1
                 }

@@ -1,0 +1,20 @@
+[
+  {
+    "mutant": "remove-current-run-approval",
+    "test": "test_continuation.AssemblyTest.test_whole_runner_denies_without_approval_before_any_step_or_process",
+    "exit": 1,
+    "expected_assertion_failure": true
+  },
+  {
+    "mutant": "remove-observation-sha",
+    "test": "test_continuation.AssemblyTest.test_tampered_or_unlinked_process_confirmation_refuses",
+    "exit": 1,
+    "expected_assertion_failure": true
+  },
+  {
+    "mutant": "reset-inherited-time",
+    "test": "test_continuation.AssemblyTest.test_whole_runner_reaches_original_java_boundary_with_cumulative_time",
+    "exit": 1,
+    "expected_assertion_failure": true
+  }
+]

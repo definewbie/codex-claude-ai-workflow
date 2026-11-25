@@ -1,0 +1,12 @@
+Human gate approved
+Workstream: ws-20260906T130900Z-SPM9
+Running workflow until next gate...
+Step 1: implement.claude_implement -> RUNNING (resumed workflow)
+Step 2: implement.claude_implement -> WAITING_FOR_RECOVERY (workflow stopped at FAILED)
+
+Next actions:
+  1. Inspect the recovery summary:
+     dualctl recovery show --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9 ws-20260906T130900Z-SPM9
+     summary: /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9/recovery/current-failure.md
+  2. Inspect recovery evidence before deciding whether retry is safe.
+     dualctl retry --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9 ws-20260906T130900Z-SPM9

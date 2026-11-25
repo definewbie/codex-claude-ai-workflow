@@ -80,10 +80,10 @@ Claude ACP command 是否能拿到这些变量。
 在 `dual-orchestrator` 目录下运行：
 
 ```bash
-./scripts/smoke-test.sh --case lifecycle --cleanup
+rtk proxy mvn -q clean test
 ```
 
-这是最快的 CLI/workflow sanity check。
+这是离线全模块回归，包含使用程序观察的工作流序列。旧 smoke 已退役；全绿不证明真实原生能力或目标 Git 交付。
 
 ## 5. 运行真实 Lifecycle Case
 
@@ -322,8 +322,11 @@ ledger 位于：
 
 ## 11. P0 已知限制
 
-MVP 主生命周期已经以 `Done with known limits` 收口；详见
+2026-06-19 的历史 MVP 曾以 `Done with known limits` 收口；详见
 [testing/p0-closure-report.md](testing/p0-closure-report.md)。
+当前生命周期收敛仍是 B03 `IN_PROGRESS`、真实运行 `NO-GO`，以
+[主工作清单](plans/20260927-dual-lifecycle-worklist.zh-CN.md) 为准。
+历史 smoke 不能作为当前准入证据，也不授权 P1 工作。
 
 P0 后接受的限制：
 
@@ -333,3 +336,7 @@ P0 后接受的限制：
 - context/provider metrics 已能支持 MVP，但 token/cost 治理还会在 P1 继续强化；
 - delivery merge 是显式保守动作：工具把已审查 patch apply 到目标 repo index，
   不自动 commit，也不自动 merge。
+
+### Delivery interruption / 交付中断
+
+正常顺序是批准候选 → `delivery merge` → 人检查目标暂存内容并实际 commit → `delivery finalize`。UNKNOWN 时先查看 `status`/`summary` 的停止依据与下一步，不盲目再次应用；使用当前裁定模板经 `delivery resolve --decision <decision.json>` 显式关闭再次应用，或核实旧操作停止后授权一次新尝试。已知活动不得被人工声明覆盖；声明不等于测量退出码。详见 [reference](reference.md) 的交付裁定入口。

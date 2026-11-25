@@ -1,0 +1,121 @@
+{
+  "W09": {
+    "tokens": {
+      "inputTokens": 1025476,
+      "outputTokens": 307572,
+      "cachedReadTokens": 3498880,
+      "totalTokens": 4831928
+    },
+    "byNode": {
+      "acceptance.codex_verifier_review": {
+        "runs": 1,
+        "tokens": 49207
+      },
+      "design.claude_design": {
+        "runs": 7,
+        "tokens": 1496273
+      },
+      "design.codex_arch_review": {
+        "runs": 6,
+        "tokens": 290366
+      },
+      "implement.claude_implement": {
+        "runs": 1,
+        "tokens": 918786
+      },
+      "implement.claude_self_test_report": {
+        "runs": 1,
+        "tokens": 261472
+      },
+      "intake.claude_brainstorm": {
+        "runs": 13,
+        "tokens": 411267
+      },
+      "intake.codex_product_review": {
+        "runs": 8,
+        "tokens": 253263
+      },
+      "plan.claude_plan": {
+        "runs": 4,
+        "tokens": 824187
+      },
+      "plan.codex_plan_review": {
+        "runs": 3,
+        "tokens": 327107
+      }
+    },
+    "failureMeasuredTokens": 66948,
+    "unpricedIdentityTokens": 918786,
+    "reach": {
+      "intake": 9,
+      "design": 4,
+      "plan": 2,
+      "implement": 1,
+      "acceptance": 1
+    }
+  },
+  "okx-btc-k-line-demo": {
+    "tokens": {
+      "inputTokens": 5481635,
+      "outputTokens": 1900334,
+      "cachedReadTokens": 58859008,
+      "totalTokens": 66240977
+    },
+    "byNode": {
+      "acceptance.codex_verifier_review": {
+        "runs": 5,
+        "tokens": 925311
+      },
+      "design.claude_design": {
+        "runs": 28,
+        "tokens": 5792582
+      },
+      "design.codex_arch_review": {
+        "runs": 24,
+        "tokens": 2100307
+      },
+      "implement.claude_implement": {
+        "runs": 29,
+        "tokens": 29804293
+      },
+      "implement.claude_self_test_report": {
+        "runs": 19,
+        "tokens": 25084767
+      },
+      "intake.claude_brainstorm": {
+        "runs": 23,
+        "tokens": 885851
+      },
+      "intake.codex_product_review": {
+        "runs": 23,
+        "tokens": 804062
+      },
+      "plan.claude_plan": {
+        "runs": 7,
+        "tokens": 843804
+      }
+    },
+    "failureMeasuredTokens": 5047486,
+    "unpricedIdentityTokens": 35446651,
+    "reach": {
+      "intake": 12,
+      "design": 9,
+      "plan": 5,
+      "implement": 5,
+      "acceptance": 2
+    }
+  },
+  "newline_campaign": {
+    "cases": 8,
+    "runs": 35,
+    "measuredRuns": 31,
+    "recordedTokenCostPerObservedDelivery": 2797125,
+    "successCaseTokens": 2077707,
+    "extraReadinessPlanAndReviewTokens": 284326,
+    "productDesignRepairAndReviewTokens": 202023
+  },
+  "series_illustration": {
+    "0.99": 0.6894490858690777,
+    "0.98": 0.4735488656416021
+  }
+}

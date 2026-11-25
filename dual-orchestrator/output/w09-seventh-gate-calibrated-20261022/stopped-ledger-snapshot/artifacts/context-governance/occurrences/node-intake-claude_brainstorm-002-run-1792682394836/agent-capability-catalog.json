@@ -1,0 +1,11 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "agent_capability_catalog",
+  "workstreamId" : "ws-20261022T150557Z-Y2KB",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "capabilities" : [ {
+    "kind" : "direct_file_read",
+    "provider" : "Read",
+    "description" : "Direct file content retrieval tool."
+  } ]
+}

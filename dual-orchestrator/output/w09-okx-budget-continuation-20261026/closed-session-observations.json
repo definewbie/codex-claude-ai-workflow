@@ -1,0 +1,20 @@
+[
+  {
+    "metadata_path": "/Users/kriswang/.acpx/sessions/75fd08fd-0532-4728-8c47-1571b2008d04.json",
+    "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793026771764",
+    "observation_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/operations/stop-cleanup/01-show/stdout.log",
+    "observation_sha256": "be10919e312ed475386548a84b4e10eacc9eb408c3666427f2e9b3f8762cf2c6"
+  },
+  {
+    "metadata_path": "/Users/kriswang/.acpx/sessions/01a178bd-309e-7f13-b4f7-a9538baf1173.json",
+    "name": "codex-reviewer-ws-20261026T142203Z-7SNA",
+    "observation_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/operations/stop-cleanup/02-show/stdout.log",
+    "observation_sha256": "87a10d73494a2382e1518025756e5611a07871d22b3db0797c773a2cb28d3697"
+  },
+  {
+    "metadata_path": "/Users/kriswang/.acpx/sessions/8473c12f-45d4-4593-b904-65a370d0d6ab.json",
+    "name": "claude-main-ws-20261026T142203Z-7SNA-run-1793027503466",
+    "observation_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/operations/stop-cleanup/03-show/stdout.log",
+    "observation_sha256": "1bd4eaaaaa7477be4308492818813bcdb305078b69e3fcd4f7e073be7971577c"
+  }
+]

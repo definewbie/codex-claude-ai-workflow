@@ -1,0 +1,21 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "stage_scope_policy",
+  "workstreamId" : "ws-20261010T124812Z-XCZL",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-context-intake_codex_product_review-008",
+  "nodeDefinitionId" : "context.intake_codex_product_review",
+  "builderNodeDefinitionId" : "context.intake_codex_product_review",
+  "targetNodeDefinitionId" : "intake.codex_product_review",
+  "iterationId" : "iter-002",
+  "writeScope" : [ ],
+  "previouslyReadFiles" : [ ],
+  "readReusePolicy" : {
+    "avoidRepeatedReads" : [ ],
+    "requireReasonWhenRereading" : false,
+    "reasonField" : "",
+    "preferExistingEvidence" : true
+  },
+  "forbiddenScope" : [ ".git/**", ".agent/workstreams/**/workflow/**", ".agent/workstreams/**/nodes/**", "business source writes" ],
+  "generatedAt" : "2026-10-10T12:56:41.179929Z"
+}

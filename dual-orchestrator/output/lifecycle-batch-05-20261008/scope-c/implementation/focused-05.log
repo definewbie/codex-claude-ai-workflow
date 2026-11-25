@@ -1,0 +1,225 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/6]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/6]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/6]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/6]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/6]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/6]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 107 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 3 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 93 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- jar:3.4.2:test-jar (shared-lifecycle-test-fixtures) @ dual-runtime ---
+[INFO] Building jar: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/dual-runtime-0.1.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.runtime.handler.ContractQualificationSequenceTest
+[ERROR] Tests run: 4, Failures: 2, Errors: 1, Skipped: 0, Time elapsed: 4.522 s <<< FAILURE! -- in dev.dual.runtime.handler.ContractQualificationSequenceTest
+[ERROR] dev.dual.runtime.handler.ContractQualificationSequenceTest.actualDependencyDriftIsPairedFixedAndRestoredSameInputsCanContinue -- Time elapsed: 0.962 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: RecoveryAssessment[classification=qualification_diagnostic_unknown, retryReadiness=INSPECT_BEFORE_MANUAL_CONTINUATION, reason=Diagnostic evidence is insufficient or this family/entry was not checked. Inspect the original cause and source identity; no automatic retry is granted. Original cause: VERIFICATION_READINESS_REQUIRED / [TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED: VERIFICATION_READINESS_REQUIRED: VERIFICATION_READINESS_REQUIRED: environment dependency changed], suggestedCommand=Inspect dualctl recovery show --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-11671254272045733103 ws-readiness, diagnosticJsonRef=, diagnosticMarkdownRef=, contractDiagnostic={continuation_failure={schemaVersion=1, family=TaskContractProjectionVerifier, status=DIAGNOSTIC_INSUFFICIENT, decisionRef=, decisionSha256=, action=, sourceNodeInstanceId=, targetNodeInstanceId=node-implement-claude_implement-020, subjectRefs=[], targetInputRefs=[.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.json, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.md, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/contract-resolution.json], targetInputTransition={}, consumer=AgentRunGovernanceContext.ensureQualified, phase=EXECUTION, failureCode=VERIFICATION_READINESS_REQUIRED, runtimeIdentitySha256=3b4d65fcb4c22cc3c36beeb768ba38422b2fa1969e0484245815418bb73023ef, failedCheck={ruleId=TaskContractProjectionVerifier.validateExecutionInputs.dynamic_diagnostic_or_i_o_failure, ruleVersion=de4c85e4b6fed92b6f33835897086579ab8b41ce1b3eb886eef634bd0868f331, result=FAILED, explanation=, inputRefs=[], inputValues={readiness={active_readiness=[{ref=.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json, sha256=685c79ac00c4ae091783f06cdfd1618415e9677051b0604fe723587b04d858d3}], bindings=[{actual_exit_required=false, authority_refs=[], criterion_id=AC-1, detail_owner=verification-owner, environment_refs=[{ref=.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json, sha256=685c79ac00c4ae091783f06cdfd1618415e9677051b0604fe723587b04d858d3}], evidence_kind=PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, executor=AGENT, expected_exit_code=null, feasibility_refs=[{ref=.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json, sha256=685c79ac00c4ae091783f06cdfd1618415e9677051b0604fe723587b04d858d3}], method=run project tests}, {actual_exit_required=false, authority_refs=[], criterion_id=AC-2, detail_owner=verification-owner, environment_refs=[{ref=.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json, sha256=685c79ac00c4ae091783f06cdfd1618415e9677051b0604fe723587b04d858d3}], evidence_kind=PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, executor=AGENT, expected_exit_code=null, feasibility_refs=[{ref=.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json, sha256=685c79ac00c4ae091783f06cdfd1618415e9677051b0604fe723587b04d858d3}], method=run project tests}], check_times={.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json=2026-10-08T15:09:10.721226Z}, goal={ref=.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-compile-003/task-contract.json, sha256=d38bd9078c660d8c640ecfd2bccabf04e65de42f0da783ccd60c9d64c1dae8f9}, requests={.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json={declaration={action=RECORD, criterionIds=[AC-1, AC-2], detailOwner=verification-owner, environment={dependencies=[{absent=false, path=/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-11671254272045733103/test-tool.lock, sha256=19c3d3628fa50524092c8ad05babb96a1d6324497147340861599fc149147208}], identity=local-test-environment, owner=operator, workspace=/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-11671254272045733103}, epoch=1, evidenceKind=PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, executor=AGENT, expiresAt=null, goal={ref=.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-compile-003/task-contract.json, sha256=d38bd9078c660d8c640ecfd2bccabf04e65de42f0da783ccd60c9d64c1dae8f9}, lifetime=AUTHORIZATION_EPOCH, method=run project tests, requestId=ready, schema=1, statement=The test dependencies are prepared, subject=node-gate-plan-012, supersedes=null}, dependencies={/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-11671254272045733103/test-tool.lock={canonical_file=true, sha256=074380f07f099048e2433cb2b361fff01eeac07a45d65be7157824e5b7727ee4}}, unexpired=true}}}}, comparable=false}, explanation=cannot verify resolving decision: source lacks trustworthy decision checks}, diagnostic_category=UNKNOWN, original_code=VERIFICATION_READINESS_REQUIRED}, retrySafe=false, permissionRequest={}, allowedActions=[]] ==> expected: <qualification_input_drift> but was: <qualification_diagnostic_unknown>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.ContractQualificationSequenceTest.actualDependencyDriftIsPairedFixedAndRestoredSameInputsCanContinue(ContractQualificationSequenceTest.java:59)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ContractQualificationSequenceTest.wrongTestCheckerWithIdenticalObservedInputsTriggersContradictionNotNewAuthority -- Time elapsed: 0.855 s <<< ERROR!
+java.lang.RuntimeException: java.io.IOException: INVALID_LOCAL_COMMIT: path outside this workstream
+	at dev.dual.runtime.handler.ContractQualificationSequenceTest.lambda$wrongTestCheckerWithIdenticalObservedInputsTriggersContradictionNotNewAuthority$0(ContractQualificationSequenceTest.java:117)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.output(PhasedContractContinuationTest.java:328)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow$1.execute(PhasedContractContinuationTest.java:312)
+	at dev.dual.runtime.WorkflowRuntime.executeNode(WorkflowRuntime.java:365)
+	at dev.dual.runtime.WorkflowRuntime.lambda$executeAndRecordNode$0(WorkflowRuntime.java:327)
+	at dev.dual.runtime.handler.EvidenceCollection.execute(EvidenceCollection.java:94)
+	at dev.dual.runtime.WorkflowRuntime.executeAndRecordNode(WorkflowRuntime.java:326)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveNode(WorkflowRuntime.java:236)
+	at dev.dual.runtime.WorkflowRuntime.executeActiveSnapshot(WorkflowRuntime.java:197)
+	at dev.dual.runtime.WorkflowRuntime.resumeWithinExecution(WorkflowRuntime.java:136)
+	at dev.dual.runtime.WorkflowRuntime.resume(WorkflowRuntime.java:105)
+	at dev.dual.runtime.handler.PhasedContractContinuationTest$Flow.untilPause(PhasedContractContinuationTest.java:399)
+	at dev.dual.runtime.handler.ContractQualificationSequenceTest.wrongTestCheckerWithIdenticalObservedInputsTriggersContradictionNotNewAuthority(ContractQualificationSequenceTest.java:119)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.io.IOException: INVALID_LOCAL_COMMIT: path outside this workstream
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:433)
+	at dev.dual.ledger.file.LedgerSession.checked(LedgerSession.java:375)
+	at dev.dual.ledger.file.LedgerSession.readBytes(LedgerSession.java:92)
+	at dev.dual.runtime.handler.ContractQualificationTrace.readBytes(ContractQualificationTrace.java:177)
+	at dev.dual.runtime.handler.ContractQualificationSequenceTest.lambda$wrongTestCheckerWithIdenticalObservedInputsTriggersContradictionNotNewAuthority$1(ContractQualificationSequenceTest.java:105)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:83)
+	at dev.dual.runtime.handler.ContractQualificationSequenceTest.lambda$wrongTestCheckerWithIdenticalObservedInputsTriggersContradictionNotNewAuthority$0(ContractQualificationSequenceTest.java:103)
+	... 15 more
+
+[ERROR] dev.dual.runtime.handler.ContractQualificationSequenceTest.deferredCompletedCompilerConditionIsActuallyRejectedAndItsRemovalAllowsContinuation -- Time elapsed: 0.862 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: RecoveryAssessment[classification=qualification_diagnostic_unknown, retryReadiness=INSPECT_BEFORE_MANUAL_CONTINUATION, reason=Diagnostic evidence is insufficient or this family/entry was not checked. Inspect the original cause and source identity; no automatic retry is granted. Original cause: UNAPPROVED_RECOMPILE / [TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED: UNAPPROVED_RECOMPILE: completed contract.compile is newer than the approved source: node-unapproved-extra], suggestedCommand=Inspect dualctl recovery show --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-4322449690788469133 ws-readiness, diagnosticJsonRef=, diagnosticMarkdownRef=, contractDiagnostic={continuation_failure={schemaVersion=1, family=TaskContractProjectionVerifier, status=DIAGNOSTIC_INSUFFICIENT, decisionRef=, decisionSha256=, action=, sourceNodeInstanceId=, targetNodeInstanceId=node-implement-claude_implement-020, subjectRefs=[], targetInputRefs=[.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.json, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.md, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/contract-resolution.json], targetInputTransition={}, consumer=AgentRunGovernanceContext.ensureQualified, phase=EXECUTION, failureCode=UNAPPROVED_RECOMPILE, runtimeIdentitySha256=3b4d65fcb4c22cc3c36beeb768ba38422b2fa1969e0484245815418bb73023ef, failedCheck={ruleId=TaskContractProjectionVerifier.resolveExecution.completed_contract_compile_is_newer_than_the_approved_source, ruleVersion=de4c85e4b6fed92b6f33835897086579ab8b41ce1b3eb886eef634bd0868f331, result=FAILED, explanation=, inputRefs=[], inputValues={approvedCompiler={finishedAt=1.791472152356149E9, handlerType=contract.compile, inputRefs=[.agent/workstreams/ws-readiness/runs/flow-6/outputs/result.json, .agent/workstreams/ws-readiness/runs/flow-6/outputs/result.contract.json], inputTransition={condition=unconditional, required=true, source_node_instance_id=node-plan-decision-017, source_node_sha256=0fd1cb1e028214de393ef69942383d48fe243e1180bbe772418813626a119174, transition_type=normal}, iterationId=iter-002, kind=TASK, latestExecutionId=nxe-1791472152336-4fac4cdc, nodeDefinitionId=contract.execution_compile, nodeInstanceId=node-contract-execution_compile-018, outputRefs=[.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.json, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.md, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/contract-resolution.json], result={compilation_pass=1, contract_epoch=1, contract_id=tc-ws-readiness-node-contract-execution_compile-018, contract_phase=EXECUTION, contract_resolution_sha256=44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a, contract_status=READY_FOR_REVIEW, contract_version=1, generated_at=2026-10-08T15:09:12.354620Z, task_contract_sha256=1501423cf9eca1fca473f9c436e0e0359813a6fac5d5ed06b7ca75e688e87e36}, runRef=null, schemaVersion=1, stageId=stage-contract, startedAt=1.79147215233738E9, status=COMPLETED}, newerCompiler={finishedAt=1.791472152422466E9, handlerType=contract.compile, inputRefs=[.agent/workstreams/ws-readiness/runs/flow-6/outputs/result.json, .agent/workstreams/ws-readiness/runs/flow-6/outputs/result.contract.json], inputTransition={condition=unconditional, required=true, source_node_instance_id=node-plan-decision-017, source_node_sha256=0fd1cb1e028214de393ef69942383d48fe243e1180bbe772418813626a119174, transition_type=normal}, iterationId=iter-002, kind=TASK, latestExecutionId=nxe-1791472152336-4fac4cdc, nodeDefinitionId=contract.execution_compile, nodeInstanceId=node-unapproved-extra, outputRefs=[.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.json, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.md, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/contract-resolution.json], result={compilation_pass=1, contract_epoch=1, contract_id=tc-ws-readiness-node-contract-execution_compile-018, contract_phase=EXECUTION, contract_resolution_sha256=44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a, contract_status=READY_FOR_REVIEW, contract_version=1, generated_at=2026-10-08T15:09:12.354620Z, task_contract_sha256=1501423cf9eca1fca473f9c436e0e0359813a6fac5d5ed06b7ca75e688e87e36}, runRef=null, schemaVersion=1, stageId=stage-contract, startedAt=1.79147215233738E9, status=COMPLETED}}, comparable=true}, explanation=cannot verify resolving decision: source lacks trustworthy decision checks}, diagnostic_category=UNKNOWN, original_code=UNAPPROVED_RECOMPILE}, retrySafe=false, permissionRequest={}, allowedActions=[]] ==> expected: <qualification_consumer_prerequisite> but was: <qualification_diagnostic_unknown>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.ContractQualificationSequenceTest.deferredCompletedCompilerConditionIsActuallyRejectedAndItsRemovalAllowsContinuation(ContractQualificationSequenceTest.java:88)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.PhasedContractContinuationTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.71 s -- in dev.dual.runtime.handler.PhasedContractContinuationTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   ContractQualificationSequenceTest.actualDependencyDriftIsPairedFixedAndRestoredSameInputsCanContinue:59 RecoveryAssessment[classification=qualification_diagnostic_unknown, retryReadiness=INSPECT_BEFORE_MANUAL_CONTINUATION, reason=Diagnostic evidence is insufficient or this family/entry was not checked. Inspect the original cause and source identity; no automatic retry is granted. Original cause: VERIFICATION_READINESS_REQUIRED / [TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED: VERIFICATION_READINESS_REQUIRED: VERIFICATION_READINESS_REQUIRED: environment dependency changed], suggestedCommand=Inspect dualctl recovery show --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-11671254272045733103 ws-readiness, diagnosticJsonRef=, diagnosticMarkdownRef=, contractDiagnostic={continuation_failure={schemaVersion=1, family=TaskContractProjectionVerifier, status=DIAGNOSTIC_INSUFFICIENT, decisionRef=, decisionSha256=, action=, sourceNodeInstanceId=, targetNodeInstanceId=node-implement-claude_implement-020, subjectRefs=[], targetInputRefs=[.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.json, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.md, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/contract-resolution.json], targetInputTransition={}, consumer=AgentRunGovernanceContext.ensureQualified, phase=EXECUTION, failureCode=VERIFICATION_READINESS_REQUIRED, runtimeIdentitySha256=3b4d65fcb4c22cc3c36beeb768ba38422b2fa1969e0484245815418bb73023ef, failedCheck={ruleId=TaskContractProjectionVerifier.validateExecutionInputs.dynamic_diagnostic_or_i_o_failure, ruleVersion=de4c85e4b6fed92b6f33835897086579ab8b41ce1b3eb886eef634bd0868f331, result=FAILED, explanation=, inputRefs=[], inputValues={readiness={active_readiness=[{ref=.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json, sha256=685c79ac00c4ae091783f06cdfd1618415e9677051b0604fe723587b04d858d3}], bindings=[{actual_exit_required=false, authority_refs=[], criterion_id=AC-1, detail_owner=verification-owner, environment_refs=[{ref=.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json, sha256=685c79ac00c4ae091783f06cdfd1618415e9677051b0604fe723587b04d858d3}], evidence_kind=PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, executor=AGENT, expected_exit_code=null, feasibility_refs=[{ref=.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json, sha256=685c79ac00c4ae091783f06cdfd1618415e9677051b0604fe723587b04d858d3}], method=run project tests}, {actual_exit_required=false, authority_refs=[], criterion_id=AC-2, detail_owner=verification-owner, environment_refs=[{ref=.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json, sha256=685c79ac00c4ae091783f06cdfd1618415e9677051b0604fe723587b04d858d3}], evidence_kind=PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, executor=AGENT, expected_exit_code=null, feasibility_refs=[{ref=.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json, sha256=685c79ac00c4ae091783f06cdfd1618415e9677051b0604fe723587b04d858d3}], method=run project tests}], check_times={.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json=2026-10-08T15:09:10.721226Z}, goal={ref=.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-compile-003/task-contract.json, sha256=d38bd9078c660d8c640ecfd2bccabf04e65de42f0da783ccd60c9d64c1dae8f9}, requests={.agent/workstreams/ws-readiness/artifacts/verification-readiness/ready.json={declaration={action=RECORD, criterionIds=[AC-1, AC-2], detailOwner=verification-owner, environment={dependencies=[{absent=false, path=/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-11671254272045733103/test-tool.lock, sha256=19c3d3628fa50524092c8ad05babb96a1d6324497147340861599fc149147208}], identity=local-test-environment, owner=operator, workspace=/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-11671254272045733103}, epoch=1, evidenceKind=PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, executor=AGENT, expiresAt=null, goal={ref=.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-compile-003/task-contract.json, sha256=d38bd9078c660d8c640ecfd2bccabf04e65de42f0da783ccd60c9d64c1dae8f9}, lifetime=AUTHORIZATION_EPOCH, method=run project tests, requestId=ready, schema=1, statement=The test dependencies are prepared, subject=node-gate-plan-012, supersedes=null}, dependencies={/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-11671254272045733103/test-tool.lock={canonical_file=true, sha256=074380f07f099048e2433cb2b361fff01eeac07a45d65be7157824e5b7727ee4}}, unexpired=true}}}}, comparable=false}, explanation=cannot verify resolving decision: source lacks trustworthy decision checks}, diagnostic_category=UNKNOWN, original_code=VERIFICATION_READINESS_REQUIRED}, retrySafe=false, permissionRequest={}, allowedActions=[]] ==> expected: <qualification_input_drift> but was: <qualification_diagnostic_unknown>
+[ERROR]   ContractQualificationSequenceTest.deferredCompletedCompilerConditionIsActuallyRejectedAndItsRemovalAllowsContinuation:88 RecoveryAssessment[classification=qualification_diagnostic_unknown, retryReadiness=INSPECT_BEFORE_MANUAL_CONTINUATION, reason=Diagnostic evidence is insufficient or this family/entry was not checked. Inspect the original cause and source identity; no automatic retry is granted. Original cause: UNAPPROVED_RECOMPILE / [TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED: UNAPPROVED_RECOMPILE: completed contract.compile is newer than the approved source: node-unapproved-extra], suggestedCommand=Inspect dualctl recovery show --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-4322449690788469133 ws-readiness, diagnosticJsonRef=, diagnosticMarkdownRef=, contractDiagnostic={continuation_failure={schemaVersion=1, family=TaskContractProjectionVerifier, status=DIAGNOSTIC_INSUFFICIENT, decisionRef=, decisionSha256=, action=, sourceNodeInstanceId=, targetNodeInstanceId=node-implement-claude_implement-020, subjectRefs=[], targetInputRefs=[.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.json, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.md, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/contract-resolution.json], targetInputTransition={}, consumer=AgentRunGovernanceContext.ensureQualified, phase=EXECUTION, failureCode=UNAPPROVED_RECOMPILE, runtimeIdentitySha256=3b4d65fcb4c22cc3c36beeb768ba38422b2fa1969e0484245815418bb73023ef, failedCheck={ruleId=TaskContractProjectionVerifier.resolveExecution.completed_contract_compile_is_newer_than_the_approved_source, ruleVersion=de4c85e4b6fed92b6f33835897086579ab8b41ce1b3eb886eef634bd0868f331, result=FAILED, explanation=, inputRefs=[], inputValues={approvedCompiler={finishedAt=1.791472152356149E9, handlerType=contract.compile, inputRefs=[.agent/workstreams/ws-readiness/runs/flow-6/outputs/result.json, .agent/workstreams/ws-readiness/runs/flow-6/outputs/result.contract.json], inputTransition={condition=unconditional, required=true, source_node_instance_id=node-plan-decision-017, source_node_sha256=0fd1cb1e028214de393ef69942383d48fe243e1180bbe772418813626a119174, transition_type=normal}, iterationId=iter-002, kind=TASK, latestExecutionId=nxe-1791472152336-4fac4cdc, nodeDefinitionId=contract.execution_compile, nodeInstanceId=node-contract-execution_compile-018, outputRefs=[.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.json, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.md, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/contract-resolution.json], result={compilation_pass=1, contract_epoch=1, contract_id=tc-ws-readiness-node-contract-execution_compile-018, contract_phase=EXECUTION, contract_resolution_sha256=44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a, contract_status=READY_FOR_REVIEW, contract_version=1, generated_at=2026-10-08T15:09:12.354620Z, task_contract_sha256=1501423cf9eca1fca473f9c436e0e0359813a6fac5d5ed06b7ca75e688e87e36}, runRef=null, schemaVersion=1, stageId=stage-contract, startedAt=1.79147215233738E9, status=COMPLETED}, newerCompiler={finishedAt=1.791472152422466E9, handlerType=contract.compile, inputRefs=[.agent/workstreams/ws-readiness/runs/flow-6/outputs/result.json, .agent/workstreams/ws-readiness/runs/flow-6/outputs/result.contract.json], inputTransition={condition=unconditional, required=true, source_node_instance_id=node-plan-decision-017, source_node_sha256=0fd1cb1e028214de393ef69942383d48fe243e1180bbe772418813626a119174, transition_type=normal}, iterationId=iter-002, kind=TASK, latestExecutionId=nxe-1791472152336-4fac4cdc, nodeDefinitionId=contract.execution_compile, nodeInstanceId=node-unapproved-extra, outputRefs=[.agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.json, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/task-contract.md, .agent/workstreams/ws-readiness/artifacts/contracts/node-contract-execution_compile-018/contract-resolution.json], result={compilation_pass=1, contract_epoch=1, contract_id=tc-ws-readiness-node-contract-execution_compile-018, contract_phase=EXECUTION, contract_resolution_sha256=44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a, contract_status=READY_FOR_REVIEW, contract_version=1, generated_at=2026-10-08T15:09:12.354620Z, task_contract_sha256=1501423cf9eca1fca473f9c436e0e0359813a6fac5d5ed06b7ca75e688e87e36}, runRef=null, schemaVersion=1, stageId=stage-contract, startedAt=1.79147215233738E9, status=COMPLETED}}, comparable=true}, explanation=cannot verify resolving decision: source lacks trustworthy decision checks}, diagnostic_category=UNKNOWN, original_code=UNAPPROVED_RECOMPILE}, retrySafe=false, permissionRequest={}, allowedActions=[]] ==> expected: <qualification_consumer_prerequisite> but was: <qualification_diagnostic_unknown>
+[ERROR] Errors: 
+[ERROR]   ContractQualificationSequenceTest.wrongTestCheckerWithIdenticalObservedInputsTriggersContradictionNotNewAuthority:119->lambda$wrongTestCheckerWithIdenticalObservedInputsTriggersContradictionNotNewAuthority$0:117 Runtime java.io.IOException: INVALID_LOCAL_COMMIT: path outside this workstream
+[INFO] 
+[ERROR] Tests run: 15, Failures: 2, Errors: 1, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.227 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  0.029 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  0.050 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  0.014 s]
+[INFO] dual-runtime ....................................... FAILURE [ 18.118 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  18.578 s
+[INFO] Finished at: 2026-10-08T23:09:23+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project dual-runtime: There are test failures.
+[ERROR] 
+[ERROR] See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-runtime

@@ -87,7 +87,8 @@
       "kind": "TASK",
       "handlerType": "contract.compile",
       "config": {
-        "required_subject": "approved_task_contract_proposal"
+        "required_subject": "approved_task_contract_proposal",
+        "contract_phase": "GOAL"
       }
     },
     {
@@ -102,7 +103,8 @@
           "reject"
         ],
         "max_revisions": 3,
-        "gate_purpose": "contract"
+        "gate_purpose": "contract",
+        "required_contract_phase": "GOAL"
       }
     },
     {
@@ -110,7 +112,6 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
-        "requires_approved_task_contract": true,
         "agent": "claude",
         "session": "claude-main",
         "permission_profile": "observe",
@@ -120,7 +121,8 @@
         "allowed_stage_outcomes": [
           "READY",
           "BLOCKED"
-        ]
+        ],
+        "required_contract_phase": "GOAL"
       }
     },
     {
@@ -128,10 +130,10 @@
       "kind": "TASK",
       "handlerType": "context.build_package",
       "config": {
-        "requires_approved_task_contract": true,
         "target_node": "design.codex_arch_review",
         "profile": "architecture_review",
-        "purpose": "Package Claude design and prior review context for Codex architecture review."
+        "purpose": "Package Claude design and prior review context for Codex architecture review.",
+        "required_contract_phase": "GOAL"
       }
     },
     {
@@ -139,7 +141,6 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
-        "requires_approved_task_contract": true,
         "agent": "codex",
         "session": "codex-reviewer",
         "permission_profile": "review",
@@ -150,7 +151,8 @@
           "READY",
           "NEEDS_REVISION",
           "BLOCKED"
-        ]
+        ],
+        "required_contract_phase": "GOAL"
       }
     },
     {
@@ -158,7 +160,7 @@
       "kind": "DECISION",
       "handlerType": "review.decision",
       "config": {
-        "requires_approved_task_contract": true
+        "required_contract_phase": "GOAL"
       }
     },
     {
@@ -166,14 +168,14 @@
       "kind": "GATE",
       "handlerType": "human.review",
       "config": {
-        "requires_approved_task_contract": true,
         "terminal_gate": false,
         "allowed_actions": [
           "approve",
           "revise"
         ],
         "max_revisions": 3,
-        "gate_purpose": "design"
+        "gate_purpose": "design",
+        "required_contract_phase": "GOAL"
       }
     },
     {
@@ -181,7 +183,6 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
-        "requires_approved_task_contract": true,
         "agent": "claude",
         "session": "claude-main",
         "permission_profile": "observe",
@@ -191,7 +192,8 @@
         "allowed_stage_outcomes": [
           "READY",
           "BLOCKED"
-        ]
+        ],
+        "required_contract_phase": "GOAL"
       }
     },
     {
@@ -199,14 +201,14 @@
       "kind": "GATE",
       "handlerType": "human.review",
       "config": {
-        "requires_approved_task_contract": true,
         "terminal_gate": false,
         "allowed_actions": [
           "approve",
           "revise"
         ],
         "max_revisions": 3,
-        "gate_purpose": "plan"
+        "gate_purpose": "plan",
+        "required_contract_phase": "GOAL"
       }
     },
     {
@@ -214,10 +216,10 @@
       "kind": "TASK",
       "handlerType": "context.build_package",
       "config": {
-        "requires_approved_task_contract": true,
         "target_node": "implement.claude_implement",
         "profile": "implementation",
-        "purpose": "Package approved plan and review history for Claude implementation."
+        "purpose": "Package approved plan and review history for Claude implementation.",
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -225,7 +227,6 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
-        "requires_approved_task_contract": true,
         "approve_all": true,
         "permission_profile": "implement",
         "prompt_template": "implement-claude",
@@ -236,7 +237,8 @@
         "allowed_stage_outcomes": [
           "READY",
           "BLOCKED"
-        ]
+        ],
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -244,7 +246,6 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
-        "requires_approved_task_contract": true,
         "approve_all": true,
         "permission_profile": "implement",
         "prompt_template": "implement-claude-self-test",
@@ -256,7 +257,8 @@
           "READY",
           "INSUFFICIENT_EVIDENCE",
           "BLOCKED"
-        ]
+        ],
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -264,8 +266,8 @@
       "kind": "DECISION",
       "handlerType": "review.decision",
       "config": {
-        "requires_approved_task_contract": true,
-        "max_revisions": 1
+        "max_revisions": 1,
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -273,7 +275,6 @@
       "kind": "GATE",
       "handlerType": "human.review",
       "config": {
-        "requires_approved_task_contract": true,
         "allowed_actions": [
           "revise",
           "request_scope_revision",
@@ -282,7 +283,8 @@
           "submit_evidence"
         ],
         "max_revisions": 1,
-        "gate_purpose": "implementation_repair"
+        "gate_purpose": "implementation_repair",
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -290,8 +292,8 @@
       "kind": "TASK",
       "handlerType": "artifact.validate",
       "config": {
-        "requires_approved_task_contract": true,
-        "route_scope_violation": true
+        "route_scope_violation": true,
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -299,7 +301,6 @@
       "kind": "TASK",
       "handlerType": "context.build_package",
       "config": {
-        "requires_approved_task_contract": true,
         "target_node": "acceptance.codex_verifier_review",
         "profile": "acceptance",
         "required_agent_evidence": {
@@ -307,7 +308,8 @@
           "source_artifact_type": "self_test_report",
           "decision": "SELF_TEST_COMPLETE"
         },
-        "purpose": "Package implementation output, self-test report, and Git evidence for Codex acceptance."
+        "purpose": "Package implementation output, self-test report, and Git evidence for Codex acceptance.",
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -315,7 +317,6 @@
       "kind": "TASK",
       "handlerType": "acpx.agent_run",
       "config": {
-        "requires_approved_task_contract": true,
         "agent": "codex",
         "session": "codex-reviewer",
         "permission_profile": "review",
@@ -328,7 +329,8 @@
           "REJECTED",
           "INSUFFICIENT_EVIDENCE",
           "BLOCKED"
-        ]
+        ],
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -336,8 +338,8 @@
       "kind": "DECISION",
       "handlerType": "review.decision",
       "config": {
-        "requires_approved_task_contract": true,
-        "max_revisions": 1
+        "max_revisions": 1,
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -345,8 +347,8 @@
       "kind": "TASK",
       "handlerType": "acceptance.failure_classify",
       "config": {
-        "requires_approved_task_contract": true,
-        "max_revisions": 3
+        "max_revisions": 3,
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -354,7 +356,7 @@
       "kind": "TASK",
       "handlerType": "report.generate_final",
       "config": {
-        "requires_approved_task_contract": true
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -362,7 +364,7 @@
       "kind": "TASK",
       "handlerType": "delivery.prepare_pr",
       "config": {
-        "requires_approved_task_contract": true
+        "required_contract_phase": "EXECUTION"
       }
     },
     {
@@ -370,14 +372,63 @@
       "kind": "GATE",
       "handlerType": "human.review",
       "config": {
-        "requires_approved_task_contract": true,
         "terminal_gate": true,
         "allowed_actions": [
           "approve",
           "revise"
         ],
         "max_revisions": 1,
-        "gate_purpose": "acceptance"
+        "gate_purpose": "acceptance",
+        "required_contract_phase": "EXECUTION"
+      }
+    },
+    {
+      "id": "context.plan_codex_plan_review",
+      "kind": "TASK",
+      "handlerType": "context.build_package",
+      "config": {
+        "target_node": "plan.codex_plan_review",
+        "profile": "plan_review",
+        "purpose": "Package Claude plan and design context for Codex plan review.",
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "plan.codex_plan_review",
+      "kind": "TASK",
+      "handlerType": "acpx.agent_run",
+      "config": {
+        "agent": "codex",
+        "session": "codex-reviewer",
+        "permission_profile": "review",
+        "prompt_template": "plan-codex-review",
+        "expected_artifact": "agent_output_contract",
+        "artifact_compiler": "agent_output_contract_compiler",
+        "allowed_stage_outcomes": [
+          "READY",
+          "NEEDS_REVISION",
+          "BLOCKED"
+        ],
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "plan.decision",
+      "kind": "DECISION",
+      "handlerType": "review.decision",
+      "config": {
+        "max_revisions": 3,
+        "required_contract_phase": "GOAL"
+      }
+    },
+    {
+      "id": "contract.compile_execution",
+      "kind": "TASK",
+      "handlerType": "contract.compile",
+      "config": {
+        "contract_phase": "EXECUTION",
+        "required_subject": "reviewed_design_and_plan",
+        "required_contract_phase": "GOAL"
       }
     }
   ],
@@ -511,7 +562,7 @@
     {
       "from": "contract.compile",
       "on": "completed",
-      "to": "gate.contract_review",
+      "to": "design.claude_design",
       "condition": null,
       "metadata": {
         "transitionType": "normal",
@@ -525,7 +576,7 @@
     {
       "from": "gate.contract_review",
       "on": "approved",
-      "to": "design.claude_design",
+      "to": "context.implement_claude",
       "condition": null,
       "metadata": {
         "transitionType": "normal",
@@ -595,7 +646,7 @@
     {
       "from": "design.decision",
       "on": "READY_FOR_ARCH_REVIEW",
-      "to": "gate.human_design_approval",
+      "to": "plan.claude_plan",
       "condition": null,
       "metadata": {
         "transitionType": "normal",
@@ -623,34 +674,6 @@
     {
       "from": "design.decision",
       "on": "NEEDS_REVISION",
-      "to": "gate.human_design_approval",
-      "condition": null,
-      "metadata": {
-        "transitionType": "normal",
-        "branchGroupId": "",
-        "required": true,
-        "purpose": "",
-        "joinStrategy": "",
-        "loopReason": ""
-      }
-    },
-    {
-      "from": "gate.human_design_approval",
-      "on": "approved",
-      "to": "plan.claude_plan",
-      "condition": null,
-      "metadata": {
-        "transitionType": "normal",
-        "branchGroupId": "",
-        "required": true,
-        "purpose": "",
-        "joinStrategy": "",
-        "loopReason": ""
-      }
-    },
-    {
-      "from": "gate.human_design_approval",
-      "on": "revise",
       "to": "design.claude_design",
       "condition": null,
       "metadata": {
@@ -663,31 +686,45 @@
       }
     },
     {
-      "from": "plan.claude_plan",
-      "on": "completed",
-      "to": "gate.human_plan_approval",
+      "from": "gate.human_design_approval",
+      "on": "approved",
+      "to": "design.claude_design",
       "condition": null,
       "metadata": {
-        "transitionType": "normal",
+        "transitionType": "loop",
         "branchGroupId": "",
         "required": true,
         "purpose": "",
         "joinStrategy": "",
-        "loopReason": ""
+        "loopReason": "Human resolution requires a fresh author and independent review"
+      }
+    },
+    {
+      "from": "gate.human_design_approval",
+      "on": "revise",
+      "to": "design.claude_design",
+      "condition": null,
+      "metadata": {
+        "transitionType": "loop",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": "Human resolution requires a fresh author and independent review"
       }
     },
     {
       "from": "gate.human_plan_approval",
       "on": "approved",
-      "to": "context.implement_claude",
+      "to": "plan.claude_plan",
       "condition": null,
       "metadata": {
-        "transitionType": "normal",
+        "transitionType": "loop",
         "branchGroupId": "",
         "required": true,
         "purpose": "",
         "joinStrategy": "",
-        "loopReason": ""
+        "loopReason": "Human resolution requires a fresh author and independent review"
       }
     },
     {
@@ -696,12 +733,12 @@
       "to": "plan.claude_plan",
       "condition": null,
       "metadata": {
-        "transitionType": "normal",
+        "transitionType": "loop",
         "branchGroupId": "",
         "required": true,
         "purpose": "",
         "joinStrategy": "",
-        "loopReason": ""
+        "loopReason": "Human resolution requires a fresh author and independent review"
       }
     },
     {
@@ -766,7 +803,10 @@
       "to": "context.implement_claude",
       "condition": {
         "type": "config_equals",
-        "params": { "key": "continuation_kind", "value": "IMPLEMENTATION_REPAIR" }
+        "params": {
+          "key": "continuation_kind",
+          "value": "IMPLEMENTATION_REPAIR"
+        }
       },
       "metadata": {
         "transitionType": "loop",
@@ -783,7 +823,10 @@
       "to": "gate.human_implementation_repair",
       "condition": {
         "type": "config_equals",
-        "params": { "key": "continuation_kind", "value": "HUMAN_REVIEW" }
+        "params": {
+          "key": "continuation_kind",
+          "value": "HUMAN_REVIEW"
+        }
       },
       "metadata": {
         "transitionType": "normal",
@@ -827,8 +870,11 @@
       "on": "submit_evidence",
       "to": "implement.claude_self_test_report",
       "condition": null,
-      "metadata": { "transitionType": "normal" }
-    }, {
+      "metadata": {
+        "transitionType": "normal"
+      }
+    },
+    {
       "from": "gate.human_implementation_repair",
       "on": "collect_evidence",
       "to": "implement.claude_self_test_report",
@@ -999,15 +1045,15 @@
     {
       "from": "acceptance.classify_failure",
       "on": "REJECT_CONTEXT_INSUFFICIENT",
-      "to": "context.implement_claude",
+      "to": "gate.human_implementation_repair",
       "condition": null,
       "metadata": {
-        "transitionType": "loop",
+        "transitionType": "normal",
         "branchGroupId": "",
         "required": true,
-        "purpose": "",
+        "purpose": "Require human disposition of missing context or tool prerequisites.",
         "joinStrategy": "",
-        "loopReason": "Acceptance rejected because implementation context is insufficient"
+        "loopReason": ""
       }
     },
     {
@@ -1027,15 +1073,15 @@
     {
       "from": "acceptance.classify_failure",
       "on": "REJECT_TOOL_LIMITATION",
-      "to": "context.implement_claude",
+      "to": "gate.human_implementation_repair",
       "condition": null,
       "metadata": {
-        "transitionType": "loop",
+        "transitionType": "normal",
         "branchGroupId": "",
         "required": true,
-        "purpose": "",
+        "purpose": "Require human disposition of missing context or tool prerequisites.",
         "joinStrategy": "",
-        "loopReason": "Acceptance rejected because implementation/tooling limits need repair"
+        "loopReason": ""
       }
     },
     {
@@ -1092,6 +1138,124 @@
         "purpose": "",
         "joinStrategy": "",
         "loopReason": "Human acceptance requested implementation repair"
+      }
+    },
+    {
+      "from": "plan.claude_plan",
+      "on": "completed",
+      "to": "context.plan_codex_plan_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "context.plan_codex_plan_review",
+      "on": "completed",
+      "to": "plan.codex_plan_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "plan.codex_plan_review",
+      "on": "completed",
+      "to": "plan.decision",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "plan.decision",
+      "on": "READY_TO_IMPLEMENT",
+      "to": "contract.compile_execution",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "plan.decision",
+      "on": "BLOCKED",
+      "to": "gate.human_plan_approval",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "plan.decision",
+      "on": "VERIFICATION_READINESS_REQUIRED",
+      "to": "gate.human_plan_approval",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "plan.decision",
+      "on": "NEEDS_REVISION",
+      "to": "plan.claude_plan",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "branchGroupId": "",
+        "required": true,
+        "purpose": "",
+        "joinStrategy": "",
+        "loopReason": ""
+      }
+    },
+    {
+      "from": "contract.compile_execution",
+      "on": "completed",
+      "to": "gate.contract_review",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "required": true
+      }
+    },
+    {
+      "from": "contract.compile_execution",
+      "on": "authorization_unchanged",
+      "to": "context.implement_claude",
+      "condition": null,
+      "metadata": {
+        "transitionType": "normal",
+        "required": true
       }
     }
   ]

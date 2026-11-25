@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261011T044656Z-BMDJ",
+  "node_instance_id" : "node-design-codex_arch_review-015",
+  "run_id" : "run-1791700195359",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-015-run-1791700195359/working-set.json",
+      "sha256" : "bcadecaa3e889676afe89dbd39e891006ead03b6a5e869912bc27d3f87c6be88"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-015-run-1791700195359/read-reuse-contract.json",
+      "sha256" : "7ecfbfae13cc40d90585845abb09f9b03ba5fcb41418489264f3293e94bde452"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-015-run-1791700195359/agent-capability-catalog.json",
+      "sha256" : "fbe3c9d553a28b566f23bf1057d466c2290e9ae0ad97d40930bbbec85af14521"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-015-run-1791700195359/planned-report.json",
+      "sha256" : "6a20740ea10cf50496f0a5f8deae187a7e46c4c376245998ec162258d28fb727"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-015-run-1791700195359/repo-map.json",
+      "sha256" : "2803a447597f770e660929c01ea5e06a53bfee7dc7384568b8e5c4c749c75e1e"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-015-run-1791700195359/file-summaries.json",
+      "sha256" : "5c1596317ef33bf68b237009aa7605829de9f917fd999aee19a61bc5b0b2f620"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-015-run-1791700195359/stage-scope-policy.json",
+      "sha256" : "dc13ba9b5b295981c70694d80774c198b4a1f8b11adc6f178555450a104214e5"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-codex_arch_review-015-run-1791700195359/file-relevance-plan.json",
+      "sha256" : "0d4c8758b65ba2083aa5f984585c57dd7cbb211e7a7236732a7f5319b27f36fb"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+OWNER=file:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-interface-forward-fix-20261010/counterproof/summary-mutant/
+EXPECTED_ASSERTION_FAILURE=org.opentest4j.AssertionFailedError: # Current Failure
+
+## Summary
+
+- Workflow Status: WAITING_FOR_RECOVERY
+- Node: intake.claude_brainstorm
+- Node Instance: node-intake-claude_brainstorm-002
+- Node Status: FAILED
+- Handler: acpx.agent_run
+- Reason: AGENT_OUTPUT_CONTRACT_VIOLATION
+- Recoverable: N/A
+- Exit Code: 1
+- Run ID: run-1791618632374
+- Agent: claude
+- Session: claude-main-ws-human-continuation-run-1791618632374
+- Attention Category: FAILED
+- Retry Safe: false
+
+## Contract Failure Diagnostic
+
+- Diagnostic JSON: .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-intake-claude_brainstorm-002.json
+- Diagnostic Markdown: .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-intake-claude_brainstorm-002.md
+- Error Code: AGENT_RESULT_MISSING
+- Error Message: No readable agent output artifact found for contract validation.
+
+## Evidence
+
+- .agent/workstreams/ws-human-continuation/runs/run-1791618632374/outputs/intake-claude-brainstorm.stderr.log
+- .agent/workstreams/ws-human-continuation/runs/run-1791618632374/outputs/intake-claude-brainstorm.transcript.log
+- .agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791618632374/binding.json
+- .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-intake-claude_brainstorm-002.json
+- .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-intake-claude_brainstorm-002.md
+
+## Suggested Action
+
+- Blocking adapter signal: ADAPTER_INCOMPATIBLE - fixture incompatible protocol
+- Inspect recovery evidence before deciding whether retry is safe.
+- Command: `dualctl retry --workdir /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/w09-counterproof-6210415171079734710 ws-human-continuation  # only after fixing the recorded protocol/session mismatch; never resend an unknown call`.
+ ==> expected: <true> but was: <false>

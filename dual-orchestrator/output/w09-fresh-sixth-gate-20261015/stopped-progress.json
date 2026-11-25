@@ -1,0 +1,377 @@
+{
+  "gate": "FAIL",
+  "domain_current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261014T234009Z-RN9X",
+    "workflowInstanceId": "wf-ws-20261014T234009Z-RN9X",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "WAITING_FOR_RECOVERY",
+    "activeNodeInstanceIds": [
+      "node-intake-claude_brainstorm-006"
+    ],
+    "openGateIds": [
+      "recovery-node-intake-claude_brainstorm-006"
+    ],
+    "lastEventId": "evt-000008",
+    "updatedAt": "2026-10-14T23:45:06.478858Z",
+    "commitSequence": 28
+  },
+  "actual_top_level_requests": 4,
+  "known_partial_tokens": 51231,
+  "complete_aggregate_tokens": null,
+  "partial_is_not_total": true,
+  "diagnostic_only_native_records": [
+    {
+      "run_id": "run-1792021247531",
+      "occurrence": 1,
+      "request_id": "3",
+      "session_id": "e4d34f6c-2aa7-4011-81a4-42ef0d961aa7",
+      "matching_request_count": 1,
+      "matching_result_count": 1,
+      "native_result_usage": {
+        "inputTokens": 4906,
+        "outputTokens": 3753,
+        "cachedReadTokens": 0,
+        "cachedWriteTokens": 0,
+        "totalTokens": 8659
+      },
+      "stream_ref": "stop-session-operations/6f351661-60a7-47db-8059-0e743e0e6689/before.stream.ndjson",
+      "stream_sha256": "e7525055cac6f77bdc51b381738dddf6c22e62494c4f438012b0f5fd65128566",
+      "budget_authority": false,
+      "fixed_fact_modified": false
+    },
+    {
+      "run_id": "run-1792021315581",
+      "occurrence": 1,
+      "request_id": "3",
+      "session_id": "01a13ccb-57ae-7f23-8715-34182953b3cb",
+      "matching_request_count": 1,
+      "matching_result_count": 1,
+      "native_result_usage": {
+        "totalTokens": 27428,
+        "inputTokens": 13279,
+        "cachedReadTokens": 12928,
+        "outputTokens": 1221,
+        "thoughtTokens": 357
+      },
+      "stream_ref": "stop-session-operations/01a13ccb-4cae-7d12-9174-9788eb3c00fe/before.stream.ndjson",
+      "stream_sha256": "0c687fe59ac63f7debfd936d664124b15a51af65eb50acc35b06b7aa635292de",
+      "budget_authority": false,
+      "fixed_fact_modified": false
+    },
+    {
+      "run_id": "run-1792021385197",
+      "occurrence": 1,
+      "request_id": "3",
+      "session_id": "3991a08b-9ce3-4412-b0b3-d824fce1fdaf",
+      "matching_request_count": 1,
+      "matching_result_count": 1,
+      "native_result_usage": {
+        "inputTokens": 6760,
+        "outputTokens": 8384,
+        "cachedReadTokens": 0,
+        "cachedWriteTokens": 0,
+        "totalTokens": 15144
+      },
+      "stream_ref": "stop-session-operations/fe3ee258-ed11-483c-9d00-70276dd5aee0/before.stream.ndjson",
+      "stream_sha256": "08e221471f58efc01d5d1bc1a4832ec2559ff5f33de1fd97acfb6ac162318e89",
+      "budget_authority": false,
+      "fixed_fact_modified": false
+    },
+    {
+      "run_id": "run-1792021385197",
+      "occurrence": 2,
+      "request_id": "4",
+      "session_id": "3991a08b-9ce3-4412-b0b3-d824fce1fdaf",
+      "matching_request_count": 1,
+      "matching_result_count": 1,
+      "native_result_usage": {
+        "inputTokens": 9706,
+        "outputTokens": 3144,
+        "cachedReadTokens": 6720,
+        "cachedWriteTokens": 0,
+        "totalTokens": 19570
+      },
+      "stream_ref": "stop-session-operations/fe3ee258-ed11-483c-9d00-70276dd5aee0/before.stream.ndjson",
+      "stream_sha256": "08e221471f58efc01d5d1bc1a4832ec2559ff5f33de1fd97acfb6ac162318e89",
+      "budget_authority": false,
+      "fixed_fact_modified": false
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "run-1792021247531",
+      "node": "intake.claude_brainstorm",
+      "status": "completed",
+      "outcome": {
+        "status": "SUCCESS",
+        "primaryReason": "completed",
+        "nodeMaySucceed": true,
+        "retryPolicy": "NONE",
+        "recoveryCategory": "NONE",
+        "operatorMessage": "The agent produced valid result and artifact evidence.",
+        "secondarySignals": []
+      },
+      "run_usage": {
+        "inputTokens": 4906,
+        "outputTokens": 3753,
+        "cachedReadTokens": 0,
+        "cachedWriteTokens": 0,
+        "totalTokens": 8659,
+        "costAmount": 0.11835499999999999,
+        "costCurrency": "USD",
+        "source": "acpx_stream",
+        "measurementType": "PROVIDER_RUN_USAGE",
+        "attribution": "EXACT_REQUEST_MATCH",
+        "cumulative": false,
+        "contextUsedTokens": 0,
+        "sessionCostAmount": 0.11835499999999999,
+        "sessionCostCurrency": "USD",
+        "providerId": "zhipu",
+        "model": "glm-5.3",
+        "billingMode": "subscription_token_only",
+        "providerMetadataSource": "acpx_session_json",
+        "unavailableReason": ""
+      },
+      "occurrences": [
+        {
+          "ordinal": 1,
+          "request_id": "3",
+          "usage": {
+            "inputTokens": 4906,
+            "outputTokens": 3753,
+            "cachedReadTokens": 0,
+            "cachedWriteTokens": 0,
+            "totalTokens": 8659,
+            "costAmount": 0.11835499999999999,
+            "costCurrency": "USD",
+            "source": "acpx_stream",
+            "measurementType": "PROVIDER_RUN_USAGE",
+            "attribution": "EXACT_REQUEST_MATCH",
+            "cumulative": false,
+            "contextUsedTokens": 0,
+            "sessionCostAmount": 0.11835499999999999,
+            "sessionCostCurrency": "USD",
+            "providerId": "zhipu",
+            "model": "glm-5.3",
+            "billingMode": "subscription_token_only",
+            "providerMetadataSource": "acpx_session_json",
+            "unavailableReason": ""
+          },
+          "parse_error": "",
+          "raw_json_syntax_valid_by_stdlib": true,
+          "revision_response_extra_keys": [],
+          "human_log_json_fragment_lines": [],
+          "transcript": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree/.agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021247531/outputs/intake-claude-brainstorm.transcript.log",
+          "transcript_sha256": "7f63e06cdb56b1b8b010d345690736c674bc7a20c2513bff5967ccfd45ededdc",
+          "prompt": ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021247531/prompts/intake-claude-brainstorm.md",
+          "prompt_sha256": "b8fe9d6fdc47a22b52ee88c51a978919efe1aaad2028584dd7972197f15c31e4"
+        }
+      ]
+    },
+    {
+      "run_id": "run-1792021315581",
+      "node": "intake.codex_product_review",
+      "status": "completed",
+      "outcome": {
+        "status": "SUCCESS",
+        "primaryReason": "completed",
+        "nodeMaySucceed": true,
+        "retryPolicy": "NONE",
+        "recoveryCategory": "NONE",
+        "operatorMessage": "The agent produced valid result and artifact evidence.",
+        "secondarySignals": []
+      },
+      "run_usage": {
+        "inputTokens": 13279,
+        "outputTokens": 1221,
+        "cachedReadTokens": 12928,
+        "cachedWriteTokens": 0,
+        "totalTokens": 27428,
+        "costAmount": null,
+        "costCurrency": "",
+        "source": "acpx_current_transcript",
+        "measurementType": "PROVIDER_RUN_USAGE",
+        "attribution": "EXACT_REQUEST_MATCH",
+        "cumulative": false,
+        "contextUsedTokens": 0,
+        "sessionCostAmount": null,
+        "sessionCostCurrency": "",
+        "providerId": "openai",
+        "model": "GPT-6-Astra",
+        "billingMode": "metered",
+        "providerMetadataSource": "acpx_session_json",
+        "unavailableReason": ""
+      },
+      "occurrences": [
+        {
+          "ordinal": 1,
+          "request_id": "3",
+          "usage": {
+            "inputTokens": 13279,
+            "outputTokens": 1221,
+            "cachedReadTokens": 12928,
+            "cachedWriteTokens": 0,
+            "totalTokens": 27428,
+            "costAmount": null,
+            "costCurrency": "",
+            "source": "acpx_current_transcript",
+            "measurementType": "PROVIDER_RUN_USAGE",
+            "attribution": "EXACT_REQUEST_MATCH",
+            "cumulative": false,
+            "contextUsedTokens": 0,
+            "sessionCostAmount": null,
+            "sessionCostCurrency": "",
+            "providerId": "openai",
+            "model": "GPT-6-Astra",
+            "billingMode": "metered",
+            "providerMetadataSource": "acpx_session_json",
+            "unavailableReason": ""
+          },
+          "parse_error": "",
+          "raw_json_syntax_valid_by_stdlib": true,
+          "revision_response_extra_keys": [],
+          "human_log_json_fragment_lines": [],
+          "transcript": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree/.agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.transcript.log",
+          "transcript_sha256": "7518b1a4c6d24b259fbf6a47196e5f46f7c7c065c3d3f43ddc7dfddb3cea8354",
+          "prompt": ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/prompts/intake-codex-product-review.md",
+          "prompt_sha256": "1019c17acea7c26275681bccf70d810161b8d445fbc0f45cbd6c6a65c53224ca"
+        }
+      ]
+    },
+    {
+      "run_id": "run-1792021385197",
+      "node": "intake.claude_brainstorm",
+      "status": "failed",
+      "outcome": {
+        "status": "OUTPUT_INCOMPLETE",
+        "primaryReason": "agent_result_missing_or_invalid",
+        "nodeMaySucceed": false,
+        "retryPolicy": "MANUAL_ONLY",
+        "recoveryCategory": "OUTPUT_INCOMPLETE",
+        "operatorMessage": "The final ACP assistant message did not contain a valid AgentResultEnvelope.",
+        "secondarySignals": []
+      },
+      "run_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "cachedReadTokens": 0,
+        "cachedWriteTokens": 0,
+        "totalTokens": 0,
+        "costAmount": null,
+        "costCurrency": "",
+        "source": "not_available",
+        "measurementType": "UNAVAILABLE",
+        "attribution": "",
+        "cumulative": false,
+        "contextUsedTokens": 0,
+        "sessionCostAmount": null,
+        "sessionCostCurrency": "",
+        "providerId": "zhipu",
+        "model": "glm-5.3",
+        "billingMode": "subscription_token_only",
+        "providerMetadataSource": "acpx_session_json",
+        "unavailableReason": "MULTI_PROMPT_USAGE_REQUIRES_OCCURRENCE_SUM"
+      },
+      "occurrences": [
+        {
+          "ordinal": 1,
+          "request_id": "3",
+          "usage": {
+            "inputTokens": 6760,
+            "outputTokens": 8384,
+            "cachedReadTokens": 0,
+            "cachedWriteTokens": 0,
+            "totalTokens": 15144,
+            "costAmount": 0.2434,
+            "costCurrency": "USD",
+            "source": "acpx_stream",
+            "measurementType": "PROVIDER_RUN_USAGE",
+            "attribution": "EXACT_REQUEST_MATCH",
+            "cumulative": false,
+            "contextUsedTokens": 0,
+            "sessionCostAmount": 0.2434,
+            "sessionCostCurrency": "USD",
+            "providerId": "zhipu",
+            "model": "glm-5.3",
+            "billingMode": "subscription_token_only",
+            "providerMetadataSource": "acpx_session_json",
+            "unavailableReason": ""
+          },
+          "parse_error": "AGENT_RESULT_PARSE_FAILED",
+          "raw_json_syntax_valid_by_stdlib": true,
+          "revision_response_extra_keys": [
+            [
+              "response"
+            ]
+          ],
+          "human_log_json_fragment_lines": [],
+          "transcript": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree/.agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/outputs/intake-claude-brainstorm.transcript.log",
+          "transcript_sha256": "14357e80203a94e1815b14abe7dd034b62ac93088954e4f793adfd1ae376d907",
+          "prompt": ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/prompts/intake-claude-brainstorm.md",
+          "prompt_sha256": "466699e65e8c15d16a7b1ba0e1760d3b9409433a9b78680e5effe7d85ebee78e"
+        },
+        {
+          "ordinal": 2,
+          "request_id": "4",
+          "usage": {
+            "inputTokens": 0,
+            "outputTokens": 0,
+            "cachedReadTokens": 0,
+            "cachedWriteTokens": 0,
+            "totalTokens": 0,
+            "costAmount": null,
+            "costCurrency": "",
+            "source": "not_available",
+            "measurementType": "UNAVAILABLE",
+            "attribution": "",
+            "cumulative": false,
+            "contextUsedTokens": 0,
+            "sessionCostAmount": null,
+            "sessionCostCurrency": "",
+            "providerId": "zhipu",
+            "model": "glm-5.3",
+            "billingMode": "subscription_token_only",
+            "providerMetadataSource": "acpx_session_json",
+            "unavailableReason": "INVALID_CURRENT_TRANSCRIPT"
+          },
+          "parse_error": "AGENT_RESULT_PARSE_FAILED",
+          "raw_json_syntax_valid_by_stdlib": true,
+          "revision_response_extra_keys": [
+            [
+              "response"
+            ]
+          ],
+          "human_log_json_fragment_lines": [
+            {
+              "line": 6,
+              "text": "{"
+            },
+            {
+              "line": 19,
+              "text": "        {\"path\": \"src/normalize_text.py\"},"
+            },
+            {
+              "line": 20,
+              "text": "        {\"path\": \"tests/test_normalize_text.py\"},"
+            },
+            {
+              "line": 30,
+              "text": "      {\"id\": \"AC-1\", \"text\": \"测试源码至少覆盖八类输入并各有明确期望结果：空串、纯 LF、CRLF、单独 CR、混合换行、Unicode 内容、末尾有/无换行、连续空行；"
+            },
+            {
+              "line": 31,
+              "text": "      {\"id\": \"AC-2\", \"text\": \"实际执行 unittest 测试并记录真实运行输出，输出明确显示用例覆盖数（如 Ran N tests）且 failure=0、error="
+            }
+          ],
+          "transcript": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree/.agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/outputs/intake-claude-brainstorm.contract-correction.transcript.log",
+          "transcript_sha256": "88599829277f37c27ca34b47ffe95682f7e9e0d964a0233162d1f85791d64ff2",
+          "prompt": ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/prompts/intake-claude-brainstorm.contract-correction.md",
+          "prompt_sha256": "39a0e085a209866feba86533ddeb96c14502ec0caf89c3d0666d0750e6b8247a"
+        }
+      ]
+    }
+  ],
+  "no_new_authority": true
+}

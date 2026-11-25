@@ -33,9 +33,8 @@ public final class RecoveryCloseMistakenIterationCommand implements Callable<Int
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "recovery close mistaken iteration"))) {
-            CliLedgerFactory.create().closeMistakenIteration(paths, note);
-        }
+        CliLedgerFactory.create().closeMistakenIteration(paths, note);
+
         System.out.println("Mistaken iteration closed");
         System.out.println("Workstream: " + workstreamId);
         System.out.println("Ledger: " + paths.workstreamDir());

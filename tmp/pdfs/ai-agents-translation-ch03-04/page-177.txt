@@ -1,0 +1,41 @@
+        ),
+    dict(
+        name="note_taker", tools=[create_outline, read_document],
+        prompt=NOTE_PROMPT, llm=fast_llm
+        ),
+    dict(
+        name="doc_writer", tools=[write_document, edit_document,
+read_document],
+        prompt=WRITER_PROMPT, llm=fast_llm
+        ),
+]
+
+nodes = {
+    s["name"]: make_react_worker_node(llm=s["llm"], name=s["name"],
+    tools=s["tools"], prompt=s["prompt"])
+    for s in specs
+}
+
+When you run the code and inspect the output of the analyst agent, you’ll
+see something like this:
+
+
+  Analyst (ModernBERT) processing 2 docs...
+  'analyst': {'messages': [HumanMessage(content='\n\n[\n {\n
+  ""text": "### Latest
+  Developments in AI Agents: A Focus on Coding Agents\\n\\nAI
+  agents, particularly
+  those focused on coding, are rapidly evolving and transforming
+  the landscape of
+  software development.",\n "source": "Source Doc [1]",\n "score":
+  0.956\n  },
+  # Rest of output omitted
+
+You see in the second-last line the score of 0.956, which is the relevance
+ranking score ModernBERT assigned to this particular content.
+
+This setup gives you what you want: a single, deliberate analyst that reasons
+carefully over evidence, cross-checked by a modern encoder model, while
+everyone else remains fast and cheap. This is an example of how to design
+self-auditing systems, by checking for relevance and potential hallucination
+in addition to prompting the model to provide the links to its resources.

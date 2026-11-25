@@ -24,7 +24,7 @@ public final class DeliveryMergeCommand implements Callable<Integer> {
     private final DeliveryApplicationService delivery;
 
     public DeliveryMergeCommand() {
-        this(new DeliveryApplicationService());
+        this(new DeliveryApplicationService(CliLedgerFactory.create()));
     }
 
     DeliveryMergeCommand(DeliveryApplicationService delivery) {
@@ -37,10 +37,12 @@ public final class DeliveryMergeCommand implements Callable<Integer> {
         System.out.println("Delivery: " + result.status());
         if (!result.candidateRef().isBlank()) System.out.println("Candidate: " + result.candidateRef());
         if (!result.reason().isBlank()) System.out.println("Reason: " + result.reason());
-        if ("APPLIED".equals(result.status())) {
+        if (result.currentActions().contains("COMMIT_EXTERNALLY")) {
             System.out.println("Review and commit the staged target diff, then run delivery finalize --commit <sha>.");
             return 0;
         }
-        return "COMMITTED".equals(result.status()) ? 0 : 1;
+        System.out.println("Next action: " + result.nextAction());
+        result.nextCommands().forEach(System.out::println);
+        return "COMMITTED".equals(result.status()) || result.canFinalize() ? 0 : 1;
     }
 }

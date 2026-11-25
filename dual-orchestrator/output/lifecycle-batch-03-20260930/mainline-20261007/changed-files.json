@@ -1,0 +1,22 @@
+[
+  "README.md",
+  "docs/README.md",
+  "docs/README.zh-CN.md",
+  "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+  "docs/quickstart.md",
+  "docs/quickstart.zh-CN.md",
+  "docs/reference.md",
+  "docs/release-checklist.md",
+  "docs/release-checklist.zh-CN.md",
+  "docs/testing/llm-boundary-hardening-validation-checklist.zh-CN.md",
+  "docs/testing/smoke-test-e2e.md",
+  "docs/troubleshooting.md",
+  "docs/troubleshooting.zh-CN.md",
+  "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxSessionStreamProjectorTest.java",
+  "dual-runtime/src/test/java/dev/dual/runtime/handler/PermissionEvidenceSequenceTest.java",
+  "output/lifecycle-batch-03-20260930/progress-and-decision.md",
+  "scripts/fixtures/emit-strict-agent-result.py",
+  "scripts/semantic-boundary-smoke.sh",
+  "scripts/smoke-test.sh",
+  "smoke-test-full.md"
+]

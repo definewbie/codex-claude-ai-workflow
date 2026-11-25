@@ -1,0 +1,2395 @@
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxPermissionProfile.java
+1: package dev.dual.adapter.acpx;
+2: 
+3: import java.util.List;
+4: 
+5: /**
+6:  * acpx/Claude Code 工具权限的 adapter 边界模型。
+7:  *
+8:  * Workflow node 只声明语义化 profile；这里负责把 profile 翻译成两层权限：
+9:  * acpx 的 ACP 权限种类（read/search/execute）和 Claude Code 的免确认工具集。
+10:  *
+11:  * acpx 的 `--permission-policy` 不理解 `Bash(ls *)` 这类 Claude Code 模式；
+12:  * 它只能按 ACP 工具种类或标题批准权限请求。Claude Code 的
+13:  * `--allowed-tools` 实际表示工具可以无需询问即执行，不是可见性白名单。
+14:  * 它不能弥补 ACP 层对 execute 的过度批准。因此 discovery/observe/review
+15:  * 不自动批准 execute；
+16:  * intake contract discovery 只批准 read/search，并继续关闭 terminal；它不依赖
+17:  * deny-all 与 permission-policy 的组合优先级来获得基本读取能力。
+18:  */
+19: record AcpxPermissionProfile(
+20:         String name,
+21:         boolean approveAll,
+22:         boolean denyAll,
+23:         boolean terminalEnabled,
+24:         boolean simpleClaudeCode,
+25:         List<String> autoApprovedTools,
+26:         List<String> autoApproveKinds,
+27:         List<String> escalateKinds,
+28:         int promptRetries
+29: ) {
+30:     AcpxPermissionProfile {
+31:         if (name == null || name.isBlank()) {
+32:             throw new IllegalArgumentException("permission profile name is required");
+33:         }
+34:         if (promptRetries < 0) {
+35:             throw new IllegalArgumentException("promptRetries must be zero or positive");
+36:         }
+37:         autoApprovedTools = autoApprovedTools == null ? List.of() : List.copyOf(autoApprovedTools);
+38:         autoApproveKinds = autoApproveKinds == null ? List.of() : List.copyOf(autoApproveKinds);
+39:         escalateKinds = escalateKinds == null ? List.of() : List.copyOf(escalateKinds);
+40:     }
+41: 
+42:     static AcpxPermissionProfile fromName(String name, boolean approveAllFallback) {
+43:         if (approveAllFallback) {
+44:             return new AcpxPermissionProfile(
+45:                     "implement",
+46:                     true,
+47:                     false,
+48:                     true,
+49:                     false,
+50:                     List.of(),
+51:                     List.of(),
+52:                     List.of(),
+53:                     0
+54:             );
+55:         }
+56:         if (name == null || name.isBlank()) {
+57:             return observe();
+58:         }
+59:         return switch (name) {
+60:             case "contract_discovery" -> contractDiscovery();
+61:             case "observe" -> observe();
+62:             case "review" -> review();
+63:             case "implement" -> implement();
+64:             default -> throw new IllegalArgumentException("unsupported acpx permission profile: " + name);
+65:         };
+66:     }
+67: 
+68:     static AcpxPermissionProfile contractDiscovery() {
+69:         return new AcpxPermissionProfile("contract_discovery", false, false, false, true, List.of(
+70:                 "Read",
+71:                 "Grep",
+72:                 "Glob"
+73:         ), List.of("read", "search"), List.of("fetch"), 1);
+74:     }
+75: 
+76:     static AcpxPermissionProfile observe() {
+77:         return new AcpxPermissionProfile("observe", false, false, true, false, List.of(
+78:                 "Read",
+79:                 "Grep",
+80:                 "Glob"
+81:         ), List.of("read", "search"), List.of("fetch"), 1);
+82:     }
+83: 
+84:     static AcpxPermissionProfile review() {
+85:         var observe = observe();
+86:         return new AcpxPermissionProfile(
+87:                 "review",
+88:                 false,
+89:                 false,
+90:                 true,
+91:                 false,
+92:                 observe.autoApprovedTools(),
+93:                 observe.autoApproveKinds(),
+94:                 observe.escalateKinds(),
+95:                 observe.promptRetries()
+96:         );
+97:     }
+98: 
+99:     static AcpxPermissionProfile implement() {
+100:         return new AcpxPermissionProfile("implement", false, false, true, false, List.of(
+101:                 "Read",
+102:                 "Write",
+103:                 "Edit",
+104:                 "MultiEdit",
+105:                 "Grep",
+106:                 "Glob",
+107:                 "Bash"
+108:         ), List.of("read", "search", "edit", "execute"), List.of("fetch"), 0);
+109:     }
+110: 
+111:     static AcpxPermissionProfile contractCorrection() {
+112:         return new AcpxPermissionProfile(
+113:                 "contract_correction",
+114:                 false,
+115:                 true,
+116:                 false,
+117:                 false,
+118:                 List.of(),
+119:                 List.of(),
+120:                 List.of(),
+121:                 0
+122:         );
+123:     }
+124: 
+125:     String autoApprovedToolsArgument() {
+126:         return String.join(",", autoApprovedTools);
+127:     }
+128: 
+129:     boolean approveReads() {
+130:         return autoApproveKinds.contains("read");
+131:     }
+132: 
+133:     boolean requiresFreshSession() {
+134:         return simpleClaudeCode;
+135:     }
+136: 
+137:     boolean escalates(String kind) {
+138:         return kind != null && escalateKinds.contains(kind);
+139:     }
+140: 
+141:     boolean allowsLocalBinding() {
+142:         return "implement".equals(name);
+143:     }
+144: 
+145:     boolean autoAllowsSandboxedBash() {
+146:         return !denyAll && !approveAll && autoApproveKinds.contains("execute")
+147:                 && autoApprovedTools.contains("Bash");
+148:     }
+149: 
+150:     AcpxPermissionProfile withAutoApprovedTool(String tool) {
+151:         if (tool == null || tool.isBlank() || autoApprovedTools.contains(tool)) {
+152:             return this;
+153:         }
+154:         var tools = new java.util.ArrayList<>(autoApprovedTools);
+155:         tools.add(tool);
+156:         return new AcpxPermissionProfile(
+157:                 name,
+158:                 approveAll,
+159:                 denyAll,
+160:                 terminalEnabled,
+161:                 simpleClaudeCode,
+162:                 tools,
+163:                 autoApproveKinds,
+164:                 escalateKinds,
+165:                 promptRetries
+166:         );
+167:     }
+168: 
+169:     String permissionPolicyJson() {
+170:         if (autoApproveKinds.isEmpty() && escalateKinds.isEmpty()) {
+171:             return "";
+172:         }
+173:         var autoApprove = autoApproveKinds.stream()
+174:                 .map(kind -> "\"" + kind + "\"")
+175:                 .collect(java.util.stream.Collectors.joining(","));
+176:         var escalate = escalateKinds.stream()
+177:                 .map(kind -> "\"" + kind + "\"")
+178:                 .collect(java.util.stream.Collectors.joining(","));
+179:         return "{\"autoApprove\":[" + autoApprove + "],\"escalate\":[" + escalate
+180:                 + "],\"defaultAction\":\"deny\"}";
+181:     }
+182: }
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ClaudeExecutionPolicy.java
+1: package dev.dual.adapter.acpx;
+2: 
+3: import com.fasterxml.jackson.core.type.TypeReference;
+4: import com.fasterxml.jackson.databind.ObjectMapper;
+5: import com.fasterxml.jackson.databind.SerializationFeature;
+6: 
+7: import java.io.IOException;
+8: import java.nio.charset.StandardCharsets;
+9: import java.nio.file.Files;
+10: import java.nio.file.Path;
+11: import java.nio.file.StandardCopyOption;
+12: import java.security.MessageDigest;
+13: import java.security.NoSuchAlgorithmException;
+14: import java.time.Instant;
+15: import java.util.HexFormat;
+16: import java.util.LinkedHashMap;
+17: import java.util.List;
+18: import java.util.Map;
+19: import dev.dual.core.id.DualId;
+20: import dev.dual.ledger.file.ExecutionNetworkGrantStore;
+21: import dev.dual.ledger.file.WorkstreamPaths;
+22: 
+23: final class ClaudeExecutionPolicy {
+24:     static final String SCHEMA = "claude_execution_policy.v2";
+25:     static final String NETWORK_TRANSPORT_OWNER = "claude_sandbox";
+26:     private static final List<String> PROVIDER_DENIED_ENV_NAMES = List.of(
+27:             "ANTHROPIC_API_KEY",
+28:             "ANTHROPIC_AUTH_TOKEN",
+29:             "ANTHROPIC_BASE_URL"
+30:     );
+31:     private static final ObjectMapper MAPPER = new ObjectMapper()
+32:             .enable(SerializationFeature.INDENT_OUTPUT)
+33:             .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+34: 
+35:     private ClaudeExecutionPolicy() {
+36:     }
+37: 
+38:     static Binding write(
+39:             Path workspaceRoot,
+40:             String workstreamId,
+41:             String nodeInstanceId,
+42:             String runId,
+43:             Path runDir
+44:     ) throws IOException {
+45:         return write(workspaceRoot, workstreamId, nodeInstanceId, runId, runDir, false, false, null);
+46:     }
+47: 
+48:     static Binding write(
+49:             Path workspaceRoot,
+50:             String workstreamId,
+51:             String nodeInstanceId,
+52:             String runId,
+53:             Path runDir,
+54:             AcpxPermissionProfile permissionProfile
+55:     ) throws IOException {
+56:         if (permissionProfile == null) {
+57:             throw new IllegalArgumentException("permissionProfile is required");
+58:         }
+59:         return write(
+60:                 workspaceRoot,
+61:                 workstreamId,
+62:                 nodeInstanceId,
+63:                 runId,
+64:                 runDir,
+65:                 permissionProfile.allowsLocalBinding(), permissionProfile.autoAllowsSandboxedBash(), null);
+66:     }
+67: 
+68:     static Binding write(Path workspaceRoot, String workstreamId, String nodeInstanceId, String runId,
+69:                          Path runDir, AcpxPermissionProfile profile, ExecutionNetworkGrantStore.Claim claim) throws IOException {
+70:         if (profile == null || claim != null && !profile.allowsLocalBinding()) {
+71:             throw new IOException("network grant requires implement profile");
+72:         }
+73:         if (claim != null) new ExecutionNetworkGrantStore().verifyClaim(
+74:                 new WorkstreamPaths(workspaceRoot.toRealPath(), new DualId(workstreamId)), claim, nodeInstanceId, runId);
+75:         return write(workspaceRoot, workstreamId, nodeInstanceId, runId, runDir,
+76:                 profile.allowsLocalBinding(), profile.autoAllowsSandboxedBash(), claim);
+77:     }
+78: 
+79:     private static Binding write(
+80:             Path workspaceRoot,
+81:             String workstreamId,
+82:             String nodeInstanceId,
+83:             String runId,
+84:             Path runDir,
+85:             boolean allowLocalBinding,
+86:             boolean autoAllowSandboxedBash,
+87:             ExecutionNetworkGrantStore.Claim claim
+88:     ) throws IOException {
+89:         var root = workspaceRoot.toRealPath();
+90:         var realRunDir = runDir.toRealPath();
+91:         if (!realRunDir.startsWith(root)) {
+92:             throw new IOException("Claude execution policy run directory is outside workspace");
+93:         }
+94:         var scratch = Path.of(System.getProperty("java.io.tmpdir")).toRealPath();
+95:         var policyPath = runDir.resolve("execution-authority").resolve("claude-execution-policy.json");
+96:         Files.createDirectories(policyPath.getParent());
+97: 
+98:         var network = new LinkedHashMap<String, Object>();
+99:         network.put("strict_allowlist", true);
+100:         network.put("allowed_domains", claim == null ? List.of() : claim.domains());
+101:         network.put("allow_local_binding", allowLocalBinding);
+102:         network.put("allow_unix_sockets", List.of());
+103: 
+104:         var filesystem = new LinkedHashMap<String, Object>();
+105:         filesystem.put("allow_read", List.of(root.toString(), scratch.toString()));
+106:         filesystem.put("allow_write", List.of(root.toString(), scratch.toString()));
+107:         filesystem.put("deny_read", List.of());
+108:         var controlRoot = root.resolve(".agent/workstreams").resolve(requireIdentifier(workstreamId, "workstreamId"));
+109:         filesystem.put("deny_write", List.of(controlRoot.resolve("nodes").toString(),
+110:                 controlRoot.resolve("execution-authority").toString()));
+111: 
+112:         var sandbox = new LinkedHashMap<String, Object>();
+113:         sandbox.put("enabled", true);
+114:         sandbox.put("fail_if_unavailable", true);
+115:         sandbox.put("allow_unsandboxed_commands", false);
+116:         sandbox.put("auto_allow_sandboxed_bash", autoAllowSandboxedBash);
+117:         sandbox.put("network", network);
+118:         sandbox.put("filesystem", filesystem);
+119: 
+120:         var document = new LinkedHashMap<String, Object>();
+121:         document.put("schema_version", SCHEMA);
+122:         document.put("workstream_id", requireIdentifier(workstreamId, "workstreamId"));
+123:         document.put("node_instance_id", requireIdentifier(nodeInstanceId, "nodeInstanceId"));
+124:         document.put("run_id", requireIdentifier(runId, "runId"));
+125:         document.put("network_transport_owner", NETWORK_TRANSPORT_OWNER);
+126:         document.put("setting_sources", List.of());
+127:         document.put("sandbox", sandbox);
+128:         document.put("provider_subprocess_denied_env_names", PROVIDER_DENIED_ENV_NAMES);
+129:         document.put("generated_at", Instant.now().toString());
+130: 
+131:         var bytes = MAPPER.writeValueAsBytes(document);
+132:         writeAtomically(policyPath, bytes);
+133:         var ref = root.relativize(policyPath.toRealPath()).toString();
+134:         var binding = new Binding(ref, sha256(bytes), workstreamId, nodeInstanceId, runId, claim);
+135:         binding.verify(root);
+136:         return binding;
+137:     }
+138: 
+139:     record Binding(
+140:             String ref,
+141:             String sha256,
+142:             String workstreamId,
+143:             String nodeInstanceId,
+144:             String runId,
+145:             ExecutionNetworkGrantStore.Claim networkGrant
+146:     ) {
+147:         Binding(String ref, String sha256, String workstreamId, String nodeInstanceId, String runId) {
+148:             this(ref, sha256, workstreamId, nodeInstanceId, runId, null);
+149:         }
+150:         Binding {
+151:             requireText(ref, "policy ref");
+152:             if (!sha256.matches("[a-f0-9]{64}")) {
+153:                 throw new IllegalArgumentException("policy SHA-256 is invalid");
+154:             }
+155:             requireIdentifier(workstreamId, "workstreamId");
+156:             requireIdentifier(nodeInstanceId, "nodeInstanceId");
+157:             requireIdentifier(runId, "runId");
+158:         }
+159: 
+160:         void verify(Path workspaceRoot) throws IOException {
+161:             var root = workspaceRoot.toRealPath();
+162:             var resolved = root.resolve(ref).normalize();
+163:             if (!resolved.startsWith(root) || !Files.isRegularFile(resolved)) {
+164:                 throw new IOException("Claude execution policy is missing or outside workspace");
+165:             }
+166:             var realPolicy = resolved.toRealPath();
+167:             if (!realPolicy.startsWith(root)) {
+168:                 throw new IOException("Claude execution policy resolves outside workspace");
+169:             }
+170:             var bytes = Files.readAllBytes(realPolicy);
+171:             if (!sha256.equals(ClaudeExecutionPolicy.sha256(bytes))) {
+172:                 throw new IOException("Claude execution policy SHA-256 mismatch");
+173:             }
+174:             Map<String, Object> document = MAPPER.readValue(bytes, new TypeReference<>() {
+175:             });
+176:             requireEquals(document, "schema_version", SCHEMA);
+177:             requireEquals(document, "workstream_id", workstreamId);
+178:             requireEquals(document, "node_instance_id", nodeInstanceId);
+179:             requireEquals(document, "run_id", runId);
+180:             requireEquals(document, "network_transport_owner", NETWORK_TRANSPORT_OWNER);
+181:             if (networkGrant != null) new ExecutionNetworkGrantStore().verifyClaim(
+182:                     new WorkstreamPaths(root, new DualId(workstreamId)), networkGrant, nodeInstanceId, runId);
+183:         }
+184: 
+185:         Map<String, Object> metadata(String disposition) {
+186:             var metadata = new LinkedHashMap<String, Object>(Map.of(
+187:                     "schema", SCHEMA,
+188:                     "policyRef", ref,
+189:                     "policySha256", sha256,
+190:                     "transportDisposition", disposition
+191:             ));
+192:             if (networkGrant != null) metadata.put("networkGrant", networkGrant.metadata());
+193:             return Map.copyOf(metadata);
+194:         }
+195:     }
+196: 
+197:     private static void requireEquals(Map<String, Object> document, String key, String expected) throws IOException {
+198:         if (!expected.equals(document.get(key))) {
+199:             throw new IOException("Claude execution policy lineage mismatch: " + key);
+200:         }
+201:     }
+202: 
+203:     private static String requireIdentifier(String value, String label) {
+204:         requireText(value, label);
+205:         if (!value.matches("[A-Za-z0-9._-]+")) {
+206:             throw new IllegalArgumentException(label + " must be a canonical identifier");
+207:         }
+208:         return value;
+209:     }
+210: 
+211:     private static void requireText(String value, String label) {
+212:         if (value == null || value.isBlank()) {
+213:             throw new IllegalArgumentException(label + " is required");
+214:         }
+215:     }
+216: 
+217:     private static String sha256(byte[] bytes) {
+218:         try {
+219:             return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+220:         } catch (NoSuchAlgorithmException impossible) {
+221:             throw new IllegalStateException(impossible);
+222:         }
+223:     }
+224: 
+225:     private static void writeAtomically(Path path, byte[] bytes) throws IOException {
+226:         var temp = path.resolveSibling(path.getFileName() + ".tmp");
+227:         Files.write(temp, bytes);
+228:         try {
+229:             Files.move(temp, path, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+230:         } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
+231:             Files.move(temp, path, StandardCopyOption.REPLACE_EXISTING);
+232:         }
+233:     }
+234: }
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+112:         boolean providerDispatchStarted = false;
+113:         try {
+114:             var agent = configText(context, "agent");
+115:             if (!"claude".equals(agent) && !"codex".equals(agent)) {
+116:                 throw new IllegalArgumentException("unsupported agent: " + agent);
+117:             }
+118:             var configuredSession = configText(context, "session");
+119:             var promptTemplate = configText(context, "prompt_template");
+120:             var runId = "run-" + Instant.now().toEpochMilli();
+121:             var e1Enabled = "claude".equals(agent) && hasNamedPermissionProfile(context);
+122:             var emissionContext = proposalEmissionContext(context);
+123:             if (emissionContext.failed() != null) {
+124:                 return emissionContext.failed();
+125:             }
+126:             var agentResultContract = agentResultContractPrompt(
+127:                     context, runId, emissionContext.context());
+128:             var sessionScopeConfigValue = context.definition().config().get("session_scope");
+129:             var nodeConfigScope = sessionScopeConfigValue instanceof String text ? text.trim() : "";
+130:             var sessionDecision = e1Enabled
+131:                     ? SessionScopePolicy.occurrenceBound(
+132:                             configuredSession,
+133:                             context.workstreamId(),
+134:                             context.instance().stageId(),
+135:                             context.instance().iterationId(),
+136:                             runId)
+137:                     : SessionScopePolicy.resolve(
+138:                             agent,
+139:                             configuredSession,
+140:                             context.workstreamId(),
+215:             }
+216:             var compactionMeta = SessionCompactionMeta.from(compactionDecision, context.workspaceRoot(), seedPath);
+217:             var effectivePermissionProfile = permissionProfile(context);
+218:             if (e1Enabled && effectivePermissionProfile.approveAll()) {
+219:                 throw new IllegalStateException(
+220:                         "NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
+221:             }
+222:             var networkGrant = e1Enabled && !prepareOnly
+223:                     ? new dev.dual.ledger.file.ExecutionNetworkGrantStore().claimIfPresent(
+224:                             new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot().toRealPath(),
+225:                                     new dev.dual.core.id.DualId(context.workstreamId())), context.instance().nodeInstanceId(), runId)
+226:                     : null;
+227:             var executionPolicy = e1Enabled
+228:                     ? ClaudeExecutionPolicy.write(
+229:                             context.workspaceRoot(),
+230:                             context.workstreamId(),
+231:                             context.instance().nodeInstanceId(),
+232:                             runId,
+233:                             runDir,
+234:                             effectivePermissionProfile, networkGrant)
+235:                     : null;
+236:             var rendered = withExternalResearchGuidance(promptRenderer.renderWithSections(
+237:                     context.workspaceRoot(),
+238:                     context.workstreamId(),
+239:                     runId,
+240:                     context.definition().id(),
+241:                     promptTemplate,
+242:                     inputRefs,
+243:                     agentResultContract,
+244:                     governanceContext.trustedTaskContractPayload().orElse(null)
+245:             ), effectivePermissionProfile);
+246:             if (!retryInstruction.isEmpty()) {
+247:                 var sections = new ArrayList<>(rendered.sections());
+335:                     stderrPath,
+336:                     sessionMeta,
+337:                     compactionMeta,
+338:                     executionPolicy
+339:             );
+340:             var request = new AcpxRunRequest(
+341:                     context.workspaceRoot(),
+342:                     session,
+343:                     promptPath,
+344:                     transcriptPath,
+345:                     stderrPath,
+346:                     effectivePermissionProfile,
+347:                     event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event),
+348:                     executionPolicy
+349:             );
+350:             var correctionRequest = new AcpxRunRequest(
+351:                     context.workspaceRoot(),
+352:                     session,
+353:                     correctionPromptPath,
+354:                     correctionTranscriptPath,
+355:                     correctionStderrPath,
+356:                     AcpxPermissionProfile.contractCorrection(),
+357:                     event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event),
+358:                     executionPolicy
+359:             );
+360:             var authoritySnapshot = ChangeBoundaryAuthoritySnapshot.capture(
+361:                     context.workspaceRoot(),
+362:                     context.workstreamId(),
+363:                     request.permissionProfile().approveAll()
+364:             );
+365:             providerDispatchStarted = true;
+366:             try {
+367:                 var acquisition = resultAcquirer.acquire(
+368:                         agent,
+369:                         request,
+370:                         correctionRequest,
+371:                         agentResultContract,
+372:                         context.workstreamId(),
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java
+173:      * Agent-neutral session-aware run path. The named session is ensured before the
+174:      * prompt process starts, so first-run session creation is owned by transport and
+175:      * never depends on a reactive signal or stderr text. A bootstrap failure forms a
+176:      * typed {@code SESSION_BOOTSTRAP_FAILED} (via {@code SessionCommandResult.toRunResult()})
+177:      * before any prompt side effect. After the run, the typed {@code isMissingSession} and
+178:      * {@code isReconnectRequired} judgments remain the only reconnect triggers: a missing
+179:      * session is re-ensured (idempotent {@code sessions ensure}) and a reconnect signal
+180:      * rebuilds the session once. Bounded correction turns bypass this path and reuse the
+181:      * already established session (see {@link #runAgentResultCorrection(String, AcpxRunRequest)}).
+182:      */
+183:     private AcpxRunResult runWithSession(String agent, AcpxRunRequest request) throws IOException, InterruptedException {
+184:         try {
+185:             validateExecutionPolicyBinding(agent, request);
+186:             var identityFailure = reviewedBuildIdentityFailure(agent, request);
+187:             if (identityFailure != null) {
+188:                 return identityFailure.toRunResult();
+189:             }
+190:             var bootstrap = ensureSession(agent, request);
+191:             if (!bootstrap.success()) {
+192:                 return bootstrap.toRunResult();
+193:             }
+194:             var result = run(agent, request);
+195:             if (isMissingSession(request, result)) {
+196:                 var reensure = ensureSession(agent, request);
+197:                 if (reensure.success()) {
+198:                     return run(agent, request);
+199:                 }
+200:                 return reensure.toRunResult();
+201:             }
+202:             if (isReconnectRequired(request, result)) {
+203:                 var rebuild = rebuildSession(agent, request);
+204:                 if (rebuild.success()) {
+205:                     return run(agent, request);
+206:                 }
+207:                 return rebuild.toRunResult();
+208:             }
+209:             return result;
+210:         } catch (InterruptedException failure) {
+211:             Thread.currentThread().interrupt();
+212:             return transportExceptionResult(agent, request, Instant.now(), null, failure, true);
+213:         }
+214:     }
+215: 
+216:     private SessionCommandResult reviewedBuildIdentityFailure(String agent, AcpxRunRequest request)
+217:             throws InterruptedException {
+218:         if (!"claude".equals(agent) || request.claudeExecutionPolicy() == null) {
+219:             return null;
+220:         }
+221:         var command = List.of(acpxExecutable, "build-info", "--json");
+222:         var result = runSessionCommand(command, request.workdir(), false, sessionCommandTimeout);
+223:         if (!result.success()) {
+224:             return result.withOutput("NETWORK_AUTHORITY_NOT_CONFIGURED: patched acpx build-info is unavailable"
+225:                     + (result.output().isBlank() ? "" : " - " + result.output()));
+226:         }
+227:         var verification = ReviewedAcpxBuildIdentity.verify(result.output());
+228:         return verification.valid() ? null : result.asFailure(verification.message());
+229:     }
+230: 
+231:     /** Sends a bounded contract-correction turn to the already established session. */
+232:     AcpxRunResult runAgentResultCorrection(String agent, AcpxRunRequest request)
+233:             throws IOException, InterruptedException {
+234:         if (!"claude".equals(agent) && !"codex".equals(agent)) {
+235:             throw new IllegalArgumentException("unsupported agent: " + agent);
+236:         }
+237:         validateExecutionPolicyBinding(agent, request);
+238:         var identityFailure = reviewedBuildIdentityFailure(agent, request);
+239:         if (identityFailure != null) {
+240:             return identityFailure.toRunResult();
+241:         }
+242:         return run(agent, request);
+243:     }
+244: 
+245:     private AcpxRunResult run(String agent, AcpxRunRequest request) throws IOException, InterruptedException {
+246:         var command = new ArrayList<String>();
+247:         command.add(acpxExecutable);
+248:         // A total deadline is an explicit operator budget, not a test of agent progress.
+435:     private void addPermissionArguments(ArrayList<String> command, AcpxRunRequest request) {
+436:         if (request.permissionProfile().promptRetries() > 0) {
+437:             command.add("--prompt-retries");
+438:             command.add(Integer.toString(request.permissionProfile().promptRetries()));
+439:         }
+440:         if (request.approveAll()) {
+441:             command.add("--approve-all");
+442:         } else {
+443:             if (request.permissionProfile().denyAll()) {
+444:                 command.add("--deny-all");
+445:             }
+446:             if (request.permissionProfile().approveReads()) {
+447:                 command.add("--approve-reads");
+448:             }
+449:             command.add("--non-interactive-permissions");
+450:             command.add("fail");
+451:             if (!request.permissionProfile().permissionPolicyJson().isBlank()) {
+452:                 command.add("--permission-policy");
+453:                 command.add(request.permissionProfile().permissionPolicyJson());
+454:             }
+455:             if (!request.permissionProfile().autoApprovedTools().isEmpty()) {
+456:                 command.add("--allowed-tools");
+457:                 command.add(request.permissionProfile().autoApprovedToolsArgument());
+458:             }
+459:             if (!request.permissionProfile().terminalEnabled()) {
+460:                 command.add("--no-terminal");
+461:             }
+462:         }
+463:     }
+464: 
+465:     private void addExecutionPolicyArguments(
+466:             ArrayList<String> command,
+467:             String agent,
+468:             AcpxRunRequest request
+469:     ) throws IOException {
+470:         validateExecutionPolicyBinding(agent, request);
+471:         var binding = request.claudeExecutionPolicy();
+472:         if (binding == null) {
+473:             return;
+474:         }
+475:         command.add("--claude-execution-policy-ref");
+476:         command.add(binding.ref());
+477:         command.add("--claude-execution-policy-sha256");
+478:         command.add(binding.sha256());
+479:     }
+480: 
+481:     private void validateExecutionPolicyBinding(String agent, AcpxRunRequest request) throws IOException {
+482:         var binding = request.claudeExecutionPolicy();
+483:         if (!"claude".equals(agent)) {
+484:             if (binding != null) {
+485:                 throw new IOException("Claude execution policy cannot be used by agent " + agent);
+486:             }
+487:             return;
+488:         }
+489:         if (binding == null) {
+490:             return;
+491:         }
+492:         if (request.approveAll()) {
+493:             throw new IOException("NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
+494:         }
+495:         binding.verify(request.workdir());
+496:     }
+497: 
+570:     private SessionCommandResult ensureSession(String agent, AcpxRunRequest request)
+571:             throws IOException, InterruptedException {
+572:         var command = new ArrayList<String>();
+573:         command.add(acpxExecutable);
+574:         // Both `sessions new` and the idempotent `sessions ensure` carry the current
+575:         // request's permission/profile args. acpx 0.11.0 applies these only when a
+576:         // fresh session is created (createClient); an existing persistent record is
+577:         // returned unchanged on reuse, so reusing a session never alters its policy.
+578:         addPermissionArguments(command, request);
+579:         addExecutionPolicyArguments(command, agent, request);
+580:         command.add(agent);
+581:         command.add("sessions");
+582:         command.add(request.permissionProfile().requiresFreshSession() ? "new" : "ensure");
+583:         command.add("--name");
+584:         command.add(request.sessionName());
+585:         var result = runSessionCommand(command, request.workdir(), request.permissionProfile().simpleClaudeCode());
+586:         if (result.success()) {
+587:             return result;
+588:         }
+589:         appendSessionCommandFailure(
+590:                 request.stderrPath(),
+591:                 "ensure",
+592:                 agent,
+593:                 request.sessionName(),
+594:                 result
+595:         );
+596:         return result;
+597:     }
+598: 
+599:     private SessionCommandResult rebuildSession(String agent, AcpxRunRequest request)
+600:             throws IOException, InterruptedException {
+601:         closeSession(agent, request);
+602:         return ensureSession(agent, request);
+603:     }
+604: 
+605:     private void closeSession(String agent, AcpxRunRequest request) throws InterruptedException {
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts
+287:   fs: boolean;
+288:   terminal: boolean;
+289:   elicitationModes: readonly AcpElicitationMode[];
+290: }): ClientCapabilities {
+291:   const baseCapabilities: ClientCapabilities = {
+292:     fs: {
+293:       readTextFile: params.fs,
+294:       writeTextFile: params.fs,
+295:     },
+296:     terminal: params.terminal,
+297:     ...(params.elicitationModes.length > 0
+298:       ? {
+299:           elicitation: {
+300:             ...(params.elicitationModes.includes("form") ? { form: {} } : {}),
+648:     };
+649: 
+650:     this.filesystem = new FileSystemHandlers({
+651:       cwd: this.options.cwd,
+652:       permissionMode: this.options.permissionMode,
+653:       nonInteractivePermissions: this.options.nonInteractivePermissions,
+654:       onOperation: (operation) => {
+655:         this.eventHandlers.onClientOperation?.(operation);
+656:       },
+657:     });
+658:     this.terminalManager = new TerminalManager({
+659:       cwd: this.options.cwd,
+660:       permissionMode: this.options.permissionMode,
+661:       nonInteractivePermissions: this.options.nonInteractivePermissions,
+662:       onOperation: (operation) => {
+663:         this.eventHandlers.onClientOperation?.(operation);
+664:       },
+665:     });
+666:   }
+667: 
+810:     if (this.connection && this.agent && isChildProcessRunning(this.agent)) {
+811:       return;
+812:     }
+813:     if (this.connection || this.agent) {
+814:       await this.close();
+815:     }
+816: 
+817:     const launch = await this.resolveAgentLaunchPlan();
+818:     this.logAgentLaunch(launch);
+819:     await this.ensureLaunchSupport(launch);
+820:     if (launch.claudeExecutionPolicyBound) {
+821:       finalizeClaudeExecutionPolicyAgentEnvironment(launch.spawnOptions.env);
+822:     }
+823:     const child = await this.spawnAgentProcess(launch);
+824:     this.closing = false;
+825:     this.agentStartedAt = isoNow();
+826:     this.lastAgentExit = undefined;
+827:     this.lastKnownPid = child.pid ?? undefined;
+828:     this.attachAgentLifecycleObservers(child);
+829:     const startupStderr: string[] = [];
+830: 
+831:     child.stderr.on("data", (chunk: Buffer | string) => {
+832:       this.captureStartupStderr(startupStderr, chunk);
+833:       if (!this.options.verbose) {
+834:         return;
+835:       }
+836:       process.stderr.write(chunk);
+837:     });
+838: 
+839:     const input = Writable.toWeb(child.stdin);
+840:     const output = Readable.toWeb(child.stdout) as ReadableStream<Uint8Array>;
+841:     const stream = this.createTappedStream(
+842:       createNdJsonMessageStream(this.options.agentCommand, input, output),
+843:     );
+844: 
+845:     const connection = this.createConnection(stream, launch);
+846:     connection.signal.addEventListener(
+847:       "abort",
+848:       () => {
+849:         this.recordAgentExit("connection_close", child.exitCode ?? null, child.signalCode ?? null);
+850:       },
+851:       { once: true },
+852:     );
+853:     const startupFailure = this.createStartupFailureWatcher(child, startupStderr);
+854: 
+855:     await this.initializeAgentConnection({
+856:       child,
+857:       connection,
+858:       startupFailure,
+859:       startupStderr,
+860:       launch,
+861:     });
+862:   }
+863: 
+864:   private async resolveAgentLaunchPlan(): Promise<AgentLaunchPlan> {
+865:     const configuredCommand = resolveAgentCommandParts(
+866:       this.options.agentCommand,
+867:       this.options.agentArgv,
+868:     );
+869:     const resolvedBuiltInLaunch = resolveBuiltInAgentLaunch(this.options.agentCommand);
+870:     const spawnCommand = resolvedBuiltInLaunch?.command ?? configuredCommand.command;
+871:     let args = resolvedBuiltInLaunch?.args ?? configuredCommand.args;
+872:     args = await resolveGeminiCommandArgs(spawnCommand, args);
+873:     if (isQoderAcpCommand(spawnCommand, args)) {
+874:       args = buildQoderAcpCommandArgs(args, this.options);
+875:     }
+876:     const claudeAcp = isClaudeAcpCommand(spawnCommand, args);
+877:     const claudeExecutionPolicyBound = this.resolveClaudeExecutionPolicyBinding(claudeAcp);
+878:     return {
+879:       spawnCommand,
+880:       args,
+881:       resolvedBuiltInLaunch,
+882:       devinAcp: isDevinAcpCommand(spawnCommand, args),
+883:       geminiAcp: isGeminiAcpCommand(spawnCommand, args),
+884:       copilotAcp: isCopilotAcpCommand(spawnCommand, args),
+885:       claudeAcp,
+886:       claudeExecutionPolicyBound,
+887:       spawnOptions: buildAgentSpawnOptions(
+888:         this.options.cwd,
+889:         this.options.authCredentials,
+890:         this.options.sessionOptions?.env,
+891:       ),
+892:     };
+893:   }
+894: 
+895:   private resolveClaudeExecutionPolicyBinding(claudeAcp: boolean): boolean {
+896:     const ref = this.options.sessionOptions?.claudeExecutionPolicyRef?.trim();
+897:     const sha256 = this.options.sessionOptions?.claudeExecutionPolicySha256?.trim();
+898:     if (!ref && !sha256) {
+899:       return false;
+900:     }
+901:     if (!ref || !sha256) {
+902:       throw new Error("claude execution policy ref and SHA-256 must be provided together");
+903:     }
+904:     if (!claudeAcp) {
+905:       throw new Error("claude execution policy is only supported by claude-agent-acp");
+906:     }
+907:     return true;
+908:   }
+909: 
+910:   private logAgentLaunch(plan: AgentLaunchPlan): void {
+911:     const launch = plan.resolvedBuiltInLaunch;
+912:     if (launch?.source === "installed") {
+913:       this.log(
+914:         `spawning installed built-in agent ${launch.packageName}${launch.packageVersion ? `@${launch.packageVersion}` : ""} via ${plan.spawnCommand} ${plan.args.join(" ")}`,
+915:       );
+916:       return;
+917:     }
+918:     if (launch?.source === "package-exec") {
+919:       this.log(
+920:         `spawning built-in agent ${launch.packageName}@${launch.packageRange} via current Node package exec bridge ${plan.spawnCommand} ${plan.args.join(" ")}`,
+921:       );
+922:       return;
+1040:   private async initializeProtocolConnection(
+1041:     connection: AcpAgentConnection,
+1042:     launch: Pick<AgentLaunchPlan, "devinAcp" | "geminiAcp">,
+1043:   ): Promise<InitializeResponse> {
+1044:     const initializePromise = connection.initialize({
+1045:       protocolVersion: PROTOCOL_VERSION,
+1046:       clientCapabilities: resolveClientCapabilities({
+1047:         devinAcp: launch.devinAcp,
+1048:         fs: this.options.fs !== false,
+1049:         terminal: this.options.terminal !== false,
+1050:         elicitationModes: this.options.elicitationModes ?? [],
+1051:       }),
+1052:       clientInfo: resolveClientInfo(launch.devinAcp),
+1053:     });
+1170: 
+1171:   async createSession(cwd = this.options.cwd): Promise<SessionCreateResult> {
+1172:     const connection = this.getConnection();
+1173:     const { command, args } = resolveAgentCommandParts(
+1174:       this.options.agentCommand,
+1175:       this.options.agentArgv,
+1176:     );
+1177:     const claudeAcp = isClaudeAcpCommand(command, args);
+1178:     const sessionCwd = await resolveAgentSessionCwd(cwd, this.options.agentCommand);
+1179: 
+1180:     let result: NewSessionResponse;
+1181:     try {
+1182:       const createPromise = this.runConnectionRequest(() =>
+1183:         connection.newSession({
+1184:           cwd: sessionCwd,
+1185:           mcpServers: this.options.mcpServers ?? [],
+1186:           _meta: buildClaudeCodeOptionsMeta(
+1187:             this.options.sessionOptions,
+1188:             claudeAcp,
+1189:             this.options.cwd,
+1190:           ),
+1191:         }),
+1192:       );
+1193:       result = claudeAcp
+1194:         ? await withTimeout(createPromise, resolveClaudeAcpSessionCreateTimeoutMs())
+1195:         : await createPromise;
+1196:     } catch (error) {
+1197:       if (claudeAcp && error instanceof TimeoutError) {
+1198:         throw new ClaudeAcpSessionCreateTimeoutError(buildClaudeAcpSessionCreateTimeoutMessage(), {
+1199:           cause: error,
+1200:           retryable: true,
+1201:         });
+1202:       }
+1203:       throw error;
+1204:     }
+1205: 
+1206:     this.loadedSessionId = result.sessionId;
+1207:     const configOptions = normalizeResponseConfigOptions(result);
+1208:     const models = modelStateFromSessionResponse({ configOptions, response: result });
+1209:     this.rememberSessionModels(result.sessionId, models);
+1210: 
+1211:     return {
+1212:       sessionId: result.sessionId,
+1213:       agentSessionId: extractRuntimeSessionId(result._meta),
+1214:       configOptions,
+1215:       models,
+1216:       configOptionsPresent: hasResponseField(result, "configOptions"),
+1217:       legacyModelMetadataPresent: hasResponseField(result, "models"),
+1218:     };
+1219:   }
+1220: 
+1221:   async loadSession(sessionId: string, cwd = this.options.cwd): Promise<SessionLoadResult> {
+1222:     this.getConnection();
+1223:     return await this.loadSessionWithOptions(sessionId, cwd, {});
+1224:   }
+1225: 
+1226:   async loadSessionWithOptions(
+1227:     sessionId: string,
+1228:     cwd = this.options.cwd,
+1229:     options: LoadSessionOptions = {},
+1230:   ): Promise<SessionLoadResult> {
+1231:     const connection = this.getConnection();
+1232:     const sessionCwd = await resolveAgentSessionCwd(cwd, this.options.agentCommand);
+1233:     const previousSuppression = this.applySessionUpdateSuppression(
+1234:       Boolean(options.suppressReplayUpdates),
+1235:     );
+1236: 
+1237:     let response: LoadSessionResponse | undefined;
+1238: 
+1239:     try {
+1240:       response = await this.runConnectionRequest(() =>
+1241:         connection.loadSession({
+1242:           sessionId,
+1243:           cwd: sessionCwd,
+1244:           mcpServers: this.options.mcpServers ?? [],
+1245:         }),
+1246:       );
+1247: 
+1248:       await this.waitForSessionUpdateDrain(
+1249:         options.replayIdleMs ?? REPLAY_IDLE_MS,
+1250:         options.replayDrainTimeoutMs ?? REPLAY_DRAIN_TIMEOUT_MS,
+1251:       );
+1252:     } finally {
+1253:       this.restoreSessionUpdateSuppression(previousSuppression);
+1254:     }
+1255: 
+1256:     this.loadedSessionId = sessionId;
+1257:     const result = toReconnectedSessionResult(response);
+1258:     this.updateRememberedSessionModels(sessionId, result);
+1259:     return result;
+1260:   }
+1261: 
+1262:   async resumeSession(sessionId: string, cwd = this.options.cwd): Promise<SessionResumeResult> {
+1263:     const connection = this.getConnection();
+1264:     const sessionCwd = await resolveAgentSessionCwd(cwd, this.options.agentCommand);
+1265:     const response = await this.runConnectionRequest(() =>
+1266:       connection.resumeSession({
+1267:         sessionId,
+1268:         cwd: sessionCwd,
+1269:         mcpServers: this.options.mcpServers ?? [],
+1270:       }),
+1271:     );
+1272: 
+1273:     this.loadedSessionId = sessionId;
+1274:     const result = toReconnectedSessionResult(response);
+1275:     this.updateRememberedSessionModels(sessionId, result);
+1276:     return result;
+1277:   }
+1278: 
+1279:   private applySessionUpdateSuppression(enabled: boolean): SessionUpdateSuppressionState {
+1280:     const previous = {
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/agent-command.ts
+301: export function buildClaudeCodeOptionsMeta(
+302:   options: AcpClientOptions["sessionOptions"],
+303:   claudeAcp = false,
+304:   cwd = process.cwd(),
+305: ): Record<string, unknown> | undefined {
+306:   const claudeCodeOptions: Record<string, unknown> = {};
+307:   if (claudeAcp) {
+308:     claudeCodeOptions.settingSources = resolveClaudeCodeSettingSources();
+309:   }
+310:   if (options) {
+311:     assignClaudeCodeOptions(claudeCodeOptions, options);
+312:     assignClaudeExecutionPolicyOptions(claudeCodeOptions, options, claudeAcp, cwd);
+313:   }
+314: 
+315:   const meta: Record<string, unknown> = {};
+316:   if (Object.keys(claudeCodeOptions).length > 0) {
+317:     meta.claudeCode = { options: claudeCodeOptions };
+318:   }
+319: 
+320:   assignClaudeCodeSystemPrompt(meta, options?.systemPrompt);
+321: 
+322:   if (Object.keys(meta).length === 0) {
+323:     return undefined;
+324:   }
+325: 
+326:   return meta;
+327: }
+328: 
+329: function assignClaudeExecutionPolicyOptions(
+330:   target: Record<string, unknown>,
+331:   options: NonNullable<AcpClientOptions["sessionOptions"]>,
+332:   claudeAcp: boolean,
+333:   cwd: string,
+334: ): void {
+335:   const ref = options.claudeExecutionPolicyRef;
+336:   const sha256 = options.claudeExecutionPolicySha256;
+337:   if (ref === undefined && sha256 === undefined) {
+338:     return;
+339:   }
+340:   if (!claudeAcp) {
+341:     throw new Error("claude execution policy is only supported by claude-agent-acp");
+342:   }
+343:   if (!ref || !sha256) {
+344:     throw new Error("claude execution policy ref and SHA-256 must be provided together");
+345:   }
+346:   const policy = loadClaudeExecutionPolicy(cwd, { ref, sha256 });
+347:   Object.assign(target, policy);
+348: }
+349: 
+350: export function resolveClaudeCodeSettingSources(env: NodeJS.ProcessEnv = process.env): string[] {
+351:   if (env.ACPX_CLAUDE_INCLUDE_USER_SETTINGS?.trim() === "1") {
+352:     return ["user", ...CLAUDE_CODE_DEFAULT_SETTING_SOURCES];
+353:   }
+354:   return [...CLAUDE_CODE_DEFAULT_SETTING_SOURCES];
+355: }
+356: 
+357: function assignClaudeCodeOptions(
+358:   target: Record<string, unknown>,
+359:   options: NonNullable<AcpClientOptions["sessionOptions"]>,
+360: ): void {
+361:   if (typeof options.model === "string" && options.model.trim().length > 0) {
+362:     target.model = options.model;
+363:   }
+364:   if (Array.isArray(options.allowedTools)) {
+365:     target.allowedTools = [...options.allowedTools];
+366:   }
+367:   if (typeof options.maxTurns === "number") {
+368:     target.maxTurns = options.maxTurns;
+369:   }
+370: }
+371: 
+372: function assignClaudeCodeSystemPrompt(
+373:   target: Record<string, unknown>,
+374:   systemPrompt: NonNullable<AcpClientOptions["sessionOptions"]>["systemPrompt"] | undefined,
+375: ): void {
+376:   if (typeof systemPrompt === "string" && systemPrompt.length > 0) {
+377:     target.systemPrompt = systemPrompt;
+378:     return;
+379:   }
+380:   if (isAppendSystemPrompt(systemPrompt)) {
+381:     target.systemPrompt = { append: systemPrompt.append };
+382:   }
+383: }
+384: 
+385: function isAppendSystemPrompt(
+386:   value: NonNullable<AcpClientOptions["sessionOptions"]>["systemPrompt"],
+387: ): value is { append: string } {
+388:   return (
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/runtime/engine/session-options.ts
+1: import type { SessionRecord } from "../../types.js";
+2: 
+3: export type SystemPromptOption = string | { append: string };
+4: 
+5: export type SessionAgentOptions = {
+6:   model?: string;
+7:   allowedTools?: string[];
+8:   maxTurns?: number;
+9:   systemPrompt?: SystemPromptOption;
+10:   /**
+11:    * Per-agent environment variables injected into the spawned agent child
+12:    * process and persisted with the session record for reconnects. Keys here
+13:    * override the parent process environment for the spawned child, except
+14:    * acpx-managed auth credential keys. Do not put secrets here; use
+15:    * authCredentials for credentials. Callers are responsible for sanitizing
+16:    * dangerous keys such as `PATH`, `LD_PRELOAD`, and `NODE_OPTIONS` before
+17:    * passing them to acpx.
+18:    */
+19:   env?: Record<string, string>;
+20:   claudeExecutionPolicyRef?: string;
+21:   claudeExecutionPolicySha256?: string;
+22: };
+23: 
+24: export function mergeSessionOptions(
+25:   preferred: SessionAgentOptions | undefined,
+26:   fallback: SessionAgentOptions | undefined,
+27: ): SessionAgentOptions | undefined {
+28:   const merged: SessionAgentOptions = { ...fallback };
+29:   assignDefinedOption(merged, "model", preferred?.model);
+30:   assignDefinedOption(merged, "allowedTools", preferred?.allowedTools);
+31:   assignDefinedOption(merged, "maxTurns", preferred?.maxTurns);
+32:   assignDefinedOption(merged, "systemPrompt", preferred?.systemPrompt);
+33:   assignDefinedOption(merged, "env", mergeEnvRecords(fallback?.env, preferred?.env));
+34:   assignPolicyBinding(merged, preferred);
+35:   return Object.keys(merged).length > 0 ? merged : undefined;
+36: }
+37: 
+38: export function assertCompatiblePersistentSessionOptions(
+39:   record: SessionRecord,
+40:   requested: SessionAgentOptions | undefined,
+41: ): void {
+42:   if (
+43:     executionPolicyBindingKey(sessionOptionsFromRecord(record)) !==
+44:     executionPolicyBindingKey(requested)
+45:   ) {
+46:     throw new Error("CLAUDE_EXECUTION_POLICY_CONFLICT: persistent session policy binding differs");
+47:   }
+48: }
+49: 
+50: function executionPolicyBindingKey(options: SessionAgentOptions | undefined): string {
+51:   return [options?.claudeExecutionPolicyRef, options?.claudeExecutionPolicySha256].join("\0");
+52: }
+53: 
+54: function assignPolicyBinding(
+55:   target: SessionAgentOptions,
+56:   source: SessionAgentOptions | undefined,
+57: ): void {
+58:   assignDefinedOption(target, "claudeExecutionPolicyRef", source?.claudeExecutionPolicyRef);
+59:   assignDefinedOption(target, "claudeExecutionPolicySha256", source?.claudeExecutionPolicySha256);
+60: }
+61: 
+62: function mergeEnvRecords(
+63:   fallback: Record<string, string> | undefined,
+64:   preferred: Record<string, string> | undefined,
+65: ): Record<string, string> | undefined {
+66:   if (!fallback && !preferred) {
+67:     return undefined;
+68:   }
+69:   return { ...fallback, ...preferred };
+70: }
+71: 
+72: function assignDefinedOption<Key extends keyof SessionAgentOptions>(
+73:   target: SessionAgentOptions,
+74:   key: Key,
+75:   value: SessionAgentOptions[Key] | undefined,
+76: ): void {
+77:   if (value !== undefined) {
+78:     target[key] = value;
+79:   }
+80: }
+81: 
+82: export function persistSessionOptions(
+83:   record: SessionRecord,
+84:   options: SessionAgentOptions | undefined,
+85: ): void {
+86:   const next = options === undefined ? undefined : persistedSessionOptions(options);
+87:   if (next !== undefined) {
+88:     record.acpx = {
+89:       ...record.acpx,
+90:       session_options: next,
+91:     };
+92:     return;
+93:   }
+94: 
+95:   if (!record.acpx) {
+96:     return;
+97:   }
+98: 
+99:   delete record.acpx.session_options;
+100: }
+101: 
+102: export function sessionOptionsFromRecord(record: SessionRecord): SessionAgentOptions | undefined {
+103:   const stored = record.acpx?.session_options;
+104:   if (!stored) {
+105:     return undefined;
+106:   }
+107: 
+108:   const sessionOptions: SessionAgentOptions = {};
+109:   assignStoredOption(sessionOptions, "model", nonEmptyString(stored.model));
+110:   assignStoredOption(sessionOptions, "allowedTools", storedAllowedTools(stored.allowed_tools));
+111:   assignStoredOption(sessionOptions, "maxTurns", storedMaxTurns(stored.max_turns));
+112:   assignStoredOption(
+113:     sessionOptions,
+114:     "systemPrompt",
+115:     storedSystemPromptOption(stored.system_prompt),
+116:   );
+117:   assignStoredOption(sessionOptions, "env", storedEnvRecord(stored.env));
+118:   assignStoredOption(
+119:     sessionOptions,
+120:     "claudeExecutionPolicyRef",
+121:     nonEmptyString(stored.claude_execution_policy_ref),
+122:   );
+123:   assignStoredOption(
+124:     sessionOptions,
+125:     "claudeExecutionPolicySha256",
+126:     storedSha256(stored.claude_execution_policy_sha256),
+127:   );
+128: 
+129:   return Object.keys(sessionOptions).length > 0 ? sessionOptions : undefined;
+130: }
+131: 
+132: type PersistedSessionOptions = NonNullable<NonNullable<SessionRecord["acpx"]>["session_options"]>;
+133: 
+134: function persistedSessionOptions(
+135:   options: SessionAgentOptions,
+136: ): PersistedSessionOptions | undefined {
+137:   const next = {
+138:     model: nonEmptyString(options.model),
+139:     allowed_tools: Array.isArray(options.allowedTools) ? [...options.allowedTools] : undefined,
+140:     max_turns: typeof options.maxTurns === "number" ? options.maxTurns : undefined,
+141:     system_prompt: normalizeSystemPromptOption(options.systemPrompt),
+142:     env: storedEnvRecord(options.env),
+143:     ...(nonEmptyString(options.claudeExecutionPolicyRef) !== undefined
+144:       ? { claude_execution_policy_ref: nonEmptyString(options.claudeExecutionPolicyRef) }
+145:       : {}),
+146:     ...(storedSha256(options.claudeExecutionPolicySha256) !== undefined
+147:       ? { claude_execution_policy_sha256: storedSha256(options.claudeExecutionPolicySha256) }
+148:       : {}),
+149:   } satisfies PersistedSessionOptions;
+150:   return hasPersistedSessionOptions(next) ? next : undefined;
+151: }
+152: 
+153: function hasPersistedSessionOptions(options: PersistedSessionOptions): boolean {
+154:   return (
+155:     options.model !== undefined ||
+156:     options.allowed_tools !== undefined ||
+157:     options.max_turns !== undefined ||
+158:     options.system_prompt !== undefined ||
+159:     options.env !== undefined ||
+160:     options.claude_execution_policy_ref !== undefined ||
+161:     options.claude_execution_policy_sha256 !== undefined
+162:   );
+163: }
+164: 
+165: function storedEnvRecord(value: unknown): Record<string, string> | undefined {
+166:   if (value === null || typeof value !== "object" || Array.isArray(value)) {
+167:     return undefined;
+168:   }
+169:   const entries = Object.entries(value as Record<string, unknown>);
+170:   const result: Record<string, string> = {};
+171:   for (const [key, raw] of entries) {
+172:     if (typeof raw !== "string") {
+173:       continue;
+174:     }
+175:     result[key] = raw;
+176:   }
+177:   return Object.keys(result).length > 0 ? result : undefined;
+178: }
+179: 
+180: function normalizeSystemPromptOption(value: unknown): SystemPromptOption | undefined {
+181:   const prompt = nonEmptyString(value);
+182:   if (prompt !== undefined) {
+183:     return prompt;
+184:   }
+185:   const append = appendedSystemPrompt(value);
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/runtime/engine/connected-session.ts
+1: import type { SetSessionConfigOptionResponse } from "@agentclientprotocol/sdk";
+2: import { AcpClient } from "../../acp/client.js";
+3: import { withInterrupt } from "../../async-control.js";
+4: import { applyConfigOptionsToRecord } from "../../session/config-options.js";
+5: import { advertisedModelState } from "../../session/model-state.js";
+6: import { absolutePath, isoNow } from "../../session/persistence.js";
+7: import type {
+8:   AcpPermissionDecision,
+9:   AcpPermissionRequest,
+10:   AcpElicitationMode,
+11:   AuthPolicy,
+12:   McpServer,
+13:   NonInteractivePermissionPolicy,
+14:   PermissionMode,
+15:   PermissionPolicy,
+16:   SessionRecord,
+17:   SessionResumePolicy,
+18: } from "../../types.js";
+19: import { applyLifecycleSnapshotToRecord } from "./lifecycle.js";
+20: import {
+21:   connectAndLoadSession,
+22:   type ConnectAndLoadSessionOptions,
+23:   type ConnectedSessionController,
+24: } from "./reconnect.js";
+25: import { sessionOptionsFromRecord } from "./session-options.js";
+26: 
+27: export type FullConnectedSessionController = ConnectedSessionController & {
+28:   setSessionModel: (modelId: string) => Promise<SetSessionConfigOptionResponse | undefined>;
+29:   setSessionConfigOption: (
+30:     configId: string,
+31:     value: string,
+32:   ) => Promise<SetSessionConfigOptionResponse>;
+33: };
+34: 
+35: type ConnectedSessionContext = {
+36:   record: SessionRecord;
+37:   client: AcpClient;
+38:   activeController: FullConnectedSessionController;
+39:   sessionId: string;
+40:   resumed: boolean;
+41:   loadError?: string;
+42: };
+43: 
+44: export type WithConnectedSessionOptions<T> = {
+45:   sessionRecordId: string;
+46:   loadRecord: (sessionRecordId: string) => Promise<SessionRecord>;
+47:   saveRecord: (record: SessionRecord) => Promise<void>;
+48:   createClient?: (options: ConstructorParameters<typeof AcpClient>[0]) => AcpClient;
+49:   mcpServers?: McpServer[];
+50:   permissionMode?: PermissionMode;
+51:   nonInteractivePermissions?: NonInteractivePermissionPolicy;
+52:   permissionPolicy?: PermissionPolicy;
+53:   onPermissionRequest?: (
+54:     req: AcpPermissionRequest,
+55:     ctx: { signal: AbortSignal },
+56:   ) => Promise<AcpPermissionDecision | undefined>;
+57:   authCredentials?: Record<string, string>;
+58:   authPolicy?: AuthPolicy;
+59:   fs?: boolean;
+60:   terminal?: boolean;
+61:   elicitationModes?: readonly AcpElicitationMode[];
+62:   resumePolicy?: SessionResumePolicy;
+63:   replacingConfigOption?: ConnectAndLoadSessionOptions["replacingConfigOption"];
+64:   timeoutMs?: number;
+65:   verbose?: boolean;
+66:   onClientAvailable?: (controller: FullConnectedSessionController) => void;
+67:   onClientClosed?: () => void;
+68:   onConnectedRecord?: (record: SessionRecord) => void;
+69:   onInterrupt?: (params: { client: AcpClient; record: SessionRecord }) => Promise<void>;
+70:   run: (context: ConnectedSessionContext) => Promise<T>;
+71: };
+72: 
+73: export type WithConnectedSessionResult<T> = {
+74:   value: T;
+75:   record: SessionRecord;
+76:   resumed: boolean;
+77:   loadError?: string;
+78: };
+79: 
+80: function createActiveSessionController(params: {
+81:   client: AcpClient;
+82:   record: SessionRecord;
+83:   getActiveSessionId: () => string;
+84: }): FullConnectedSessionController {
+85:   const getActiveSessionId = () => params.getActiveSessionId();
+86:   return {
+87:     hasActivePrompt: () => params.client.hasActivePrompt(),
+88:     requestCancelActivePrompt: async () => await params.client.requestCancelActivePrompt(),
+89:     setSessionMode: async (modeId: string) => {
+90:       await params.client.setSessionMode(getActiveSessionId(), modeId);
+91:     },
+92:     setSessionModel: async (modelId: string) => {
+93:       const models = advertisedModelState(params.record.acpx);
+94:       const response = await params.client.setSessionModel(getActiveSessionId(), modelId, models);
+95:       applyConfigOptionsToRecord(params.record, response);
+96:       return response;
+97:     },
+98:     setSessionConfigOption: async (configId: string, value: string) => {
+99:       return await params.client.setSessionConfigOption(getActiveSessionId(), configId, value);
+100:     },
+101:   };
+102: }
+103: 
+104: export async function withConnectedSession<T>(
+105:   options: WithConnectedSessionOptions<T>,
+106: ): Promise<WithConnectedSessionResult<T>> {
+107:   const record = await options.loadRecord(options.sessionRecordId);
+108:   const clientOptions: ConstructorParameters<typeof AcpClient>[0] = {
+109:     agentCommand: record.agentCommand,
+110:     agentArgv: record.agentArgv,
+111:     cwd: absolutePath(record.cwd),
+112:     mcpServers: options.mcpServers,
+113:     permissionMode: options.permissionMode ?? "approve-reads",
+114:     nonInteractivePermissions: options.nonInteractivePermissions,
+115:     permissionPolicy: options.permissionPolicy,
+116:     onPermissionRequest: options.onPermissionRequest,
+117:     authCredentials: options.authCredentials,
+118:     authPolicy: options.authPolicy,
+119:     fs: options.fs,
+120:     terminal: options.terminal,
+121:     elicitationModes: options.elicitationModes,
+122:     verbose: options.verbose,
+123:     sessionOptions: sessionOptionsFromRecord(record),
+124:   };
+125:   const client = options.createClient?.(clientOptions) ?? new AcpClient(clientOptions);
+126:   let activeSessionIdForControl = record.acpSessionId;
+127:   let notifiedClientAvailable = false;
+128:   const activeController = createActiveSessionController({
+129:     client,
+130:     record,
+131:     getActiveSessionId: () => activeSessionIdForControl,
+132:   });
+133: 
+134:   try {
+135:     return await withInterrupt(
+136:       async () => {
+137:         const { sessionId, resumed, loadError } = await connectAndLoadSession({
+138:           client,
+139:           record,
+140:           resumePolicy: options.resumePolicy,
+141:           replacingConfigOption: options.replacingConfigOption,
+142:           timeoutMs: options.timeoutMs,
+143:           verbose: options.verbose,
+144:           activeController,
+145:           onClientAvailable: (controller) => {
+146:             options.onClientAvailable?.(controller);
+147:             notifiedClientAvailable = true;
+148:           },
+149:           onConnectedRecord: options.onConnectedRecord,
+150:           onSessionIdResolved: (sessionIdValue) => {
+151:             activeSessionIdForControl = sessionIdValue;
+152:           },
+153:         });
+154: 
+155:         const value = await options.run({
+156:           record,
+157:           client,
+158:           activeController,
+159:           sessionId,
+160:           resumed,
+161:           loadError,
+162:         });
+163: 
+164:         const now = isoNow();
+165:         record.lastUsedAt = now;
+166:         record.closed = false;
+167:         record.closedAt = undefined;
+168:         record.protocolVersion = client.initializeResult?.protocolVersion;
+169:         record.agentCapabilities = client.initializeResult?.agentCapabilities;
+170:         applyLifecycleSnapshotToRecord(record, client.getAgentLifecycleSnapshot());
+
+## /Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js
+139:     if (session.forceCancelTimer) {
+140:         clearTimeout(session.forceCancelTimer);
+141:         session.forceCancelTimer = undefined;
+142:     }
+143: }
+144: /** Compute a stable fingerprint of the session-defining params so we can
+145:  *  detect when a loadSession/resumeSession call requires tearing down and
+146:  *  recreating the underlying Query process.  MCP servers are sorted by name
+147:  *  so that ordering differences don't trigger unnecessary recreations. */
+148: function computeSessionFingerprint(params) {
+149:     const servers = [...(params.mcpServers ?? [])].sort((a, b) => a.name.localeCompare(b.name));
+150:     return JSON.stringify({ cwd: params.cwd, mcpServers: servers });
+151: }
+3724:     async setSessionMode(params) {
+3725:         const session = this.sessions[params.sessionId];
+3726:         if (!session) {
+3727:             throw new Error("Session not found");
+3728:         }
+3729:         // The SDK query stream already ended (see closeQueryStream); the session is
+3730:         // a husk and `query.setPermissionMode` below would act on a closed query.
+3731:         // Fail with the same clear message prompt()/cancel() give for a dead stream.
+3732:         if (session.queryClosed) {
+3733:             throw RequestError.internalError(undefined, SESSION_ENDED_MESSAGE);
+3734:         }
+3735:         await this.applySessionMode(params.sessionId, params.modeId);
+3736:         await this.updateConfigOption(params.sessionId, MODE_CONFIG_ID, params.modeId);
+3737:         return {};
+3738:     }
+3739:     async setSessionConfigOption(params) {
+3740:         const session = this.sessions[params.sessionId];
+3826:     async applySessionMode(sessionId, modeId) {
+3827:         switch (modeId) {
+3828:             case "auto":
+3829:             case "default":
+3830:             case "acceptEdits":
+3831:             case "bypassPermissions":
+3832:             case "dontAsk":
+3833:             case "plan":
+3834:                 break;
+3835:             default:
+3836:                 throw new Error("Invalid Mode");
+3837:         }
+3838:         const session = this.sessions[sessionId];
+3839:         if (!session) {
+3840:             throw new Error("Session not found");
+3841:         }
+3842:         if (!session.modes.availableModes.some((mode) => mode.id === modeId)) {
+3843:             throw new Error(`Mode ${modeId} is not available in this session`);
+3844:         }
+3845:         try {
+3846:             await session.query.setPermissionMode(modeId);
+3847:         }
+3848:         catch (error) {
+3849:             if (error instanceof Error) {
+3850:                 if (!error.message) {
+3851:                     error.message = "Invalid Mode";
+3852:                 }
+3853:                 throw error;
+3854:             }
+3855:             else {
+3856:                 // eslint-disable-next-line preserve-caught-error
+3857:                 throw new Error("Invalid Mode");
+3858:             }
+3859:         }
+3860:     }
+4640:                 sessionUpdate: "config_option_update",
+4641:                 configOptions: session.configOptions,
+4642:             },
+4643:         });
+4644:     }
+4645:     async getOrCreateSession(params) {
+4646:         const existingSession = this.sessions[params.sessionId];
+4647:         if (existingSession) {
+4648:             const fingerprint = computeSessionFingerprint(params);
+4649:             if (fingerprint === existingSession.sessionFingerprint) {
+4650:                 return {
+4651:                     sessionId: params.sessionId,
+4652:                     modes: existingSession.modes,
+4653:                     configOptions: existingSession.configOptions,
+4654:                 };
+4655:             }
+4656:             // Session-defining params changed (e.g. cwd pointed at a git worktree,
+4657:             // or MCP servers reconfigured). Tear down the existing session and
+4658:             // recreate it so the underlying Query process picks up the new values.
+4659:             await this.teardownSession(params.sessionId);
+4660:         }
+4661:         const response = await this.createSession({
+4662:             cwd: params.cwd,
+4663:             mcpServers: params.mcpServers ?? [],
+4664:             additionalDirectories: params.additionalDirectories,
+4665:             _meta: params._meta,
+4666:         }, {
+4667:             resume: params.sessionId,
+4668:         });
+4669:         return {
+4670:             sessionId: response.sessionId,
+4671:             modes: response.modes,
+4672:             configOptions: response.configOptions,
+4673:         };
+4674:     }
+4675:     /**
+4676:      * Ensures the requested `cwd` is an absolute path that points at an existing
+4677:      * directory before we create a session. Throws an `invalidParams` error with
+4678:      * an actionable message so clients (e.g. Zed) can surface it to the user
+4696:     async createSession(params, creationOpts = {}) {
+4697:         // Validate `cwd` up front. The ACP spec requires an absolute path, and the
+4698:         // directory must actually exist on the machine running the agent. Without
+4699:         // this check a session is created against a missing directory and the
+4700:         // failure only surfaces later as a confusing "native binary failed to
+4701:         // launch" error from the SDK (see issue #749).
+4702:         await this.validateCwd(params.cwd);
+4703:         // We want to create a new session id unless it is resume,
+4704:         // but not resume + forkSession.
+4705:         let sessionId;
+4706:         if (creationOpts.forkSession) {
+4707:             sessionId = randomUUID();
+4708:         }
+4709:         else if (creationOpts.resume) {
+4710:             sessionId = creationOpts.resume;
+4711:         }
+4712:         else {
+4713:             sessionId = randomUUID();
+4714:         }
+4715:         const input = new Pushable();
+4716:         const settingsManager = new SettingsManager(params.cwd, {
+4717:             logger: this.logger,
+4718:         });
+4719:         await settingsManager.initialize();
+4720:         const mcpServers = {};
+4721:         if (Array.isArray(params.mcpServers)) {
+4722:             for (const server of params.mcpServers) {
+4723:                 if ("type" in server && (server.type === "http" || server.type === "sse")) {
+4724:                     // HTTP or SSE type MCP server
+4725:                     mcpServers[server.name] = {
+4726:                         type: server.type,
+4727:                         url: server.url,
+4728:                         headers: server.headers
+4729:                             ? Object.fromEntries(server.headers.map((e) => [e.name, e.value]))
+4730:                             : undefined,
+4731:                     };
+4732:                 }
+4733:                 else if (!("type" in server)) {
+4734:                     // Stdio type MCP server (with or without explicit type field)
+4735:                     mcpServers[server.name] = {
+4736:                         type: "stdio",
+4737:                         command: server.command,
+4738:                         args: server.args,
+4739:                         env: server.env
+4740:                             ? Object.fromEntries(server.env.map((e) => [e.name, e.value]))
+4741:                             : undefined,
+4742:                     };
+4743:                 }
+4744:             }
+4745:         }
+4746:         let systemPrompt = { type: "preset", preset: "claude_code" };
+4747:         if (params._meta?.systemPrompt) {
+4748:             const customPrompt = params._meta.systemPrompt;
+4749:             if (typeof customPrompt === "string") {
+4750:                 systemPrompt = customPrompt;
+4751:             }
+4752:             else if (typeof customPrompt === "object" &&
+4753:                 customPrompt !== null &&
+4754:                 !Array.isArray(customPrompt)) {
+4755:                 // Forward all preset options (append, excludeDynamicSections, and
+4756:                 // anything the SDK adds later) while locking type/preset.
+4757:                 systemPrompt = {
+4758:                     ...customPrompt,
+4759:                     type: "preset",
+4760:                     preset: "claude_code",
+4761:                 };
+4762:             }
+4763:         }
+4764:         const permissionMode = resolvePermissionMode(settingsManager.getSettings().permissions?.defaultMode, this.logger);
+4765:         // Extract options from _meta if provided
+4766:         const sessionMeta = params._meta;
+4767:         const userProvidedOptions = sessionMeta?.claudeCode?.options;
+4768:         const forwardSubagentText = supportsSubagentTranscript(this.clientCapabilities) ||
+4769:             userProvidedOptions?.forwardSubagentText === true;
+4770:         // Configure thinking behavior from environment variable
+4771:         const thinking = resolveThinkingConfig(process.env.MAX_THINKING_TOKENS, this.logger);
+4772:         // Parse model configuration from environment (e.g. Bedrock model overrides)
+4773:         const modelConfig = parseModelConfig(process.env.CLAUDE_MODEL_CONFIG);
+4774:         // Elicitation modes the connected client advertised. We only forward
+4775:         // elicitations (and only re-enable AskUserQuestion) for modes the client
+4776:         // can actually render.
+4777:         const elicitationSupport = {
+4778:             form: !!this.clientCapabilities?.elicitation?.form,
+4779:             url: !!this.clientCapabilities?.elicitation?.url,
+4780:         };
+4781:         // AskUserQuestion surfaces as a `permission_ask_user_question` dialog that
+4782:         // we render as a form elicitation. Without form-elicitation support there
+4783:         // is no way to present it over ACP, so keep it disabled in that case.
+4784:         const disallowedTools = elicitationSupport.form ? [] : ["AskUserQuestion"];
+4785:         // Resolve which built-in tools to expose.
+4786:         // Explicit tools array from _meta.claudeCode.options takes precedence.
+4787:         // disableBuiltInTools is a legacy shorthand for tools: [] — kept for
+4788:         // backward compatibility but callers should prefer the tools array.
+4789:         const tools = userProvidedOptions?.tools ??
+4790:             (params._meta?.disableBuiltInTools === true ? [] : { type: "preset", preset: "claude_code" });
+4791:         const abortController = userProvidedOptions?.abortController || new AbortController();
+4792:         // Per-session task state. Created here (rather than in the session record
+4793:         // below) so the TaskCreated/TaskCompleted hook callbacks can close over
+4794:         // the same Map that the streaming message handler will read from.
+4795:         const taskState = new Map();
+4796:         // Resolve every workspace root once. The hidden report tool uses this same
+4797:         // set for lexical path validation, and the SDK receives it below.
+4798:         const acpAdditionalDirectories = params.additionalDirectories ?? sessionMeta?.additionalRoots ?? [];
+4855:             // creation; provider updates recreate loaded queries between turns.
+4856:             ...providerEnv,
+4857:             // Opt-in to session state events like when the agent is idle
+4858:             CLAUDE_CODE_EMIT_SESSION_STATE_EVENTS: "1",
+4859:         };
+4860:         // Scopes the context-window cache to this query's backend (see
+4861:         // `contextWindowCache`). Derived from the same `env` object handed to the
+4862:         // SDK, so per-session `_meta` env routing and ambient process-env routing
+4863:         // are distinguished exactly as the CLI will see them.
+4864:         const providerCacheKey = providerCacheKeyFor(env);
+4865:         this.logger.log(`[session/query] sessionId=${sessionId} resume=${creationOpts?.resume ?? "none"} apiType=${resolvedProvider?.apiType ?? "native"} baseUrl=${resolvedProvider?.baseUrl ?? "native"}`);
+4866:         const options = {
+4867:             systemPrompt,
+4868:             settingSources: ["user", "project", "local"],
+4869:             ...(thinking !== undefined && { thinking }),
+4870:             ...userProvidedOptions,
+4871:             ...(settings && { settings }),
+4872:             env,
+4873:             // Override certain fields that must be controlled by ACP
+4874:             cwd: params.cwd,
+4875:             includePartialMessages: true,
+4876:             forwardSubagentText,
+4877:             mcpServers: {
+4878:                 ...(userProvidedOptions?.mcpServers || {}),
+4879:                 ...mcpServers,
+4880:                 ...(fileChangeAuditSupport
+4881:                     ? { [FILE_CHANGE_AUDIT_SERVER_NAME]: fileChangeAuditSupport.mcpServer }
+4882:                     : {}),
+4883:             },
+4884:             // If we want bypassPermissions to be an option, we have to allow it here.
+4885:             // But it doesn't work in root mode, so we only activate it if it will work.
+4886:             allowDangerouslySkipPermissions: ALLOW_BYPASS,
+4887:             permissionMode,
+4888:             canUseTool: this.canUseTool(sessionId),
+4889:             // Forward MCP elicitation requests onto ACP elicitation. Only attached
+4890:             // when the client advertised support, so non-supporting clients keep the
+4891:             // SDK's default (auto-decline) behavior. (AskUserQuestion is handled in
+4892:             // canUseTool, not here.)
+4893:             ...(elicitationSupport.form || elicitationSupport.url
+4894:                 ? { onElicitation: this.handleMcpElicitation(sessionId, elicitationSupport) }
+4895:                 : {}),
+4896:             // Render the CLI's refusal-fallback consent prompt ("<model> declined —
+4897:             // retry with <fallback>?") as an ACP form elicitation. Declaring the
+4898:             // kind is the opt-in: the CLI never emits an undeclared dialog, and the
+4899:             // flow instead degrades to the classic refusal error ending the turn.
+4900:             // Gated on form elicitation since that's the only ACP surface that can
+4901:             // present a choice outside a tool call.
+4902:             ...(elicitationSupport.form
+4903:                 ? {
+4904:                     onUserDialog: this.handleUserDialog(sessionId),
+4905:                     supportedDialogKinds: [REFUSAL_FALLBACK_DIALOG_KIND],
+4906:                 }
+4907:                 : {}),
+4908:             pathToClaudeCodeExecutable: process.env.CLAUDE_CODE_EXECUTABLE ?? (await claudeCliPath()),
+4909:             extraArgs: {
+4910:                 ...userProvidedOptions?.extraArgs,
+4911:                 "replay-user-messages": "",
+4912:             },
+4913:             disallowedTools: [...(userProvidedOptions?.disallowedTools || []), ...disallowedTools],
+4914:             tools,
+4915:             hooks: {
+4916:                 ...userProvidedOptions?.hooks,
+4917:                 ...(fileChangeAuditSupport
+4918:                     ? {
+4919:                         PreToolUse: [
+4920:                             ...(userProvidedOptions?.hooks?.PreToolUse || []),
+4921:                             { hooks: [fileChangeAuditSupport.preToolUseHook] },
+4922:                         ],
+4923:                     }
+4924:                     : {}),
+4925:                 PostToolUse: [
+4926:                     ...(userProvidedOptions?.hooks?.PostToolUse || []),
+4927:                     {
+4928:                         hooks: [
+4929:                             createPostToolUseHook({
+4930:                                 onEnterPlanMode: async () => {
+4931:                                     await this.client.sessionUpdate({
+4932:                                         sessionId,
+4933:                                         update: {
+4934:                                             sessionUpdate: "current_mode_update",
+4935:                                             currentModeId: "plan",
+4936:                                         },
+4937:                                     });
+4938:                                     await this.updateConfigOption(sessionId, MODE_CONFIG_ID, "plan");
+4939:                                 },
+4940:                             }),
+4941:                         ],
+4942:                     },
+4943:                 ],
+4944:                 ...(fileChangeAuditSupport
+4945:                     ? {
+
+## /Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/settings.js
+1: import * as fs from "node:fs";
+2: import * as path from "node:path";
+3: // resolveSettings and filterEscalatingDefaultMode are marked @alpha in the
+4: // SDK; API may shift in a future release.
+5: import { filterEscalatingDefaultMode, resolveSettings, } from "@anthropic-ai/claude-agent-sdk";
+6: import { CLAUDE_CONFIG_DIR } from "./acp-agent.js";
+7: /**
+8:  * Permission rule format examples:
+9:  * - "Read" - matches all Read tool calls
+10:  * - "Read(./.env)" - matches specific path
+11:  * - "Read(./.env.*)" - glob pattern
+12:  * - "Read(./secrets/**)" - recursive glob
+13:  * - "Bash(npm run lint)" - exact command prefix
+14:  * - "Bash(npm run:*)" - command prefix with wildcard
+15:  *
+16:  * Docs: https://code.claude.com/docs/en/iam#tool-specific-permission-rules
+17:  */
+18: function getManagedSettingsPath() {
+19:     switch (process.platform) {
+20:         case "darwin":
+21:             return "/Library/Application Support/ClaudeCode/managed-settings.json";
+22:         case "win32":
+23:             return "C:\\Program Files\\ClaudeCode\\managed-settings.json";
+24:         default:
+25:             return "/etc/claude-code/managed-settings.json";
+26:     }
+27: }
+28: /**
+29:  * Manages Claude Code settings using the SDK's `resolveSettings` merge engine
+30:  * so the values we see match what `query()` would observe.
+31:  *
+32:  * Watches the user/project/local/managed settings files for changes and
+33:  * re-resolves through the SDK on update. Escalating `permissions.defaultMode`
+34:  * values from repo-committed sources are filtered out via
+35:  * `filterEscalatingDefaultMode`, matching the CLI's trust policy.
+36:  */
+37: export class SettingsManager {
+38:     cwd;
+39:     effective = {};
+40:     watchers = [];
+41:     onChange;
+42:     logger;
+43:     initialized = false;
+44:     disposed = false;
+45:     debounceTimer = null;
+46:     initPromise = null;
+47:     constructor(cwd, options) {
+48:         this.cwd = cwd;
+49:         this.onChange = options?.onChange;
+50:         this.logger = options?.logger ?? console;
+51:     }
+52:     /**
+53:      * Initialize the settings manager by loading all settings and setting up file watchers
+54:      */
+55:     async initialize() {
+56:         if (this.initialized) {
+57:             return;
+58:         }
+59:         if (this.initPromise) {
+60:             return this.initPromise;
+61:         }
+62:         this.disposed = false;
+63:         this.initPromise = this.loadAllSettings().then(() => {
+64:             if (!this.disposed) {
+65:                 this.setupWatchers();
+66:                 this.initialized = true;
+67:             }
+68:             this.initPromise = null;
+69:         });
+70:         return this.initPromise;
+71:     }
+72:     /**
+73:      * Paths the SDK reads when resolving settings for this cwd. Watching the
+74:      * containing directories means we pick up file creation as well as edits.
+75:      */
+76:     getWatchedPaths() {
+77:         return [
+78:             path.join(CLAUDE_CONFIG_DIR, "settings.json"),
+79:             path.join(this.cwd, ".claude", "settings.json"),
+80:             path.join(this.cwd, ".claude", "settings.local.json"),
+81:             getManagedSettingsPath(),
+82:         ];
+83:     }
+84:     /**
+85:      * Resolves the effective settings via the SDK and applies the CLI's trust
+86:      * filter for escalating `permissions.defaultMode` values.
+87:      */
+88:     async loadAllSettings() {
+89:         try {
+90:             const resolved = await resolveSettings({ cwd: this.cwd });
+91:             this.effective = filterEscalatingDefaultMode(resolved);
+92:         }
+93:         catch (error) {
+94:             this.logger.error("Failed to resolve settings:", error);
+95:             this.effective = {};
+96:         }
+97:     }
+98:     /**
+99:      * Sets up file watchers for all settings files
+100:      */
+101:     setupWatchers() {
+102:         for (const filePath of this.getWatchedPaths()) {
+103:             try {
+104:                 const dir = path.dirname(filePath);
+105:                 const filename = path.basename(filePath);
+106:                 if (fs.existsSync(dir)) {
+107:                     const watcher = fs.watch(dir, (eventType, changedFilename) => {
+108:                         if (changedFilename === filename) {
+109:                             this.handleSettingsChange();
+110:                         }
+111:                     });
+112:                     watcher.on("error", (error) => {
+113:                         this.logger.error(`Settings watcher error for ${filePath}:`, error);
+114:                     });
+115:                     this.watchers.push(watcher);
+116:                 }
+117:             }
+118:             catch (error) {
+119:                 this.logger.error(`Failed to set up watcher for ${filePath}:`, error);
+120:             }
+121:         }
+122:     }
+123:     /**
+124:      * Handles settings file changes with debouncing to avoid rapid reloads
+125:      */
+126:     handleSettingsChange() {
+127:         if (this.debounceTimer) {
+128:             clearTimeout(this.debounceTimer);
+129:         }
+130:         this.debounceTimer = setTimeout(async () => {
+131:             this.debounceTimer = null;
+132:             if (this.disposed) {
+133:                 return;
+134:             }
+135:             try {
+136:                 await this.loadAllSettings();
+137:                 if (!this.disposed) {
+138:                     this.onChange?.();
+139:                 }
+140:             }
+141:             catch (error) {
+142:                 this.logger.error("Failed to reload settings:", error);
+143:             }
+144:         }, 100);
+145:     }
+146:     /**
+147:      * Returns the current merged settings
+148:      */
+149:     getSettings() {
+150:         return this.effective;
+
+## /Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts
+1397:      * To restrict which tools are available, use the `tools` option instead.
+1398:      *
+1399:      * Note: passing `'Skill'` here is deprecated — use the `skills` option instead.
+1400:      */
+1401:     allowedTools?: string[];
+1402:     /**
+1403:      * Custom permission handler for controlling tool usage. Called before each
+1404:      * tool execution to determine if it should be allowed, denied, or prompt the user.
+1405:      */
+1406:     canUseTool?: CanUseTool;
+1407:     /**
+1408:      * Continue the most recent conversation in the current directory instead of starting a new one.
+1409:      * Mutually exclusive with `resume`.
+1410:      */
+1411:     continue?: boolean;
+1412:     /**
+1413:      * Current working directory for the session. Defaults to `process.cwd()`.
+1414:      */
+1415:     cwd?: string;
+1416:     /**
+1417:      * List of tool names that are disallowed. These tools will be removed
+1418:      * from the model's context and cannot be used, even if they would
+1419:      * otherwise be allowed.
+1420:      */
+1421:     disallowedTools?: string[];
+1422:     /**
+1423:      * Map of tool-name aliases applied before name resolution. When the
+1424:      * model emits a `tool_use` whose name is a key in this map, the tool
+1425:      * execution path resolves the mapped name instead.
+1426:      *
+1427:      * This lets SDK consumers redirect built-in tool names to their own
+1428:      * tools. For example, a host that runs Bash inside a remote sandbox via
+1429:      * an MCP tool can set `{ Bash: 'mcp__workspace__bash' }` so that if the
+1430:      * model emits `Bash` (e.g. because a skill document instructed it to),
+1431:      * the call is routed to the MCP tool instead of failing as unknown.
+1432:      *
+1433:      * The redirect is single-hop: an alias that points at another aliased
+1434:      * name resolves that target literally rather than following a chain, so
+1435:      * cycles like `{A: 'B', B: 'A'}` cannot loop.
+1436:      *
+1437:      * `toolAliases` is complementary to `disallowedTools`, not a replacement
+1438:      * for it: the alias only affects name-based lookup of model-emitted
+1439:      * `tool_use` blocks, whereas `disallowedTools` also blocks harness-internal
+1440:      * direct calls that hold the tool object without a name lookup.
+1441:      *
+1442:      * @example
+1443:      * ```typescript
+1444:      * toolAliases: { Bash: 'mcp__workspace__bash' }
+1445:      * ```
+1446:      */
+1447:     toolAliases?: Record<string, string>;
+1448:     /**
+1449:      * Specify the base set of available built-in tools.
+1450:      * - `string[]` - Array of specific tool names (e.g., `['Bash', 'Read', 'Edit']`)
+1451:      * - `[]` (empty array) - Disable all built-in tools
+1452:      * - `{ type: 'preset'; preset: 'claude_code' }` - Use all default Claude Code tools
+1453:      *
+1454:      * Note: native builds may provide search via Bash `find`/`grep` instead of the
+1455:      * dedicated Grep/Glob tools. List Grep/Glob here or in `allowedTools` to get them.
+1456:      */
+1457:     tools?: string[] | {
+1458:         type: 'preset';
+1459:         preset: 'claude_code';
+1460:     };
+1461:     /**
+1945:      * ```typescript
+1946:      * settings: { model: 'claude-sonnet-5', permissions: { allow: ['Bash(*)'] } }
+1947:      * ```
+1948:      *
+1949:      * @example Path to settings file
+1950:      * ```typescript
+1951:      * settings: '/path/to/settings.json'
+1952:      * ```
+1953:      */
+1954:     settings?: string | Settings;
+1955:     /**
+1956:      * Policy-tier settings supplied by the spawning parent process. When an
+1957:      * IT-controlled managed-settings tier (server / MDM / managed-settings.json)
+1958:      * exists on the user's machine, these are **dropped by default** — they only
+1959:      * layer in if that admin opts in via `parentSettingsBehavior: 'merge'` in
+1960:      * their managed settings. Even when opted in, the value is filtered
+1961:      * restrictive-only: permissive arrays (`permissions.allow`,
+1962:      * `additionalDirectories`, `allowedMcpServers`, …) that would widen an
+1963:      * existing admin lock are silently dropped. With no admin tier present,
+1964:      * these apply as the sole policy tier (still filtered restrictive-only —
+1965:      * non-allowlisted keys are dropped regardless).
+1966:      *
+1967:      * Intended for embedding applications (e.g. desktop apps) that derive
+1968:      * lockdown settings from their own enterprise configuration and need to
+1969:      * enforce them on the spawned subprocess without writing root-owned files.
+1970:      *
+1971:      * @example
+1972:      * ```typescript
+1973:      * managedSettings: {
+1974:      *   sandbox: { network: { allowManagedDomainsOnly: true } }
+1975:      * }
+1976:      * ```
+1977:      */
+1978:     managedSettings?: Settings;
+1979:     /**
+1980:      * Control which filesystem settings to load.
+1981:      * - `'user'` - Global user settings (`~/.claude/settings.json`)
+1982:      * - `'project'` - Project settings (`.claude/settings.json`)
+1983:      * - `'local'` - Local settings (`.claude/settings.local.json`)
+1984:      *
+1985:      * When omitted, all sources are loaded (matches CLI defaults).
+1986:      * Pass `[]` to disable filesystem settings (SDK isolation mode).
+1987:      * Must include `'project'` to load CLAUDE.md files.
+1988:      */
+1989:     settingSources?: SettingSource[];
+1990:     /**
+1991:      * Skills to enable for the main session. This is the single place to turn
+1992:      * skills on; you do not need to add `'Skill'` to `allowedTools` yourself
+1993:      * when using this option.
+1994:      *
+1995:      * - omitted (default): no SDK auto-configuration. The CLI's own defaults
+1996:      *   still apply, so this is **not** "skills off."
+1997:      * - `'all'`: enable every discovered skill.
+1998:      * - `string[]`: enable only the listed skills. Names match the SKILL.md
+1999:      *   `name` / directory name, or `plugin:skill` for plugin-qualified skills.
+2000:      *
+2001:      * This is a context filter, not a sandbox: unlisted skills are hidden from
+2002:      * the model's listing and rejected by the Skill tool, but their files
+2003:      * remain on disk and are reachable via Read/Bash. Do not store secrets in
+
+## /Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js
+27219:     "Ask for approval",
+27220:     "Always ask to edit external files and use the internet",
+27221:     "standard",
+27222:     "on-request",
+27223:     "user",
+27224:     {
+27225:       type: "workspaceWrite",
+27226:       writableRoots: [],
+27227:       networkAccess: false,
+27228:       excludeTmpdirEnvVar: false,
+27229:       excludeSlashTmp: false
+27230:     },
+27231:     "workspace-write"
+27232:   );
+27233:   static Agent = new _AgentMode(
+27234:     "agent",
+27235:     "Approve for me",
+27236:     "Only ask for actions detected as potentially unsafe",
+27237:     "auto_review",
+27238:     "on-request",
+27239:     "auto_review",
+27240:     {
+27241:       type: "workspaceWrite",
+27242:       writableRoots: [],
+27243:       networkAccess: false,
+27244:       excludeTmpdirEnvVar: false,
+27245:       excludeSlashTmp: false
+27246:     },
+27247:     "workspace-write"
+27248:   );
+27249:   static AgentFullAccess = new _AgentMode(
+27250:     "agent-full-access",
+27251:     "Full access",
+27252:     "Unrestricted access to the internet and any file on your computer",
+27253:     "full_access",
+27254:     "never",
+27255:     "user",
+27256:     { "type": "dangerFullAccess" },
+27257:     "danger-full-access"
+27258:   );
+27259:   static DEFAULT_AGENT_MODE = _AgentMode.Agent;
+27260:   toSessionMode() {
+27261:     return {
+27262:       id: this.id,
+27263:       name: this.name,
+27264:       description: this.description,
+27265:       _meta: { kind: this.kind }
+27266:     };
+27267:   }
+27268:   toSessionModeState() {
+27269:     return {
+27270:       availableModes: _AgentMode.all().map((mode) => mode.toSessionMode()),
+27271:       currentModeId: this.id
+27272:     };
+27273:   }
+27274:   toConfigOption() {
+27275:     return {
+27276:       id: MODE_CONFIG_ID,
+27277:       name: "Mode",
+27278:       description: "Approval and sandboxing preset for the session",
+27279:       category: "mode",
+27280:       type: "select",
+27281:       currentValue: this.id,
+27282:       options: _AgentMode.all().map((mode) => ({
+27283:         value: mode.id,
+27284:         name: mode.name,
+27285:         description: mode.description,
+27286:         _meta: { kind: mode.kind }
+27287:       }))
+27288:     };
+27289:   }
+27290:   static all() {
+27291:     return [_AgentMode.ReadOnly, _AgentMode.Agent, _AgentMode.AgentFullAccess];
+27292:   }
+27293:   static find(modeId) {
+27294:     const match = _AgentMode.all().find((m) => m.id === modeId);
+27295:     return match ?? null;
+27296:   }
+27297:   static getInitialAgentMode() {
+27298:     const predefinedAgentMode = process.env["INITIAL_AGENT_MODE"];
+27299:     if (predefinedAgentMode) {
+27300:       return _AgentMode.find(predefinedAgentMode) ?? _AgentMode.DEFAULT_AGENT_MODE;
+27301:     } else {
+27302:       return _AgentMode.DEFAULT_AGENT_MODE;
+27303:     }
+27304:   }
+27975: var SUPPORTED_GATEWAY_PROTOCOLS = {
+27976:   openai: "responses"
+27977: };
+27978: var CodexAcpClient = class {
+27979:   codexClient;
+27980:   config;
+27981:   modelProvider;
+27982:   gatewayConfig;
+27983:   /**
+27984:    * Where the stored gateway routing came from: the `gateway` auth method
+27985:    * (agent-owned authentication) or the ACP `providers/*` API (client-driven
+27986:    * routing). `authStatus` reports only the agent-owned one.
+27987:    */
+27988:   gatewayConfigSource;
+27989:   pendingLoginCompleted = null;
+27990:   pendingAccountUpdated = null;
+27991:   sessionNotificationQueues = /* @__PURE__ */ new Map();
+27992:   subagents;
+27993:   skillExtraRoots = [];
+27994:   configPath = null;
+27995:   constructor(codexClient, codexConfig, modelProvider) {
+27996:     this.codexClient = codexClient;
+27997:     this.config = codexConfig ?? {};
+27998:     this.modelProvider = modelProvider ?? null;
+27999:     this.gatewayConfig = null;
+28000:     this.gatewayConfigSource = null;
+28001:     this.subagents = new CodexSubagentSubscriptions(codexClient);
+28002:   }
+28003:   get appServerClient() {
+28004:     return this.codexClient;
+28005:   }
+28006:   defaultClientInfo = {
+28007:     name: `${package_default.name}`,
+28008:     title: "Codex ACP",
+28009:     version: `${package_default.version}`
+28010:   };
+28011:   async initialize(request) {
+28012:     const response = await this.codexClient.initialize({
+28013:       capabilities: {
+28014:         experimentalApi: true,
+28015:         requestAttestation: false
+28016:       },
+28017:       clientInfo: {
+28018:         name: request.clientInfo?.name ?? this.defaultClientInfo.name,
+28019:         version: request.clientInfo?.version ?? this.defaultClientInfo.version,
+28020:         title: request.clientInfo?.title ?? this.defaultClientInfo.title
+28021:       }
+28022:     });
+28023:     this.configPath = response?.codexHome ?? null;
+28024:   }
+28025:   getHomePath() {
+28406:   async newSession(request) {
+28407:     const additionalDirectories = readAdditionalDirectories(request.cwd, request.additionalDirectories, request._meta);
+28408:     await this.refreshSkills(request.cwd, additionalDirectories);
+28409:     const response = await this.codexClient.threadStart({
+28410:       config: await this.createSessionConfig(request.cwd, additionalDirectories, request.mcpServers),
+28411:       modelProvider: this.getModelProvider(),
+28412:       cwd: request.cwd
+28413:     });
+28414:     const codexModels = await this.fetchAvailableModels();
+28415:     if (codexModels.length === 0) {
+28416:       throw new Error("Codex did not return any models");
+28417:     }
+28418:     const currentModelId = this.createModelId(codexModels, response.model, response.reasoningEffort).toString();
+28419:     return {
+28420:       sessionId: response.thread.id,
+28421:       currentModelId,
+28422:       models: codexModels,
+28423:       collaborationMode: this.getCollaborationMode(response.thread.id),
+28424:       modelProvider: response.modelProvider,
+28425:       currentServiceTier: response.serviceTier ?? null,
+28426:       additionalDirectories
+28427:     };
+28428:   }
+28429:   async closeSession(sessionId) {
+28430:     try {
+28431:       await this.codexClient.threadUnsubscribe({ threadId: sessionId });
+28432:     } finally {
+28433:       this.codexClient.clearThreadHandlers(sessionId);
+28434:       this.subagents.clear(sessionId);
+28435:     }
+28436:   }
+28500:   async createSessionConfig(projectPath, additionalDirectories, mcpServers) {
+28501:     const sessionRoots = [projectPath, ...additionalDirectories];
+28502:     const activeProvider = this.gatewayConfig ? {
+28503:       apiType: gatewayApiTypeFromConfig(this.gatewayConfig),
+28504:       baseUrl: this.gatewayConfig.config.base_url
+28505:     } : this.getNativeProviderConfig();
+28506:     logger.log("Creating session config", {
+28507:       projectPath,
+28508:       overrideActive: this.gatewayConfig !== null,
+28509:       modelProvider: this.getModelProvider(),
+28510:       apiType: activeProvider.apiType,
+28511:       baseUrl: activeProvider.baseUrl
+28512:     });
+28513:     const mergedConfig = {
+28514:       ...mergeGatewayConfig(this.config, this.gatewayConfig),
+28515:       projects: Object.fromEntries(sessionRoots.map((root) => [root, {
+28516:         trust_level: "trusted"
+28517:       }]))
+28518:     };
+28519:     const configWithWorkspaceRoots = mergeSandboxWorkspaceWriteRoots(mergedConfig, additionalDirectories);
+28520:     if (mcpServers.length === 0) {
+28521:       return configWithWorkspaceRoots;
+28522:     }
+28523:     const requestedServers = mcpServers.map((mcp) => ({
+28524:       name: sanitizeMcpServerName(mcp.name),
+28525:       server: mcp
+28526:     }));
+28527:     let serversToConfigure = requestedServers;
+28528:     if (shouldDeduplicateMcpConflicts()) {
+28529:       const existingNames = await this.getConfigMcpServerNames(projectPath);
+28530:       serversToConfigure = requestedServers.filter((mcp) => !existingNames.has(mcp.name));
+28531:     }
+28532:     if (serversToConfigure.length === 0) {
+28533:       return configWithWorkspaceRoots;
+28534:     }
+28535:     return {
+28536:       ...configWithWorkspaceRoots,
+28537:       "mcp_servers": Object.fromEntries(serversToConfigure.map((mcp) => [mcp.name, this.createMcpSeverConfig(mcp.server)]))
+28538:     };
+28539:   }
+28540:   async getConfigMcpServerNames(projectPath) {
+28541:     const response = await this.codexClient.configRead({ includeLayers: true, cwd: projectPath });
+28542:     const effectiveMcpServers = response?.config?.["mcp_servers"];
+28543:     const configLayers = response?.layers ?? [];
+28544:     const layerMcpServers = configLayers.map((layer) => {
+28545:       return isJsonObject(layer.config) ? layer.config["mcp_servers"] : void 0;
+28546:     });
+28547:     const configuredMcpServers = [effectiveMcpServers, ...layerMcpServers].filter(isJsonObject);
+28548:     if (configuredMcpServers.length === 0) {
+28549:       return /* @__PURE__ */ new Set();
+28550:     }
+28551:     return new Set(configuredMcpServers.flatMap((server) => Object.keys(server)));
+28552:   }
+28553:   getModelProvider() {
+28554:     return this.gatewayConfig?.modelProvider ?? this.modelProvider;
+28555:   }
+28556:   async getResumeModelProvider() {
+28655:   async sendPrompt(request, agentMode, modelId, serviceTier, disableSummary, cwd, additionalDirectories, onTurnStarted, shouldCancel) {
+28656:     const input = buildPromptItems(request.prompt);
+28657:     const effort = modelId.effort;
+28658:     await this.refreshSkills(cwd, additionalDirectories);
+28659:     if (shouldCancel?.()) {
+28660:       return null;
+28661:     }
+28662:     return await this.codexClient.runTurn({
+28663:       threadId: request.sessionId,
+28664:       input,
+28665:       approvalPolicy: agentMode.approvalPolicy,
+28666:       approvalsReviewer: agentMode.approvalsReviewer,
+28667:       sandboxPolicy: addAdditionalDirectoriesToSandboxPolicy(agentMode.sandboxPolicy, additionalDirectories),
+28668:       summary: disableSummary ? "none" : "auto",
+28669:       effort,
+28670:       model: modelId.model,
+28671:       serviceTier
+28672:     }, onTurnStarted);
+28673:   }
+28674:   async runAgentFileChangeReport(params) {
+28675:     if (params.signal?.aborted) {
+28676:       return createUnavailableAgentFileChangeReport(params.requestId, "cancelled");
+28677:     }
+28678:     const budget = new AgentFileChangeReportBudget(params.signal);
+28679:     let forkThreadId = null;
+28680:     let auditTurnId = null;
+28681:     let auditTurnCompleted = false;
+28682:     let lateStopReason = null;
+28683:     try {
+28684:       const forkPromise = this.codexClient.threadFork({
+28685:         threadId: params.sessionId,
+28686:         lastTurnId: params.turnId,
+28687:         cwd: params.workspace.cwd,
+28688:         approvalPolicy: "never",
+28689:         sandbox: "read-only",
+28690:         developerInstructions: AGENT_FILE_CHANGE_REPORT_DEVELOPER_INSTRUCTIONS,
+28691:         ephemeral: true
+28692:       });
+28693:       void forkPromise.then((fork2) => {
+28694:         if (lateStopReason !== null && forkThreadId === null) {
+28695:           void this.unsubscribeAgentFileChangeReportThread(fork2.thread.id, budget);
+28696:         }
+28697:       }, () => {
+28698:       });
+28699:       const fork = await budget.wait(forkPromise);
+28700:       forkThreadId = fork.thread.id;
+28701:       const turnPromise = this.codexClient.runTurn({
+28702:         threadId: forkThreadId,
+28703:         input: [{
+28704:           type: "text",
+28705:           text: createAgentFileChangeReportPrompt(params.workspace),
+28706:           text_elements: []
+28707:         }],
+28708:         cwd: params.workspace.cwd,
+28709:         approvalPolicy: "never",
+28710:         sandboxPolicy: { type: "readOnly", networkAccess: false },
+28711:         summary: "none",
+28712:         outputSchema: AGENT_FILE_CHANGE_REPORT_OUTPUT_SCHEMA
+28713:       }, (turnId) => {
+28714:         auditTurnId = turnId;
+33083:   async setSessionMode(_params) {
+33084:     logger.log("Set session mode requested", {
+33085:       sessionId: _params.sessionId,
+33086:       modeId: _params.modeId
+33087:     });
+33088:     const sessionState = this.sessions.get(_params.sessionId);
+33089:     if (!sessionState) throw new Error(`Session ${_params.sessionId} not found`);
+33090:     this.applyModeChange(sessionState, _params.modeId);
+33091:     return {};
+33092:   }
+33093:   async setSessionConfigOption(params) {
+33094:     logger.log("Set session config option requested", {
+33095:       sessionId: params.sessionId,
+33096:       configId: params.configId
+33097:     });
+33098:     const sessionState = this.sessions.get(params.sessionId);
+33099:     if (!sessionState) throw new Error(`Session ${params.sessionId} not found`);
+33100:     await this.applySessionConfigOption(sessionState, params);
+33101:     return {
+33102:       configOptions: this.createSessionConfigOptions(sessionState)
+33103:     };
+33104:   }
+33105:   async applySessionConfigOption(sessionState, params) {
+33106:     switch (params.configId) {
+33107:       case FAST_MODE_CONFIG_ID:
+33108:         this.applyFastModeChange(sessionState, params);
+33109:         break;
+33110:       case MODE_CONFIG_ID:
+33111:         this.applyModeChange(sessionState, this.stringConfigValue(params));
+33112:         break;
+33113:       case COLLABORATION_MODE_CONFIG_ID:
+33114:         await this.applyCollaborationModeChange(sessionState, this.stringConfigValue(params));
+33115:         break;
+33116:       case MODEL_CONFIG_ID:
+33117:         this.applyModelChange(sessionState, this.stringConfigValue(params));
+33118:         break;
+33119:       case REASONING_EFFORT_CONFIG_ID:
+33120:         this.applyReasoningEffortChange(sessionState, this.stringConfigValue(params));
+33121:         break;
+33122:       default:
+33123:         throw RequestError.invalidParams();
+33124:     }
+33125:   }
+33126:   applyFastModeChange(sessionState, params) {
+33127:     const value = params.value;
+33128:     if (typeof value === "boolean") {
+33129:       sessionState.fastModeEnabled = value;
+33130:       return;
+33131:     }
+33132:     if (value !== FAST_MODE_ON && value !== FAST_MODE_OFF) {
+33133:       throw RequestError.invalidParams();
+33134:     }
+33135:     sessionState.fastModeEnabled = value === FAST_MODE_ON;
+33136:   }
+33137:   stringConfigValue(params) {
+33138:     if (typeof params.value !== "string") {
+33139:       throw RequestError.invalidParams();
+33140:     }
+33141:     return params.value;
+33142:   }
+33143:   applyModeChange(sessionState, value) {
+33144:     const newMode = AgentMode.find(value);
+33145:     if (!newMode) {
+33146:       throw RequestError.invalidParams();
+33147:     }
+33148:     sessionState.agentMode = newMode;
+33149:   }
+33150:   async applyCollaborationModeChange(sessionState, value) {
+33151:     const mode = parseCollaborationMode(value);
+33152:     if (mode === null) {
+33153:       throw RequestError.invalidParams();
+33154:     }
+33155:     await this.codexAcpClient.setCollaborationMode(sessionState.sessionId, mode, sessionState.currentModelId);
+33156:     sessionState.collaborationMode = mode;
+33157:   }
+33158:   applyModelChange(sessionState, value) {
+
+## /Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex/package.json
+1: {
+2:   "name": "@openai/codex",
+3:   "version": "0.153.4",
+4:   "description": "Codex CLI is a coding agent from OpenAI that runs locally on your computer.",
+5:   "license": "Apache-2.0",
+6:   "bin": {
+7:     "codex": "bin/codex.js"
+8:   },
+9:   "type": "module",
+10:   "engines": {
+11:     "node": ">=16"
+12:   },
+13:   "files": [
+14:     "bin/codex.js"
+15:   ],
+16:   "repository": {
+17:     "type": "git",
+18:     "url": "git+https://github.com/openai/codex.git",
+19:     "directory": "codex-cli"
+20:   },
+21:   "packageManager": "pnpm@10.34.5+sha512.a4ee05f2f73658255bd6a89859c065a45c28a57daefae2c893a168ee2b73168c37b91e83e57ea67654ad03f03031746430e8bce38e362e042605fb8abc80192e",
+22:   "optionalDependencies": {
+23:     "@openai/codex-linux-x64": "npm:@openai/codex@0.153.4-linux-x64",
+24:     "@openai/codex-linux-arm64": "npm:@openai/codex@0.153.4-linux-arm64",
+25:     "@openai/codex-darwin-x64": "npm:@openai/codex@0.153.4-darwin-x64",
+26:     "@openai/codex-darwin-arm64": "npm:@openai/codex@0.153.4-darwin-arm64",
+27:     "@openai/codex-win32-x64": "npm:@openai/codex@0.153.4-win32-x64",
+28:     "@openai/codex-win32-arm64": "npm:@openai/codex@0.153.4-win32-arm64"
+29:   }
+30: }

@@ -1,0 +1,18 @@
+{
+  "scope": "Harness-external deterministic function grader; authored in this audit, not a third-party blind benchmark; no full OKX/browser claim",
+  "source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target/src/normalize_text.py",
+  "source_sha256": "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c",
+  "delivered": {
+    "cases": 9331,
+    "failed": 0
+  },
+  "noop_mutant": {
+    "cases": 9331,
+    "failed": 5425
+  },
+  "cr_first_mutant": {
+    "cases": 9331,
+    "failed": 966
+  },
+  "target_head": "f8ec3d41cbe1cac554a78c3131372af434440691"
+}

@@ -1,0 +1,42 @@
+   Compile with checkpointer so both interrupts can resume.
+
+Here, both nodes start from START and each calls interrupt(...).
+You use Example 2-21 to build a dictionary that maps interrupt_id to
+its value, and then resume with Command(resume=that_map).
+
+Example 2-21. Resume multiple interrupts
+def wait_for_interrupt_and_prompt(app, cfg):
+    state = app.get_state(cfg)
+    ints = getattr(state, "interrupts", []) or []
+    if not ints:
+        print("No interrupts pending")
+        return None
+
+    if len(ints) > 1:
+        print("\nMultiple interrupts pending:")
+        for i, it in enumerate(ints, 1):
+            print(f"[{i}] id={it.interrupt_id} value=
+{jdump(it.value)}")
+        print("Enter values per interrupt. Leave blank to echo
+original.")
+        resume_map = {}
+        for it in ints:
+            val = input(f"Value for {it.interrupt_id}: ").strip()
+            if val:
+                try:
+                    resume_map[it.interrupt_id] = json.loads(val)
+                except Exception:
+                    resume_map[it.interrupt_id] = val
+            else:
+                resume_map[it.interrupt_id] = it.value
+        return Command(resume=resume_map)
+
+    Collect any pending interrupts from state.
+
+   Handle multiple interruptions at once.
+
+    Print each interrupt ID and its current value.
+
+   Ask the human for a new value per interrupt.
+
+   Try to parse as JSON for structured edits.

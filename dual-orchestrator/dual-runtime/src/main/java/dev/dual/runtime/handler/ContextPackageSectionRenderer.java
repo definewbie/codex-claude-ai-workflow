@@ -33,14 +33,7 @@ final class ContextPackageSectionRenderer {
         appendTaskContract(builder, contract);
     }
 
-    static void appendLegacyTaskContract(
-            StringBuilder builder,
-            TaskContractProjectionVerifier.LegacyProjection legacy
-    ) {
-        if (legacy.contract() != null) {
-            appendTaskContract(builder, legacy.contract());
-        }
-    }
+
 
     private static void appendTaskContract(StringBuilder builder, TaskContract contract) {
         builder.append("**Objective:** ").append(contract.objective()).append("\n\n");
@@ -56,7 +49,7 @@ final class ContextPackageSectionRenderer {
             }
             builder.append("\n");
         }
-        appendListSection(builder, "Acceptance Criteria", contract.acceptanceCriteria());
+        appendListSection(builder, "Acceptance Criteria", contract.acceptanceCriteria().stream().map(c -> c.id() + ": " + c.text()).toList());
         appendListSection(builder, "Non-Goals", contract.nonGoals());
         appendListSection(builder, "Constraints", contract.constraints());
         appendListSection(builder, "Risk Areas", contract.riskAreas());
@@ -85,12 +78,7 @@ final class ContextPackageSectionRenderer {
         appendRequirementResolution(builder, qualifiedContract.resolutionDocument());
     }
 
-    static void appendLegacyRequirementResolution(
-            StringBuilder builder,
-            TaskContractProjectionVerifier.LegacyProjection legacy
-    ) {
-        appendRequirementResolution(builder, legacy.resolutionDocument());
-    }
+
 
     private static void appendRequirementResolution(StringBuilder builder, Map<String, Object> json) {
         builder.append("**Requirement Resolution**\n");
@@ -108,7 +96,7 @@ final class ContextPackageSectionRenderer {
             return;
         }
         var evidence = AgentEvidenceIndex.fromRefs(
-                context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER);
+                context.ledger(), context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER);
         var renderedSidecars = new HashSet<Path>();
         for (String inputRef : context.instance().inputRefs()) {
             var path = context.workspaceRoot().resolve(inputRef).normalize();
@@ -289,12 +277,12 @@ final class ContextPackageSectionRenderer {
         }
     }
 
-    static void appendWorkingMemory(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
-        WorkstreamMemoryProjection.appendAgentHandoff(builder, workstreamDir, workspaceRoot);
+    static void appendWorkingMemory(dev.dual.ledger.file.WorkflowFileLedger ledger, StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
+        WorkstreamMemoryProjection.appendAgentHandoff(ledger, builder, workstreamDir, workspaceRoot);
     }
 
-    static void appendReviewEvidenceBrief(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
-        WorkstreamMemoryProjection.appendReviewEvidenceBrief(builder, workstreamDir, workspaceRoot);
+    static void appendReviewEvidenceBrief(dev.dual.ledger.file.WorkflowFileLedger ledger, StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
+        WorkstreamMemoryProjection.appendReviewEvidenceBrief(ledger, builder, workstreamDir, workspaceRoot);
     }
 
     static void appendRequiredReviewSubject(
@@ -328,7 +316,7 @@ final class ContextPackageSectionRenderer {
             return;
         }
         var evidence = AgentEvidenceIndex.fromRefs(
-                context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER);
+                context.ledger(), context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER);
         var renderedSidecars = new HashSet<Path>();
         for (String inputRef : context.instance().inputRefs()) {
             var path = context.workspaceRoot().resolve(inputRef).normalize();
@@ -475,7 +463,7 @@ final class ContextPackageSectionRenderer {
             int maxItems
     ) {
         var entries = AgentEvidenceIndex.fromRefs(
-                context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER)
+                context.ledger(), context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER)
                 .recent(maxItems);
         if (entries.isEmpty()) {
             builder.append("(no routed validated agent outputs)\n\n");
@@ -533,6 +521,18 @@ final class ContextPackageSectionRenderer {
         var verification = contract.verificationSummary();
         if (!verification.isBlank()) {
             builder.append("- Verification: ").append(verification.replace("\n", " / ")).append("\n");
+        }
+        if (!contract.verificationChecks().isEmpty()) {
+            builder.append("- Criterion evidence (assertions still require independent review):\n");
+            for (var check : contract.verificationChecks()) {
+                var ref = "CURRENT".equals(check.executionRef())
+                        ? ".agent/workstreams/" + contract.workstreamId() + "/runs/" + contract.runId() + "/outputs/verification-observations.json"
+                        : check.executionRef();
+                builder.append("  - ").append(check.criterionId()).append(": ").append(check.assertion())
+                        .append("; execution evidence: ").append(ref)
+                        .append("; selected tool calls: ").append(check.toolCallIds())
+                        .append("; materials: ").append(check.materialRefs()).append("\n");
+            }
         }
         builder.append("- Contract Sidecar: ").append(toDisplayRef(sidecar)).append("\n");
         builder.append("- Raw Output: ").append(contract.sourceOutputRef()).append("\n\n");

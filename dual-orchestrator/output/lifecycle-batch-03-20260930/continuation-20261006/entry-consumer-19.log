@@ -1,0 +1,577 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] dual-cli                                                           [jar]
+[INFO] dual-server                                                        [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/9]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/9]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/9]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/9]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/9]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 86 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.203 s -- in dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.078 s -- in dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-acpx >---------------------
+[INFO] Building dual-adapter-acpx 0.1.0-SNAPSHOT                          [7/9]
+[INFO]   from dual-adapter-acpx/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-acpx ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 11 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-acpx ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-acpx ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-acpx ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-acpx ---
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-cli >--------------------------
+[INFO] Building dual-cli 0.1.0-SNAPSHOT                                   [8/9]
+[INFO]   from dual-cli/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-cli ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-cli ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 67 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-cli ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-cli ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 27 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-cli ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.cli.RecoveryShowCommandTest
+[ERROR] Tests run: 6, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 1.189 s <<< FAILURE! -- in dev.dual.cli.RecoveryShowCommandTest
+[ERROR] dev.dual.cli.RecoveryShowCommandTest.showPrintsRecoverableRuntimeAssessmentAndCurrentFailureSummary -- Time elapsed: 0.375 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at dev.dual.cli.RecoveryShowCommandTest.showPrintsRecoverableRuntimeAssessmentAndCurrentFailureSummary(RecoveryShowCommandTest.java:47)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.cli.DeliveryMergeCommandTest
+[ERROR] Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.107 s <<< FAILURE! -- in dev.dual.cli.DeliveryMergeCommandTest
+[ERROR] dev.dual.cli.DeliveryMergeCommandTest.refusesLegacyAcceptanceThatIsNotBoundToCandidateBytes -- Time elapsed: 0.106 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: missing workstream runtime identity
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:77)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:253)
+	at dev.dual.ledger.file.WorkflowFileLedger.readSession(WorkflowFileLedger.java:243)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.runtime.delivery.DeliveryApplicationService.applyBound(DeliveryApplicationService.java:108)
+	at dev.dual.runtime.delivery.DeliveryApplicationService.apply(DeliveryApplicationService.java:102)
+	at dev.dual.cli.DeliveryMergeCommand.call(DeliveryMergeCommand.java:36)
+	at dev.dual.cli.DeliveryMergeCommandTest.refusesLegacyAcceptanceThatIsNotBoundToCandidateBytes(DeliveryMergeCommandTest.java:30)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.cli.RecoveryNetworkCommandTest
+{
+  "grant" : {
+    "schemaVersion" : 1,
+    "workstreamId" : "ws-cli-network",
+    "sourceNodeInstanceId" : "node-verify-tests-001",
+    "targetNodeDefinitionId" : "verify.tests",
+    "definitionSha256" : "e00dda3709007990cb5de7a3edbb6d822e60f2ca413a62393573bb8731e56ea4",
+    "domains" : [ "api.example.org", "packages.example.org" ],
+    "note" : "approved tests",
+    "approvedAt" : "2026-10-06T11:04:42.295595Z",
+    "state" : "PENDING",
+    "claimedNodeInstanceId" : "",
+    "claimedRunId" : ""
+  },
+  "canCancel" : true,
+  "canApprove" : false,
+  "scope" : "one_execution",
+  "grantRef" : ".agent/workstreams/ws-cli-network/execution-authority/network-grants/grant-634e0f34-cba3-4158-a2d4-72dee5ce9c18.json",
+  "targets" : [ "verify.tests" ]
+}
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.171 s <<< FAILURE! -- in dev.dual.cli.RecoveryNetworkCommandTest
+[ERROR] dev.dual.cli.RecoveryNetworkCommandTest.cliApprovesAndCancelsWithoutRetrying -- Time elapsed: 0.170 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+expected: <{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-cli-network",
+  "workflowInstanceId" : "wf-cli",
+  "workflowId" : "custom",
+  "definitionVersion" : 1,
+  "status" : "WAITING_FOR_RECOVERY",
+  "activeNodeInstanceIds" : [ "node-verify-tests-001" ],
+  "openGateIds" : [ "recovery-node-verify-tests-001" ],
+  "lastEventId" : "evt-000002",
+  "updatedAt" : "2026-10-06T11:04:42.209123Z",
+  "commitSequence" : 2
+}> but was: <{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-cli-network",
+  "workflowInstanceId" : "wf-cli",
+  "workflowId" : "custom",
+  "definitionVersion" : 1,
+  "status" : "WAITING_FOR_RECOVERY",
+  "activeNodeInstanceIds" : [ "node-verify-tests-001" ],
+  "openGateIds" : [ "recovery-node-verify-tests-001" ],
+  "lastEventId" : "evt-000002",
+  "updatedAt" : "2026-10-06T11:04:42.209123Z",
+  "commitSequence" : 3
+}>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.cli.RecoveryNetworkCommandTest.cliApprovesAndCancelsWithoutRetrying(RecoveryNetworkCommandTest.java:28)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.cli.ReviewRequestActionCommandTest
+Action need recorded. Gate remains waiting; no execution was authorized.
+Action need recorded. Gate remains waiting; no execution was authorized.
+[ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.485 s <<< FAILURE! -- in dev.dual.cli.ReviewRequestActionCommandTest
+[ERROR] dev.dual.cli.ReviewRequestActionCommandTest.commandRecordsAnAdvisoryRequestAndDoesNotResolve -- Time elapsed: 0.350 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <WorkflowCurrentDocument[schemaVersion=1, workstreamId=ws-cli-request, workflowInstanceId=wf-cli-request, workflowId=cli-request, definitionVersion=1, status=WAITING_FOR_HUMAN, activeNodeInstanceIds=[node-repair-002], openGateIds=[gate-node-repair-002], lastEventId=evt-000002, updatedAt=2026-10-06T11:04:42.525848Z, commitSequence=2]> but was: <WorkflowCurrentDocument[schemaVersion=1, workstreamId=ws-cli-request, workflowInstanceId=wf-cli-request, workflowId=cli-request, definitionVersion=1, status=WAITING_FOR_HUMAN, activeNodeInstanceIds=[node-repair-002], openGateIds=[gate-node-repair-002], lastEventId=evt-000002, updatedAt=2026-10-06T11:04:42.525848Z, commitSequence=3]>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.cli.ReviewRequestActionCommandTest.commandRecordsAnAdvisoryRequestAndDoesNotResolve(ReviewRequestActionCommandTest.java:60)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.cli.RecoveryStaleCommandTest
+Recovery state: WAITING_FOR_RECOVERY
+Workstream: ws-stale-command
+Next: inspect recovery; UNKNOWN requires a structured decision and does not permit ordinary retry.
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.234 s -- in dev.dual.cli.RecoveryStaleCommandTest
+[INFO] Running dev.dual.cli.SummaryCommandTest
+[ERROR] Tests run: 4, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 0.208 s <<< FAILURE! -- in dev.dual.cli.SummaryCommandTest
+[ERROR] dev.dual.cli.SummaryCommandTest.printsWorkstreamSummaryFromLedgerFiles -- Time elapsed: 0.053 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.validateIdentity(LedgerSession.java:330)
+	at dev.dual.ledger.file.LedgerSession.validateWorkstreamIdentity(LedgerSession.java:334)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:253)
+	at dev.dual.ledger.file.WorkflowFileLedger.readSession(WorkflowFileLedger.java:243)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadCurrent(WorkflowFileLedger.java:382)
+	at dev.dual.cli.SummaryCommand.render(SummaryCommand.java:73)
+	at dev.dual.cli.SummaryCommand.call(SummaryCommand.java:52)
+	at dev.dual.cli.SummaryCommandTest.captureStdout(SummaryCommandTest.java:222)
+	at dev.dual.cli.SummaryCommandTest.printsWorkstreamSummaryFromLedgerFiles(SummaryCommandTest.java:27)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.cli.SummaryCommandTest.writesSummaryToReportsWhenRequested -- Time elapsed: 0.050 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.validateIdentity(LedgerSession.java:330)
+	at dev.dual.ledger.file.LedgerSession.validateWorkstreamIdentity(LedgerSession.java:334)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:253)
+	at dev.dual.ledger.file.WorkflowFileLedger.readSession(WorkflowFileLedger.java:243)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadCurrent(WorkflowFileLedger.java:382)
+	at dev.dual.cli.SummaryCommand.render(SummaryCommand.java:73)
+	at dev.dual.cli.SummaryCommand.call(SummaryCommand.java:52)
+	at dev.dual.cli.SummaryCommandTest.captureStdout(SummaryCommandTest.java:222)
+	at dev.dual.cli.SummaryCommandTest.writesSummaryToReportsWhenRequested(SummaryCommandTest.java:57)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.cli.SummaryCommandTest.rawAppliedPlanCannotProduceFinalizeWithoutAcceptedCandidateBinding -- Time elapsed: 0.051 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.validateIdentity(LedgerSession.java:330)
+	at dev.dual.ledger.file.LedgerSession.validateWorkstreamIdentity(LedgerSession.java:334)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:253)
+	at dev.dual.ledger.file.WorkflowFileLedger.readSession(WorkflowFileLedger.java:243)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadCurrent(WorkflowFileLedger.java:382)
+	at dev.dual.cli.SummaryCommand.render(SummaryCommand.java:73)
+	at dev.dual.cli.SummaryCommand.call(SummaryCommand.java:52)
+	at dev.dual.cli.SummaryCommandTest.captureStdout(SummaryCommandTest.java:222)
+	at dev.dual.cli.SummaryCommandTest.rawAppliedPlanCannotProduceFinalizeWithoutAcceptedCandidateBinding(SummaryCommandTest.java:105)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.cli.SummaryCommandTest.showsCurrentFailureOnlyForRecoveryStates -- Time elapsed: 0.052 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.validateIdentity(LedgerSession.java:330)
+	at dev.dual.ledger.file.LedgerSession.validateWorkstreamIdentity(LedgerSession.java:334)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:253)
+	at dev.dual.ledger.file.WorkflowFileLedger.readSession(WorkflowFileLedger.java:243)
+	at dev.dual.ledger.file.WorkflowFileLedger.loadCurrent(WorkflowFileLedger.java:382)
+	at dev.dual.cli.SummaryCommand.render(SummaryCommand.java:73)
+	at dev.dual.cli.SummaryCommand.call(SummaryCommand.java:52)
+	at dev.dual.cli.SummaryCommandTest.captureStdout(SummaryCommandTest.java:222)
+	at dev.dual.cli.SummaryCommandTest.showsCurrentFailureOnlyForRecoveryStates(SummaryCommandTest.java:75)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.cli.ProjectionsRefreshCommandTest
+Workstream ledger not found: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-7576280194148375721/.agent/workstreams/ws-missing/workflow/current.json
+[ERROR] Tests run: 5, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 0.197 s <<< FAILURE! -- in dev.dual.cli.ProjectionsRefreshCommandTest
+[ERROR] dev.dual.cli.ProjectionsRefreshCommandTest.refreshSurfacesHistoricalDeadPidRunningNodeWithoutMutatingLedger -- Time elapsed: 0.050 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: missing workstream runtime identity
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:77)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:253)
+	at dev.dual.ledger.file.WorkflowFileLedger.writeSession(WorkflowFileLedger.java:247)
+	at dev.dual.ledger.file.WorkflowFileLedger.refreshProjections(WorkflowFileLedger.java:959)
+	at dev.dual.cli.ProjectionsRefreshCommand.call(ProjectionsRefreshCommand.java:40)
+	at dev.dual.cli.ProjectionsRefreshCommandTest.captureStdout(ProjectionsRefreshCommandTest.java:455)
+	at dev.dual.cli.ProjectionsRefreshCommandTest.refreshSurfacesHistoricalDeadPidRunningNodeWithoutMutatingLedger(ProjectionsRefreshCommandTest.java:119)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.cli.ProjectionsRefreshCommandTest.refreshesTimelineAndMetricsFromExistingLedger -- Time elapsed: 0.049 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: missing workstream runtime identity
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:77)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:253)
+	at dev.dual.ledger.file.WorkflowFileLedger.writeSession(WorkflowFileLedger.java:247)
+	at dev.dual.ledger.file.WorkflowFileLedger.refreshProjections(WorkflowFileLedger.java:959)
+	at dev.dual.cli.ProjectionsRefreshCommand.call(ProjectionsRefreshCommand.java:40)
+	at dev.dual.cli.ProjectionsRefreshCommandTest.captureStdout(ProjectionsRefreshCommandTest.java:455)
+	at dev.dual.cli.ProjectionsRefreshCommandTest.refreshesTimelineAndMetricsFromExistingLedger(ProjectionsRefreshCommandTest.java:37)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.cli.ProjectionsRefreshCommandTest.refreshSurfacesExecutionConsistencyWarningsWithoutMutatingLedger -- Time elapsed: 0.048 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: missing workstream runtime identity
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:77)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:253)
+	at dev.dual.ledger.file.WorkflowFileLedger.writeSession(WorkflowFileLedger.java:247)
+	at dev.dual.ledger.file.WorkflowFileLedger.refreshProjections(WorkflowFileLedger.java:959)
+	at dev.dual.cli.ProjectionsRefreshCommand.call(ProjectionsRefreshCommand.java:40)
+	at dev.dual.cli.ProjectionsRefreshCommandTest.captureStdout(ProjectionsRefreshCommandTest.java:455)
+	at dev.dual.cli.ProjectionsRefreshCommandTest.refreshSurfacesExecutionConsistencyWarningsWithoutMutatingLedger(ProjectionsRefreshCommandTest.java:86)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.cli.ProjectionsRefreshCommandTest.refreshSurfacesAttemptOutcomeConflictsWithoutMutatingLedger -- Time elapsed: 0.048 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: missing workstream runtime identity
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:77)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:253)
+	at dev.dual.ledger.file.WorkflowFileLedger.writeSession(WorkflowFileLedger.java:247)
+	at dev.dual.ledger.file.WorkflowFileLedger.refreshProjections(WorkflowFileLedger.java:959)
+	at dev.dual.cli.ProjectionsRefreshCommand.call(ProjectionsRefreshCommand.java:40)
+	at dev.dual.cli.ProjectionsRefreshCommandTest.captureStdout(ProjectionsRefreshCommandTest.java:455)
+	at dev.dual.cli.ProjectionsRefreshCommandTest.refreshSurfacesAttemptOutcomeConflictsWithoutMutatingLedger(ProjectionsRefreshCommandTest.java:155)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   RecoveryNetworkCommandTest.cliApprovesAndCancelsWithoutRetrying:28 expected: <{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-cli-network",
+  "workflowInstanceId" : "wf-cli",
+  "workflowId" : "custom",
+  "definitionVersion" : 1,
+  "status" : "WAITING_FOR_RECOVERY",
+  "activeNodeInstanceIds" : [ "node-verify-tests-001" ],
+  "openGateIds" : [ "recovery-node-verify-tests-001" ],
+  "lastEventId" : "evt-000002",
+  "updatedAt" : "2026-10-06T11:04:42.209123Z",
+  "commitSequence" : 2
+}> but was: <{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-cli-network",
+  "workflowInstanceId" : "wf-cli",
+  "workflowId" : "custom",
+  "definitionVersion" : 1,
+  "status" : "WAITING_FOR_RECOVERY",
+  "activeNodeInstanceIds" : [ "node-verify-tests-001" ],
+  "openGateIds" : [ "recovery-node-verify-tests-001" ],
+  "lastEventId" : "evt-000002",
+  "updatedAt" : "2026-10-06T11:04:42.209123Z",
+  "commitSequence" : 3
+}>
+[ERROR]   RecoveryShowCommandTest.showPrintsRecoverableRuntimeAssessmentAndCurrentFailureSummary:47 expected: <true> but was: <false>
+[ERROR]   ReviewRequestActionCommandTest.commandRecordsAnAdvisoryRequestAndDoesNotResolve:60 expected: <WorkflowCurrentDocument[schemaVersion=1, workstreamId=ws-cli-request, workflowInstanceId=wf-cli-request, workflowId=cli-request, definitionVersion=1, status=WAITING_FOR_HUMAN, activeNodeInstanceIds=[node-repair-002], openGateIds=[gate-node-repair-002], lastEventId=evt-000002, updatedAt=2026-10-06T11:04:42.525848Z, commitSequence=2]> but was: <WorkflowCurrentDocument[schemaVersion=1, workstreamId=ws-cli-request, workflowInstanceId=wf-cli-request, workflowId=cli-request, definitionVersion=1, status=WAITING_FOR_HUMAN, activeNodeInstanceIds=[node-repair-002], openGateIds=[gate-node-repair-002], lastEventId=evt-000002, updatedAt=2026-10-06T11:04:42.525848Z, commitSequence=3]>
+[ERROR] Errors: 
+[ERROR]   DeliveryMergeCommandTest.refusesLegacyAcceptanceThatIsNotBoundToCandidateBytes:30 » IO INVALID_LOCAL_COMMIT: missing workstream runtime identity
+[ERROR]   ProjectionsRefreshCommandTest.refreshSurfacesAttemptOutcomeConflictsWithoutMutatingLedger:155->captureStdout:455 » IO INVALID_LOCAL_COMMIT: missing workstream runtime identity
+[ERROR]   ProjectionsRefreshCommandTest.refreshSurfacesExecutionConsistencyWarningsWithoutMutatingLedger:86->captureStdout:455 » IO INVALID_LOCAL_COMMIT: missing workstream runtime identity
+[ERROR]   ProjectionsRefreshCommandTest.refreshSurfacesHistoricalDeadPidRunningNodeWithoutMutatingLedger:119->captureStdout:455 » IO INVALID_LOCAL_COMMIT: missing workstream runtime identity
+[ERROR]   ProjectionsRefreshCommandTest.refreshesTimelineAndMetricsFromExistingLedger:37->captureStdout:455 » IO INVALID_LOCAL_COMMIT: missing workstream runtime identity
+[ERROR]   SummaryCommandTest.printsWorkstreamSummaryFromLedgerFiles:27->captureStdout:222 » IO INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+[ERROR]   SummaryCommandTest.rawAppliedPlanCannotProduceFinalizeWithoutAcceptedCandidateBinding:105->captureStdout:222 » IO INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+[ERROR]   SummaryCommandTest.showsCurrentFailureOnlyForRecoveryStates:75->captureStdout:222 » IO INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+[ERROR]   SummaryCommandTest.writesSummaryToReportsWhenRequested:57->captureStdout:222 » IO INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+[INFO] 
+[ERROR] Tests run: 21, Failures: 3, Errors: 9, Skipped: 0
+[INFO] 
+[ERROR] There are test failures.
+
+See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/surefire-reports for the individual test results.
+See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[INFO] 
+[INFO] ------------------------< dev.dual:dual-server >------------------------
+[INFO] Building dual-server 0.1.0-SNAPSHOT                                [9/9]
+[INFO]   from dual-server/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-server ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 7 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-server ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-server ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-server ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 14 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-server ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.server.WorkstreamApiControllerTest
+[ERROR] Tests run: 29, Failures: 2, Errors: 1, Skipped: 0, Time elapsed: 6.524 s <<< FAILURE! -- in dev.dual.server.WorkstreamApiControllerTest
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.timelineReturnsNodesInChronologicalOrder -- Time elapsed: 0.214 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <early> but was: <first>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.server.WorkstreamApiControllerTest.timelineReturnsNodesInChronologicalOrder(WorkstreamApiControllerTest.java:190)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.statusAndOverviewExposeAgentTaskDispatchReadModel -- Time elapsed: 0.114 s <<< ERROR!
+java.nio.file.NoSuchFileException: /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-8358378468024003146/.agent/workstreams/ws-api-agent-task/executions/nodes/nxe-api-agent-task.json
+	at dev.dual.ledger.file.LedgerSession.readBytes(LedgerSession.java:97)
+	at dev.dual.ledger.file.AtomicJsonWriter.readBytes(AtomicJsonWriter.java:62)
+	at dev.dual.ledger.file.AtomicJsonWriter.read(AtomicJsonWriter.java:53)
+	at dev.dual.ledger.file.AgentTaskLedgerWriter.markRunning(AgentTaskLedgerWriter.java:83)
+	at dev.dual.ledger.file.WorkflowFileLedger.markAgentTaskRunning(WorkflowFileLedger.java:573)
+	at dev.dual.ledger.file.WorkflowFileLedger.markAgentTaskRunning(WorkflowFileLedger.java:568)
+	at dev.dual.server.WorkstreamApiControllerTest.statusAndOverviewExposeAgentTaskDispatchReadModel(WorkstreamApiControllerTest.java:380)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.timelineReturnsProjectionJson -- Time elapsed: 0.197 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: java.lang.String@1f19d423<WAITING_FOR_HUMAN> but was: dev.dual.core.workflow.WorkflowStatus@58a2b4c<WAITING_FOR_HUMAN>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.server.WorkstreamApiControllerTest.timelineReturnsProjectionJson(WorkstreamApiControllerTest.java:150)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   WorkstreamApiControllerTest.timelineReturnsNodesInChronologicalOrder:190 expected: <early> but was: <first>
+[ERROR]   WorkstreamApiControllerTest.timelineReturnsProjectionJson:150 expected: java.lang.String@1f19d423<WAITING_FOR_HUMAN> but was: dev.dual.core.workflow.WorkflowStatus@58a2b4c<WAITING_FOR_HUMAN>
+[ERROR] Errors: 
+[ERROR]   WorkstreamApiControllerTest.statusAndOverviewExposeAgentTaskDispatchReadModel:380 » NoSuchFile /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-8358378468024003146/.agent/workstreams/ws-api-agent-task/executions/nodes/nxe-api-agent-task.json
+[INFO] 
+[ERROR] Tests run: 29, Failures: 2, Errors: 1, Skipped: 0
+[INFO] 
+[ERROR] There are test failures.
+
+See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/target/surefire-reports for the individual test results.
+See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.221 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  0.027 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  0.054 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  0.015 s]
+[INFO] dual-runtime ....................................... SUCCESS [  2.206 s]
+[INFO] dual-adapter-acpx .................................. SUCCESS [  0.035 s]
+[INFO] dual-cli ........................................... SUCCESS [  3.247 s]
+[INFO] dual-server ........................................ SUCCESS [  6.929 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  12.871 s
+[INFO] Finished at: 2026-10-06T19:04:50+08:00
+[INFO] ------------------------------------------------------------------------

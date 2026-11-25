@@ -1,0 +1,80 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1791700286524-bb86e853",
+  "agentTaskId" : "agt-1791700286519-cafd570d",
+  "workflowExecutionId" : "wfe-1791700286437-f22292f8",
+  "nodeInstanceId" : "node-design-claude_design-017",
+  "nodeDefinitionId" : "design.claude_design",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "pid" : 80463,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/design-claude.stderr.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/design-claude.transcript.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/design-claude.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-claude_design-017-run-1791700286570/binding.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/design-claude.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-11T06:31:25.272Z",
+      "input_identity" : "8d5604e9a86a23bc602d14367d154046bea7ea99ffb89958ab5ae0627d4045e0",
+      "executor_pid" : 80463
+    },
+    "prepared_run" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/nxe-1791700286524-bb86e853-prepared.json",
+      "sha256" : "9397d7dccef790df13781d5e2c6ebb9499fcc81e89d33f341de78881b1ef0d09"
+    },
+    "adapter_signals" : [ ],
+    "agent" : "claude",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "design_result",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "READY_FOR_ARCH_REVIEW",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/design-claude.contract.json",
+    "contract_sidecar_sha256" : "22b78042520150aea3c28091e32da6bfd11c532a6f25c4b984939bff938ec4e9",
+    "decision" : "READY_FOR_ARCH_REVIEW",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-claude_design-017-run-1791700286570/binding.json",
+    "repository_fact_binding_sha256" : "16af937e15e3f0e7834b87c726384c9cabe1bbd491a55965eb9e3b67904f54ff",
+    "run_id" : "run-1791700286570",
+    "run_metadata" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/run.json",
+    "session" : "claude-main-ws-20261011T044656Z-BMDJ-run-1791700286570",
+    "summary" : "完整替换设计：算法与三文件结构沿用已认可形态，AC-2 验证改为 unittest 真实输出加逐案例 repr 实测打印两条必选步骤，实际返回值展示不再可选。",
+    "transcript_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/design-claude.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/nxe-1791700286524-bb86e853-completion.json",
+    "completion_sha256" : "2cc57eb2b40e7385c6a7754bf3045e50d09b960542990a01e479415b9bccab76",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "run-1791700286570",
+  "agentRunRef" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/run.json",
+  "agent" : "claude",
+  "session" : "claude-main-ws-20261011T044656Z-BMDJ-run-1791700286570",
+  "exitCode" : 0,
+  "startedAt" : "2026-10-11T06:31:26.524364Z",
+  "finishedAt" : "2026-10-11T06:33:47.753574Z",
+  "durationMs" : 141229
+}

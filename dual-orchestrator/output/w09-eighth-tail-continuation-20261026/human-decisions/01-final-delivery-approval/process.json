@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/opt/homebrew/Cellar/rtk/0.42.3/bin/rtk",
+    "proxy",
+    "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin/java",
+    "-jar",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015/release/dual-cli-0.1.0-SNAPSHOT.jar",
+    "review",
+    "approve",
+    "--workdir=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+    "--note=用户批准当前三文件最终交付候选 5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb；允许原交付入口应用到既有第八例隔离target；commit仍由用户执行。累计300万token、18请求、3600活动秒及储备规则不变，历史停止记录保留。",
+    "ws-20261023T005431Z-9YYF"
+  ],
+  "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+  "started_at": "2026-10-26T09:28:05.070939+08:00",
+  "purpose": "Current explicit human final delivery approval; no --run"
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation": "https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd",
+    "version": "3.0.2",
+    "name": "dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest",
+    "time": "0.413",
+    "tests": "1",
+    "errors": "0",
+    "skipped": "0",
+    "failures": "1"
+  },
+  {
+    "{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation": "https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd",
+    "version": "3.0.2",
+    "name": "dev.dual.adapter.acpx.AcpxUsageWireCompletenessTest",
+    "time": "0.003",
+    "tests": "1",
+    "errors": "0",
+    "skipped": "0",
+    "failures": "1"
+  }
+]

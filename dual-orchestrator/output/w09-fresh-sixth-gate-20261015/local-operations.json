@@ -1,0 +1,194 @@
+[
+  {
+    "label": "git-init",
+    "argv": [
+      "git",
+      "init",
+      "-b",
+      "main"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/target",
+    "exit": 0,
+    "elapsed_seconds": 0.014
+  },
+  {
+    "label": "empty-base-commit",
+    "argv": [
+      "git",
+      "-c",
+      "core.hooksPath=/dev/null",
+      "-c",
+      "commit.gpgSign=false",
+      "commit",
+      "--allow-empty",
+      "-m",
+      "Initialize fresh Dual verification target"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/target",
+    "exit": 0,
+    "elapsed_seconds": 0.017
+  },
+  {
+    "label": "start",
+    "argv": [
+      "java",
+      "-Xlog:class+load=debug:file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-sixth-gate-20261015/start-classloading.log:uptime,level,tags",
+      "-jar",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-revision-forward-fix-20261014/release/dual-cli-0.1.0-SNAPSHOT.jar",
+      "start",
+      "--workdir=/private/tmp/dual-w09-newlines-20261015-fresh-06/target",
+      "--worktree-dir=/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+      "--branch=codex/w09-newlines-20261015-fresh-06",
+      "--workflow-variant=terminal-delivery",
+      "--prompt-language=zh-CN",
+      "--task-file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-sixth-gate-20261015/task-requirement.md"
+    ],
+    "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator",
+    "exit": 0,
+    "elapsed_seconds": 1.443
+  },
+  {
+    "label": "build-info",
+    "argv": [
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "build-info",
+      "--json"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+    "exit": 0,
+    "elapsed_seconds": 0.123
+  },
+  {
+    "label": "config-show",
+    "argv": [
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "config",
+      "show"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+    "exit": 0,
+    "elapsed_seconds": 0.099
+  },
+  {
+    "label": "host-python",
+    "argv": [
+      "python3",
+      "-I",
+      "-c",
+      "import sys,unittest,importlib,json; print(json.dumps(dict(executable=sys.executable,version=sys.version,unittest=unittest.__file__,importlib=importlib.__file__,isolated=sys.flags.isolated)))"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+    "exit": 0,
+    "elapsed_seconds": 0.031
+  },
+  {
+    "label": "target-head",
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/target",
+    "exit": 0,
+    "elapsed_seconds": 0.009
+  },
+  {
+    "label": "target-tree",
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD^{tree}"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/target",
+    "exit": 0,
+    "elapsed_seconds": 0.008
+  },
+  {
+    "label": "target-common-dir",
+    "argv": [
+      "git",
+      "rev-parse",
+      "--path-format=absolute",
+      "--git-common-dir"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/target",
+    "exit": 0,
+    "elapsed_seconds": 0.007
+  },
+  {
+    "label": "target-status",
+    "argv": [
+      "git",
+      "status",
+      "--porcelain"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/target",
+    "exit": 0,
+    "elapsed_seconds": 0.008
+  },
+  {
+    "label": "target-tracked",
+    "argv": [
+      "git",
+      "ls-files"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/target",
+    "exit": 0,
+    "elapsed_seconds": 0.008
+  },
+  {
+    "label": "workspace-head",
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+    "exit": 0,
+    "elapsed_seconds": 0.008
+  },
+  {
+    "label": "workspace-tree",
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD^{tree}"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+    "exit": 0,
+    "elapsed_seconds": 0.008
+  },
+  {
+    "label": "workspace-common-dir",
+    "argv": [
+      "git",
+      "rev-parse",
+      "--path-format=absolute",
+      "--git-common-dir"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+    "exit": 0,
+    "elapsed_seconds": 0.007
+  },
+  {
+    "label": "workspace-status",
+    "argv": [
+      "git",
+      "status",
+      "--porcelain"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+    "exit": 0,
+    "elapsed_seconds": 0.009
+  },
+  {
+    "label": "workspace-tracked",
+    "argv": [
+      "git",
+      "ls-files"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+    "exit": 0,
+    "elapsed_seconds": 0.008
+  }
+]

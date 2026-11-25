@@ -1,0 +1,186 @@
+{
+  "input": {
+    "actual_tokens": 51762,
+    "completed_calls": 2,
+    "active_seconds": 146.234,
+    "remaining_mainline": [
+      "design.claude_design",
+      "design.codex_arch_review",
+      "plan.claude_plan",
+      "plan.codex_plan_review",
+      "implement.claude_implement",
+      "implement.claude_self_test_report",
+      "acceptance.codex_verifier_review"
+    ],
+    "new_extra_calls": [],
+    "measurement_complete": true,
+    "external_pending": false
+  },
+  "result": {
+    "result": "ALLOW_BUDGET_ONLY",
+    "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+    "required_token_reserve": 1015000,
+    "required_call_reserve": 8,
+    "remaining_tokens": 1648238,
+    "remaining_calls": 16,
+    "warning": false
+  },
+  "observation": {
+    "completed_runs": [
+      {
+        "run_id": "run-1792717427983",
+        "node_id": "intake.claude_brainstorm",
+        "agent": "claude",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 12273,
+          "outputTokens": 7015,
+          "cachedReadTokens": 4928,
+          "cachedWriteTokens": 0,
+          "totalTokens": 24216,
+          "costAmount": 0.23920399999999997,
+          "costCurrency": "USD",
+          "source": "acpx_stream",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": 0.23920399999999997,
+          "sessionCostCurrency": "USD",
+          "providerId": "zhipu",
+          "model": "glm-5.3",
+          "billingMode": "subscription_token_only",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "7bdcea18-5233-4263-9689-20327c9e56ab",
+            "record_id": "05607b4d-1875-4342-9454-e0ad019d6b42",
+            "request_id": "3",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 12273,
+              "outputTokens": 7015,
+              "cachedReadTokens": 4928,
+              "cachedWriteTokens": 0,
+              "totalTokens": 24216,
+              "costAmount": 0.23920399999999997,
+              "costCurrency": "USD",
+              "source": "acpx_stream",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": 0.23920399999999997,
+              "sessionCostCurrency": "USD",
+              "providerId": "zhipu",
+              "model": "glm-5.3",
+              "billingMode": "subscription_token_only",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "inputTokens": 12273,
+              "outputTokens": 7015,
+              "cachedReadTokens": 4928,
+              "cachedWriteTokens": 0,
+              "totalTokens": 24216
+            },
+            "transcript_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.transcript.log",
+            "transcript_sha256": "33293e308c0f0ba8211e903d8cd1ba79051dca45b19a0bd25bab9f597a65afcf",
+            "usage_source_ref": "/Users/kriswang/.acpx/sessions/05607b4d-1875-4342-9454-e0ad019d6b42.stream.ndjson",
+            "usage_source_sha256": "7782e3b4356ba498c50d3af28d3f191a7b4cf4e71830ce495e058c0296f70f1f"
+          }
+        ]
+      },
+      {
+        "run_id": "run-1792717558540",
+        "node_id": "intake.codex_product_review",
+        "agent": "codex",
+        "outcome": {
+          "status": "SUCCESS",
+          "primaryReason": "completed",
+          "nodeMaySucceed": true,
+          "retryPolicy": "NONE",
+          "recoveryCategory": "NONE",
+          "operatorMessage": "The agent produced valid result and artifact evidence.",
+          "secondarySignals": []
+        },
+        "usage": {
+          "inputTokens": 13704,
+          "outputTokens": 914,
+          "cachedReadTokens": 12928,
+          "cachedWriteTokens": 0,
+          "totalTokens": 27546,
+          "costAmount": null,
+          "costCurrency": "",
+          "source": "acpx_current_transcript",
+          "measurementType": "PROVIDER_RUN_USAGE",
+          "attribution": "EXACT_REQUEST_MATCH",
+          "cumulative": false,
+          "contextUsedTokens": 0,
+          "sessionCostAmount": null,
+          "sessionCostCurrency": "",
+          "providerId": "openai",
+          "model": "GPT-6-Astra",
+          "billingMode": "metered",
+          "providerMetadataSource": "acpx_session_json",
+          "unavailableReason": ""
+        },
+        "occurrences": [
+          {
+            "session_id": "01a1664b-2902-7702-a04f-63ca9ddc4c2b",
+            "record_id": "01a1664b-1ea2-7e72-824f-a15b70c68b84",
+            "request_id": "3",
+            "occurrence": 1,
+            "fixed_usage": {
+              "inputTokens": 13704,
+              "outputTokens": 914,
+              "cachedReadTokens": 12928,
+              "cachedWriteTokens": 0,
+              "totalTokens": 27546,
+              "costAmount": null,
+              "costCurrency": "",
+              "source": "acpx_current_transcript",
+              "measurementType": "PROVIDER_RUN_USAGE",
+              "attribution": "EXACT_REQUEST_MATCH",
+              "cumulative": false,
+              "contextUsedTokens": 0,
+              "sessionCostAmount": null,
+              "sessionCostCurrency": "",
+              "providerId": "openai",
+              "model": "GPT-6-Astra",
+              "billingMode": "metered",
+              "providerMetadataSource": "acpx_session_json",
+              "unavailableReason": ""
+            },
+            "native_usage": {
+              "totalTokens": 27546,
+              "inputTokens": 13704,
+              "cachedReadTokens": 12928,
+              "outputTokens": 914,
+              "thoughtTokens": 110
+            },
+            "transcript_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log",
+            "transcript_sha256": "1be51432bc7e219f3572d9cc5be1dad5f81bea34d9636467270816a42b1568ee",
+            "usage_source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log",
+            "usage_source_sha256": "1be51432bc7e219f3572d9cc5be1dad5f81bea34d9636467270816a42b1568ee"
+          }
+        ]
+      }
+    ],
+    "actual_tokens": 51762,
+    "completed_calls": 2,
+    "measurement_complete": true,
+    "cost_note": "SDK amounts retained; not actual subscription payment. No invented mixed-provider price."
+  }
+}

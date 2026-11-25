@@ -1,0 +1,19 @@
+test_old_true_does_not_approve_new_combination (test_continuation.AssemblyTest.test_old_true_does_not_approve_new_combination) ... FAIL
+
+======================================================================
+FAIL: test_old_true_does_not_approve_new_combination (test_continuation.AssemblyTest.test_old_true_does_not_approve_new_combination)
+----------------------------------------------------------------------
+AssertionError: Unauthorized launch reached
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/w09-launch-mutant-ge2mk2ok/test_continuation.py", line 349, in test_old_true_does_not_approve_new_combination
+    with self.assertRaisesRegex(AssertionError,'Unapproved launch combination'):self.run_entry('run-one-step.py',['old-auth','plan.decision'])
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "Unapproved launch combination" does not match "Unauthorized launch reached"
+
+----------------------------------------------------------------------
+Ran 1 test in 0.013s
+
+FAILED (failures=1)

@@ -1,0 +1,19 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "read_reuse_contract",
+  "workstreamId" : "ws-20261014T234009Z-RN9X",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-context-intake_codex_product_review-003",
+  "nodeDefinitionId" : "context.intake_codex_product_review",
+  "targetNodeDefinitionId" : "intake.codex_product_review",
+  "iterationId" : "iter-001",
+  "preferExistingEvidence" : true,
+  "avoidRepeatingReads" : [ ],
+  "reusableReadFiles" : [ ],
+  "invalidatedReadFiles" : [ ],
+  "allowedRereadFiles" : [ ],
+  "reuseSource" : "run_history",
+  "requireReasonWhenRereading" : false,
+  "reasonField" : "",
+  "generatedAt" : "2026-10-14T23:41:37.546705Z"
+}

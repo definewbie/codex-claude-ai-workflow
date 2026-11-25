@@ -1,0 +1,40 @@
+method offers a pragmatic middle ground between a simple ReAct loop (see
+“How to Make Your Agent Take Action and Reflect”) and the full
+computational complexity of more tree-search-based algorithms, which I’ll
+cover in “Test Time Compute: Balancing Size with Thought”.
+
+
+        TOT AS AN ENGINEERING SHORTCUT
+
+    A lightweight ToT setup, where a smaller model proposes branches and a stronger
+     model evaluates them, can sometimes replace the need for a full multi-agent
+       architecture. In this case, the “roles” are workflow stages rather than independent
+      agents. This simplifies design and saves both money and time by avoiding repeated calls
+       to large reasoning models when a smaller setup already provides reliable results.
+
+
+You begin by creating a “tree” of possibilities. The propose_options
+node in Example 2-4 is the first step. Instead of producing a single, linear
+output, it uses a smaller LLM to generate three distinct approaches for a
+blog post. In this example, the branching factor is intentionally limited to
+three so the workflow remains easy to inspect and inexpensive to run. These
+options represent candidate branches, or “thoughts” in the ToT sense, that
+the workflow can evaluate before choosing a path. This is different from
+exposing a reasoning model’s internal trace. Here, a “thought” is an explicit
+candidate output generated as part of the workflow. This is the core
+principle of ToT: moving beyond a single-chain process toward multi-path
+exploration.
+
+Example 2-4. Thought generation
+def propose_options(state: BlogState) -> BlogState:
+    """Generator (small): propose 3 creative approaches (ToT-style
+branching)."""
+    proposer = gen_llm.with_structured_output(OptionsPayload)
+    prompt = (
+        "Generate exactly 3 distinct approaches for a developer-
+focused blog on:\n"
+        f"{state['topic']}\n\nFor each option, provide: title,
+audience, angle, "
+        "a 5-bullet outline, and a concise rationale."
+    )
+    payload: OptionsPayload = proposer.invoke(prompt)

@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "lastProjectId" : "target-615e7612",
+  "projects" : [ {
+    "projectId" : "target-615e7612",
+    "name" : "target",
+    "repoRoot" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/target",
+    "agentRunsDir" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/target-agent-runs",
+    "lastOpenedAt" : "2026-10-26T14:22:03.632612Z",
+    "workstreams" : [ {
+      "workstreamId" : "ws-20261026T142203Z-7SNA",
+      "effectiveWorkdir" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree",
+      "title" : "# 智能套利追平简单赚币的资金费率阈值",
+      "status" : "created",
+      "updatedAt" : "2026-10-26T14:22:03.632612Z"
+    } ]
+  } ]
+}

@@ -1,0 +1,19 @@
+{
+  "status": "PASS_MATERIAL_INTEGRITY_ONLY",
+  "baseline_existing_files": 869,
+  "changed_existing_files": [
+    "docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md"
+  ],
+  "unexpected_changes": [],
+  "broken_local_links": [],
+  "product_and_test_baseline_contents_unchanged": true,
+  "product_test_changes": 0,
+  "tests_run": false,
+  "native_provider_runs": 0,
+  "meaning": "Verifies only document links and unchanged measured baseline inputs; not C implemented, regression passed, design independently reviewed or Gate promoted.",
+  "new_product_test_src_files": [],
+  "changed_product_test_src_files": [],
+  "current_src_files_checked": 638
+}

@@ -1,0 +1,30 @@
+{
+  "details" : {
+    "cleanup" : false,
+    "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--timeout", "600", "--ttl", "1800", "--prompt-retries", "1", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "--no-terminal", "--claude-execution-policy-ref", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "8fc5f2e57d508a477b69dbd7f592ac6ed143eb8b1f77988ed397eb49d624ff6c", "claude", "-s", "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680", "-f", "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/prompts/intake-claude-brainstorm.md" ],
+    "command_id" : "536ae11e-51fc-41aa-a73f-677f5d86e0bf",
+    "invocation" : {
+      "agent" : "claude",
+      "cwd" : "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+      "executable" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "launch_environment" : {
+        "CLAUDE_CODE_EXECUTABLE" : "",
+        "PATH" : "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.codex/tmp/arg0/codex-arg04zOxWP:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS"
+      },
+      "schema" : "dual.acpx.invocation.v1",
+      "session" : "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680"
+    },
+    "prompt" : "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/prompts/intake-claude-brainstorm.md",
+    "prompt_sha256" : "206d03302895c2802e176424bf1cc8de3100a58f30be323c4da29f895c7775b5",
+    "purpose" : "prompt",
+    "request_options" : [ "--prompt-retries", "1", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "--no-terminal", "--claude-execution-policy-ref", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "8fc5f2e57d508a477b69dbd7f592ac6ed143eb8b1f77988ed397eb49d624ff6c" ],
+    "session" : "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680"
+  },
+  "kind" : "command_intent",
+  "ordinal" : 4,
+  "prepared" : {
+    "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/outputs/nxe-1791636537653-6d731ae2-prepared.json",
+    "sha256" : "0b694eff25083c3f8e5d7e2c4762ce91da772a8d15a10c771c197036aefca1f8"
+  },
+  "schema" : "dual.run.command.v1"
+}

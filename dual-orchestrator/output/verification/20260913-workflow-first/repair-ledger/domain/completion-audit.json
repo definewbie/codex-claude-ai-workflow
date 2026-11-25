@@ -1,0 +1,11 @@
+{
+  "schemaVersion" : 1,
+  "lifecycleState" : "ENDED",
+  "status" : "ready",
+  "workflowStatus" : "COMPLETED",
+  "finalNodeDefinitionId" : "gate.human_next_stage_approval",
+  "finalOutcome" : "complete",
+  "gaps" : [ ],
+  "completedAt" : "2026-09-13T16:07:11.557601Z",
+  "generatedAt" : "2026-09-13T16:07:11.558868Z"
+}

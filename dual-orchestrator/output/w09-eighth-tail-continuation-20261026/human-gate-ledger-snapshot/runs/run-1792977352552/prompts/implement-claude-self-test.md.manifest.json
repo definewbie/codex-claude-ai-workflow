@@ -1,0 +1,169 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "runId" : "run-1792977352552",
+  "nodeId" : "implement.claude_self_test_report",
+  "agent" : "claude",
+  "promptTemplate" : "implement-claude-self-test",
+  "promptPath" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/prompts/implement-claude-self-test.md",
+  "totalBytes" : 49023,
+  "totalEstimatedTokens" : 12256,
+  "sections" : [ {
+    "name" : "workspace_guard",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "workspace-guard",
+    "bytes" : 465,
+    "estimatedTokens" : 117,
+    "sha256" : "1c38a82cdfe20fcb44d80188b584a111fe711b8858f569240c8fdd68c835b4e7",
+    "includedReason" : "execution safety boundary",
+    "required" : true
+  }, {
+    "name" : "language_policy",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "language-policy",
+    "bytes" : 244,
+    "estimatedTokens" : 61,
+    "sha256" : "d20252d3644a0521308cb5b24f421c899463b6078aece0141858ed2ed32f50d5",
+    "includedReason" : "output language policy",
+    "required" : true
+  }, {
+    "name" : "structured_artifact_field_semantics",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "structured-artifact-field-semantics",
+    "bytes" : 0,
+    "estimatedTokens" : 0,
+    "sha256" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "includedReason" : "structured artifact field semantics",
+    "required" : false
+  }, {
+    "name" : "template_static_frame",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "dev/dual/adapter/acpx/prompts/implement-claude-self-test.md",
+    "bytes" : 2853,
+    "estimatedTokens" : 714,
+    "sha256" : "f393d0332968ad6f17d2e0ba4cd5c00dc6904895f416400a5c7791c27312900a",
+    "includedReason" : "prompt skeleton instructions",
+    "required" : true
+  }, {
+    "name" : "requirement",
+    "sourceType" : "requirement",
+    "sourceRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/requirement.md",
+    "bytes" : 1190,
+    "estimatedTokens" : 298,
+    "sha256" : "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+    "includedReason" : "task requirement",
+    "required" : true
+  }, {
+    "name" : "context_package",
+    "sourceType" : "context_package",
+    "sourceRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.stderr.log,.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.transcript.log,.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.json,.agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_implement-030-run-1792967793610/binding.json,.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/verification-observations.json,.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.contract.json,.agent/workstreams/ws-20261023T005431Z-9YYF/context/agent-governance-node-implement-claude_self_test_report-031-run-1792977352552.md",
+    "bytes" : 10459,
+    "estimatedTokens" : 2615,
+    "sha256" : "fa5d74b956524f26c7177406aac3e0c4bf9ef2014e0e282712024f0625fd253f",
+    "includedReason" : "prior artifacts / assembled context",
+    "required" : true
+  }, {
+    "name" : "read_reuse_contract",
+    "sourceType" : "read_reuse_contract",
+    "sourceRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.stderr.log,.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.transcript.log,.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.json,.agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_implement-030-run-1792967793610/binding.json,.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/verification-observations.json,.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792967793610/outputs/implement-claude.contract.json,.agent/workstreams/ws-20261023T005431Z-9YYF/context/agent-governance-node-implement-claude_self_test_report-031-run-1792977352552.md",
+    "bytes" : 0,
+    "estimatedTokens" : 0,
+    "sha256" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "includedReason" : "typed memory read-reuse projection",
+    "required" : false
+  }, {
+    "name" : "contract_review_principles",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "contract-review-principles.md",
+    "bytes" : 1996,
+    "estimatedTokens" : 499,
+    "sha256" : "255a1af39f7d8cc79006c28508b0833b7f25c8a60ef50ec52fbd956a5947a5f8",
+    "includedReason" : "review principles",
+    "required" : true
+  }, {
+    "name" : "prompt_contract",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "ContractRegistry:implement.claude_self_test_report",
+    "bytes" : 2525,
+    "estimatedTokens" : 632,
+    "sha256" : "cc0ab55fbea5ad39f4683f135a938efd94c071ce78c4a71388be198f6ecc36a7",
+    "includedReason" : "strict agent result envelope",
+    "required" : true
+  }, {
+    "name" : "external_research_discipline",
+    "sourceType" : "permission_policy_projection",
+    "sourceRef" : "implement",
+    "bytes" : 521,
+    "estimatedTokens" : 131,
+    "sha256" : "518335f6aed4ae3d471ead53c2a92286330b234a02bc3fd4cbdd7a5b3cf27867",
+    "includedReason" : "guide provider behavior without replacing adapter enforcement",
+    "required" : true
+  }, {
+    "name" : "authored-context",
+    "sourceType" : "typed_authored_context",
+    "sourceRef" : "node-implement-claude_self_test_report-031",
+    "bytes" : 30630,
+    "estimatedTokens" : 7658,
+    "sha256" : "170e8b1bc126eda867f12f1aeb6c2f0a02e30ede86a5707d043c2a5613eed66a",
+    "includedReason" : "required approved and revision inputs",
+    "required" : true
+  } ],
+  "authoredContext" : {
+    "workstreamId" : "ws-20261023T005431Z-9YYF",
+    "nodeInstanceId" : "node-implement-claude_self_test_report-031",
+    "nodeId" : "implement.claude_self_test_report",
+    "runId" : "run-1792977352552",
+    "historyThrough" : 31,
+    "contract" : {
+      "compileNodeInstanceId" : "node-contract-compile_execution-027",
+      "approvalGateRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-contract_review-028.json",
+      "approvalEventId" : "evt-000028",
+      "contract" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json",
+        "sha256" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505"
+      },
+      "resolution" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json",
+        "sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417"
+      }
+    },
+    "reviewedDesign" : {
+      "decision" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-design-decision-016.json",
+        "sha256" : "e14f6e8c78b136449f68f13bd52e194bc31cfa44e57fd44f5ff34ef32389b45d"
+      },
+      "eventId" : "evt-000017",
+      "candidate" : {
+        "sidecar" : {
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.contract.json",
+          "sha256" : "107919da51a181a4e8fa14254d2158d2f28f5b08aa36c449fc783d00d7631bc8"
+        },
+        "nodeInstanceId" : "node-design-claude_design-012",
+        "nodeId" : "design.claude_design",
+        "runId" : "run-1792718732583",
+        "artifactType" : "design_result"
+      }
+    },
+    "reviewedPlan" : {
+      "decision" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-plan-decision-026.json",
+        "sha256" : "7cd1081dbf5e2f349a2ce47c08aad26ad6a66a829ade97a5f3cbbf825038bc08"
+      },
+      "eventId" : "evt-000027",
+      "candidate" : {
+        "sidecar" : {
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.contract.json",
+          "sha256" : "7db15a9535462e8642d80db8eeb6857afa2865a040ff3210f8488e1b52118e06"
+        },
+        "nodeInstanceId" : "node-plan-claude_plan-022",
+        "nodeId" : "plan.claude_plan",
+        "runId" : "run-1792724160451",
+        "artifactType" : "plan_result"
+      }
+    },
+    "parent" : null,
+    "subject" : null,
+    "trigger" : null,
+    "obligations" : [ ]
+  }
+}

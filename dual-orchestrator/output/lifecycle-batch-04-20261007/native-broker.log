@@ -1,0 +1,35 @@
+TAP version 13
+# Subtest: concurrent asks retain exact per-request allow/deny decisions; repeats never send twice
+ok 1 - concurrent asks retain exact per-request allow/deny decisions; repeats never send twice
+  ---
+  duration_ms: 1.111459
+  ...
+# Subtest: wrong owner/prompt/session/RPC/hash/deadline/choice does not poison a legal ask
+ok 2 - wrong owner/prompt/session/RPC/hash/deadline/choice does not poison a legal ask
+  ---
+  duration_ms: 0.167625
+  ...
+# Subtest: cancel/turn replacement/owner restart never restore an old callback from a commit
+ok 3 - cancel/turn replacement/owner restart never restore an old callback from a commit
+  ---
+  duration_ms: 0.110375
+  ...
+# Subtest: deadline and request publication failure cancel instead of falling through
+ok 4 - deadline and request publication failure cancel instead of falling through
+  ---
+  duration_ms: 42.459584
+  ...
+# Subtest: wire rejects absent/changed generations, unbounded asks and prompt retry
+ok 5 - wire rejects absent/changed generations, unbounded asks and prompt retry
+  ---
+  duration_ms: 0.514
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 92.286875

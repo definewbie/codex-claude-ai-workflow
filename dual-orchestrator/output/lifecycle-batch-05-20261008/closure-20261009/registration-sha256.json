@@ -1,0 +1,16 @@
+{
+  "output/lifecycle-batch-05-20261008/closure-20261009/disposition.md": "e7d543b8aa47a4aaec2b6b2fe547d1508c2aaffa9de9c731c247648eb949f294",
+  "output/lifecycle-batch-05-20261008/closure-20261009/document-changes.json": "2500294d802308998092e48cd37c80c2944e501ee046729cb7eefc72c1db2545",
+  "output/lifecycle-batch-05-20261008/closure-20261009/reception-check.json": "a677f3e48411cbd4472fef7c78fdba62cc5a77bf6c33d1796c1d3175a51d5bc4",
+  "output/lifecycle-batch-05-20261008/closure-20261009/cc-review.md": "87eae0c8fbc6b56be5bb01ed9a65b6f3fa0ba7327a94e6e40768fd024d750220",
+  "output/lifecycle-batch-05-20261008/closure-20261009/closure-documentation.patch": "a895e6b337fe7f0e440b52cffe02350ea7afdf386e2d972ae2707be56e60412f",
+  "output/lifecycle-batch-05-20261008/closure-20261009/reviewed-material-sha256.json": "c34192af151b53690c78a0ba2166daeedcf91ba5e31eca508b2743183d40dca2",
+  "output/lifecycle-batch-05-20261008/closure-20261009/closure.json": "bb55b6fa6bd4512e2931267c71d6216e87c3ec983fc183eedb67666fc92c0260",
+  "output/lifecycle-batch-05-20261008/closure-20261009/documents-before-text.json": "bc74da7bc64cfa2dad2fffa4ecf9406500e210572ff2a5e009dc5e9ef6350e07",
+  "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "4ce75e9c72c8403d1437629a95e9ed7e5bc7e65d9c8a31fed3861076bbcbe3e6",
+  "docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md": "8442eee290ac92ca3d81754454bedee06a2e93e6685c71e02d3ae0c6a1dff429",
+  "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "f0fb3f823c74061f4f44778b206bc14efd9f0907191f020a43efca76347ede79",
+  "output/lifecycle-batch-05-20261008/scope-c/design.md": "7669ac39d63259768d3380cf9486905a3636a5bb33789afc9fd49396db22f130",
+  "output/lifecycle-batch-05-20261008/scope-c/implementation/batch.md": "b992bb98de464fc04f0d9d61d7d4d93a73a757c2357a4df6c090df15c5bd0736",
+  "output/lifecycle-batch-05-20261008/scope-c/implementation/cc-review-received.md": "b810fde0a040d514fe60af860772850399d7d53c294ad97536dba8d556c1f1ac"
+}

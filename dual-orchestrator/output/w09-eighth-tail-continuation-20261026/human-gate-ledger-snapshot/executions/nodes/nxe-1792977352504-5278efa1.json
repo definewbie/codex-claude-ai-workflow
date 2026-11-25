@@ -1,0 +1,84 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792977352504-5278efa1",
+  "agentTaskId" : "agt-1792977352498-e620b960",
+  "workflowExecutionId" : "wfe-1792977352402-409e55c7",
+  "nodeInstanceId" : "node-implement-claude_self_test_report-031",
+  "nodeDefinitionId" : "implement.claude_self_test_report",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "pid" : 40957,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/verification-observations.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-26T01:15:50.985Z",
+      "input_identity" : "481cc9ea43ef277df24a3cf1d4ac6a1145b53c2f039df334473dbbd99f20c7a6",
+      "executor_pid" : 40957
+    },
+    "prepared_run" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/nxe-1792977352504-5278efa1-prepared.json",
+      "sha256" : "9e3bb4ce84f86d938bf51a45b4857495dd23ede725db76ab0a176aca79015e97"
+    },
+    "adapter_signals" : [ ],
+    "agent" : "claude",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "self_test_report",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "SELF_TEST_COMPLETE",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.contract.json",
+    "contract_sidecar_sha256" : "1b53549fcad974e3990a88de46bddf93371e819fbe147e04bd79d37138e9627a",
+    "decision" : "SELF_TEST_COMPLETE",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/binding.json",
+    "repository_fact_binding_sha256" : "0ed346af2379f7061e4c6a2c8e08a7c3f51c6153b197635b138b94a640293ace",
+    "run_id" : "run-1792977352552",
+    "run_metadata" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/run.json",
+    "session" : "claude-main-ws-20261023T005431Z-9YYF-run-1792977352552",
+    "summary" : "在仓库根实际执行 python -m unittest discover -s tests -v 2>&1 得 Ran 11 tests 与 OK（零 failure/error），11 个用例名与 tests/test_normalize_text.py 九项 CASES 逐条核对一致，README 示例经逐字符比对与 doctest 实际执行确认与实现一致，AC-1/AC-2/AC-3 全部通过。",
+    "transcript_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.transcript.log",
+    "verification_observations" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/verification-observations.json",
+      "sha256" : "7b037b915de2188c604a87c5346bbebeaf8747a1b874828fbd08fbc9e2598af8"
+    },
+    "completion_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/nxe-1792977352504-5278efa1-completion.json",
+    "completion_sha256" : "4a4508fd4947559feb2018ef3550ed61e0b669881bece151515bde1b7acf4e51",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "run-1792977352552",
+  "agentRunRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/run.json",
+  "agent" : "claude",
+  "session" : "claude-main-ws-20261023T005431Z-9YYF-run-1792977352552",
+  "exitCode" : 0,
+  "startedAt" : "2026-10-26T01:15:52.504147Z",
+  "finishedAt" : "2026-10-26T01:18:45.345128Z",
+  "durationMs" : 172840
+}

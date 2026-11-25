@@ -1,0 +1,37 @@
+Test Time Compute: Balancing Size with Thought
+
+There’s a limit to how far you can go by scaling model size alone. Training ever-
+larger language models demands enormous resources and quickly becomes
+unsustainable. Yet, reasoning ability doesn’t come purely from size. Recent
+research shows that even smaller models can perform exceptionally well if they’re
+given more time to think at test time.
+
+Instead of adding more parameters, you can add more computation during
+inference. You can let the model reason longer, explore multiple ideas, and refine
+its answers before committing to a final one. This approach changes how you
+think about scale: not as more neurons, but as more deliberate reasoning. In short,
+so far you’ve taught your agent to learn, but now you teach it to think. This is
+where your learning systems turn into thinking systems.
+
+This can mean sampling multiple reasoning paths, reflecting on intermediate steps,
+or revising answers based on feedback. The result is an agent that learns to spend
+compute where it matters. It can simulate alternative outcomes, evaluate them, and
+refine its reasoning dynamically. This idea of scaling thinking time rather than
+model size is one of the most promising paths toward more capable and efficient
+agents.
+
+To support this shift, preference and reward models take on a new role. They no
+longer serve only during training but become part of the inference process itself.
+Instead of scoring a single final answer, they guide reasoning as it unfolds. Each
+step or branch in the reasoning process can be evaluated and compared, much like
+a human reviewing a line of argument or debugging code. This feedback loop
+allows smaller models to match or even outperform larger ones on complex
+reasoning tasks, especially when resources are limited or when models must run
+efficiently on local devices.
+
+To scale test-time compute, you can use tree-search algorithms, which helps your
+agents allocate reasoning effort adaptively. Among these, Monte Carlo Tree Search
+(MCTS) is one of the most powerful. MCTS allows an LLM to explore a
+structured space of possible answers and gradually converge on the best one. It
+balances curiosity and focus, searching just widely enough to discover new ideas
+and deeply enough to refine them.

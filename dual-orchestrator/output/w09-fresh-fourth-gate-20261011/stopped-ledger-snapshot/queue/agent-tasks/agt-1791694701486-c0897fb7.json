@@ -1,0 +1,35 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1791694701486-c0897fb7",
+  "workflowExecutionId" : "wfe-1791694701410-7fd3b321",
+  "nodeInstanceId" : "node-intake-decision-010",
+  "nodeDefinitionId" : "intake.decision",
+  "nodeKind" : "DECISION",
+  "handlerType" : "review.decision",
+  "status" : "SUCCEEDED",
+  "agent" : "",
+  "session" : "",
+  "promptTemplate" : "",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "DECISION",
+    "handler_type" : "review.decision",
+    "agent" : "",
+    "session" : "",
+    "prompt_template" : "",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "max_revisions" : 3
+    },
+    "outcome" : "READY_FOR_PRODUCT_REVIEW",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 5
+  },
+  "nodeExecutionId" : "nxe-1791694701492-d6e07257",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-11T04:58:21.486668Z",
+  "claimedAt" : "2026-10-11T04:58:21.501969Z",
+  "completedAt" : "2026-10-11T04:58:21.541699Z"
+}

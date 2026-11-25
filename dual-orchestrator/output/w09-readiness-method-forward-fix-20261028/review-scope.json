@@ -1,0 +1,14 @@
+{
+  "source_changes": [
+    "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java",
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java",
+    "dual-runtime/src/test/java/dev/dual/runtime/handler/VerificationReadinessTest.java",
+    "dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java",
+    "dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java"
+  ],
+  "unplanned_module_source_changes": [],
+  "validateBindings_and_sameVerificationBoundary_source_bytes_unchanged": true,
+  "extra_agents": 0,
+  "review_kind": "AUTHOR_SELF_CHECK_NOT_INDEPENDENT_CC"
+}

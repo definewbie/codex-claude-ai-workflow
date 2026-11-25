@@ -1,0 +1,79 @@
+{
+  "startedAt" : 1788886009.752462000,
+  "finishedAt" : 1788886017.740044000,
+  "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--ttl", "1800", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "--claude-execution-policy-ref", ".agent/workstreams/probe/runs/run-4f21f8a6-3348-48cd-8e85-f7fc97281eea/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "909e4a652a3f2080d762494b483e16845d66905128aa28debd64019018f99372", "claude", "-s", "read-probe-4f21f8a6-3348-48cd-8e85-f7fc97281eea", "-f", "/private/tmp/dual-deepseek-read-20260909/prompt.md" ],
+  "executionTimeline" : [ {
+    "kind" : "PROCESS_STARTED",
+    "source" : "adapter",
+    "sequence" : 0,
+    "observedAt" : 1788886009.756004000,
+    "elapsedMs" : 3,
+    "details" : {
+      "pid" : 40348
+    }
+  }, {
+    "kind" : "PROCESS_WAIT_STARTED",
+    "source" : "adapter",
+    "sequence" : 0,
+    "observedAt" : 1788886009.756062000,
+    "elapsedMs" : 0,
+    "details" : {
+      "pid" : 40348
+    }
+  }, {
+    "kind" : "PROMPT_ACCEPTED",
+    "source" : "acpx_stream",
+    "sequence" : 11,
+    "observedAt" : 1788886013.787124000,
+    "elapsedMs" : 4031,
+    "details" : {
+      "lifecycleSequence" : 11
+    }
+  }, {
+    "kind" : "PROMPT_COMPLETED",
+    "source" : "acpx_stream",
+    "sequence" : 89,
+    "observedAt" : 1788886017.739713000,
+    "elapsedMs" : 7983,
+    "details" : {
+      "lifecycleSequence" : 89
+    }
+  }, {
+    "kind" : "PROCESS_WAIT_COMPLETED",
+    "source" : "adapter",
+    "sequence" : 91,
+    "observedAt" : 1788886017.739762000,
+    "elapsedMs" : 7983,
+    "details" : {
+      "exitCode" : 0,
+      "waitMode" : "process_exit"
+    }
+  }, {
+    "kind" : "PROCESS_EXITED",
+    "source" : "adapter",
+    "sequence" : 5,
+    "observedAt" : 1788886017.740039000,
+    "elapsedMs" : 7987,
+    "details" : {
+      "exitCode" : 0
+    }
+  } ],
+  "usage" : null,
+  "promptCompletion" : {
+    "requestId" : "3",
+    "stopReason" : "end_turn",
+    "finalAssistantMessage" : "{\"nonce\":\"7636b38f-db5b-49b3-b61a-ce035cfb4f11\"}"
+  },
+  "processResult" : {
+    "command" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx --ttl 1800 --approve-reads --non-interactive-permissions fail --permission-policy {\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"} --allowed-tools Read,Grep,Glob --claude-execution-policy-ref .agent/workstreams/probe/runs/run-4f21f8a6-3348-48cd-8e85-f7fc97281eea/execution-authority/claude-execution-policy.json --claude-execution-policy-sha256 909e4a652a3f2080d762494b483e16845d66905128aa28debd64019018f99372 claude -s read-probe-4f21f8a6-3348-48cd-8e85-f7fc97281eea -f /private/tmp/dual-deepseek-read-20260909/prompt.md",
+    "pid" : 40348,
+    "exitCode" : 0,
+    "usability" : "EXITED_ZERO",
+    "durationMs" : 7987,
+    "stdoutPath" : "stream.jsonl",
+    "stderrPath" : "stderr.log",
+    "interrupted" : false,
+    "timedOut" : false
+  },
+  "adapterSignals" : [ ]
+}

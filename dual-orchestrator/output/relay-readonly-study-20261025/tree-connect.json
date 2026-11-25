@@ -1,0 +1,108 @@
+{
+  "sha": "4e92050c7ee76d5c75b7d378421d7b567ab9f448",
+  "url": "https://api.github.com/repos/AgentWorkforce/relay/git/trees/4e92050c7ee76d5c75b7d378421d7b567ab9f448",
+  "tree": [
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f5c312776681e397f02892f35974991a88bf426b",
+      "size": 3912,
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/blobs/f5c312776681e397f02892f35974991a88bf426b"
+    },
+    {
+      "path": "package.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3d5ab14b3db59ae59499f9523e44b7aa79a9ae4",
+      "size": 754,
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/blobs/d3d5ab14b3db59ae59499f9523e44b7aa79a9ae4"
+    },
+    {
+      "path": "scripts",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "451323ae9f0bd1a7aed2f6b1f11d32ff71385bf9",
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/trees/451323ae9f0bd1a7aed2f6b1f11d32ff71385bf9"
+    },
+    {
+      "path": "scripts/build.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9db494d686dc48828728b2018eb5dabc57f105ad",
+      "size": 525,
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/blobs/9db494d686dc48828728b2018eb5dabc57f105ad"
+    },
+    {
+      "path": "scripts/clean.mjs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "56e922fa7d6a3258e52c8f26bb500fef593183ed",
+      "size": 278,
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/blobs/56e922fa7d6a3258e52c8f26bb500fef593183ed"
+    },
+    {
+      "path": "src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d0d8a04aea0a3519253939cf022a0275fd22c834",
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/trees/d0d8a04aea0a3519253939cf022a0275fd22c834"
+    },
+    {
+      "path": "src/cli.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f21e477dca39d83f119752f4df523f5f8b295e8",
+      "size": 11323,
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/blobs/7f21e477dca39d83f119752f4df523f5f8b295e8"
+    },
+    {
+      "path": "src/http.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4c5a40a8bab792db95cce0c901dd1d7c90bb2ee0",
+      "size": 1789,
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/blobs/4c5a40a8bab792db95cce0c901dd1d7c90bb2ee0"
+    },
+    {
+      "path": "src/index.d.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cb0ff5c3b541f646105198ee23ac0fc3d805023e",
+      "size": 11,
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/blobs/cb0ff5c3b541f646105198ee23ac0fc3d805023e"
+    },
+    {
+      "path": "src/index.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cb0ff5c3b541f646105198ee23ac0fc3d805023e",
+      "size": 11,
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/blobs/cb0ff5c3b541f646105198ee23ac0fc3d805023e"
+    },
+    {
+      "path": "src/install.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ce026e63a0df90e9ec912699339fbbc608f84fb",
+      "size": 31541,
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/blobs/3ce026e63a0df90e9ec912699339fbbc608f84fb"
+    },
+    {
+      "path": "tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7e9d64dbb5a617ee66f7f4e19cd9d46650d5a1a8",
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/trees/7e9d64dbb5a617ee66f7f4e19cd9d46650d5a1a8"
+    },
+    {
+      "path": "tests/connect.test.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4b4f0521ee4f18a3249d2c0cd90b3541e3bd953",
+      "size": 52765,
+      "url": "https://api.github.com/repos/AgentWorkforce/relay/git/blobs/a4b4f0521ee4f18a3249d2c0cd90b3541e3bd953"
+    }
+  ],
+  "truncated": false
+}

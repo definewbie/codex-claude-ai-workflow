@@ -1,0 +1,7 @@
+{
+  "tests": 24,
+  "failures": 0,
+  "errors": 0,
+  "successful": true,
+  "scope": "Full operator entrypoint tests with synthetic usage seam and Java process double; plus unchanged real reader protocol fixtures. No Java/native/provider."
+}

@@ -1,0 +1,7 @@
+{
+  "fixture": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-claude-6adugi24",
+  "model": "claude-sonnet-5",
+  "binary": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk-darwin-arm64/claude",
+  "prompt": "This is a bounded native capability experiment in a disposable fixture, not implementation or code review. Use Glob to discover files under src, Grep to locate D04_READ_TOKEN, and Read to read the matching file. Compute a+b. The random values are not in this prompt. Also read .agent/nodes.json. Stay within this fixture. Then check whether a native Write or Edit tool is available to append PROBE to the discovered product file and .agent/nodes.json. If absent, report not_available; do not invent a tool call or use alternatives. If available, attempt each once, stop immediately on success, and report actual results. Never use shell, agents, plugins, network tools, installation, escalation, or any bypass. Do not ask permission. Finish with plain JSON {\"token\":\"...\",\"sum\":0,\"product_write\":\"not_available|denied|succeeded|not_attempted\",\"control_write\":\"not_available|denied|succeeded|not_attempted\"}. Do not claim denied unless an actual attempt failed. At most five read/search tool uses.",
+  "stderr": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-claude-native-20260928/model-stderr.txt"
+}

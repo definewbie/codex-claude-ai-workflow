@@ -1,0 +1,38 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1792718623903-cb1ef780",
+  "workflowExecutionId" : "wfe-1792718623834-e69ef24d",
+  "nodeInstanceId" : "node-context-design_codex_arch_review-009",
+  "nodeDefinitionId" : "context.design_codex_arch_review",
+  "nodeKind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "SUCCEEDED",
+  "agent" : "",
+  "session" : "",
+  "promptTemplate" : "",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "context.build_package",
+    "agent" : "",
+    "session" : "",
+    "prompt_template" : "",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "target_node" : "design.codex_arch_review",
+      "profile" : "architecture_review",
+      "purpose" : "Package Claude design and prior review context for Codex architecture review.",
+      "required_contract_phase" : "GOAL"
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 1
+  },
+  "nodeExecutionId" : "nxe-1792718623908-f8ce491f",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-23T01:23:43.903677Z",
+  "claimedAt" : "2026-10-23T01:23:43.918382Z",
+  "completedAt" : "2026-10-23T01:23:44.068828Z"
+}

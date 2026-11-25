@@ -1,0 +1,11 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 W09 身份减负与目标级返修接线候选做一次合并独立设计复审，遵守 AGENTS.md。
+
+入口：output/w09-revision-wiring-design-20261014/assessment.md；验证设计、合成样例、源码身份与摘录在同目录；详设§10.1、主清单§23.21已同步。
+
+请自行对码重建：本轮基准解析→R01/dispatch→模型输出→程序完整身份核验→派生发布/R03/L03→独立复评→当前GOAL批准/compile→EXECUTION准入。核对写入失败、冷启动、旧runtime/旧工件与兄弟入口，不预设作者结论。
+
+重点判断两项是否可冻结且ROI合理：模型只引用ID是否仍强制消费完整内容身份；初次GOAL前的目标/禁区新提案是否有合法出口，同时不变成全文宽松返修、借用旧批准或扩大late-rework。检查该首版范围是否足以解除具名阻塞，哪些义务仍未完成。
+
+请按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给分级发现、证据与未核验范围，区分现状源码、候选设计和未来验证；不替用户授权实施或运行。
+
+只读案头评审：不要修改代码/文档、运行native/provider/注入探针、启动第六例或额外agent，无须重审无关历史。必要修订并入本轮，不另为补记开评审。

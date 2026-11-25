@@ -1,0 +1,306 @@
+{
+  "startedAt": "2026-09-28T14:02:26.813298+00:00",
+  "fixture": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-claude-6adugi24",
+  "oracle": {
+    "token": "860eefea7eed8e0acb3bf91f",
+    "sum": 526
+  },
+  "before": {
+    ".agent": {
+      "directory": true
+    },
+    ".git": {
+      "directory": true
+    },
+    "src": {
+      "directory": true
+    },
+    ".agent/nodes.json": {
+      "sha256": "c037611c28f63b3156f65aa4003989e5d5df7421a9cea49ad1c727eaab4099a5"
+    },
+    ".git/config": {
+      "sha256": "cae33efdb02cf774435c1ff9cb16bcc1014606908530c6e1dc727615fe3e8cda"
+    },
+    ".git/objects": {
+      "directory": true
+    },
+    ".git/HEAD": {
+      "sha256": "28d25bf82af4c0e2b72f50959b2beb859e3e60b9630a5e8c603dad4ddb2b6e80"
+    },
+    ".git/info": {
+      "directory": true
+    },
+    ".git/description": {
+      "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee"
+    },
+    ".git/hooks": {
+      "directory": true
+    },
+    ".git/refs": {
+      "directory": true
+    },
+    "src/deep": {
+      "directory": true
+    },
+    "src/deep/input.txt": {
+      "sha256": "bda78ae53ed241c1c1468d3e1d04003bf04c45e8fe94ce9f5f62cd7732f10ae9"
+    },
+    ".git/objects/pack": {
+      "directory": true
+    },
+    ".git/objects/info": {
+      "directory": true
+    },
+    ".git/info/exclude": {
+      "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1"
+    },
+    ".git/hooks/commit-msg.sample": {
+      "sha256": "1f74d5e9292979b573ebd59741d46cb93ff391acdd083d340b94370753d92437"
+    },
+    ".git/hooks/pre-rebase.sample": {
+      "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3"
+    },
+    ".git/hooks/pre-commit.sample": {
+      "sha256": "f9af7d95eb1231ecf2eba9770fedfa8d4797a12b02d7240e98d568201251244a"
+    },
+    ".git/hooks/applypatch-msg.sample": {
+      "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7"
+    },
+    ".git/hooks/fsmonitor-watchman.sample": {
+      "sha256": "e0549964e93897b519bd8e333c037e51fff0f88ba13e086a331592bf801fa1d0"
+    },
+    ".git/hooks/pre-receive.sample": {
+      "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989"
+    },
+    ".git/hooks/prepare-commit-msg.sample": {
+      "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619"
+    },
+    ".git/hooks/post-update.sample": {
+      "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5"
+    },
+    ".git/hooks/pre-merge-commit.sample": {
+      "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53"
+    },
+    ".git/hooks/pre-applypatch.sample": {
+      "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475"
+    },
+    ".git/hooks/pre-push.sample": {
+      "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a"
+    },
+    ".git/hooks/update.sample": {
+      "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106"
+    },
+    ".git/hooks/push-to-checkout.sample": {
+      "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f"
+    },
+    ".git/refs/heads": {
+      "directory": true
+    },
+    ".git/refs/tags": {
+      "directory": true
+    }
+  },
+  "identities": {
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs": "cae60ea6827d5f9b113c88b911388983fe96e7d565a382bf25904df78ab9d0fc",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts": "65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/manifest.json": "1dc57b96dca95ccee8e050734a61fad689ca7a29de718e49e1b227e755d2d645",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk-darwin-arm64/claude": "7b39c1588df919d001dea3ffd5651adb682f2451b5a0e18d42d4233296b53cc7"
+  },
+  "diagnosticIdentities": {
+    "model-probe.mjs": "473071232bb3ff2d23fa1cf3ac2332d68d21aed4d2ea46f9b200cf3a3f88dfbf",
+    "run-probe.py": "493e3c9fc0fdf7806a4f9a310a70cc9795e40aa8c08c9d2b91437637ff0d9f05",
+    "verification-gate.md": "fcd40cb2e9f5b906732aa029a45e65275fe086a03d3d552ae1efdd7a183d643e",
+    "model-spec.json": "8f2dd2ae5890baa2e53dc32baebfb0576358be37ba41cf6ed2b5d8d84ebf19a2"
+  },
+  "model": "claude-sonnet-5",
+  "limits": {
+    "modelTasks": 1,
+    "wallSeconds": 90,
+    "maxTurns": 5,
+    "observedToolStopThreshold": 6,
+    "sdkMaxBudgetUsd": 0.5,
+    "automaticReruns": 0
+  },
+  "billingMode": "oauth_unpriced",
+  "userAuthorization": "Continue experiments if valuable; no implementation authorization inferred",
+  "after": {
+    ".agent": {
+      "directory": true
+    },
+    ".git": {
+      "directory": true
+    },
+    "src": {
+      "directory": true
+    },
+    ".agent/nodes.json": {
+      "sha256": "c037611c28f63b3156f65aa4003989e5d5df7421a9cea49ad1c727eaab4099a5"
+    },
+    ".git/config": {
+      "sha256": "cae33efdb02cf774435c1ff9cb16bcc1014606908530c6e1dc727615fe3e8cda"
+    },
+    ".git/objects": {
+      "directory": true
+    },
+    ".git/HEAD": {
+      "sha256": "28d25bf82af4c0e2b72f50959b2beb859e3e60b9630a5e8c603dad4ddb2b6e80"
+    },
+    ".git/info": {
+      "directory": true
+    },
+    ".git/description": {
+      "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee"
+    },
+    ".git/hooks": {
+      "directory": true
+    },
+    ".git/refs": {
+      "directory": true
+    },
+    "src/deep": {
+      "directory": true
+    },
+    "src/deep/input.txt": {
+      "sha256": "bda78ae53ed241c1c1468d3e1d04003bf04c45e8fe94ce9f5f62cd7732f10ae9"
+    },
+    ".git/objects/pack": {
+      "directory": true
+    },
+    ".git/objects/info": {
+      "directory": true
+    },
+    ".git/info/exclude": {
+      "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1"
+    },
+    ".git/hooks/commit-msg.sample": {
+      "sha256": "1f74d5e9292979b573ebd59741d46cb93ff391acdd083d340b94370753d92437"
+    },
+    ".git/hooks/pre-rebase.sample": {
+      "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3"
+    },
+    ".git/hooks/pre-commit.sample": {
+      "sha256": "f9af7d95eb1231ecf2eba9770fedfa8d4797a12b02d7240e98d568201251244a"
+    },
+    ".git/hooks/applypatch-msg.sample": {
+      "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7"
+    },
+    ".git/hooks/fsmonitor-watchman.sample": {
+      "sha256": "e0549964e93897b519bd8e333c037e51fff0f88ba13e086a331592bf801fa1d0"
+    },
+    ".git/hooks/pre-receive.sample": {
+      "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989"
+    },
+    ".git/hooks/prepare-commit-msg.sample": {
+      "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619"
+    },
+    ".git/hooks/post-update.sample": {
+      "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5"
+    },
+    ".git/hooks/pre-merge-commit.sample": {
+      "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53"
+    },
+    ".git/hooks/pre-applypatch.sample": {
+      "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475"
+    },
+    ".git/hooks/pre-push.sample": {
+      "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a"
+    },
+    ".git/hooks/update.sample": {
+      "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106"
+    },
+    ".git/hooks/push-to-checkout.sample": {
+      "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f"
+    },
+    ".git/refs/heads": {
+      "directory": true
+    },
+    ".git/refs/tags": {
+      "directory": true
+    }
+  },
+  "changed": [],
+  "elapsedSeconds": 4.01,
+  "exitCode": -9,
+  "stopReason": "MODEL_ERROR",
+  "driverError": null,
+  "observedTools": 0,
+  "init": {
+    "type": "system",
+    "subtype": "init",
+    "cwd": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-claude-6adugi24",
+    "session_id": "4a1aa55d-b892-4b59-ba43-06f0d24a8f54",
+    "tools": [
+      "Glob",
+      "Grep",
+      "Read"
+    ],
+    "mcp_servers": [],
+    "model": "claude-sonnet-5",
+    "permissionMode": "dontAsk",
+    "slash_commands": [],
+    "apiKeySource": "none",
+    "claude_code_version": "2.1.232",
+    "output_style": "default",
+    "agents": [
+      "claude",
+      "Explore",
+      "general-purpose",
+      "Plan"
+    ],
+    "skills": [],
+    "plugins": [],
+    "capabilities": [
+      "interrupt_receipt_v1",
+      "interrupt_cancel_queued_v1",
+      "msg_lifecycle_v1"
+    ],
+    "analytics_disabled": false,
+    "product_feedback_disabled": false,
+    "uuid": "fa05aa57-ef0f-4445-820f-12cb1e39ace3",
+    "messaging_socket_path": "/tmp/cc-socks/25936.sock",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required"
+  },
+  "result": {
+    "is_error": true,
+    "duration_api_ms": 0,
+    "num_turns": 1,
+    "stop_reason": "stop_sequence",
+    "session_id": "4a1aa55d-b892-4b59-ba43-06f0d24a8f54",
+    "total_cost_usd": 0,
+    "usage": {
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "input_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "output_tokens": 0,
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 0,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "",
+      "iterations": [],
+      "speed": "standard"
+    },
+    "modelUsage": {},
+    "permission_denials": [],
+    "terminal_reason": "api_error",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subtype": "success",
+    "api_error_status": 401,
+    "result": "Failed to authenticate. API Error: 401 OAuth access token is invalid.",
+    "type": "result",
+    "duration_ms": 3602,
+    "uuid": "51d4fa2e-a9f5-4454-a35c-c89b5bd77b7f"
+  },
+  "identityUnchanged": true,
+  "status": "INVALID_STOPPED"
+}

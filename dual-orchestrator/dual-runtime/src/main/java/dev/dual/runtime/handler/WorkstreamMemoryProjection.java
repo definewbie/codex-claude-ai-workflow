@@ -44,9 +44,9 @@ public final class WorkstreamMemoryProjection {
      * reads, last stage outcome, open issues, the reuse directive, and evidence
      * refs. Appends section body only (the caller writes the {@code ##} heading).
      */
-    public static void appendAgentHandoff(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
+    public static void appendAgentHandoff(dev.dual.ledger.file.WorkflowFileLedger ledger, StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
         var memory = readMemory(workstreamDir);
-        var qualification = qualificationStatus(memory, workstreamDir, workspaceRoot);
+        var qualification = qualificationStatus(ledger, memory, workstreamDir, workspaceRoot);
         var decidedScope = strings(memory.get("decidedScope"));
         var nonGoals = strings(memory.get("nonGoals"));
         var reads = list(memory.get("readFiles"));
@@ -83,9 +83,9 @@ public final class WorkstreamMemoryProjection {
      * decision summary, the incremental-audit directive, and evidence refs.
      * Appends section body only (the caller writes the {@code ##} heading).
      */
-    public static void appendReviewEvidenceBrief(StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
+    public static void appendReviewEvidenceBrief(dev.dual.ledger.file.WorkflowFileLedger ledger, StringBuilder builder, Path workstreamDir, Path workspaceRoot) {
         var memory = readMemory(workstreamDir);
-        var qualification = qualificationStatus(memory, workstreamDir, workspaceRoot);
+        var qualification = qualificationStatus(ledger, memory, workstreamDir, workspaceRoot);
         var verdicts = list(memory.get("priorVerdicts"));
         var openIssues = openIssues(list(memory.get("openIssues")));
         var acceptance = List.<String>of();
@@ -284,6 +284,7 @@ public final class WorkstreamMemoryProjection {
     }
 
     private static String qualificationStatus(
+            dev.dual.ledger.file.WorkflowFileLedger ledger,
             Map<String, Object> memory,
             Path workstreamDir,
             Path workspaceRoot
@@ -295,7 +296,10 @@ public final class WorkstreamMemoryProjection {
             return "unavailable";
         }
         var workstreamId = workstreamDir.getFileName().toString();
-        var current = TaskContractProjectionVerifier.resolve(workspaceRoot, workstreamId);
+        final dev.dual.core.contract.TaskContract.Phase phase;
+        try { phase = dev.dual.core.contract.TaskContract.Phase.valueOf(text(projected.get("phase"))); }
+        catch (IllegalArgumentException missing) { return "stale_projection"; }
+        var current = TaskContractProjectionVerifier.resolve(ledger, workspaceRoot, workstreamId, phase);
         if (current.failure() != null || current.qualified().isEmpty()) {
             return "stale_projection";
         }

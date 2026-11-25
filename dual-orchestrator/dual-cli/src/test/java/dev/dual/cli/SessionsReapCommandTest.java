@@ -33,7 +33,7 @@ class SessionsReapCommandTest {
     void reapsTerminalWorkstreamsAndSkipsNonTerminal() throws Exception {
         // terminal workstream: drive it to COMPLETED
         var donePaths = createWorkstream("ws-done", completeGateDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = CliLedgerFactory.create();
         var definition = ledger.loadDefinition(donePaths);
         var entry = ledger.loadCurrent(donePaths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(donePaths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
@@ -43,7 +43,7 @@ class SessionsReapCommandTest {
         // non-terminal workstream: left RUNNING after initialize
         createWorkstream("ws-running", simpleDefinition());
         assertEquals(WorkflowStatus.RUNNING,
-                new WorkflowFileLedger().loadCurrent(paths("ws-running")).status());
+                CliLedgerFactory.create().loadCurrent(paths("ws-running")).status());
 
         var reaped = new ArrayList<String>();
         var cmd = new SessionsReapCommand();
@@ -74,7 +74,7 @@ class SessionsReapCommandTest {
         // acpx close failures (summary.failed()) must surface in the reap total as
         // closeFailed=, not be hidden behind a failed=0 total.
         var donePaths = createWorkstream("ws-closefail", completeGateDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = CliLedgerFactory.create();
         var definition = ledger.loadDefinition(donePaths);
         var entry = ledger.loadCurrent(donePaths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(donePaths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
@@ -101,7 +101,7 @@ class SessionsReapCommandTest {
     @Test
     void explicitlySelectedRecoverableWorkstreamCanBeQuiesced() throws Exception {
         var recoverablePaths = createWorkstream("ws-recoverable", simpleDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = CliLedgerFactory.create();
         var definition = ledger.loadDefinition(recoverablePaths);
         var active = ledger.loadCurrent(recoverablePaths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(
@@ -134,7 +134,7 @@ class SessionsReapCommandTest {
     @Test
     void explicitlySelectedCloseFailureReturnsNonZero() throws Exception {
         var recoverablePaths = createWorkstream("ws-close-failed", simpleDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = CliLedgerFactory.create();
         var definition = ledger.loadDefinition(recoverablePaths);
         var active = ledger.loadCurrent(recoverablePaths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(
@@ -180,7 +180,7 @@ class SessionsReapCommandTest {
     private WorkstreamPaths createWorkstream(String workstreamId, WorkflowDefinition definition) throws Exception {
         var paths = paths(workstreamId);
         Files.createDirectories(paths.workstreamDir());
-        new WorkflowFileLedger().initialize(paths, "wf-" + workstreamId, definition);
+        CliTestLedger.initialize(CliLedgerFactory.create(), paths, "wf-" + workstreamId, definition);
         return paths;
     }
 

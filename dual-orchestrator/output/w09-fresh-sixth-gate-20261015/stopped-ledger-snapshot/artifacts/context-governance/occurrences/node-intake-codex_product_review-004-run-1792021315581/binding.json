@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261014T234009Z-RN9X",
+  "node_instance_id" : "node-intake-codex_product_review-004",
+  "run_id" : "run-1792021315581",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/repo-map.json",
+      "sha256" : "c86bf39f75200a6f536877c95df021ef6bc6a38968669b2d942d0ffa0f3b9fc2"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/planned-report.json",
+      "sha256" : "f494d49eb0fc3105652ccff469ab22ef08add08a242f66c3046823c1f6765929"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/agent-capability-catalog.json",
+      "sha256" : "7b6fab9be3d693c9d2399b16ee9c2d42556ce02d1c7fb2898ab05af97fb81483"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/read-reuse-contract.json",
+      "sha256" : "c31f53768c43f0231ad65cfc637cb91bc61442f243725c0085dc7ce7a5afed9e"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/working-set.json",
+      "sha256" : "bd33892ce39569a49ab17820f3290812c9a1a9ef669961e3958ce9f017889ce1"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/file-relevance-plan.json",
+      "sha256" : "220b3007161117f3f28294b83a1c0e221eb28ca5b70c9fcab023b18ea4fcf4e8"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/stage-scope-policy.json",
+      "sha256" : "61461001a33423f2d6b7d50b86036715ee1771e083bc595adc71d337ef01215b"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/file-summaries.json",
+      "sha256" : "0b625c61c5a01dcb75bcfd4b2cd414a9569389b3d3d2ea418aa0b9bbf17b8a43"
+    }
+  }
+}

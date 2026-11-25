@@ -1,0 +1,36 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1791636766183-3008109f",
+  "agentTaskId" : "agt-1791636766178-01d9056c",
+  "workflowExecutionId" : "wfe-1791636766103-13a2338e",
+  "nodeInstanceId" : "node-intake-decision-005",
+  "nodeDefinitionId" : "intake.decision",
+  "handlerType" : "review.decision",
+  "status" : "SUCCEEDED",
+  "pid" : 49256,
+  "outcome" : "NEEDS_REVISION",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791636690133/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_pid" : 49256,
+      "input_identity" : "1a5302f0bb5318432b233595f7c8ad5390db5b844f6cc25e0996542591acb787",
+      "executor_started_at" : "2026-10-10T12:52:44.917Z"
+    },
+    "summary" : "功能与验收要求覆盖充分，但 C-4 将建议文件固化为产品约束，未保留用户要求的设计、计划确认及实现前单独批准边界。",
+    "source" : "contract-sidecar",
+    "decision" : "NEEDS_REVISION",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-10T12:52:46.183012Z",
+  "finishedAt" : "2026-10-10T12:52:46.230212Z",
+  "durationMs" : 47
+}

@@ -45,8 +45,8 @@ record AcpxUsage(
 
     /** result.usage 精确匹配到本次 prompt 文本。 */
     static final String ATTR_EXACT_PROMPT_MATCH = "EXACT_PROMPT_MATCH";
-    /** 无法精确匹配 prompt 文本，按 request id 取会话内最近一条 prompt 的 result.usage。 */
-    static final String ATTR_LATEST_PROMPT_IN_SESSION = "LATEST_PROMPT_IN_SESSION";
+    /** Current completion session/request identity, never prompt text or latest. */
+    static final String ATTR_EXACT_REQUEST_MATCH = "EXACT_REQUEST_MATCH";
     /** 只有 usage_update，没有 result.usage，记录为会话累计快照。 */
     static final String ATTR_SESSION_USAGE_UPDATE = "SESSION_USAGE_UPDATE";
     static final String ATTR_MULTI_PROMPT_SUM = "MULTI_PROMPT_SUM";
@@ -160,11 +160,8 @@ record AcpxUsage(
     }
 
     static AcpxUsage aggregatePromptOccurrences(AcpxUsage first, AcpxUsage second) {
-        if (first == null) {
-            return second;
-        }
-        if (second == null) {
-            return first;
+        if (first == null || second == null) {
+            return incompleteSum(first, second);
         }
         if (!PROVIDER_RUN_USAGE.equals(first.measurementType)
                 || !PROVIDER_RUN_USAGE.equals(second.measurementType)
@@ -173,7 +170,7 @@ record AcpxUsage(
                 || !first.providerId.equals(second.providerId)
                 || !first.model.equals(second.model)
                 || !first.billingMode.equals(second.billingMode)) {
-            return second.withUnavailableReason("MULTI_PROMPT_USAGE_REQUIRES_OCCURRENCE_SUM");
+            return incompleteSum(first, second);
         }
         var currency = first.costCurrency.equals(second.costCurrency) ? first.costCurrency : "";
         var cost = currency.isBlank() || first.costAmount == null || second.costAmount == null
@@ -200,6 +197,13 @@ record AcpxUsage(
                 second.providerMetadataSource,
                 ""
         );
+    }
+
+    private static AcpxUsage incompleteSum(AcpxUsage first, AcpxUsage second) {
+        var identity = second == null ? first : second;
+        var metadata = identity == null ? AcpxProviderMetadata.empty() : new AcpxProviderMetadata(
+                identity.providerId, identity.model, identity.billingMode, identity.providerMetadataSource);
+        return unavailable("MULTI_PROMPT_USAGE_REQUIRES_OCCURRENCE_SUM", metadata);
     }
 
     private static String firstNonBlank(String current, String fallback) {

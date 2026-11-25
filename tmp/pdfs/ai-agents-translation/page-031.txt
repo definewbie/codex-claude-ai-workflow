@@ -1,0 +1,27 @@
+Figure 1-3. Overview of a hierarchical state machine with history marker that records the last active
+                                               substate.
+
+HSMs are particularly relevant to more advanced MASs. An HSM allows
+for “states within states,” which reduces duplication and makes policies
+obvious. For example, you can attach rate limits, safety filters, or circuit
+breakers to a WORKING superstate, so planning, acting, and reflecting all
+inherit the same safeguards. You define a guard or router once and reuse it
+across nodes.
+
+Consider a research agent. Instead of treating research as a single
+monolithic step, you can break it into a sub-machine with states such as
+searching for keywords, gathering URLs, scraping data, and summarizing
+findings. Each of these states can even map to a dedicated agent with its
+own capabilities, contributing to the larger team of agents. This nested
+structure helps manage complexity, keeps policies consistent, and makes the
+overall system easier to reason about and maintain.
+
+Mapping FSM/HSM to Agent Frameworks
+
+LangGraph already speaks the language of state machines and hierarchy.
+You implement it with subgraphs and shared keys. The router or decision-
+making agent that selects the next action (such as calling the next agent or
+tool) is analogous to the event handler in a classic state machine. It’s the
+part of the system that takes the current state and the LLM’s output (the
+event or payload) and determines the next logical step. The direct mapping
+is shown as follows:

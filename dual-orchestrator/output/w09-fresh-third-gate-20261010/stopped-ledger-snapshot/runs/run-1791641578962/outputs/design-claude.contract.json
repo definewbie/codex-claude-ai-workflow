@@ -1,0 +1,60 @@
+{
+  "artifact_type" : "agent_output_contract",
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261010T124812Z-XCZL",
+  "run_id" : "run-1791641578962",
+  "node_id" : "design.claude_design",
+  "node_instance_id" : "node-design-claude_design-013",
+  "handler_type" : "acpx.agent_run",
+  "decision" : "READY_FOR_ARCH_REVIEW",
+  "summary" : "最小设计：新建 src/normalize_text.py、tests/test_normalize_text.py 与 README.md 三个文件，以两步 replace 的纯函数实现 CRLF 与单独 CR 到 LF 的规范化，并给出满足 AC-1 至 AC-5 的测试与证据方案。",
+  "required_keys" : [ "summary", "decision" ],
+  "allowed_decisions" : [ "READY_FOR_ARCH_REVIEW" ],
+  "source_output_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/outputs/design-claude.json",
+  "source_artifact_type" : "design_result",
+  "generated_at" : "2026-10-10T14:16:16.066921Z",
+  "control" : {
+    "summary" : "最小设计：新建 src/normalize_text.py、tests/test_normalize_text.py 与 README.md 三个文件，以两步 replace 的纯函数实现 CRLF 与单独 CR 到 LF 的规范化，并给出满足 AC-1 至 AC-5 的测试与证据方案。",
+    "decision" : "READY_FOR_ARCH_REVIEW"
+  },
+  "control_source" : {
+    "kind" : "strict_agent_result_envelope"
+  },
+  "revision_responses" : [ ],
+  "lifecycle_status" : "READY",
+  "checks" : [ "已实读获批契约 tc-ws-20261010T124812Z-XCZL-node-contract-compile-012 与人工门 gate-node-gate-human_requirement_review-011（human_action=approved，仅批准目标、验收与排除范围，不锁定实施文件集），本设计的目标、语义与证据方案与契约逐条对齐。", "排除范围遵守：不创建任何依赖声明文件，不改 .git/ 与 .agent/，无网络、数据库、浏览器、后台服务或系统配置访问；实现文件零 import，测试仅使用标准库 unittest、sys、pathlib。", "转换语义正确（AC-4）：函数体为 return text.replace(\"\\r\\n\", \"\\n\").replace(\"\\r\", \"\\n\")，先处理 CRLF 再处理单独 CR，每个 CRLF 与每个单独 CR 恰好转为一个 LF，其余字符（含空串、已有 LF、末尾换行有无）逐字符不变。", "幂等性（AC-1/TR-3）：规范化结果不含 \\r，重复调用为恒等；test_idempotent_for_all_cases 以 subTest 遍历全部类别样本断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。", "生命周期边界声明：本设计不新增状态、索引、锁、事务、队列、缓存、外部副作用或补偿逻辑，为无状态纯函数；并发、超时/提供方失败、中断/崩溃、重启恢复、回滚/冲突及 cannot-bypass 测试均不适用，理由是不存在任何可被绕过或需恢复的状态。", "测试导入确定性：tests/test_normalize_text.py 以 Path(__file__).resolve().parents[1] / \"src\" 插入 sys.path 后导入 normalize_text，不依赖安装步骤或特定工作目录之外的假设（契约风险区建议方式），从仓库根可复现执行。", "AC-2/TR-2 证据方案：执行阶段从仓库根运行 python3 -B -m unittest discover -s tests -v（-B 避免 __pycache__ 产生授权文件集之外的落盘产物），保留真实命令与完整输出，核对其中的 Ran N tests 与 OK（failures=0、errors=0），且 N 与源码测试方法数一致、用例名一一对应；仅凭文字结论不视为满足。", "AC-3/TR-4 证据方案：README 示例使用显式转义与 repr 风格表示输入/输出（契约风险区要求，规避 Markdown 中 CR/LF 不可见问题），执行阶段实际运行示例（如 PYTHONPATH=src python3 - <<'EOF' ... EOF）并逐字符比对输出，或以读取源码方式核对一致性。", "文件集穷尽且为提案：本设计提议的全部变更为三个 CREATE（仓库 tracked 文件数为 0，不存在可 MODIFY 的现有文件，也不引入 __init__.py、配置或依赖文件）；依 AC-5 与 GOAL 语义，该列表不构成实施授权，精确路径与 CREATE/MODIFY 须在 EXECUTION scope.included 单独获批。" ],
+  "evidence" : [ "契约与门禁事实：objective 要求实现 normalize_newlines(text: str) -> str 并配套 unittest 与 README；AC-1 至 AC-5、TR-1 至 TR-4、约束（签名固定、不读写文件系统、不改调用方字符串）、非目标（不去首尾空白、不转编码、不做 NFC/NFD、不改制表符、无 CLI/打包/CI、不支持非 str 输入、不新增公开 API）均已在设计中逐项落实，且未引入任何被排除的机制。", "仓库现状事实：git status 干净，最近提交为 Initialize fresh Dual verification target；Glob 结果与治理上下文 repo-map 均显示产品树为空（tracked=0），src/、tests/、README.md 皆不存在，故三个文件均为 CREATE，无覆盖或冲突风险。", "AC-1 覆盖映射：模块级 CASES 表含九类显式 (输入, 期望) 样本——空字符串、纯 LF、含 CRLF、含单独 CR、混合换行、Unicode、末尾有换行、末尾无换行、连续空行；对应 test_empty_string、test_pure_lf_unchanged、test_crlf_converted_to_lf、test_lone_cr_converted_to_lf、test_mixed_newline_kinds、test_unicode_content_preserved、test_trailing_newline_present_preserved、test_trailing_newline_absent_preserved、test_consecutive_blank_lines 九个方法，另加 test_idempotent_for_all_cases 与 test_input_string_unchanged，共 11 个测试方法，unittest -v 输出应显示 Ran 11 tests。", "实现规格：src/normalize_text.py 无 import、无 I/O、无全局状态，仅含模块与函数 docstring 加一行函数体；Python str 不可变，天然满足不修改调用方字符串的约束。", "Unicode 安全性：\\r 与 \\n 为 ASCII 码点，str.replace 按码点匹配替换，不会触碰任何非 ASCII 字符，Unicode 样本（中文、emoji、重音字母等）仅换行符被替换。", "README 规格：含 from normalize_text import normalize_newlines 导入语句、典型混合换行示例（输入 \"first\\r\\nsecond\\rthird\\n\"，输出以 repr 表示为 'first\\nsecond\\nthird\\n'）、行为规则列表、从仓库根运行 python3 -m unittest discover -s tests -v 的说明，以及仅标准库、无第三方依赖的说明（不创建任何依赖声明文件）。" ],
+  "missing_evidence" : [ ],
+  "must_fix" : [ ],
+  "open_risks" : [ ],
+  "verification_summary" : "仅设计阶段：未编写实现代码、未执行测试、未产生任何仓库变更；设计依据来自实读的任务契约、人工门禁记录与仓库现状核查。",
+  "design" : {
+    "planned_files" : [ {
+      "path" : "src/normalize_text.py",
+      "operation" : "CREATE",
+      "responsibility" : "提供纯函数 normalize_newlines(text: str) -> str：函数体为 return text.replace(\"\\r\\n\", \"\\n\").replace(\"\\r\", \"\\n\")，将每个 CRLF 与每个单独 CR 恰好转为一个 LF，其余字符、空字符串、已有 LF、末尾换行有无逐字符保持；零 import、无 I/O、无状态，附模块与函数 docstring 说明语义与幂等性。"
+    }, {
+      "path" : "tests/test_normalize_text.py",
+      "operation" : "CREATE",
+      "responsibility" : "标准库 unittest 测试：以 Path(__file__).resolve().parents[1] / \"src\" 插入 sys.path 后 from normalize_text import normalize_newlines；模块级 CASES 表覆盖空字符串、纯 LF、CRLF、单独 CR、混合换行、Unicode、末尾有换行、末尾无换行、连续空行九类显式期望并逐类断言；test_idempotent_for_all_cases 以 subTest 遍历全部样本断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)；另含调用后输入字符串未被修改的断言。"
+    }, {
+      "path" : "README.md",
+      "operation" : "CREATE",
+      "responsibility" : "文档：行为规则（CRLF 与单独 CR 各转一个 LF，其余字符与末尾换行有无保持不变）、含 from normalize_text import normalize_newlines 的用法示例（典型混合换行输入与 repr 风格逐字符可核对的输出）、从仓库根运行 python3 -m unittest discover -s tests -v 的说明，以及仅使用 Python 标准库、无第三方依赖的说明。"
+    } ]
+  },
+  "stage_outcome" : "READY",
+  "stage_outcome_source" : "declared_status",
+  "evidence_state" : {
+    "blocking" : false,
+    "evidence_count" : 6,
+    "missing_evidence_count" : 0,
+    "must_fix_count" : 0,
+    "acceptance_note_count" : 0,
+    "open_risk_count" : 0
+  },
+  "authored_context" : {
+    "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791641578962/prompts/design-claude.md.manifest.json",
+    "sha256" : "1ff522301fc01c33b65395d1f60e8fdd436297009e27bffd791adfb312ba2921"
+  }
+}

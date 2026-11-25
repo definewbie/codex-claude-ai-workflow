@@ -1,0 +1,9 @@
+{
+  "commit": "f8ec3d41cbe1cac554a78c3131372af434440691",
+  "single_parent": "c442fd02fb39d87481bbd940aa5f270947a72a60",
+  "tree": "0233afaf8755e44b6c8ab156e311ffbef6e50983",
+  "target_clean": true,
+  "candidate_sha256": "5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb",
+  "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target",
+  "source": "Actual git show and successful git status; not parsed commit summary"
+}

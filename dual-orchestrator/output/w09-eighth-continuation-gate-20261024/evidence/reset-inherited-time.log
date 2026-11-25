@@ -1,0 +1,15 @@
+test_whole_runner_reaches_original_java_boundary_with_cumulative_time (test_continuation.AssemblyTest.test_whole_runner_reaches_original_java_boundary_with_cumulative_time) ... FAIL
+
+======================================================================
+FAIL: test_whole_runner_reaches_original_java_boundary_with_cumulative_time (test_continuation.AssemblyTest.test_whole_runner_reaches_original_java_boundary_with_cumulative_time)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmprj3xkht8/test_continuation.py", line 135, in test_whole_runner_reaches_original_java_boundary_with_cumulative_time
+    self.assertEqual(1263.444,pre['prior_active_seconds'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1263.444 != 0.0
+
+----------------------------------------------------------------------
+Ran 1 test in 0.011s
+
+FAILED (failures=1)

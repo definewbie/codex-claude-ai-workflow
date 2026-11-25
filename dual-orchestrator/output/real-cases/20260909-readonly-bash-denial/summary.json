@@ -1,0 +1,12 @@
+{
+  "verdict": "INVALID_DENIAL_NOT_EXERCISED",
+  "read": "PASS",
+  "bashAttemptCount": 0,
+  "bashSuccessCount": 0,
+  "prompts": 1,
+  "exitCode": 0,
+  "closed": true,
+  "autoAllow": false,
+  "managedBashDeny": true,
+  "readNonceMatch": true
+}

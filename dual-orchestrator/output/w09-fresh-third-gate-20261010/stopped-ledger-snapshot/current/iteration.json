@@ -1,0 +1,12 @@
+{
+  "schemaVersion" : 1,
+  "iterationId" : "iter-001",
+  "stageId" : "stage-design",
+  "number" : 1,
+  "status" : "created",
+  "objective" : "Create the initial design for the user requirement.",
+  "claudeRunId" : "",
+  "codexRunId" : "",
+  "inputArtifactRefs" : [ "artifact-requirement" ],
+  "outputArtifactRefs" : [ ]
+}

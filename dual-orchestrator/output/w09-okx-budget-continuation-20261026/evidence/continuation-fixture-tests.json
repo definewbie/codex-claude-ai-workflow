@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "tests": 35,
+  "failures": 0,
+  "errors": 0,
+  "runtime_seconds": 14.125,
+  "command": "python3.13 -B -m unittest test_fresh_assembly test_gate_observer",
+  "raw_tool_session": 81425,
+  "model_calls": 0,
+  "boundary": "23 assembly fixtures including6 continuation-specific; 12 unchanged observer cases. Java process double/synthetic usage; not native E2E."
+}

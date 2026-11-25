@@ -1,0 +1,9 @@
+{
+  "exit": 0,
+  "timed_out": false,
+  "wait_seconds": 0.178,
+  "cleanup_deadline": 1884937.084055458,
+  "observed_owned_group_before_cleanup": [],
+  "process_observation_error": null,
+  "elapsed_seconds": 0.233
+}

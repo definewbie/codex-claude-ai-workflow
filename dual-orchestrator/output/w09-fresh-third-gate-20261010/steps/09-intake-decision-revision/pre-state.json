@@ -1,0 +1,50 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261010T124812Z-XCZL",
+    "workflowInstanceId": "wf-ws-20261010T124812Z-XCZL",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-intake-decision-010"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000010",
+    "updatedAt": "2026-10-10T12:57:10.739206Z",
+    "commitSequence": 37
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-intake-decision-010",
+    "nodeDefinitionId": "intake.decision",
+    "kind": "DECISION",
+    "handlerType": "review.decision",
+    "status": "READY",
+    "stageId": "stage-intake",
+    "iterationId": "iter-002",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json"
+    ],
+    "inputTransition": {
+      "source_node_sha256": "f5c1dd33fa60fb075c3c73aa86a698cbe74d06b0f3a8c3dc25f795af2a6edd41",
+      "source_node_instance_id": "node-intake-codex_product_review-009",
+      "required": true,
+      "transition_type": "normal",
+      "condition": "unconditional",
+      "purpose": "Seed the first Claude intake run with repo-scope context."
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 355.046,
+  "prior_run_count": 4
+}

@@ -1,0 +1,79 @@
+W09 启动选择收敛与 Relay 办法复用（设计候选，未实施）
+
+目标：解除操作层重复基线造成的合法流程误拒，继续既有 Dual 主链；保持真实程序/配置变化可见、用量及时间累计、人门和停止语义。推进 P0 主流程可执行性，不增加 P1/P2/P3 功能，不宣称新增 token 治理或节省。
+
+一、Relay 是否有更好的现成办法
+本轮只检查已固定官方提交 c3a92d9c179972963756ebce3fcd106679302934 的相关源码，不把“没找到”说成整个 Relay 项目都没有。
+
+问题 / Relay 源码的具体办法 / Dual 的处置
+身份转录与可选原生 ID：SessionClient 程序生成 UUID，nativeResumeId 可选，身份放元数据。Dual 已完成程序固定 SHA 与可选原生身份修正；这是同方向的办法，无需再开发一套。源码 packages/session/src/client.ts:162-195。
+启动检查关注错对象：Connect 用明确 socket pointer 定位，再检查实际端点及会话回应。可借鉴“检查实际将消费的对象”；不搬其安装器、守护进程和签名系统。源码 packages/connect/src/install.js:161-202、284-297。
+无意义等待：waitForLiveSocket 区分“会话身份被拒”和“没有服务响应”；前者立即返回，后者按截止时间停止并保留最后回应。将此作为已有 typed 诊断的检查原则，不扩大当前 45 秒超时、不新增探针。源码同文件:242-249、302-332。
+用量跨代归因：SDK 有观测来源、精度、turnId，但本轮检查范围没有证明它能解决 Dual 已遇到的跨连接编号复用和逐请求完整计量。继续现有 A 案，不替换 reader，不把 usage 事件名称当作能力证明。
+输出格式与领域契约：Connect 的自由正文减轻协作约束，但不能替代 Dual 的批准、验收和 typed 结果。继续既有 TRANSIENT 有界格式修正与 strict parser；不借帖子放宽业务契约。
+并发写入与恢复：SessionClient 的写后读回+有限重试明确自述为 mitigation，未保证跨进程并发不丢写；不是 Dual D06/D07 或 C/X 的更好替代。源码 packages/session/src/client.ts:353-405。
+
+实际采用的只是两个小原则：定位真实消费对象；把服务可用、会话身份可用和业务完成分开。没有发现能直接替代当前启动修正或用量 A 案、且接线成本更低的现成实现。后续按原计划推进，不接 Relay，不再为本比较另开实验。
+
+二、配置差异已经核清到字段层
+找到完整旧文件 private-baseline/config.toml，SHA=61caf49514401ce6ffb089620de56ecdc9f1a22db4d6a0900cc276f234752452，与第八例固定 config 完全相同。
+TOML 结构比较有四处：
+1. mcp_servers.node_repl.env.BROWSER_USE_CODEX_APP_VERSION 变化。
+2. mcp_servers.node_repl.env.NODE_REPL_TRUSTED_SERVICES 变化。
+3. plugins 中 code-review@openai-bundled 项移除。
+4. projects 新增第八例 target 的信任项。
+model、reasoning effort、context window、compaction limit、approval policy、approvals reviewer、sandbox mode、features、shell environment policy 九组均相同。
+第 4 项在已有窄例外的范围内，但前三项不能由该例外豁免；工具可用性与服务信任可能受影响，不能无证据称为无关变化。当前 Codex 程序字节也不同：旧 9394a943…，当前 a04752e4…。不要求回滚或锁版本，当前整体作为新候选待审；真实兼容性仍由既有接口检查和未来受控执行证明。
+当前完整 config 已另存私有候选（目录0700/文件0600），只读比较产物不导出敏感值。它不是新获批准的运行基线；不修改用户配置或旧包。
+
+三、最小接线设计
+分类：operator 启动事实的双来源冲突。业务 SoT、实例状态、Java 协议不变。新领域概念：无。
+唯一准备事实继续放既有 local-launch-selection.json：实际要用的程序入口，以及明确的子进程环境。复用 explicit_child_environment，补齐实际使用的 PATH 等必要启动值，不另造 launch registry 或平台。
+准备时记录完整候选子 PATH 的原文；不能从旧哈希猜造旧 PATH，不能为了满足旧名称回指未受审的 Homebrew/旧 Node 程序。原 launch-identity 的程序字节和配置锚仍核对，不合并成“只检查路径”。
+
+检查与使用的共同路径：
+1. 由受审绝对解释器进入辅助脚本；检查当前 sys.executable 的真实入口及字节，避免辅助脚本本身受父 PATH 改变。
+2. 在 continuation.py 现有 owner 中一次构造选定环境 E，统一返回给 inspect 的调用者。对 E 而非父 shell 做程序解析、realpath/字节和配置核验。保留原 SHA、授权、checkpoint、stop、进程与预算检查。
+3. 实际 Java 命令使用选定 Java/rtk 的明确入口，并把同一 E 传给 Popen；不在检查后重新读另一份环境拼接执行参数。
+4. acpx 仍使用已固定 DUAL_ACPX_EXECUTABLE wrapper；其 exec node 在 E 的 PATH 内解析到同一已核 Node。无需改 wrapper 或 acpx patch。
+5. 未决 PID 检查的 ps/rtk 调用也消费选定环境/明确命令。已确认缺席记录不重查；只改变命令选择，不改变 EPERM/UNKNOWN/PRESENT/ABSENT 语义。不能只修 Java 命令而让其前面的进程读取沿用父 PATH。
+6. pre-dispatch-recheck 与 run-one-step 共用同一条选择和检查逻辑；不再以父 PATH 字符串必须相等作为第二套准入真相。父 PATH 保留诊断，不作为业务批准或程序身份。
+7. 其他既有行为环境键、原生客户端 override 仍按原固定规则核验；本修正不提供任意环境/动态库/恶意命令的等价性保证。未知必要依赖或无法复用现有承载时停止，不扩平台。
+
+预计仅影响未来新包内 continuation.py、run-one-step.py、process_check.py 的命令接线，及既有 local-launch-selection/launch-identity 和两套相关测试。pre-dispatch-recheck 只消费同一结果，不复制规则。确切增量以实施前 diff 核实，不能为凑文件数留下兄弟旁路。Java、acpx patch、业务 schema/validator、预算表和 reader 不改。
+
+四、完整转换和失败切面
+前态 SoT：当前实例 RUNNING/plan.decision READY；两个历史停止记录永久保留，当前包停止未处置。848,242 token/10请求为继承底数，原1.7M/18/3600上限不变。
+
+阶段 / actor与顺序 / 成功后事实与消费者 / 失败解释
+离线候选：operator 读旧字节→生成新候选环境和配置差异→固定清单；新材料仅进入评审。写到一半无可用候选，不补造旧基线，不产生运行资格。
+授权：用户批准具体新组合和具名续作；新包授权默认为false，必须绑定原workstream/checkpoint及停止引用。原true不复制为新true。检查失败零step/Java/provider。
+只读核对：先核旧证据与两个stop SHA→核E及实际必要程序/配置→核checkpoint/pending/未决外部→核累计预算和时间。任何漂移/未知/额度不足拒绝；只读通过不授业务批准。
+单步：复用核过的E→确认当前节点和业务资格→固定step准备与预算准入→Popen。准备写失败不启动；已有不完整step拒绝自动重跑，核外部后处理。
+执行后：原Java owner固定R01/R02/R03/L03、唯一outcome和逐请求usage；operator写结果/时间回执。新包每次全量核账、继承全部旧时间与新回执，去重有ref/SHA；失败重核时间也不能清零。完整累计数在装配时重新核定，本设计不另编一个总数。
+外部未知/重启：沿D06固定补齐与D07外部不明处理，无自动重派；关闭、取消不推断所有子树已停。stop不因新设计、配置候选或重启而解除。
+成功后：仍由既有独立验收、人门、交付资格消费；环境核验通过不等于产品完成。terminal guard不改。
+
+旧新支持：旧包/账本/停止只读保留，原INVALID不改判；新操作包只能经具名准入接原受支持检查点，不修改 frozenRuntimeIdentity，不给旧执行补新身份。当前新Codex/config不是旧运行已使用的事实，只能用于获批后的新执行。若Java原守卫拒绝新的实际组合，按原失败出口停止，不临场放宽。
+
+五、实施后必须验证（当前均未运行）
+A. 完整装配正向：父PATH变化，E不变→核验和实际启动都使用同一选定程序；临时脚本记录实际可执行入口和环境，不只mock返回值。
+B. 反向：相同路径不同字节、wrapper选错Node、解释器不同、配置非例外变化、程序缺失→零Java workflow/provider。
+C. 兄弟：只读入口、单步入口、未决PID分支同向；EPERM/空表仍UNKNOWN，已确认号码不复查；ps不能被父PATH中的同名程序替换。
+D. 权威：缺/旧/错批准、任一停止变更、新stop、checkpoint漂移、pending、预算/时间不足→零派发；环境ALLOW绝不产生业务许可。
+E. 写点/冷启动：候选固定前/后、step写入前/后、process回执前/后中断；不完整准备无启动，不明外部不自动重试；冷子进程重读核固定环境及清单，无新执行资格。
+F. 同样的E给检查与启动的删除反证；恢复父PATH硬比对的误拒反证；取消字节/stop核验的误放行反证。反证与正常测试分开计数。
+范围与ROI：纯operator接线不改Java，做完整操作包装配测试，不用Java全模块绿灯替代装配证明；若实际触碰产品SoT/权限/写序则停止回到边界分析并按AGENTS扩大必要回归。旧1813/210不作新修正凭证。
+
+六、设计自查
+Boundary Review: WARN（候选待独立评审，机制尚未实施）。架构建议：PROCEED_WITH_GUARDS，仅指有界设计路径。
+Declared by：用户允许借鉴Relay，否则继续原计划；没有新运行批准。
+Proven by：固定源码、旧配置完整SHA匹配、结构差异、上一轮路径与字节原始对照；不含本设计的执行证明。
+Consumed by：拟由既有operator唯一生成E，两个入口和进程读取/Java启动强制消费同一E。
+Enforced before：拟在step创建和Java/provider启动前，当前未落码，不能称ENFORCED或闭环。
+Failure route：漂移/未知/未批/stop/预算不足拒绝；写点与外部未知沿原协议，无回退找最近程序。
+Cannot-bypass：第五节待实施的成对/整包/冷启动/反证，不用本轮材料核验冒充通过。
+
+下一步：合并CC只读受影响设计复审；通过并取得实施授权后，才在新包有界实施和验证。暂不改Gate、不解除停止、不续作、不启动新例。无必要再做Relay集成设计、Java重建或新原生实验。
+
+实施授权：用户于当前轮明确批准有界实施。两项LOW并入：配置影响逐项映射；核验后Popen前程序消失。运行授权仍为false；不触碰原包/账本。

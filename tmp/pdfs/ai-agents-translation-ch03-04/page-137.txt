@@ -1,0 +1,10 @@
+ Figure 3-9. Tree structure and posterior predictive distributions for AB-MCTS-M. Image adapted from Yuichi
+                                        Inoue et al. (2025).
+
+The second variant, AB-MCTS-A (node aggregation), is simpler and closer to
+standard MCTS. It introduces a CONT node under each answer node to represent
+refinement. Each node can either generate new candidates (via GEN) or continue
+improving an existing one (via CONT). This setup limits the computational cost
+while keeping the search flexible. Depending on how rewards are distributed, AB-
+MCTS-A can use Gaussian priors or beta priors to normalize scores between 0 and
+1. Figure 3-10 shows how such a tree can evolve.

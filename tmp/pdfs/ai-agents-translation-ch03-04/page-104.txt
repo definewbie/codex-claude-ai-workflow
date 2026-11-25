@@ -1,0 +1,2 @@
+Figure 3-1. Rollout timeline showing initialization, sequential actions, reward assignment, and trajectory
+                                                capture.

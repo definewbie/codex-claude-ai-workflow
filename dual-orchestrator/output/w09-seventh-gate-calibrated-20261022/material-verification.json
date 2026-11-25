@@ -1,0 +1,28 @@
+{
+  "checked_at": "2026-10-22T23:16:55.792635+08:00",
+  "status": "PASS_CC_LOW_DOCUMENT_DISPOSITION_AND_FULL_BYTE_BASELINE",
+  "files": 78,
+  "manifest_sha256": "c0e08a12aea58eb379bc5580989886995b63def2073d4e90f6a6b36b11425d4d",
+  "pre_disposition_manifest": "cc-low-disposition-before/material-sha256.json",
+  "reviewed_files_changed": [
+    "assessment.md",
+    "fresh-seventh-gate.md",
+    "launch-identity.json",
+    "preflight-summary.json"
+  ],
+  "all_other_reviewed_files": "UNCHANGED",
+  "full_client_byte_baseline": "PASS_MATCH_REVIEWED_IDENTITY",
+  "python_parse": "PASS_NO_EXECUTION",
+  "relative_links": "PASS",
+  "observer_launch_inputs": "PASS",
+  "initial_ledger": "21_UNCHANGED",
+  "model_runs": 0,
+  "authorization": false,
+  "cc_review": "ACCEPTED_TWO_LOW_CONDITIONS_FULFILLED",
+  "new_independent_review_performed": false,
+  "runtime_compatibility": "NOT_RUN",
+  "historical_whole_config_equivalence": "NOT_PROVEN",
+  "after_authorization_readonly_recheck": "REQUIRED_NOT_REPLACED_BY_THIS_CHECK",
+  "native_provider_calls": 0,
+  "maven_rerun": false
+}

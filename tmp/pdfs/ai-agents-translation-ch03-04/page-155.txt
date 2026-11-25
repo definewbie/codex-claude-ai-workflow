@@ -1,0 +1,6 @@
+unnecessary cache invalidations, while high memory pressure signals the
+need for paging or trimming strategies. Frameworks such as vLLM already
+support hierarchical paging and segment-level cache reuse to maintain
+stability under high concurrency. Table 4-3 shows an overview of the most
+important vLLM features for helping you to manage your KV cache
+efficiently.

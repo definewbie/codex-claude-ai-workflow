@@ -1,0 +1,7 @@
+Workflow definition is valid.
+Path: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json
+Workflow: agent-lifecycle-small-plan-human-review-experiment@1
+Entry: context.intake_claude_brainstorm
+Nodes: 28
+Edges: 51
+Handlers: [acceptance.failure_classify, acpx.agent_run, artifact.validate, context.build_package, contract.compile, delivery.prepare_pr, human.review, report.generate_final, review.decision]

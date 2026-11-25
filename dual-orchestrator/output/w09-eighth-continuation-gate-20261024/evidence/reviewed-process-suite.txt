@@ -1,0 +1,2 @@
+Transcribed from this turn exec result: rtk proxy python3 -B -m unittest -q in ../w09-process-absence-forward-fix-20261023/candidate
+exit 0; Ran 17 tests; OK. Separate suite, not added to the 25-case assembly count. No native/provider/Java.

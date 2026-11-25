@@ -1,0 +1,1183 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] dual-cli                                                           [jar]
+[INFO] dual-server                                                        [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-orchestrator ---
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/9]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-core ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 62 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 16 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.core.contract.TaskContractTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.166 s -- in dev.dual.core.contract.TaskContractTest
+[INFO] Running dev.dual.core.contract.PhasedContractTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 s -- in dev.dual.core.contract.PhasedContractTest
+[INFO] Running dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Running dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Running dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Running dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Running dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Running dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Running dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Running dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Running dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Running dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Running dev.dual.core.workflow.EdgeConditionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.workflow.EdgeConditionTest
+[INFO] Running dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Running dev.dual.core.id.DualIdGeneratorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.id.DualIdGeneratorTest
+[INFO] Running dev.dual.core.domain.PromptLanguageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.domain.PromptLanguageTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 125, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/9]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-ledger-file ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 68 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 24 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java使用了未经检查或不安全的操作。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Running dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Running dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.099 s -- in dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Running dev.dual.ledger.file.FileLedgerStoreTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.150 s -- in dev.dual.ledger.file.FileLedgerStoreTest
+[INFO] Running dev.dual.ledger.file.IterationRefTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.ledger.file.IterationRefTest
+[INFO] Running dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.251 s -- in dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[INFO] Running dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.565 s -- in dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Running dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Running dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Running dev.dual.ledger.file.WorkflowGateResolutionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.223 s -- in dev.dual.ledger.file.WorkflowGateResolutionTest
+[INFO] Running dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.106 s -- in dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[INFO] Running dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.302 s -- in dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[INFO] Running dev.dual.ledger.file.ParallelFanOutTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.162 s -- in dev.dual.ledger.file.ParallelFanOutTest
+[INFO] Running dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Running dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Running dev.dual.ledger.file.WorkflowFileLedgerTest
+[INFO] Tests run: 50, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.381 s -- in dev.dual.ledger.file.WorkflowFileLedgerTest
+[INFO] Running dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Running dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.402 s -- in dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[INFO] Running dev.dual.ledger.file.ExecutionClaimSequenceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.074 s -- in dev.dual.ledger.file.ExecutionClaimSequenceTest
+[INFO] Running dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.173 s -- in dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Running dev.dual.ledger.file.HumanActionRequestTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.100 s -- in dev.dual.ledger.file.HumanActionRequestTest
+[INFO] Running dev.dual.ledger.file.LedgerSessionTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.533 s -- in dev.dual.ledger.file.LedgerSessionTest
+[INFO] Running dev.dual.ledger.file.RetryFailureContextTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.290 s -- in dev.dual.ledger.file.RetryFailureContextTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 153, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/9]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-flow-liteflow ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 8 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.736 s -- in dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest
+[INFO] Running dev.dual.flow.liteflow.FlowKernelProviderTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.flow.liteflow.FlowKernelProviderTest
+[INFO] Running dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest
+[INFO] Running dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest
+D08 topology: pid=71634, kernel=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, kernelLoader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, holderLoader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, holderSource=file:/Users/kriswang/.m2/repository/com/yomahub/liteflow-core/2.16.0/liteflow-core-2.16.0.jar
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.448 s -- in dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/9]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-adapter-git ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 2 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.adapter.git.GitPatchMergeServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.744 s -- in dev.dual.adapter.git.GitPatchMergeServiceTest
+[INFO] Running dev.dual.adapter.git.GitWorkspaceServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.078 s -- in dev.dual.adapter.git.GitWorkspaceServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/9]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-runtime ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 104 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 89 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- jar:3.4.2:test-jar (shared-lifecycle-test-fixtures) @ dual-runtime ---
+[INFO] Building jar: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/dual-runtime-0.1.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.runtime.handler.LateContractRevisionContextTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.07 s -- in dev.dual.runtime.handler.LateContractRevisionContextTest
+[INFO] Running dev.dual.runtime.handler.PlanArtifactDocumentTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.runtime.handler.PlanArtifactDocumentTest
+[INFO] Running dev.dual.runtime.handler.TypedDesignScopeTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.453 s -- in dev.dual.runtime.handler.TypedDesignScopeTest
+[INFO] Running dev.dual.runtime.handler.EvidenceCollectionSourceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.493 s -- in dev.dual.runtime.handler.EvidenceCollectionSourceTest
+[INFO] Running dev.dual.runtime.handler.TokenEstimatorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.handler.TokenEstimatorTest
+[INFO] Running dev.dual.runtime.handler.TypedPlanScopeTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 27.89 s -- in dev.dual.runtime.handler.TypedPlanScopeTest
+[INFO] Running dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.149 s -- in dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest
+[INFO] Running dev.dual.runtime.handler.TaskContractScopeResolverTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.runtime.handler.TaskContractScopeResolverTest
+[INFO] Running dev.dual.runtime.handler.SelfTestContinuationSequenceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.485 s -- in dev.dual.runtime.handler.SelfTestContinuationSequenceTest
+[INFO] Running dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.057 s -- in dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest
+[INFO] Running dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.442 s -- in dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest
+[INFO] Running dev.dual.runtime.handler.EvidenceCollectionSequenceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.69 s -- in dev.dual.runtime.handler.EvidenceCollectionSequenceTest
+[INFO] Running dev.dual.runtime.handler.HandlerRegistryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.HandlerRegistryTest
+[INFO] Running dev.dual.runtime.handler.AgentEvidenceIndexTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.110 s -- in dev.dual.runtime.handler.AgentEvidenceIndexTest
+[INFO] Running dev.dual.runtime.handler.FailureArbiterTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.FailureArbiterTest
+[INFO] Running dev.dual.runtime.handler.PhasedContractContinuationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.972 s -- in dev.dual.runtime.handler.PhasedContractContinuationTest
+[INFO] Running dev.dual.runtime.handler.ContractRegistryTest
+[INFO] Tests run: 50, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in dev.dual.runtime.handler.ContractRegistryTest
+[INFO] Running dev.dual.runtime.handler.TaskContractProjectionVerifierTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.21 s -- in dev.dual.runtime.handler.TaskContractProjectionVerifierTest
+[INFO] Running dev.dual.runtime.handler.LateProposalScopeTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.647 s -- in dev.dual.runtime.handler.LateProposalScopeTest
+[INFO] Running dev.dual.runtime.handler.ContractReviewGateTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.056 s -- in dev.dual.runtime.handler.ContractReviewGateTest
+[INFO] Running dev.dual.runtime.handler.AcceptanceRepairSequenceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 34.72 s -- in dev.dual.runtime.handler.AcceptanceRepairSequenceTest
+[INFO] Running dev.dual.runtime.handler.ContractRevisionDisplayTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 33.51 s -- in dev.dual.runtime.handler.ContractRevisionDisplayTest
+[INFO] Running dev.dual.runtime.handler.AuthoredRevisionCoverageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.AuthoredRevisionCoverageTest
+[INFO] Running dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.140 s -- in dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest
+[INFO] Running dev.dual.runtime.handler.TaskContractArtifactWriterTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.runtime.handler.TaskContractArtifactWriterTest
+[INFO] Running dev.dual.runtime.handler.ContextBudgetOverrideTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.runtime.handler.ContextBudgetOverrideTest
+[INFO] Running dev.dual.runtime.handler.StageOutcomeCompilerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.StageOutcomeCompilerTest
+[INFO] Running dev.dual.runtime.handler.ExternalVerificationEvidenceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 22.51 s -- in dev.dual.runtime.handler.ExternalVerificationEvidenceTest
+[INFO] Running dev.dual.runtime.handler.ReadinessRoutingDefinitionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.runtime.handler.ReadinessRoutingDefinitionTest
+[INFO] Running dev.dual.runtime.handler.AuthoredBoundarySequenceTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 36.93 s -- in dev.dual.runtime.handler.AuthoredBoundarySequenceTest
+[INFO] Running dev.dual.runtime.handler.ChangeScopeEvaluationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.runtime.handler.ChangeScopeEvaluationTest
+[INFO] Running dev.dual.runtime.handler.WorkflowIntegrationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.088 s -- in dev.dual.runtime.handler.WorkflowIntegrationTest
+[INFO] Running dev.dual.runtime.handler.AgentResultEnvelopeParserTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.runtime.handler.AgentResultEnvelopeParserTest
+[INFO] Running dev.dual.runtime.handler.VerificationReadinessTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.333 s -- in dev.dual.runtime.handler.VerificationReadinessTest
+[INFO] Running dev.dual.runtime.handler.AgentRunCommitProtocolTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.485 s -- in dev.dual.runtime.handler.AgentRunCommitProtocolTest
+[INFO] Running dev.dual.runtime.handler.ContractLifecycleLedgerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.506 s -- in dev.dual.runtime.handler.ContractLifecycleLedgerTest
+[INFO] Running dev.dual.runtime.handler.VerificationEvidenceSequenceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.90 s -- in dev.dual.runtime.handler.VerificationEvidenceSequenceTest
+[INFO] Running dev.dual.runtime.handler.AcceptanceRepairInterruptionTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.801 s -- in dev.dual.runtime.handler.AcceptanceRepairInterruptionTest
+[INFO] Running dev.dual.runtime.handler.AgentRunMetadataFinalizerTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.074 s -- in dev.dual.runtime.handler.AgentRunMetadataFinalizerTest
+[INFO] Running dev.dual.runtime.handler.FailureClassifyHandlerTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.726 s -- in dev.dual.runtime.handler.FailureClassifyHandlerTest
+[INFO] Running dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest
+[INFO] Running dev.dual.runtime.handler.ContextBuildPackageHandlerTest
+[INFO] Tests run: 61, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.189 s -- in dev.dual.runtime.handler.ContextBuildPackageHandlerTest
+[INFO] Running dev.dual.runtime.handler.LegacyContractConsumerRejectionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.752 s -- in dev.dual.runtime.handler.LegacyContractConsumerRejectionTest
+[INFO] Running dev.dual.runtime.handler.ContractCompileHandlerTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.463 s -- in dev.dual.runtime.handler.ContractCompileHandlerTest
+[INFO] Running dev.dual.runtime.handler.AuthoredStageSequenceTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.52 s -- in dev.dual.runtime.handler.AuthoredStageSequenceTest
+[INFO] Running dev.dual.runtime.handler.ReportGenerateFinalHandlerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.92 s -- in dev.dual.runtime.handler.ReportGenerateFinalHandlerTest
+[INFO] Running dev.dual.runtime.handler.ContextTaskContractSectionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.677 s -- in dev.dual.runtime.handler.ContextTaskContractSectionTest
+[INFO] Running dev.dual.runtime.handler.ReportTaskContractTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.299 s -- in dev.dual.runtime.handler.ReportTaskContractTest
+[INFO] Running dev.dual.runtime.handler.TypedContextPayloadBoundaryTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.handler.TypedContextPayloadBoundaryTest
+[INFO] Running dev.dual.runtime.handler.AuthoredDefinitionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.runtime.handler.AuthoredDefinitionTest
+[INFO] Running dev.dual.runtime.handler.BuiltinHandlerTest
+[INFO] Tests run: 67, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.52 s -- in dev.dual.runtime.handler.BuiltinHandlerTest
+[INFO] Running dev.dual.runtime.handler.TaskContractProposalValidatorTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.085 s -- in dev.dual.runtime.handler.TaskContractProposalValidatorTest
+[INFO] Running dev.dual.runtime.handler.AgentContractSemanticsTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.runtime.handler.AgentContractSemanticsTest
+[INFO] Running dev.dual.runtime.handler.AgentResultPromptContractTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.runtime.handler.AgentResultPromptContractTest
+[INFO] Running dev.dual.runtime.handler.ReportFailureClassificationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.283 s -- in dev.dual.runtime.handler.ReportFailureClassificationTest
+[INFO] Running dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.071 s -- in dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest
+[INFO] Running dev.dual.runtime.handler.ArtifactContractValidatorTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.376 s -- in dev.dual.runtime.handler.ArtifactContractValidatorTest
+[INFO] Running dev.dual.runtime.handler.AuthoredRevisionContractTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in dev.dual.runtime.handler.AuthoredRevisionContractTest
+[INFO] Running dev.dual.runtime.handler.WorkstreamMemoryProjectionTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.runtime.handler.WorkstreamMemoryProjectionTest
+[INFO] Running dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest
+[INFO] Running dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest
+[INFO] Running dev.dual.runtime.handler.FailureClassifyRegistryTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.FailureClassifyRegistryTest
+[INFO] Running dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest
+[INFO] Running dev.dual.runtime.WorkflowRuntimeTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.722 s -- in dev.dual.runtime.WorkflowRuntimeTest
+[INFO] Running dev.dual.runtime.FrozenRuntimeIdentityTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.runtime.FrozenRuntimeIdentityTest
+[INFO] Running dev.dual.runtime.WorkflowRuntimeEventTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.628 s -- in dev.dual.runtime.WorkflowRuntimeEventTest
+[INFO] Running dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.910 s -- in dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest
+[INFO] Running dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest
+[INFO] Running dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest
+[INFO] Running dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest
+[INFO] Running dev.dual.runtime.RunningStateGuardTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 57.15 s -- in dev.dual.runtime.RunningStateGuardTest
+[INFO] Running dev.dual.runtime.StaleRunningRecoveryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.113 s -- in dev.dual.runtime.StaleRunningRecoveryTest
+[INFO] Running dev.dual.runtime.governance.AgentCapabilityCatalogTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.governance.AgentCapabilityCatalogTest
+[INFO] Running dev.dual.runtime.delivery.DeliveryApplicationServiceTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.248 s -- in dev.dual.runtime.delivery.DeliveryApplicationServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 712, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-acpx >---------------------
+[INFO] Building dual-adapter-acpx 0.1.0-SNAPSHOT                          [7/9]
+[INFO]   from dual-adapter-acpx/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ dual-adapter-acpx ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-acpx ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 11 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-acpx ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 49 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-acpx ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-acpx ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 38 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-acpx ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.adapter.acpx.AcpxNativeCommandSequenceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.005 s -- in dev.dual.adapter.acpx.AcpxNativeCommandSequenceTest
+[INFO] Running dev.dual.adapter.acpx.AcpxTranscriptToolUsageReaderTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.dual.adapter.acpx.AcpxTranscriptToolUsageReaderTest
+[INFO] Running dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest
+[ERROR] Tests run: 10, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 12.87 s <<< FAILURE! -- in dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan(boolean)[1] -- Time elapsed: 1.853 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan(AuthoredReferenceCorrectionSequenceTest.java:68)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan(boolean)[2] -- Time elapsed: 2.073 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan(AuthoredReferenceCorrectionSequenceTest.java:68)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.adapter.acpx.PromptManifestWriterTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.adapter.acpx.PromptManifestWriterTest
+[INFO] Running dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest
+[ERROR] Tests run: 49, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 31.49 s <<< FAILURE! -- in dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.schemaMissingFieldUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes -- Time elapsed: 0.857 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.schemaMissingFieldUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes(AcpxAgentTaskHandlerTest.java:358)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.adapter.acpx.AuthoredManifestDispatchTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.176 s -- in dev.dual.adapter.acpx.AuthoredManifestDispatchTest
+[INFO] Running dev.dual.adapter.acpx.AcpxProcessCleanupPolicyTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.adapter.acpx.AcpxProcessCleanupPolicyTest
+[INFO] Running dev.dual.adapter.acpx.AgentRunnerKindTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.adapter.acpx.AgentRunnerKindTest
+[INFO] Running dev.dual.adapter.acpx.ContextGovernanceActualReportWriterTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in dev.dual.adapter.acpx.ContextGovernanceActualReportWriterTest
+[INFO] Running dev.dual.adapter.acpx.AcpxExecutionFactOwnershipBoundaryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.adapter.acpx.AcpxExecutionFactOwnershipBoundaryTest
+[INFO] Running dev.dual.adapter.acpx.AcpxProviderMetadataTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.adapter.acpx.AcpxProviderMetadataTest
+[INFO] Running dev.dual.adapter.acpx.ClaudeExecutionPolicyTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.adapter.acpx.ClaudeExecutionPolicyTest
+[INFO] Running dev.dual.adapter.acpx.AcpxUsageReaderTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.088 s -- in dev.dual.adapter.acpx.AcpxUsageReaderTest
+[INFO] Running dev.dual.adapter.acpx.AcpxAgentTransportTest
+[INFO] Tests run: 44, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 163.4 s -- in dev.dual.adapter.acpx.AcpxAgentTransportTest
+[INFO] Running dev.dual.adapter.acpx.ToolUsageCapabilityClassifierTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.adapter.acpx.ToolUsageCapabilityClassifierTest
+[INFO] Running dev.dual.adapter.acpx.AcpxSessionLifecycleTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.adapter.acpx.AcpxSessionLifecycleTest
+[INFO] Running dev.dual.adapter.acpx.SessionCompactionSignalTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.adapter.acpx.SessionCompactionSignalTest
+[INFO] Running dev.dual.adapter.acpx.AgentLifecycleEventReaderTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.dual.adapter.acpx.AgentLifecycleEventReaderTest
+[INFO] Running dev.dual.adapter.acpx.PromptTemplateConsistencyTest
+[INFO] Tests run: 53, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.dual.adapter.acpx.PromptTemplateConsistencyTest
+[INFO] Running dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest
+[INFO] Running dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest
+[INFO] Tests run: 31, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.056 s -- in dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest
+[INFO] Running dev.dual.adapter.acpx.SessionScopePolicyTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.adapter.acpx.SessionScopePolicyTest
+[INFO] Running dev.dual.adapter.acpx.AgentExecutionHealthTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.adapter.acpx.AgentExecutionHealthTest
+[INFO] Running dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest
+[ERROR] Tests run: 16, Failures: 6, Errors: 0, Skipped: 0, Time elapsed: 15.28 s <<< FAILURE! -- in dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest
+[ERROR] dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.acceptedProductTraversesEveryGateAndTerminalPreventsNewExecution(boolean)[1] -- Time elapsed: 2.035 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-implement-claude_self_test_report-026, nodeDefinitionId=implement.claude_self_test_report, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-implement, iterationId=iter-002, inputRefs=[.agent/workstreams/ws-human-continuation/runs/run-1791300368010/outputs/implement-claude.stderr.log, .agent/workstreams/ws-human-continuation/runs/run-1791300368010/outputs/implement-claude.transcript.log, .agent/workstreams/ws-human-continuation/runs/run-1791300368010/outputs/implement-claude.json, .agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_implement-025-run-1791300368010/binding.json, .agent/workstreams/ws-human-continuation/runs/run-1791300368010/outputs/verification-observations.json, .agent/workstreams/ws-human-continuation/runs/run-1791300368010/outputs/implement-claude.contract.json], inputTransition={required=true, source_node_instance_id=node-implement-claude_implement-025, source_node_sha256=95d9fc4b6e23a25648fa74b55a5409bf0ed0ba12d25b0f854e498c4520c345cb, purpose=Seed the first Claude intake run with repo-scope context., condition=unconditional, transition_type=normal}, outputRefs=[.agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/implement-claude-self-test.stderr.log, .agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/implement-claude-self-test.transcript.log, .agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/implement-claude-self-test.json, .agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-026-run-1791300368237/binding.json, .agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/verification-observations.json, .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.json, .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=self_test_report, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=successful verification requires one evidence check for each approved criterion, path=, present=true, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., primaryReason=required_artifact_contract_failed, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=CONTRACT_FAILED}, agent_execution_result_contract={decision=SELF_TEST_COMPLETE, present=true, summary=, valid=true, validationError=}, contract_allowed_decisions=[BLOCKED, SELF_TEST_COMPLETE, SELF_TEST_INCOMPLETE], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.json, contract_node_id=implement.claude_self_test_report, contract_required_keys=[summary, decision], exit_code=0, message=successful verification requires one evidence check for each approved criterion, output_complete=true, parse_error={code=VERIFICATION_EVIDENCE_INVALID, details={}, message=successful verification requires one evidence check for each approved criterion}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-026-run-1791300368237/binding.json, repository_fact_binding_sha256=f4ab15f9889c71ed409fd2aca1c258562f916164aa496ff9214a100063002b9d, run_id=run-1791300368237, run_metadata=.agent/workstreams/ws-human-continuation/runs/run-1791300368237/run.json, session=claude-main-ws-human-continuation-run-1791300368237, transcript_ref=.agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/implement-claude-self-test.transcript.log, verification_observations={ref=.agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/verification-observations.json, sha256=527f20c6e533a5522efd2ceda110d95edb4d73acdd3bbd0cb5a6f4dd11c45e45}, completion_ref=.agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/nxe-1791300368227-e27bbf7c-completion.json, completion_sha256=e68d8b3874da5cffbf70f3b05425f893fb8c0607a92c03e9a41c8b61e9e4487b}, runRef=null, latestExecutionId=nxe-1791300368227-e27bbf7c, startedAt=2026-10-06T15:26:08.228594Z, finishedAt=2026-10-06T15:26:08.434523Z] ==> expected: <WAITING_FOR_HUMAN> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.acceptedProductTraversesEveryGateAndTerminalPreventsNewExecution(WorkflowFirstLifecycleSequenceTest.java:188)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.acceptedProductTraversesEveryGateAndTerminalPreventsNewExecution(boolean)[2] -- Time elapsed: 2.326 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-implement-claude_self_test_report-026, nodeDefinitionId=implement.claude_self_test_report, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-implement, iterationId=iter-002, inputRefs=[.agent/workstreams/ws-human-continuation/runs/run-1791300370294/outputs/implement-claude.stderr.log, .agent/workstreams/ws-human-continuation/runs/run-1791300370294/outputs/implement-claude.transcript.log, .agent/workstreams/ws-human-continuation/runs/run-1791300370294/outputs/implement-claude.json, .agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_implement-025-run-1791300370294/binding.json, .agent/workstreams/ws-human-continuation/runs/run-1791300370294/outputs/verification-observations.json, .agent/workstreams/ws-human-continuation/runs/run-1791300370294/outputs/implement-claude.contract.json], inputTransition={required=true, source_node_instance_id=node-implement-claude_implement-025, source_node_sha256=f961facf14991d23185f7b39d6631281e7e50deda357ecc7b58473a7b969d720, purpose=Seed the first Claude intake run with repo-scope context., condition=unconditional, transition_type=normal}, outputRefs=[.agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/implement-claude-self-test.stderr.log, .agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/implement-claude-self-test.transcript.log, .agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/implement-claude-self-test.json, .agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-026-run-1791300370540/binding.json, .agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/verification-observations.json, .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.json, .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=self_test_report, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=successful verification requires one evidence check for each approved criterion, path=, present=true, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., primaryReason=required_artifact_contract_failed, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=CONTRACT_FAILED}, agent_execution_result_contract={decision=SELF_TEST_COMPLETE, present=true, summary=, valid=true, validationError=}, contract_allowed_decisions=[BLOCKED, SELF_TEST_COMPLETE, SELF_TEST_INCOMPLETE], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.json, contract_node_id=implement.claude_self_test_report, contract_required_keys=[summary, decision], exit_code=0, message=successful verification requires one evidence check for each approved criterion, output_complete=true, parse_error={code=VERIFICATION_EVIDENCE_INVALID, details={}, message=successful verification requires one evidence check for each approved criterion}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-026-run-1791300370540/binding.json, repository_fact_binding_sha256=0b81a21e3399b6d4d9c542847a26afea0d879aa9724225e82b0ee93fe5bea267, run_id=run-1791300370540, run_metadata=.agent/workstreams/ws-human-continuation/runs/run-1791300370540/run.json, session=claude-main-ws-human-continuation-run-1791300370540, transcript_ref=.agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/implement-claude-self-test.transcript.log, verification_observations={ref=.agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/verification-observations.json, sha256=3465f98d1c7513141c15a32e4a784449c08b1530da5be39ba54841cd6ec24177}, completion_ref=.agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/nxe-1791300370529-3de0fcaa-completion.json, completion_sha256=2595b115c66c84c1c50d371c3b15c7bcc8dde6e19e2bcfa15c08ed87c4ad75ef}, runRef=null, latestExecutionId=nxe-1791300370529-3de0fcaa, startedAt=2026-10-06T15:26:10.530276Z, finishedAt=2026-10-06T15:26:10.758835Z] ==> expected: <WAITING_FOR_HUMAN> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.acceptedProductTraversesEveryGateAndTerminalPreventsNewExecution(WorkflowFirstLifecycleSequenceTest.java:188)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.unavailablePrerequisitesRequireHumanDispositionThenEvidenceReverification(boolean)[1] -- Time elapsed: 1.918 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: TOOL_LIMITATION ==> expected: <gate.human_implementation_repair> but was: <implement.claude_self_test_report>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.unavailablePrerequisitesRequireHumanDispositionThenEvidenceReverification(WorkflowFirstLifecycleSequenceTest.java:161)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.unavailablePrerequisitesRequireHumanDispositionThenEvidenceReverification(boolean)[2] -- Time elapsed: 2.251 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: TOOL_LIMITATION ==> expected: <gate.human_implementation_repair> but was: <implement.claude_self_test_report>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.unavailablePrerequisitesRequireHumanDispositionThenEvidenceReverification(WorkflowFirstLifecycleSequenceTest.java:161)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.removedApprovedContractStopsTheNextAuthorBeforeProvider(boolean)[1] -- Time elapsed: 1.859 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <gate.human_acceptance> but was: <implement.claude_self_test_report>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.removedApprovedContractStopsTheNextAuthorBeforeProvider(WorkflowFirstLifecycleSequenceTest.java:143)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.removedApprovedContractStopsTheNextAuthorBeforeProvider(boolean)[2] -- Time elapsed: 2.196 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <gate.human_acceptance> but was: <implement.claude_self_test_report>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.removedApprovedContractStopsTheNextAuthorBeforeProvider(WorkflowFirstLifecycleSequenceTest.java:143)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.adapter.acpx.AcpxFailureSignalCatalogTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.adapter.acpx.AcpxFailureSignalCatalogTest
+[INFO] Running dev.dual.adapter.acpx.AcpxToolObservationsTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.adapter.acpx.AcpxToolObservationsTest
+[INFO] Running dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.130 s -- in dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest
+[INFO] Running dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactoryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactoryTest
+[INFO] Running dev.dual.adapter.acpx.AcpxExecutionEventTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.adapter.acpx.AcpxExecutionEventTest
+[INFO] Running dev.dual.adapter.acpx.RetryFailureContextSequenceTest
+[ERROR] Tests run: 8, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 9.823 s <<< FAILURE! -- in dev.dual.adapter.acpx.RetryFailureContextSequenceTest
+[ERROR] dev.dual.adapter.acpx.RetryFailureContextSequenceTest.rejectedAuthorRetriesWithDiagnosticAndStillTraversesReviewAndApproval(boolean)[1] -- Time elapsed: 1.188 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.RetryFailureContextSequenceTest.rejectedAuthorRetriesWithDiagnosticAndStillTraversesReviewAndApproval(RetryFailureContextSequenceTest.java:93)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.RetryFailureContextSequenceTest.rejectedAuthorRetriesWithDiagnosticAndStillTraversesReviewAndApproval(boolean)[2] -- Time elapsed: 1.329 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.RetryFailureContextSequenceTest.rejectedAuthorRetriesWithDiagnosticAndStillTraversesReviewAndApproval(RetryFailureContextSequenceTest.java:93)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.adapter.acpx.AgentPromptRendererTest
+[INFO] Tests run: 36, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.119 s -- in dev.dual.adapter.acpx.AgentPromptRendererTest
+[INFO] Running dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 29.38 s -- in dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest
+[INFO] Running dev.dual.adapter.acpx.ReadFileSummaryTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.adapter.acpx.ReadFileSummaryTest
+[INFO] Running dev.dual.adapter.acpx.SessionCompactionPolicyTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in dev.dual.adapter.acpx.SessionCompactionPolicyTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   AcpxAgentTaskHandlerTest.schemaMissingFieldUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes:358 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan:68 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AuthoredReferenceCorrectionSequenceTest.humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan:68 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   RetryFailureContextSequenceTest.rejectedAuthorRetriesWithDiagnosticAndStillTraversesReviewAndApproval:93 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   RetryFailureContextSequenceTest.rejectedAuthorRetriesWithDiagnosticAndStillTraversesReviewAndApproval:93 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   WorkflowFirstLifecycleSequenceTest.acceptedProductTraversesEveryGateAndTerminalPreventsNewExecution:188 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-implement-claude_self_test_report-026, nodeDefinitionId=implement.claude_self_test_report, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-implement, iterationId=iter-002, inputRefs=[.agent/workstreams/ws-human-continuation/runs/run-1791300368010/outputs/implement-claude.stderr.log, .agent/workstreams/ws-human-continuation/runs/run-1791300368010/outputs/implement-claude.transcript.log, .agent/workstreams/ws-human-continuation/runs/run-1791300368010/outputs/implement-claude.json, .agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_implement-025-run-1791300368010/binding.json, .agent/workstreams/ws-human-continuation/runs/run-1791300368010/outputs/verification-observations.json, .agent/workstreams/ws-human-continuation/runs/run-1791300368010/outputs/implement-claude.contract.json], inputTransition={required=true, source_node_instance_id=node-implement-claude_implement-025, source_node_sha256=95d9fc4b6e23a25648fa74b55a5409bf0ed0ba12d25b0f854e498c4520c345cb, purpose=Seed the first Claude intake run with repo-scope context., condition=unconditional, transition_type=normal}, outputRefs=[.agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/implement-claude-self-test.stderr.log, .agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/implement-claude-self-test.transcript.log, .agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/implement-claude-self-test.json, .agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-026-run-1791300368237/binding.json, .agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/verification-observations.json, .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.json, .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=self_test_report, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=successful verification requires one evidence check for each approved criterion, path=, present=true, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., primaryReason=required_artifact_contract_failed, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=CONTRACT_FAILED}, agent_execution_result_contract={decision=SELF_TEST_COMPLETE, present=true, summary=, valid=true, validationError=}, contract_allowed_decisions=[BLOCKED, SELF_TEST_COMPLETE, SELF_TEST_INCOMPLETE], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.json, contract_node_id=implement.claude_self_test_report, contract_required_keys=[summary, decision], exit_code=0, message=successful verification requires one evidence check for each approved criterion, output_complete=true, parse_error={code=VERIFICATION_EVIDENCE_INVALID, details={}, message=successful verification requires one evidence check for each approved criterion}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-026-run-1791300368237/binding.json, repository_fact_binding_sha256=f4ab15f9889c71ed409fd2aca1c258562f916164aa496ff9214a100063002b9d, run_id=run-1791300368237, run_metadata=.agent/workstreams/ws-human-continuation/runs/run-1791300368237/run.json, session=claude-main-ws-human-continuation-run-1791300368237, transcript_ref=.agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/implement-claude-self-test.transcript.log, verification_observations={ref=.agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/verification-observations.json, sha256=527f20c6e533a5522efd2ceda110d95edb4d73acdd3bbd0cb5a6f4dd11c45e45}, completion_ref=.agent/workstreams/ws-human-continuation/runs/run-1791300368237/outputs/nxe-1791300368227-e27bbf7c-completion.json, completion_sha256=e68d8b3874da5cffbf70f3b05425f893fb8c0607a92c03e9a41c8b61e9e4487b}, runRef=null, latestExecutionId=nxe-1791300368227-e27bbf7c, startedAt=2026-10-06T15:26:08.228594Z, finishedAt=2026-10-06T15:26:08.434523Z] ==> expected: <WAITING_FOR_HUMAN> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   WorkflowFirstLifecycleSequenceTest.acceptedProductTraversesEveryGateAndTerminalPreventsNewExecution:188 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-implement-claude_self_test_report-026, nodeDefinitionId=implement.claude_self_test_report, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-implement, iterationId=iter-002, inputRefs=[.agent/workstreams/ws-human-continuation/runs/run-1791300370294/outputs/implement-claude.stderr.log, .agent/workstreams/ws-human-continuation/runs/run-1791300370294/outputs/implement-claude.transcript.log, .agent/workstreams/ws-human-continuation/runs/run-1791300370294/outputs/implement-claude.json, .agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_implement-025-run-1791300370294/binding.json, .agent/workstreams/ws-human-continuation/runs/run-1791300370294/outputs/verification-observations.json, .agent/workstreams/ws-human-continuation/runs/run-1791300370294/outputs/implement-claude.contract.json], inputTransition={required=true, source_node_instance_id=node-implement-claude_implement-025, source_node_sha256=f961facf14991d23185f7b39d6631281e7e50deda357ecc7b58473a7b969d720, purpose=Seed the first Claude intake run with repo-scope context., condition=unconditional, transition_type=normal}, outputRefs=[.agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/implement-claude-self-test.stderr.log, .agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/implement-claude-self-test.transcript.log, .agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/implement-claude-self-test.json, .agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-026-run-1791300370540/binding.json, .agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/verification-observations.json, .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.json, .agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.md], result={adapter_signals=[], agent=claude, agent_execution_artifact_contract_results=[{contractType=self_test_report, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=successful verification requires one evidence check for each approved criterion, path=, present=true, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., primaryReason=required_artifact_contract_failed, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=CONTRACT_FAILED}, agent_execution_result_contract={decision=SELF_TEST_COMPLETE, present=true, summary=, valid=true, validationError=}, contract_allowed_decisions=[BLOCKED, SELF_TEST_COMPLETE, SELF_TEST_INCOMPLETE], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-human-continuation/artifacts/contract-failures/node-implement-claude_self_test_report-026.json, contract_node_id=implement.claude_self_test_report, contract_required_keys=[summary, decision], exit_code=0, message=successful verification requires one evidence check for each approved criterion, output_complete=true, parse_error={code=VERIFICATION_EVIDENCE_INVALID, details={}, message=successful verification requires one evidence check for each approved criterion}, process_usability=EXITED_ZERO, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-human-continuation/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-026-run-1791300370540/binding.json, repository_fact_binding_sha256=0b81a21e3399b6d4d9c542847a26afea0d879aa9724225e82b0ee93fe5bea267, run_id=run-1791300370540, run_metadata=.agent/workstreams/ws-human-continuation/runs/run-1791300370540/run.json, session=claude-main-ws-human-continuation-run-1791300370540, transcript_ref=.agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/implement-claude-self-test.transcript.log, verification_observations={ref=.agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/verification-observations.json, sha256=3465f98d1c7513141c15a32e4a784449c08b1530da5be39ba54841cd6ec24177}, completion_ref=.agent/workstreams/ws-human-continuation/runs/run-1791300370540/outputs/nxe-1791300370529-3de0fcaa-completion.json, completion_sha256=2595b115c66c84c1c50d371c3b15c7bcc8dde6e19e2bcfa15c08ed87c4ad75ef}, runRef=null, latestExecutionId=nxe-1791300370529-3de0fcaa, startedAt=2026-10-06T15:26:10.530276Z, finishedAt=2026-10-06T15:26:10.758835Z] ==> expected: <WAITING_FOR_HUMAN> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   WorkflowFirstLifecycleSequenceTest.removedApprovedContractStopsTheNextAuthorBeforeProvider:143 expected: <gate.human_acceptance> but was: <implement.claude_self_test_report>
+[ERROR]   WorkflowFirstLifecycleSequenceTest.removedApprovedContractStopsTheNextAuthorBeforeProvider:143 expected: <gate.human_acceptance> but was: <implement.claude_self_test_report>
+[ERROR]   WorkflowFirstLifecycleSequenceTest.unavailablePrerequisitesRequireHumanDispositionThenEvidenceReverification:161 TOOL_LIMITATION ==> expected: <gate.human_implementation_repair> but was: <implement.claude_self_test_report>
+[ERROR]   WorkflowFirstLifecycleSequenceTest.unavailablePrerequisitesRequireHumanDispositionThenEvidenceReverification:161 TOOL_LIMITATION ==> expected: <gate.human_implementation_repair> but was: <implement.claude_self_test_report>
+[INFO] 
+[ERROR] Tests run: 431, Failures: 11, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Skipping dual-cli
+[INFO] This project has been banned from the build due to previous failures.
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Skipping dual-server
+[INFO] This project has been banned from the build due to previous failures.
+[INFO] ------------------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.053 s]
+[INFO] dual-core .......................................... SUCCESS [  1.708 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  8.960 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  1.597 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  1.104 s]
+[INFO] dual-runtime ....................................... SUCCESS [06:53 min]
+[INFO] dual-adapter-acpx .................................. FAILURE [04:25 min]
+[INFO] dual-cli ........................................... SKIPPED
+[INFO] dual-server ........................................ SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  11:33 min
+[INFO] Finished at: 2026-10-06T23:27:00+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project dual-adapter-acpx: There are test failures.
+[ERROR] 
+[ERROR] See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-adapter-acpx

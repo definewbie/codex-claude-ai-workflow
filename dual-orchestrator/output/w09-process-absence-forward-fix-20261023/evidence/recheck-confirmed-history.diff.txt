@@ -1,0 +1,4 @@
+Replace exactly:
+(confirmed if row.get("absent") is True else unresolved).append(pid)
+With:
+unresolved.append(pid)

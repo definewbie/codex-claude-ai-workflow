@@ -1,0 +1,2760 @@
+{
+  "status": "INCOMPLETE_FAILURE_INVENTORY_NOT_PASS",
+  "note": "Diagnostic clean test with test.failure.ignore=true completed through CLI; server compile interrupted by in-progress API DTO edit, subsequently corrected. Reactor success labels do not mean tests passed. Not final revision evidence.",
+  "suites": [
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.RecoveryCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.TimelineCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.RecoveryNetworkCommandTest",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "cliApprovesAndCancelsWithoutRetrying",
+          "message": "expected: <{\n  \"schemaVersion\" : 1,\n  \"workstreamId\" : \"ws-cli-network\",\n  \"workflowInstanceId\" : \"wf-cli\",\n  \"workflowId\" : \"custom\",\n  \"definitionVe"
+        }
+      ]
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.StatusCommandTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.TraceCommandTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.ReviewRequestActionCommandTest",
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "commandRecordsAnAdvisoryRequestAndDoesNotResolve",
+          "message": "expected: <WorkflowCurrentDocument[schemaVersion=1, workstreamId=ws-cli-request, workflowInstanceId=wf-cli-request, workflowId=cli-request, definition"
+        }
+      ]
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.SummaryCommandTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 4,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "printsWorkstreamSummaryFromLedgerFiles",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "writesSummaryToReportsWhenRequested",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "rawAppliedPlanCannotProduceFinalizeWithoutAcceptedCandidateBinding",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "showsCurrentFailureOnlyForRecoveryStates",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        }
+      ]
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.CliNextActionHintsTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.ReviewDecideCommandTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.InspectRunnerKindConsistencyTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.WorkflowPrintDefaultCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.RecoveryShowCommandTest",
+      "tests": 6,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "showPrintsRecoverableRuntimeAssessmentAndCurrentFailureSummary",
+          "message": "expected: <true> but was: <false>"
+        }
+      ]
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.ProjectionsRefreshCommandTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 4,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "refreshSurfacesHistoricalDeadPidRunningNodeWithoutMutatingLedger",
+          "message": "INVALID_LOCAL_COMMIT: missing workstream runtime identity"
+        },
+        {
+          "name": "refreshesTimelineAndMetricsFromExistingLedger",
+          "message": "INVALID_LOCAL_COMMIT: missing workstream runtime identity"
+        },
+        {
+          "name": "refreshSurfacesExecutionConsistencyWarningsWithoutMutatingLedger",
+          "message": "INVALID_LOCAL_COMMIT: missing workstream runtime identity"
+        },
+        {
+          "name": "refreshSurfacesAttemptOutcomeConflictsWithoutMutatingLedger",
+          "message": "INVALID_LOCAL_COMMIT: missing workstream runtime identity"
+        }
+      ]
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.RetryCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.DoctorCommandTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.CliLedgerFactoryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.ResumeCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.SessionsReapCommandTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.ReviewShowCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.DeliveryMergeCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "refusesLegacyAcceptanceThatIsNotBoundToCandidateBytes",
+          "message": "INVALID_LOCAL_COMMIT: missing workstream runtime identity"
+        }
+      ]
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.CalibrationCommandTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.RecoveryStaleCommandTest",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "commandReconcilesRunBeforeMovingNodeToRecovery",
+          "message": "expected: <INTERRUPTED> but was: <>"
+        }
+      ]
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.StartCommandVariantTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.AutoRunCommandTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.WatchCommandTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-cli",
+      "name": "dev.dual.cli.ReviewPacketCliHintsTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-flow-liteflow",
+      "name": "dev.dual.flow.liteflow.FlowKernelProviderTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-flow-liteflow",
+      "name": "dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-flow-liteflow",
+      "name": "dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-flow-liteflow",
+      "name": "dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.DeliveryCandidateWriterTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.DeliveryMergePlanTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.ExecutionClaimSequenceTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.FileLedgerStoreTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.WorkflowFileLedgerTest",
+      "tests": 50,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.OperatorWorkspaceRegistryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.WorkflowGateResolutionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.RetryFailureContextTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.LedgerMigratorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.ParallelFanOutTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.HumanActionRequestTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.ExecutionNetworkGrantStoreTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.ConditionalEdgeRoutingTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.LedgerSessionTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.RecoveryAssessmentTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.WorkstreamLockTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.IterationRefTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.ExecutionConsistencyClassifierTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.WorkflowCommitSequenceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.CheckpointDocumentTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-ledger-file",
+      "name": "dev.dual.ledger.file.MetricsProjectionWriterTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest",
+      "tests": 49,
+      "failures": 34,
+      "errors": 9,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "contractDiscoveryProfileAllowsReadAndSearchWithoutExecute",
+          "message": "expected: <false> but was: <null>"
+        },
+        {
+          "name": "unresolvedSessionRequestCannotUseEarlierCompletionToSuppressReconnect",
+          "message": ""
+        },
+        {
+          "name": "completedRunSplitsRawTranscriptFromFinalArtifactOutput",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "completedRunPreservesFencedRawTranscriptButPersistsStrictCandidate",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "prepareOnlyProviderCacheAwareWritesCompactionSeedWhenStabilitySignalTriggers",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "runScopedSessionRemainsOptIn",
+          "message": ""
+        },
+        {
+          "name": "typedPublicWebSearchApprovalAddsOnlyExactToolForOneRetry",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "runMetadataRecordsSessionScopeStageAndIteration",
+          "message": "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-4754317880120234090/.agent/workstreams/ws-sess/runs"
+        },
+        {
+          "name": "recordsProviderConnectionFailureAsAdapterBoundaryFailure",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "deniedOptionalToolWithOnlyMissingRootClosureCompletesWithWarnings",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "unvalidatedCompletionDoesNotEnterSemanticMemory",
+          "message": "unqualified stable contract must not enter semantic memory: {\n  \"schemaVersion\" : 1,\n  \"artifactType\" : \"workstream_memory\",\n  \"workstreamId\" : \"ws-se"
+        },
+        {
+          "name": "treatsNonZeroExitAsCompletedWhenStdoutHasCompleteTerminalArtifact",
+          "message": "{reason=REQUIRED_AGENT_EVIDENCE_MISSING, errors=[AUTHORED_CONTEXT_INVALID], failure_code=AUTHORED_CONTEXT_INVALID, input_preparation_failure={details="
+        },
+        {
+          "name": "nonImplementationAgentNodeRunsWithoutApproveAll",
+          "message": "expected: <false> but was: <null>"
+        },
+        {
+          "name": "prepareOnlyRunWritesSessionCompactionSeedWhenExperimentEnabled",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "nodePermissionProfileIsPassedToAcpxTransport",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "adjacentE1ExecutionsDoNotReuseAConflictingPolicySession",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "completesWhenExitCodeIsZeroAndOutputIsCompleteDespiteReconnectStderr",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "completedAgentRunRecordsAcpxUsageFromSessionStream",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "configuredPostContractNodeWithoutQualificationFailsBeforeTransportInvocation",
+          "message": "expected: <TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED> but was: <INPUT_PREPARATION_FAILED>"
+        },
+        {
+          "name": "startedRunIsClosedToTerminalWhenHandlerFailsBeforeFinalizer",
+          "message": "Expected java.io.IOException to be thrown, but nothing was thrown."
+        },
+        {
+          "name": "schemaCorrectionStillInvalidCannotRouteAndDoesNotStartThirdPrompt",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "writesPromptAndReturnsPreparedWhenConfiguredForPrepareOnly",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "schemaMissingFieldUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "capturedLargeStreamKeepsOccurrenceFactsConsistentThroughFinalization",
+          "message": "NodeResult[outcome=TASK_CONTRACT_REVISION_CONTEXT_INVALID, status=FAILED, outputRefs=[], result={reason=TASK_CONTRACT_REVISION_CONTEXT_INVALID, errors"
+        },
+        {
+          "name": "completedRunRecordsActualReadTelemetryWithoutReadPolicyFields",
+          "message": "read telemetry must not replace the change-boundary decision ==> expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "qualifiedAuthoredReviewStillExcludesUnvalidatedOutputFromMemory",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "normalRunWritesPreparedMetadataBeforeLaunchingAgentProcess",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "implementationAgentCannotRewriteWorkspaceBaseAuthority",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "namedImplementProfileOverridesLegacyApproveAllFlag",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "implementationAgentCannotCreateWorkspaceAuthority",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "runWritesExecutionTimeline",
+          "message": "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-1849561467029263597/.agent/workstreams/ws-timeline/runs"
+        },
+        {
+          "name": "prosePrefixedFinalMessageUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "recordsTypedTimeoutForZeroExitWithoutPromptCompletionAtDeadline",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "completesReconnectExitWhenStdoutHasCompleteTerminalArtifact",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "operatorGrantFlowsThroughRealHandlerPolicyAndDoesNotSurviveRetry",
+          "message": "expected: not <null>"
+        },
+        {
+          "name": "recordsSessionBootstrapFailureAsAdapterBoundaryFailure",
+          "message": ""
+        },
+        {
+          "name": "deniedOptionalToolWithProseWrappedFencedArtifactCompletesWithWarnings",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "implementationAgentNodeRunsWithApproveAllWhenConfigured",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "completedAgentRunPrefersTransportUsageWhenNoAcpxSessionStreamExists",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "handlerCannotFabricateExecutionFactsWhenTransportContractThrows",
+          "message": "Expected java.io.IOException to be thrown, but nothing was thrown."
+        },
+        {
+          "name": "runWritesPromptManifestByDefault",
+          "message": "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-13450668647877616130/.agent/workstreams/ws-manifest/runs"
+        },
+        {
+          "name": "implementationAgentCannotRewriteTaskContractAuthority",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "treatsReconnectStderrAsRecoverableFailureEvenWhenExitCodeIsZero",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        }
+      ]
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AgentExecutionHealthTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxUsageReaderTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AuthoredManifestDispatchTest",
+      "tests": 11,
+      "failures": 11,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(boolean)[1]",
+          "message": "the writer returned; dispatch must independently verify its output ==> expected: <1> but was: <0>"
+        },
+        {
+          "name": "aSuccessfulWriterWithWrongIdentityCannotDispatchProvider(boolean)[2]",
+          "message": "the writer returned; dispatch must independently verify its output ==> expected: <1> but was: <0>"
+        },
+        {
+          "name": "partialManifestCannotDispatchProvider(boolean)[1]",
+          "message": "the writer returned; dispatch must independently verify its output ==> expected: <1> but was: <0>"
+        },
+        {
+          "name": "partialManifestCannotDispatchProvider(boolean)[2]",
+          "message": "the writer returned; dispatch must independently verify its output ==> expected: <1> but was: <0>"
+        },
+        {
+          "name": "prepareOnlyWritesAndReadsTheSameManifestWithoutProvider",
+          "message": "{reason=INPUT_PREPARATION_FAILED, errors=[legacy contract qualification flag is not supported: design.claude_design], failure_code=java.lang.IllegalAr"
+        },
+        {
+          "name": "nonAuthoredSiblingPreservesTheSameIoFailureBeforeProvider(boolean)[1]",
+          "message": "expected: <java.io.IOException> but was: <java.lang.IllegalArgumentException>"
+        },
+        {
+          "name": "nonAuthoredSiblingPreservesTheSameIoFailureBeforeProvider(boolean)[2]",
+          "message": "expected: <java.io.IOException> but was: <java.lang.IllegalArgumentException>"
+        },
+        {
+          "name": "manifestWriteFailureRemainsAnIoFailureBeforeProvider(boolean)[1]",
+          "message": "expected: <java.io.IOException> but was: <java.lang.IllegalArgumentException>"
+        },
+        {
+          "name": "manifestWriteFailureRemainsAnIoFailureBeforeProvider(boolean)[2]",
+          "message": "expected: <java.io.IOException> but was: <java.lang.IllegalArgumentException>"
+        },
+        {
+          "name": "retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(boolean)[1]",
+          "message": "the writer returned; dispatch must independently verify its output ==> expected: <1> but was: <0>"
+        },
+        {
+          "name": "retainingManifestRefsWithoutRequiredPromptContentCannotDispatchProvider(boolean)[2]",
+          "message": "the writer returned; dispatch must independently verify its output ==> expected: <1> but was: <0>"
+        }
+      ]
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest",
+      "tests": 16,
+      "failures": 2,
+      "errors": 14,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "providerFailureCannotPublishEvenWhenItReturnsAValidCandidate(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "providerFailureCannotPublishEvenWhenItReturnsAValidCandidate(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "acceptedProductTraversesEveryGateAndTerminalPreventsNewExecution(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "acceptedProductTraversesEveryGateAndTerminalPreventsNewExecution(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "publishedCandidateWithoutDurableCompletionCannotReachTheReviewerOnColdResume(boolean)[1]",
+          "message": "expected: <1> but was: <0>"
+        },
+        {
+          "name": "publishedCandidateWithoutDurableCompletionCannotReachTheReviewerOnColdResume(boolean)[2]",
+          "message": "expected: <1> but was: <0>"
+        },
+        {
+          "name": "trustworthyCompleteProcessWarningPublishesAndReachesIndependentReview(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "trustworthyCompleteProcessWarningPublishesAndReachesIndependentReview(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "unavailablePrerequisitesRequireHumanDispositionThenEvidenceReverification(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "unavailablePrerequisitesRequireHumanDispositionThenEvidenceReverification(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "removedApprovedContractStopsTheNextAuthorBeforeProvider(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "removedApprovedContractStopsTheNextAuthorBeforeProvider(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "incompleteProcessCannotBeReclassifiedAsMissingArtifactAfterPublicationIsBlocked(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "incompleteProcessCannotBeReclassifiedAsMissingArtifactAfterPublicationIsBlocked(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "preparationStorageFailureStopsBeforeProviderAndRetainsTheException(boolean)[1]",
+          "message": "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-9490374952992592796/.agent/workstreams/ws-human-continuation/runs: Is a directory"
+        },
+        {
+          "name": "preparationStorageFailureStopsBeforeProviderAndRetainsTheException(boolean)[2]",
+          "message": "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-3262231009361626408/.agent/workstreams/ws-human-continuation/runs: Is a directory"
+        }
+      ]
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactoryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.SessionCompactionPolicyTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxProcessCleanupPolicyTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest",
+      "tests": 10,
+      "failures": 10,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "ordinarySchemaCorrectionAlsoCannotPublishChangedSemanticContent(boolean)[1]",
+          "message": "expected: <1> but was: <0>"
+        },
+        {
+          "name": "ordinarySchemaCorrectionAlsoCannotPublishChangedSemanticContent(boolean)[2]",
+          "message": "expected: <1> but was: <0>"
+        },
+        {
+          "name": "stillMalformedCorrectionStopsAfterOneAttemptWithoutSidecar(boolean)[1]",
+          "message": "NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-001, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx"
+        },
+        {
+          "name": "stillMalformedCorrectionStopsAfterOneAttemptWithoutSidecar(boolean)[2]",
+          "message": "NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-001, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx"
+        },
+        {
+          "name": "humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan(boolean)[1]",
+          "message": "expected: <gate.human_design_approval> but was: <design.claude_design>"
+        },
+        {
+          "name": "humanRevisionCorrectionsPublishAndFlowThroughReviewForDesignAndPlan(boolean)[2]",
+          "message": "expected: <gate.human_design_approval> but was: <design.claude_design>"
+        },
+        {
+          "name": "changedAuthoredSourceBeforePublicationStillFailsClosed(boolean)[1]",
+          "message": "NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-001, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx"
+        },
+        {
+          "name": "changedAuthoredSourceBeforePublicationStillFailsClosed(boolean)[2]",
+          "message": "NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-001, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx"
+        },
+        {
+          "name": "shapeValidCorrectionThatChangesEvidenceMustNotPublishOrRoute(boolean)[1]",
+          "message": "NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-001, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx"
+        },
+        {
+          "name": "shapeValidCorrectionThatChangesEvidenceMustNotPublishOrRoute(boolean)[2]",
+          "message": "NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-design-claude_design-001, nodeDefinitionId=design.claude_design, kind=TASK, handlerType=acpx"
+        }
+      ]
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AgentRunnerKindTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.ToolUsageCapabilityClassifierTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 12,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "automaticRevisionAndContractClarificationReenterBothApprovalGates(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "automaticRevisionAndContractClarificationReenterBothApprovalGates(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "interruptedHumanDecisionCannotDispatchAnOrphanOrRepeatApproval(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "interruptedHumanDecisionCannotDispatchAnOrphanOrRepeatApproval(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "persistedHumanDecisionCannotBeForgedOrDetachedFromItsSubject(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "persistedHumanDecisionCannotBeForgedOrDetachedFromItsSubject(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "humanRevisionReachesSameAuthorReReviewAndBothApprovals(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "humanRevisionReachesSameAuthorReReviewAndBothApprovals(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "missingRevisionAndClarificationNotesAreRejectedBeforeAnyWrite(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "missingRevisionAndClarificationNotesAreRejectedBeforeAnyWrite(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "invalidRevisionInputRetainsItsCauseThroughColdLedgerAndRecovery(boolean)[1]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "invalidRevisionInputRetainsItsCauseThroughColdLedgerAndRecovery(boolean)[2]",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        }
+      ]
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxTranscriptToolUsageReaderTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.SessionScopePolicyTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest",
+      "tests": 31,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.RetryFailureContextSequenceTest",
+      "tests": 8,
+      "failures": 4,
+      "errors": 4,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "rejectedAuthorRetriesWithDiagnosticAndStillTraversesReviewAndApproval(boolean)[1]",
+          "message": ""
+        },
+        {
+          "name": "rejectedAuthorRetriesWithDiagnosticAndStillTraversesReviewAndApproval(boolean)[2]",
+          "message": ""
+        },
+        {
+          "name": "malformedSnapshotStopsTheWholePipelineBeforeProvider(boolean)[1]",
+          "message": "class com.fasterxml.jackson.databind.node.MissingNode cannot be cast to class com.fasterxml.jackson.databind.node.ObjectNode (com.fasterxml.jackson.da"
+        },
+        {
+          "name": "malformedSnapshotStopsTheWholePipelineBeforeProvider(boolean)[2]",
+          "message": "class com.fasterxml.jackson.databind.node.MissingNode cannot be cast to class com.fasterxml.jackson.databind.node.ObjectNode (com.fasterxml.jackson.da"
+        },
+        {
+          "name": "incompleteRetryWritesCannotLaunchAfterRestart(boolean)[1]",
+          "message": "expected: <READY> but was: <FAILED>"
+        },
+        {
+          "name": "incompleteRetryWritesCannotLaunchAfterRestart(boolean)[2]",
+          "message": "expected: <READY> but was: <FAILED>"
+        },
+        {
+          "name": "anotherInvalidCandidateIsRejectedAndNextRetryUsesOnlyItsDiagnostic(boolean)[1]",
+          "message": "no reviewer or automatic retry ==> expected: <2> but was: <0>"
+        },
+        {
+          "name": "anotherInvalidCandidateIsRejectedAndNextRetryUsesOnlyItsDiagnostic(boolean)[2]",
+          "message": "no reviewer or automatic retry ==> expected: <2> but was: <0>"
+        }
+      ]
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.ReadFileSummaryTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxExecutionFactOwnershipBoundaryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxProviderMetadataTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.PromptTemplateConsistencyTest",
+      "tests": 53,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AgentPromptRendererTest",
+      "tests": 36,
+      "failures": 1,
+      "errors": 2,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "intakeRevisionPromptRejectsTamperedPreviousProposalBeforeDispatch",
+          "message": "Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.IllegalStateException>"
+        },
+        {
+          "name": "intakeRevisionPromptProjectsExactVerifiedPreviousProposal",
+          "message": "routed agent evidence lineage is invalid: sidecar ledger occurrence cannot be resolved: INVALID_LOCAL_COMMIT: missing workstream runtime identity"
+        },
+        {
+          "name": "validatedSidecarProjectsTypedFieldsWithoutUnknownRawContent",
+          "message": "routed agent evidence lineage is invalid: sidecar ledger occurrence cannot be resolved: INVALID_LOCAL_COMMIT: missing workstream runtime identity"
+        }
+      ]
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxFailureSignalCatalogTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxSessionLifecycleTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AgentLifecycleEventReaderTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.SessionCompactionSignalTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.PromptManifestWriterTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.ContextGovernanceActualReportWriterTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.ClaudeExecutionPolicyTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxAgentTransportTest",
+      "tests": 44,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxExecutionEventTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest",
+      "tests": 10,
+      "failures": 1,
+      "errors": 2,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "typedDesignRetainsDecisionAndSummaryWithoutCopyingPlannedScope",
+          "message": "{reason=REQUIRED_AGENT_EVIDENCE_MISSING, errors=[AUTHORED_CONTEXT_INVALID], failure_code=AUTHORED_CONTEXT_INVALID, input_preparation_failure={details="
+        },
+        {
+          "name": "readFilesSummaryIsSemanticFromStructureNotMetadata",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "updateMemoryPopulatesDecidedScopeAndNonGoalsFromTaskContract",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract`, problem: unsupported task contract schema: 0\n at [Source: REDACTED (`StreamReadFea"
+        }
+      ]
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "name": "dev.dual.adapter.acpx.AcpxNativeCommandSequenceTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AcceptanceRepairSequenceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest",
+      "tests": 4,
+      "failures": 1,
+      "errors": 2,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "validatedPlanSidecarRoutesDirectlyToHumanGateAndApproveStartsImplementationContext",
+          "message": "No value present"
+        },
+        {
+          "name": "humanPlanRevisionMayContinueBeyondTheAutomaticBudget",
+          "message": "No value present"
+        },
+        {
+          "name": "lineageInvalidPlanSidecarCannotBecomeHumanReviewEvidence",
+          "message": "expected: <gate.human_plan_approval> but was: <context.plan_codex_plan_review>"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AgentResultPromptContractTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest",
+      "tests": 6,
+      "failures": 2,
+      "errors": 1,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "architectureReviewIsAdvisoryAcrossBundledVariants",
+          "message": "full ==> expected: <{READY_FOR_ARCH_REVIEW=gate.human_design_approval, NEEDS_REVISION=gate.human_design_approval, BLOCKED=gate.human_design_approval}>"
+        },
+        {
+          "name": "includesFullVariantAcrossLifecycleStages",
+          "message": "expected: <{READY_FOR_ARCH_REVIEW=gate.human_design_approval, NEEDS_REVISION=gate.human_design_approval, BLOCKED=gate.human_design_approval}> but was:"
+        },
+        {
+          "name": "finalNextStageGateCompletesWithoutStartingAnotherIteration",
+          "message": "unknown node: gate.human_next_stage_approval"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ArtifactContractValidatorTest",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.PhasedContractContinuationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AcceptanceRepairInterruptionTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ReportFailureClassificationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ContextBudgetOverrideTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.SelfTestContinuationSequenceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.WorkflowRuntimeTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 5,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "decisionRoutesUsingContractSidecarOutcome",
+          "message": "ledger already initialized"
+        },
+        {
+          "name": "changeScopeViolationStopsBeforeAcceptanceContext",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "contradictoryAcceptanceCannotPublishOrReachSuccessConsumersEvenAfterColdResume",
+          "message": "typed execution requires program-owned run metadata"
+        },
+        {
+          "name": "historicalRejectWithNoncanonicalCategoryCannotEnterCurrentClassification",
+          "message": "ledger already initialized"
+        },
+        {
+          "name": "invalidAgentOutputContractStopsBeforeRouting",
+          "message": "typed execution requires program-owned run metadata"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AgentExecutionAttemptReconcilerTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "stopLossTerminatesDurableInFlightProcessTreeBeforeReconciliation",
+          "message": "Operation not permitted (sysctl failed)"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.governance.AgentCapabilityCatalogTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AgentContractSemanticsTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.WorkflowRuntimeEventTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "contractCompile_emitsCompilationCompletedEvent",
+          "message": "ledger already initialized"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.EvidenceCollectionSourceTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.LateContractRevisionContextTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ContractReviewGateTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AuthoredRevisionCoverageTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AgentResultEnvelopeParserTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ContractCompileHandlerTest",
+      "tests": 24,
+      "failures": 5,
+      "errors": 1,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "approvedStrictProposalCompilesCanonicalContract(Path)",
+          "message": "{validation_errors=[an explicit ledger session is required], message=task_contract_proposal JSON could not be parsed: an explicit ledger session is re"
+        },
+        {
+          "name": "blockedReviewApprovedWithHumanNotePreservesTypedQuestions(Path)",
+          "message": "{validation_errors=[an explicit ledger session is required], message=task_contract_proposal JSON could not be parsed: an explicit ledger session is re"
+        },
+        {
+          "name": "approvedProposalWithOpenQuestionsProducesResolution(Path)",
+          "message": "{validation_errors=[an explicit ledger session is required], message=task_contract_proposal JSON could not be parsed: an explicit ledger session is re"
+        },
+        {
+          "name": "contractClarificationCannotBypassVerifiedRequirementGateLineage(Path)",
+          "message": "{validation_errors=[an explicit ledger session is required], message=task_contract_proposal JSON could not be parsed: an explicit ledger session is re"
+        },
+        {
+          "name": "revisionCompilesOnlyWhenEveryTriggeredReviewObligationIsCovered(Path)",
+          "message": "typed execution requires program-owned run metadata"
+        },
+        {
+          "name": "completedContractGateNodeWithoutResolvedDecisionCannotAuthorizeClarification(Path)",
+          "message": "{validation_errors=[an explicit ledger session is required], message=task_contract_proposal JSON could not be parsed: an explicit ledger session is re"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.FrozenRuntimeIdentityTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AuthoredDefinitionTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ChangeScopeEvaluationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.FailureClassifyHandlerTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AgentEvidenceIndexTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.TaskContractArtifactWriterTest",
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "writeMarkdownArtifact(Path)",
+          "message": "Markdown should have checkbox AC ==> expected: <true> but was: <false>"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.LateProposalScopeTest",
+      "tests": 9,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "scopeReviewRejectsMissingFieldsWithoutThrowing",
+          "message": "expected: <true> but was: <false>"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.WorkstreamMemoryProjectionTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "bundledVariantChangesOnlyTheAcceptedDeliveryTail",
+          "message": "expected: <31> but was: <32>"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.TypedContextPayloadBoundaryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ContextTaskContractSectionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 2,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "acceptancePackageWithoutTaskContractRendersPlaceholder",
+          "message": "required_contract_phase is missing: ctx.test"
+        },
+        {
+          "name": "contextPackageRendersTaskContractSection",
+          "message": "required_contract_phase is missing: ctx.test"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.TaskContractProposalValidatorTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ReportTaskContractTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.HandlerRegistryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.PlanArtifactDocumentTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 4,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "missingRequiredFieldReportsEachMissingField",
+          "message": "missing typed plan list"
+        },
+        {
+          "name": "fromReadsAllFields",
+          "message": "missing typed plan list"
+        },
+        {
+          "name": "fromToleratesMissingKeysAsEmptyAndReportsFirstMissing",
+          "message": "missing typed plan list"
+        },
+        {
+          "name": "missingRequiredFieldEmptyWhenComplete",
+          "message": "missing typed plan list"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.TaskContractScopeResolverTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 5,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "acceptsAcceptanceWithNotes",
+          "message": "typed execution requires program-owned run metadata"
+        },
+        {
+          "name": "acceptanceNotesMayStillRecordNonBlockingMissingEvidence",
+          "message": "typed execution requires program-owned run metadata"
+        },
+        {
+          "name": "acceptsStageHandoffResult",
+          "message": "typed execution requires program-owned run metadata"
+        },
+        {
+          "name": "acceptsSelfTestResult",
+          "message": "typed execution requires program-owned run metadata"
+        },
+        {
+          "name": "acceptsRejectedReviewWithBlockingEvidence",
+          "message": "typed execution requires program-owned run metadata"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ReadinessRoutingDefinitionTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.TypedPlanScopeTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 4,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "approvedPlanDoesNotExcuseActualGitScopeViolation",
+          "message": "INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent"
+        },
+        {
+          "name": "planWriteFailuresRemainIoFailuresAndColdReadersCannotUsePartialPublication",
+          "message": "run has no execution claim"
+        },
+        {
+          "name": "everyPlanTopologySurvivesColdReadAndFeedsTheSameApprovedIdentityToImplementationAndSelfTest",
+          "message": "AUTHORED_REVIEW_NOT_READY"
+        },
+        {
+          "name": "publicationRequiresCurrentQualificationButDoesNotRequireEveryContractPathOrReferenceInEditScope",
+          "message": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-6123269628008466359/case-0/.agent/workstreams/ws-authored/artifacts/task-contract.json "
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.TypedDesignScopeTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 8,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "twoBusinessesAndConsistentRenamesUseTheSamePublicationAndContextChain",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "runtimeInvokesReviewerForAnAuthorizedDesign",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "reviewerRejectsGenericMissingTamperedAndAmbiguousSubjectsButDeduplicatesRefs",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "runtimeNeverInvokesReviewerWithoutContractApproval",
+          "message": "typed execution requires program-owned run metadata"
+        },
+        {
+          "name": "runtimeNeverInvokesReviewerAfterOutOfScopeDesign",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "absentOrStaleContractCannotPublishOrStartReviewer",
+          "message": "legacy contract qualification flag is not supported: ctx.design"
+        },
+        {
+          "name": "unauthorizedOrMalformedDeclarationsCannotPublishEvenWhenProseClaimsCompliance",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "genericDesignIsRejectedWhileDesignShapeRemainsClosed",
+          "message": "legacy contract qualification flag is not supported: ctx.design"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ContractRegistryTest",
+      "tests": 50,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "bundledWorkflowNodesThatNeedContractsHaveContracts",
+          "message": "agent-lifecycle-full node contract.compile_execution uses contract.compile but has no output contract ==> expected: <true> but was: <false>"
+        },
+        {
+          "name": "decisionNodeRoutingOutcomesMatchAllowedContractDecisions",
+          "message": "agent-lifecycle-full decision node plan.decision has edge outcomes not allowed by contract: [READY_TO_IMPLEMENT, BLOCKED, NEEDS_REVISION, VERIFICATION"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.FailureArbiterTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AuthoredBoundarySequenceTest",
+      "tests": 14,
+      "failures": 6,
+      "errors": 1,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "everyDeclaredImplementationAndDirectSelfTestEntryConsumesTheApprovedPlan",
+          "message": "five implementation entries and one direct self-test entry; prerequisites wait for a human decision ==> expected: <6> but was: <7>"
+        },
+        {
+          "name": "approvedInputDamageAndPartialPublicationBlockTheActualConsumer(String)[1]",
+          "message": "Exception in thread \"main\" java.io.IOException: AUTHORED_CONTRACT_NOT_QUALIFIED\n at dev.dual.runtime.handler.AuthoredStageLineageResolver.require(Auth"
+        },
+        {
+          "name": "approvedInputDamageAndPartialPublicationBlockTheActualConsumer(String)[2]",
+          "message": "Exception in thread \"main\" java.io.IOException: AUTHORED_CONTRACT_NOT_QUALIFIED\n at dev.dual.runtime.handler.AuthoredStageLineageResolver.require(Auth"
+        },
+        {
+          "name": "sameBytesReapprovalRejectsOldAuthoredChainAndFreshChainCompletes",
+          "message": "No value present"
+        },
+        {
+          "name": "aLaterOpenApprovalBlocksOldRetryAndAResolvedReplacementDoesNotRebindIt",
+          "message": "java.io.IOException: AUTHORED_NODE_NOT_CURRENT ==> expected: <true> but was: <false>"
+        },
+        {
+          "name": "twoValidPlanCandidatesInOneApprovalCannotBeChosenByOrder(String)[1]",
+          "message": "Expected java.io.IOException to be thrown, but nothing was thrown."
+        },
+        {
+          "name": "twoValidPlanCandidatesInOneApprovalCannotBeChosenByOrder(String)[2]",
+          "message": "Expected java.io.IOException to be thrown, but nothing was thrown."
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AgentRunCommitProtocolTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.StaleRunningRecoveryTest",
+      "tests": 3,
+      "failures": 2,
+      "errors": 1,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "recoverCannotTransitionInstanceWhileDurableProviderProcessIsAlive",
+          "message": "Expected java.lang.IllegalStateException to be thrown, but nothing was thrown."
+        },
+        {
+          "name": "terminateAndRecoverCannotTransitionWithoutDurableProcessEvidence",
+          "message": "Expected java.lang.IllegalStateException to be thrown, but nothing was thrown."
+        },
+        {
+          "name": "terminateAndRecoverClosesExecutionBeforeInstanceTransition",
+          "message": "running process is still alive: 39872"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.BuiltinHandlerTest",
+      "tests": 67,
+      "failures": 14,
+      "errors": 5,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "humanGateReviewPacketSummarizesContractDecisionEvidenceAndDelivery",
+          "message": "expected: <true> but was: <false>"
+        },
+        {
+          "name": "contextPackageUsesProfileToKeepImplementationContextFocused",
+          "message": "expected: <implementation> but was: <null>"
+        },
+        {
+          "name": "contextPackageIncludesRoutedAgentOutputAfterHumanGate",
+          "message": ""
+        },
+        {
+          "name": "configuredControlHandlersFailBeforeEvidenceSideEffectsWithoutContractQualification",
+          "message": "legacy contract qualification flag is not supported: implement.artifact_validation"
+        },
+        {
+          "name": "configuredArtifactValidationRoutesViolationWithOccurrenceEvidence",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "artifactValidationPreservesSpecialPathFromNulFramedGitEvidence",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "artifactValidationFailsClosedWithoutWorkspaceBaseCommit",
+          "message": "expected: <CHANGE_SCOPE_EVIDENCE_UNAVAILABLE> but was: <TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED>"
+        },
+        {
+          "name": "configuredHumanGateFailsBeforePublishingPacketWithoutContractQualification",
+          "message": "Unexpected exception type thrown, expected: <java.lang.IllegalStateException> but was: <java.lang.IllegalArgumentException>"
+        },
+        {
+          "name": "reviewDecisionRoutesFromContractSidecarInputRef",
+          "message": "AUTHORED_REF_INVALID: .agent/workstreams/ws/nodes/node-plan-decision.json"
+        },
+        {
+          "name": "artifactValidationPreservesValidatedAgentEvidenceForAcceptance",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "contextPackageIncludesRecentWorkflowIterationHistory",
+          "message": ""
+        },
+        {
+          "name": "artifactValidationIncludesUntrackedFilesInPatch",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "artifactValidationWritesHygieneWarningsForGeneratedByproducts",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "artifactValidationCollectsGitEvidence",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "contextPackageIncludesHumanGateFeedbackFromNodeResult",
+          "message": ""
+        },
+        {
+          "name": "artifactValidationUsesWorkspaceBaseCommitWhenImplementationWasCommitted",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "artifactValidationRejectsDeclaredOperationMismatch",
+          "message": "expected: <CHANGE_SCOPE_VIOLATION> but was: <TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED>"
+        },
+        {
+          "name": "artifactValidationRejectsUnexpectedActualChange",
+          "message": "expected: <CHANGE_SCOPE_VIOLATION> but was: <TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED>"
+        },
+        {
+          "name": "finalReportHandlerGeneratesAcceptanceReport",
+          "message": "expected: <true> but was: <false>"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.FailureClassifyRegistryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AuthoredStageSequenceTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ContextBuildPackageHandlerTest",
+      "tests": 61,
+      "failures": 4,
+      "errors": 11,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "acceptanceProfileRendersReviewEvidenceBriefWithChangedFiles",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "governedPackageWritesRepoScopeGovernanceArtifacts",
+          "message": "expected: <true> but was: <false>"
+        },
+        {
+          "name": "acceptanceAlsoPreservesFeedbackAfterEnoughTrimming",
+          "message": "required_contract_phase is missing: ctx.test"
+        },
+        {
+          "name": "planReviewRendersTypedPlanFromValidatedAgentEvidence",
+          "message": "routed agent evidence sidecar is unreadable: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-8308573689058278365/.agent/workstreams/ws-ctx/runs"
+        },
+        {
+          "name": "acceptanceDoesNotAcceptMatchingDecisionFromWrongProducer",
+          "message": "required_contract_phase is missing: ctx.acceptance"
+        },
+        {
+          "name": "inputArtifactAgentOutputUsesSidecarSummaryInsteadOfRawBody",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "implementTargetDoesNotReceiveTypedSourceRereadAllowance",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "acceptanceRendersCompletedSelfTestEvidenceFromRoutedSidecar",
+          "message": "required_contract_phase is missing: ctx.acceptance"
+        },
+        {
+          "name": "observedAndHeuristicFilesCannotExpandCanonicalChangeBoundary",
+          "message": "expected: <[src/allowed.java, docs/API contract.md]> but was: <[]>"
+        },
+        {
+          "name": "governedStageGuidanceContainsNoReadAuthority",
+          "message": "required_contract_phase is missing: ctx.test"
+        },
+        {
+          "name": "taskContractSectionIncludesContractResolution",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "acceptancePreservesQualifiedContractBeyondSoftBudgetAndRecordsWarning",
+          "message": "required_contract_phase is missing: ctx.test"
+        },
+        {
+          "name": "architectureReviewSubjectKeepsLargeValidatedChecksAndEvidenceOutsideSummaryBudget",
+          "message": "routed agent evidence lineage is invalid: sidecar source is not published by the ledger node occurrence"
+        },
+        {
+          "name": "canonicalScopeIsNotTruncatedByRecommendationLimit",
+          "message": "canonical contract scope must not inherit the 24-file recommendation limit ==> expected: <true> but was: <false>"
+        },
+        {
+          "name": "acceptanceRequiresCompletedSelfTestEvidenceBeforeReviewerStarts",
+          "message": "required_contract_phase is missing: ctx.acceptance"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ContractLifecycleLedgerTest",
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "contractCompileEmitsEventMetadata(Path)",
+          "message": "result should contain contract_id ==> expected: not <null>"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest",
+      "tests": 6,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "contractVariantRoutesContractReviewToDesign",
+          "message": "expected: <design.claude_design> but was: <context.implement_claude>"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ExternalVerificationEvidenceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.RunningStateGuardTest",
+      "tests": 23,
+      "failures": 3,
+      "errors": 13,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "failedNotRecoverableIsRejected",
+          "message": "INVALID_LOCAL_COMMIT: current commit sequence is missing or invalid"
+        },
+        {
+          "name": "failedRecoverableRateLimitAllowsFiveRetries",
+          "message": "INVALID_LOCAL_COMMIT: current commit sequence is missing or invalid"
+        },
+        {
+          "name": "retryDelayRecordedInEvent",
+          "message": "INVALID_LOCAL_COMMIT: current commit sequence is missing or invalid"
+        },
+        {
+          "name": "blockedNodeIsRejected",
+          "message": "INVALID_LOCAL_COMMIT: current commit sequence is missing or invalid"
+        },
+        {
+          "name": "staleRunningNodeReconcilesInFlightAgentRunBeforeRecovery",
+          "message": "reconciled in-flight run must move to failed status ==> expected: <failed> but was: <prepared>"
+        },
+        {
+          "name": "failedRecoverableOverThresholdIsRejected",
+          "message": "INVALID_LOCAL_COMMIT: current commit sequence is missing or invalid"
+        },
+        {
+          "name": "outcomeManualOnlyPreventsLegacyRecoverableAutoRetry",
+          "message": "INVALID_LOCAL_COMMIT: current commit sequence is missing or invalid"
+        },
+        {
+          "name": "interruptedAgentOutputAllowsTwoRetries",
+          "message": "INVALID_LOCAL_COMMIT: current commit sequence is missing or invalid"
+        },
+        {
+          "name": "unknownRecoverableFailureUsesDefaultPolicy",
+          "message": "INVALID_LOCAL_COMMIT: current commit sequence is missing or invalid"
+        },
+        {
+          "name": "deadPidMarksLatestNodeExecutionStale",
+          "message": "execution requires a task bound to the current eligible node"
+        },
+        {
+          "name": "resumeReconcilesLeftoverStaleRunBeforeExecutingReadyNode",
+          "message": "pre-resume reconcile must close a leftover stale in-flight run to a typed outcome ==> expected: <INTERRUPTED> but was: <>"
+        },
+        {
+          "name": "failedRecoverableAutoRetriesThroughWaitingForRecovery",
+          "message": "execution requires a task bound to the current eligible node"
+        },
+        {
+          "name": "contextWindowAllowsFewerRetriesThanRateLimit",
+          "message": "INVALID_LOCAL_COMMIT: current commit sequence is missing or invalid"
+        },
+        {
+          "name": "outcomeAutoAllowedIsTheNewAutoRetrySourceOfTruth",
+          "message": "INVALID_LOCAL_COMMIT: current commit sequence is missing or invalid"
+        },
+        {
+          "name": "failedNodeMarksAgentTaskFailedAndKeepsExecutionLink",
+          "message": "expected: <FAILED> but was: <RUNNING>"
+        },
+        {
+          "name": "configOverrideTakesPrecedenceOverPolicy",
+          "message": "INVALID_LOCAL_COMMIT: current commit sequence is missing or invalid"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.EvidenceCollectionSequenceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.TaskContractProjectionVerifierTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 9,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "rejectsArtifactWithoutCompletedCompileBinding",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "rejectsUnreadableNodeLedgerInsteadOfSelectingPartialHistory",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "qualifiedSnapshotFeedsAllContextConsumersAfterDiskMutation",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "rejectsGateSourceIdentityMismatch",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "rejectsCompletedRecompileUntilItIsApproved",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "reapprovalSwitchesQualificationToTheNewCompileOccurrence",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "resolvedClarifyOrRejectIsNotContractApproval",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "rejectsContractMutationAfterCompile",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        },
+        {
+          "name": "resolvesOneQualifiedSnapshotFromLatestCompileBinding",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.VerificationReadinessTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AgentRunMetadataFinalizerTest",
+      "tests": 14,
+      "failures": 1,
+      "errors": 3,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "persistsSuccessfulExecutionOutcomeToRunMetadata",
+          "message": "failed to finalize typed agent run metadata"
+        },
+        {
+          "name": "mapsModelMismatchFailureReasonToTypedAdapterSignal",
+          "message": "failed to finalize typed agent run metadata"
+        },
+        {
+          "name": "persistsRetrySafeConsistentlyForManualRecoverableAdapterFailure",
+          "message": "failed to finalize typed agent run metadata"
+        },
+        {
+          "name": "malformedNodeResultAdapterSignalsCannotBecomeNoSignal",
+          "message": "Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.IllegalStateException>"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AuthoredRevisionContractTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.TokenEstimatorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.WorkflowIntegrationTest",
+      "tests": 10,
+      "failures": 4,
+      "errors": 1,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "chain5_needsRevisionLoopWithContextCarryover",
+          "message": "Requirement must be present ==> expected: <true> but was: <false>"
+        },
+        {
+          "name": "chain1_contextBuildToDecision",
+          "message": "expected: <true> but was: <false>"
+        },
+        {
+          "name": "chain3_activeProfileBudgetExcludesDuplicateRequirement",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "chain4_explicitFullProfileCompressesOversizedRequirement",
+          "message": "expected: <COMPLETED> but was: <FAILED>"
+        },
+        {
+          "name": "chain7_multiProfileGovernance",
+          "message": "Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/facto"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.StageOutcomeCompilerTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest",
+      "tests": 6,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "experimentDoesNotChangeBundledWorkflowResources",
+          "message": "expected: <914ea4be11a3884e654b4a4627a0d11cdf0385f6d248f058f9927018766e1706> but was: <4375c8074896871bb00970b0ba8946bb4344d098800dbe060038c112a6897c0"
+        },
+        {
+          "name": "allDesignProfilesDeclareTypedDesignAndTheSameReviewConsumer",
+          "message": "expected: <true> but was: <null>"
+        },
+        {
+          "name": "experimentPreservesPlanProducerBlockedBehaviorAndHumanGateBudget",
+          "message": "expected: <context.implement_claude> but was: <plan.claude_plan>"
+        },
+        {
+          "name": "externalDefinitionEqualsTerminalDeliveryPlusTheApprovedPlanReviewDelta",
+          "message": "expected: <[NodeDefinition[id=context.intake_claude_brainstorm, kind=TASK, handlerType=context.build_package, config={target_node=intake.claude_brains"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.AgentExecutionAttemptTimeoutPolicyTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ContractRevisionDisplayTest",
+      "tests": 7,
+      "failures": 3,
+      "errors": 1,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "missingIterationCannotPublishEitherPacket",
+          "message": "expected: <true> but was: <false>"
+        },
+        {
+          "name": "contractPacketRejectsChangedCompileBytesBeforeReplacingEitherPacket",
+          "message": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-17265117800197153214/falsetask-contract.json/.agent/workstreams/ws-repair-sequence/arti"
+        },
+        {
+          "name": "realHumanRevisionShowsSameCumulativeEvidenceInContextAndBothPackets",
+          "message": "artifacts/task-contract.json ==> expected: <true> but was: <false>"
+        },
+        {
+          "name": "tamperedRootBlocksRealContextAndPacketsEvenWithIntactCandidate",
+          "message": "artifacts/task-contract.json ==> expected: <true> but was: <false>"
+        }
+      ]
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.delivery.DeliveryApplicationServiceTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-runtime",
+      "name": "dev.dual.runtime.handler.ReportGenerateFinalHandlerTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "configuredReportFailsBeforePublishingWithoutContractQualification",
+          "message": "legacy contract qualification flag is not supported: acceptance.generate_final_report"
+        }
+      ]
+    },
+    {
+      "module": "dual-adapter-git",
+      "name": "dev.dual.adapter.git.GitPatchMergeServiceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-adapter-git",
+      "name": "dev.dual.adapter.git.GitWorkspaceServiceTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.provider.ProviderPricingCatalogTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.arbitration.FailureClassificationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.workflow.EdgeConditionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.workflow.EdgeDefinitionTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.contract.TaskContractTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.id.DualIdGeneratorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.provider.ProviderBillingCsvCalibrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.execution.AgentExecutionOutcomeResolverTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.execution.AgentExecutionFinalizerTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.contract.PhasedContractTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.execution.AgentExecutionAttemptTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.workflow.HumanGateActionSemanticsTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.provider.ProviderCachePolicyTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.domain.PromptLanguageTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    },
+    {
+      "module": "dual-core",
+      "name": "dev.dual.core.workflow.WorkflowDefinitionTest",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": []
+    }
+  ],
+  "totals_by_module": {
+    "dual-cli": [
+      91,
+      4,
+      9,
+      0
+    ],
+    "dual-flow-liteflow": [
+      17,
+      0,
+      0,
+      0
+    ],
+    "dual-ledger-file": [
+      153,
+      0,
+      0,
+      0
+    ],
+    "dual-adapter-acpx": [
+      426,
+      63,
+      43,
+      0
+    ],
+    "dual-runtime": [
+      717,
+      56,
+      80,
+      0
+    ],
+    "dual-adapter-git": [
+      6,
+      0,
+      0,
+      0
+    ],
+    "dual-core": [
+      123,
+      0,
+      0,
+      0
+    ]
+  }
+}

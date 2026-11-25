@@ -50,8 +50,8 @@ class RunningStateGuardTest {
     @Test
     void readyNodeMarksRunningAndExecutes() throws Exception {
         var paths = setup("ws-ready");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-ready", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-ready", SINGLE_TASK);
 
         var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-ready"));
@@ -62,8 +62,8 @@ class RunningStateGuardTest {
     @Test
     void executedNodeWritesWorkflowAndNodeExecutionLedger() throws Exception {
         var paths = setup("ws-execution-ledger");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-execution-ledger", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-execution-ledger", SINGLE_TASK);
 
         var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-execution-ledger"));
@@ -97,8 +97,8 @@ class RunningStateGuardTest {
                 List.of()
         );
         var paths = setup("ws-agent-task");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-agent-task", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-agent-task", definition);
 
         var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-agent-task"));
@@ -126,8 +126,8 @@ class RunningStateGuardTest {
     @Test
     void failedNodeMarksAgentTaskFailedAndKeepsExecutionLink() throws Exception {
         var paths = setup("ws-agent-task-failed");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-agent-task-failed", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-agent-task-failed", SINGLE_TASK);
 
         var runtime = new WorkflowRuntime(ledger, registry(new FailingTask()));
         try {
@@ -150,11 +150,48 @@ class RunningStateGuardTest {
         assertTrue(Files.readString(paths.eventsJsonl()).contains("agent_task_failed"));
     }
 
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+    void handlerExceptionClosesLocalAndQueuedClaimsWithoutNativeSuccess(boolean local) throws Exception {
+        var paths = setup("ws-handler-exception-" + local);
+        var ledger = RuntimeTestLedger.ledger();
+        RuntimeTestLedger.initialize(ledger, paths, "wf-exception", SINGLE_TASK);
+        TaskHandler failing = new TaskHandler() {
+            public String type() { return "test.handler"; }
+            public boolean localLedgerMutation() { return local; }
+            public NodeResult execute(TaskContext context) { throw new IllegalStateException("boom"); }
+        };
+        var handlers = registry(failing);
+        var runtime = new WorkflowRuntime(ledger, handlers,
+                local ? AgentTaskDispatchMode.INLINE : AgentTaskDispatchMode.WORKER);
+        var command = new WorkflowCommand(tempDir, paths.workstreamId().value());
+        if (local) org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> runtime.resume(command));
+        else {
+            // Queue a real task through the ledger; product queued mode selects native tasks only.
+            try (var write = ledger.writeSession(paths, "queue handler test", "request")) {
+                var scoped = write.ledger();
+                var current = scoped.loadCurrent(paths);
+                var workflow = scoped.startWorkflowExecution(paths, current, "test queue");
+                var node = scoped.loadNode(paths, current.activeNodeInstanceIds().get(0));
+                scoped.createAgentTask(paths, workflow.workflowExecutionId(), SINGLE_TASK.node(node.nodeDefinitionId()), node);
+                write.commit();
+            }
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> new AgentWorker(ledger, handlers).runOne(command));
+        }
+        assertEquals(AgentTaskStatus.FAILED, ledger.readAgentTasks(paths).get(0).status());
+        var failed = ledger.readNodeExecutions(paths).get(0);
+        assertEquals(NodeExecutionStatus.FAILED, failed.status());
+        assertEquals("exception", failed.outcome());
+        assertEquals(NodeStatus.FAILED, ledger.loadNode(paths, failed.nodeInstanceId()).status());
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, ledger.loadCurrent(paths).status());
+        assertFalse(failed.result().containsKey("completion_ref"));
+    }
+
     @Test
     void completedWorkflowResumeIsRejectedBeforeCreatingNewExecution() throws Exception {
         var paths = setup("ws-terminal-refusal");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-terminal-refusal", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-terminal-refusal", SINGLE_TASK);
 
         var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
         assertEquals(WorkflowStatus.COMPLETED,
@@ -174,8 +211,8 @@ class RunningStateGuardTest {
     @Test
     void acceptanceRejectWritesGoalSatisfactionNeedsRepair() throws Exception {
         var paths = setup("ws-goal-repair");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-goal-repair", ACCEPTANCE_DECISION);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-goal-repair", ACCEPTANCE_DECISION);
 
         var runtime = new WorkflowRuntime(ledger, decisionRegistry(new RejectDecision()));
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-goal-repair"));
@@ -193,8 +230,8 @@ class RunningStateGuardTest {
     @Test
     void runningNodeWithDeadPidMovesToRecoveryWithoutReexecuting() throws Exception {
         var paths = setup("ws-dead-pid");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-dead-pid", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-dead-pid", SINGLE_TASK);
 
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.RUNNING, Map.of("running_pid", 999999L));
@@ -214,10 +251,10 @@ class RunningStateGuardTest {
     }
 
     @Test
-    void staleRunningNodeReconcilesInFlightAgentRunBeforeRecovery() throws Exception {
+    void staleLocalNodeDoesNotRewriteAnUnboundMutableRun() throws Exception {
         var paths = setup("ws-reconcile");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-reconcile", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-reconcile", SINGLE_TASK);
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.RUNNING, Map.of("running_pid", 999999L));
 
@@ -256,19 +293,16 @@ class RunningStateGuardTest {
         var recoveredNode = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         assertEquals(NodeStatus.FAILED, recoveredNode.status());
         var reconciled = mapper.readTree(runJson.toFile());
-        assertEquals("failed", reconciled.path("status").asText(),
-                "reconciled in-flight run must move to failed status");
-        assertEquals("INTERRUPTED", reconciled.path("executionOutcome").path("status").asText(),
-                "stale in-flight agent run must be reconciled to a typed terminal outcome, not left without one");
-        assertFalse(reconciled.path("executionAttempt").path("status").asText("").isBlank(),
-                "reconciled run must carry a terminal executionAttempt");
+        assertEquals(mapper.readTree(mapper.writeValueAsString(runNode)), reconciled, "mutable unbound run is preserved, not promoted into a completion");
+        assertEquals("STALE_RUNNING_PROCESS", recoveredNode.result().get("reason"));
+
     }
 
     @Test
-    void resumeReconcilesLeftoverStaleRunBeforeExecutingReadyNode() throws Exception {
+    void unboundMutableRunCannotBlockOrImpersonateTheCurrentReadyClaim() throws Exception {
         var paths = setup("ws-reconcile-before-run");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-reconcile-before-run", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-reconcile-before-run", SINGLE_TASK);
 
         // A leftover in-flight agent run from a previous attempt that never returned.
         var runJson = paths.runsDir().resolve("run-leftover").resolve("run.json");
@@ -299,28 +333,25 @@ class RunningStateGuardTest {
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-reconcile-before-run"));
 
         var reconciled = mapper.readTree(runJson.toFile());
-        assertEquals("INTERRUPTED", reconciled.path("executionOutcome").path("status").asText(),
-                "pre-resume reconcile must close a leftover stale in-flight run to a typed outcome");
-        assertEquals("failed", reconciled.path("status").asText());
-        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, result.status(),
-                "resume must stop at recovery after reconciling a stale active-node attempt");
-        assertEquals(0, executed[0],
-                "resume must not create or execute a new task after stale attempt reconciliation");
-        var current = ledger.loadCurrent(paths);
-        var recoveredNode = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
-        assertEquals(NodeStatus.FAILED, recoveredNode.status());
-        assertEquals("STALE_RUNNING_ATTEMPT", recoveredNode.result().get("reason"));
+        assertEquals(mapper.readTree(mapper.writeValueAsString(runNode)), reconciled, "historical unbound bytes are neither recovered nor adopted");
+        assertEquals(WorkflowStatus.COMPLETED, result.status());
+        assertEquals(1, executed[0], "a valid unrelated ready task remains executable");
+        assertEquals(1, ledger.readNodeExecutions(paths).size());
+        assertFalse(ledger.readNodeExecutions(paths).getFirst().result().containsKey("completion_ref"));
+
     }
 
     @Test
     void deadPidMarksLatestNodeExecutionStale() throws Exception {
         var paths = setup("ws-dead-pid-execution");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-dead-pid-execution", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-dead-pid-execution", SINGLE_TASK);
 
         var node = ledger.loadNode(paths, "node-task-under_test-001");
-        var nodeExecution = ledger.startNodeExecution(paths, "wfe-test", node, null, 999999L);
-        ledger.markRunning(paths, node.nodeInstanceId(), 999999L);
+        var executor = new ProcessBuilder("sh", "-c", "read input").start();
+        final dev.dual.ledger.file.NodeExecutionDocument nodeExecution;
+        try { nodeExecution = claim(ledger, paths, executor.pid()); }
+        finally { executor.destroyForcibly(); executor.waitFor(); }
 
         var runtime = new WorkflowRuntime(ledger, registry(new OkTask()));
         var result = runtime.resume(new WorkflowCommand(tempDir, "ws-dead-pid-execution"));
@@ -338,8 +369,8 @@ class RunningStateGuardTest {
     @Test
     void runningNodeWithLivePidIsRejected() throws Exception {
         var paths = setup("ws-live-pid");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-live-pid", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-live-pid", SINGLE_TASK);
 
         ledger.markRunning(paths, "node-task-under_test-001", 999999L);
         writeNodeStatus(ledger, paths, ledger.loadNode(paths, "node-task-under_test-001"),
@@ -355,14 +386,14 @@ class RunningStateGuardTest {
     @Test
     void failedRecoverableAutoRetriesThroughWaitingForRecovery() throws Exception {
         var paths = setup("ws-auto-retry");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-auto-retry", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-auto-retry", SINGLE_TASK);
 
         // Simulate a FAILED node that was routed through stopOnNonCompletedNode
         // (workflow is WAITING_FOR_RECOVERY, node is FAILED with recoverable=true)
         var node = ledger.loadNode(paths, "node-task-under_test-001");
-        var previousExecution = ledger.startNodeExecution(paths, "wfe-original", node, null, 123L);
-        ledger.failNodeExecution(paths, previousExecution, new RuntimeException("rate limit"));
+        var previousExecution = claim(ledger, paths, ProcessHandle.current().pid());
+        AgentExecutionCompletion.recordHandlerFailure(ledger, paths, previousExecution, new RuntimeException("rate limit"));
         node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
                 Map.of("acpx_failure.recoverable", true, "acpx_failure.reason", "RECOVERABLE_RATE_LIMIT", "auto_retry_count", 0));
@@ -386,8 +417,8 @@ class RunningStateGuardTest {
     @Test
     void outcomeManualOnlyPreventsLegacyRecoverableAutoRetry() throws Exception {
         var paths = setup("ws-outcome-manual");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-outcome-manual", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-outcome-manual", SINGLE_TASK);
 
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.FAILED, Map.of(
@@ -414,8 +445,8 @@ class RunningStateGuardTest {
     @Test
     void outcomeAutoAllowedIsTheNewAutoRetrySourceOfTruth() throws Exception {
         var paths = setup("ws-outcome-auto");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-outcome-auto", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-outcome-auto", SINGLE_TASK);
 
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.FAILED, Map.of(
@@ -438,8 +469,8 @@ class RunningStateGuardTest {
     @Test
     void failedRecoverableRateLimitAllowsFiveRetries() throws Exception {
         var paths = setup("ws-rate-limit");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-rate-limit", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-rate-limit", SINGLE_TASK);
 
         // 4 retries still allowed (policy allows 5)
         var node = ledger.loadNode(paths, "node-task-under_test-001");
@@ -456,8 +487,8 @@ class RunningStateGuardTest {
     @Test
     void failedRecoverableOverThresholdIsRejected() throws Exception {
         var paths = setup("ws-over-threshold");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-over-threshold", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-over-threshold", SINGLE_TASK);
 
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
@@ -475,8 +506,8 @@ class RunningStateGuardTest {
     @Test
     void failedNotRecoverableIsRejected() throws Exception {
         var paths = setup("ws-not-recoverable");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-not-recoverable", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-not-recoverable", SINGLE_TASK);
 
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
@@ -492,8 +523,8 @@ class RunningStateGuardTest {
     @Test
     void blockedNodeIsRejected() throws Exception {
         var paths = setup("ws-blocked");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-blocked", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-blocked", SINGLE_TASK);
 
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.BLOCKED,
@@ -509,8 +540,8 @@ class RunningStateGuardTest {
     @Test
     void contextWindowAllowsFewerRetriesThanRateLimit() throws Exception {
         var paths = setup("ws-ctx-window");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-ctx-window", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-ctx-window", SINGLE_TASK);
 
         // CONTEXT_WINDOW policy allows max 2 retries, so count=2 should be rejected
         var node = ledger.loadNode(paths, "node-task-under_test-001");
@@ -528,8 +559,8 @@ class RunningStateGuardTest {
     @Test
     void interruptedAgentOutputAllowsTwoRetries() throws Exception {
         var paths = setup("ws-interrupted-output");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-interrupted-output", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-interrupted-output", SINGLE_TASK);
 
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
@@ -549,8 +580,8 @@ class RunningStateGuardTest {
     @Test
     void unknownRecoverableFailureUsesDefaultPolicy() throws Exception {
         var paths = setup("ws-unknown");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-unknown", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-unknown", SINGLE_TASK);
 
         // Unknown reason gets default policy (max 3)
         var node = ledger.loadNode(paths, "node-task-under_test-001");
@@ -573,8 +604,8 @@ class RunningStateGuardTest {
                 List.of()
         );
         var paths = setup("ws-config-override");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-config-override", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-config-override", definition);
 
         // Default policy for UNKNOWN_TRANSIENT is max 3, but config says max 1.
         // count=1 should hit the config limit even though default policy would allow more.
@@ -592,8 +623,8 @@ class RunningStateGuardTest {
     @Test
     void retryDelayRecordedInEvent() throws Exception {
         var paths = setup("ws-delay-event");
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-delay-event", SINGLE_TASK);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-delay-event", SINGLE_TASK);
 
         var node = ledger.loadNode(paths, "node-task-under_test-001");
         writeNodeStatus(ledger, paths, node, NodeStatus.FAILED,
@@ -659,12 +690,60 @@ class RunningStateGuardTest {
                 current.schemaVersion(), current.workstreamId(), current.workflowInstanceId(),
                 current.workflowId(), current.definitionVersion(), status,
                 current.activeNodeInstanceIds(), current.openGateIds(), current.lastEventId(),
-                java.time.Instant.now()
+                java.time.Instant.now(), current.commitSequence()
         );
         var field = WorkflowFileLedger.class.getDeclaredField("jsonWriter");
         field.setAccessible(true);
         var writer = (dev.dual.ledger.file.AtomicJsonWriter) field.get(ledger);
         writer.write(paths.workflowCurrentJson(), updated);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"before_manifest", "after_replace"})
+    void exceptionClosureCannotReplaceAPreparedSuccessfulLocalResult(String cut) throws Exception {
+        var paths = setup("ws-local-prefix-" + cut);
+        var ledger = RuntimeTestLedger.ledger();
+        RuntimeTestLedger.initialize(ledger, paths, "wf-prefix", SINGLE_TASK);
+        var execution = claim(ledger, paths, ProcessHandle.current().pid());
+        var interrupted = dev.dual.ledger.file.InterruptedTestLedger.at(cut);
+        org.junit.jupiter.api.Assertions.assertThrows(java.io.IOException.class, () -> {
+            try (var write = interrupted.writeSession(paths, "local result", execution.nodeExecutionId())) {
+                var scoped = write.ledger();
+                var result = NodeResult.completed("completed", List.of(), Map.of("local_result", "fixed"));
+                scoped.markAgentTaskFinished(paths, scoped.readAgentTask(paths, execution.agentTaskId()).orElseThrow(), result);
+                scoped.finishNodeExecution(paths, execution, result);
+                scoped.completeAndRoute(paths, SINGLE_TASK, execution.nodeInstanceId(), result.status(), result.outcome(), result.outputRefs(), result.result());
+                write.commit();
+            }
+        });
+        if (cut.equals("before_manifest")) {
+            AgentExecutionCompletion.recordHandlerFailure(ledger, paths, execution, new IllegalStateException("local write failed"));
+            assertEquals(NodeExecutionStatus.FAILED, ledger.readNodeExecutions(paths).getFirst().status());
+            assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, ledger.loadCurrent(paths).status());
+        } else {
+            org.junit.jupiter.api.Assertions.assertThrows(java.io.IOException.class, () ->
+                    AgentExecutionCompletion.recordHandlerFailure(ledger, paths, execution, new IllegalStateException("late exception")));
+            try (var finish = ledger.writeSession(paths, "finish fixed bytes", "recover")) { finish.commit(); }
+            assertEquals(NodeExecutionStatus.SUCCEEDED, ledger.readNodeExecutions(paths).getFirst().status());
+            assertEquals("fixed", ledger.readNodeExecutions(paths).getFirst().result().get("local_result"));
+            assertEquals(WorkflowStatus.COMPLETED, ledger.loadCurrent(paths).status());
+            AgentExecutionCompletion.recordHandlerFailure(ledger, paths, execution, new IllegalStateException("duplicate exception"));
+            assertEquals(WorkflowStatus.COMPLETED, ledger.loadCurrent(paths).status());
+        }
+    }
+
+    private dev.dual.ledger.file.NodeExecutionDocument claim(WorkflowFileLedger ledger, WorkstreamPaths paths, long pid) throws Exception {
+        try (var write = ledger.writeSession(paths, "claim test execution", "claim")) {
+            var scoped = write.ledger();
+            var current = scoped.loadCurrent(paths);
+            var wf = scoped.startWorkflowExecution(paths, current, "test");
+            var node = scoped.loadNode(paths, current.activeNodeInstanceIds().getFirst());
+            var task = scoped.createAgentTask(paths, wf.workflowExecutionId(), SINGLE_TASK.node(node.nodeDefinitionId()), node);
+            var execution = scoped.startNodeExecution(paths, wf.workflowExecutionId(), node, task, pid);
+            scoped.markAgentTaskRunning(paths, task, execution.nodeExecutionId());
+            scoped.markRunning(paths, node.nodeInstanceId(), pid);
+            write.commit(); return execution;
+        }
     }
 
     private static final class OkTask implements TaskHandler {

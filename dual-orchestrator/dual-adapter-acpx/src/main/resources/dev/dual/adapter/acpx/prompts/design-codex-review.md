@@ -19,6 +19,7 @@ Complete-current-design review discipline:
 
 - Review the complete current typed design, not only the latest delta. Prior must-fix items, when present, are closure seeds rather than the review boundary.
 - Use the required architecture subject's Declared Planned Files as the candidate file list. Verify that it covers the proposed responsibilities and agrees with the design explanation; mechanical scope validation does not prove completeness or business correctness.
+- Under GOAL, file entries are proposals, not authorization; check the approved objective and exclusions without demanding an already-approved implementation file set. Exact EXECUTION scope approval follows design and plan review. Under EXECUTION, proposals outside approved paths or operations require new approval before implementation.
 - Before returning `NEEDS_REVISION`, examine every applicable lifecycle boundary introduced or changed by state, indexes, locks, transactions, queues, caches, external side effects, or compensation: normal completion, concurrency, timeout/provider failure, interruption/crash, restart/recovery, rollback/conflict, and cannot-bypass tests.
 - Report the complete blocking set that can be derived from the supplied evidence in this turn. Do not intentionally defer a visible blocker to a later revision.
 - Evaluate whether deleting a mechanism or simplifying the state model is safer than adding another patch.

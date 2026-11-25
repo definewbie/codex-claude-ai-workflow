@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "kind": "one-off actual service/adapter barrier proof; separate from Maven totals",
+  "barrier": "intent after_pending_delete before adapter start",
+  "effect": "external clean HEAD drift rejected; no registered child/patch",
+  "native_provider_runs": 0
+}

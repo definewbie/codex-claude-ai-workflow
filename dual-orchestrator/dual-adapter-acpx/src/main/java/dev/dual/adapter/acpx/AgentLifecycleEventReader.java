@@ -34,6 +34,8 @@ final class AgentLifecycleEventReader {
     private final Path sessionsDir;
     private final Map<String, Long> streamStartOffsets;
     private final boolean streamBaselineCaptured;
+    private long permissionOffset;
+    private byte[] pendingPermissionBytes = new byte[0];
     private long stdoutOffset;
     private long stderrOffset;
     private long streamOffset = -1;
@@ -62,6 +64,37 @@ final class AgentLifecycleEventReader {
         this.sessionsDir = sessionsDir;
         this.streamBaselineCaptured = streamStartOffsets != null;
         this.streamStartOffsets = streamStartOffsets == null ? Map.of() : Map.copyOf(streamStartOffsets);
+    }
+
+    /** Complete NDJSON frames only; never scan model content or swallow permission I/O errors. */
+    List<Map<String, Object>> readPermissionRequests() throws IOException {
+        if (!Files.exists(stdoutPath)) return List.of();
+        var size = Files.size(stdoutPath);
+        if (size < permissionOffset) throw new IOException("current permission stream was truncated");
+        byte[] incoming;
+        try (var channel = java.nio.channels.FileChannel.open(stdoutPath, StandardOpenOption.READ)) {
+            channel.position(permissionOffset);
+            var buffer = ByteBuffer.allocate((int) Math.min(1024 * 1024, size - permissionOffset));
+            channel.read(buffer); incoming = Arrays.copyOf(buffer.array(), buffer.position());
+        }
+        permissionOffset += incoming.length;
+        var combined = Arrays.copyOf(pendingPermissionBytes, pendingPermissionBytes.length + incoming.length);
+        System.arraycopy(incoming, 0, combined, pendingPermissionBytes.length, incoming.length);
+        if (combined.length > 10 * 1024 * 1024) throw new IOException("native permission frame exceeds the existing IPC buffer limit");
+        var requests = new ArrayList<Map<String, Object>>();
+        int start = 0;
+        for (int i = 0; i < combined.length; i++) if (combined[i] == '\n') {
+            var line = new String(combined, start, i - start, StandardCharsets.UTF_8); start = i + 1;
+            var wire = AcpxStreamWireLine.parse(line);
+            if (wire.notification() != null && wire.notification().nativePermission() != null) {
+                var node = wire.notification().nativePermission();
+                if (!node.isObject()) throw new IOException("malformed native permission envelope");
+                requests.add(new com.fasterxml.jackson.databind.ObjectMapper().convertValue(node,
+                        new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {}));
+            }
+        }
+        pendingPermissionBytes = Arrays.copyOfRange(combined, start, combined.length);
+        return List.copyOf(requests);
     }
 
     List<AgentLifecycleEvent> readNewEvents() {
@@ -102,6 +135,10 @@ final class AgentLifecycleEventReader {
 
     AcpxPromptCompletion promptCompletion() {
         return streamProjector.promptCompletion();
+    }
+
+    List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> toolObservations() {
+        return streamProjector.toolObservations();
     }
 
     private void updateSessionId(String text) {

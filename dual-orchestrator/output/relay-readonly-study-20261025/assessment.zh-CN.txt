@@ -1,0 +1,114 @@
+Relay 对 Dual 的启发与当前阻塞核查（只读研究）
+日期：2026-10-25
+结论：优先修正现有启动选择的重复描述；暂不接入或替换为 Relay。
+边界审查：WARN——研究证据可用，当前续作运行前提未齐；不是修复完成或运行 PASS。
+架构建议：LOCAL_FIX_ONLY（限下一步操作层设计）；Relay 替换方案暂缓。
+
+一、本轮回答的题目
+在不改变 Dual 的批准、scope、独立复评、证据和交付职责的前提下，对照帖子、固定版本官方源码和本地启动原始记录：哪些复杂度可以删除；当前停止是否由真实执行环境变化引起；最小必要动作是什么。主目标是减少合法主流程被辅助接线误挡，不扩展通信平台，不预先许诺 token 或调用量下降。
+
+专家会额外检查的不是更多功能，而是三个反例：消息送到却未执行；同路径但程序字节已变；路径不同但实际使用同一份已固定程序。这三者分别防止“以通信代替验收”“漏掉真实漂移”“误拒等价入口”。本轮从这些原始对象入手，没有把历史评审 PASS 当作当前准入事实。
+
+二、检查范围与材料
+1. 用户提供的 X 帖子已读取：
+https://x.com/longhaiqwe123/status/2114031712430948410
+这是作者报告的协作演示，本轮没有重现其测试数量、速度或成本。它展示原生 Claude/Codex 会话协作，不等于证明 Dual 的完整批准、验收与交付链。
+2. Relay 官方源码固定于 c3a92d9c179972963756ebce3fcd106679302934；下载 11 个相关源码/测试文件并逐个对照官方目录树 Git blob 身份，11/11 相同。只检查选定入口和测试断言，没有安装依赖、运行其测试、创建 Connect 或执行外部代码。
+3. 本地核对：continuation.py、run-one-step.py、gate_support.py、两份启动身份记录、实际程序路径/字节、已有停止记录；AcpxAgentTransport、AgentResultEnvelopeValidator、AgentResultPromptContract。
+4. 只启动了两个 Java 入口的运行时信息查询（-XshowSettings:properties -version），没有运行 Dual JAR、原生编码客户端或模型。所有新材料只写本研究目录；未改产品、原 Gate、账本、授权和停止标记。
+5. 当前文档与帖子可能属于不同版本。Connect 原生辅助进程内部的入站注入、认证和停止实现未审；不能把 SDK 的类型/测试外推为该辅助进程的实际保证。
+
+三、帖子思路与 Dual：相同目标、不同证明责任
+Dual 一直主张原生客户端负责编码方式，Dual 负责能否推进及结果根据。帖子不是这个目标的新发现。它更值得追问的是：Dual 是否让模型承担了程序已经知道的身份转录，让运行准备承担了与实际执行无关的限制。
+
+Relay 有两处具体实现值得借鉴：
+A. 消息回执与任务结果分开。SDK 的 MessageReceipt 有 accepted/delivered/deferred/failed；DeliveryRunner 消费回执再 ACK/defer/fail。它没有把 delivered 当作测试通过或业务完成。
+固定源码：
+https://github.com/AgentWorkforce/relay/blob/c3a92d9c179972963756ebce3fcd106679302934/packages/sdk/src/session/types.ts#L144
+https://github.com/AgentWorkforce/relay/blob/c3a92d9c179972963756ebce3fcd106679302934/packages/sdk/src/delivery/runner.ts#L62
+这与 Dual 已有的 ACK 不等于已执行、原生完成不等于验收通过一致，可用来约束未来接线，不需要另造一套消息状态。
+
+B. 能力归实际会话。AgentSession 同时提供 capabilities、receiveMessage 和可选 release；观测能力区分 exact/inferred/unavailable。接口字段和事件名称本身不保证当前 Claude/Codex 会话能提供这些事实。Dual 先前可选 agentSessionId 被误当必填的教训与此对应；可借鉴“按本次实际可用能力检查”，而非为全部客户端统一增加必填元数据。
+固定源码：
+https://github.com/AgentWorkforce/relay/blob/c3a92d9c179972963756ebce3fcd106679302934/packages/sdk/src/session/types.ts#L171
+https://github.com/AgentWorkforce/relay/blob/c3a92d9c179972963756ebce3fcd106679302934/packages/sdk/src/session/types.ts#L530
+这只是架构约束，当前没有足够理由新增 capability registry、发现服务或通用适配平台。
+
+不能直接搬用的部分：
+- Connect CLI 的 send/join/status/leave 经 Unix socket 交本机 probe；源码显示安装入口会获取原生发布物。它把依赖换成原生 probe/服务，不是让运行环境依赖消失。
+- DeliveryRunner 在异常时允许消息重投；传递的 idempotencyKey 可以缺席。该段源码没有证明跨崩溃只执行一次；不能替代 Dual C/X 的单次许可协议，也不能把消息重投当作安全的外部操作重试。
+- 消息注入若能触发下一次模型执行，未来接入时必须在触发前消费原派发资格、批准和储备预算。收到消息后再记账不能替代派发前准入。
+- usage.updated 的通用 map、工具 completed 或消息 delivered，都没有自动提供 Dual 已批准验收需要的真实退出码、逐请求完整用量、完成候选 SHA 和独立验收。
+固定源码：
+https://github.com/AgentWorkforce/relay/blob/c3a92d9c179972963756ebce3fcd106679302934/packages/connect/src/cli.js#L224
+https://github.com/AgentWorkforce/relay/blob/c3a92d9c179972963756ebce3fcd106679302934/packages/sdk/src/delivery/runner.ts#L89
+
+四、当前阻塞的原始证据：两类问题，不能混说
+
+问题一：操作包对同一启动环境有两份不一致的描述。
+continuation.py:65-66 要求父进程 PATH 整串哈希及 shutil.which 的字符串路径完全等于 local-launch-selection.json。
+但 launch-identity.json 已固定了实际 JDK、nvm Node、pyenv 解释器的程序字节；当前实际选中的这三份字节全部仍相同。
+
+程序 / 路径选择记录要求 / 当前实际入口 / 实际字节是否已固定且匹配
+Java / /usr/bin/java / JDK 25 的 bin/java / 是
+Node / /usr/local/bin/node / nvm v22.21.0/bin/node / 是
+辅助解释器 / Homebrew python3 / pyenv 3.13.0/bin/python3 / 是（realpath 对应已固定 python3.13）
+
+Java 两个入口在当前环境均报告 java.home 为同一 JDK 路径、runtime.version=25.0.3+9-LTS-195。这证明当前入口的运行时选择相同，不追溯证明历史运行，也不证明所有动态库、所有子命令或任意 PATH 变化都等价。
+反向证据同样重要：/usr/local/bin/node 和 Homebrew 解释器当前字节与实际已固定程序不同。不能为了满足旧路径记录而盲目把 PATH 改回去。
+另一冗余：包里核对 ambient acpx 的 PATH 解析结果，但 Java 实际使用 explicit_child_environment 指定的仓库 wrapper；wrapper 再通过 env 的 node 启动。这说明应该围绕实际使用链核对，而非把环境里所有同名入口一律视为运行依据。
+
+这不是 Java 生命周期状态机的问题。Python 在这里是 W09 人工实验的准备/核对脚本，Java 产品仍拥有 workflow/ledger/审批/交付状态。把脚本移入 Java 不能自动消除两份选择记录互相冲突。
+
+问题二：本次完整重核发现了真正的新输入变化。
+31 项 config_and_installed_sources 中，当前有两项字节与固定记录不同：Codex 程序，以及 ~/.codex/config.toml。配置差异也不满足既有“只新增当前 fixture 信任项”的窄例外（隔离执行现有纯检查函数得出 false；未运行 Gate 入口）。
+这说明：即使设计好问题一的修正，今天也不能直接继续旧包。程序字节变化不等于已经证明不兼容；版本不同也不自动要求回滚或锁版本。但当前字节未获旧冻结组合的证明，配置实际语义差异尚未核清，必须分别记录和处理。
+本轮没有把 10 月 24 日的 PATH 停止改判，也没有把当前 Codex/config 变化写成那次停止的历史原因。
+证据文件：effective-program-comparison.json、java-runtime-observation.json、installed-input-differences.json、config-difference-classification.json。
+
+五、最小必要方案与 ROI
+
+优先级 1——下一步只做有界的启动选择收敛设计和配置差异核对。
+沿既有 operator owner，令“检查的子环境/程序选择”与“实际启动使用的子环境/程序选择”为同一份事实：Java 用选定入口；acpx wrapper 的 Node 在同一明确子环境中解析并核对；其他确实会使用的必要依赖同向核对。父 shell PATH 可保留诊断，不能与另一份已固定实际程序身份互相矛盾。不能简单删除 PATH 检查后宣称安全，也不能静默重写旧基线。
+同步读取可得旧配置快照与当前配置，输出不含敏感值的具体差异类别；若旧字节无法找到，应明确不可还原的部分，不能用当前值补造旧配置。当前 Codex 作为待审新输入，不为核版本额外调用模型。
+收益：直接解除已定位的辅助误拒来源，并保留真实漂移拒绝；不重建 Java，不换 transport。
+成本：操作包现有几个文件的设计与后续完整装配验证；本轮不实施。不新增环境认证服务、通用兼容矩阵或进程监督平台。
+未来验证须成对覆盖：同一受审程序在不同父 PATH 下仍使用指定子环境；路径不变但字节变化必须拒；wrapper 实际 Node 与被核 Node 不同必须拒；配置发生非例外变化拒；未批准/既有 stop/预算不足时零 Java workflow 与零模型派发。涉及当前基线与停止处置，须单独受影响审查和用户决定，不能借本研究视为已修或已授权。
+
+优先级 2——把 Relay 的两条分界当作现有接线的约束，随相关工作处理。
+协作正文可自由，推进决定、批准、身份和执行证据继续 typed；能由程序固定的关联元数据不再要求模型复制。身份减负已经实施，不能把它再包装成一次新改造。只有出现剩余字段的真实转录损失，才按具体字段评估，不能开启全模型契约重写。
+收益：减少无意义模型义务；代价必须按实际字段衡量，本轮没有测得节省 token 或成功率提升。
+
+优先级 3——暂缓 Relay 接入。
+现阶段加 Connect 会增加 probe/云房间/消息触发/身份映射/用量与批准接线，不能删除已有的 R01/R02/R03、C/X、验收与交付义务。当前最高 ROI 是跑通既有链，而非同时迁移通信底座。
+重新评估触发：有重复且可测的 acpx 会话接线损失，并能证明 Relay 某个现成接口消除该损失，且新的端到端接线与迁移成本更低。不能以演示能对话作为触发依据。
+
+六、权威事实与转换链（没有更换 owner）
+Definition：已批准 Gate 的预算/准入规则与 Dual workflow definition。
+Instance：原 workstream 及其当前 node/批准谱系，SoT 仍在 ledger。
+Execution：每次实际 Java/acpx/原生请求的输入、身份、结果、用量，由原执行记录固定。
+Operator：仅核环境、时间、预算与运行授权；不产生业务批准或领域完成。
+Relay：若未来引入，仅提供外部消息/会话事实，不成为第二 workflow 或批准来源。
+
+转换 / 先决与写序 / 成功下游 / 失败出口
+启动准备：具名运行授权、stop 处置、固定输入与进程检查通过，才允许创建 step 和启动 Java；当前 stop 未处置，零派发。
+派发：原 owner 固定 R01/claim、核资格与人门、R02 intent，再执行原生请求；本研究未改写序。
+完成：观察与输出→typed artifact/唯一 outcome→固定完成/R03/L03→独立验收或返修；消息回执不能提前推进。
+交付：候选身份与最终批准→目标应用→人 commit/finalize；聊天中的“完成”不替代此链。
+中断/重启：未明外部副作用按 D07，已固定本地材料按 D06；不因重投消息重新获得许可，不因研究结论重开 stop 或 terminal。
+
+六维核对：
+Declared by：用户仅授权只读研究；既有 Gate 批准没有被本轮扩大。
+Proven by：本地程序字节对照、Java 运行时信息、固定源码 Git blob 校验、原清单保全。没有新运行证明。
+Consumed by：当前启动检查消费两份描述；冲突已定位但未改。其余事实仍由原 Java owner 唯一消费。
+Enforced before：现有 stop/输入检查仍在 workflow/provider 前。拟议选择收敛尚为设计建议，未 ENFORCED。
+Failure route：继续保留当前 INVALID/stop，不自动恢复；新程序/config 差异待审；未知不推导兼容或零执行。
+Cannot-bypass test：本轮对照证明“路径相同未必字节相同”和“路径不同可以已有同一实际身份”；不是修复后的装配测试。上列成对装配测试仍待未来实施，不冒称闭环。
+
+七、复核与保全
+本轮重新核对原包 402 项、停止账本 541 项、Java 冻结源码输入 659 项、2 个 JAR：全部与原 manifest 一致。原 stop 与续作 stop 均在，续作没有新 steps。31 项外部安装/配置输入的当前两处差异单列，未混入上述“保全通过”。
+不运行 Maven：本轮没有产品改动；不把旧 1813/210 当成本研究或未来修正的测试凭证。
+未证：Relay 原生 probe 内部保障、文章演示重现、任何下一次真实运行、完整主流程后半链、当前 Codex 兼容性、配置差异语义、拟议修正的完整装配行为。
+
+八、下一步动作
+先完成启动子环境唯一选择的最小设计，以及 Codex/config 新输入的只读差异说明；把成对装配验证与 stop 处置列清，交受影响评审及用户批准后再实施/装配。暂不接 Relay，不改 Java 状态机，不恢复第八例、不启动新例、不重置 848,242 token/10 请求及累计耗时，不把研究作为任何新运行授权。

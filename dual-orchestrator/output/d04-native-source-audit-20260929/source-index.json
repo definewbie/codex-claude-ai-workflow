@@ -1,0 +1,132 @@
+{
+  "commit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "scope": "Only verified-source is evidence; initial source downloads may be truncated. No signature-chain verification or reproducible build.",
+  "files": {
+    "codex-rs/core/src/tools/router.rs": {
+      "path": "codex-rs/core/src/tools/router.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/tools/router.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "status": 200,
+      "bytes": 13188,
+      "gitBlobSha": "8d5bde30851210c520e3c91b5c7e43b627459637",
+      "sha256": "466ee7a51fd9e6b741653b50313a2567bb08ce55a32af815a619a07cc38bafef",
+      "blobVerified": true
+    },
+    "codex-rs/core/src/tools/handlers/multi_agents_v2/spawn.rs": {
+      "path": "codex-rs/core/src/tools/handlers/multi_agents_v2/spawn.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/tools/handlers/multi_agents_v2/spawn.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "status": 200,
+      "bytes": 12145,
+      "gitBlobSha": "3684156f985e616684598f52ba9373fb2cf70f83",
+      "sha256": "82f738243e40f075bdf2dc08613c5657e8ab5c6aa92aea0644c787a3ea65b317",
+      "blobVerified": true
+    },
+    "codex-rs/core/src/tools/spec_plan.rs": {
+      "path": "codex-rs/core/src/tools/spec_plan.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/tools/spec_plan.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "status": 200,
+      "bytes": 58757,
+      "gitBlobSha": "908bb143afcbe3b8f0523ce5c3406c7b8c443603",
+      "sha256": "fef34c2bdc27159e4137321526ce8df3e453d3b6538c9db09425561c2320b43e",
+      "blobVerified": true
+    },
+    "codex-rs/codex-api/src/sse/responses.rs": {
+      "path": "codex-rs/codex-api/src/sse/responses.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/codex-api/src/sse/responses.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "status": 200,
+      "bytes": 72196,
+      "gitBlobSha": "abef2468cc0c896a17bcd30ff785b3539988adc0",
+      "sha256": "ffe0a51e8b496d6c6e3b887859a3ee1afcc5b9a4c76d2f3bdffffa719de0aa9c",
+      "blobVerified": true
+    },
+    "codex-rs/core/src/tools/handlers/multi_agents_v2.rs": {
+      "path": "codex-rs/core/src/tools/handlers/multi_agents_v2.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/tools/handlers/multi_agents_v2.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "status": 200,
+      "bytes": 2946,
+      "gitBlobSha": "b82bdd6a0b8498b627972f047d715949cb9b9286",
+      "sha256": "a60e2b7ff40dc1d686db6b91dbcac9a0bec471503d25ff1c407ed5a619777c0c",
+      "blobVerified": true
+    },
+    "codex-rs/core/src/agent/control.rs": {
+      "path": "codex-rs/core/src/agent/control.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/agent/control.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "status": 200,
+      "bytes": 32439,
+      "gitBlobSha": "141aaddc6ec762ecbdaebae10d328a80207b7994",
+      "sha256": "06fa53e7b587945b23bb178252566101ca3a8b30ea5d4809d56decbed10f81bb",
+      "blobVerified": true
+    },
+    "codex-rs/protocol/src/models.rs": {
+      "path": "codex-rs/protocol/src/models.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/protocol/src/models.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "bytes": 152866,
+      "gitBlobSha": "71846545fe8c80f8fc388e41c597ec38acf7ddc9",
+      "sha256": "22c4496e666cb3078abb8f82ce623c21695bd639cf38f7a33f93fb6d8d280190",
+      "blobVerified": true,
+      "earlierErrors": []
+    },
+    "codex-rs/core/src/tools/registry.rs": {
+      "path": "codex-rs/core/src/tools/registry.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/tools/registry.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "bytes": 30218,
+      "gitBlobSha": "e73711f8e601e7f1e8a4c1490c0ee7894e14b61e",
+      "sha256": "f90bfac6c021ffa0aadce1208bd7d13679915ac2b1bfcec227e9648e9992343a",
+      "blobVerified": true,
+      "earlierErrors": []
+    },
+    "codex-rs/core/src/tools/handlers/multi_agents_v2/list_agents.rs": {
+      "path": "codex-rs/core/src/tools/handlers/multi_agents_v2/list_agents.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/tools/handlers/multi_agents_v2/list_agents.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "bytes": 2575,
+      "gitBlobSha": "669a994589d1e7de3dc65760536ddc662c37db94",
+      "sha256": "97f54d0ed0757576c1ab40eb07db2142455180f28543664401ed0df32760e977",
+      "blobVerified": true,
+      "earlierErrors": []
+    },
+    "codex-rs/core/src/session/multi_agents.rs": {
+      "path": "codex-rs/core/src/session/multi_agents.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/session/multi_agents.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "bytes": 9211,
+      "gitBlobSha": "666f32cce208137fc6830121aa3d161e108c24d1",
+      "sha256": "8e74c565c293fba9b51708c7c1ae1312b1003d53cc01b27eb80fe53bbc40c7bd",
+      "blobVerified": true,
+      "earlierErrors": []
+    },
+    "codex-rs/core/src/agent/control/spawn.rs": {
+      "path": "codex-rs/core/src/agent/control/spawn.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/agent/control/spawn.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "bytes": 54360,
+      "gitBlobSha": "e5518b2729eeaaa067a338f2d444c69cdb52855b",
+      "sha256": "b41c919444d5fe752fa1b2ee8db45df229a42c61fc9aa5c07c3a197aa99f90a9",
+      "blobVerified": true,
+      "earlierErrors": []
+    },
+    "codex-rs/core/src/agent/control/user_authorization.rs": {
+      "path": "codex-rs/core/src/agent/control/user_authorization.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/agent/control/user_authorization.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "bytes": 4056,
+      "gitBlobSha": "56cf626faea862fc661075d7267f09010299cc72",
+      "sha256": "10ecc23c94be15d3fafb9271023ecb357a05e2acb41b8a125cce2e95f9cbad8f",
+      "blobVerified": true,
+      "earlierErrors": []
+    },
+    "codex-rs/core/src/tools/handlers/multi_agents_common.rs": {
+      "path": "codex-rs/core/src/tools/handlers/multi_agents_common.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/tools/handlers/multi_agents_common.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "bytes": 15844,
+      "gitBlobSha": "77442ad43b60419deb388c47d5b21191d0466f37",
+      "sha256": "4c580a1a5e74951c9228f370bb7529eaa8bdd6b21a83f206ba0762504974fce6",
+      "blobVerified": true,
+      "earlierErrors": []
+    },
+    "codex-rs/core/src/tools/hosted_spec.rs": {
+      "path": "codex-rs/core/src/tools/hosted_spec.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/core/src/tools/hosted_spec.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "bytes": 1791,
+      "gitBlobSha": "af7cdf801364b79af9e24924a63ed32543348f95",
+      "sha256": "add42354c1662ced395898ba4b8bac9b4546ee5b5963cd40bc3f542fc950765c",
+      "blobVerified": true,
+      "earlierErrors": []
+    }
+  }
+}

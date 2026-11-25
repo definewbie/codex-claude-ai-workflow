@@ -218,6 +218,7 @@ public final class AgentResultEnvelopeValidator {
                 validateNoVerificationRemediation(plan.failure(), errors);
             }
             case AgentResultEnvelope.SelfTestResult selfTest -> {
+                validateVerificationChecks(selfTest.verificationChecks(), errors);
                 requiredText(selfTest.lifecycleStatus(), "result.lifecycle_status", errors);
                 requiredList(selfTest.checksRun(), "result.checks_run", false, errors);
                 requiredList(selfTest.checksSkipped(), "result.checks_skipped", false, errors);
@@ -233,6 +234,7 @@ public final class AgentResultEnvelopeValidator {
                 requiredText(selfTest.verificationSummary(), "result.verification_summary", errors);
             }
             case AgentResultEnvelope.AcceptanceReviewResult review -> {
+                validateVerificationChecks(review.verificationChecks(), errors);
                 validateEvidencePayload(
                         review.lifecycleStatus(), review.checks(), review.evidence(), review.missingEvidence(),
                         review.mustFix(), review.acceptanceNotes(), review.openRisks(), review.changedFiles(),
@@ -283,11 +285,6 @@ public final class AgentResultEnvelopeValidator {
             ValidationErrors errors
     ) {
         requiredText(patch.baseProposalId(), "result.base_proposal_id", errors);
-        requiredText(patch.baseProposalSha256(), "result.base_proposal_sha256", errors);
-        if (patch.baseProposalSha256() != null
-                && !patch.baseProposalSha256().matches("[0-9a-f]{64}")) {
-            errors.reject("result.base_proposal_sha256 must be 64 lowercase hexadecimal characters");
-        }
         requiredList(patch.obligationPatches(), "result.obligation_patches", true, errors);
         if (patch.obligationPatches() == null) {
             return;
@@ -480,6 +477,21 @@ public final class AgentResultEnvelopeValidator {
         requiredList(failure.contextGaps(), "result.failure.context_gaps", false, errors);
     }
 
+
+    private static void validateVerificationChecks(List<AgentResultEnvelope.VerificationCheck> checks, ValidationErrors errors) {
+        if (checks == null) { errors.reject("result.verification_checks is required (empty for missing evidence)"); return; }
+        var ids = new HashSet<String>();
+        for (var check : checks) {
+            if (check == null) { errors.reject("null verification check"); continue; }
+            requiredText(check.criterionId(), "verification_checks.criterion_id", errors);
+            requiredText(check.assertion(), "verification_checks.assertion", errors);
+            requiredText(check.executionRef(), "verification_checks.execution_ref", errors);
+            if (!ids.add(check.criterionId())) errors.reject("duplicate verification criterion");
+            if (check.toolCallIds() == null || check.materialRefs() == null) errors.reject("verification selectors must be explicit lists");
+            if (check.toolCallIds() != null) for (var id : check.toolCallIds())
+                requiredText(id, "verification_checks.tool_call_ids[]", errors);
+        }
+    }
 
     private static void validateNoVerificationRemediation(
             AgentResultEnvelope.Failure failure,

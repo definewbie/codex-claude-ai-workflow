@@ -1,0 +1,26 @@
+{
+  "case": "EIGHTH_CONTINUATION_LAUNCH_RECONCILED",
+  "original_package": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023",
+  "workstream": "ws-20261023T005431Z-9YYF",
+  "checkpoint_sha256": "5cc5c75e9291ca72c02ff121c209d324fcec888f555dccce89c0feaeeca3c3bc",
+  "original_stop_sha256": "b0d1e123671e6f220469254109de3065a823eecf93dbc060be623b26d594fbcc",
+  "token_limit": 3000000,
+  "call_limit": 18,
+  "active_seconds_limit": 3600,
+  "initial_next_node": "implement.claude_self_test_report",
+  "preserve_original_stop": true,
+  "prior_stops": [
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/stop-required.json",
+      "sha256": "b0d1e123671e6f220469254109de3065a823eecf93dbc060be623b26d594fbcc"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/stop-required.json",
+      "sha256": "bcbd4ae0c3e6d47e618b8defe744b58af655f9c4aa98c8a7be8a562111fde80b"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/stop-required.json",
+      "sha256": "1a5f70d2096a87f86548686adc5f167d402d73e079a0cd44bc39aea4768c3e5f"
+    }
+  ]
+}

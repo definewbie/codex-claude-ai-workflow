@@ -28,17 +28,16 @@ public final class RecoveryNetworkCommand implements Callable<Integer> {
 
     @Override public Integer call() throws Exception {
         var paths = new WorkstreamPaths(workdir.toRealPath(), new DualId(workstreamId));
-        var store = new ExecutionNetworkGrantStore();
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "network authority"))) {
-            if (cancel) {
-                if (target != null || domains != null || note != null) throw new IllegalArgumentException("cancel cannot include approval options");
-                store.cancel(paths);
-            } else if (target != null || domains != null || note != null) {
-                if (target == null || domains == null || note == null) throw new IllegalArgumentException("approval requires --target, --domains and --note");
-                store.approve(paths, target, domains, note);
-            }
-            System.out.println(new AtomicJsonWriter().objectMapper().writeValueAsString(store.view(paths)));
+        var store = new ExecutionNetworkGrantStore(CliLedgerFactory.create());
+        if (cancel) {
+            if (target != null || domains != null || note != null) throw new IllegalArgumentException("cancel cannot include approval options");
+            store.cancel(paths);
+        } else if (target != null || domains != null || note != null) {
+            if (target == null || domains == null || note == null) throw new IllegalArgumentException("approval requires --target, --domains and --note");
+            store.approve(paths, target, domains, note);
         }
+        System.out.println(new AtomicJsonWriter().objectMapper().writeValueAsString(store.view(paths)));
+
         return 0;
     }
 }

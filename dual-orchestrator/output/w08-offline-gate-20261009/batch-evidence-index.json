@@ -1,0 +1,29 @@
+{
+  "kind": "historical batch acceptance references, not re-run counts",
+  "batches": {
+    "B01": {
+      "path": "output/lifecycle-batch-01-20260930/cc-review-disposition.md",
+      "sha256": "fade12b44d18c065dff3c72f75d13ac01ab07e3be9c502ae8f2619db651b6c81"
+    },
+    "B02": {
+      "path": "output/lifecycle-batch-02-20260930/cc-review-disposition.md",
+      "sha256": "7fb5b7065bbe01cf11481085105dbfaf949674c1458daa0b6a4040fcf20854c1"
+    },
+    "B03": {
+      "path": "output/lifecycle-batch-03-20260930/closure-20261007/disposition.md",
+      "sha256": "28cd7a0c47f2ac8b84e95ca628977ed18b4ea45d3efb1863d826f8b69fe06673"
+    },
+    "B04": {
+      "path": "output/lifecycle-batch-04-20261007/closure-20261007/disposition.md",
+      "sha256": "54b1b6215f00ade00e55ff97aac87856ea287b8d8a733a0ec286cd0af5298d6e"
+    },
+    "B05": {
+      "path": "output/lifecycle-batch-05-20261008/closure-20261009/disposition.md",
+      "sha256": "e7d543b8aa47a4aaec2b6b2fe547d1508c2aaffa9de9c731c247648eb949f294"
+    },
+    "B06": {
+      "path": "output/lifecycle-batch-06-20261009/batch-review-acceptance-20261009/disposition.md",
+      "sha256": "f9b25fda5f3a9c111efa48c58d4da307dab66940880874c4dafce0c60a684975"
+    }
+  }
+}

@@ -18,7 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TaskContractArtifactWriterTest {
 
     private static TaskContract sampleContract() {
-        return new TaskContract(
+        return new TaskContract(2,
+                dev.dual.core.contract.TaskContract.Phase.EXECUTION,
+                1,
                 "tc-test-v1",
                 1,
                 Instant.parse("2026-05-30T12:00:00Z"),
@@ -27,17 +29,21 @@ class TaskContractArtifactWriterTest {
                         List.of(new TaskContract.ScopeEntry(
                                 "src/auth/Login.java", TaskContract.ScopeOperation.MODIFY)),
                         List.of("legacy/")),
-                List.of("Login page renders", "Authentication works"),
-                List.of(),
+                dev.dual.runtime.RuntimeTestLedger.clauses("AC-", List.of("Login page renders", "Authentication works")),
+                dev.dual.runtime.RuntimeTestLedger.clauses("TR-", List.of()),
                 List.of("Max 200 lines per file"),
                 List.of("SSO integration"),
                 List.of("Token expiry edge case"),
+                java.util.List.of(),
                 List.of("Error codes not specified"),
                 List.of("Which auth provider?"),
                 ContractStatus.READY_FOR_REVIEW,
                 1,
-                new TaskContract.Source("requirement.md", "contract.compile")
-        );
+                new TaskContract.Source("requirement.md", "contract.compile", null, null),
+                null,
+                java.util.List.of(),
+                java.util.List.of(),
+                java.util.List.of());
     }
 
     @Test
@@ -81,7 +87,7 @@ class TaskContractArtifactWriterTest {
         assertTrue(md.contains("Implement user login feature"), "Markdown should contain objective text");
         assertTrue(md.contains("## Scope"), "Markdown should have scope section");
         assertTrue(md.contains("## Acceptance Criteria"), "Markdown should have AC section");
-        assertTrue(md.contains("- [ ] Login page renders"), "Markdown should have checkbox AC");
+        assertTrue(md.contains("- [ ] AC-1: Login page renders"), "Markdown should have checkbox AC");
         assertTrue(md.contains("## Constraints"), "Markdown should have constraints section");
         assertTrue(md.contains("Max 200 lines per file"), "Markdown should contain constraint");
         assertTrue(md.contains("## Non-Goals"), "Markdown should have non-goals section");

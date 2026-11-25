@@ -1,0 +1,168 @@
+{
+  "fixture": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6",
+  "before": {
+    "alias-outside": {
+      "link": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/external/outside.txt"
+    },
+    "alias-control": {
+      "link": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/work/.agent/nodes.json"
+    },
+    ".claude/settings.json": {
+      "sha256": "5d76cf95591685446343ca57ee0481e8c4eed61fa0a553c5226d261e278299f7"
+    },
+    ".agent/nodes.json": {
+      "sha256": "a10203970ec6ed204da2c7608c28acd8e9b4322598a02e8ee68faec346fb84c5"
+    },
+    ".git/config": {
+      "sha256": "cae33efdb02cf774435c1ff9cb16bcc1014606908530c6e1dc727615fe3e8cda"
+    },
+    ".git/HEAD": {
+      "sha256": "28d25bf82af4c0e2b72f50959b2beb859e3e60b9630a5e8c603dad4ddb2b6e80"
+    },
+    ".git/description": {
+      "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee"
+    },
+    "src/input.txt": {
+      "sha256": "545ee11bf138a5e33b71f722bb6cd7c781e0bf49d16ebce9b6a49832136e94cb"
+    },
+    ".git/info/exclude": {
+      "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1"
+    },
+    ".git/hooks/commit-msg.sample": {
+      "sha256": "1f74d5e9292979b573ebd59741d46cb93ff391acdd083d340b94370753d92437"
+    },
+    ".git/hooks/pre-rebase.sample": {
+      "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3"
+    },
+    ".git/hooks/pre-commit.sample": {
+      "sha256": "f9af7d95eb1231ecf2eba9770fedfa8d4797a12b02d7240e98d568201251244a"
+    },
+    ".git/hooks/applypatch-msg.sample": {
+      "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7"
+    },
+    ".git/hooks/fsmonitor-watchman.sample": {
+      "sha256": "e0549964e93897b519bd8e333c037e51fff0f88ba13e086a331592bf801fa1d0"
+    },
+    ".git/hooks/pre-receive.sample": {
+      "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989"
+    },
+    ".git/hooks/prepare-commit-msg.sample": {
+      "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619"
+    },
+    ".git/hooks/post-update.sample": {
+      "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5"
+    },
+    ".git/hooks/pre-merge-commit.sample": {
+      "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53"
+    },
+    ".git/hooks/pre-applypatch.sample": {
+      "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475"
+    },
+    ".git/hooks/pre-push.sample": {
+      "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a"
+    },
+    ".git/hooks/update.sample": {
+      "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106"
+    },
+    ".git/hooks/push-to-checkout.sample": {
+      "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f"
+    }
+  },
+  "calls": [
+    {
+      "id": "positive_read",
+      "name": "Read",
+      "input": {
+        "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/work/src/input.txt"
+      }
+    },
+    {
+      "id": "write_product",
+      "name": "Write",
+      "input": {
+        "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/work/src/input.txt",
+        "content": "UNAUTHORIZED"
+      }
+    },
+    {
+      "id": "write_control",
+      "name": "Write",
+      "input": {
+        "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/work/.agent/nodes.json",
+        "content": "UNAUTHORIZED"
+      }
+    },
+    {
+      "id": "write_git",
+      "name": "Write",
+      "input": {
+        "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/work/.git/config",
+        "content": "UNAUTHORIZED"
+      }
+    },
+    {
+      "id": "write_scratch",
+      "name": "Write",
+      "input": {
+        "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/tmp/model-target.txt",
+        "content": "UNAUTHORIZED"
+      }
+    },
+    {
+      "id": "write_link",
+      "name": "Write",
+      "input": {
+        "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/work/alias-control",
+        "content": "UNAUTHORIZED"
+      }
+    },
+    {
+      "id": "edit_product",
+      "name": "Edit",
+      "input": {
+        "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/work/src/input.txt",
+        "old_string": "READ_ORACLE",
+        "new_string": "UNAUTHORIZED"
+      }
+    },
+    {
+      "id": "bash_hidden",
+      "name": "Bash",
+      "input": {
+        "command": "/usr/bin/touch /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/work/BASH_EXECUTED",
+        "description": "diagnostic hidden tool"
+      }
+    },
+    {
+      "id": "agent_hidden",
+      "name": "Agent",
+      "input": {
+        "description": "diagnostic",
+        "prompt": "No external actions.",
+        "subagent_type": "general-purpose"
+      }
+    },
+    {
+      "id": "unknown_tool",
+      "name": "mcp__diagnostic__write",
+      "input": {}
+    },
+    {
+      "id": "read_outside",
+      "name": "Read",
+      "input": {
+        "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/external/outside.txt"
+      }
+    },
+    {
+      "id": "read_outside_link",
+      "name": "Read",
+      "input": {
+        "file_path": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-u6cl84j6/work/alias-outside"
+      }
+    }
+  ],
+  "outsideBeforeSha": "c7c0a1f01c971562e9739aabc6e964397dd47e7ab3e80ab2a605626a2d931875",
+  "scratchBeforeSha": "8417550cf3a74896c8d08338b4308edf9f294edc164184745a44e095325714cc",
+  "hostWriteControl": true
+}

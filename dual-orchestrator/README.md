@@ -54,13 +54,13 @@ dualctl --help
 
 ## 5 分钟验证
 
-先跑 controlled smoke：
+先跑离线全模块回归（旧 controlled smoke 已退役）：
 
 ```bash
-./scripts/smoke-test.sh --case lifecycle --cleanup
+rtk proxy mvn -q clean test
 ```
 
-再跑公开 real-case benchmark：
+真实任务仍须先通过并批准 Verification Gate；以下命令不是当前开跑授权：
 
 ```bash
 ./scripts/run-public-benchmark.sh
@@ -210,8 +210,9 @@ stream usage 时，根据 prompt/output/transcript metadata 估算的观察值�
 
 ## 当前限制
 
-- P0 主生命周期已闭环，但状态是 `Done with known limits`，详见
-  [P0 Closure Report](docs/testing/p0-closure-report.md)。
+- 2026-06-19 的历史 MVP 结论是 `Done with known limits`，见
+  [P0 Closure Report](docs/testing/p0-closure-report.md)。当前生命周期收敛仍为 B03 `IN_PROGRESS`、真实运行 `NO-GO`，以
+  [主工作清单](docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md) 为准；历史 smoke 不能作当前准入证据。
 - 项目仍是 pre-1.0，workflow schema 和 prompt 还会演进。
 - 真实运行依赖本地 `acpx`、Claude、Codex 可用性和额度。
 - Public benchmark 会消耗真实 Agent quota。

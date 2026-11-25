@@ -1,0 +1,7 @@
+{
+  "created_at": "2026-10-08T19:28:42.647616+08:00",
+  "head": "3362eb421514e75fdc4332f570df5bf274b3725e",
+  "source_files": 869,
+  "baseline": "actual dirty workspace; B01-B04 and unrelated changes preserved",
+  "user_authorized": "B05 W01/D01 implementation and offline validation; no real native/provider, installer, commit, agent or next batch"
+}

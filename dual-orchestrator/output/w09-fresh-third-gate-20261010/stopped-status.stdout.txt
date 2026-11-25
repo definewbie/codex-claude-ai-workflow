@@ -1,0 +1,23 @@
+Workstream: ws-20261010T124812Z-XCZL
+Workspace: /private/tmp/dual-w09-newlines-20261010-fresh-03/worktree
+Branch: codex/w09-newlines-20261010-fresh-03
+Ledger: /private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL
+
+Workflow:
+  Definition: agent-lifecycle-terminal-delivery@5
+  Status: RUNNING
+  Active nodes: [node-context-design_codex_arch_review-014]
+  Open gates: []
+  Active node definition: context.design_codex_arch_review
+  Active node status: READY
+  Active iteration: iter-002
+
+Delivery:
+  Status: BLOCKED
+  Eligibility: Current workflow is not yet deliverable.
+  Reason: WORKFLOW_NOT_DELIVERABLE - workstream is not completed: RUNNING
+  Changed files: 0
+  Can merge: false
+  Can finalize: false
+  Stop basis: UNKNOWN
+  Next action: workstream is not completed: RUNNING

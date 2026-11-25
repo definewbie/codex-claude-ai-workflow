@@ -26,16 +26,24 @@ public final class AuthoredExecutionContext {
 
     public static Optional<Snapshot> prepare(TaskHandler.TaskContext context, String runId) throws IOException {
         if (!AuthoredStageLineageResolver.participates(context.definition().id())) return Optional.empty();
-        try {
-            var snapshot = new AuthoredStageLineageResolver(context.workspaceRoot(), context.workstreamId(), Long.MAX_VALUE)
-                    .prepare(context.instance().nodeInstanceId(), runId);
-            require(snapshot.nodeId().equals(context.definition().id())
-                    && snapshot.nodeId().equals(context.instance().nodeDefinitionId()), "AUTHORED_CONTEXT_NODE_MISMATCH");
-            verifyDirectInputs(context.workspaceRoot(), snapshot);
-            return Optional.of(snapshot);
-        } catch (IllegalArgumentException failure) {
-            throw new IOException("AUTHORED_CONTEXT_INVALID", failure);
-        }
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot(), new dev.dual.core.id.DualId(context.workstreamId()));
+        return context.ledger().inspect(paths, (scoped, files) -> {
+            try {
+                var actual = scoped.loadNode(paths, context.instance().nodeInstanceId());
+                var current = scoped.loadCurrent(paths);
+                require(!current.status().isTerminal() && current.activeNodeInstanceIds().contains(actual.nodeInstanceId())
+                        && java.util.Set.of(dev.dual.core.workflow.NodeStatus.READY, dev.dual.core.workflow.NodeStatus.RUNNING).contains(actual.status()),
+                        "AUTHORED_NODE_NOT_CURRENT");
+                var snapshot = new AuthoredStageLineageResolver(scoped, context.workspaceRoot(), context.workstreamId(), Long.MAX_VALUE)
+                        .prepare(context.instance().nodeInstanceId(), runId);
+                require(snapshot.nodeId().equals(context.definition().id())
+                        && snapshot.nodeId().equals(context.instance().nodeDefinitionId()), "AUTHORED_CONTEXT_NODE_MISMATCH");
+                verifyDirectInputs(context.workspaceRoot(), snapshot);
+                return Optional.of(snapshot);
+            } catch (IllegalArgumentException failure) {
+                throw new IOException("AUTHORED_CONTEXT_INVALID", failure);
+            }
+        });
     }
 
     public static void verifyManifest(Path root, Path manifestPath, Snapshot expected) throws IOException {
@@ -60,18 +68,24 @@ public final class AuthoredExecutionContext {
         }
         require(count == 1, "AUTHORED_REQUIRED_SECTION_MISSING_OR_DUPLICATED");
         var promptPath = Path.of(String.valueOf(document.get("promptPath"))).toAbsolutePath().normalize();
-        require(promptPath.getParent().equals(path.getParent()) && Files.isRegularFile(promptPath), "AUTHORED_PROMPT_PATH_INVALID");
+        require(Files.isRegularFile(promptPath) && Files.isSameFile(promptPath.getParent(), path.getParent()), "AUTHORED_PROMPT_PATH_INVALID");
         var prompt = Files.readString(promptPath);
         require(prompt.contains(required), "AUTHORED_REQUIRED_CONTENT_MISSING");
     }
 
-    static Reference validatePublication(Path root, String ws, String nodeInstanceId, String runId,
+    static Reference validatePublication(dev.dual.ledger.file.WorkflowFileLedger ledger, Path root, String ws, String nodeInstanceId, String runId,
                                          AgentResultEnvelope.AgentResult result) throws IOException {
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(root, new dev.dual.core.id.DualId(ws));
+        return ledger.inspect(paths, (scoped, files) -> validatePublicationSnapshot(scoped, root, ws, nodeInstanceId, runId, result));
+    }
+
+    private static Reference validatePublicationSnapshot(dev.dual.ledger.file.WorkflowFileLedger ledger, Path root, String ws,
+            String nodeInstanceId, String runId, AgentResultEnvelope.AgentResult result) throws IOException {
         var loaded = runSnapshot(root, ws, nodeInstanceId, runId);
-        var expected = new AuthoredStageLineageResolver(root, ws, Long.MAX_VALUE).prepare(nodeInstanceId, runId);
+        var expected = new AuthoredStageLineageResolver(ledger, root, ws, Long.MAX_VALUE).prepare(nodeInstanceId, runId);
         // New unrelated ledger events do not change the input identity.
         expected = new Snapshot(expected.workstreamId(), expected.nodeInstanceId(), expected.nodeId(), expected.runId(),
-                loaded.snapshot().historyThrough(), expected.contract(), expected.approvedDesign(), expected.approvedPlan(),
+                loaded.snapshot().historyThrough(), expected.contract(), expected.reviewedDesign(), expected.reviewedPlan(),
                 expected.parent(), expected.subject(), expected.trigger(), expected.obligations());
         verifyManifest(root, verifiedPath(root, loaded.reference()), expected);
         verifyDirectInputs(root, expected);
@@ -115,16 +129,32 @@ public final class AuthoredExecutionContext {
 
     private static void verifyDirectInputs(Path root, Snapshot snapshot) throws IOException {
         var candidates = new java.util.ArrayList<Candidate>();
-        if (snapshot.approvedDesign() != null) candidates.add(snapshot.approvedDesign().candidate());
-        if (snapshot.approvedPlan() != null) candidates.add(snapshot.approvedPlan().candidate());
+        if (snapshot.reviewedDesign() != null) candidates.add(snapshot.reviewedDesign().candidate());
+        if (snapshot.reviewedPlan() != null) candidates.add(snapshot.reviewedPlan().candidate());
         if (snapshot.parent() != null) candidates.add(snapshot.parent());
         if (snapshot.subject() != null) candidates.add(snapshot.subject());
         for (var candidate : candidates) {
             var bound = verifiedCandidateSnapshot(root, snapshot.workstreamId(), candidate);
-            require(Objects.equals(bound.contract(), snapshot.contract()), "AUTHORED_CONTRACT_EPOCH_MISMATCH");
+            require(sameAuthorization(root, bound.contract(), snapshot.contract()), "AUTHORED_CONTRACT_EPOCH_MISMATCH");
             if (candidate.artifactType().equals("plan_result"))
-                require(Objects.equals(bound.approvedDesign(), snapshot.approvedDesign()), "AUTHORED_PLAN_DESIGN_MISMATCH");
+                require(Objects.equals(bound.reviewedDesign(), snapshot.reviewedDesign()), "AUTHORED_PLAN_DESIGN_MISMATCH");
         }
+    }
+
+    /** Design/plan are authored under GOAL; execution must bind that exact goal, not impersonate its approval. */
+    private static boolean sameAuthorization(Path root, ContractIdentity authored, ContractIdentity consumer) throws IOException {
+        if (Objects.equals(authored, consumer)) return true;
+        if (authored == null || consumer == null) return false;
+        var goal = TaskContractArtifactWriter.mapper().readValue(verifiedPath(root, authored.contract()).toFile(),
+                dev.dual.core.contract.TaskContract.class);
+        var execution = TaskContractArtifactWriter.mapper().readValue(verifiedPath(root, consumer.contract()).toFile(),
+                dev.dual.core.contract.TaskContract.class);
+        return goal.phase() == dev.dual.core.contract.TaskContract.Phase.GOAL
+                && execution.phase() == dev.dual.core.contract.TaskContract.Phase.EXECUTION
+                && goal.epoch() == execution.epoch()
+                && new dev.dual.core.contract.TaskContract.Reference(authored.contract().ref(), authored.contract().sha256())
+                    .equals(execution.goalContract())
+                && Objects.equals(goal.source(), execution.source());
     }
 
     static Snapshot verifiedCandidateSnapshot(Path root, String ws, Candidate candidate) throws IOException {
@@ -163,27 +193,27 @@ public final class AuthoredExecutionContext {
 
     public record Candidate(Reference sidecar, String nodeInstanceId, String nodeId, String runId, String artifactType) { }
 
-    public record Approval(Reference gate, String eventId, Candidate candidate) { }
+    public record ReviewedCandidate(Reference decision, String eventId, Candidate candidate) { }
 
     public record Obligation(String id, Reference source, String text) { }
 
     public record Snapshot(String workstreamId, String nodeInstanceId, String nodeId, String runId,
-                           long historyThrough, ContractIdentity contract, Approval approvedDesign,
-                           Approval approvedPlan, Candidate parent, Candidate subject, Reference trigger,
+                           long historyThrough, ContractIdentity contract, ReviewedCandidate reviewedDesign,
+                           ReviewedCandidate reviewedPlan, Candidate parent, Candidate subject, Reference trigger,
                            List<Obligation> obligations) {
         public Snapshot { obligations = List.copyOf(obligations); }
 
         Snapshot withHistoryThrough(long through) {
             return new Snapshot(workstreamId, nodeInstanceId, nodeId, runId, through, contract,
-                    approvedDesign, approvedPlan, parent, subject, trigger, obligations);
+                    reviewedDesign, reviewedPlan, parent, subject, trigger, obligations);
         }
 
         public String render(Path root) throws IOException {
             var text = new StringBuilder("# Required Authored Context\n\n");
             text.append("The following verified inputs are mandatory. Respond to every active obligation; ")
                     .append("ADDRESSED does not close it. Use NOT_ADDRESSED honestly. Initial authors return [].\n\n");
-            append(text, root, "Approved design", approvedDesign == null ? null : approvedDesign.candidate());
-            append(text, root, "Approved plan", approvedPlan == null ? null : approvedPlan.candidate());
+            append(text, root, "Reviewed design", reviewedDesign == null ? null : reviewedDesign.candidate());
+            append(text, root, "Reviewed plan", reviewedPlan == null ? null : reviewedPlan.candidate());
             append(text, root, "Revision parent", parent);
             append(text, root, "Review candidate", subject);
             text.append("## Active obligations\n\n")

@@ -1,0 +1,38 @@
+[
+  {
+    "record": "01a125de-60c0-7453-a3eb-cc55042b4faa",
+    "raw_stream_source": "/Users/kriswang/.acpx/sessions/01a125de-60c0-7453-a3eb-cc55042b4faa.stream.ndjson",
+    "raw_stream_sha256": "376599ad49ef40294247b676c2f741f8c14d3e3a2643d310440feb50ef95735a",
+    "archive_sha256": "376599ad49ef40294247b676c2f741f8c14d3e3a2643d310440feb50ef95735a",
+    "meta_source": "/Users/kriswang/.acpx/sessions/01a125de-60c0-7453-a3eb-cc55042b4faa.json",
+    "meta_source_sha256": "5623448f58675528214a401e60e365ac5bffcfd9f4ac28b8ebc39c196dd0cd58",
+    "meta_is_sanitized_selection": true
+  },
+  {
+    "record": "26a99c40-bdba-4c61-9037-c7d68880d0bd",
+    "raw_stream_source": "/Users/kriswang/.acpx/sessions/26a99c40-bdba-4c61-9037-c7d68880d0bd.stream.ndjson",
+    "raw_stream_sha256": "e43fac4b46f5a0ace7b73bc4219973889ef8a1a9f5d581c4d92aff1f8395fbae",
+    "archive_sha256": "e43fac4b46f5a0ace7b73bc4219973889ef8a1a9f5d581c4d92aff1f8395fbae",
+    "meta_source": "/Users/kriswang/.acpx/sessions/26a99c40-bdba-4c61-9037-c7d68880d0bd.json",
+    "meta_source_sha256": "55ddb6c3665acb307d0001a21f169c6797e7b0d446f95933cca74c8df7b0a249",
+    "meta_is_sanitized_selection": true
+  },
+  {
+    "record": "5d7146fd-ea25-4ae9-b028-2ea4ba57bb18",
+    "raw_stream_source": "/Users/kriswang/.acpx/sessions/5d7146fd-ea25-4ae9-b028-2ea4ba57bb18.stream.ndjson",
+    "raw_stream_sha256": "88ec62d69866f728ecdaa414651a42e398f200aaeac626c8b2b1b1d505e6620a",
+    "archive_sha256": "88ec62d69866f728ecdaa414651a42e398f200aaeac626c8b2b1b1d505e6620a",
+    "meta_source": "/Users/kriswang/.acpx/sessions/5d7146fd-ea25-4ae9-b028-2ea4ba57bb18.json",
+    "meta_source_sha256": "6684ffd3e175b9856b3ff5ab1a1507f4c63a11ce41fa00a674c2ee84b6871ad0",
+    "meta_is_sanitized_selection": true
+  },
+  {
+    "record": "d1587a2b-1836-4d4d-aee2-b39a5762d344",
+    "raw_stream_source": "/Users/kriswang/.acpx/sessions/d1587a2b-1836-4d4d-aee2-b39a5762d344.stream.ndjson",
+    "raw_stream_sha256": "83477e084a2cc4e8afa87eb52faad4c6fb13aab926875f1b4128a68dc1d41c40",
+    "archive_sha256": "83477e084a2cc4e8afa87eb52faad4c6fb13aab926875f1b4128a68dc1d41c40",
+    "meta_source": "/Users/kriswang/.acpx/sessions/d1587a2b-1836-4d4d-aee2-b39a5762d344.json",
+    "meta_source_sha256": "d9ed943a27b3fc35e10ad7ae1e3bade2453e38629aff81d99255a0350921c6dd",
+    "meta_is_sanitized_selection": true
+  }
+]

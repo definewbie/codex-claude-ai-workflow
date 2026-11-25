@@ -1,0 +1,289 @@
+{
+  "schemaVersion" : 3,
+  "runId" : "run-1788956758608",
+  "workstreamId" : "ws-20260909T113923Z-FZ8K",
+  "nodeId" : "implement.claude_implement",
+  "agent" : "claude",
+  "session" : "claude-main-ws-20260909T113923Z-FZ8K-run-1788956758608",
+  "sessionScope" : "run",
+  "sessionSegmentKey" : "ws:ws-20260909T113923Z-FZ8K/run:run-1788956758608",
+  "sessionScopeReason" : "execution-policy:occurrence-bound",
+  "stage" : "stage-implement",
+  "semanticIteration" : "iter-003",
+  "sessionCompactionMode" : "off",
+  "sessionCompactionEnabled" : false,
+  "sessionCompactionReason" : "default:off",
+  "sessionCompactionSeedKind" : "",
+  "sessionCompactionSeedPath" : "",
+  "promptTemplate" : "implement-claude",
+  "workdir" : "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K",
+  "promptPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/prompts/implement-claude.md",
+  "promptManifestPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/prompts/implement-claude.md.manifest.json",
+  "outputPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.json",
+  "transcriptPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.transcript.log",
+  "stderrPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.stderr.log",
+  "promptMetadataPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/prompts/implement-claude.md.meta.json",
+  "outputMetadataPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.json.meta.json",
+  "transcriptMetadataPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.transcript.log.meta.json",
+  "stderrMetadataPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.stderr.log.meta.json",
+  "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--ttl", "1800", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\",\"edit\",\"execute\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Write,Edit,MultiEdit,Grep,Glob,Bash", "--claude-execution-policy-ref", ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/execution-authority/claude-execution-policy.json", "--claude-execution-policy-sha256", "359e4b9f0c09d3d42356de0dff45fcb2e826b61b6eeff12ecd8295e8013250f2", "claude", "-s", "claude-main-ws-20260909T113923Z-FZ8K-run-1788956758608", "-f", "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K/.agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/prompts/implement-claude.md" ],
+  "startedAt" : "2026-09-09T12:26:01.954817Z",
+  "finishedAt" : "2026-09-09T12:51:32.061376Z",
+  "durationMs" : 1530106,
+  "exitCode" : 0,
+  "status" : "failed",
+  "failureReason" : "agent_result_missing_or_invalid",
+  "recoverable" : true,
+  "usage" : {
+    "inputTokens" : 153705,
+    "outputTokens" : 92448,
+    "cachedReadTokens" : 3663680,
+    "cachedWriteTokens" : 0,
+    "totalTokens" : 3909833,
+    "costAmount" : 4.911564999999999,
+    "costCurrency" : "USD",
+    "source" : "acpx_stream",
+    "measurementType" : "PROVIDER_RUN_USAGE",
+    "attribution" : "LATEST_PROMPT_IN_SESSION",
+    "cumulative" : false,
+    "contextUsedTokens" : 0,
+    "sessionCostAmount" : 4.911564999999999,
+    "sessionCostCurrency" : "USD",
+    "providerId" : "zhipu",
+    "model" : "glm-5.3",
+    "billingMode" : "subscription_token_only",
+    "providerMetadataSource" : "acpx_session_json",
+    "unavailableReason" : ""
+  },
+  "agentResultAcquisition" : {
+    "schemaVersion" : 2,
+    "correctionAttempted" : false,
+    "maxCorrectionAttempts" : 1,
+    "selectedCandidateOccurrence" : 1,
+    "correctionReason" : "PARSE_FAILURE",
+    "correctionDisposition" : "SKIPPED_NOT_COMPLETED",
+    "occurrences" : [ {
+      "occurrence" : 1,
+      "sessionName" : "claude-main-ws-20260909T113923Z-FZ8K-run-1788956758608",
+      "requestId" : "3",
+      "promptPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/prompts/implement-claude.md",
+      "outputPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.json",
+      "transcriptPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.transcript.log",
+      "stderrPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.stderr.log",
+      "startedAt" : "2026-09-09T12:26:01.954817Z",
+      "finishedAt" : "2026-09-09T12:51:32.061376Z",
+      "durationMs" : 1530106,
+      "exitCode" : 0,
+      "stopReason" : "cancelled",
+      "presentationDisposition" : "NOT_NEEDED",
+      "rawAssistantSha256" : "a8ac03b572877e2a2b9ffbbc19c90a3fb8101871c1dba3b0465f6b6f909774ac",
+      "candidateSha256" : "a8ac03b572877e2a2b9ffbbc19c90a3fb8101871c1dba3b0465f6b6f909774ac",
+      "contractDecodable" : false,
+      "parseErrorCode" : "AGENT_RESULT_PARSE_FAILED",
+      "contractSchemaValid" : false,
+      "contractCorrectionDisposition" : "NOT_EVALUATED",
+      "contractValidationErrors" : [ ],
+      "usage" : {
+        "inputTokens" : 153705,
+        "outputTokens" : 92448,
+        "cachedReadTokens" : 3663680,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 3909833,
+        "costAmount" : 4.911564999999999,
+        "costCurrency" : "USD",
+        "source" : "acpx_stream",
+        "measurementType" : "PROVIDER_RUN_USAGE",
+        "attribution" : "LATEST_PROMPT_IN_SESSION",
+        "cumulative" : false,
+        "contextUsedTokens" : 0,
+        "sessionCostAmount" : 4.911564999999999,
+        "sessionCostCurrency" : "USD",
+        "providerId" : "zhipu",
+        "model" : "glm-5.3",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "acpx_session_json",
+        "unavailableReason" : ""
+      },
+      "processResult" : {
+        "command" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx --ttl 1800 --approve-reads --non-interactive-permissions fail --permission-policy {\"autoApprove\":[\"read\",\"search\",\"edit\",\"execute\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"} --allowed-tools Read,Write,Edit,MultiEdit,Grep,Glob,Bash --claude-execution-policy-ref .agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/execution-authority/claude-execution-policy.json --claude-execution-policy-sha256 359e4b9f0c09d3d42356de0dff45fcb2e826b61b6eeff12ecd8295e8013250f2 claude -s claude-main-ws-20260909T113923Z-FZ8K-run-1788956758608 -f /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K/.agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/prompts/implement-claude.md",
+        "pid" : 90201,
+        "exitCode" : 0,
+        "usability" : "EXITED_ZERO",
+        "durationMs" : 1530106,
+        "stdoutPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.transcript.log",
+        "stderrPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.stderr.log",
+        "interrupted" : false,
+        "timedOut" : false
+      },
+      "adapterSignals" : [ ]
+    } ]
+  },
+  "providerModelIdentity" : {
+    "confidence" : "high",
+    "source" : "acpx_session_json",
+    "provider" : "zhipu",
+    "billingMode" : "subscription_token_only",
+    "model" : "glm-5.3"
+  },
+  "toolUsage" : {
+    "schemaVersion" : 1,
+    "toolCallCount" : 54,
+    "readCount" : 3,
+    "writeCount" : 26,
+    "bashCount" : 25,
+    "otherCount" : 0,
+    "byTool" : {
+      "Read" : 1,
+      "Edit" : 1,
+      "Bash" : 25,
+      "Write" : 25,
+      "LS" : 2
+    },
+    "toolIds" : [ "Bash", "LS" ],
+    "readFiles" : [ ".gitignore" ],
+    "directReadFiles" : [ ".gitignore" ],
+    "writeFiles" : [ "pom.xml", ".gitignore", "src/main/java/com/example/okxkline/OkxKlineApplication.java", "src/main/java/com/example/okxkline/config/OkxSyncProperties.java", "src/main/java/com/example/okxkline/config/OkxHttpClientConfig.java", "src/main/java/com/example/okxkline/config/MybatisPlusConfig.java", "src/main/resources/application.yml", "src/main/resources/application-live-smoke.yml", "src/main/resources/db/migration/V1__initial_schema.sql", "src/main/java/com/example/okxkline/candle/Candle.java", "src/main/java/com/example/okxkline/candle/CandleEntity.java", "src/main/java/com/example/okxkline/candle/CandleMapper.java", "src/main/resources/mappers/CandleMapper.xml", "src/main/java/com/example/okxkline/candle/CandleService.java", "src/main/java/com/example/okxkline/okx/OkxCandlesResponse.java", "src/main/java/com/example/okxkline/okx/OkxHttpException.java", "src/main/java/com/example/okxkline/okx/OkxParseException.java", "src/main/java/com/example/okxkline/okx/OkxMarketClient.java", "src/main/java/com/example/okxkline/okx/CandleRowParser.java", "src/main/java/com/example/okxkline/sync/SyncStatus.java", "src/main/java/com/example/okxkline/sync/SyncStateEntity.java", "src/main/java/com/example/okxkline/sync/SyncStateMapper.java", "src/main/java/com/example/okxkline/sync/SyncStateService.java", "src/main/java/com/example/okxkline/sync/CandleSyncService.java", "src/main/java/com/example/okxkline/sync/SyncScheduler.java" ],
+    "bashCommands" : [ "find . -path ./.git -prune -o -path ./.agent -prune -o -type f -print | sort", "java -version 2>&1; echo \"---\"; mvn -version 2>&1 | head -3; echo \"---\"; python3 --version 2>&1", "curl -sS -I --max-time 15 https://unpkg.com/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js 2>&1 | head -20", "for h in repo.maven.apache.org registry.npmjs.org cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com github.com raw.githubusercontent.com; do printf \"%s: \" \"$h\"; curl -sS -o /dev/null -w \"%{http_code}\" --max-time 10 \"https://$h/\" 2>&1 | tail -...", "env | grep -i proxy; echo \"---\"; curl -sSv --max-time 8 https://cdn.jsdelivr.net/ 2>&1 | head -15", "curl -sSv --max-time 8 https://cdn.jsdelivr.net/ 2>&1 | sed -n '15,30p'", "mdfind -name \"lightweight-charts.standalone.production.js\" 2>/dev/null | head -5; echo \"---find---\"; find ~/work -maxdepth 6 -path \"*node_modules/lightweight-charts/dist/lightweight-charts.standalone.production.js\" -print 2>/dev/null | head...", "grep -rl \"lightweight-charts\" ~/.npm/_cacache/index-v5 2>/dev/null | head -3; echo \"---\"; ls ~/Library/Caches 2>/dev/null | grep -iE \"playwright|chrom\" ; echo \"---\"; ls ~/Library/Caches/ms-playwright 2>/dev/null | head", "ls ~/.m2/repository/org/springframework/boot/spring-boot-starter-parent/ 2>/dev/null; echo \"---mp---\"; ls ~/.m2/repository/com/mybatis-plus/ 2>/dev/null; ls ~/.m2/repository/com/mybatis-plus/mybatis-plus-spring-boot4-starter/ 2>/dev/null; e...", "ls -la ~/Library/Caches/ms-playwright/ 2>/dev/null; ls ~/Library/Caches/ms-playwright/b 2>/dev/null | head", "ls -d ~/.m2/repository/com/mybatis-plus 2>&1; echo \"---\"; find ~/.m2/repository/com/mybatis-plus -name \"*.jar\" 2>/dev/null | head; echo \"---precise---\"; ls ~/.m2/repository/org/xerial/sqlite-jdbc/ 2>/dev/null; ls ~/.m2/repository/org/flyway...", "find ~/Library/Caches/ms-playwright -maxdepth 3 2>/dev/null | head -20", "echo \"via proxy:\"; curl -sS -o /dev/null -w \"%{http_code}\\n\" --max-time 10 https://repo.maven.apache.org/maven2/org/xerial/sqlite-jdbc/maven-metadata.xml 2>&1 | tail -1; echo \"direct:\"; curl -sS --noproxy '*' -o /dev/null -w \"%{http_code}\\n...", "ls ~/.m2/repository/org/springframework/boot/spring-boot-starter-web/4.1.0/ 2>/dev/null | head -3; ls ~/.m2/repository/org/springframework/spring-webmvc/ 2>/dev/null; ls ~/.m2/repository/org/flywaydb/flyway-core/ 2>/dev/null; ls ~/.m2/repos...", "grep -oE \"<(flyway|sqlite-jdbc|jackson-bom|spring-framework|tomcat)\\.version>[^<]+\" ~/.m2/repository/org/springframework/boot/spring-boot-dependencies/4.1.0/spring-boot-dependencies-4.1.0.pom | sort -u; echo \"---mybatis---\"; ls ~/.m2/reposi...", "ls ~/.m2/repository/tools/jackson/core/ 2>/dev/null; ls ~/.m2/repository/tools/jackson/core/jackson-databind/ 2>/dev/null; echo \"---tomcat---\"; ls ~/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/ 2>/dev/null; echo \"---mybatis cor...", "unzip -l ~/.m2/repository/tools/jackson/core/jackson-databind/3.1.4/jackson-databind-3.1.4.jar 2>/dev/null | grep -E \"ObjectMapper.class|JsonProcessingException|_HtmlStringParser\" | head; echo \"---core---\"; unzip -l ~/.m2/repository/tools/j...", "find ~/.m2/repository/tools/jackson ~/.m2/repository/com/fasterxml -name \"*.jar\" 2>/dev/null | grep -v sources | sed 's|.*/repository/||' | sort | head -20; echo \"---core classes---\"; unzip -l ~/.m2/repository/tools/jackson/core/jackson-cor...", "mdfind -name \"mybatis-plus\" 2>/dev/null | head -5; echo \"---\"; find ~/.m2/repository/com/baomidou ~/.m2/repository/cn/iseei 2>/dev/null | head -5", "find ~/.m2/repository/com/baomidou -maxdepth 2 -type d | sed 's|.*/baomidou/||' | sort; echo \"===3.5.17?===\"; find ~/.m2/repository/com/baomidou -name \"*3.5.17*\" -name \"*.jar\" | head; echo \"===boot4 starter===\"; find ~/.m2/repository/com/ba...", "unzip -l ~/.m2/repository/org/flywaydb/flyway-core/12.4.0/flyway-core-12.4.0.jar 2>/dev/null | grep -iE \"sqlite\" | head -5; echo \"===spring-test===\"; unzip -l ~/.m2/repository/org/springframework/spring-test/7.0.8/spring-test-7.0.8.jar 2>/d...", "for j in ~/.m2/repository/org/springframework/boot/spring-boot-test/4.1.0/spring-boot-test-4.1.0.jar ~/.m2/repository/org/springframework/boot/spring-boot/4.1.0/spring-boot-4.1.0.jar; do echo \"== $j\"; unzip -l \"$j\" 2>/dev/null | grep -E \"Te...", "for j in $(find ~/.m2/repository/org/springframework/boot -name \"spring-boot*-4.1.0.jar\" 2>/dev/null); do r=$(unzip -l \"$j\" 2>/dev/null | grep -c \"TestRestTemplate.class\"); [ \"$r\" != \"0\" ] && echo \"$j -> $r\"; done; echo \"===MockitoSpyBean==...", "for p in maven-compiler-plugin maven-surefire-plugin maven-resources-plugin maven-jar-plugin maven-install-plugin; do printf \"%s: \" $p; ls ~/.m2/repository/org/apache/maven/plugins/$p/ 2>/dev/null | tail -1; done; printf \"spring-boot-maven-...", "unzip -l ~/.m2/repository/com/baomidou/mybatis-plus-spring-boot-autoconfigure/3.5.17/mybatis-plus-spring-boot-autoconfigure-3.5.17.jar | grep -E \"Customizer|MybatisPlusProperties|AutoConfiguration.class\" | head; echo \"===mybatis-spring Mapp..." ],
+    "commandExecutables" : [ "find", "java", "curl", "for", "mdfind", "grep", "ls", "echo", "unzip" ]
+  },
+  "contextGovernanceActualReportPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/artifacts/context-governance/implement.claude_implement-actual-run-1788956758608.json",
+  "executionAuthority" : {
+    "schema" : "claude_execution_policy.v2",
+    "policyRef" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/execution-authority/claude-execution-policy.json",
+    "policySha256" : "359e4b9f0c09d3d42356de0dff45fcb2e826b61b6eeff12ecd8295e8013250f2",
+    "transportDisposition" : "POLICY_BOUND"
+  },
+  "processResult" : {
+    "command" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx --ttl 1800 --approve-reads --non-interactive-permissions fail --permission-policy {\"autoApprove\":[\"read\",\"search\",\"edit\",\"execute\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"} --allowed-tools Read,Write,Edit,MultiEdit,Grep,Glob,Bash --claude-execution-policy-ref .agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/execution-authority/claude-execution-policy.json --claude-execution-policy-sha256 359e4b9f0c09d3d42356de0dff45fcb2e826b61b6eeff12ecd8295e8013250f2 claude -s claude-main-ws-20260909T113923Z-FZ8K-run-1788956758608 -f /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K/.agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/prompts/implement-claude.md",
+    "pid" : 90201,
+    "exitCode" : 0,
+    "usability" : "EXITED_ZERO",
+    "durationMs" : 1530106,
+    "stdoutPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.transcript.log",
+    "stderrPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.stderr.log",
+    "interrupted" : false,
+    "timedOut" : false
+  },
+  "adapterSignals" : [ ],
+  "agentResultContract" : {
+    "present" : false,
+    "valid" : false,
+    "decision" : "",
+    "summary" : "",
+    "validationError" : "agent result is missing"
+  },
+  "artifactContractResults" : [ {
+    "contractType" : "agent_output_contract",
+    "required" : false,
+    "present" : false,
+    "valid" : false,
+    "path" : "",
+    "errorCode" : "",
+    "errorMessage" : ""
+  } ],
+  "executionAttempt" : {
+    "attemptId" : "att-run-1788956758608",
+    "runId" : "run-1788956758608",
+    "workstreamId" : "ws-20260909T113923Z-FZ8K",
+    "nodeId" : "implement.claude_implement",
+    "agent" : "claude",
+    "status" : "RECOVERABLE_FAILED",
+    "processStatus" : "FAILED",
+    "failureSignal" : null,
+    "recoverable" : true,
+    "retrySafe" : true,
+    "message" : "The final ACP assistant message did not contain a valid AgentResultEnvelope.",
+    "stderrPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.stderr.log",
+    "transcriptPath" : ".agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.transcript.log",
+    "sessionName" : "claude-main-ws-20260909T113923Z-FZ8K-run-1788956758608",
+    "sessionId" : "",
+    "sessionScope" : "run",
+    "sessionSegmentKey" : "ws:ws-20260909T113923Z-FZ8K/run:run-1788956758608",
+    "startedAt" : "2026-09-09T12:26:01.954817Z",
+    "finishedAt" : "2026-09-09T12:51:32.061376Z"
+  },
+  "executionOutcome" : {
+    "status" : "OUTPUT_INCOMPLETE",
+    "primaryReason" : "agent_result_missing_or_invalid",
+    "nodeMaySucceed" : false,
+    "retryPolicy" : "MANUAL_ONLY",
+    "recoveryCategory" : "OUTPUT_INCOMPLETE",
+    "operatorMessage" : "The final ACP assistant message did not contain a valid AgentResultEnvelope.",
+    "secondarySignals" : [ ]
+  },
+  "executionTimeline" : [ {
+    "elapsedMs" : 2,
+    "observedAt" : "2026-09-09T12:26:01.957506Z",
+    "kind" : "process_started",
+    "sequence" : 0,
+    "details" : {
+      "pid" : 90201
+    },
+    "source" : "adapter"
+  }, {
+    "elapsedMs" : 0,
+    "observedAt" : "2026-09-09T12:26:01.959983Z",
+    "kind" : "process_wait_started",
+    "sequence" : 0,
+    "details" : {
+      "pid" : 90201
+    },
+    "source" : "adapter"
+  }, {
+    "elapsedMs" : 4035,
+    "observedAt" : "2026-09-09T12:26:05.995666Z",
+    "kind" : "prompt_accepted",
+    "sequence" : 11,
+    "details" : {
+      "lifecycleSequence" : 11
+    },
+    "source" : "acpx_stream"
+  }, {
+    "elapsedMs" : 1529570,
+    "observedAt" : "2026-09-09T12:51:31.530963Z",
+    "kind" : "prompt_completed",
+    "sequence" : 79275,
+    "details" : {
+      "lifecycleSequence" : 79275
+    },
+    "source" : "acpx_stream"
+  }, {
+    "elapsedMs" : 1529950,
+    "observedAt" : "2026-09-09T12:51:31.910069Z",
+    "kind" : "process_wait_completed",
+    "sequence" : 79277,
+    "details" : {
+      "waitMode" : "process_exit",
+      "exitCode" : 0
+    },
+    "source" : "adapter"
+  }, {
+    "elapsedMs" : 1530105,
+    "observedAt" : "2026-09-09T12:51:32.060461Z",
+    "kind" : "session_closure",
+    "sequence" : 5,
+    "details" : {
+      "cancelExitCode" : 0,
+      "closeExitCode" : 0,
+      "cancelTimedOut" : false,
+      "closeTimedOut" : false,
+      "disposition" : "CANCELLED"
+    },
+    "source" : "adapter"
+  }, {
+    "elapsedMs" : 1530106,
+    "observedAt" : "2026-09-09T12:51:32.061093Z",
+    "kind" : "process_exited",
+    "sequence" : 6,
+    "details" : {
+      "exitCode" : 0
+    },
+    "source" : "adapter"
+  }, {
+    "observedAt" : "2026-09-09T12:51:32.278232Z",
+    "source" : "runtime",
+    "kind" : "contract_validated",
+    "elapsedMs" : 0,
+    "sequence" : 8
+  } ]
+}

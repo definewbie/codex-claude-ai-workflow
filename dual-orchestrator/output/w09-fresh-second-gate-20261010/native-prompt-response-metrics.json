@@ -1,0 +1,28 @@
+[
+  {
+    "id": 3,
+    "result": {
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 17904,
+        "outputTokens": 14305,
+        "cachedReadTokens": 4736,
+        "cachedWriteTokens": 0,
+        "totalTokens": 36945
+      }
+    }
+  },
+  {
+    "id": 4,
+    "result": {
+      "stopReason": "end_turn",
+      "usage": {
+        "inputTokens": 3950,
+        "outputTokens": 4806,
+        "cachedReadTokens": 17792,
+        "cachedWriteTokens": 0,
+        "totalTokens": 26548
+      }
+    }
+  }
+]

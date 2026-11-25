@@ -1,0 +1,30 @@
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -40,8 +40,8 @@
+ | W05 同冻结身份中断恢复；外部未知人工裁定；终态不重开 | I5/I1；D06/D07 ledger/runtime/worker/kernel | B02 holder、B03 本地协议/构造与身份、B04/B05/B06 写点/冷 JVM 独立 PASS，见 §23 | kernel 内部 I/O 专项与部署拓扑未全证，保留；首 Gate 限单 JVM 路由/ClassLoader，实际身份/停止核验不能以测试 JVM 代替 | 具名协议离线有据；I5 全故障/部署普适性未关闭 |
+ | W06 验收满足→候选批准→目标 Git 应用→实际提交→交付确认/中断处置 | I6，§4 交付行；candidate、DeliveryApplicationService、Git、query | T12；B06 四变体×inline/worker 受控完整批准链接临时真实 Git apply/人工实际 commit/finalize；写点、冷 JVM、拒绝/续作与同源投影证据见 §22.3；CC 批末独立 PASS 见 §22.4 | 本批实施/离线接线范围收口；LOW-1 查询锁序常驻化已登记，现有一次性反证仍有效；真实目标 Git、浏览器视觉与真实客户端未证，归组合准入/Gate；不自动 commit 或盲目重 apply | W04 验收/批准；W05 本地边界；B06/W06/D09 批次 CLOSED / PASS（离线范围）；真实交付证明未关闭，NO-GO 保持 |
+ | W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | 单一示例/typed 去重/受限 correction 已有；本轮逐字段案头表完成，见 §23 | G01 已在既有 prompt/template owner 修正并扫 intake/design/plan/reviewer/implement，共同保留严格身份；实际模型负担待真实 Gate，不承诺 token 节省 | 案头审计和 G01 离线修正已获 CC 合并独立 PASS；真实回应负担 NOT PROVEN |
+-| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23 历史查询 LOW 常驻 6/0 与隔离反证；§23.1 本轮单轮 1755/206/0、654 输入同一性及新发行核验；CC PASS 接收见 §23.2；首例后1768/206/0及新发行候选见 §23.5，CC认可及身份重核见 §23.6 | 本轮 G01/G02–G04 见 §23.1；G05 本地批准/实际初始化前提见 §23.3；真实握手、业务 occurrence/工具证据在获准运行内核验；browser/真实 worker 未证，首个 CLI/INLINE 不关闭整体 W08 | 准备批次 CLOSED/PASS（离线）；CC 合并独立 PASS 见 §23.2；G05 本地准备见 §23.3；首次真实运行已授权并在接口核验处停止，见 §23.4；前向修复/新发行已获受影响CC认可，见 §23.6；fresh第二次已获准并停止，见 §23.7 |
+-| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | §23 fresh Python 任务与 Gate 已受审；§23.3 G05 本地准备已批准并建立新实例，首例在prompt前停止，无真实业务交付 | 首次真实运行授权及停止证据见 §23.4；两处前向修复/离线证明/新发行与fresh候选见 §23.5，CC认可见 §23.6，fresh第二次运行/停止见 §23.7；不自动retry/第二样本，未触发分支不冒填PASS | 本地准备 PASS；首次真实 Gate FAIL / WAITING_FOR_RECOVERY，见 §23.4；首例没有模型prompt；第二例已有真实响应但artifact拒绝，仍无产品交付（§23.7） |
++| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23历史离线批次；§23.16本轮1790/208/0、656输入及CLI/server新发行候选 | 修复/发行/新observer合并CC待审；fresh第五例当次授权/实际身份与出口未核；browser/真实worker未证 | 本轮离线有据/发行候选，AWAITING_CC；不关闭整体W08 |
++| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实evidence/candidate/目标Git | 前四例从握手到真实返修/GOAL/合法设计复评获分段事实；当前归因A修复见§23.16 | 第四Gate停止不可恢复；新发行/observer待CC，fresh第五例需当次授权；计划/实施/自测/验收/交付仍未真实证明 | 四例FAIL保留；第四领域RUNNING与GateFAIL分立；W09未完成，零第五例 |
+ 
+ ### 2.1 次序、依赖与独立评审触发
+ 
+@@ -889,3 +889,16 @@
+ 
+ 
+ 23.15检查点：第四例完成需求作者→独立复评→一次返修→再复评，4次真实请求/103724token，当前WAITING_FOR_HUMAN需求门。observer修正了max-steps正常yield误判与当前fixture冗余同级trust登记误拒（原其余字节精确一致）；未改生产、模型、验收或权限，详细证据及操作错误披露见运行assessment。下一动作是批准当前GOAL具体提案；设计/实现/验收/交付均未证明，不声明W09完成。
++
++
++### 23.16 W09 第四例停止认可与 A 案前向修复（2026-10-11）
++
++用户带回 CC：第四例 **Gate FAIL / STOP_LOSS_USAGE_UNATTRIBUTABLE** 分类成立；同一 ACP session/request 跨连接重用是合法形态，不是模型缺 JSON。第四例领域保留 RUNNING/design-decision READY，332733为前7次原固定用量，第8次仍UNAVAILABLE，禁止继续/恢复；案头70687与403420不回填。原现场437权威文件和738归档条目不变。
++
++用户“授权，继续”覆盖 A 案生产reader+Gate observer联合修复、成对回归、重冻发行和CC提示，**不授权第五例**。入口[本轮assessment](../../output/w09-current-transcript-forward-fix-20261011/assessment.md)，含开工前dirty工作区/增量、完整transition、失败切面、消费者与证据分层。生产增量仅reader/handler/唯一wire grammar三类；无新schema/连接代/acpx patch/权限或预算平台。
++
++当前日志唯一完整result按本次completion核身份并固定token，主/correction各取各日志；共享stream仅无当前完成帧时严格唯一延迟出口，或同数值/不歧义的金额补充。坏/重/错/部分当前帧不得洗白。实际旧材料6次当前来源、2次早期Claude仅原共享出口；stream-only跨代重复仍未支持，真实发生先停，不自动B案。新Gate核R03固定usage/acquisition与输出SHA，按run+occurrence计调用；合法共享编号重用不抹历史当前日志事实。
++
++新增常驻先红2项及最终聚焦11项已通过；真实旧材料只读对照8项/诊断403420，observer离线9项与模拟固定输入验证、Java2+observer2隔离反证和13预算对照分列。最终单轮clean 1790/208/0失败/0错误/0跳过、656输入前后相等；CLI/server及六内嵌模块/14资源/6只读命令核验通过，发行候选见本轮release-identity。自查与发行核验不冒称CC认可。旧4例manifest116/153/487/738、第四例live/snapshot437文件已只读核齐；无native/provider调用、提交、目标或实例创建。
++
++**下一步动作**：完成最终回归/发行核验后，交[CC合并受影响复审](../../output/w09-current-transcript-forward-fix-20261011/cc-review-prompt.txt)，独立判断修复、发行和[fresh第五例候选](../../output/w09-current-transcript-forward-fix-20261011/fresh-fifth-gate.md)。通过后再向用户申请当次170万/18请求/60min与隔离准备/真实运行授权，才创建新例并核实际身份/出口；三道人门与用户产品commit仍逐当前subject决定。不复用第四例或旧余额，W09未关闭。

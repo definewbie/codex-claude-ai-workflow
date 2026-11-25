@@ -1,0 +1,20 @@
+{
+  "schema_version" : 1,
+  "artifact_type" : "contract_failure_diagnostic",
+  "generated_at" : "2026-10-11T14:24:29.024379Z",
+  "workstream_id" : "ws-20261011T141651Z-MBC2",
+  "node_instance_id" : "node-intake-claude_brainstorm-006",
+  "node_id" : "intake.claude_brainstorm",
+  "handler_type" : "acpx.agent_run",
+  "category" : "contract_violation",
+  "reason" : "TASK_CONTRACT_REVISION_PATCH_INVALID",
+  "message" : "task contract revision patch could not be merged",
+  "source_output_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728580831/outputs/intake-claude-brainstorm.json",
+  "required_keys" : [ "decision", "summary" ],
+  "allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW" ],
+  "details" : {
+    "errors" : [ "REVISION_BASE_PROPOSAL_SHA256_MISMATCH" ]
+  },
+  "recovery_hint" : "Inspect the diagnostic details, prompt contract, and source output before retrying the node.",
+  "recommended_owner" : "harness_or_prompt"
+}

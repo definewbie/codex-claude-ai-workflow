@@ -1,0 +1,13 @@
+{
+  "schemaVersion" : 1,
+  "iterationId" : "iter-002",
+  "parentIterationId" : "iter-001",
+  "number" : 2,
+  "stageId" : "stage-design",
+  "status" : "active",
+  "triggerNodeInstanceId" : "node-design-decision-011",
+  "triggerAction" : "NEEDS_REVISION",
+  "targetNodeDefinitionId" : "design.claude_design",
+  "reason" : "整体方案与范围适配，但混合换行案例的期望值错误，且测试输出采集方案遗漏 stderr，需修正后继续。",
+  "createdAt" : "2026-10-23T01:25:03.176839Z"
+}

@@ -1,0 +1,39 @@
+                     1    G   1         |oi|
+                             −β DKL (πθ ∥πref),   LGRPO(θ) = Eq,{oi} ∑ i=1  ∑ t=1                  [ G          |oi|         ℓi,t(θ)]
+         ℓi,t(θ) =min (wi,tAi, clip (wi,t, 1 −ε, 1 + ε)Ai)
+
+This equation captures GRPO’s core intuition mathematically. Table 3-4 shows the
+conceptional overview of GRPO.
+
+Table 3-4. GRPO objective: what each part does
+
+                                 Why it matters for
+ Term                 What it means      agents
+
+ wi,t(θ) Ai                   Encourages the model   Guides learning
+                                  to increase the         toward better
+                                 likelihood of higher-    reasoning paths within
+                             ranked responses       each group
+
+ Clipping                      Prevents large updates   Stabilizes learning by
+ clip (wi,t(θ), 1 −ε, 1 + ε)   when the new policy     limiting off-policy
+                                      drifts too far from the   jumps that could cause
+                               old one                  collapse
+
+ −β DKL (πθ || πref)            Penalizes the model     Acts as a leash on
+                                  for diverging too         exploration, keeping
+                        much from its         improvement balanced
+                                reference policy        with stability
+
+
+This group-based normalization stabilizes learning by anchoring each update
+within its local context. As you learned in “Learning on a Leash: KL Divergence”,
+the KL divergence puts a leash on the policy, so that improvement doesn’t lead to
+instability via too much divergence from the reference.
+
+In practice, GRPO operates at the token level. The clipping and KL penalty are
+applied incrementally as the model generates each token, allowing the training
+signal to remain both adaptive and efficient.
+
+GRPO’s strength lies in its simplicity: no critic model, no handcrafted reward
+scaling, only relative comparison within each group. This design made GRPO one

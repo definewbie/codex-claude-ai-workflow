@@ -1,0 +1,19 @@
+{
+  "cachePath": "/Users/kriswang/.npm/_cacache/content-v2/sha512/07/5a/a13777dad5acb4474c06ce25ea8304a407989ca580a134a1e1b411df7ffd14b524c2ef3fa5f1a4edbcc9468c7dc4f0712f637fa78c825e94cf42000a155a",
+  "exists": true,
+  "expectedIntegrity": "sha512-B1qhN3fa1ay0R0wGziXqgwSkB5icpYChNKHhtBHff/0UtSTC7z+l8aTtvMlGjH3E8HEvY3+njIJelM9CAAoVWg==",
+  "members": [
+    {
+      "path": "package/vendor/aarch64-apple-darwin/bin/codex",
+      "sha256": "b973d440acac501fd2594a43e7ca9ce41e0a65b9dfb28d0d7a7837c99e1261e3",
+      "bytes": 220584000
+    },
+    {
+      "path": "package/vendor/aarch64-apple-darwin/bin/codex-code-mode-host",
+      "sha256": "d8a2222e017342718d16a5dbe092921c628961f812f62f42036b8d960e1ffe56",
+      "bytes": 62767552
+    }
+  ],
+  "archiveIntegrityMatches": true,
+  "scope": "read cache only, no extraction/execution; compare content identity, not cryptographic signature verification"
+}

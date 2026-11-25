@@ -1,0 +1,17 @@
+{
+  "increment_relative_to_preexisting_dirty_workspace": [
+    {
+      "path": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "before_sha256": "3c37e1c462f394e4a7f1ab7bcd2c2355f52d076e0b77c0073407a3d6c55d1996",
+      "after_sha256": "1add6ec848fb0e4877888b39ccd2575b7a6e42a8af5796e2e2b51771b124281a"
+    },
+    {
+      "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "before_sha256": "0419204b33cfaee339b61bf0f0f17af3b45c61aeeaa07c279692ea210c94d979",
+      "after_sha256": "0485acf95af314ec7253a4b4e02326d5f473cb51e5ce56453acd3fd736428d39"
+    }
+  ],
+  "production_changes": 0,
+  "test_code_changes": 0,
+  "configuration_changes": 0
+}

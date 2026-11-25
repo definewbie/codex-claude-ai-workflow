@@ -1,0 +1,212 @@
+model = "gpt-6-astra"
+model_reasoning_effort = "high"
+model_context_window = 272000
+model_auto_compact_token_limit = 240000
+
+notify = ["/Users/kriswang/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+sandbox_mode = "workspace-write"
+personality = "pragmatic"
+
+[marketplaces.openai-bundled]
+source_type = "local"
+source = "/Users/kriswang/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[marketplaces.openai-primary-runtime]
+source_type = "local"
+source = "/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
+[marketplaces.gitnexus-marketplace]
+last_updated = "2026-08-29T12:24:11Z"
+last_revision = "54f97c86c7d938e7a7bbf3652645561b66dc38cf"
+source_type = "git"
+source = "https://github.com/abhigyanpatwari/GitNexus.git"
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[plugins."superpowers@openai-curated"]
+enabled = true
+
+[plugins."chrome@openai-bundled"]
+enabled = true
+
+[plugins."codex-security@openai-curated"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."gitnexus@gitnexus-marketplace"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."codex-app-tools@openai-bundled"]
+enabled = true
+
+[plugins."unified-computer-use@openai-bundled"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[projects."/Users/kriswang/work/projects/ai/sre-production-agent"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/work/projects/ai/r-and-d-efficiency-platform"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/work/projects/ai/cancer-clinic"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/work/projects/ai/research_and_dev_efficiency"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/work/projects/ai/codex-claude-ai-workflow"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/Documents/self-distill"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/work/projects/ai/daily_stock_analysis"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/work/projects/ai/hello-agent/chapter4"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/work/projects/ai/ai-humanizer"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/work/mxc/projects/luban"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/work/projects/ai/hello-agent/hello-agents-java"]
+trust_level = "trusted"
+
+[projects."/private/tmp/dual-codex-direct-official"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/Documents/Codex/2026-08-14/referenced-chatgpt-conversation-this-is-an"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/Documents/Codex/2026-08-14/referenced-chatgpt-conversation-this-is-an-2"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/Documents/Codex/2026-08-20/she"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/work/projects/ai/okx-btc-k-line-demo"]
+trust_level = "trusted"
+
+[projects."/private/tmp"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/Documents/Codex/2026-09-21/duq"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/.codex/.chatgpt-projects/g-p-6ab0dc6be624819189e8070b2ef95764"]
+trust_level = "trusted"
+
+[projects."/private/tmp/dual-w09-newlines-20261010-fresh-03/target"]
+trust_level = "trusted"
+
+[projects."/private/tmp/dual-w09-newlines-20261011-fresh-04/target"]
+trust_level = "trusted"
+
+[projects."/private/tmp/dual-w09-newlines-20261011-fresh-05/target"]
+trust_level = "trusted"
+
+[projects."/private/tmp/dual-w09-newlines-20261015-fresh-06/target"]
+trust_level = "trusted"
+
+[projects."/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target"]
+trust_level = "trusted"
+
+[desktop]
+ambient-suggestions-enabled = true
+composerEnterBehavior = "enter"
+conversationDetailMode = "STEPS_PROSE"
+show-context-window-usage = true
+followUpQueueMode = "queue"
+dock-icon-preference = "codex-system"
+keepRemoteControlAwakeWhilePluggedIn = true
+
+[desktop.open-in-target-preferences]
+global = "vscode"
+
+[desktop.open-in-target-preferences.perPath]
+"/Users/kriswang/work/projects/ai/sre-production-agent" = "intellij"
+"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow" = "vscode"
+
+[features]
+goals = true
+js_repl = false
+
+[mcp_servers.node_repl]
+args = []
+command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
+env_vars = ["BROWSER_USE_ACCESS_EXECUTOR_ID", "BROWSER_USE_ACCESS_PIPE_PATH", "BROWSER_USE_ACCESS_VERIFYING_IDENTITY"]
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = "/Applications/ChatGPT.app/Contents/Resources/cua_node/lib/node_modules"
+NODE_REPL_NODE_PATH = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node"
+NODE_REPL_TRUSTED_CODE_PATHS = "/Users/kriswang/.codex:/Applications/ChatGPT.app/Contents/Resources/cua_node/lib/node_modules"
+CODEX_HOME = "/Users/kriswang/.codex"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab,mcpapps"
+BROWSER_USE_TINYSKY_ENABLED = "1"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = ""
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = ""
+NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = ""
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.1021.31345"
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/kriswang/.codex/plugins/cache/openai-bundled/browser/26.1021.31345/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
+SKY_CUA_SERVICE_PATH = "/Users/kriswang/.codex/computer-use/Codex Computer Use.app"
+CODEX_CLI_PATH = "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
+
+[mcp_servers.headroom]
+type = "stdio"
+command = "headroom"
+args = ["mcp", "serve"]
+
+[mcp_servers.serena]
+type = "stdio"
+command = "uvx"
+args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--project-from-cwd", "--context", "codex"]
+
+[mcp_servers.computer-use]
+command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
+args = ["mcp"]
+cwd = "."
+enabled = false
+
+[hooks.state]
+
+[hooks.state."gitnexus@gitnexus-marketplace:hooks/hooks.json:post_tool_use:0:0"]
+trusted_hash = "sha256:6f386e16c018dcc235f28d6024027aea599d77c48075dc12421c2d26e220f3fa"
+
+[hooks.state."gitnexus@gitnexus-marketplace:hooks/hooks.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:b9a707ea6853cdaa409358cd49e1d27bc0a4f030ba27921798bc3c43ad568767"
+
+[shell_environment_policy.set]
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "9230e2bd8b24b7ac7a0ba6774c64bf0d78ecdabbdd91d0ed627b02a587bae2df"
+# --- end Headroom MCP server: serena ---

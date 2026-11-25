@@ -1,0 +1,33 @@
+{
+  "material_status": "COMPLETE / AUTHOR_WARN / AWAITING_CC",
+  "technical_gate": "NO_GO",
+  "live_authorization": false,
+  "source_inputs": 654,
+  "production_resource_changes": [],
+  "test_changes": [
+    {
+      "path": "dual-server/src/test/java/dev/dual/server/DeliveryViewServiceTest.java",
+      "before": "2b8b68904cb4db5ce8342cd77387c22220617b6842777bbb7ca1e1b5626c639b",
+      "after": "bf63fd4dedbdfc162e8c3aa69101a9461132d6e3a157474f14d15ce785ba3411"
+    }
+  ],
+  "resident_tests": 6,
+  "resident_failures": 0,
+  "isolated_counterproof": {
+    "tests": 1,
+    "expected_assertion_failures": 1,
+    "errors": 0
+  },
+  "whole_reactor_rerun": false,
+  "retained_whole_reactor": "B06 1752/206/0, unchanged production/resources; not W08 current full suite count",
+  "offline_package_exit": 0,
+  "actual_jar_help_and_definition_validation": 4,
+  "native_provider_runs": 0,
+  "installer_runs": 0,
+  "real_target_git_operations": 0,
+  "extra_agents": 0,
+  "project_commits": 0,
+  "broken_links": [],
+  "known_gap": "G01 design prompt scope-copy instruction vs GOAL proposal",
+  "next": "CC affected-scope review; then fix G01 and actual preconditions; no automatic live run"
+}

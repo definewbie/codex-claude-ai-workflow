@@ -1,0 +1,62 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-intake-claude_brainstorm-012",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "FAILED",
+  "stageId" : "stage-intake",
+  "iterationId" : "iter-003",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T004742Z-6NX5/runs/run-1789260933290/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20260913T004742Z-6NX5/runs/run-1789260933290/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20260913T004742Z-6NX5/runs/run-1789260933290/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1789260933290/binding.json", ".agent/workstreams/ws-20260913T004742Z-6NX5/runs/run-1789260933290/outputs/intake-codex-product-review.contract.json" ],
+  "inputTransition" : {
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "transition_type" : "normal",
+    "condition" : "unconditional",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/contract-failures/node-intake-claude_brainstorm-012.json", ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/contract-failures/node-intake-claude_brainstorm-012.md" ],
+  "result" : {
+    "errors" : [ "human requirement revision must reference exactly one verified blocked intake review", "review_count=0" ],
+    "reason" : "AGENT_OUTPUT_CONTRACT_VIOLATION",
+    "contract_node_id" : "intake.claude_brainstorm",
+    "contract_required_keys" : [ "decision", "summary" ],
+    "contract_allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW" ],
+    "parse_error" : {
+      "details" : { },
+      "code" : "AGENT_RESULT_MISSING",
+      "message" : "No readable agent output artifact found for contract validation."
+    },
+    "contract_failure_diagnostic_ref" : ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/contract-failures/node-intake-claude_brainstorm-012.json",
+    "contract_failure_diagnostic_markdown_ref" : ".agent/workstreams/ws-20260913T004742Z-6NX5/artifacts/contract-failures/node-intake-claude_brainstorm-012.md",
+    "message" : "No readable agent output artifact found for contract validation.",
+    "agent_execution_result_contract" : {
+      "present" : false,
+      "valid" : false,
+      "decision" : "",
+      "summary" : "",
+      "validationError" : "agent result is missing"
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "task_contract_proposal",
+      "required" : false,
+      "present" : false,
+      "valid" : false,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "agent_execution_outcome" : {
+      "status" : "OUTPUT_INCOMPLETE",
+      "primaryReason" : "agent_result_missing_or_invalid",
+      "nodeMaySucceed" : false,
+      "retryPolicy" : "MANUAL_ONLY",
+      "recoveryCategory" : "OUTPUT_INCOMPLETE",
+      "operatorMessage" : "The final ACP assistant message did not contain a valid AgentResultEnvelope.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789261222247-97563d47",
+  "startedAt" : "2026-09-13T01:00:22.268068Z",
+  "finishedAt" : "2026-09-13T01:00:22.306233Z"
+}

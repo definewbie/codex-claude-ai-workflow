@@ -1,0 +1,81 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1791728450910-9f437bb0",
+  "agentTaskId" : "agt-1791728450905-fcaa7a4f",
+  "workflowExecutionId" : "wfe-1791728450833-3d007c40",
+  "nodeInstanceId" : "node-intake-codex_product_review-004",
+  "nodeDefinitionId" : "intake.codex_product_review",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "pid" : 42492,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791728450947/binding.json", ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-11T14:20:49.669Z",
+      "input_identity" : "9b23ed8bb51d54275ba33ca253ffb7588cf00c1c5298fdf92a6b0abb370a4987",
+      "executor_pid" : 42492
+    },
+    "prepared_run" : {
+      "sha256" : "ebdb57508d51f5188ee669b4c582eabd9bd2ba4ac2d714e595df8def4a23b5c7",
+      "ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/nxe-1791728450910-9f437bb0-prepared.json"
+    },
+    "adapter_signals" : [ ],
+    "agent" : "codex",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "agent_output_contract",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "NEEDS_REVISION",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.contract.json",
+    "contract_sidecar_sha256" : "212810d57e31942e817ac64796fef170fe55613738e01d82200f475f1bcc65d1",
+    "decision" : "NEEDS_REVISION",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791728450947/binding.json",
+    "repository_fact_binding_sha256" : "9a05627dc328b4a01a4f0feefcc9b1b8d2871eb04e5449b57596678dc1c0f576",
+    "reread_reasons" : [ ],
+    "run_id" : "run-1791728450947",
+    "run_metadata" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/run.json",
+    "session" : "codex-reviewer-ws-20261011T141651Z-MBC2",
+    "summary" : "功能语义与主要验收要求完整，但文件范围约束与提案性质冲突，且缺少退出码验证豁免。",
+    "transcript_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/nxe-1791728450910-9f437bb0-completion.json",
+    "completion_sha256" : "4d7909433212e19e0d99df8163ee29dbab7d8ac953ba1417b1a6071fd64a5dad",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "run-1791728450947",
+  "agentRunRef" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/run.json",
+  "agent" : "codex",
+  "session" : "codex-reviewer-ws-20261011T141651Z-MBC2",
+  "exitCode" : 0,
+  "startedAt" : "2026-10-11T14:20:50.909780Z",
+  "finishedAt" : "2026-10-11T14:21:50.378770Z",
+  "durationMs" : 59468
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20260913T160342Z-TVXE",
+  "workflowInstanceId" : "wf-ws-20260913T160342Z-TVXE",
+  "workflowId" : "agent-lifecycle-full",
+  "definitionVersion" : 10,
+  "status" : "COMPLETED",
+  "activeNodeInstanceIds" : [ ],
+  "openGateIds" : [ ],
+  "lastEventId" : "evt-000033",
+  "updatedAt" : "2026-09-13T16:05:41.033017Z"
+}

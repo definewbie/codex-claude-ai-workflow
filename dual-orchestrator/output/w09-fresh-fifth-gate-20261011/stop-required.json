@@ -1,0 +1,8 @@
+{
+  "reason": "REQUIRED_ARTIFACT_CONTRACT_FAILED",
+  "error_code": "TASK_CONTRACT_REVISION_PATCH_INVALID",
+  "detail": "REVISION_BASE_PROPOSAL_SHA256_MISMATCH",
+  "gate_classification": "FAIL_PENDING_STOP_AND_AFFECTED_REVIEW",
+  "new_dispatch": "FORBIDDEN",
+  "automatic_retry": false
+}

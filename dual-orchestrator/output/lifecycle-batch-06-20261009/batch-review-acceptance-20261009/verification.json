@@ -1,0 +1,19 @@
+{
+  "status": "PASS_REVIEW_RECEIPT_CONSISTENCY_NOT_NEW_RUNTIME_PROOF",
+  "review_result": "USER_SUPPLIED_CC_BATCH_PASS",
+  "batch_status": "CLOSED / PASS_OFFLINE",
+  "source_inputs_unchanged": 654,
+  "implementation_material_files_unchanged": 276,
+  "source_drift": [],
+  "implementation_material_drift": [],
+  "new_broken_links": [],
+  "historical_broken_links_found": [],
+  "low_1": "REGISTERED / NOT RESIDENT; next W08 offline package or query/view change",
+  "implementation_changes_this_receipt": 0,
+  "test_runs_this_receipt": 0,
+  "native_provider_runs": 0,
+  "agents_spawned": 0,
+  "next_batch_started": false,
+  "real_no_go_unchanged": true,
+  "next_suggested_action": "W08 offline obligations reconciliation and bounded fresh Verification Gate draft; not started"
+}

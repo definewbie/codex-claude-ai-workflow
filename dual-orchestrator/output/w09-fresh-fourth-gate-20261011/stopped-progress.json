@@ -1,0 +1,22 @@
+{
+  "recorded_at": "2026-10-11T14:53:47.034240+08:00",
+  "gate": "FAIL",
+  "gate_reason": "STOP_LOSS_USAGE_UNATTRIBUTABLE",
+  "domain_status": "RUNNING",
+  "active_nodes": [
+    "node-design-decision-021"
+  ],
+  "design_review": "READY_FOR_ARCH_REVIEW, source run-1791701323469",
+  "actual_top_level_calls": 8,
+  "last_complete_observed_tokens": 332733,
+  "current_authoritative_usage": "UNAVAILABLE/AMBIGUOUS_PROMPT_REQUEST_IDENTITY",
+  "raw_current_response_tokens": 70687,
+  "raw_diagnostic_sum_not_budget_authority": 403420,
+  "active_seconds": 695.871,
+  "semantic_revision_loops": 2,
+  "next_dispatch": "FORBIDDEN",
+  "product_execution_approved": false,
+  "final_delivery_approved": false,
+  "real_product_tests_and_delivery": "NOT_EXERCISED",
+  "no_more_budget_automatically_authorized": true
+}

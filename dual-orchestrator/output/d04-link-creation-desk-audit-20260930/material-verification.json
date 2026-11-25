@@ -1,0 +1,18 @@
+{
+  "status": "PASS_MATERIAL_INTEGRITY_ONLY",
+  "priorSourceAndGateFilesUnchanged": 715,
+  "localSourceIdentitiesVerified": 3,
+  "upstreamFilesAvailable": 6,
+  "upstreamGitBlobsVerified": 3,
+  "upstreamIncomplete": "One file unavailable; API identity errors retained; no complete effective-policy proof",
+  "localLinksValid": 4,
+  "nativeProviderProbeRuns": 0,
+  "designState": "D04_DESIGN_GAP",
+  "review": "author-only; independent review pending",
+  "documents": {
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "f12b41f4bdd70a15174f65380b8f2c755a4a70e83724edfcf0c63d6107ee8804",
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "f890b959a6199d5d3d9b7566c2d0b6cc6fae43a1762be4b3c0aa911415a77651",
+    "docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "9cd49fa1d5befed0f799237dc5fbb2c1fd850e20bd2ea8c818e9881bb3e9f67c"
+  },
+  "staticExcerptSelfCheck": "PASS; repeated minified names disambiguated by adjacent policy construction; no evaluation"
+}

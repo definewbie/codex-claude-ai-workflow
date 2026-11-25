@@ -1,0 +1,10 @@
+{
+  "gate.md": "b29f9ca496adc4796d1e4cbd4f780a1afd18cfd32ca2ac3e19ea6d060a3de123",
+  "plan.json": "aca934006bf1a26c9aa2320c325670057322261ba3546082cf232c6ed47b0ae0",
+  "source-identity.json": "af0087ceae57da174946562a326d397ee9dcedf03684caef12f6c1cfc937c3fe",
+  "probe.py": "2b5d424f2e3702795149c3bc4532d2f6e42332d90f396213e9fb80a46ac79e6e",
+  "claude-worker.mjs": "36832727ae8a66785245e51fd140ce955802c76e039bedd22089df31e8c5c1ff",
+  "offline_test.py": "1d47e35035502da990d0669ce6f44a1bebf2b77ff971a40bc629602f9547d482",
+  "offline-checks.txt": "b5f034f682ddc5fb7749016b15a4556cd561a7d8f15e9ecb4c084a2342a9dc6d",
+  "preparation-result.json": "069e2943c2bb7a099ef40004196d953c6e1e2d0ae5156ac3033fe851f9d1c3e7"
+}

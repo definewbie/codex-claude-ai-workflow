@@ -1,0 +1,111 @@
+{
+  "sessions": [
+    {
+      "agent": "claude",
+      "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680",
+      "before": {
+        "schema": "acpx.session.v1",
+        "acpxRecordId": "d1587a2b-1836-4d4d-aee2-b39a5762d344",
+        "acpSessionId": "3feafcc2-1d0e-417a-9b69-c140582c8b1c",
+        "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680",
+        "cwd": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+        "closed": false,
+        "protocolVersion": 1,
+        "lastAgentExitCode": null,
+        "lastAgentExitAt": "2026-10-10T13:20:24.476Z"
+      },
+      "after": {
+        "schema": "acpx.session.v1",
+        "acpxRecordId": "d1587a2b-1836-4d4d-aee2-b39a5762d344",
+        "acpSessionId": "3feafcc2-1d0e-417a-9b69-c140582c8b1c",
+        "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791636537680",
+        "cwd": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+        "closed": true,
+        "protocolVersion": 1,
+        "lastAgentExitCode": null,
+        "lastAgentExitAt": "2026-10-10T13:20:24.476Z"
+      }
+    },
+    {
+      "agent": "claude",
+      "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791636803114",
+      "before": {
+        "schema": "acpx.session.v1",
+        "acpxRecordId": "5d7146fd-ea25-4ae9-b028-2ea4ba57bb18",
+        "acpSessionId": "c4dd7241-1651-4705-83e5-84d6680f7c20",
+        "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791636803114",
+        "cwd": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+        "closed": false,
+        "protocolVersion": 1,
+        "lastAgentExitCode": null,
+        "lastAgentExitAt": "2026-10-10T13:26:21.612Z"
+      },
+      "after": {
+        "schema": "acpx.session.v1",
+        "acpxRecordId": "5d7146fd-ea25-4ae9-b028-2ea4ba57bb18",
+        "acpSessionId": "c4dd7241-1651-4705-83e5-84d6680f7c20",
+        "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791636803114",
+        "cwd": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+        "closed": true,
+        "protocolVersion": 1,
+        "lastAgentExitCode": null,
+        "lastAgentExitAt": "2026-10-10T13:26:21.612Z"
+      }
+    },
+    {
+      "agent": "claude",
+      "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791641578962",
+      "before": {
+        "schema": "acpx.session.v1",
+        "acpxRecordId": "26a99c40-bdba-4c61-9037-c7d68880d0bd",
+        "acpSessionId": "10cb57b6-2dd3-4fa1-b3e4-5cffa79d216a",
+        "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791641578962",
+        "cwd": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+        "closed": false,
+        "protocolVersion": 1,
+        "lastAgentExitCode": null,
+        "lastAgentExitAt": null
+      },
+      "after": {
+        "schema": "acpx.session.v1",
+        "acpxRecordId": "26a99c40-bdba-4c61-9037-c7d68880d0bd",
+        "acpSessionId": "10cb57b6-2dd3-4fa1-b3e4-5cffa79d216a",
+        "name": "claude-main-ws-20261010T124812Z-XCZL-run-1791641578962",
+        "cwd": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+        "closed": true,
+        "protocolVersion": 1,
+        "lastAgentExitCode": null,
+        "lastAgentExitAt": null
+      }
+    },
+    {
+      "agent": "codex",
+      "name": "codex-reviewer-ws-20261010T124812Z-XCZL",
+      "before": {
+        "schema": "acpx.session.v1",
+        "acpxRecordId": "01a125de-60c0-7453-a3eb-cc55042b4faa",
+        "acpSessionId": "01a125de-a692-7510-bfbb-5591a1561dc0",
+        "name": "codex-reviewer-ws-20261010T124812Z-XCZL",
+        "cwd": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+        "closed": false,
+        "protocolVersion": 1,
+        "lastAgentExitCode": null,
+        "lastAgentExitAt": "2026-10-10T13:27:10.510Z"
+      },
+      "after": {
+        "schema": "acpx.session.v1",
+        "acpxRecordId": "01a125de-60c0-7453-a3eb-cc55042b4faa",
+        "acpSessionId": "01a125de-a692-7510-bfbb-5591a1561dc0",
+        "name": "codex-reviewer-ws-20261010T124812Z-XCZL",
+        "cwd": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+        "closed": true,
+        "protocolVersion": 1,
+        "lastAgentExitCode": null,
+        "lastAgentExitAt": "2026-10-10T13:27:10.510Z"
+      }
+    }
+  ],
+  "closed_specific_sessions": 4,
+  "zero_new_native_prompts": true,
+  "all_native_subtasks_physical_stop": "NOT_PROVEN; completed prompt processes plus named session closure only"
+}

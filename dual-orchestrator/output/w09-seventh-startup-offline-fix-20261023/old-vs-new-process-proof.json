@@ -1,0 +1,10 @@
+{
+  "checked_at": "2026-10-23T03:13:48.444319+08:00",
+  "ps_exit": 1,
+  "ps_stdout_empty": true,
+  "ps_stderr": "rtk: Failed to execute command: ps: Operation not permitted (os error 1)\n",
+  "historical_predicate_accepts": true,
+  "new_guard_status": "UNKNOWN",
+  "root_cause_of_process_misclassification": "Exit 1 with empty stdout accepted without checking command success/stderr; EPERM is not PID absence",
+  "model_calls": 0
+}

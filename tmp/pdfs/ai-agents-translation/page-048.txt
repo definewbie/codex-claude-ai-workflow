@@ -1,0 +1,44 @@
+    title="TURN 1",
+)
+print("\nTURN 1 (final assistant):\n", turn1_answer)
+
+This results in this model output:
+
+
+  TURN 1 (final assistant):
+  The current air temperature in New York City is 18°C.
+
+You continue in the same thread. Example 1-11 asks to square the
+previously retrieved temperature. Because the thread ID is unchanged, the
+app restores the earlier messages, allowing the assistant to use the prior
+result without you repeating it in the prompt.
+
+Example 1-11. Turn 2: square that temperature in the same thread
+turn2_answer = run_with_tracing(
+    app,
+    {"messages": [HumanMessage(content="Now compute the square of
+that
+    temperature.")]},
+    config={**cfg, "recursion_limit": 20},
+    title="TURN 2",
+)
+print("\nTURN 2 (final assistant):\n", turn2_answer)
+
+Now the square will be computed and the model returns:
+
+
+  TURN 2 (final assistant):
+  The square of the temperature, 18°C, is 324.
+
+Agents often need to explore alternatives without losing progress. Example
+1-12 starts a separate branch by using a different thread ID and requests a
+different follow-up. This creates an isolated conversation that can diverge
+from the main path while keeping the main thread’s memory intact.
+
+Example 1-12. Branch a parallel thread for a different follow-up
+branch_answer = run_with_tracing(
+    app,
+    {"messages": [HumanMessage(content="Instead of squaring,
+convert it to
+    Fahrenheit and report both.")]},
+    config=cfg_branch,

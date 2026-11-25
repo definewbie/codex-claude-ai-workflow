@@ -1,0 +1,42 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1792977598084-f6014b6a",
+  "workflowExecutionId" : "wfe-1792977597985-24a059cd",
+  "nodeInstanceId" : "node-acceptance-codex_verifier_review-035",
+  "nodeDefinitionId" : "acceptance.codex_verifier_review",
+  "nodeKind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "agent" : "codex",
+  "session" : "codex-reviewer",
+  "promptTemplate" : "acceptance-codex-review",
+  "contextPackageRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-acceptance_codex_verifier_review-034.json",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "acpx.agent_run",
+    "agent" : "codex",
+    "session" : "codex-reviewer",
+    "prompt_template" : "acceptance-codex-review",
+    "context_package_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-acceptance_codex_verifier_review-034.json",
+    "expected_contract" : "",
+    "node_config" : {
+      "agent" : "codex",
+      "session" : "codex-reviewer",
+      "permission_profile" : "review",
+      "prompt_template" : "acceptance-codex-review",
+      "expected_artifact" : "acceptance_review",
+      "artifact_compiler" : "acceptance_review_compiler",
+      "allowed_stage_outcomes" : [ "ACCEPTED", "ACCEPTED_WITH_NOTES", "REJECTED", "INSUFFICIENT_EVIDENCE", "BLOCKED" ],
+      "required_contract_phase" : "EXECUTION"
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 6
+  },
+  "nodeExecutionId" : "nxe-1792977598090-59012cf5",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-26T01:19:58.084749Z",
+  "claimedAt" : "2026-10-26T01:19:58.100464Z",
+  "completedAt" : "2026-10-26T01:21:00.254882Z"
+}

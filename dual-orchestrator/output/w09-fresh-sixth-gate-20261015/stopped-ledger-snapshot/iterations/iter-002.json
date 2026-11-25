@@ -1,0 +1,13 @@
+{
+  "schemaVersion" : 1,
+  "iterationId" : "iter-002",
+  "parentIterationId" : "iter-001",
+  "number" : 2,
+  "stageId" : "stage-intake",
+  "status" : "active",
+  "triggerNodeInstanceId" : "node-intake-decision-005",
+  "triggerAction" : "NEEDS_REVISION",
+  "targetNodeDefinitionId" : "intake.claude_brainstorm",
+  "reason" : "功能语义与验收要求完整，但排除项提前锁定了文件集合，与文件须经后续设计、计划和执行批准的要求冲突。",
+  "createdAt" : "2026-10-14T23:42:46.843747Z"
+}

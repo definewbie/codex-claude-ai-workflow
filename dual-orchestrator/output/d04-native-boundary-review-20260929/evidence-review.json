@@ -1,0 +1,128 @@
+{
+  "status": "PASS_EVIDENCE_CHECKS_D04_NOT_FROZEN",
+  "checks": [
+    {
+      "name": "legal SDK success may omit is_error",
+      "status": "PASS"
+    },
+    {
+      "name": "explicit false also succeeds",
+      "status": "PASS"
+    },
+    {
+      "name": "error cannot pass even with oracle",
+      "status": "PASS"
+    },
+    {
+      "name": "missing tool result cannot pass",
+      "status": "PASS"
+    },
+    {
+      "name": "system text is not user message",
+      "status": "PASS"
+    },
+    {
+      "name": "Claude positive read linked to unchanged prepared file",
+      "status": "PASS"
+    },
+    {
+      "name": "all eleven actual native negative results",
+      "status": "PASS"
+    },
+    {
+      "name": "Claude protected fixture/config/scratch",
+      "status": "PASS"
+    },
+    {
+      "name": "Claude observed interface and native completion",
+      "status": "PASS"
+    },
+    {
+      "name": "open Write counterproof actually writes",
+      "status": "PASS"
+    },
+    {
+      "name": "Codex code host actually ran",
+      "status": "PASS"
+    },
+    {
+      "name": "Code Mode no direct process/require/fetch/WebSocket",
+      "status": "PASS"
+    },
+    {
+      "name": "Node filesystem import rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Code Mode real executor positive read",
+      "status": "PASS"
+    },
+    {
+      "name": "Codex productWrite",
+      "status": "PASS"
+    },
+    {
+      "name": "Codex controlWrite",
+      "status": "PASS"
+    },
+    {
+      "name": "Codex scratchWrite",
+      "status": "PASS"
+    },
+    {
+      "name": "Codex runtimeDirectoryWrite",
+      "status": "PASS"
+    },
+    {
+      "name": "Codex runtimeConfigWrite",
+      "status": "PASS"
+    },
+    {
+      "name": "native patch rejected before write",
+      "status": "PASS"
+    },
+    {
+      "name": "never rejects escalation",
+      "status": "PASS"
+    },
+    {
+      "name": "Codex immutable target bytes",
+      "status": "PASS"
+    },
+    {
+      "name": "configuration and AGENTS canaries absent",
+      "status": "PASS"
+    },
+    {
+      "name": "extra-control gap recorded rather than suppressed",
+      "status": "PASS"
+    }
+  ],
+  "claude": "PASS_NATIVE_PROTOCOL_SLICE_AFTER_OFFLINE_REASSESSMENT",
+  "claudeOriginalDiagnosticSummaries": "preserved; not relabeled",
+  "codex": "PASS_CODE_MODE_WRITE_BOUNDARY_SLICE",
+  "extraControlSurface": {
+    "functions": [
+      "exec",
+      "wait",
+      "request_user_input",
+      "request_user_input_async"
+    ],
+    "clock": [
+      "sleep"
+    ],
+    "collaboration": [
+      "followup_task",
+      "interrupt_agent",
+      "list_agents",
+      "send_message",
+      "spawn_agent",
+      "wait_agent"
+    ]
+  },
+  "blocker": "Collaboration remains exposed with configured multi_agent flags false; no native hard-disable proof; not invoked under user no-agent constraint.",
+  "D04": "DESIGN_GAP",
+  "providerCalls": 0,
+  "realModelTokens": 0,
+  "note": "Usage in local mock responses is synthetic and cannot be used as real usage/cost evidence."
+}

@@ -1,0 +1,30 @@
+{
+  "rows": [
+    {
+      "mutant": "remove-current-approval",
+      "target": "test_fresh_assembly.FreshAssemblyTest.test_false_auth_blocks_before_instance_or_step",
+      "exit": 1,
+      "expected": "nonzero designated invariant violation",
+      "elapsed_seconds": 0.3561096671037376,
+      "test_fixture_only": true
+    },
+    {
+      "mutant": "parent-path-reintroduced",
+      "target": "test_fresh_assembly.FreshAssemblyTest.test_positive_whole_runner_same_environment",
+      "exit": 1,
+      "expected": "nonzero designated invariant violation",
+      "elapsed_seconds": 0.6213027911726385,
+      "test_fixture_only": true
+    },
+    {
+      "mutant": "remove-fixed-observer-sha",
+      "target": "test_fresh_assembly.FreshAssemblyTest.test_observer_byte_drift_rejects",
+      "exit": 1,
+      "expected": "nonzero designated invariant violation",
+      "elapsed_seconds": 0.9250127919949591,
+      "test_fixture_only": true
+    }
+  ],
+  "not_added_to_green_suite": true,
+  "model_calls": 0
+}

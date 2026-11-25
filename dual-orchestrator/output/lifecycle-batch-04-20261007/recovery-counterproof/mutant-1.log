@@ -1,0 +1,2 @@
+Exception in thread "main" java.lang.AssertionError: mutant escaped actual user-flow assertion
+	at RecoveryCounterproof.main(RecoveryCounterproof.java:7)

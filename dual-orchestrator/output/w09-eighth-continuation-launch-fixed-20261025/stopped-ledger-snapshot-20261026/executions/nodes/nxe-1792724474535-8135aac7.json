@@ -1,0 +1,40 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792724474535-8135aac7",
+  "agentTaskId" : "agt-1792724474529-ef803876",
+  "workflowExecutionId" : "wfe-1792724474439-807f3013",
+  "nodeInstanceId" : "node-context-plan_codex_plan_review-024",
+  "nodeDefinitionId" : "context.plan_codex_plan_review",
+  "handlerType" : "context.build_package",
+  "status" : "SUCCEEDED",
+  "pid" : 82932,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-plan_codex_plan_review-024.md" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-23T03:01:13.344Z",
+      "executor_pid" : 82932,
+      "input_identity" : "b25052cb3bfb70d51392802421a6626cc1e9ea5c08a3f9d59ea48ca18b4e76c8"
+    },
+    "context_package" : ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-plan_codex_plan_review-024.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-plan_codex_plan_review-024.json",
+    "target_node" : "plan.codex_plan_review",
+    "profile" : "plan_review",
+    "sections" : [ "input_artifacts", "iteration_history", "review_evidence", "human_feedback", "recent_agent_outputs", "ledger_pointers" ],
+    "input_ref_count" : 6,
+    "generated_at" : "2026-10-23T03:01:14.716908Z",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-23T03:01:14.534882Z",
+  "finishedAt" : "2026-10-23T03:01:14.730808Z",
+  "durationMs" : 195
+}

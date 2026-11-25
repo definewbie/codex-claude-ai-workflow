@@ -104,6 +104,7 @@ class AcpxAgentTransportTest {
                 if printf '%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
                 exit 0
                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("codex-prompt.md");
@@ -132,6 +133,7 @@ class AcpxAgentTransportTest {
                 echo "$@" >> "__LOG__"
                 exit 0
                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("observe-prompt.md");
@@ -166,6 +168,7 @@ class AcpxAgentTransportTest {
                 echo "$@" >> "__LOG__"
                 exit 0
                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("implement-prompt.md");
@@ -201,6 +204,7 @@ class AcpxAgentTransportTest {
                 echo "$@" >> "__LOG__"
                 exit 0
                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("correction.md");
@@ -243,6 +247,7 @@ class AcpxAgentTransportTest {
                 exit 0
                 """.replace("__LOG__", invocationLog.toString())
                         .replace("__PATCH_SHA__", ReviewedAcpxBuildIdentity.PATCH_SHA256), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
         var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
@@ -285,6 +290,7 @@ class AcpxAgentTransportTest {
                 fi
                 exit 0
                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-unreviewed"));
         var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-unreviewed", runDir);
@@ -312,6 +318,7 @@ class AcpxAgentTransportTest {
                 echo '{"upstream_commit":"wrong","patch_sha256":"wrong","policy_schema":"wrong"}'
                 exit 0
                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-correction"));
         var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-correction", runDir);
@@ -339,6 +346,7 @@ class AcpxAgentTransportTest {
                 echo "$@" >> "__LOG__"
                 exit 0
                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var prompt = tempDir.resolve("deadline-prompt.md");
         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
@@ -371,6 +379,7 @@ class AcpxAgentTransportTest {
                 done
                 echo "ACPX_DONE"
                 """);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var prompt = tempDir.resolve("active-prompt.md");
         Files.writeString(prompt, "# Prompt\n");
@@ -401,6 +410,7 @@ class AcpxAgentTransportTest {
                 sleep 20
                 echo "MUST_NOT_COMPLETE"
                 """);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var prompt = tempDir.resolve("silent-prompt.md");
         Files.writeString(prompt, "# Prompt\n");
@@ -422,6 +432,7 @@ class AcpxAgentTransportTest {
                 echo "$@" >> "__LOG__"
                 exit 0
                 """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
         var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
@@ -470,6 +481,7 @@ class AcpxAgentTransportTest {
                 sleep 3
                 exit 0
                 """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -512,6 +524,7 @@ class AcpxAgentTransportTest {
                 sleep 20
                 exit 0
                 """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -562,6 +575,7 @@ class AcpxAgentTransportTest {
                 """
                 .replace("__SESSION_ID__", sessionId)
                 .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -618,6 +632,7 @@ class AcpxAgentTransportTest {
                 """
                 .replace("__SESSION_ID__", sessionId)
                 .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("body-words-prompt.md");
@@ -680,6 +695,7 @@ class AcpxAgentTransportTest {
                 """
                 .replace("__SESSION_ID__", sessionId)
                 .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt-completion.md");
@@ -724,6 +740,7 @@ class AcpxAgentTransportTest {
                 if printf '%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
                 sleep 30
                 """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var prompt = tempDir.resolve("event-failure-prompt.md");
         var stdout = tempDir.resolve("event-failure.stdout");
@@ -802,6 +819,7 @@ class AcpxAgentTransportTest {
                 .replace("__SESSION_ID__", sessionId)
                 .replace("__STREAM__", stream.toString())
                 .replace("__SENTINEL__", exactResponseWritten.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt-occurrence.md");
@@ -863,6 +881,7 @@ class AcpxAgentTransportTest {
                 """
                 .replace("__SESSION_ID__", sessionId)
                 .replace("__STREAM__", stream.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var prompt = tempDir.resolve("stale-only-prompt.md");
         var stdout = tempDir.resolve("stale-only.stdout");
@@ -921,6 +940,7 @@ class AcpxAgentTransportTest {
                 .replace("__SESSION_ID__", sessionId)
                 .replace("__SECOND_HALF_WRITTEN__", secondHalfWritten.toString())
                 .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("typed-429-prompt.md");
@@ -984,6 +1004,7 @@ class AcpxAgentTransportTest {
                 """
                 .replace("__SESSION_ID__", sessionId)
                 .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1056,6 +1077,7 @@ class AcpxAgentTransportTest {
                 """
                 .replace("__ARGS_LOG__", argsLog.toString())
                 .replace("__STATE__", state.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1102,6 +1124,7 @@ class AcpxAgentTransportTest {
                 echo "No acpx session found" >&2
                 exit 4
                 """.replace("__STATE__", state.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1168,6 +1191,7 @@ class AcpxAgentTransportTest {
                 echo "ACPX_AFTER_THINKING_RECONNECT"
                 exit 0
                 """.replace("__STATE__", state.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1202,6 +1226,7 @@ class AcpxAgentTransportTest {
                 echo "ACPX_PROBE_OK"
                 exit 0
                 """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1238,6 +1263,7 @@ class AcpxAgentTransportTest {
                 echo "ACPX_DONE"
                 exit 0
                 """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1287,6 +1313,7 @@ class AcpxAgentTransportTest {
                 echo '```'
                 exit 0
                 """.replace("__ACPX_LOG__", acpxLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1336,6 +1363,7 @@ class AcpxAgentTransportTest {
                 echo "ACPX_DONE"
                 exit 0
                 """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1372,6 +1400,7 @@ class AcpxAgentTransportTest {
                 echo "ACPX_DONE"
                 exit 0
                 """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1414,6 +1443,7 @@ class AcpxAgentTransportTest {
                 echo "ACPX_DONE"
                 exit 0
                 """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1462,6 +1492,7 @@ class AcpxAgentTransportTest {
                 sleep 3
                 exit 0
                 """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1509,6 +1540,7 @@ class AcpxAgentTransportTest {
                 sleep 3
                 exit 0
                 """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1549,6 +1581,7 @@ class AcpxAgentTransportTest {
                 done
                 exit 0
                 """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("prompt.md");
@@ -1586,6 +1619,7 @@ class AcpxAgentTransportTest {
                 printf '%s\n' '{"incomplete":"candidate"}'
                 exit 5
                 """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
 
         var prompt = tempDir.resolve("permission-prompt.md");
@@ -1632,6 +1666,7 @@ class AcpxAgentTransportTest {
                 echo "connected (%s)" >&2
                 exit 5
                 """.formatted(recordId), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var prompt = tempDir.resolve("historical-permission-prompt.md");
         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
@@ -1674,6 +1709,7 @@ class AcpxAgentTransportTest {
                 echo "connected (%s)" >&2
                 exit 5
                 """.formatted(recordId), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var prompt = tempDir.resolve("missing-session-index-prompt.md");
         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
@@ -1717,12 +1753,14 @@ class AcpxAgentTransportTest {
                 if printf '%%s ' "$@" | grep -qF ' cancel '; then exit 0; fi
                 echo "connected (%s)" >&2
                 cat >> '%s' <<'EOF'
+                {"jsonrpc":"2.0","id":91,"method":"session/prompt","params":{"sessionId":"session-current","prompt":[]}}
                 {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"session-current","update":{"sessionUpdate":"tool_call_update","toolCallId":"call-current-1","_meta":{"claudeCode":{"toolName":"WebSearch"}}}}}
-                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"options":[{"optionId":"allow"},{"optionId":"reject"}],"toolCall":{"toolCallId":"call-current-1","kind":"fetch","title":"Mailpit latest stable Docker tag","rawInput":{"query":"Mailpit latest stable Docker tag"}}}}
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"sessionId":"session-current","options":[{"optionId":"allow","kind":"allow_once"},{"optionId":"reject","kind":"reject_once"}],"toolCall":{"toolCallId":"call-current-1","kind":"fetch","title":"Mailpit latest stable Docker tag","rawInput":{"query":"Mailpit latest stable Docker tag"}}}}
                 {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
                 EOF
                 exit 5
                 """.formatted(commandLog, recordId, sessions.resolve(recordId + ".stream.ndjson")), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var prompt = tempDir.resolve("current-permission-prompt.md");
         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
@@ -1780,6 +1818,7 @@ class AcpxAgentTransportTest {
                 echo $! > '%s'
                 exit 5
                 """.formatted(ownerPid, marker, ownerPid), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var prompt = tempDir.resolve("persistent-turn-prompt.md");
         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
@@ -1814,6 +1853,7 @@ class AcpxAgentTransportTest {
                   *) exit 5 ;;
                 esac
                 """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
         var prompt = tempDir.resolve("closure-fails-prompt.md");
         Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);

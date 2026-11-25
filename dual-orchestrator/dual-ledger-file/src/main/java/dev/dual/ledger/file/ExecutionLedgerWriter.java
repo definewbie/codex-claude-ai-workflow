@@ -1,5 +1,7 @@
 package dev.dual.ledger.file;
 
+import dev.dual.core.workflow.WorkflowStatus;
+
 import dev.dual.core.workflow.NodeResult;
 import dev.dual.core.workflow.NodeStatus;
 
@@ -33,6 +35,19 @@ final class ExecutionLedgerWriter {
             WorkflowCurrentDocument current,
             String trigger
     ) throws IOException {
+        var authoritative = jsonWriter.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
+        if (!authoritative.equals(current) || authoritative.status().isTerminal())
+            throw new IOException("cannot start execution from terminal or stale workflow state");
+        for (var id : authoritative.activeNodeInstanceIds()) {
+            var active = jsonWriter.read(paths.nodeJson(id), NodeInstanceDocument.class);
+            if (active.status() == NodeStatus.COMPLETED)
+                throw new IOException("active workflow points to a completed node without a pending commit");
+        }
+        for (var id : authoritative.openGateIds()) {
+            var gate = jsonWriter.read(paths.gateJson(id), GateDocument.class);
+            if (!"open".equals(gate.status()) || !authoritative.activeNodeInstanceIds().contains(gate.nodeInstanceId()))
+                throw new IOException("current open gate is resolved or belongs to another occurrence");
+        }
         var now = Instant.now();
         var document = new WorkflowExecutionDocument(
                 1,
@@ -83,6 +98,23 @@ final class ExecutionLedgerWriter {
             AgentTaskDocument agentTask,
             long pid
     ) throws IOException {
+        var current = jsonWriter.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
+        var actual = jsonWriter.read(paths.nodeJson(node.nodeInstanceId()), NodeInstanceDocument.class);
+        if (agentTask == null || current.status().isTerminal()
+                || !current.activeNodeInstanceIds().contains(node.nodeInstanceId()) || !actual.equals(node))
+            throw new IOException("execution requires a task bound to the current eligible node");
+        var task = jsonWriter.read(paths.agentTaskJson(agentTask.agentTaskId()), AgentTaskDocument.class);
+        if (!task.equals(agentTask) || task.status() != AgentTaskStatus.QUEUED
+                || !task.nodeInstanceId().equals(node.nodeInstanceId()))
+            throw new IOException("task is not available for a unique claim");
+        boolean queued = node.status() == NodeStatus.RUNNING
+                && task.agentTaskId().equals(node.result().get("queued_agent_task_id"))
+                && "QUEUED".equals(node.result().get("dispatch_state"));
+        if (node.status() != NodeStatus.READY && !queued)
+            throw new IOException("node is neither READY nor waiting for this queued task");
+        var previous = latestNodeExecution(paths, node);
+        if (previous.isPresent() && previous.get().status() == NodeExecutionStatus.RUNNING)
+            throw new IOException("previous execution still owns the node");
         var now = Instant.now();
         var document = new NodeExecutionDocument(
                 1,
@@ -97,7 +129,11 @@ final class ExecutionLedgerWriter {
                 "",
                 null,
                 List.of(),
-                Map.of(),
+                Map.of("claim", Map.of(
+                        "executor_pid", pid,
+                        "executor_started_at", ProcessHandle.of(pid).flatMap(p -> p.info().startInstant())
+                                .orElseThrow(() -> new IOException("executor start identity unavailable")).toString(),
+                        "input_identity", inputIdentity(node))),
                 "",
                 node.runRef(),
                 "",
@@ -117,8 +153,35 @@ final class ExecutionLedgerWriter {
             NodeExecutionDocument nodeExecution,
             NodeResult result
     ) throws IOException {
+        nodeExecution = currentRunningExecution(paths, nodeExecution);
+        return writeFinished(paths, nodeExecution, result);
+    }
+
+    NodeExecutionDocument adoptVerifiedResult(WorkstreamPaths paths, NodeExecutionDocument execution, NodeResult result)
+            throws IOException {
+        var actual = jsonWriter.read(paths.nodeExecutionJson(execution.nodeExecutionId()), NodeExecutionDocument.class);
+        var node = jsonWriter.read(paths.nodeJson(actual.nodeInstanceId()), NodeInstanceDocument.class);
+        var current = jsonWriter.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
+        if (!actual.equals(execution) || actual.status() != NodeExecutionStatus.FAILED
+                || !"UNKNOWN".equals(actual.result().get("external_effect"))
+                || current.status() != WorkflowStatus.WAITING_FOR_RECOVERY
+                || !current.activeNodeInstanceIds().equals(List.of(node.nodeInstanceId()))
+                || node.status() != NodeStatus.FAILED || !node.latestExecutionId().equals(actual.nodeExecutionId())
+                || !(actual.result().get("claim") instanceof Map<?, ?> claim)
+                || !inputIdentity(node).equals(claim.get("input_identity")))
+            throw new IOException("late completion is not for the current unknown execution");
+        var facts = new LinkedHashMap<String, Object>(actual.result());
+        facts.put("prior_unknown_observation", Map.of("outcome", actual.outcome(), "result", actual.result(),
+                "finished_at", actual.finishedAt().toString()));
+        for (var key : java.util.List.of("reason", "external_effect", "provider_invocation", "automatic_retry")) facts.remove(key);
+        return writeFinished(paths, withFacts(actual, facts), result);
+    }
+
+    private NodeExecutionDocument writeFinished(WorkstreamPaths paths, NodeExecutionDocument nodeExecution, NodeResult result)
+            throws IOException {
         var finishedAt = Instant.now();
-        var resultMap = result == null ? Map.<String, Object>of() : result.result();
+        var resultMap = mergeOwnedFacts(nodeExecution, result == null ? Map.of() : result.result());
+        if (result == null || result.status() != NodeStatus.RUNNING) closeReplyFacts(resultMap);
         var document = new NodeExecutionDocument(
                 nodeExecution.schemaVersion(),
                 nodeExecution.nodeExecutionId(),
@@ -152,8 +215,10 @@ final class ExecutionLedgerWriter {
             NodeExecutionDocument nodeExecution,
             Exception failure
     ) throws IOException {
+        nodeExecution = currentRunningExecution(paths, nodeExecution);
         var finishedAt = Instant.now();
-        var details = new LinkedHashMap<String, Object>();
+        var details = new LinkedHashMap<String, Object>(nodeExecution.result());
+        closeReplyFacts(details);
         details.put("exception_type", failure == null ? "" : failure.getClass().getName());
         details.put("exception_message", failure == null ? "" : nullToEmpty(failure.getMessage()));
         var document = new NodeExecutionDocument(
@@ -185,17 +250,17 @@ final class ExecutionLedgerWriter {
     }
 
     List<NodeExecutionDocument> readNodeExecutions(WorkstreamPaths paths) throws IOException {
-        if (!java.nio.file.Files.isDirectory(paths.nodeExecutionsDir())) {
+        if (!jsonWriter.exists(paths.nodeExecutionsDir())) {
             return List.of();
         }
         var documents = new ArrayList<NodeExecutionDocument>();
-        try (var stream = java.nio.file.Files.list(paths.nodeExecutionsDir())) {
+        try (var stream = jsonWriter.list(paths.nodeExecutionsDir()).stream()) {
             var files = stream
                     .filter(path -> path.getFileName().toString().endsWith(".json"))
                     .sorted()
                     .toList();
             for (var file : files) {
-                documents.add(jsonWriter.objectMapper().readValue(file.toFile(), NodeExecutionDocument.class));
+                documents.add(jsonWriter.read(file, NodeExecutionDocument.class));
             }
         }
         return documents;
@@ -206,10 +271,10 @@ final class ExecutionLedgerWriter {
             return Optional.empty();
         }
         var path = paths.nodeExecutionJson(node.latestExecutionId());
-        if (!java.nio.file.Files.isRegularFile(path)) {
+        if (!jsonWriter.exists(path)) {
             return Optional.empty();
         }
-        return Optional.of(jsonWriter.objectMapper().readValue(path.toFile(), NodeExecutionDocument.class));
+        return Optional.of(jsonWriter.read(path, NodeExecutionDocument.class));
     }
 
     NodeExecutionDocument markNodeExecutionStale(
@@ -220,6 +285,7 @@ final class ExecutionLedgerWriter {
         var finishedAt = Instant.now();
         var staleResult = new LinkedHashMap<String, Object>();
         staleResult.putAll(nodeExecution.result());
+        closeReplyFacts(staleResult);
         staleResult.put("reason", "STALE_RUNNING_PROCESS");
         staleResult.put("stale_running_pid", nodeExecution.pid() == null ? "" : nodeExecution.pid());
         staleResult.put("recovery_note", nullToEmpty(note));
@@ -264,6 +330,130 @@ final class ExecutionLedgerWriter {
             case CREATED -> NodeExecutionStatus.CREATED;
             case SKIPPED -> NodeExecutionStatus.SKIPPED;
         };
+    }
+
+    private NodeExecutionDocument currentRunningExecution(WorkstreamPaths paths, NodeExecutionDocument expected)
+            throws IOException {
+        var actual = jsonWriter.read(paths.nodeExecutionJson(expected.nodeExecutionId()), NodeExecutionDocument.class);
+        var node = jsonWriter.read(paths.nodeJson(expected.nodeInstanceId()), NodeInstanceDocument.class);
+        var current = jsonWriter.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
+        if (actual.status() != NodeExecutionStatus.RUNNING
+                || !actual.agentTaskId().equals(expected.agentTaskId())
+                || !actual.nodeInstanceId().equals(expected.nodeInstanceId())
+                || !node.latestExecutionId().equals(actual.nodeExecutionId())
+                || node.status() != NodeStatus.RUNNING || current.status().isTerminal()
+                || !current.activeNodeInstanceIds().contains(node.nodeInstanceId())
+                || !(actual.result().get("claim") instanceof Map<?, ?> claim)
+                || !inputIdentity(node).equals(claim.get("input_identity")))
+            throw new IOException("execution claim is no longer current");
+        return actual;
+    }
+
+    NodeExecutionDocument verifyClaim(WorkstreamPaths paths, NodeExecutionDocument expected) throws IOException {
+        var value = currentRunningExecution(paths, expected);
+        if (value.result().get("permission_reply") instanceof Map<?, ?> reply && Boolean.TRUE.equals(reply.get("closed")))
+            throw new IOException("permission reply submission is closed");
+        return value;
+    }
+
+    void bindPreparedRun(WorkstreamPaths paths, NodeExecutionDocument expected, Map<String, String> reference)
+            throws IOException {
+        var value = verifyClaim(paths, expected);
+        if (!reference.keySet().equals(java.util.Set.of("ref", "sha256"))
+                || reference.get("ref").isBlank() || !reference.get("sha256").matches("[a-f0-9]{64}"))
+            throw new IOException("invalid prepared run reference");
+        var prior = value.result().get("prepared_run");
+        if (prior != null && !prior.equals(reference)) throw new IOException("claim already binds another preparation");
+        var facts = new LinkedHashMap<String, Object>(value.result());
+        facts.put("prepared_run", reference);
+        jsonWriter.write(paths.nodeExecutionJson(value.nodeExecutionId()), withFacts(value, facts));
+    }
+
+    private String inputIdentity(NodeInstanceDocument node) throws IOException {
+        try {
+            var bytes = jsonWriter.objectMapper().writer().with(com.fasterxml.jackson.databind.SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS).writeValueAsBytes(Map.of(
+                    "node", node.nodeInstanceId(), "iteration", node.iterationId(),
+                    "input_refs", node.inputRefs(), "input_transition", node.inputTransition()));
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes));
+        } catch (java.security.NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
+    }
+
+    private static NodeExecutionDocument withFacts(NodeExecutionDocument value, Map<String, Object> facts) {
+        return new NodeExecutionDocument(value.schemaVersion(), value.nodeExecutionId(), value.agentTaskId(),
+                value.workflowExecutionId(), value.nodeInstanceId(), value.nodeDefinitionId(), value.handlerType(),
+                value.status(), value.pid(), value.outcome(), value.nodeStatus(), value.outputRefs(), facts,
+                value.errorMessage(), value.runRef(), value.agentRunRef(), value.agent(), value.session(),
+                value.exitCode(), value.startedAt(), value.finishedAt(), value.durationMs());
+    }
+
+    /** Plans C only. The live caller must complete the surrounding D06 mutation before sending. */
+    boolean commitPermissionReply(WorkstreamPaths paths, NodeExecutionDocument expected, String key, Map<String, Object> commit)
+            throws IOException {
+        if (!key.matches("[a-f0-9-]{36}")) throw new IOException("invalid permission request key");
+        var value = jsonWriter.read(paths.nodeExecutionJson(expected.nodeExecutionId()), NodeExecutionDocument.class);
+        var reply = objectMap(value.result().get("permission_reply"));
+        var commits = objectMap(reply.get("commits"));
+        var prior = commits.get(key);
+        if (prior != null) {
+            if (!jsonWriter.objectMapper().valueToTree(prior).equals(jsonWriter.objectMapper().valueToTree(commit)))
+                throw new IOException("permission commit identity conflict");
+            return false; // Neither restart nor idempotent read grants a new send.
+        }
+        value = verifyClaim(paths, expected);
+        if (!(commit.get("deadline_ms") instanceof Number deadline) || deadline.longValue() <= System.currentTimeMillis())
+            throw new IOException("permission request expired before C");
+        for (var name : List.of("request", "decision")) {
+            var ref = objectMap(commit.get(name));
+            if (!ref.keySet().equals(java.util.Set.of("ref", "sha256")) || text(ref.get("ref")).isBlank()
+                    || !text(ref.get("sha256")).matches("[a-f0-9]{64}")) throw new IOException("permission commit lacks immutable material identity");
+        }
+        if (text(commit.get("option_id")).isBlank()) throw new IOException("permission commit has no exact option");
+        commits.put(key, Map.copyOf(commit));
+        reply.put("commits", commits);
+        reply.put("closed", false);
+        var facts = new LinkedHashMap<String, Object>(value.result());
+        facts.put("permission_reply", reply);
+        jsonWriter.write(paths.nodeExecutionJson(value.nodeExecutionId()), withFacts(value, facts));
+        return true;
+    }
+
+    void closeLivePermissionReplies(WorkstreamPaths paths, String executionId) throws IOException {
+        var value = jsonWriter.read(paths.nodeExecutionJson(executionId), NodeExecutionDocument.class);
+        var facts = new LinkedHashMap<String, Object>(value.result());
+        closeReplyFacts(facts);
+        jsonWriter.write(paths.nodeExecutionJson(executionId), withFacts(value, facts));
+    }
+
+    private static void closeReplyFacts(Map<String, Object> facts) {
+        var reply = objectMap(facts.get("permission_reply"));
+        reply.put("closed", true);
+        facts.put("permission_reply", reply);
+    }
+
+    private static LinkedHashMap<String, Object> objectMap(Object value) {
+        var map = new LinkedHashMap<String, Object>();
+        if (value instanceof Map<?, ?> old) old.forEach((key, item) -> map.put(String.valueOf(key), item));
+        return map;
+    }
+
+    void closePermissionReply(WorkstreamPaths paths, String executionId) throws IOException {
+        var value = jsonWriter.read(paths.nodeExecutionJson(executionId), NodeExecutionDocument.class);
+        if (value.status() == NodeExecutionStatus.RUNNING || value.status() == NodeExecutionStatus.CREATED
+                || value.status() == NodeExecutionStatus.READY)
+            throw new IOException("in-flight execution must be resolved before replacing readiness");
+        closeLivePermissionReplies(paths, executionId);
+    }
+
+    private static Map<String, Object> mergeOwnedFacts(NodeExecutionDocument execution, Map<String, Object> result)
+            throws IOException {
+        var merged = new LinkedHashMap<String, Object>(execution.result());
+        for (var entry : result.entrySet()) {
+            if (java.util.Set.of("claim", "authorization", "permission_reply", "prepared_run")
+                    .contains(entry.getKey()))
+                throw new IOException("handler result cannot replace execution-owned fact: " + entry.getKey());
+            merged.put(entry.getKey(), entry.getValue());
+        }
+        return merged;
     }
 
     private static Long durationMs(Instant startedAt, Instant finishedAt) {

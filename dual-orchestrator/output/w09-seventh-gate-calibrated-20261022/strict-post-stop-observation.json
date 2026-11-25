@@ -1,0 +1,96 @@
+{
+  "checked_at": "2026-10-22T23:22:58.795778+08:00",
+  "strict_ps_exit": 0,
+  "strict_ps_stderr_empty": true,
+  "known_prior_pids_checked": 58,
+  "known_prior_and_current_runner_pids_present": [],
+  "prior_sessions": [
+    {
+      "record_id": "d1587a2b-1836-4d4d-aee2-b39a5762d344",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "5d7146fd-ea25-4ae9-b028-2ea4ba57bb18",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "26a99c40-bdba-4c61-9037-c7d68880d0bd",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "01a125de-60c0-7453-a3eb-cc55042b4faa",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "1d507713-7c39-44bd-9010-2a15019a4f1e",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "e67d5ff9-924f-403b-8fc4-98ccd7d42f62",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "01a1294c-d0dc-7711-b5ff-74b18d96e7d2",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "bc943490-00c4-466e-ae58-8e9054ca69c7",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "25354bf6-942a-464e-a046-4178013baebd",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "2c72e475-4f58-42e5-8377-2fa53e182c46",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "8b971cae-40eb-4a77-b91e-5f43981b9ef4",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "3eb67a2d-a9ea-4031-9bc1-00562d18407f",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "01a12b56-89d8-72b2-a797-56d1ed91e36f",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "dbbca816-3d32-498f-acee-d857e72cd612",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "6f351661-60a7-47db-8059-0e743e0e6689",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "fe3ee258-ed11-483c-9d00-70276dd5aee0",
+      "closed": true,
+      "name_matches": true
+    },
+    {
+      "record_id": "01a13ccb-4cae-7d12-9174-9788eb3c00fe",
+      "closed": true,
+      "name_matches": true
+    }
+  ],
+  "current_workspace_session_records": [],
+  "interpretation": "Post-stop local observation only; does not retroactively validate pre-dispatch process check or prove arbitrary descendants/remote state stopped"
+}

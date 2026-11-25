@@ -65,11 +65,79 @@ public record RecoveryAssessment(
         var result = node.result() == null ? Map.<String, Object>of() : node.result();
         var retry = "dualctl retry --workdir " + root + " " + workstreamId;
         var abort = "dualctl recovery abort --workdir " + root + " " + workstreamId;
+        if ("UNKNOWN".equals(result.get("external_effect"))) {
+            return new RecoveryAssessment("external_result_unknown", "STOP_AND_ADJUDICATE",
+                    "An external intent exists without a verified completion. Stopping does not prove the operation had no effect.",
+                    "Inspect dualctl recovery show --workdir " + root + " " + workstreamId
+                            + "; obtain a recorded native stop, then submit an explicit retry/abort --decision. Ordinary retry is refused.",
+                    "", "", Map.of(), false, Map.of(), java.util.List.of("inspect", "stop_recorded_session", "adjudicate"));
+        }
+        var qualificationPreparation = result.get("input_preparation_failure") instanceof Map<?, ?> value ? value : Map.of();
+        boolean nativeQualification = Boolean.FALSE.equals(qualificationPreparation.get("providerInvoked"))
+                && "TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED".equals(qualificationPreparation.get("reason"));
+        boolean localQualification = "TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED".equals(result.get("failure_code"));
+        if (node.status() == dev.dual.core.workflow.NodeStatus.FAILED && (nativeQualification || localQualification)) {
+            var originalCode = nativeQualification ? qualificationPreparation.get("code") : result.get("reason");
+            var originalDetails = nativeQualification ? qualificationPreparation.get("details") : result.get("error");
+            ContractQualificationChecks.ContinuationFailure pair = null;
+            try { pair = ContractQualificationChecks.continuation(result.get("continuation_failure")); }
+            catch (IllegalArgumentException invalid) { /* Missing/invalid diagnostics never become trustworthy NOT_CHECKED. */ }
+            var category = pair == null ? "UNKNOWN" : ContractQualificationRecovery.classify(node, root, workstreamId, pair);
+            var explanation = switch (category) {
+                case "CONTRADICTION" -> "The same recorded rule and inputs passed at the decision but rejected at consumption. Inspect the checker/consumer; retry is not granted.";
+                case "INPUT_DRIFT" -> "Observed qualification inputs changed after the fixed decision. Restore the same evidence or revise and obtain a new reviewed approval; the old decision does not approve changed inputs.";
+                case "CONSUMER_PREREQUISITE" -> "The decision explicitly deferred this consumer prerequisite. Its owner must supply the missing input through an existing verified entry before reconsidering continuation.";
+                default -> "Diagnostic evidence is insufficient or this family/entry was not checked. Inspect the original cause and source identity; no automatic retry is granted.";
+            };
+            var classification = switch (category) {
+                case "CONTRADICTION" -> "qualification_contract_contradiction";
+                case "INPUT_DRIFT" -> "qualification_input_drift";
+                case "CONSUMER_PREREQUISITE" -> "qualification_consumer_prerequisite";
+                default -> "qualification_diagnostic_unknown";
+            };
+            var evidence = new LinkedHashMap<String, Object>();
+            if (pair != null) evidence.put("continuation_failure", pair.toMap());
+            evidence.put("diagnostic_category", category);
+            evidence.put("original_code", originalCode);
+            var command = "Inspect dualctl recovery show --workdir " + root + " " + workstreamId;
+            if (!"CONTRADICTION".equals(category) && !"UNKNOWN".equals(category)
+                    && "VERIFICATION_READINESS_REQUIRED".equals(originalCode))
+                command += "; restore the same readiness evidence or use dualctl review record-readiness --workdir " + root
+                        + " --subject " + node.nodeInstanceId() + " --request-id <new-id> --file <declaration.json> " + workstreamId
+                        + ". Recording does not approve or execute anything; changed reviewed inputs require author/review/new approval.";
+            return new RecoveryAssessment(classification, "INSPECT_BEFORE_MANUAL_CONTINUATION",
+                    explanation + " Original cause: " + text(originalCode) + " / " + text(originalDetails),
+                    command, "", "", evidence, false);
+        }
         var diagnosticJsonRef = text(result.get("contract_failure_diagnostic_ref"));
         var diagnosticMarkdownRef = text(result.get("contract_failure_diagnostic_markdown_ref"));
         var diagnostic = readDiagnostic(root, diagnosticJsonRef);
         var agent = blankDefault(text(result.get("agent")), "claude");
         var session = blankDefault(text(result.get("session")), agent + "-main");
+        if (node.status() == dev.dual.core.workflow.NodeStatus.FAILED
+                && ("VERIFICATION_READINESS_REQUIRED".equals(result.get("readiness_reason"))
+                || result.get("input_preparation_failure") instanceof Map<?, ?> preparation
+                && "VERIFICATION_READINESS_REQUIRED".equals(preparation.get("code"))
+                && Boolean.FALSE.equals(preparation.get("providerInvoked")))) {
+            return new RecoveryAssessment("verification_readiness_required", "RECORD_READINESS_BEFORE_MANUAL_RETRY",
+                    "Verification prerequisites are missing or no longer applicable; this does not report a model output failure.",
+                    "Use dualctl review record-readiness --workdir " + root + " --subject " + node.nodeInstanceId()
+                            + " --request-id <new-id> --file <declaration.json> " + workstreamId
+                            + ". Recording does not approve or execute anything. Retry only with the same reviewed inputs; "
+                            + "to revise use dualctl review revise --workdir " + root + " --subject " + node.nodeInstanceId()
+                            + " --note <repair-requirement> " + workstreamId + "; the author and independent reviewer must run again.",
+                    "", "", Map.of(), false);
+        }
+        if (result.get("input_preparation_failure") instanceof Map<?, ?> failure
+                && node.status() == dev.dual.core.workflow.NodeStatus.FAILED
+                && Boolean.FALSE.equals(failure.get("providerInvoked"))) {
+            return new RecoveryAssessment("input_preparation_failure", "FIX_INPUTS_BEFORE_MANUAL_RETRY",
+                    "Input preparation rejected before provider dispatch: " + text(failure.get("reason"))
+                            + " / " + text(failure.get("code")) + ": " + text(failure.get("details")),
+                    "Inspect the current input identity and approval evidence before `" + retry
+                            + "`; or stop with `" + abort + "`.",
+                    "", "", Map.of(), false);
+        }
         var outcomeAssessment = fromAgentExecutionOutcome(
                 result.get("agent_execution_outcome"),
                 retry,
@@ -283,7 +351,8 @@ public record RecoveryAssessment(
         if ("OUTPUT_INCOMPLETE".equals(recoveryCategory)) {
             return new RecoveryAssessment(
                     "agent_output_incomplete",
-                    "RETRY_AFTER_OUTPUT_CONTRACT_FIX",
+                    "process_output_incomplete".equals(primaryReason)
+                            ? "RETRY_AFTER_EXTERNAL_FIX" : "RETRY_AFTER_OUTPUT_CONTRACT_FIX",
                     blankDefault(operatorMessage, "The agent output stopped before a valid terminal control and artifact boundary."),
                     retry,
                     diagnosticJsonRef,
@@ -355,6 +424,8 @@ public record RecoveryAssessment(
 
     private static String adapterClassification(String primaryReason) {
         return switch (primaryReason) {
+            case "native_permission_interrupted" -> "native_permission_requires_external_reconciliation";
+            case "adapter_incompatible" -> "agent_interface_incompatible";
             case "auth_failed" -> "agent_auth_failed";
             case "permission_blocked" -> "agent_permission_blocked";
             case "provider_connection_failed" -> "provider_connection_failed";
@@ -367,6 +438,8 @@ public record RecoveryAssessment(
 
     private static String adapterRetryReadiness(String primaryReason) {
         return switch (primaryReason) {
+            case "native_permission_interrupted" -> "VERIFY_EXTERNAL_STATE_BEFORE_NEW_ATTEMPT";
+            case "adapter_incompatible" -> "FIX_AGENT_INTERFACE_THEN_RETRY";
             case "auth_failed" -> "FIX_AGENT_AUTH_THEN_RETRY";
             case "rate_limited" -> "WAIT_THEN_RETRY";
             case "provider_connection_failed" -> "WAIT_OR_FIX_PROVIDER_CONNECTION_THEN_RETRY";
@@ -400,6 +473,8 @@ public record RecoveryAssessment(
             String retry
     ) {
         return switch (primaryReason) {
+            case "native_permission_interrupted" -> "Inspect the original execution and stop evidence; do not resend an approval or automatically retry the prompt.";
+            case "adapter_incompatible" -> retry + "  # only after fixing the recorded protocol/session mismatch; never resend an unknown call";
             case "agent_reconnect_required" ->
                     "acpx " + agent + " sessions close " + session
                             + " && acpx " + agent + " sessions new --name " + session

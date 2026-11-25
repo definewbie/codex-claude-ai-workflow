@@ -1,0 +1,2185 @@
+{
+  "status": "LEXICAL_ONLY_NOT_SEMANTIC_MAPPING",
+  "scope": "require / failure helper / Failure.of call sites in four selected current guard classes; excludes HumanGateActionSemantics, bare throws, method declarations, property accessors and definitionRequire; not comparable one-for-one with historical 200-site inventory",
+  "count": 217,
+  "counts": {
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java": 93,
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java": 63,
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java": 45,
+    "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java": 16
+  },
+  "rows": [
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 39,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"revision snapshot unavailable\"",
+        "message(failure)"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 52,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"current proposal node is missing\"",
+        "nodePath.toString()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 57,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"current proposal node identity is inconsistent\"",
+        "nodeInstanceId"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 64,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"revision context could not be resolved\"",
+        "message(failure)"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 79,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"current workflow iteration is missing\"",
+        "iterationPath.toString()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 83,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"current workflow iteration identity is inconsistent\"",
+        "iterationId",
+        "iteration.iterationId()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 102,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"contract revision reached an unsupported iteration trigger\"",
+        "\"trigger_action=\" + iteration.triggerAction()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 106,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"revision iteration trigger lineage is incomplete\"",
+        "iteration.iterationId()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 111,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"revision trigger decision node is missing\"",
+        "triggerPath.toString()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 118,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"revision trigger is not the completed intake decision\"",
+        "iteration.triggerNodeInstanceId()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 125,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"revision trigger must reference exactly one verified rejected intake review\"",
+        "\"review_count=\" + baselines.size()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 136,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"revision iteration lineage could not be resolved\"",
+        "message(failure)"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 147,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"human requirement revision trigger lineage is incomplete\"",
+        "iteration.iterationId()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 151,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"human requirement revision gate node is missing\"",
+        "triggerPath.toString()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 160,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"revision trigger is not a completed human requirement revision gate\"",
+        "iteration.triggerNodeInstanceId()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 167,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"human requirement revision must reference exactly one verified human-reviewable intake review\"",
+        "\"review_count=\" + baselines.size()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 176,
+      "kind": "require",
+      "predicate": "verified.previousReference().equals(baseline.previousReference())",
+      "existing_arguments": [
+        "verified.previousReference().equals(baseline.previousReference())",
+        "\"human requirement revision subject mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 194,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"contract clarification iteration trigger lineage is incomplete\"",
+        "iteration.iterationId()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 198,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"contract clarification gate node is missing\"",
+        "triggerPath.toString()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 207,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"revision trigger is not a completed contract clarification gate\"",
+        "iteration.triggerNodeInstanceId()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 243,
+      "kind": "require",
+      "predicate": "candidate != null && candidate.resolveArtifact(root, workstreamId, OBJECT_MAPPER).isPresent()",
+      "existing_arguments": [
+        "candidate != null && candidate.resolveArtifact(root, workstreamId, OBJECT_MAPPER).isPresent()",
+        "\"proposal reference invalid\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 253,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"proposal revision context could not be resolved\"",
+        "message(failure)"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 274,
+      "kind": "require",
+      "predicate": "new dev.dual.core.contract.TaskContract.Reference(goal.contractRef(), goal.sha256())\n                .equals(candidate.contract().goalContract())",
+      "existing_arguments": [
+        "new dev.dual.core.contract.TaskContract.Reference(goal.contractRef(), goal.sha256())\n                .equals(candidate.contract().goalContract())",
+        "\"execution candidate GOAL mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 289,
+      "kind": "failure",
+      "predicate": null,
+      "existing_arguments": [
+        "\"compile revision context could not be resolved\"",
+        "message(failure)"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 300,
+      "kind": "require",
+      "predicate": "review.equals(acceptance.document())",
+      "existing_arguments": [
+        "review.equals(acceptance.document())",
+        "\"acceptance capture changed while reading\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 324,
+      "kind": "require",
+      "predicate": "approval.node().nodeDefinitionId().equals(\"gate.contract_review\")\n                && approval.source().nodeInstanceId().equals(compile.nodeInstanceId())\n                && approval.event().id().equals(qualified.approvalEventId())",
+      "existing_arguments": [
+        "approval.node().nodeDefinitionId().equals(\"gate.contract_review\")\n                && approval.source().nodeInstanceId().equals(compile.nodeInstanceId())\n                && approval.event().id().equals(qualified.approvalEventId())",
+        "\"qualified contract gate mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 329,
+      "kind": "require",
+      "predicate": "qualified.sha256().equals(text(compile.result().get(\"task_contract_sha256\")))\n                && qualified.resolutionSha256().equals(text(compile.result().get(\"contract_resolution_sha256\")))",
+      "existing_arguments": [
+        "qualified.sha256().equals(text(compile.result().get(\"task_contract_sha256\")))\n                && qualified.resolutionSha256().equals(text(compile.result().get(\"contract_resolution_sha256\")))",
+        "\"qualified compile hashes mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 332,
+      "kind": "require",
+      "predicate": "reader.sha(qualified.contractRef()).equals(qualified.sha256())\n                && reader.sha(qualified.resolutionRef()).equals(qualified.resolutionSha256())",
+      "existing_arguments": [
+        "reader.sha(qualified.contractRef()).equals(qualified.sha256())\n                && reader.sha(qualified.resolutionRef()).equals(qualified.resolutionSha256())",
+        "\"qualified capture artifacts changed\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 369,
+      "kind": "require",
+      "predicate": "seen.add(item.iterationId())",
+      "existing_arguments": [
+        "seen.add(item.iterationId())",
+        "\"contract revision ancestry cycle\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 376,
+      "kind": "require",
+      "predicate": "!item.parentIterationId().isBlank()",
+      "existing_arguments": [
+        "!item.parentIterationId().isBlank()",
+        "\"contract revision ancestry parent missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 379,
+      "kind": "require",
+      "predicate": "path.getParent().equals(dir.resolve(\"iterations\")) && Files.isRegularFile(path)",
+      "existing_arguments": [
+        "path.getParent().equals(dir.resolve(\"iterations\")) && Files.isRegularFile(path)",
+        "\"contract revision ancestry parent missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 382,
+      "kind": "require",
+      "predicate": "parentId.equals(item.iterationId())",
+      "existing_arguments": [
+        "parentId.equals(item.iterationId())",
+        "\"contract revision ancestry identity mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 409,
+      "kind": "require",
+      "predicate": "ids.add(id)",
+      "existing_arguments": [
+        "ids.add(id)",
+        "\"duplicate historical event identity\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 411,
+      "kind": "require",
+      "predicate": "id.matches(\"evt-[0-9]+\")",
+      "existing_arguments": [
+        "id.matches(\"evt-[0-9]+\")",
+        "\"invalid routing event identity\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 423,
+      "kind": "require",
+      "predicate": "!ref.isBlank() && !Path.of(ref).isAbsolute() && relative(value).equals(ref)\n                    && value.startsWith(dir) && Files.isRegularFile(value)\n                    && value.toRealPath().equals(root.toRealPath().resolve(ref).normalize())",
+      "existing_arguments": [
+        "!ref.isBlank() && !Path.of(ref).isAbsolute() && relative(value).equals(ref)\n                    && value.startsWith(dir) && Files.isRegularFile(value)\n                    && value.toRealPath().equals(root.toRealPath().resolve(ref).normalize())",
+        "\"missing or noncanonical historical reference: \" + ref"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 433,
+      "kind": "require",
+      "predicate": "id.matches(\"[A-Za-z0-9._-]+\")",
+      "existing_arguments": [
+        "id.matches(\"[A-Za-z0-9._-]+\")",
+        "\"invalid historical node identity\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 436,
+      "kind": "require",
+      "predicate": "id.equals(node.nodeInstanceId())",
+      "existing_arguments": [
+        "id.equals(node.nodeInstanceId())",
+        "\"historical node identity mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 441,
+      "kind": "require",
+      "predicate": "node.status() == NodeStatus.COMPLETED && node.nodeDefinitionId().equals(role)",
+      "existing_arguments": [
+        "node.status() == NodeStatus.COMPLETED && node.nodeDefinitionId().equals(role)",
+        "\"historical node not completed with required role: \" + role"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 446,
+      "kind": "require",
+      "predicate": "definition.edges().stream().filter(e -> e.from().equals(from)\n                    && e.on().equals(action) && e.to().equals(to)).count() == 1",
+      "existing_arguments": [
+        "definition.edges().stream().filter(e -> e.from().equals(from)\n                    && e.on().equals(action) && e.to().equals(to)).count() == 1",
+        "\"historical transition is not uniquely declared\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 453,
+      "kind": "require",
+      "predicate": "matches.size() == 1",
+      "existing_arguments": [
+        "matches.size() == 1",
+        "\"historical routed occurrence missing or ambiguous: \" + id"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 459,
+      "kind": "require",
+      "predicate": "event.from().equals(source.nodeDefinitionId()) && event.to().equals(target.nodeDefinitionId())\n                    && event.action().equals(action) && target.inputRefs().equals(source.outputRefs())",
+      "existing_arguments": [
+        "event.from().equals(source.nodeDefinitionId()) && event.to().equals(target.nodeDefinitionId())\n                    && event.action().equals(action) && target.inputRefs().equals(source.outputRefs())",
+        "\"historical routed source/input mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 469,
+      "kind": "require",
+      "predicate": "entries.size() == 1 && entries.getFirst().path().equals(file)",
+      "existing_arguments": [
+        "entries.size() == 1 && entries.getFirst().path().equals(file)",
+        "\"historical sidecar publication lineage or semantics invalid\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 475,
+      "kind": "require",
+      "predicate": "ref != null && ref.resolveArtifact(root, ws, OBJECT_MAPPER).isPresent()",
+      "existing_arguments": [
+        "ref != null && ref.resolveArtifact(root, ws, OBJECT_MAPPER).isPresent()",
+        "\"historical proposal reference invalid\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 478,
+      "kind": "require",
+      "predicate": "document.taskContractProposal() != null",
+      "existing_arguments": [
+        "document.taskContractProposal() != null",
+        "\"historical proposal payload missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 483,
+      "kind": "require",
+      "predicate": "sha(ref).equals(hash)",
+      "existing_arguments": [
+        "sha(ref).equals(hash)",
+        "\"acceptance reference hash mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 485,
+      "kind": "require",
+      "predicate": "document.nodeId().equals(\"acceptance.codex_verifier_review\")\n                    && document.sourceArtifactType().equals(\"acceptance_review\")\n                    && document.decision().equals(\"REJECT\") && !document.failure().contractGaps().isEmpty()",
+      "existing_arguments": [
+        "document.nodeId().equals(\"acceptance.codex_verifier_review\")\n                    && document.sourceArtifactType().equals(\"acceptance_review\")\n                    && document.decision().equals(\"REJECT\") && !document.failure().contractGaps().isEmpty()",
+        "\"late root requires a rejected acceptance with contract obligations\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 499,
+      "kind": "require",
+      "predicate": "matches.size() == 1",
+      "existing_arguments": [
+        "matches.size() == 1",
+        "\"exactly one historical proposal review required\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 505,
+      "kind": "require",
+      "predicate": "review.sourceArtifactType().equals(\"agent_output_contract\")\n                    && decisions.contains(review.decision()) && review.reviewSubject() != null",
+      "existing_arguments": [
+        "review.sourceArtifactType().equals(\"agent_output_contract\")\n                    && decisions.contains(review.decision()) && review.reviewSubject() != null",
+        "\"historical proposal review subject/decision invalid\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 508,
+      "kind": "require",
+      "predicate": "node(review.nodeInstanceId()).iterationId().equals(iteration)\n                    && node(review.reviewSubject().producerNodeInstanceId()).iterationId().equals(iteration)",
+      "existing_arguments": [
+        "node(review.nodeInstanceId()).iterationId().equals(iteration)\n                    && node(review.reviewSubject().producerNodeInstanceId()).iterationId().equals(iteration)",
+        "\"historical review/proposal iteration mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 518,
+      "kind": "require",
+      "predicate": "event.gateId().equals(document.gateId()) && event.to().equals(node.nodeDefinitionId())\n                    && document.status().equals(\"resolved\") && node.status() == NodeStatus.COMPLETED\n                    && action.equals(text(document.result().get(\"human_action\")))\n                    && action.equals(text(node.result().get(\"human_action\")))\n                    && text(document.result().get(\"note\")).equals(text(node.result().get(\"note\")))\n                    && node.inputRefs().equals(stringList(document.result().get(\"subject_input_refs\")))",
+      "existing_arguments": [
+        "event.gateId().equals(document.gateId()) && event.to().equals(node.nodeDefinitionId())\n                    && document.status().equals(\"resolved\") && node.status() == NodeStatus.COMPLETED\n                    && action.equals(text(document.result().get(\"human_action\")))\n                    && action.equals(text(node.result().get(\"human_action\")))\n                    && text(document.result().get(\"note\")).equals(text(node.result().get(\"note\")))\n                    && node.inputRefs().equals(stringList(document.result().get(\"subject_input_refs\")))",
+        "\"historical gate decision/subject mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 526,
+      "kind": "require",
+      "predicate": "!sourceId.isBlank() && sourceId.equals(event.sourceId())\n                    && sourceId.equals(text(node.result().get(\"source_node_instance_id\")))",
+      "existing_arguments": [
+        "!sourceId.isBlank() && sourceId.equals(event.sourceId())\n                    && sourceId.equals(text(node.result().get(\"source_node_instance_id\")))",
+        "\"historical gate source identity mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 530,
+      "kind": "require",
+      "predicate": "source.status() == NodeStatus.COMPLETED && source.iterationId().equals(node.iterationId())\n                    && event.action().equals(text(document.result().get(\"source_outcome\")))",
+      "existing_arguments": [
+        "source.status() == NodeStatus.COMPLETED && source.iterationId().equals(node.iterationId())\n                    && event.action().equals(text(document.result().get(\"source_outcome\")))",
+        "\"historical gate source state mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 546,
+      "kind": "require",
+      "predicate": "gate.source().inputRefs().equals(gate.node().inputRefs())\n                    && baseline.review().decision().equals(text(gate.source().result().get(\"decision\")))\n                    && baseline.review().decision().equals(gate.event().action())",
+      "existing_arguments": [
+        "gate.source().inputRefs().equals(gate.node().inputRefs())\n                    && baseline.review().decision().equals(text(gate.source().result().get(\"decision\")))\n                    && baseline.review().decision().equals(gate.event().action())",
+        "\"requirement decision does not match reviewed subject\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 568,
+      "kind": "require",
+      "predicate": "subject.previousReference().equals(baseline.previousReference())",
+      "existing_arguments": [
+        "subject.previousReference().equals(baseline.previousReference())",
+        "\"compile requirement subject mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 571,
+      "kind": "require",
+      "predicate": "!text(doc.result().get(\"note\")).isBlank()",
+      "existing_arguments": [
+        "!text(doc.result().get(\"note\")).isBlank()",
+        "\"blocked approval note missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 576,
+      "kind": "require",
+      "predicate": "matches.size() == 1",
+      "existing_arguments": [
+        "matches.size() == 1",
+        "\"compile requirement approval missing or ambiguous\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 583,
+      "kind": "require",
+      "predicate": "contractRefs.size() == 1",
+      "existing_arguments": [
+        "contractRefs.size() == 1",
+        "\"compile contract reference missing or ambiguous\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 585,
+      "kind": "require",
+      "predicate": "sha(contractRef).equals(text(compile.result().get(\"task_contract_sha256\")))",
+      "existing_arguments": [
+        "sha(contractRef).equals(text(compile.result().get(\"task_contract_sha256\")))",
+        "\"compile contract bytes changed\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 588,
+      "kind": "require",
+      "predicate": "compile.nodeDefinitionId().equals(\"contract.compile\")",
+      "existing_arguments": [
+        "compile.nodeDefinitionId().equals(\"contract.compile\")",
+        "\"GOAL compiler identity mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 591,
+      "kind": "require",
+      "predicate": "contract.phase() == dev.dual.core.contract.TaskContract.Phase.EXECUTION\n                    && compile.nodeDefinitionId().equals(\"contract.compile_execution\") && contract.goalContract() != null",
+      "existing_arguments": [
+        "contract.phase() == dev.dual.core.contract.TaskContract.Phase.EXECUTION\n                    && compile.nodeDefinitionId().equals(\"contract.compile_execution\") && contract.goalContract() != null",
+        "\"EXECUTION compiler has no GOAL binding\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 596,
+      "kind": "require",
+      "predicate": "source.outputRefs().equals(compile.inputRefs())\n                    && sha(relative(dir.resolve(\"nodes/\" + sourceId + \".json\"))).equals(text(compile.inputTransition().get(\"source_node_sha256\")))",
+      "existing_arguments": [
+        "source.outputRefs().equals(compile.inputRefs())\n                    && sha(relative(dir.resolve(\"nodes/\" + sourceId + \".json\"))).equals(text(compile.inputTransition().get(\"source_node_sha256\")))",
+        "\"execution compiler input lineage changed\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 600,
+      "kind": "require",
+      "predicate": "sha(contract.goalContract().ref()).equals(contract.goalContract().sha256())",
+      "existing_arguments": [
+        "sha(contract.goalContract().ref()).equals(contract.goalContract().sha256())",
+        "\"original GOAL bytes changed\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 610,
+      "kind": "require",
+      "predicate": "matches.size() == 1",
+      "existing_arguments": [
+        "matches.size() == 1",
+        "\"original GOAL compile occurrence missing or ambiguous\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 625,
+      "kind": "require",
+      "predicate": "doc.proposalDerivation() != null && doc.sourceArtifactType().equals(\"task_contract_revision_patch\")\n                    && doc.proposalDerivation().baseProposalReference().equals(parent)",
+      "existing_arguments": [
+        "doc.proposalDerivation() != null && doc.sourceArtifactType().equals(\"task_contract_revision_patch\")\n                    && doc.proposalDerivation().baseProposalReference().equals(parent)",
+        "\"late proposal does not derive from the preceding patch parent\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 635,
+      "kind": "require",
+      "predicate": "author.iterationId().equals(iteration.iterationId())",
+      "existing_arguments": [
+        "author.iterationId().equals(iteration.iterationId())",
+        "\"late author iteration mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 639,
+      "kind": "require",
+      "predicate": "entry.nodeInstanceId().equals(author.nodeInstanceId())",
+      "existing_arguments": [
+        "entry.nodeInstanceId().equals(author.nodeInstanceId())",
+        "\"late author is not the routed iteration entry\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 642,
+      "kind": "require",
+      "predicate": "entry.iterationId().equals(author.iterationId())",
+      "existing_arguments": [
+        "entry.iterationId().equals(author.iterationId())",
+        "\"late intake context iteration mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 657,
+      "kind": "require",
+      "predicate": "matches.size() == 1",
+      "existing_arguments": [
+        "matches.size() == 1",
+        "\"contract approval successor missing or ambiguous\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 664,
+      "kind": "require",
+      "predicate": "id.matches(\"[A-Za-z0-9._-]+\")",
+      "existing_arguments": [
+        "id.matches(\"[A-Za-z0-9._-]+\")",
+        "\"primary workspace missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 667,
+      "kind": "require",
+      "predicate": "workdir.isBlank() || Path.of(workdir).toAbsolutePath().normalize().equals(root)",
+      "existing_arguments": [
+        "workdir.isBlank() || Path.of(workdir).toAbsolutePath().normalize().equals(root)",
+        "\"original workspace directory changed\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 670,
+      "kind": "require",
+      "predicate": "!base.isBlank()",
+      "existing_arguments": [
+        "!base.isBlank()",
+        "\"original workspace base missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 679,
+      "kind": "require",
+      "predicate": "first.targetNodeDefinitionId().equals(\"context.intake_claude_brainstorm\")",
+      "existing_arguments": [
+        "first.targetNodeDefinitionId().equals(\"context.intake_claude_brainstorm\")",
+        "\"late root target must be intake context\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 684,
+      "kind": "require",
+      "predicate": "baselineOwner.result().get(baselineKey) instanceof Map<?",
+      "existing_arguments": [
+        "baselineOwner.result().get(baselineKey) instanceof Map<?",
+        "?>",
+        "\"fixed contract rework baseline missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 697,
+      "kind": "require",
+      "predicate": "\"CHANGE_SCOPE_VIOLATION\".equals(text(scopeGate.document().result().get(\"source_outcome\")))\n                        && !text(classifier.result().get(\"note\")).isBlank()",
+      "existing_arguments": [
+        "\"CHANGE_SCOPE_VIOLATION\".equals(text(scopeGate.document().result().get(\"source_outcome\")))\n                        && !text(classifier.result().get(\"note\")).isBlank()",
+        "\"scope revision source/note mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 701,
+      "kind": "require",
+      "predicate": "scopeEvidence.ref().equals(text(binding.get(\"evaluation_ref\")))\n                        && scopeEvidence.sha256().equals(text(binding.get(\"evaluation_sha256\")))\n                        && scopeEvidence.document().sourceNodeInstanceId().equals(baselineOwner.nodeInstanceId())",
+      "existing_arguments": [
+        "scopeEvidence.ref().equals(text(binding.get(\"evaluation_ref\")))\n                        && scopeEvidence.sha256().equals(text(binding.get(\"evaluation_sha256\")))\n                        && scopeEvidence.document().sourceNodeInstanceId().equals(baselineOwner.nodeInstanceId())",
+        "\"scope revision evaluation baseline mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 707,
+      "kind": "require",
+      "predicate": "classifier.inputRefs().contains(acceptanceRef) && classifier.outputRefs().contains(acceptanceRef)\n                    && node(acceptance.nodeInstanceId()).iterationId().equals(classifier.iterationId())\n                    && first.triggerAction().equals(\"REJECT_\" + text(classifier.result().get(\"category\")))\n                    && text(classifier.result().get(\"category\")).equals(acceptance.failure().categoryHint())",
+      "existing_arguments": [
+        "classifier.inputRefs().contains(acceptanceRef) && classifier.outputRefs().contains(acceptanceRef)\n                    && node(acceptance.nodeInstanceId()).iterationId().equals(classifier.iterationId())\n                    && first.triggerAction().equals(\"REJECT_\" + text(classifier.result().get(\"category\")))\n                    && text(classifier.result().get(\"category\")).equals(acceptance.failure().categoryHint())",
+        "\"classifier acceptance identity/category mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 712,
+      "kind": "require",
+      "predicate": "classifier.inputRefs().stream().filter(r -> r.endsWith(\".contract.json\")).count() == 1",
+      "existing_arguments": [
+        "classifier.inputRefs().stream().filter(r -> r.endsWith(\".contract.json\")).count() == 1",
+        "\"classifier acceptance source is ambiguous\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 717,
+      "kind": "require",
+      "predicate": "base.previousReference().equals(ref)",
+      "existing_arguments": [
+        "base.previousReference().equals(ref)",
+        "\"frozen compile proposal mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 719,
+      "kind": "require",
+      "predicate": "goalCompile.nodeInstanceId().equals(text(binding.get(\"goal_compile_node_instance_id\")))",
+      "existing_arguments": [
+        "goalCompile.nodeInstanceId().equals(text(binding.get(\"goal_compile_node_instance_id\")))",
+        "\"frozen GOAL compile identity mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 721,
+      "kind": "require",
+      "predicate": "productRef.equals(text(binding.get(\"proposal_review_ref\")))\n                    && sha(productRef).equals(text(binding.get(\"proposal_review_sha256\")))\n                    && text(compile.result().get(\"task_contract_sha256\")).equals(text(binding.get(\"task_contract_sha256\")))\n                    && text(compile.result().get(\"contract_resolution_sha256\")).equals(text(binding.get(\"contract_resolution_sha256\")))",
+      "existing_arguments": [
+        "productRef.equals(text(binding.get(\"proposal_review_ref\")))\n                    && sha(productRef).equals(text(binding.get(\"proposal_review_sha256\")))\n                    && text(compile.result().get(\"task_contract_sha256\")).equals(text(binding.get(\"task_contract_sha256\")))\n                    && text(compile.result().get(\"contract_resolution_sha256\")).equals(text(binding.get(\"contract_resolution_sha256\")))",
+        "\"frozen compile/review hash mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 727,
+      "kind": "require",
+      "predicate": "sha(contractGateRef).equals(text(binding.get(\"contract_gate_sha256\")))",
+      "existing_arguments": [
+        "sha(contractGateRef).equals(text(binding.get(\"contract_gate_sha256\")))",
+        "\"frozen contract gate hash mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 729,
+      "kind": "require",
+      "predicate": "approvedRoute(approval).sequence() < rootEvent.sequence()",
+      "existing_arguments": [
+        "approvedRoute(approval).sequence() < rootEvent.sequence()",
+        "\"root precedes its contract approval\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 730,
+      "kind": "require",
+      "predicate": "approval.node().nodeDefinitionId().equals(\"gate.contract_review\")\n                    && approval.source().nodeInstanceId().equals(compile.nodeInstanceId())\n                    && approval.event().id().equals(text(binding.get(\"contract_gate_event_id\")))",
+      "existing_arguments": [
+        "approval.node().nodeDefinitionId().equals(\"gate.contract_review\")\n                    && approval.source().nodeInstanceId().equals(compile.nodeInstanceId())\n                    && approval.event().id().equals(text(binding.get(\"contract_gate_event_id\")))",
+        "\"frozen contract approval mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 735,
+      "kind": "require",
+      "predicate": "requirement.ref().equals(text(binding.get(\"requirement_gate_ref\")))\n                    && sha(requirement.ref()).equals(text(binding.get(\"requirement_gate_sha256\")))",
+      "existing_arguments": [
+        "requirement.ref().equals(text(binding.get(\"requirement_gate_ref\")))\n                    && sha(requirement.ref()).equals(text(binding.get(\"requirement_gate_sha256\")))",
+        "\"frozen requirement approval mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 739,
+      "kind": "require",
+      "predicate": "workspace.equals(List.of(text(binding.get(\"workspace_id\")), text(binding.get(\"base_commit\"))))",
+      "existing_arguments": [
+        "workspace.equals(List.of(text(binding.get(\"workspace_id\")), text(binding.get(\"base_commit\"))))",
+        "\"original workspace identity/base changed\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 758,
+      "kind": "require",
+      "predicate": "iteration.parentIterationId().equals(chain.get(i - 1).iterationId())",
+      "existing_arguments": [
+        "iteration.parentIterationId().equals(chain.get(i - 1).iterationId())",
+        "\"late parent chain mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 761,
+      "kind": "require",
+      "predicate": "event.sequence() > through",
+      "existing_arguments": [
+        "event.sequence() > through",
+        "\"late revision event order invalid\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 771,
+      "kind": "require",
+      "predicate": "text(trigger.result().get(\"decision\")).equals(\"NEEDS_REVISION\")\n                            && !direct.review().contractObligations().isEmpty()",
+      "existing_arguments": [
+        "text(trigger.result().get(\"decision\")).equals(\"NEEDS_REVISION\")\n                            && !direct.review().contractObligations().isEmpty()",
+        "\"late review obligations missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 788,
+      "kind": "require",
+      "predicate": "!note.isBlank()",
+      "existing_arguments": [
+        "!note.isBlank()",
+        "\"late revision human note missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 806,
+      "kind": "require",
+      "predicate": "trigger.status() == NodeStatus.COMPLETED && trigger.iterationId().equals(iteration.parentIterationId())",
+      "existing_arguments": [
+        "trigger.status() == NodeStatus.COMPLETED && trigger.iterationId().equals(iteration.parentIterationId())",
+        "\"late trigger parent/status mismatch\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 821,
+      "kind": "require",
+      "predicate": "matches.size() == 1",
+      "existing_arguments": [
+        "matches.size() == 1",
+        "\"late iteration routing missing or ambiguous\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 832,
+      "kind": "require",
+      "predicate": "value != null && !value.isBlank()",
+      "existing_arguments": [
+        "value != null && !value.isBlank()",
+        "\"late obligation text missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+      "before_line": 835,
+      "kind": "require",
+      "predicate": "previous == null || previous.equals(obligation)",
+      "existing_arguments": [
+        "previous == null || previous.equals(obligation)",
+        "\"late obligation source collision\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 64,
+      "kind": "require",
+      "predicate": "!\"node_routed\".equals(text(event.get(\"event_type\")))",
+      "existing_arguments": [
+        "!\"node_routed\".equals(text(event.get(\"event_type\")))",
+        "\"AUTHORED_EVENT_ID_INVALID\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 70,
+      "kind": "require",
+      "predicate": "sequence > previous",
+      "existing_arguments": [
+        "sequence > previous",
+        "\"AUTHORED_EVENT_ORDER_INVALID\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 76,
+      "kind": "require",
+      "predicate": "target.id().equals(occurrence.nodeDefinitionId())",
+      "existing_arguments": [
+        "target.id().equals(occurrence.nodeDefinitionId())",
+        "\"AUTHORED_ROUTE_TARGET_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 143,
+      "kind": "require",
+      "predicate": "participates(node.nodeDefinitionId())",
+      "existing_arguments": [
+        "participates(node.nodeDefinitionId())",
+        "\"AUTHORED_ROLE_UNSUPPORTED\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 146,
+      "kind": "require",
+      "predicate": "contractResolution.failure() == null && contractResolution.qualified().isPresent()",
+      "existing_arguments": [
+        "contractResolution.failure() == null && contractResolution.qualified().isPresent()",
+        "\"AUTHORED_CONTRACT_NOT_QUALIFIED\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 150,
+      "kind": "require",
+      "predicate": "events.stream().anyMatch(event -> event.id().equals(contract.approvalEventId()))",
+      "existing_arguments": [
+        "events.stream().anyMatch(event -> event.id().equals(contract.approvalEventId()))",
+        "\"AUTHORED_CONTRACT_OUTSIDE_HISTORY\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 170,
+      "kind": "require",
+      "predicate": "origins.size() == 1",
+      "existing_arguments": [
+        "origins.size() == 1",
+        "\"AUTHORED_NODE_ORIGIN_NOT_UNIQUE\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 174,
+      "kind": "require",
+      "predicate": "snapshot.withHistoryThrough(original.historyThrough()).equals(original)",
+      "existing_arguments": [
+        "snapshot.withHistoryThrough(original.historyThrough()).equals(original)",
+        "\"AUTHORED_NODE_AUTHORITY_CHANGED\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 186,
+      "kind": "require",
+      "predicate": "stage.ready.equals(text(cursor.result().get(\"decision\")))",
+      "existing_arguments": [
+        "stage.ready.equals(text(cursor.result().get(\"decision\")))",
+        "\"AUTHORED_REVIEW_NOT_READY\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 190,
+      "kind": "require",
+      "predicate": "JSON.readTree(JSON.writeValueAsBytes(facts)).equals(JSON.valueToTree(cursor.result().get(\"reviewed_candidate\")))",
+      "existing_arguments": [
+        "JSON.readTree(JSON.writeValueAsBytes(facts)).equals(JSON.valueToTree(cursor.result().get(\"reviewed_candidate\")))",
+        "\"AUTHORED_REVIEWED_FACTS_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 198,
+      "kind": "require",
+      "predicate": "event.size() == 1",
+      "existing_arguments": [
+        "event.size() == 1",
+        "\"AUTHORED_READY_ROUTE_NOT_UNIQUE\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 203,
+      "kind": "require",
+      "predicate": "!source.isBlank()",
+      "existing_arguments": [
+        "!source.isBlank()",
+        "\"AUTHORED_REVIEWED_MISSING: \" + stage.purpose"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 208,
+      "kind": "require",
+      "predicate": "origins.size() == 1 && source.equals(text(origins.getFirst().payload().get(\"source_node_instance_id\")))",
+      "existing_arguments": [
+        "origins.size() == 1 && source.equals(text(origins.getFirst().payload().get(\"source_node_instance_id\")))",
+        "\"AUTHORED_NODE_ORIGIN_NOT_UNIQUE\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 211,
+      "kind": "require",
+      "predicate": "parent.nodeDefinitionId().equals(text(route.payload().get(\"from\")))\n                    && cursor.nodeDefinitionId().equals(text(route.payload().get(\"to\")))",
+      "existing_arguments": [
+        "parent.nodeDefinitionId().equals(text(route.payload().get(\"from\")))\n                    && cursor.nodeDefinitionId().equals(text(route.payload().get(\"to\")))",
+        "\"AUTHORED_ROUTE_TARGET_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 218,
+      "kind": "require",
+      "predicate": "parent.status() == NodeStatus.FAILED && cursor.nodeDefinitionId().equals(Stage.PLAN.author)\n                        && \"revise_readiness\".equals(text(route.payload().get(\"outcome\")))\n                        && repair.path(\"action\").asText().equals(\"revise_readiness\") && !repair.path(\"note\").asText().isBlank()\n                        && repair.equals(JSON.valueToTree(route.payload().get(\"repair\")))\n                        && cursor.inputRefs().equals(List.copyOf(refs))",
+      "existing_arguments": [
+        "parent.status() == NodeStatus.FAILED && cursor.nodeDefinitionId().equals(Stage.PLAN.author)\n                        && \"revise_readiness\".equals(text(route.payload().get(\"outcome\")))\n                        && repair.path(\"action\").asText().equals(\"revise_readiness\") && !repair.path(\"note\").asText().isBlank()\n                        && repair.equals(JSON.valueToTree(route.payload().get(\"repair\")))\n                        && cursor.inputRefs().equals(List.copyOf(refs))",
+        "\"AUTHORED_REPAIR_ROUTE_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 225,
+      "kind": "require",
+      "predicate": "cursor.inputRefs().equals(parent.outputRefs())",
+      "existing_arguments": [
+        "cursor.inputRefs().equals(parent.outputRefs())",
+        "\"AUTHORED_ROUTE_INPUT_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 228,
+      "kind": "require",
+      "predicate": "reference(root, prefix + \"nodes/\" + source + \".json\").sha256()\n                    .equals(text(cursor.inputTransition().get(\"source_node_sha256\")))",
+      "existing_arguments": [
+        "reference(root, prefix + \"nodes/\" + source + \".json\").sha256()\n                    .equals(text(cursor.inputTransition().get(\"source_node_sha256\")))",
+        "\"AUTHORED_ROUTE_SOURCE_CHANGED\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 242,
+      "kind": "require",
+      "predicate": "decision.nodeDefinitionId().equals(stage.decision)",
+      "existing_arguments": [
+        "decision.nodeDefinitionId().equals(stage.decision)",
+        "\"AUTHORED_DECISION_ROLE_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 244,
+      "kind": "require",
+      "predicate": "stage.ready.equals(document(reviewer).decision())",
+      "existing_arguments": [
+        "stage.ready.equals(document(reviewer).decision())",
+        "\"AUTHORED_REVIEW_NOT_READY\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 246,
+      "kind": "require",
+      "predicate": "reviewerNode.nodeInstanceId().equals(text(decision.inputTransition().get(\"source_node_instance_id\")))\n                && reference(root, prefix + \"nodes/\" + reviewer.nodeInstanceId() + \".json\").sha256()\n                    .equals(text(decision.inputTransition().get(\"source_node_sha256\")))",
+      "existing_arguments": [
+        "reviewerNode.nodeInstanceId().equals(text(decision.inputTransition().get(\"source_node_instance_id\")))\n                && reference(root, prefix + \"nodes/\" + reviewer.nodeInstanceId() + \".json\").sha256()\n                    .equals(text(decision.inputTransition().get(\"source_node_sha256\")))",
+        "\"AUTHORED_REVIEW_ROUTE_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 251,
+      "kind": "require",
+      "predicate": "author.equals(reviewedInput.subject())",
+      "existing_arguments": [
+        "author.equals(reviewedInput.subject())",
+        "\"AUTHORED_REVIEW_SUBJECT_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 253,
+      "kind": "require",
+      "predicate": "authorInput.contract().equals(reviewedInput.contract())",
+      "existing_arguments": [
+        "authorInput.contract().equals(reviewedInput.contract())",
+        "\"AUTHORED_REVIEW_CONTRACT_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 281,
+      "kind": "require",
+      "predicate": "successor.nodeDefinitionId().equals(text(event.payload().get(\"to\")))\n                    && successor.iterationId().equals(source.iterationId())\n                    && successor.inputRefs().equals(source.outputRefs())",
+      "existing_arguments": [
+        "successor.nodeDefinitionId().equals(text(event.payload().get(\"to\")))\n                    && successor.iterationId().equals(source.iterationId())\n                    && successor.inputRefs().equals(source.outputRefs())",
+        "\"AUTHORED_APPROVAL_SUCCESSOR_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 293,
+      "kind": "require",
+      "predicate": "node.kind() == NodeKind.GATE && node.nodeDefinitionId().equals(text(payload.get(\"to\")))",
+      "existing_arguments": [
+        "node.kind() == NodeKind.GATE && node.nodeDefinitionId().equals(text(payload.get(\"to\")))",
+        "\"AUTHORED_GATE_NODE_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 296,
+      "kind": "require",
+      "predicate": "gate.gateId().equals(text(payload.get(\"gate_id\")))\n                && gate.nodeInstanceId().equals(node.nodeInstanceId())",
+      "existing_arguments": [
+        "gate.gateId().equals(text(payload.get(\"gate_id\")))\n                && gate.nodeInstanceId().equals(node.nodeInstanceId())",
+        "\"AUTHORED_GATE_INSTANCE_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 298,
+      "kind": "require",
+      "predicate": "strings(gate.result().get(\"subject_input_refs\")).equals(node.inputRefs())",
+      "existing_arguments": [
+        "strings(gate.result().get(\"subject_input_refs\")).equals(node.inputRefs())",
+        "\"AUTHORED_GATE_SUBJECT_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 300,
+      "kind": "require",
+      "predicate": "!source.isBlank() && source.equals(text(gate.result().get(\"source_node_instance_id\")))\n                && source.equals(text(node.result().get(\"source_node_instance_id\")))",
+      "existing_arguments": [
+        "!source.isBlank() && source.equals(text(gate.result().get(\"source_node_instance_id\")))\n                && source.equals(text(node.result().get(\"source_node_instance_id\")))",
+        "\"AUTHORED_GATE_SOURCE_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 302,
+      "kind": "require",
+      "predicate": "text(gate.result().get(\"human_action\")).equals(text(node.result().get(\"human_action\")))\n                && text(gate.result().get(\"note\")).equals(text(node.result().get(\"note\")))",
+      "existing_arguments": [
+        "text(gate.result().get(\"human_action\")).equals(text(node.result().get(\"human_action\")))\n                && text(gate.result().get(\"note\")).equals(text(node.result().get(\"note\")))",
+        "\"AUTHORED_GATE_ACTION_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 306,
+      "kind": "require",
+      "predicate": "producer.nodeDefinitionId().equals(text(payload.get(\"from\")))",
+      "existing_arguments": [
+        "producer.nodeDefinitionId().equals(text(payload.get(\"from\")))",
+        "\"AUTHORED_GATE_EVENT_SOURCE_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 307,
+      "kind": "require",
+      "predicate": "producer.iterationId().equals(node.iterationId())",
+      "existing_arguments": [
+        "producer.iterationId().equals(node.iterationId())",
+        "\"AUTHORED_GATE_ITERATION_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 314,
+      "kind": "require",
+      "predicate": "stage == Stage.PLAN",
+      "existing_arguments": [
+        "stage == Stage.PLAN",
+        "\"AUTHORED_DIRECT_DESIGN_GATE_UNSUPPORTED\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 317,
+      "kind": "require",
+      "predicate": "gate.source().nodeDefinitionId().equals(stage.decision)",
+      "existing_arguments": [
+        "gate.source().nodeDefinitionId().equals(stage.decision)",
+        "\"AUTHORED_GATE_SOURCE_ROLE_INVALID\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 319,
+      "kind": "require",
+      "predicate": "gate.source().inputRefs().contains(review.sidecar().ref())",
+      "existing_arguments": [
+        "gate.source().inputRefs().contains(review.sidecar().ref())",
+        "\"AUTHORED_DECISION_INPUT_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 321,
+      "kind": "require",
+      "predicate": "reviewer.iterationId().equals(gate.source().iterationId())",
+      "existing_arguments": [
+        "reviewer.iterationId().equals(gate.source().iterationId())",
+        "\"AUTHORED_REVIEW_ITERATION_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 323,
+      "kind": "require",
+      "predicate": "doc.decision().equals(text(gate.source().result().get(\"decision\")))",
+      "existing_arguments": [
+        "doc.decision().equals(text(gate.source().result().get(\"decision\")))",
+        "\"AUTHORED_DECISION_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 327,
+      "kind": "require",
+      "predicate": "subject.equals(inputs.subject())",
+      "existing_arguments": [
+        "subject.equals(inputs.subject())",
+        "\"AUTHORED_REVIEW_INPUT_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 337,
+      "kind": "require",
+      "predicate": "stage != null",
+      "existing_arguments": [
+        "stage != null",
+        "\"AUTHORED_GATE_ROLE_UNSUPPORTED\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 387,
+      "kind": "require",
+      "predicate": "publisher.iterationId().equals(reviewer.iterationId())",
+      "existing_arguments": [
+        "publisher.iterationId().equals(reviewer.iterationId())",
+        "\"AUTHORED_CONTEXT_ITERATION_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 392,
+      "kind": "require",
+      "predicate": "matches.size() == 1",
+      "existing_arguments": [
+        "matches.size() == 1",
+        "\"AUTHORED_CONTEXT_PUBLISHER_NOT_UNIQUE\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 395,
+      "kind": "require",
+      "predicate": "node(candidate.nodeInstanceId()).iterationId().equals(publisher.iterationId())",
+      "existing_arguments": [
+        "node(candidate.nodeInstanceId()).iterationId().equals(publisher.iterationId())",
+        "\"AUTHORED_CANDIDATE_ITERATION_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 400,
+      "kind": "require",
+      "predicate": "visiting.add(author.nodeInstanceId())",
+      "existing_arguments": [
+        "visiting.add(author.nodeInstanceId())",
+        "\"AUTHORED_REVISION_CYCLE\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 403,
+      "kind": "require",
+      "predicate": "iteration.iterationId().equals(author.iterationId())",
+      "existing_arguments": [
+        "iteration.iterationId().equals(author.iterationId())",
+        "\"AUTHORED_ITERATION_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 411,
+      "kind": "require",
+      "predicate": "stage.purpose.equals(text(definition.node(source.nodeDefinitionId()).config().get(\"gate_purpose\")))",
+      "existing_arguments": [
+        "stage.purpose.equals(text(definition.node(source.nodeDefinitionId()).config().get(\"gate_purpose\")))",
+        "\"AUTHORED_REVISION_STAGE_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 412,
+      "kind": "require",
+      "predicate": "Set.of(\"revise\", \"approved\").contains(iteration.triggerAction())",
+      "existing_arguments": [
+        "Set.of(\"revise\", \"approved\").contains(iteration.triggerAction())",
+        "\"AUTHORED_REVISION_ACTION_INVALID\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 415,
+      "kind": "require",
+      "predicate": "source.status() == NodeStatus.COMPLETED && gate.document().status().equals(\"resolved\")\n                    && text(gate.document().result().get(\"human_action\")).equals(iteration.triggerAction())",
+      "existing_arguments": [
+        "source.status() == NodeStatus.COMPLETED && gate.document().status().equals(\"resolved\")\n                    && text(gate.document().result().get(\"human_action\")).equals(iteration.triggerAction())",
+        "\"AUTHORED_REVISION_GATE_UNRESOLVED\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 418,
+      "kind": "require",
+      "predicate": "!note.isBlank()",
+      "existing_arguments": [
+        "!note.isBlank()",
+        "\"AUTHORED_REVISION_NOTE_MISSING\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 426,
+      "kind": "require",
+      "predicate": "source.status() == NodeStatus.FAILED",
+      "existing_arguments": [
+        "source.status() == NodeStatus.FAILED",
+        "\"AUTHORED_REPAIR_FAILURE_MISSING\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 428,
+      "kind": "require",
+      "predicate": "repair.path(\"action\").asText().equals(\"revise_readiness\") && !repair.path(\"note\").asText().isBlank()",
+      "existing_arguments": [
+        "repair.path(\"action\").asText().equals(\"revise_readiness\") && !repair.path(\"note\").asText().isBlank()",
+        "\"AUTHORED_REPAIR_DECISION_MISSING\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 431,
+      "kind": "require",
+      "predicate": "parent.equals(reviewed(Stage.PLAN, source).candidate())",
+      "existing_arguments": [
+        "parent.equals(reviewed(Stage.PLAN, source).candidate())",
+        "\"AUTHORED_REPAIR_PARENT_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 435,
+      "kind": "require",
+      "predicate": "source.nodeDefinitionId().equals(stage.decision)\n                    && iteration.triggerAction().equals(\"NEEDS_REVISION\")",
+      "existing_arguments": [
+        "source.nodeDefinitionId().equals(stage.decision)\n                    && iteration.triggerAction().equals(\"NEEDS_REVISION\")",
+        "\"AUTHORED_REVISION_TRIGGER_INVALID\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 438,
+      "kind": "require",
+      "predicate": "text(source.result().get(\"decision\")).equals(\"NEEDS_REVISION\")",
+      "existing_arguments": [
+        "text(source.result().get(\"decision\")).equals(\"NEEDS_REVISION\")",
+        "\"AUTHORED_REVISION_DECISION_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 441,
+      "kind": "require",
+      "predicate": "document(review).decision().equals(\"NEEDS_REVISION\")",
+      "existing_arguments": [
+        "document(review).decision().equals(\"NEEDS_REVISION\")",
+        "\"AUTHORED_REVIEW_DECISION_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 443,
+      "kind": "require",
+      "predicate": "parent.equals(verifiedCandidateSnapshot(root, ws, review).subject())",
+      "existing_arguments": [
+        "parent.equals(verifiedCandidateSnapshot(root, ws, review).subject())",
+        "\"AUTHORED_REVIEW_INPUT_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 446,
+      "kind": "require",
+      "predicate": "(iteration.triggerAction().equals(\"revise_readiness\") || node(parent.nodeInstanceId()).iterationId().equals(iteration.parentIterationId()))\n                && source.iterationId().equals(iteration.parentIterationId())",
+      "existing_arguments": [
+        "(iteration.triggerAction().equals(\"revise_readiness\") || node(parent.nodeInstanceId()).iterationId().equals(iteration.parentIterationId()))\n                && source.iterationId().equals(iteration.parentIterationId())",
+        "\"AUTHORED_REVISION_PARENT_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 464,
+      "kind": "require",
+      "predicate": "matches.size() == 1",
+      "existing_arguments": [
+        "matches.size() == 1",
+        "\"AUTHORED_GATE_EVENT_NOT_UNIQUE\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 470,
+      "kind": "require",
+      "predicate": "candidate.nodeInstanceId().equals(producer.nodeInstanceId())",
+      "existing_arguments": [
+        "candidate.nodeInstanceId().equals(producer.nodeInstanceId())",
+        "\"AUTHORED_CANDIDATE_SOURCE_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 481,
+      "kind": "require",
+      "predicate": "document.hasRequiredTypedPayload()",
+      "existing_arguments": [
+        "document.hasRequiredTypedPayload()",
+        "\"AUTHORED_TYPED_PAYLOAD_MISSING\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 483,
+      "kind": "require",
+      "predicate": "violation.isEmpty()",
+      "existing_arguments": [
+        "violation.isEmpty()",
+        "\"AUTHORED_CANDIDATE_LINEAGE_INVALID: \" + violation.orElse(\"\")"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 486,
+      "kind": "require",
+      "predicate": "matches.size() == 1",
+      "existing_arguments": [
+        "matches.size() == 1",
+        "\"AUTHORED_CANDIDATE_NOT_UNIQUE: \" + expectedNode"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 496,
+      "kind": "require",
+      "predicate": "!id.isBlank()",
+      "existing_arguments": [
+        "!id.isBlank()",
+        "\"AUTHORED_NODE_ID_MISSING\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 498,
+      "kind": "require",
+      "predicate": "node.nodeInstanceId().equals(id)",
+      "existing_arguments": [
+        "node.nodeInstanceId().equals(id)",
+        "\"AUTHORED_NODE_ID_MISMATCH\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 503,
+      "kind": "require",
+      "predicate": "definition.edgesFrom(from).stream().anyMatch(edge -> edge.on().equals(outcome) && edge.to().equals(to))",
+      "existing_arguments": [
+        "definition.edgesFrom(from).stream().anyMatch(edge -> edge.on().equals(outcome) && edge.to().equals(to))",
+        "\"AUTHORED_EDGE_NOT_DECLARED\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "before_line": 507,
+      "kind": "require",
+      "predicate": "node.status() == NodeStatus.COMPLETED",
+      "existing_arguments": [
+        "node.status() == NodeStatus.COMPLETED",
+        "\"AUTHORED_SOURCE_NOT_COMPLETED\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 63,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"CONTRACT_SNAPSHOT_UNAVAILABLE\"",
+        "failure.getMessage()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 81,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"CONTRACT_EPOCH_INVALID\"",
+        "\"GOAL authorization epoch is missing or duplicated\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 86,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"OUTPUT_REF_MISMATCH\"",
+        "\"GOAL compile does not publish its occurrence artifacts\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 97,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GOAL_CONTRACT_INVALID\"",
+        "\"GOAL identity, shape or immutable bytes do not match its compiler\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 102,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GOAL_APPROVAL_INVALID\"",
+        "\"GOAL approval reference is not an unchanged workstream gate\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 116,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GOAL_APPROVAL_INVALID\"",
+        "\"GOAL compiler is not routed from the matching completed human decision\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 120,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GOAL_SUBJECT_INVALID\"",
+        "\"approved review subject is not verifiable\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 125,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GOAL_SUBJECT_INVALID\"",
+        "\"GOAL does not bind the approved proposal bytes\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 149,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GOAL_APPROVAL_INVALID\"",
+        "\"GOAL approval route is missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 182,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GATE_NODE_MISSING\"",
+        "\"contract approval gate node is missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 185,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GATE_NOT_COMPLETED\"",
+        "\"latest contract approval gate is not completed\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 193,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GATE_LINEAGE_INVALID\"",
+        "\"latest contract gate lineage or status is invalid\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 198,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"CONTRACT_NOT_APPROVED\"",
+        "\"latest contract gate action is not approved: \" + gateAction"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 202,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GATE_RESULT_MISMATCH\"",
+        "\"contract gate note does not match node result\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 206,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GATE_SUBJECT_MISMATCH\"",
+        "\"contract gate subject refs do not match node input refs\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 212,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GATE_SOURCE_MISMATCH\"",
+        "\"contract gate source occurrence identity is missing or inconsistent\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 219,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"COMPILE_BINDING_MISSING\"",
+        "\"approved source is not a completed contract.compile node\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 222,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"EVENT_SOURCE_MISMATCH\"",
+        "\"routing event source does not match approved compile node\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 226,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"UNAPPROVED_RECOMPILE\"",
+        "\"completed contract.compile is newer than the approved source: \"\n                            + newerCompile.nodeInstanceId()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 234,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"ARTIFACT_MISSING\"",
+        "\"approved contract or requirement resolution artifact is missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 242,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"OUTPUT_REF_MISMATCH\"",
+        "\"approved compile/gate refs do not bind both contract artifacts\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 257,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"CONTRACT_INVALID\"",
+        "\"approved contract artifacts cannot be parsed\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 261,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"CONTRACT_INVALID\"",
+        "\"task-contract.json is invalid: \" + String.join(\"; \", errors)"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 270,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"COMPILE_BINDING_MISSING\"",
+        "\"approved contract.compile has incomplete artifact SHA binding\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 274,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"HASH_MISMATCH\"",
+        "\"approved contract artifact SHA-256 does not match compile result\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 280,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"IDENTITY_MISMATCH\"",
+        "\"task-contract.json identity does not match compile result\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 289,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "VerificationReadiness.REQUIRED",
+        "invalid.getMessage()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 350,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GOAL_CONTRACT_NOT_QUALIFIED\"",
+        "\"current GOAL is required\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 361,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"EXECUTION_GOAL_MISMATCH\"",
+        "\"execution contract no longer binds the approved goal\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 363,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"EXECUTION_DECLARATION_MISMATCH\"",
+        "\"nonessential declarations must bind the frozen node contracts\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 371,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"EXECUTION_REVIEW_MISMATCH\"",
+        "\"execution contract must consume its routed independent reviews\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 374,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "VerificationReadiness.REQUIRED",
+        "failure.getMessage()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 470,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"CONTEXT_BINDING_INVALID\"",
+        "failure.getMessage()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 478,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"COMPILE_BINDING_MISSING\"",
+        "\"qualified task contract is required\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 500,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"EVENT_HISTORY_INVALID\"",
+        "\"workflow event history contains invalid JSON\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 507,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"EVENT_HISTORY_INVALID\"",
+        "\"routing event does not have a workflow event id\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 514,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"EVENT_HISTORY_INVALID\"",
+        "\"workflow event history is not strictly ordered\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 531,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GATE_SOURCE_MISSING\"",
+        "\"contract gate routing event has incomplete source lineage\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 538,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"EVENT_HISTORY_UNREADABLE\"",
+        "\"cannot read workflow event history\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 545,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GATE_DOCUMENT_MISSING\"",
+        "\"contract approval gate document is missing\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 550,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"GATE_DOCUMENT_INVALID\"",
+        "\"contract approval gate document cannot be parsed\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 587,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"NODE_LEDGER_UNREADABLE\"",
+        "\"cannot read node ledger document \" + path.getFileName()"
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 593,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"NODE_LEDGER_UNREADABLE\"",
+        "\"cannot list node ledger\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 736,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"CONTEXT_BINDING_HASH_MISMATCH\"",
+        "\"routed context SHA does not match current task contract\""
+      ]
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "before_line": 740,
+      "kind": "Failure.of",
+      "predicate": null,
+      "existing_arguments": [
+        "\"CONTEXT_BINDING_LINEAGE_MISMATCH\"",
+        "\"routed context compile ref does not match current binding\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 24,
+      "kind": "require",
+      "predicate": "sourceId.matches(\"[A-Za-z0-9._-]+\")",
+      "existing_arguments": [
+        "sourceId.matches(\"[A-Za-z0-9._-]+\")",
+        "\"scope source identity is missing\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 26,
+      "kind": "require",
+      "predicate": "sourceId.equals(source.nodeInstanceId()) && source.status() == NodeStatus.COMPLETED\n                && source.nodeDefinitionId().equals(\"implement.artifact_validation\")\n                && source.handlerType().equals(\"artifact.validate\")\n                && source.iterationId().equals(gateNode.iterationId())\n                && \"FAIL\".equals(source.result().get(\"change_scope_status\"))\n                && \"CHANGE_SCOPE_VIOLATION\".equals(source.result().get(\"change_scope_disposition\"))",
+      "existing_arguments": [
+        "sourceId.equals(source.nodeInstanceId()) && source.status() == NodeStatus.COMPLETED\n                && source.nodeDefinitionId().equals(\"implement.artifact_validation\")\n                && source.handlerType().equals(\"artifact.validate\")\n                && source.iterationId().equals(gateNode.iterationId())\n                && \"FAIL\".equals(source.result().get(\"change_scope_status\"))\n                && \"CHANGE_SCOPE_VIOLATION\".equals(source.result().get(\"change_scope_disposition\"))",
+        "\"scope source is not a completed violation\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 34,
+      "kind": "require",
+      "predicate": "binding != null && binding.isObject()",
+      "existing_arguments": [
+        "binding != null && binding.isObject()",
+        "\"scope rework baseline is missing\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 37,
+      "kind": "require",
+      "predicate": "ref.equals(source.result().get(\"change_scope_evaluation_ref\"))\n                && sha.equals(source.result().get(\"change_scope_evaluation_sha256\"))\n                && gateNode.inputRefs().contains(ref) && source.outputRefs().contains(ref)\n                && mapper.valueToTree(gateNode.inputRefs()).equals(mapper.valueToTree(gate.result().get(\"subject_input_refs\")))",
+      "existing_arguments": [
+        "ref.equals(source.result().get(\"change_scope_evaluation_ref\"))\n                && sha.equals(source.result().get(\"change_scope_evaluation_sha256\"))\n                && gateNode.inputRefs().contains(ref) && source.outputRefs().contains(ref)\n                && mapper.valueToTree(gateNode.inputRefs()).equals(mapper.valueToTree(gate.result().get(\"subject_input_refs\")))",
+        "\"scope evaluation is not the gate subject\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 43,
+      "kind": "require",
+      "predicate": "doc.path(\"sourceNodeInstanceId\").asText().equals(sourceId)\n                && doc.path(\"schemaVersion\").asInt() == 1",
+      "existing_arguments": [
+        "doc.path(\"sourceNodeInstanceId\").asText().equals(sourceId)\n                && doc.path(\"schemaVersion\").asInt() == 1",
+        "\"scope evaluation identity is invalid\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 46,
+      "kind": "require",
+      "predicate": "\"FAIL\".equals(evaluation.path(\"status\").asText()) && evaluation.path(\"violations\").isArray()\n                && !evaluation.path(\"violations\").isEmpty()",
+      "existing_arguments": [
+        "\"FAIL\".equals(evaluation.path(\"status\").asText()) && evaluation.path(\"violations\").isArray()\n                && !evaluation.path(\"violations\").isEmpty()",
+        "\"scope evaluation has no violations\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 51,
+      "kind": "require",
+      "predicate": "\"UNEXPECTED_ACTUAL_CHANGE\".equals(violation.path(\"code\").asText())\n                    && \"CREATE\".equals(violation.path(\"actualOperation\").asText())\n                    && violation.path(\"declaredOperation\").isNull() && violation.path(\"previousPath\").isNull()\n                    && TaskContractValidator.isCanonicalPath(path) && seen.add(path)",
+      "existing_arguments": [
+        "\"UNEXPECTED_ACTUAL_CHANGE\".equals(violation.path(\"code\").asText())\n                    && \"CREATE\".equals(violation.path(\"actualOperation\").asText())\n                    && violation.path(\"declaredOperation\").isNull() && violation.path(\"previousPath\").isNull()\n                    && TaskContractValidator.isCanonicalPath(path) && seen.add(path)",
+        "\"scope revision only supports ordinary new file violations\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 66,
+      "kind": "require",
+      "predicate": "contract.phase() == TaskContract.Phase.EXECUTION && contract.goalContract() != null",
+      "existing_arguments": [
+        "contract.phase() == TaskContract.Phase.EXECUTION && contract.goalContract() != null",
+        "\"scope baseline must be an execution contract\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 69,
+      "kind": "require",
+      "predicate": "compileId.matches(\"[A-Za-z0-9._-]+\")",
+      "existing_arguments": [
+        "compileId.matches(\"[A-Za-z0-9._-]+\")",
+        "\"scope compile identity is invalid\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 71,
+      "kind": "require",
+      "predicate": "compile.status() == NodeStatus.COMPLETED && compile.nodeDefinitionId().equals(\"contract.compile_execution\")\n                && compile.outputRefs().contains(contractRef) && compile.outputRefs().contains(resolutionRef)\n                && binding.path(\"task_contract_sha256\").asText().equals(compile.result().get(\"task_contract_sha256\"))\n                && binding.path(\"contract_resolution_sha256\").asText().equals(compile.result().get(\"contract_resolution_sha256\"))",
+      "existing_arguments": [
+        "compile.status() == NodeStatus.COMPLETED && compile.nodeDefinitionId().equals(\"contract.compile_execution\")\n                && compile.outputRefs().contains(contractRef) && compile.outputRefs().contains(resolutionRef)\n                && binding.path(\"task_contract_sha256\").asText().equals(compile.result().get(\"task_contract_sha256\"))\n                && binding.path(\"contract_resolution_sha256\").asText().equals(compile.result().get(\"contract_resolution_sha256\"))",
+        "\"scope compile baseline changed\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 77,
+      "kind": "require",
+      "predicate": "goalId.matches(\"[A-Za-z0-9._-]+\")",
+      "existing_arguments": [
+        "goalId.matches(\"[A-Za-z0-9._-]+\")",
+        "\"scope GOAL compile identity is invalid\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 79,
+      "kind": "require",
+      "predicate": "goal.status() == NodeStatus.COMPLETED && goal.nodeDefinitionId().equals(\"contract.compile\")\n                && goal.outputRefs().contains(contract.goalContract().ref())\n                && contract.goalContract().sha256().equals(goal.result().get(\"task_contract_sha256\"))",
+      "existing_arguments": [
+        "goal.status() == NodeStatus.COMPLETED && goal.nodeDefinitionId().equals(\"contract.compile\")\n                && goal.outputRefs().contains(contract.goalContract().ref())\n                && contract.goalContract().sha256().equals(goal.result().get(\"task_contract_sha256\"))",
+        "\"scope GOAL compile binding changed\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 85,
+      "kind": "require",
+      "predicate": "workspaceId.matches(\"[A-Za-z0-9._-]+\")",
+      "existing_arguments": [
+        "workspaceId.matches(\"[A-Za-z0-9._-]+\")",
+        "\"scope workspace is missing\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 87,
+      "kind": "require",
+      "predicate": "binding.path(\"base_commit\").asText().matches(\"[0-9a-f]{40}|[0-9a-f]{64}\")\n                && binding.path(\"base_commit\").equals(workspace.path(\"baseCommit\"))",
+      "existing_arguments": [
+        "binding.path(\"base_commit\").asText().matches(\"[0-9a-f]{40}|[0-9a-f]{64}\")\n                && binding.path(\"base_commit\").equals(workspace.path(\"baseCommit\"))",
+        "\"scope original base changed\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 93,
+      "kind": "require",
+      "predicate": "!ref.isBlank() && !Path.of(ref).isAbsolute() && root.relativize(target).toString().equals(ref)\n                && target.startsWith(paths.workstreamDir().toAbsolutePath().normalize())\n                && Files.isRegularFile(target) && target.toRealPath().equals(root.toRealPath().resolve(ref))\n                && sha.matches(\"[0-9a-f]{64}\")",
+      "existing_arguments": [
+        "!ref.isBlank() && !Path.of(ref).isAbsolute() && root.relativize(target).toString().equals(ref)\n                && target.startsWith(paths.workstreamDir().toAbsolutePath().normalize())\n                && Files.isRegularFile(target) && target.toRealPath().equals(root.toRealPath().resolve(ref))\n                && sha.matches(\"[0-9a-f]{64}\")",
+        "\"scope baseline reference is missing or noncanonical\""
+      ]
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ScopeRevisionRequestGuard.java",
+      "before_line": 98,
+      "kind": "require",
+      "predicate": "sha.equals(HexFormat.of().formatHex(MessageDigest.getInstance(\"SHA-256\").digest(Files.readAllBytes(target))))",
+      "existing_arguments": [
+        "sha.equals(HexFormat.of().formatHex(MessageDigest.getInstance(\"SHA-256\").digest(Files.readAllBytes(target))))",
+        "\"scope baseline hash mismatch\""
+      ]
+    }
+  ]
+}

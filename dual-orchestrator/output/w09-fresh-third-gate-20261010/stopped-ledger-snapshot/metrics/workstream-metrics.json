@@ -1,0 +1,1470 @@
+{
+  "schemaVersion" : 1,
+  "commitSequence" : 51,
+  "workstreamId" : "ws-20261010T124812Z-XCZL",
+  "workflowInstanceId" : "wf-ws-20261010T124812Z-XCZL",
+  "workflowId" : "agent-lifecycle-terminal-delivery",
+  "definitionVersion" : 5,
+  "workflowStatus" : "RUNNING",
+  "generatedAt" : "2026-10-10T14:16:16.339045Z",
+  "updatedAt" : "2026-10-10T14:16:16.309796Z",
+  "nodeCount" : 13,
+  "nodeStatusCounts" : {
+    "READY" : 1,
+    "COMPLETED" : 12
+  },
+  "nodeKindCounts" : {
+    "TASK" : 10,
+    "GATE" : 1,
+    "DECISION" : 2
+  },
+  "agentRunCount" : 5,
+  "gateCount" : 1,
+  "decisionCount" : 2,
+  "iterationCount" : 2,
+  "revisionCount" : 1,
+  "completedCount" : 12,
+  "failedCount" : 0,
+  "blockedCount" : 0,
+  "waitingCount" : 0,
+  "runningCount" : 0,
+  "totalNodeDurationMs" : 539410,
+  "longestNodes" : [ {
+    "nodeInstanceId" : "node-design-claude_design-013",
+    "nodeDefinitionId" : "design.claude_design",
+    "kind" : "TASK",
+    "status" : "COMPLETED",
+    "iterationId" : "iter-002",
+    "durationMs" : 197173
+  }, {
+    "nodeInstanceId" : "node-intake-claude_brainstorm-006",
+    "nodeDefinitionId" : "intake.claude_brainstorm",
+    "kind" : "TASK",
+    "status" : "COMPLETED",
+    "iterationId" : "iter-002",
+    "durationMs" : 178682
+  }, {
+    "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+    "nodeDefinitionId" : "intake.claude_brainstorm",
+    "kind" : "TASK",
+    "status" : "COMPLETED",
+    "iterationId" : "iter-001",
+    "durationMs" : 86954
+  }, {
+    "nodeInstanceId" : "node-intake-codex_product_review-004",
+    "nodeDefinitionId" : "intake.codex_product_review",
+    "kind" : "TASK",
+    "status" : "COMPLETED",
+    "iterationId" : "iter-001",
+    "durationMs" : 55977
+  }, {
+    "nodeInstanceId" : "node-intake-codex_product_review-009",
+    "nodeDefinitionId" : "intake.codex_product_review",
+    "kind" : "TASK",
+    "status" : "COMPLETED",
+    "iterationId" : "iter-002",
+    "durationMs" : 20209
+  } ],
+  "providerMetrics" : {
+    "claude" : {
+      "runCount" : 3,
+      "completedCount" : 3,
+      "failedCount" : 0,
+      "preparedCount" : 0,
+      "recoverableFailureCount" : 0,
+      "totalDurationMs" : 451373,
+      "averageDurationMs" : 150457
+    },
+    "codex" : {
+      "runCount" : 2,
+      "completedCount" : 2,
+      "failedCount" : 0,
+      "preparedCount" : 0,
+      "recoverableFailureCount" : 0,
+      "totalDurationMs" : 70289,
+      "averageDurationMs" : 35144
+    },
+    "outcomeStatusCounts" : {
+      "SUCCESS" : 5
+    },
+    "executionConsistencyCounts" : {
+      "consistent" : 5
+    }
+  },
+  "tokenMetrics" : {
+    "runCount" : 5,
+    "measuredRunCount" : 5,
+    "estimatedRunCount" : 0,
+    "sessionSnapshotRunCount" : 0,
+    "total" : {
+      "inputTokens" : 85729,
+      "outputTokens" : 32773,
+      "cachedReadTokens" : 116864,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 235366,
+      "contextUsedTokens" : 0,
+      "costByCurrency" : {
+        "USD" : 1.110468
+      }
+    },
+    "estimatedTotal" : {
+      "inputTokens" : 0,
+      "outputTokens" : 0,
+      "cachedReadTokens" : 0,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 0,
+      "contextUsedTokens" : 0,
+      "costByCurrency" : { }
+    },
+    "byAgent" : {
+      "claude" : {
+        "inputTokens" : 59589,
+        "outputTokens" : 30947,
+        "cachedReadTokens" : 77696,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 168232,
+        "contextUsedTokens" : 0,
+        "costByCurrency" : {
+          "USD" : 1.110468
+        }
+      },
+      "codex" : {
+        "inputTokens" : 26140,
+        "outputTokens" : 1826,
+        "cachedReadTokens" : 39168,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 67134,
+        "contextUsedTokens" : 0,
+        "costByCurrency" : { }
+      }
+    },
+    "byNode" : {
+      "intake.claude_brainstorm" : {
+        "inputTokens" : 16590,
+        "outputTokens" : 16047,
+        "cachedReadTokens" : 4864,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 37501,
+        "contextUsedTokens" : 0,
+        "costByCurrency" : {
+          "USD" : 0.486557
+        }
+      },
+      "intake.codex_product_review" : {
+        "inputTokens" : 26140,
+        "outputTokens" : 1826,
+        "cachedReadTokens" : 39168,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 67134,
+        "contextUsedTokens" : 0,
+        "costByCurrency" : { }
+      },
+      "design.claude_design" : {
+        "inputTokens" : 42999,
+        "outputTokens" : 14900,
+        "cachedReadTokens" : 72832,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 130731,
+        "contextUsedTokens" : 0,
+        "costByCurrency" : {
+          "USD" : 0.623911
+        }
+      }
+    },
+    "runs" : [ {
+      "runId" : "run-1791636537680",
+      "nodeId" : "intake.claude_brainstorm",
+      "agent" : "claude",
+      "sessionScope" : "run",
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL/run:run-1791636537680",
+      "sessionScopeReason" : "execution-policy:occurrence-bound",
+      "stage" : "stage-intake",
+      "semanticIteration" : "iter-001",
+      "status" : "completed",
+      "attemptStatus" : "COMPLETED",
+      "attemptProcessStatus" : "EXITED",
+      "attemptFailureSignal" : "",
+      "outcomeStatus" : "SUCCESS",
+      "outcomePrimaryReason" : "completed",
+      "outcomeNodeMaySucceed" : true,
+      "executionConsistency" : "consistent",
+      "durationMs" : 83222,
+      "measured" : true,
+      "estimated" : false,
+      "aggregated" : true,
+      "usage" : {
+        "inputTokens" : 9813,
+        "outputTokens" : 5913,
+        "cachedReadTokens" : 4864,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 20590,
+        "contextUsedTokens" : 0,
+        "costByCurrency" : {
+          "USD" : 0.199322
+        },
+        "source" : "acpx_stream",
+        "measurementType" : "PROVIDER_RUN_USAGE",
+        "attribution" : "EXACT_REQUEST_MATCH",
+        "cumulative" : false,
+        "providerId" : "zhipu",
+        "model" : "glm-5.3",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "acpx_session_json",
+        "unavailableReason" : "",
+        "costAmount" : 0.199322,
+        "costCurrency" : "USD"
+      },
+      "providerModelIdentity" : {
+        "billingMode" : "subscription_token_only",
+        "model" : "glm-5.3",
+        "confidence" : "high",
+        "source" : "acpx_session_json",
+        "provider" : "zhipu"
+      },
+      "breakdown" : {
+        "promptTokens" : 4322,
+        "contextTokens" : 986,
+        "promptOverheadTokens" : 3336,
+        "adapterOverheadTokens" : 5491,
+        "outputArtifactTokens" : 1203,
+        "transcriptTokens" : 2090,
+        "contextPackage" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_claude_brainstorm-001.md",
+        "contextPackageMetadata" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_claude_brainstorm-001.json",
+        "contextProfile" : "intake",
+        "contextBudget" : 3000,
+        "contextWithinBudget" : true,
+        "topSections" : [ {
+          "section" : "ledger_pointers",
+          "renderedTokens" : 153,
+          "originalTokens" : 139,
+          "softBudgetTokens" : 125,
+          "degraded" : true,
+          "dropped" : false
+        }, {
+          "section" : "task_contract",
+          "renderedTokens" : 0,
+          "originalTokens" : 0,
+          "softBudgetTokens" : 500,
+          "degraded" : false,
+          "dropped" : false
+        } ]
+      }
+    }, {
+      "runId" : "run-1791636690133",
+      "nodeId" : "intake.codex_product_review",
+      "agent" : "codex",
+      "sessionScope" : "workstream",
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL",
+      "sessionScopeReason" : "default:workstream",
+      "stage" : "stage-intake",
+      "semanticIteration" : "iter-001",
+      "status" : "completed",
+      "attemptStatus" : "COMPLETED",
+      "attemptProcessStatus" : "EXITED",
+      "attemptFailureSignal" : "",
+      "outcomeStatus" : "SUCCESS",
+      "outcomePrimaryReason" : "completed",
+      "outcomeNodeMaySucceed" : true,
+      "executionConsistency" : "consistent",
+      "durationMs" : 50663,
+      "measured" : true,
+      "estimated" : false,
+      "aggregated" : true,
+      "usage" : {
+        "inputTokens" : 13504,
+        "outputTokens" : 1128,
+        "cachedReadTokens" : 12928,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 27560,
+        "contextUsedTokens" : 0,
+        "costByCurrency" : { },
+        "source" : "acpx_stream",
+        "measurementType" : "PROVIDER_RUN_USAGE",
+        "attribution" : "EXACT_REQUEST_MATCH",
+        "cumulative" : false,
+        "providerId" : "openai",
+        "model" : "GPT-6-Astra",
+        "billingMode" : "metered",
+        "providerMetadataSource" : "acpx_session_json",
+        "unavailableReason" : "",
+        "costAmount" : null,
+        "costCurrency" : ""
+      },
+      "providerModelIdentity" : {
+        "billingMode" : "metered",
+        "model" : "GPT-6-Astra",
+        "confidence" : "high",
+        "source" : "acpx_session_json",
+        "provider" : "openai"
+      },
+      "breakdown" : {
+        "promptTokens" : 5560,
+        "contextTokens" : 2441,
+        "promptOverheadTokens" : 3119,
+        "adapterOverheadTokens" : 7944,
+        "outputArtifactTokens" : 840,
+        "transcriptTokens" : 86425,
+        "contextPackage" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_codex_product_review-008.md",
+        "contextPackageMetadata" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_codex_product_review-008.json",
+        "contextProfile" : "product_review",
+        "contextBudget" : 4000,
+        "contextWithinBudget" : true,
+        "topSections" : [ {
+          "section" : "input_artifacts",
+          "renderedTokens" : 409,
+          "originalTokens" : 409,
+          "softBudgetTokens" : 1000,
+          "degraded" : false,
+          "dropped" : false
+        }, {
+          "section" : "recent_agent_outputs",
+          "renderedTokens" : 189,
+          "originalTokens" : 189,
+          "softBudgetTokens" : 750,
+          "degraded" : false,
+          "dropped" : false
+        }, {
+          "section" : "ledger_pointers",
+          "renderedTokens" : 153,
+          "originalTokens" : 139,
+          "softBudgetTokens" : 125,
+          "degraded" : true,
+          "dropped" : false
+        }, {
+          "section" : "review_evidence",
+          "renderedTokens" : 64,
+          "originalTokens" : 64,
+          "softBudgetTokens" : 1000,
+          "degraded" : false,
+          "dropped" : false
+        } ]
+      }
+    }, {
+      "runId" : "run-1791636803114",
+      "nodeId" : "intake.claude_brainstorm",
+      "agent" : "claude",
+      "sessionScope" : "run",
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL/run:run-1791636803114",
+      "sessionScopeReason" : "execution-policy:occurrence-bound",
+      "stage" : "stage-intake",
+      "semanticIteration" : "iter-002",
+      "status" : "completed",
+      "attemptStatus" : "COMPLETED",
+      "attemptProcessStatus" : "EXITED",
+      "attemptFailureSignal" : "",
+      "outcomeStatus" : "SUCCESS",
+      "outcomePrimaryReason" : "completed",
+      "outcomeNodeMaySucceed" : true,
+      "executionConsistency" : "consistent",
+      "durationMs" : 175503,
+      "measured" : true,
+      "estimated" : false,
+      "aggregated" : true,
+      "usage" : {
+        "inputTokens" : 6777,
+        "outputTokens" : 10134,
+        "cachedReadTokens" : 0,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 16911,
+        "contextUsedTokens" : 0,
+        "costByCurrency" : {
+          "USD" : 0.287235
+        },
+        "source" : "acpx_stream",
+        "measurementType" : "PROVIDER_RUN_USAGE",
+        "attribution" : "EXACT_REQUEST_MATCH",
+        "cumulative" : false,
+        "providerId" : "zhipu",
+        "model" : "glm-5.3",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "acpx_session_json",
+        "unavailableReason" : "",
+        "costAmount" : 0.287235,
+        "costCurrency" : "USD"
+      },
+      "providerModelIdentity" : {
+        "billingMode" : "subscription_token_only",
+        "model" : "glm-5.3",
+        "confidence" : "high",
+        "source" : "acpx_session_json",
+        "provider" : "zhipu"
+      },
+      "breakdown" : {
+        "promptTokens" : 5861,
+        "contextTokens" : 986,
+        "promptOverheadTokens" : 4875,
+        "adapterOverheadTokens" : 916,
+        "outputArtifactTokens" : 462,
+        "transcriptTokens" : 815,
+        "contextPackage" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_claude_brainstorm-001.md",
+        "contextPackageMetadata" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_claude_brainstorm-001.json",
+        "contextProfile" : "intake",
+        "contextBudget" : 3000,
+        "contextWithinBudget" : true,
+        "topSections" : [ {
+          "section" : "ledger_pointers",
+          "renderedTokens" : 153,
+          "originalTokens" : 139,
+          "softBudgetTokens" : 125,
+          "degraded" : true,
+          "dropped" : false
+        }, {
+          "section" : "task_contract",
+          "renderedTokens" : 0,
+          "originalTokens" : 0,
+          "softBudgetTokens" : 500,
+          "degraded" : false,
+          "dropped" : false
+        } ]
+      }
+    }, {
+      "runId" : "run-1791637010369",
+      "nodeId" : "intake.codex_product_review",
+      "agent" : "codex",
+      "sessionScope" : "workstream",
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL",
+      "sessionScopeReason" : "default:workstream",
+      "stage" : "stage-intake",
+      "semanticIteration" : "iter-002",
+      "status" : "completed",
+      "attemptStatus" : "COMPLETED",
+      "attemptProcessStatus" : "EXITED",
+      "attemptFailureSignal" : "",
+      "outcomeStatus" : "SUCCESS",
+      "outcomePrimaryReason" : "completed",
+      "outcomeNodeMaySucceed" : true,
+      "executionConsistency" : "consistent",
+      "durationMs" : 19626,
+      "measured" : true,
+      "estimated" : false,
+      "aggregated" : true,
+      "usage" : {
+        "inputTokens" : 12636,
+        "outputTokens" : 698,
+        "cachedReadTokens" : 26240,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 39574,
+        "contextUsedTokens" : 0,
+        "costByCurrency" : { },
+        "source" : "acpx_stream",
+        "measurementType" : "PROVIDER_RUN_USAGE",
+        "attribution" : "EXACT_REQUEST_MATCH",
+        "cumulative" : false,
+        "providerId" : "openai",
+        "model" : "GPT-6-Astra",
+        "billingMode" : "metered",
+        "providerMetadataSource" : "acpx_session_json",
+        "unavailableReason" : "",
+        "costAmount" : null,
+        "costCurrency" : ""
+      },
+      "providerModelIdentity" : {
+        "billingMode" : "metered",
+        "model" : "GPT-6-Astra",
+        "confidence" : "high",
+        "source" : "acpx_session_json",
+        "provider" : "openai"
+      },
+      "breakdown" : {
+        "promptTokens" : 5815,
+        "contextTokens" : 2441,
+        "promptOverheadTokens" : 3374,
+        "adapterOverheadTokens" : 6821,
+        "outputArtifactTokens" : 610,
+        "transcriptTokens" : 57003,
+        "contextPackage" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_codex_product_review-008.md",
+        "contextPackageMetadata" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_codex_product_review-008.json",
+        "contextProfile" : "product_review",
+        "contextBudget" : 4000,
+        "contextWithinBudget" : true,
+        "topSections" : [ {
+          "section" : "input_artifacts",
+          "renderedTokens" : 409,
+          "originalTokens" : 409,
+          "softBudgetTokens" : 1000,
+          "degraded" : false,
+          "dropped" : false
+        }, {
+          "section" : "recent_agent_outputs",
+          "renderedTokens" : 189,
+          "originalTokens" : 189,
+          "softBudgetTokens" : 750,
+          "degraded" : false,
+          "dropped" : false
+        }, {
+          "section" : "ledger_pointers",
+          "renderedTokens" : 153,
+          "originalTokens" : 139,
+          "softBudgetTokens" : 125,
+          "degraded" : true,
+          "dropped" : false
+        }, {
+          "section" : "review_evidence",
+          "renderedTokens" : 64,
+          "originalTokens" : 64,
+          "softBudgetTokens" : 1000,
+          "degraded" : false,
+          "dropped" : false
+        } ]
+      }
+    }, {
+      "runId" : "run-1791641578962",
+      "nodeId" : "design.claude_design",
+      "agent" : "claude",
+      "sessionScope" : "run",
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL/run:run-1791641578962",
+      "sessionScopeReason" : "execution-policy:occurrence-bound",
+      "stage" : "stage-design",
+      "semanticIteration" : "iter-002",
+      "status" : "completed",
+      "attemptStatus" : "COMPLETED",
+      "attemptProcessStatus" : "EXITED",
+      "attemptFailureSignal" : "",
+      "outcomeStatus" : "SUCCESS",
+      "outcomePrimaryReason" : "completed",
+      "outcomeNodeMaySucceed" : true,
+      "executionConsistency" : "consistent",
+      "durationMs" : 192648,
+      "measured" : true,
+      "estimated" : false,
+      "aggregated" : true,
+      "usage" : {
+        "inputTokens" : 42999,
+        "outputTokens" : 14900,
+        "cachedReadTokens" : 72832,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 130731,
+        "contextUsedTokens" : 0,
+        "costByCurrency" : {
+          "USD" : 0.623911
+        },
+        "source" : "acpx_stream",
+        "measurementType" : "PROVIDER_RUN_USAGE",
+        "attribution" : "EXACT_REQUEST_MATCH",
+        "cumulative" : false,
+        "providerId" : "zhipu",
+        "model" : "glm-5.3",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "acpx_session_json",
+        "unavailableReason" : "",
+        "costAmount" : 0.623911,
+        "costCurrency" : "USD"
+      },
+      "providerModelIdentity" : {
+        "billingMode" : "subscription_token_only",
+        "model" : "glm-5.3",
+        "confidence" : "high",
+        "source" : "acpx_session_json",
+        "provider" : "zhipu"
+      },
+      "breakdown" : {
+        "promptTokens" : 2584,
+        "contextTokens" : 0,
+        "promptOverheadTokens" : 2584,
+        "adapterOverheadTokens" : 40415,
+        "outputArtifactTokens" : 1792,
+        "transcriptTokens" : 925851,
+        "contextPackage" : "",
+        "contextPackageMetadata" : "",
+        "contextProfile" : "",
+        "contextBudget" : 0,
+        "contextWithinBudget" : false,
+        "topSections" : [ ]
+      }
+    } ],
+    "contextPackages" : [ {
+      "targetNode" : "intake.claude_brainstorm",
+      "builderNode" : "context.intake_claude_brainstorm",
+      "profile" : "intake",
+      "estimatedTokens" : 986,
+      "tokenBudget" : 3000,
+      "withinBudget" : true,
+      "metadataPath" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_claude_brainstorm-001.json",
+      "topSections" : [ {
+        "section" : "ledger_pointers",
+        "renderedTokens" : 153,
+        "originalTokens" : 139,
+        "softBudgetTokens" : 125,
+        "degraded" : true,
+        "dropped" : false
+      }, {
+        "section" : "task_contract",
+        "renderedTokens" : 0,
+        "originalTokens" : 0,
+        "softBudgetTokens" : 500,
+        "degraded" : false,
+        "dropped" : false
+      } ]
+    }, {
+      "targetNode" : "intake.codex_product_review",
+      "builderNode" : "context.intake_codex_product_review",
+      "profile" : "product_review",
+      "estimatedTokens" : 2441,
+      "tokenBudget" : 4000,
+      "withinBudget" : true,
+      "metadataPath" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_codex_product_review-008.json",
+      "topSections" : [ {
+        "section" : "input_artifacts",
+        "renderedTokens" : 409,
+        "originalTokens" : 409,
+        "softBudgetTokens" : 1000,
+        "degraded" : false,
+        "dropped" : false
+      }, {
+        "section" : "recent_agent_outputs",
+        "renderedTokens" : 189,
+        "originalTokens" : 189,
+        "softBudgetTokens" : 750,
+        "degraded" : false,
+        "dropped" : false
+      }, {
+        "section" : "ledger_pointers",
+        "renderedTokens" : 153,
+        "originalTokens" : 139,
+        "softBudgetTokens" : 125,
+        "degraded" : true,
+        "dropped" : false
+      }, {
+        "section" : "review_evidence",
+        "renderedTokens" : 64,
+        "originalTokens" : 64,
+        "softBudgetTokens" : 1000,
+        "degraded" : false,
+        "dropped" : false
+      } ]
+    } ],
+    "topContextSections" : [ {
+      "targetNode" : "intake.codex_product_review",
+      "builderNode" : "context.intake_codex_product_review",
+      "profile" : "product_review",
+      "section" : "input_artifacts",
+      "renderedTokens" : 409,
+      "originalTokens" : 409,
+      "degraded" : false,
+      "dropped" : false
+    }, {
+      "targetNode" : "intake.codex_product_review",
+      "builderNode" : "context.intake_codex_product_review",
+      "profile" : "product_review",
+      "section" : "recent_agent_outputs",
+      "renderedTokens" : 189,
+      "originalTokens" : 189,
+      "degraded" : false,
+      "dropped" : false
+    }, {
+      "targetNode" : "intake.claude_brainstorm",
+      "builderNode" : "context.intake_claude_brainstorm",
+      "profile" : "intake",
+      "section" : "ledger_pointers",
+      "renderedTokens" : 153,
+      "originalTokens" : 139,
+      "degraded" : true,
+      "dropped" : false
+    }, {
+      "targetNode" : "intake.codex_product_review",
+      "builderNode" : "context.intake_codex_product_review",
+      "profile" : "product_review",
+      "section" : "ledger_pointers",
+      "renderedTokens" : 153,
+      "originalTokens" : 139,
+      "degraded" : true,
+      "dropped" : false
+    }, {
+      "targetNode" : "intake.codex_product_review",
+      "builderNode" : "context.intake_codex_product_review",
+      "profile" : "product_review",
+      "section" : "review_evidence",
+      "renderedTokens" : 64,
+      "originalTokens" : 64,
+      "degraded" : false,
+      "dropped" : false
+    }, {
+      "targetNode" : "intake.claude_brainstorm",
+      "builderNode" : "context.intake_claude_brainstorm",
+      "profile" : "intake",
+      "section" : "task_contract",
+      "renderedTokens" : 0,
+      "originalTokens" : 0,
+      "degraded" : false,
+      "dropped" : false
+    } ]
+  },
+  "toolMetrics" : {
+    "runCount" : 5,
+    "toolCallCount" : 13,
+    "readCount" : 13,
+    "writeCount" : 0,
+    "bashCount" : 0,
+    "otherCount" : 0,
+    "repeatedReadFiles" : [ ],
+    "repeatedReadReasonRequiredCount" : 0,
+    "missingRereadReasonCount" : 0,
+    "allowedRepeatedReadReasons" : [ ],
+    "topReadFiles" : [ ],
+    "evidenceFileCount" : 0,
+    "runs" : [ {
+      "runId" : "run-1791636537680",
+      "nodeId" : "intake.claude_brainstorm",
+      "agent" : "claude",
+      "status" : "completed",
+      "toolUsage" : {
+        "toolCallCount" : 1,
+        "readCount" : 1,
+        "writeCount" : 0,
+        "bashCount" : 0,
+        "otherCount" : 0
+      },
+      "readFiles" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791636537680/repo-map.json" ]
+    }, {
+      "runId" : "run-1791636690133",
+      "nodeId" : "intake.codex_product_review",
+      "agent" : "codex",
+      "status" : "completed",
+      "toolUsage" : {
+        "toolCallCount" : 0,
+        "readCount" : 0,
+        "writeCount" : 0,
+        "bashCount" : 0,
+        "otherCount" : 0
+      },
+      "readFiles" : [ ]
+    }, {
+      "runId" : "run-1791636803114",
+      "nodeId" : "intake.claude_brainstorm",
+      "agent" : "claude",
+      "status" : "completed",
+      "toolUsage" : {
+        "toolCallCount" : 0,
+        "readCount" : 0,
+        "writeCount" : 0,
+        "bashCount" : 0,
+        "otherCount" : 0
+      },
+      "readFiles" : [ ]
+    }, {
+      "runId" : "run-1791637010369",
+      "nodeId" : "intake.codex_product_review",
+      "agent" : "codex",
+      "status" : "completed",
+      "toolUsage" : {
+        "toolCallCount" : 0,
+        "readCount" : 0,
+        "writeCount" : 0,
+        "bashCount" : 0,
+        "otherCount" : 0
+      },
+      "readFiles" : [ ]
+    }, {
+      "runId" : "run-1791641578962",
+      "nodeId" : "design.claude_design",
+      "agent" : "claude",
+      "status" : "completed",
+      "toolUsage" : {
+        "toolCallCount" : 12,
+        "readCount" : 12,
+        "writeCount" : 0,
+        "bashCount" : 0,
+        "otherCount" : 0
+      },
+      "readFiles" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/task-contract.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/gates/gate-node-gate-human_requirement_review-011.json" ]
+    } ]
+  },
+  "tokenAttribution" : {
+    "schemaVersion" : 1,
+    "perRun" : [ {
+      "runId" : "run-1791636537680",
+      "nodeId" : "intake.claude_brainstorm",
+      "agent" : "claude",
+      "stage" : "stage-intake",
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL/run:run-1791636537680",
+      "sessionScope" : "run",
+      "attemptStatus" : "COMPLETED",
+      "attemptProcessStatus" : "EXITED",
+      "outcomeStatus" : "SUCCESS",
+      "executionConsistency" : "consistent",
+      "promptTokens" : 4322,
+      "contextPackageTokens" : 986,
+      "inputTokens" : 9813,
+      "outputTokens" : 5913,
+      "cachedReadTokens" : 4864,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 20590,
+      "measurementType" : "PROVIDER_RUN_USAGE",
+      "usageSource" : "acpx_stream",
+      "usageAttribution" : "EXACT_REQUEST_MATCH",
+      "contextUsedTokens" : 0,
+      "providerId" : "zhipu",
+      "model" : "glm-5.3",
+      "billingMode" : "subscription_token_only",
+      "providerMetadataSource" : "acpx_session_json",
+      "providerModelIdentity" : {
+        "billingMode" : "subscription_token_only",
+        "model" : "glm-5.3",
+        "confidence" : "high",
+        "source" : "acpx_session_json",
+        "provider" : "zhipu"
+      },
+      "providerUsageVisibility" : "provider_run_usage",
+      "providerUsageUnavailableReason" : "",
+      "cost" : 0.199322,
+      "costEconomics" : {
+        "providerId" : "zhipu",
+        "model" : "glm-5.3",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "acpx_session_json",
+        "inputCacheHitTokens" : 4864,
+        "inputCacheMissTokens" : 9813,
+        "outputTokens" : 5913,
+        "cacheWriteTokens" : 0,
+        "clientReportedCost" : 0.199322,
+        "clientReportedCurrency" : "USD",
+        "providerCacheDecision" : "token_policy_active",
+        "providerCacheDecisionReason" : "provider/model and cache token signal are known; amount is token-only",
+        "cacheHitToMissRatio" : "",
+        "officialCalculatedCost" : 0.000000,
+        "officialCalculatedCurrency" : "TOKENS_ONLY",
+        "officialPricingSourceUrl" : "",
+        "dualCalculatedCost" : 0.000000,
+        "dualCalculatedCurrency" : "TOKENS_ONLY",
+        "cacheSignalReliability" : "provider_cache_tokens_reported",
+        "costEstimateReliability" : "token_only",
+        "reason" : "provider/model has no visible per-token billing; token usage only"
+      },
+      "costAttribution" : {
+        "inputCacheMissTokens" : 9813,
+        "inputCacheHitTokens" : 4864,
+        "outputTokens" : 5913,
+        "cachedWriteTokens" : 0,
+        "billingMode" : "subscription_token_only",
+        "clientReportedCost" : 0.199322,
+        "clientReportedCurrency" : "USD",
+        "officialCalculatedCost" : 0.000000,
+        "officialCalculatedCurrency" : "TOKENS_ONLY",
+        "reliability" : "token_only",
+        "cacheSignalSource" : "provider_reported"
+      },
+      "providerCachePolicy" : {
+        "inputsComplete" : true,
+        "costEstimateReliability" : "token_only",
+        "cacheSignalReliability" : "provider_cache_tokens_reported",
+        "mode" : "token_policy_active",
+        "reason" : "provider/model and cache token signal are known; amount is not metered by visible per-token pricing"
+      },
+      "transcriptTokens" : 2090,
+      "transcriptBytes" : 8357,
+      "executionLatency" : {
+        "schemaVersion" : 1,
+        "totalDurationMs" : 83222,
+        "processStartedMs" : 2,
+        "processWaitCompletedMs" : 83216,
+        "processBeforeTerminalMs" : 83216,
+        "terminalDetectedMs" : 0,
+        "terminalGraceElapsedMs" : 0,
+        "terminalGraceMs" : 0,
+        "terminalToProcessWaitMs" : 0,
+        "artifactExtractedMs" : 83317,
+        "contractValidatedMs" : 83377,
+        "postProcessMs" : 161,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "process_wait"
+      },
+      "toolCalls" : 1,
+      "reads" : 1,
+      "bash" : 0,
+      "writes" : 0,
+      "startedAt" : "2026-10-10T12:49:01.214930Z"
+    }, {
+      "runId" : "run-1791636690133",
+      "nodeId" : "intake.codex_product_review",
+      "agent" : "codex",
+      "stage" : "stage-intake",
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL",
+      "sessionScope" : "workstream",
+      "attemptStatus" : "COMPLETED",
+      "attemptProcessStatus" : "EXITED",
+      "outcomeStatus" : "SUCCESS",
+      "executionConsistency" : "consistent",
+      "promptTokens" : 5560,
+      "contextPackageTokens" : 2441,
+      "inputTokens" : 13504,
+      "outputTokens" : 1128,
+      "cachedReadTokens" : 12928,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 27560,
+      "measurementType" : "PROVIDER_RUN_USAGE",
+      "usageSource" : "acpx_stream",
+      "usageAttribution" : "EXACT_REQUEST_MATCH",
+      "contextUsedTokens" : 0,
+      "providerId" : "openai",
+      "model" : "GPT-6-Astra",
+      "billingMode" : "metered",
+      "providerMetadataSource" : "acpx_session_json",
+      "providerModelIdentity" : {
+        "billingMode" : "metered",
+        "model" : "GPT-6-Astra",
+        "confidence" : "high",
+        "source" : "acpx_session_json",
+        "provider" : "openai"
+      },
+      "providerUsageVisibility" : "provider_run_usage",
+      "providerUsageUnavailableReason" : "",
+      "cost" : null,
+      "costEconomics" : {
+        "providerId" : "openai",
+        "model" : "GPT-6-Astra",
+        "billingMode" : "metered",
+        "providerMetadataSource" : "acpx_session_json",
+        "inputCacheHitTokens" : 12928,
+        "inputCacheMissTokens" : 13504,
+        "outputTokens" : 1128,
+        "cacheWriteTokens" : 0,
+        "clientReportedCost" : 0,
+        "clientReportedCurrency" : "",
+        "cacheSignalReliability" : "pricing_unknown",
+        "costEstimateReliability" : "pricing_unknown",
+        "providerCacheDecision" : "measure_only",
+        "reason" : "no pricing entry for provider/model"
+      },
+      "costAttribution" : {
+        "inputCacheMissTokens" : 13504,
+        "inputCacheHitTokens" : 12928,
+        "outputTokens" : 1128,
+        "cachedWriteTokens" : 0,
+        "billingMode" : "metered",
+        "clientReportedCost" : 0,
+        "clientReportedCurrency" : "",
+        "officialCalculatedCost" : null,
+        "officialCalculatedCurrency" : "",
+        "reliability" : "pricing_unknown",
+        "cacheSignalSource" : "unavailable"
+      },
+      "providerCachePolicy" : {
+        "inputsComplete" : false,
+        "costEstimateReliability" : "pricing_unknown",
+        "cacheSignalReliability" : "pricing_unknown",
+        "mode" : "measure_only",
+        "reason" : "no pricing entry for provider/model"
+      },
+      "transcriptTokens" : 86425,
+      "transcriptBytes" : 345699,
+      "executionLatency" : {
+        "schemaVersion" : 1,
+        "totalDurationMs" : 50663,
+        "processStartedMs" : 2,
+        "processWaitCompletedMs" : 50657,
+        "processBeforeTerminalMs" : 50657,
+        "terminalDetectedMs" : 0,
+        "terminalGraceElapsedMs" : 0,
+        "terminalGraceMs" : 0,
+        "terminalToProcessWaitMs" : 0,
+        "artifactExtractedMs" : 51363,
+        "contractValidatedMs" : 51405,
+        "postProcessMs" : 748,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "process_wait"
+      },
+      "toolCalls" : 0,
+      "reads" : 0,
+      "bash" : 0,
+      "writes" : 0,
+      "startedAt" : "2026-10-10T12:51:34.661488Z"
+    }, {
+      "runId" : "run-1791636803114",
+      "nodeId" : "intake.claude_brainstorm",
+      "agent" : "claude",
+      "stage" : "stage-intake",
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL/run:run-1791636803114",
+      "sessionScope" : "run",
+      "attemptStatus" : "COMPLETED",
+      "attemptProcessStatus" : "EXITED",
+      "outcomeStatus" : "SUCCESS",
+      "executionConsistency" : "consistent",
+      "promptTokens" : 5861,
+      "contextPackageTokens" : 986,
+      "inputTokens" : 6777,
+      "outputTokens" : 10134,
+      "cachedReadTokens" : 0,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 16911,
+      "measurementType" : "PROVIDER_RUN_USAGE",
+      "usageSource" : "acpx_stream",
+      "usageAttribution" : "EXACT_REQUEST_MATCH",
+      "contextUsedTokens" : 0,
+      "providerId" : "zhipu",
+      "model" : "glm-5.3",
+      "billingMode" : "subscription_token_only",
+      "providerMetadataSource" : "acpx_session_json",
+      "providerModelIdentity" : {
+        "billingMode" : "subscription_token_only",
+        "model" : "glm-5.3",
+        "confidence" : "high",
+        "source" : "acpx_session_json",
+        "provider" : "zhipu"
+      },
+      "providerUsageVisibility" : "provider_run_usage",
+      "providerUsageUnavailableReason" : "",
+      "cost" : 0.287235,
+      "costEconomics" : {
+        "providerId" : "zhipu",
+        "model" : "glm-5.3",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "acpx_session_json",
+        "inputCacheHitTokens" : 0,
+        "inputCacheMissTokens" : 6777,
+        "outputTokens" : 10134,
+        "cacheWriteTokens" : 0,
+        "clientReportedCost" : 0.287235,
+        "clientReportedCurrency" : "USD",
+        "providerCacheDecision" : "token_policy_active",
+        "providerCacheDecisionReason" : "provider/model and cache token signal are known; amount is token-only",
+        "cacheHitToMissRatio" : "",
+        "officialCalculatedCost" : 0.000000,
+        "officialCalculatedCurrency" : "TOKENS_ONLY",
+        "officialPricingSourceUrl" : "",
+        "dualCalculatedCost" : 0.000000,
+        "dualCalculatedCurrency" : "TOKENS_ONLY",
+        "cacheSignalReliability" : "provider_usage_tokens_reported",
+        "costEstimateReliability" : "token_only",
+        "reason" : "provider/model has no visible per-token billing; token usage only"
+      },
+      "costAttribution" : {
+        "inputCacheMissTokens" : 6777,
+        "inputCacheHitTokens" : 0,
+        "outputTokens" : 10134,
+        "cachedWriteTokens" : 0,
+        "billingMode" : "subscription_token_only",
+        "clientReportedCost" : 0.287235,
+        "clientReportedCurrency" : "USD",
+        "officialCalculatedCost" : 0.000000,
+        "officialCalculatedCurrency" : "TOKENS_ONLY",
+        "reliability" : "token_only",
+        "cacheSignalSource" : "provider_reported"
+      },
+      "providerCachePolicy" : {
+        "inputsComplete" : true,
+        "costEstimateReliability" : "token_only",
+        "cacheSignalReliability" : "provider_usage_tokens_reported",
+        "mode" : "token_policy_active",
+        "reason" : "provider/model and cache token signal are known; amount is not metered by visible per-token pricing"
+      },
+      "transcriptTokens" : 815,
+      "transcriptBytes" : 3259,
+      "executionLatency" : {
+        "schemaVersion" : 1,
+        "totalDurationMs" : 175503,
+        "processStartedMs" : 2,
+        "processWaitCompletedMs" : 175496,
+        "processBeforeTerminalMs" : 175496,
+        "terminalDetectedMs" : 0,
+        "terminalGraceElapsedMs" : 0,
+        "terminalGraceMs" : 0,
+        "terminalToProcessWaitMs" : 0,
+        "artifactExtractedMs" : 175606,
+        "contractValidatedMs" : 175674,
+        "postProcessMs" : 178,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "process_wait"
+      },
+      "toolCalls" : 0,
+      "reads" : 0,
+      "bash" : 0,
+      "writes" : 0,
+      "startedAt" : "2026-10-10T12:53:26.075933Z"
+    }, {
+      "runId" : "run-1791637010369",
+      "nodeId" : "intake.codex_product_review",
+      "agent" : "codex",
+      "stage" : "stage-intake",
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL",
+      "sessionScope" : "workstream",
+      "attemptStatus" : "COMPLETED",
+      "attemptProcessStatus" : "EXITED",
+      "outcomeStatus" : "SUCCESS",
+      "executionConsistency" : "consistent",
+      "promptTokens" : 5815,
+      "contextPackageTokens" : 2441,
+      "inputTokens" : 12636,
+      "outputTokens" : 698,
+      "cachedReadTokens" : 26240,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 39574,
+      "measurementType" : "PROVIDER_RUN_USAGE",
+      "usageSource" : "acpx_stream",
+      "usageAttribution" : "EXACT_REQUEST_MATCH",
+      "contextUsedTokens" : 0,
+      "providerId" : "openai",
+      "model" : "GPT-6-Astra",
+      "billingMode" : "metered",
+      "providerMetadataSource" : "acpx_session_json",
+      "providerModelIdentity" : {
+        "billingMode" : "metered",
+        "model" : "GPT-6-Astra",
+        "confidence" : "high",
+        "source" : "acpx_session_json",
+        "provider" : "openai"
+      },
+      "providerUsageVisibility" : "provider_run_usage",
+      "providerUsageUnavailableReason" : "",
+      "cost" : null,
+      "costEconomics" : {
+        "providerId" : "openai",
+        "model" : "GPT-6-Astra",
+        "billingMode" : "metered",
+        "providerMetadataSource" : "acpx_session_json",
+        "inputCacheHitTokens" : 26240,
+        "inputCacheMissTokens" : 12636,
+        "outputTokens" : 698,
+        "cacheWriteTokens" : 0,
+        "clientReportedCost" : 0,
+        "clientReportedCurrency" : "",
+        "cacheSignalReliability" : "pricing_unknown",
+        "costEstimateReliability" : "pricing_unknown",
+        "providerCacheDecision" : "measure_only",
+        "reason" : "no pricing entry for provider/model"
+      },
+      "costAttribution" : {
+        "inputCacheMissTokens" : 12636,
+        "inputCacheHitTokens" : 26240,
+        "outputTokens" : 698,
+        "cachedWriteTokens" : 0,
+        "billingMode" : "metered",
+        "clientReportedCost" : 0,
+        "clientReportedCurrency" : "",
+        "officialCalculatedCost" : null,
+        "officialCalculatedCurrency" : "",
+        "reliability" : "pricing_unknown",
+        "cacheSignalSource" : "unavailable"
+      },
+      "providerCachePolicy" : {
+        "inputsComplete" : false,
+        "costEstimateReliability" : "pricing_unknown",
+        "cacheSignalReliability" : "pricing_unknown",
+        "mode" : "measure_only",
+        "reason" : "no pricing entry for provider/model"
+      },
+      "transcriptTokens" : 57003,
+      "transcriptBytes" : 228010,
+      "executionLatency" : {
+        "schemaVersion" : 1,
+        "totalDurationMs" : 19626,
+        "processStartedMs" : 2,
+        "processWaitCompletedMs" : 19619,
+        "processBeforeTerminalMs" : 19619,
+        "terminalDetectedMs" : 0,
+        "terminalGraceElapsedMs" : 0,
+        "terminalGraceMs" : 0,
+        "terminalToProcessWaitMs" : 0,
+        "artifactExtractedMs" : 19698,
+        "contractValidatedMs" : 19734,
+        "postProcessMs" : 115,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "process_wait"
+      },
+      "toolCalls" : 0,
+      "reads" : 0,
+      "bash" : 0,
+      "writes" : 0,
+      "startedAt" : "2026-10-10T12:56:50.794126Z"
+    }, {
+      "runId" : "run-1791641578962",
+      "nodeId" : "design.claude_design",
+      "agent" : "claude",
+      "stage" : "stage-design",
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL/run:run-1791641578962",
+      "sessionScope" : "run",
+      "attemptStatus" : "COMPLETED",
+      "attemptProcessStatus" : "EXITED",
+      "outcomeStatus" : "SUCCESS",
+      "executionConsistency" : "consistent",
+      "promptTokens" : 2584,
+      "contextPackageTokens" : 0,
+      "inputTokens" : 42999,
+      "outputTokens" : 14900,
+      "cachedReadTokens" : 72832,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 130731,
+      "measurementType" : "PROVIDER_RUN_USAGE",
+      "usageSource" : "acpx_stream",
+      "usageAttribution" : "EXACT_REQUEST_MATCH",
+      "contextUsedTokens" : 0,
+      "providerId" : "zhipu",
+      "model" : "glm-5.3",
+      "billingMode" : "subscription_token_only",
+      "providerMetadataSource" : "acpx_session_json",
+      "providerModelIdentity" : {
+        "billingMode" : "subscription_token_only",
+        "model" : "glm-5.3",
+        "confidence" : "high",
+        "source" : "acpx_session_json",
+        "provider" : "zhipu"
+      },
+      "providerUsageVisibility" : "provider_run_usage",
+      "providerUsageUnavailableReason" : "",
+      "cost" : 0.623911,
+      "costEconomics" : {
+        "providerId" : "zhipu",
+        "model" : "glm-5.3",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "acpx_session_json",
+        "inputCacheHitTokens" : 72832,
+        "inputCacheMissTokens" : 42999,
+        "outputTokens" : 14900,
+        "cacheWriteTokens" : 0,
+        "clientReportedCost" : 0.623911,
+        "clientReportedCurrency" : "USD",
+        "providerCacheDecision" : "token_policy_active",
+        "providerCacheDecisionReason" : "provider/model and cache token signal are known; amount is token-only",
+        "cacheHitToMissRatio" : "",
+        "officialCalculatedCost" : 0.000000,
+        "officialCalculatedCurrency" : "TOKENS_ONLY",
+        "officialPricingSourceUrl" : "",
+        "dualCalculatedCost" : 0.000000,
+        "dualCalculatedCurrency" : "TOKENS_ONLY",
+        "cacheSignalReliability" : "provider_cache_tokens_reported",
+        "costEstimateReliability" : "token_only",
+        "reason" : "provider/model has no visible per-token billing; token usage only"
+      },
+      "costAttribution" : {
+        "inputCacheMissTokens" : 42999,
+        "inputCacheHitTokens" : 72832,
+        "outputTokens" : 14900,
+        "cachedWriteTokens" : 0,
+        "billingMode" : "subscription_token_only",
+        "clientReportedCost" : 0.623911,
+        "clientReportedCurrency" : "USD",
+        "officialCalculatedCost" : 0.000000,
+        "officialCalculatedCurrency" : "TOKENS_ONLY",
+        "reliability" : "token_only",
+        "cacheSignalSource" : "provider_reported"
+      },
+      "providerCachePolicy" : {
+        "inputsComplete" : true,
+        "costEstimateReliability" : "token_only",
+        "cacheSignalReliability" : "provider_cache_tokens_reported",
+        "mode" : "token_policy_active",
+        "reason" : "provider/model and cache token signal are known; amount is not metered by visible per-token pricing"
+      },
+      "transcriptTokens" : 925851,
+      "transcriptBytes" : 3703403,
+      "executionLatency" : {
+        "schemaVersion" : 1,
+        "totalDurationMs" : 192648,
+        "processStartedMs" : 2,
+        "processWaitCompletedMs" : 192640,
+        "processBeforeTerminalMs" : 192640,
+        "terminalDetectedMs" : 0,
+        "terminalGraceElapsedMs" : 0,
+        "terminalGraceMs" : 0,
+        "terminalToProcessWaitMs" : 0,
+        "artifactExtractedMs" : 192749,
+        "contractValidatedMs" : 192836,
+        "postProcessMs" : 196,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "process_wait"
+      },
+      "toolCalls" : 12,
+      "reads" : 12,
+      "bash" : 0,
+      "writes" : 0,
+      "startedAt" : "2026-10-10T14:13:03.249486Z"
+    } ],
+    "usageVisibility" : {
+      "byVisibility" : {
+        "provider_run_usage" : 5
+      },
+      "byAgent" : {
+        "claude" : {
+          "provider_run_usage" : 3
+        },
+        "codex" : {
+          "provider_run_usage" : 2
+        }
+      },
+      "gaps" : [ ]
+    },
+    "costEconomics" : {
+      "byReliability" : {
+        "provider_cache_tokens_reported" : 2,
+        "pricing_unknown" : 2,
+        "provider_usage_tokens_reported" : 1
+      },
+      "byCostEstimateReliability" : {
+        "token_only" : 3,
+        "pricing_unknown" : 2
+      },
+      "byDecision" : {
+        "token_policy_active" : 3,
+        "measure_only" : 2
+      },
+      "clientReportedCostByCurrency" : {
+        "USD" : 1.110468
+      },
+      "officialCalculatedCostByCurrency" : { },
+      "providerReportedCostByCurrency" : {
+        "USD" : 1.110468
+      },
+      "dualCalculatedCostByCurrency" : { }
+    },
+    "nodeHotspots" : [ {
+      "nodeId" : "design.claude_design",
+      "agent" : "claude",
+      "runCount" : 1,
+      "promptTokens" : 2584,
+      "contextPackageTokens" : 0,
+      "inputTokens" : 42999,
+      "outputTokens" : 14900,
+      "cachedReadTokens" : 72832,
+      "totalTokens" : 130731,
+      "transcriptBytes" : 3703403,
+      "toolCalls" : 12,
+      "reads" : 12,
+      "bash" : 0,
+      "writes" : 0,
+      "heavy" : [ "tools", "transcript" ]
+    }, {
+      "nodeId" : "intake.codex_product_review",
+      "agent" : "codex",
+      "runCount" : 2,
+      "promptTokens" : 11375,
+      "contextPackageTokens" : 4882,
+      "inputTokens" : 26140,
+      "outputTokens" : 1826,
+      "cachedReadTokens" : 39168,
+      "totalTokens" : 67134,
+      "transcriptBytes" : 573709,
+      "toolCalls" : 0,
+      "reads" : 0,
+      "bash" : 0,
+      "writes" : 0,
+      "heavy" : [ "promptOverhead", "transcript" ]
+    }, {
+      "nodeId" : "intake.claude_brainstorm",
+      "agent" : "claude",
+      "runCount" : 2,
+      "promptTokens" : 10183,
+      "contextPackageTokens" : 1972,
+      "inputTokens" : 16590,
+      "outputTokens" : 16047,
+      "cachedReadTokens" : 4864,
+      "totalTokens" : 37501,
+      "transcriptBytes" : 11616,
+      "toolCalls" : 1,
+      "reads" : 1,
+      "bash" : 0,
+      "writes" : 0,
+      "heavy" : [ "promptOverhead" ]
+    } ],
+    "fileReadCost" : [ ],
+    "sessionSnowball" : [ {
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL/run:run-1791636537680",
+      "runs" : [ {
+        "runId" : "run-1791636537680",
+        "nodeId" : "intake.claude_brainstorm",
+        "seq" : 1,
+        "cachedReadTokens" : 4864,
+        "transcriptBytes" : 8357,
+        "deltaTranscriptBytes" : 8357
+      } ],
+      "maxTranscriptGrowthRun" : "run-1791636537680"
+    }, {
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL",
+      "runs" : [ {
+        "runId" : "run-1791636690133",
+        "nodeId" : "intake.codex_product_review",
+        "seq" : 1,
+        "cachedReadTokens" : 12928,
+        "transcriptBytes" : 345699,
+        "deltaTranscriptBytes" : 345699
+      }, {
+        "runId" : "run-1791637010369",
+        "nodeId" : "intake.codex_product_review",
+        "seq" : 2,
+        "cachedReadTokens" : 26240,
+        "transcriptBytes" : 228010,
+        "deltaTranscriptBytes" : -117689
+      } ],
+      "maxTranscriptGrowthRun" : "run-1791636690133"
+    }, {
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL/run:run-1791636803114",
+      "runs" : [ {
+        "runId" : "run-1791636803114",
+        "nodeId" : "intake.claude_brainstorm",
+        "seq" : 1,
+        "cachedReadTokens" : 0,
+        "transcriptBytes" : 3259,
+        "deltaTranscriptBytes" : 3259
+      } ],
+      "maxTranscriptGrowthRun" : "run-1791636803114"
+    }, {
+      "sessionSegmentKey" : "ws:ws-20261010T124812Z-XCZL/run:run-1791641578962",
+      "runs" : [ {
+        "runId" : "run-1791641578962",
+        "nodeId" : "design.claude_design",
+        "seq" : 1,
+        "cachedReadTokens" : 72832,
+        "transcriptBytes" : 3703403,
+        "deltaTranscriptBytes" : 3703403
+      } ],
+      "maxTranscriptGrowthRun" : "run-1791641578962"
+    } ],
+    "executionLatency" : {
+      "schemaVersion" : 1,
+      "topRuns" : [ {
+        "runId" : "run-1791641578962",
+        "nodeId" : "design.claude_design",
+        "agent" : "claude",
+        "totalDurationMs" : 192648,
+        "terminalDetectedMs" : 0,
+        "processWaitCompletedMs" : 192640,
+        "artifactExtractedMs" : 192749,
+        "contractValidatedMs" : 192836,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "process_wait"
+      }, {
+        "runId" : "run-1791636803114",
+        "nodeId" : "intake.claude_brainstorm",
+        "agent" : "claude",
+        "totalDurationMs" : 175503,
+        "terminalDetectedMs" : 0,
+        "processWaitCompletedMs" : 175496,
+        "artifactExtractedMs" : 175606,
+        "contractValidatedMs" : 175674,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "process_wait"
+      }, {
+        "runId" : "run-1791636537680",
+        "nodeId" : "intake.claude_brainstorm",
+        "agent" : "claude",
+        "totalDurationMs" : 83222,
+        "terminalDetectedMs" : 0,
+        "processWaitCompletedMs" : 83216,
+        "artifactExtractedMs" : 83317,
+        "contractValidatedMs" : 83377,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "process_wait"
+      }, {
+        "runId" : "run-1791636690133",
+        "nodeId" : "intake.codex_product_review",
+        "agent" : "codex",
+        "totalDurationMs" : 50663,
+        "terminalDetectedMs" : 0,
+        "processWaitCompletedMs" : 50657,
+        "artifactExtractedMs" : 51363,
+        "contractValidatedMs" : 51405,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "process_wait"
+      }, {
+        "runId" : "run-1791637010369",
+        "nodeId" : "intake.codex_product_review",
+        "agent" : "codex",
+        "totalDurationMs" : 19626,
+        "terminalDetectedMs" : 0,
+        "processWaitCompletedMs" : 19619,
+        "artifactExtractedMs" : 19698,
+        "contractValidatedMs" : 19734,
+        "terminalToContractMs" : 0,
+        "dominantPhase" : "process_wait"
+      } ]
+    }
+  }
+}

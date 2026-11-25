@@ -1,0 +1,7 @@
+请对 `/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator` 的 B06/W06/D09 做独立批末评审，遵守 AGENTS.md。
+
+入口：`output/lifecycle-batch-06-20261009/implementation/batch.md`；冻结协议在上级 `wiring-candidate/protocol.md`，本批增量、前后身份、原始测试和反证在 implementation 内。
+
+自行重建批准候选→目标应用→人工实际提交→交付确认，以及裁定、重复请求、每次耐久写入失败、冷启动和兄弟投影的控制链；核查合法续作与非法拒绝。按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 判断实际覆盖，区分常驻回归、一次性补证和真实能力未证，不预设作者结论。
+
+给出分级发现、证据、未核验范围和本批是否可收口。只读，不修改文件、启动额外 agent、运行真实 native/provider、installer 或真实目标 Git；不扩审无关历史、不把 PASS 当运行或提交授权。

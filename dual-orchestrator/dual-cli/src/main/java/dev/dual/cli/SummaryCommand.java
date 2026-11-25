@@ -67,19 +67,28 @@ public final class SummaryCommand implements Callable<Integer> {
     }
 
     static String render(WorkstreamPaths paths) throws Exception {
-        var timeline = readMap(paths.timelineJson());
-        var metrics = readMap(paths.workstreamMetricsJson());
-        var current = Files.isRegularFile(paths.workflowCurrentJson())
-                ? CliLedgerFactory.create().loadCurrent(paths)
-                : null;
-        var workflowStatus = current == null ? text(timeline.get("workflowStatus")) : current.status().name();
-        var statusSource = current == null ? "timeline_projection" : "workflow_current";
-        var activeNodes = current == null
-                ? listOfText(timeline.get("activeNodeInstanceIds"))
-                : current.activeNodeInstanceIds();
-        var openGates = current == null ? listOfText(timeline.get("openGateIds")) : current.openGateIds();
-        var delivery = new DeliveryApplicationService().view(
-                paths.workspaceRoot(), paths.workstreamId().value(), null);
+        var ledger = CliLedgerFactory.create();
+        var observedDelivery = new DeliveryApplicationService(ledger).view(paths.workspaceRoot(), paths.workstreamId().value(), null);
+        String summary;
+        try (var snapshot = ledger.readSession(paths)) {
+            summary = renderSnapshot(paths, snapshot.ledger(), observedDelivery);
+        }
+        var permissions = dev.dual.runtime.handler.NativePermissionRequests.view(ledger, paths);
+        if (!((List<?>) permissions.get("requests")).isEmpty()) summary += "\n\n## Native permission requests\n\n"
+                + "This separate snapshot grants no business approval or resend authority.\n\n```json\n"
+                + MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(permissions) + "\n```\n";
+        return summary;
+    }
+
+    private static String renderSnapshot(WorkstreamPaths paths, dev.dual.ledger.file.WorkflowFileLedger ledger, DeliveryApplicationService.View observedDelivery) throws Exception {
+        var timeline = ledger.timelineSnapshot(paths);
+        var metrics = ledger.metricsSnapshot(paths);
+        var current = ledger.loadCurrent(paths);
+        var workflowStatus = current.status().name();
+        var statusSource = "workflow_current";
+        var activeNodes = current.activeNodeInstanceIds();
+        var openGates = current.openGateIds();
+        var delivery = DeliveryApplicationService.inSnapshot(observedDelivery, ledger, paths);
         var nodes = nodes(timeline);
 
         var lines = new ArrayList<String>();
@@ -95,12 +104,14 @@ public final class SummaryCommand implements Callable<Integer> {
         lines.add("- Definition: " + text(timeline.get("workflowId")) + "@" + text(timeline.get("definitionVersion")));
         lines.add("- Status: " + text(workflowStatus, "(unavailable)"));
         lines.add("- Status Source: " + statusSource);
+        lines.add("- Source Commit: " + current.commitSequence());
         lines.add("- Active Nodes: " + emptyDash(activeNodes));
         lines.add("- Open Gates: " + emptyDash(openGates));
         lines.add("- Updated At: " + text(timeline.get("updatedAt")));
         lines.add("");
         lines.add("## Metrics");
         lines.add("");
+        lines.add("- Metrics State: " + text(metrics.get("status"), "CURRENT"));
         lines.add("- Nodes: " + text(metrics.get("nodeCount"), "unavailable"));
         lines.add("- Agent Runs: " + text(metrics.get("agentRunCount"), "unavailable"));
         lines.add("- Gates: " + text(metrics.get("gateCount"), "unavailable"));
@@ -165,7 +176,7 @@ public final class SummaryCommand implements Callable<Integer> {
             DeliveryApplicationService.View delivery,
             List<String> activeNodes,
             List<String> openGates
-    ) {
+    ) throws java.io.IOException {
         if (!"workflow_current".equals(statusSource)) {
             return "Current workflow state is unavailable. Inspect the frozen ledger; no action command is projected.";
         }
@@ -188,23 +199,10 @@ public final class SummaryCommand implements Callable<Integer> {
                     + "```";
         }
         if ("COMPLETED".equals(status)) {
-            if (delivery.canFinalize()) {
-                var targetRepo = delivery.targetRepo();
-                var command = targetRepo.isBlank() ? "" : "git -C " + quoteString(targetRepo) + " diff --cached";
-                return "Review the staged target diff, commit from the target repo, then finalize the exact commit SHA."
-                        + commandBlock(command)
-                        + "\n\n```bash\ndualctl delivery finalize --workdir " + quote(paths.workspaceRoot())
-                        + " --commit <target_commit_sha> " + paths.workstreamId().value() + "\n```";
-            }
-            if (delivery.canMerge()) {
-                return "Review final report and the accepted candidate. If ready, apply it to the original repository:\n\n```bash\n"
-                        + "dualctl delivery merge --workdir " + quote(paths.workspaceRoot()) + " "
-                        + paths.workstreamId().value() + "\n```";
-            }
-            if ("COMMITTED".equals(delivery.status())) {
-                return "The accepted delivery candidate has been committed. Inspect the recorded commit and final artifacts.";
-            }
-            return "Delivery is not actionable: " + delivery.reasonCode() + " - " + delivery.reason();
+            return delivery.nextAction() + (delivery.reasonCode().isBlank() ? "" : "\n\nReason: " + delivery.reasonCode())
+                    + (delivery.nextCommands().isEmpty() ? "" : "\n\n```bash\n" + String.join("\n", delivery.nextCommands()) + "\n```")
+                    + (delivery.resolutionTemplate().isEmpty() ? "" : "\n\nResolution template (complete the human decision explicitly):\n\n```json\n"
+                    + MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(delivery.resolutionTemplate()) + "\n```");
         }
         if ("RUNNING".equals(status) && activeNodes.isEmpty() && openGates.isEmpty()) {
             return "Workflow is marked RUNNING but no active node is visible. Run status and inspect ledger consistency.";

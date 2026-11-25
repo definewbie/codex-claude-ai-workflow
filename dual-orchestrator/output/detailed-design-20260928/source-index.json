@@ -1,0 +1,150 @@
+{
+  "scope": "Source anchors inspected in this design turn; no execution proof",
+  "files": [
+    {
+      "path": "dual-orchestrator/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java",
+      "sha256": "bdf04636c25bedaf1a72142530051efde0c74d76070edd1e7a025d5c318a1462",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-core/src/main/java/dev/dual/core/execution/ProcessResult.java",
+      "sha256": "bfb1ca6b71ef9b79ef17dd8e8cf46b780f5fb67a17841c508941ba9d97a80477",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionResultFacts.java",
+      "sha256": "2a8723d95600143b64bc1867883f53ded679b8e56dccf09efaeb13b382ff949c",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunMetadataFinalizer.java",
+      "sha256": "cfd4759e2c0ed2148af332fb7d65fb5d4b91c33e27e4655cede455aa69f45a50",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-core/src/main/java/dev/dual/core/contract/TaskContract.java",
+      "sha256": "504a6d7eaefb2accf09c372674fd136863395aefd1b35a11e4adb3ff12a99c95",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposal.java",
+      "sha256": "33c88b368b3993bb410434a4f658203bd304f50932812e3dccb5e382ff508d91",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/GateDocument.java",
+      "sha256": "d0527d19bd6a57e938bc47a2acce6d472c574ee46f8988573528f381f39bd094",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxPermissionProfile.java",
+      "sha256": "0e0ccc8e7c904d2cb698c84f7c9c8a28bcaa9da6d6106e8bcb2dee3de29586cc",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ClaudeExecutionPolicy.java",
+      "sha256": "bfcd9cdaa48c85a30fd5547a89c33cbfc505eb2f76f0932cfc500b4146a5d4c4",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java",
+      "sha256": "866b1524a904f6fd4a68dfa40d07493d7371d9791125aec151dd51dc55dc32bd",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+      "sha256": "0ed177b5252a167b40b1e2b9cd30765d0c96868f07c599de3100f83ba5059572",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelope.java",
+      "sha256": "e6b7477f7d873728b4dc4ec383a2d561f6c2da48fbd1ffc6420ad453c93d587e",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java",
+      "sha256": "e1b78e7014a9c0fdcc06b7aded36a4d247c0867f8c89b395f8bdf3fd4d266eb4",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+      "sha256": "b9e9e7999b9de918a14554848edf11bba883e4b37a129778e200ae55cce724ec",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+      "sha256": "8629e4bef76e05572a5987c1246958c59222b0f10c50eee47941fea6ec4c2181",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "sha256": "46779aafa6cb6c16388fb9e245c03ad55508d2be4c6c914be5fe383cbb13c826",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java",
+      "sha256": "73b76a0e07a7b4b735a43df2caa580ee5a82efb6385fa8ba509841a6ed6f5dbd",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "sha256": "6442114b49b0b4a7edae7f1535f8d43b2c372d5695ca7b865a8fa16853c82ee8",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/AgentTaskLedgerWriter.java",
+      "sha256": "3b8c0b977b6ef449abef48aef4a9de38f5aebbdda30f0f44b2e0e066ce810ede",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "sha256": "49f40617e49964bb9df561f98cedd3a48d97ed8ebff5594c62c8faa7951aed0f",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java",
+      "sha256": "d3f4c41a41da14a225af3d0f862663435b933af7ed1de0c984a9041edce01d63",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamDocument.java",
+      "sha256": "e511823da0aa67cc8e73cfb837f8d50119a7681509657a10be87be68f53d719f",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "sha256": "0a035ac6aa530522103b439919377d901986594c4ca18fec4a4ff73b705829ca",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryMergePlan.java",
+      "sha256": "a93905b9ab453907c203bbee733ac439985f344f96bb4cfc72af72727c9c16fe",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryMergeStatus.java",
+      "sha256": "63b333264dbc413bad88e3705b99e6170c6d513f015dd5338485b8438924df07",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java",
+      "sha256": "ee0a535e99fd1fcf1870b3ef97651d603f48c88c5b4f5e18f88e9f8b81af14dc",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamLock.java",
+      "sha256": "3f54f1e447e57bab0aa66920f26e213288f5b30aaac2e421d83be346bd050a5c",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionAttemptStatus.java",
+      "sha256": "81c900607765c89b078dd158203ace9a1b2cd93ae71eaa725e89d854ddf6e506",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    },
+    {
+      "path": "dual-orchestrator/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionProcessStatus.java",
+      "sha256": "6952ec88c235a768e9a20a001f81a58f2163dc33cc4ce4f928846efda87b6d4c",
+      "inspection": "targeted source/method or declaration read; not a whole-file audit"
+    }
+  ]
+}

@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class SmallWorkflowProfileGateIntegrationTest {
     private static final String EXPERIMENT_RESOURCE =
@@ -31,99 +32,46 @@ class SmallWorkflowProfileGateIntegrationTest {
     Path tempDir;
 
     @Test
-    void validatedPlanSidecarRoutesDirectlyToHumanGateAndApproveStartsImplementationContext() throws Exception {
-        var workspace = tempDir.resolve("approve-workspace");
-        var state = initializeAtPlan(workspace, "ws-small-approve");
-        var evidence = publishPlanSidecar(workspace, state.paths().workstreamId().value(), "run-plan-approve");
-
-        routePlanToGate(state, evidence.refs(), "completed");
-        var gateNode = state.ledger().loadCoreNode(
-                state.paths(), state.ledger().loadCurrent(state.paths()).activeNodeInstanceIds().getFirst());
-        var gate = state.ledger().loadOpenGateForNode(state.paths(), gateNode.nodeInstanceId());
-        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
-                workspace,
-                state.paths().workstreamId().value(),
-                state.definition().node("gate.human_plan_approval"),
-                gateNode,
-                String.valueOf(gate.result().get("source_outcome"))));
-
-        @SuppressWarnings("unchecked")
-        var packet = (Map<String, Object>) objectMapper.readValue(
-                workspace.resolve(String.valueOf(result.result().get("review_packet_json"))).toFile(), Map.class);
-        @SuppressWarnings("unchecked")
-        var latestDecision = (Map<String, Object>) packet.get("latestAgentDecision");
-
-        assertEquals("completed", packet.get("sourceOutcome"));
-        assertEquals(List.of("approve", "revise"), packet.get("allowedActions"));
-        assertEquals(evidence.refs(), packet.get("inputRefs"));
-        assertEquals("READY_FOR_PLAN_REVIEW", latestDecision.get("decision"));
-        assertFalse(objectMapper.writeValueAsString(packet).contains("plan.codex_plan_review"));
-
-        state.ledger().resolveOpenGate(state.paths(), state.definition(), "approve", "Plan reviewed by operator.");
-        var next = state.ledger().loadNode(
-                state.paths(), state.ledger().loadCurrent(state.paths()).activeNodeInstanceIds().getFirst());
-        assertEquals("context.implement_claude", next.nodeDefinitionId());
-        try (var files = Files.walk(workspace)) {
-            assertFalse(files.anyMatch(path -> path.toString().contains("plan-codex-review")));
+    void experimentalPlanRequiresIndependentReviewBeforeExecutionApproval() throws Exception {
+        var f = new AuthoredStageSequenceTest.Fixture(tempDir, "src/new.ext",
+                AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, "ws-small", loadExperiment());
+        f.before("implement.claude_implement");
+        assertTrue(f.calls.contains("plan.codex_plan_review"));
+        var contract = TaskContractProjectionVerifier.resolve(f.ledger, f.root, f.ws).qualified().orElseThrow();
+        assertEquals("src/new.ext", contract.contract().scope().included().getFirst().path());
+        assertEquals(2, contract.contract().reviewedCandidates().size());
+        try (var nodes = Files.list(f.paths.nodesDir())) {
+            assertFalse(nodes.anyMatch(path -> path.getFileName().toString().contains("human_plan_approval")),
+                    "normal READY is not a fabricated human approval");
         }
     }
 
     @Test
-    void humanPlanRevisionMayContinueBeyondTheAutomaticBudget() throws Exception {
-        var workspace = tempDir.resolve("revise-workspace");
-        var state = initializeAtPlan(workspace, "ws-small-revise");
-
-        for (var revision = 1; revision <= 3; revision++) {
-            var evidence = publishPlanSidecar(
-                    workspace, state.paths().workstreamId().value(), "run-plan-revise-" + revision);
-            routePlanToGate(state, evidence.refs(), "completed");
-            state.ledger().resolveOpenGate(
-                    state.paths(), state.definition(), "revise", "Human plan revision " + revision);
-
-            var plan = state.ledger().loadNode(
-                    state.paths(), state.ledger().loadCurrent(state.paths()).activeNodeInstanceIds().getFirst());
-            assertEquals("plan.claude_plan", plan.nodeDefinitionId());
-            assertEquals("iter-00" + (revision + 1), plan.iterationId());
-        }
-
-        var fourthEvidence = publishPlanSidecar(
-                workspace, state.paths().workstreamId().value(), "run-plan-revise-4");
-        routePlanToGate(state, fourthEvidence.refs(), "completed");
-        state.ledger().resolveOpenGate(
-                state.paths(), state.definition(), "revise", "Human explicitly authorizes plan revision 4");
-
-        assertEquals(WorkflowStatus.RUNNING, state.ledger().loadCurrent(state.paths()).status());
-        var fourthRevision = state.ledger().loadNode(
-                state.paths(), state.ledger().loadCurrent(state.paths()).activeNodeInstanceIds().getFirst());
-        assertEquals("plan.claude_plan", fourthRevision.nodeDefinitionId());
-        assertEquals("iter-005", fourthRevision.iterationId());
-        var events = Files.readString(state.paths().eventsJsonl());
-        assertFalse(events.contains("revision_limit_reached"));
-        assertFalse(events.contains("plan.decision"));
+    void reviewerRevisionUsesAuthorAndReReviewBeforeExecutionApproval() throws Exception {
+        var f = new AuthoredStageSequenceTest.Fixture(tempDir, "src/new.ext",
+                AuthoredStageSequenceTest.PlanTopology.REVIEWED_HUMAN, "ws-small", loadExperiment());
+        f.before("implement.claude_implement");
+        assertEquals(2, java.util.Collections.frequency(f.calls, "plan.claude_plan"));
+        assertEquals(2, java.util.Collections.frequency(f.calls, "plan.codex_plan_review"));
+        assertEquals(List.of("plan issue 1"), f.inputs.get("plan.claude_plan").obligations().stream()
+                .map(AuthoredExecutionContext.Obligation::text).toList());
+        assertTrue(TaskContractProjectionVerifier.resolve(f.ledger, f.root, f.ws).qualified().isPresent());
     }
 
     @Test
-    void lineageInvalidPlanSidecarCannotBecomeHumanReviewEvidence() throws Exception {
-        var workspace = tempDir.resolve("invalid-workspace");
-        var state = initializeAtPlan(workspace, "ws-small-invalid");
-        var evidence = writePlanSidecar(
-                workspace, state.paths().workstreamId().value(), "run-plan-forged");
-
-        routePlanToGate(state, evidence.refs(), "completed");
-        var gateNode = state.ledger().loadCoreNode(
-                state.paths(), state.ledger().loadCurrent(state.paths()).activeNodeInstanceIds().getFirst());
-        var gate = state.ledger().loadOpenGateForNode(state.paths(), gateNode.nodeInstanceId());
-
-        assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(
-                        workspace,
-                        state.paths().workstreamId().value(),
-                        state.definition().node("gate.human_plan_approval"),
-                        gateNode,
-                        String.valueOf(gate.result().get("source_outcome")))));
-        assertFalse(Files.exists(workspace.resolve(
-                ".agent/workstreams/" + state.paths().workstreamId().value()
-                        + "/reviews/" + gateNode.nodeInstanceId() + ".json")));
+    void invalidPlanCannotReachReviewOrExecutionApprovalInExperimentalVariant() throws Exception {
+        var f = new AuthoredStageSequenceTest.Fixture(tempDir, "src/new.ext",
+                AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, "ws-small", loadExperiment());
+        f.before("plan.claude_plan");
+        f.outputMutation = result -> {
+            if (result.has("plan")) ((com.fasterxml.jackson.databind.node.ObjectNode) result.get("plan"))
+                    .putArray("edit_files").add("../escape");
+        };
+        f.advanceToGate();
+        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.ledger.loadCurrent(f.paths).status());
+        assertFalse(f.calls.contains("plan.codex_plan_review"));
+        assertFalse(f.calls.contains("implement.claude_implement"));
+        assertTrue(TaskContractProjectionVerifier.resolve(f.ledger, f.root, f.ws).qualified().isEmpty());
     }
 
     @Test
@@ -192,22 +140,22 @@ class SmallWorkflowProfileGateIntegrationTest {
     private PlanEvidence publishPlanSidecar(Path workspace, String workstreamId, String runId) throws Exception {
         var evidence = writePlanSidecar(workspace, workstreamId, runId);
         var paths = new WorkstreamPaths(workspace, new DualId(workstreamId));
-        var ledger = new WorkflowFileLedger();
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
         var node = ledger.loadCoreNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
-        var context = new TaskHandler.TaskContext(workspace, workstreamId, ledger.loadDefinition(paths).node(node.nodeDefinitionId()), node);
+        var context = new TaskHandler.TaskContext(workspace, workstreamId, ledger.loadDefinition(paths).node(node.nodeDefinitionId()), node, dev.dual.runtime.RuntimeTestLedger.ledger());
         AuthoredInputFixture.record(context, runId);
         var snapshot = AuthoredExecutionContext.prepare(context, runId).orElseThrow();
         var prompt = AgentResultPromptContract.render(workstreamId, runId, "plan.claude_plan",
                 "READY_FOR_PLAN_REVIEW", java.util.Set.of("READY_FOR_PLAN_REVIEW"));
         var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(prompt.substring(prompt.indexOf('{')));
         var editFiles = ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.at("/result/plan")).putArray("edit_files");
-        TaskContractProjectionVerifier.resolve(workspace, workstreamId).qualified().orElseThrow().contract()
+        TaskContractProjectionVerifier.resolve(dev.dual.runtime.RuntimeTestLedger.ledger(), workspace, workstreamId).qualified().orElseThrow().contract()
                 .scope().included().forEach(entry -> editFiles.add(entry.path()));
         var responses = ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.get("result")).putArray("revision_responses");
         snapshot.obligations().forEach(obligation -> responses.addObject().put("obligation_id", obligation.id())
                 .put("disposition", "ADDRESSED").put("evidence", "Plan revised with the human note"));
         objectMapper.writeValue(workspace.resolve(evidence.outputRef()).toFile(), envelope);
-        var result = new ArtifactContractValidator().validate(workspace, workstreamId, node.nodeInstanceId(),
+        var result = new ArtifactContractValidator(dev.dual.runtime.RuntimeTestLedger.ledger()).validate(workspace, workstreamId, node.nodeInstanceId(),
                 context.definition(), dev.dual.core.workflow.NodeResult.completed("completed", List.of(evidence.outputRef()),
                         Map.of("run_id", runId)));
         assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());

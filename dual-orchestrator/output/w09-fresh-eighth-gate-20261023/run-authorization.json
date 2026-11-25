@@ -1,0 +1,14 @@
+{
+  "case": "FRESH_EIGHTH",
+  "offline_preparation_authorized": true,
+  "fresh_run_authorized": true,
+  "token_upper_limit": 1700000,
+  "top_level_call_limit": 18,
+  "active_seconds": 3600,
+  "reservation_rule": "UNCHANGED_CALIBRATED",
+  "business_gates_delegated": false,
+  "previous_authorizations_or_balances_inherited": false,
+  "user_scope": "Fresh eighth real run under immediately preceding Gate: 1700000 attributable tokens,18 requests,3600 active seconds,reservation admission; business approvals and product commit not delegated",
+  "approved_at": "2026-10-23T09:03:03.119390+08:00",
+  "approval_ref": "run-approval.json"
+}

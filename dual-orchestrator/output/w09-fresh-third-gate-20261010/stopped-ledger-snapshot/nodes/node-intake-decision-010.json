@@ -1,0 +1,29 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-intake-decision-010",
+  "nodeDefinitionId" : "intake.decision",
+  "kind" : "DECISION",
+  "handlerType" : "review.decision",
+  "status" : "COMPLETED",
+  "stageId" : "stage-intake",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json" ],
+  "inputTransition" : {
+    "source_node_sha256" : "f5c1dd33fa60fb075c3c73aa86a698cbe74d06b0f3a8c3dc25f795af2a6edd41",
+    "source_node_instance_id" : "node-intake-codex_product_review-009",
+    "required" : true,
+    "transition_type" : "normal",
+    "condition" : "unconditional",
+    "purpose" : "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json", ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "source" : "contract-sidecar",
+    "summary" : "修订已解决文件范围授权问题，功能、限制与验收要求完整，可以继续后续流程。"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1791637073188-85c28b50",
+  "startedAt" : "2026-10-10T12:57:53.199108Z",
+  "finishedAt" : "2026-10-10T12:57:53.242041Z"
+}

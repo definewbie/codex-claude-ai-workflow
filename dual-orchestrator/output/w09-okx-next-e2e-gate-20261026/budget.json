@@ -1,0 +1,137 @@
+{
+  "status": "NEW_CASE_PROPOSAL_NOT_RUN_AUTHORIZED",
+  "target": "one existing Java project MODIFY terminal-delivery E2E",
+  "unit": "visible attributable request totalTokens including cachedRead; not USD",
+  "total_stop": 3000000,
+  "top_level_calls": 18,
+  "active_seconds": 3600,
+  "command_timeout_seconds": 600,
+  "next_agent_time_reserve_seconds": 1500,
+  "warning": 2400000,
+  "possible_correction_tokens": 150000,
+  "possible_correction_calls": 1,
+  "semantic_loops_max": 2,
+  "extra_connection_prompts_default": 0,
+  "stages": [
+    {
+      "node": "intake.claude_brainstorm",
+      "tokens": 40000,
+      "observed_fixed_requests": [
+        24216
+      ],
+      "observed_cases": 1,
+      "basis": "PLANNING_ASSUMPTION_INFORMED_BY_SMALL_DIFFERENT_PRODUCT_SAMPLE"
+    },
+    {
+      "node": "intake.codex_product_review",
+      "tokens": 50000,
+      "observed_fixed_requests": [
+        27546
+      ],
+      "observed_cases": 1,
+      "basis": "PLANNING_ASSUMPTION_INFORMED_BY_SMALL_DIFFERENT_PRODUCT_SAMPLE"
+    },
+    {
+      "node": "design.claude_design",
+      "tokens": 150000,
+      "observed_fixed_requests": [
+        82700,
+        136458
+      ],
+      "observed_cases": 1,
+      "basis": "PLANNING_ASSUMPTION_INFORMED_BY_SMALL_DIFFERENT_PRODUCT_SAMPLE"
+    },
+    {
+      "node": "design.codex_arch_review",
+      "tokens": 100000,
+      "observed_fixed_requests": [
+        46586,
+        65565
+      ],
+      "observed_cases": 1,
+      "basis": "PLANNING_ASSUMPTION_INFORMED_BY_SMALL_DIFFERENT_PRODUCT_SAMPLE"
+    },
+    {
+      "node": "plan.claude_plan",
+      "tokens": 175000,
+      "observed_fixed_requests": [
+        91262,
+        157659
+      ],
+      "observed_cases": 1,
+      "basis": "PLANNING_ASSUMPTION_INFORMED_BY_SMALL_DIFFERENT_PRODUCT_SAMPLE"
+    },
+    {
+      "node": "plan.codex_plan_review",
+      "tokens": 150000,
+      "observed_fixed_requests": [
+        89583,
+        126667
+      ],
+      "observed_cases": 1,
+      "basis": "PLANNING_ASSUMPTION_INFORMED_BY_SMALL_DIFFERENT_PRODUCT_SAMPLE"
+    },
+    {
+      "node": "implement.claude_implement",
+      "tokens": 1100000,
+      "observed_fixed_requests": [
+        918786
+      ],
+      "observed_cases": 1,
+      "basis": "PLANNING_ASSUMPTION_INFORMED_BY_SMALL_DIFFERENT_PRODUCT_SAMPLE"
+    },
+    {
+      "node": "implement.claude_self_test_report",
+      "tokens": 350000,
+      "observed_fixed_requests": [
+        261472
+      ],
+      "observed_cases": 1,
+      "basis": "PLANNING_ASSUMPTION_INFORMED_BY_SMALL_DIFFERENT_PRODUCT_SAMPLE"
+    },
+    {
+      "node": "acceptance.codex_verifier_review",
+      "tokens": 100000,
+      "observed_fixed_requests": [
+        49207
+      ],
+      "observed_cases": 1,
+      "basis": "PLANNING_ASSUMPTION_INFORMED_BY_SMALL_DIFFERENT_PRODUCT_SAMPLE"
+    }
+  ],
+  "reserve_formula": "actual + unfinished required mainline + proposed extra/reentry + one correction <= ceiling; actual call pool and active time checked independently",
+  "previous_balance_inherited": false,
+  "real_run_authorized": false,
+  "reserves_are": "planning assumptions, not p95, per-request caps or success probability",
+  "illustrative_path": {
+    "nominal_mainline_tokens": 2215000,
+    "with_one_correction": 2365000,
+    "unallocated_margin": 635000
+  },
+  "scenarios": [
+    {
+      "name": "mainline plus one correction",
+      "tokens": 2365000,
+      "calls": 10
+    },
+    {
+      "name": "plus one readiness plan/review repeat",
+      "tokens": 2690000,
+      "calls": 12
+    },
+    {
+      "name": "plus readiness repeat and design repair pair",
+      "tokens": 2940000,
+      "calls": 14
+    },
+    {
+      "name": "plus readiness repeat and both intake/design repair pairs",
+      "tokens": 3030000,
+      "calls": 16,
+      "status": "NOT_PRE_RESERVED_AT_ZERO; 3030000 exceeds 3000000; recalculate from actual fixed usage or stop"
+    }
+  ],
+  "time_scope": "recorded active command/model/check/cleanup elapsed; no human waiting or calendar reset",
+  "time_reserve_basis": "two possible 600-second prompts plus 300-second preparation/cleanup; planning only",
+  "authority": "budget checker is offline planning, not production dispatch guard or business approval"
+}

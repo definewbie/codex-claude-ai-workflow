@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "workstreamId": "ws-20261011T044656Z-BMDJ",
+  "workflowInstanceId": "wf-ws-20261011T044656Z-BMDJ",
+  "workflowId": "agent-lifecycle-terminal-delivery",
+  "definitionVersion": 5,
+  "status": "RUNNING",
+  "activeNodeInstanceIds": [
+    "node-intake-decision-005"
+  ],
+  "openGateIds": [],
+  "lastEventId": "evt-000005",
+  "updatedAt": "2026-10-11T04:52:02.085581Z",
+  "commitSequence": 19
+}

@@ -1,0 +1,7 @@
+{
+  "tests": 25,
+  "failures": 0,
+  "errors": 0,
+  "successful": true,
+  "scope": "Full operator scripts including cold process with synthetic usage seam and Java double; real observer protocol fixtures separately included; no Java/native/provider launch"
+}

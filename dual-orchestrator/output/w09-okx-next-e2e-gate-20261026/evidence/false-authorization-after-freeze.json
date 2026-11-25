@@ -1,0 +1,7 @@
+{
+  "exit": 1,
+  "stderr": "Traceback (most recent call last):\n  File \"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/run-one-step.py\", line 13, in <module>\n    authorize()\n    ~~~~~~~~~^^\n  File \"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/admission.py\", line 15, in authorize\n    assert auth.get('real_run_authorized') is True and auth.get('budget_approved') is True, 'Fresh Gate requires current human budget and run approval'\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Fresh Gate requires current human budget and run approval\n",
+  "step_created": false,
+  "model_calls": 0,
+  "launch_sha256": "ed183a55113d8c86a56e92f4b058b24a2106f1a85be6331b41c5a111b8d3be29"
+}

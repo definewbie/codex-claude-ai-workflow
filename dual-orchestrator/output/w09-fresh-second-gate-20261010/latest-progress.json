@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-10T17:16:29.497305+08:00",
+  "state": "STOPPED_WAITING_FOR_RECOVERY",
+  "gate_result": "FAIL",
+  "actual_top_level_calls": 2,
+  "native_request_token_sum": 63493,
+  "run_reported_tokens": 53096,
+  "usage_attribution_valid": false,
+  "session_closed": true,
+  "next_dispatch_allowed_by_operator": false,
+  "no_retry": true
+}

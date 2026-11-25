@@ -85,6 +85,23 @@ public class WorkstreamApiController {
         return streamService.overviewStream(workdirPath(workdir), workstreamId, intervalMs);
     }
 
+    @GetMapping("/{workstreamId}/permissions")
+    public Map<String, Object> nativePermissions(@PathVariable String workstreamId, @RequestParam(defaultValue = "") String workdir) throws Exception {
+        return queryService.nativePermissions(workdirPath(workdir), workstreamId);
+    }
+    public record NativePermissionDecision(String execution, String requestKey, String optionId, String note) {}
+    @PostMapping("/{workstreamId}/permissions/decide")
+    public Map<String, Object> nativePermissionDecision(@PathVariable String workstreamId, @RequestParam(defaultValue = "") String workdir,
+                                                       @RequestBody NativePermissionDecision decision) throws Exception {
+        return actionService.decideNativePermission(workdirPath(workdir), workstreamId, decision.execution(), decision.requestKey(), decision.optionId(), decision.note());
+    }
+    public record NativePermissionCancel(String execution, String note) {}
+    @PostMapping("/{workstreamId}/permissions/cancel")
+    public Map<String, Object> nativePermissionCancel(@PathVariable String workstreamId, @RequestParam(defaultValue = "") String workdir,
+                                                     @RequestBody NativePermissionCancel cancel) throws Exception {
+        return actionService.cancelNativePermissionWait(workdirPath(workdir), workstreamId, cancel.execution(), cancel.note());
+    }
+
     @GetMapping("/{workstreamId}/review/current")
     public Map<String, Object> currentReview(
             @PathVariable String workstreamId,
@@ -138,6 +155,15 @@ public class WorkstreamApiController {
         return deliveryViewService.finalizeCommit(workdirPath(workdir), workstreamId, request.commit());
     }
 
+    @PostMapping("/{workstreamId}/delivery/resolve")
+    public Map<String, Object> deliveryResolve(
+            @PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir,
+            @RequestBody byte[] request
+    ) throws Exception {
+        return deliveryViewService.resolve(workdirPath(workdir), workstreamId, request);
+    }
+
     @PostMapping("/{workstreamId}/resume")
     public Map<String, Object> resume(
             @PathVariable String workstreamId,
@@ -153,6 +179,8 @@ public class WorkstreamApiController {
             @RequestParam(defaultValue = "") String workdir,
             @RequestBody(required = false) RetryRequest request
     ) throws Exception {
+        if (request != null && request.decision() != null)
+            return actionService.adjudicate(workdirPath(workdir), workstreamId, request.decision(), "AUTHORIZE_NEW_ATTEMPT");
         return actionService.retry(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
     }
 
@@ -188,13 +216,32 @@ public class WorkstreamApiController {
         return actionService.closeMistakenIteration(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
     }
 
+    @PostMapping("/{workstreamId}/recovery/abort")
+    public Map<String, Object> abortRecovery(@PathVariable String workstreamId,
+            @RequestParam(defaultValue = "") String workdir,
+            @RequestBody dev.dual.runtime.handler.ExecutionRecoveryAdjudication.Request decision) throws Exception {
+        return actionService.adjudicate(workdirPath(workdir), workstreamId, decision, "ABORT");
+    }
+
     @PostMapping("/{workstreamId}/recovery/stale")
     public Map<String, Object> recoverStaleRunning(
             @PathVariable String workstreamId,
             @RequestParam(defaultValue = "") String workdir,
             @RequestBody(required = false) RecoveryStaleRequest request
     ) throws Exception {
+        if (request != null && request.decision() != null) {
+            if (request.stopRecordedSession()) throw new IllegalArgumentException("adoption and stop are separate operations");
+            return actionService.adjudicate(workdirPath(workdir), workstreamId, request.decision(), "ADOPT_VERIFIED_RESULT");
+        }
+        if (request != null && request.stopRecordedSession()) return actionService.stopRecordedSession(workdirPath(workdir), workstreamId);
         return actionService.recoverStaleRunning(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
+    }
+
+    @PostMapping("/{workstreamId}/review/readiness")
+    public dev.dual.core.contract.TaskContract.Reference recordReadiness(
+            @PathVariable String workstreamId, @RequestParam(defaultValue = "") String workdir,
+            @RequestBody dev.dual.runtime.handler.VerificationReadiness.Request request) throws Exception {
+        return actionService.recordReadiness(workdirPath(workdir), workstreamId, request);
     }
 
     @PostMapping("/{workstreamId}/review/approve")
@@ -206,7 +253,8 @@ public class WorkstreamApiController {
             @RequestBody(required = false) ReviewApproveRequest request
     ) throws Exception {
         return actionService.approve(
-                workdirPath(workdir), workstreamId, request == null ? "" : request.note(), run, maxSteps);
+                workdirPath(workdir), workstreamId, request == null ? "" : request.note(), run, maxSteps,
+                request == null ? null : request.gateNodeInstanceId());
     }
 
     @PostMapping("/{workstreamId}/review/complete")
@@ -226,7 +274,7 @@ public class WorkstreamApiController {
             @RequestParam(defaultValue = "20") int maxSteps,
             @RequestBody(required = false) ReviewReviseRequest request
     ) throws Exception {
-        return actionService.revise(workdirPath(workdir), workstreamId, request == null ? "" : request.feedback(), run, maxSteps);
+        return actionService.revise(workdirPath(workdir), workstreamId, request == null ? "" : request.feedback(), request == null ? "" : request.subject(), run, maxSteps);
     }
 
     @PostMapping("/{workstreamId}/review/request-action")
@@ -304,13 +352,17 @@ public class WorkstreamApiController {
         return requestUri != null && requestUri.endsWith("/stream");
     }
 
-    public record RetryRequest(String note) {
+    public record RetryRequest(String note, dev.dual.runtime.handler.ExecutionRecoveryAdjudication.Request decision) {
+        public RetryRequest(String note) { this(note, null); }
     }
 
     public record RecoveryCloseRequest(String note) {
     }
 
-    public record RecoveryStaleRequest(String note) {
+    public record RecoveryStaleRequest(String note, boolean stopRecordedSession,
+            dev.dual.runtime.handler.ExecutionRecoveryAdjudication.Request decision) {
+        public RecoveryStaleRequest(String note) { this(note, false, null); }
+        public RecoveryStaleRequest(String note, boolean stopRecordedSession) { this(note, stopRecordedSession, null); }
     }
 
     public record PublicWebSearchApprovalRequest(String note, boolean publicRepositoryAttested) {
@@ -318,10 +370,10 @@ public class WorkstreamApiController {
 
     public record NetworkApprovalRequest(String target, java.util.List<String> domains, String note, boolean cancel) { }
 
-    public record ReviewReviseRequest(String feedback) {
+    public record ReviewReviseRequest(String feedback, String subject) {
     }
 
-    public record ReviewApproveRequest(String note) {
+    public record ReviewApproveRequest(String note, String gateNodeInstanceId) {
     }
 
     public record ReviewCompleteRequest(String note) {

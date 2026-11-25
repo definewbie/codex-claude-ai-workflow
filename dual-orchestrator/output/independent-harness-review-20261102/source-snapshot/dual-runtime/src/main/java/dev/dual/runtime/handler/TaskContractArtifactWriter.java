@@ -1,0 +1,122 @@
+package dev.dual.runtime.handler;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.dual.core.contract.TaskContract;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.util.HexFormat;
+import java.util.stream.Collectors;
+
+final class TaskContractArtifactWriter {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .enable(SerializationFeature.INDENT_OUTPUT);
+
+    private TaskContractArtifactWriter() {}
+
+    static void writeJson(TaskContract contract, Path artifactsDir) throws IOException {
+        Files.createDirectories(artifactsDir);
+        var jsonPath = artifactsDir.resolve("task-contract.json");
+        MAPPER.writeValue(jsonPath.toFile(), contract);
+    }
+
+    static void writeMarkdown(TaskContract contract, Path artifactsDir) throws IOException {
+        Files.createDirectories(artifactsDir);
+        Files.writeString(artifactsDir.resolve("task-contract.md"), renderMarkdown(contract), StandardCharsets.UTF_8);
+    }
+
+    static String renderMarkdown(TaskContract contract) {
+        var md = new StringBuilder();
+        md.append("# Task Contract\n\n");
+
+        md.append("## Objective\n\n").append(contract.objective()).append("\n\n");
+
+        md.append("## Scope\n\n");
+        if (contract.scope() != null) {
+            if (!contract.scope().included().isEmpty()) {
+                md.append("**Included:**\n");
+                for (var item : contract.scope().included()) {
+                    md.append("- ").append(item.operation()).append(": ").append(item.path()).append("\n");
+                }
+                md.append("\n");
+            }
+            if (!contract.scope().excluded().isEmpty()) {
+                md.append("**Excluded:**\n");
+                for (var item : contract.scope().excluded()) {
+                    md.append("- ").append(item).append("\n");
+                }
+                md.append("\n");
+            }
+        }
+
+        md.append("## Acceptance Criteria\n\n");
+        for (var criterion : contract.acceptanceCriteria()) {
+            md.append("- [ ] ").append(criterion.id()).append(": ").append(criterion.text()).append("\n");
+        }
+        md.append("\n");
+
+        appendListSection(md, "Test Requirements", contract.testRequirements().stream().map(c -> c.id() + ": " + c.text()).toList());
+        appendListSection(md, "Constraints", contract.constraints());
+        appendListSection(md, "Non-Goals", contract.nonGoals());
+        appendListSection(md, "Risk Areas", contract.riskAreas());
+        appendListSection(md, "Evidence References", contract.evidenceRefs());
+        appendListSection(md, "Ambiguity Notes", contract.ambiguityNotes());
+        appendListSection(md, "Human Questions", contract.humanQuestions());
+
+        appendListSection(md, "Nonessential Operation Declarations", nonessentialOperationDescriptions(contract));
+
+        if (contract.source() != null) {
+            md.append("## Source\n\n");
+            md.append("- **Created by:** ").append(contract.source().createdBy()).append("\n");
+            if (contract.source().rawRequestRef() != null) {
+                md.append("- **Raw request:** ").append(contract.source().rawRequestRef()).append("\n");
+            }
+            md.append("\n");
+        }
+
+        return md.toString();
+    }
+
+    static java.util.List<String> nonessentialOperationDescriptions(TaskContract contract) {
+        return contract.nonessentialOperationDeclarations().isEmpty() ? java.util.List.of("None")
+                : contract.nonessentialOperationDeclarations().stream().map(d -> d.id() + ": " + d.rationale()
+                    + "; node=" + d.nodeDefinitionId() + "; kind=" + d.operationKind()
+                    + "; criteria=" + d.criterionIds() + "; parameters_sha256=" + d.operationParametersSha256()
+                    + "; source=" + d.nodeContractRef() + "; rule=" + d.ruleIdentity()).toList();
+    }
+
+    static ObjectMapper mapper() {
+        return MAPPER;
+    }
+
+    static String sha256(byte[] bytes) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+        } catch (Exception failure) {
+            throw new IllegalStateException("SHA-256 digest is unavailable", failure);
+        }
+    }
+
+    static String sha256(Path path) throws IOException {
+        return sha256(Files.readAllBytes(path));
+    }
+
+    private static void appendListSection(StringBuilder md, String title, java.util.List<String> items) {
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+        md.append("## ").append(title).append("\n\n");
+        for (var item : items) {
+            md.append("- ").append(item).append("\n");
+        }
+        md.append("\n");
+    }
+}

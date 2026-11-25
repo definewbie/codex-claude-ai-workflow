@@ -28,9 +28,13 @@ public final class ApprovedTaskContractProposalFixture {
         MAPPER.writeValue(iterationsDir.resolve(iterationId + ".json").toFile(),
                 WorkflowIterationDocument.initial("intake.claude_brainstorm", Instant.now()));
         var proposalOutput = outputDir(workstreamDir, "run-proposal").resolve("intake-claude-brainstorm.json");
-        Files.writeString(proposalOutput, "{}");
         var proposalSidecar = AgentOutputContractSidecar.pathFor(proposalOutput);
         var proposal = MAPPER.readValue(proposalJson, Map.class);
+        var raw=(com.fasterxml.jackson.databind.node.ObjectNode)MAPPER.readTree(proposalJson);
+        raw.remove("schema_version");raw.put("decision","READY_FOR_PRODUCT_REVIEW").put("summary","proposal ready").put("needs_human_input",false);
+        raw.path("scope").path("included").forEach(e->((com.fasterxml.jackson.databind.node.ObjectNode)e).remove("operation"));
+        MAPPER.writeValue(proposalOutput.toFile(),Map.of("schema_version",1,"workstream_id",workstreamId,"run_id","run-proposal",
+                "node_id","intake.claude_brainstorm","result",raw));
         MAPPER.writeValue(proposalSidecar.toFile(), Map.ofEntries(
                 Map.entry("artifact_type", "agent_output_contract"),
                 Map.entry("schema_version", 1),
@@ -94,6 +98,19 @@ public final class ApprovedTaskContractProposalFixture {
                         "source_outcome", "READY_FOR_PRODUCT_REVIEW",
                         "subject_input_refs", List.of(reviewRef))));
         return reviewRef;
+    }
+
+    /** Standalone initial fixtures use the actual wire shape; this does not create R01 or grant authority. */
+    static void writeInitialSource(Path root, AgentOutputContractDocument document) throws Exception {
+        var raw = (com.fasterxml.jackson.databind.node.ObjectNode) MAPPER.valueToTree(document.taskContractProposal());
+        raw.remove("schema_version");
+        raw.put("artifact_type", "task_contract_proposal");
+        raw.put("decision", document.decision()).put("summary", document.summary()).put("needs_human_input", false);
+        raw.path("scope").path("included").forEach(e ->
+                ((com.fasterxml.jackson.databind.node.ObjectNode) e).remove("operation"));
+        MAPPER.writeValue(root.resolve(document.sourceOutputRef()).toFile(), Map.of(
+                "schema_version", 1, "workstream_id", document.workstreamId(), "run_id", document.runId(),
+                "node_id", document.nodeId(), "result", raw));
     }
 
     private static Path outputDir(Path workstreamDir, String runId) throws Exception {

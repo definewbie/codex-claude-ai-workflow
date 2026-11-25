@@ -1,0 +1,40 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792718949588-d29c3491",
+  "agentTaskId" : "agt-1792718949584-964af3bc",
+  "workflowExecutionId" : "wfe-1792718949515-83df36f8",
+  "nodeInstanceId" : "node-context-design_codex_arch_review-014",
+  "nodeDefinitionId" : "context.design_codex_arch_review",
+  "handlerType" : "context.build_package",
+  "status" : "SUCCEEDED",
+  "pid" : 77039,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-design_codex_arch_review-014.md" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-23T01:29:08.447Z",
+      "executor_pid" : 77039,
+      "input_identity" : "1d826139d7e80352770cffde64d8d1b1e40cee6385818a4463ef10a33c0a1370"
+    },
+    "context_package" : ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-design_codex_arch_review-014.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-design_codex_arch_review-014.json",
+    "target_node" : "design.codex_arch_review",
+    "profile" : "architecture_review",
+    "sections" : [ "input_artifacts", "iteration_history", "review_evidence", "human_feedback", "recent_agent_outputs", "ledger_pointers" ],
+    "input_ref_count" : 5,
+    "generated_at" : "2026-10-23T01:29:09.730985Z",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-23T01:29:09.588464Z",
+  "finishedAt" : "2026-10-23T01:29:09.742909Z",
+  "durationMs" : 154
+}

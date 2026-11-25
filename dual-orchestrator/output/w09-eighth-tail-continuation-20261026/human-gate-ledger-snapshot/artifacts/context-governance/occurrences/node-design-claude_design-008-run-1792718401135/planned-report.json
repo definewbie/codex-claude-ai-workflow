@@ -1,0 +1,20 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "context_governance_report",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "design",
+  "nodeInstanceId" : "node-design-claude_design-008",
+  "nodeDefinitionId" : "design.claude_design",
+  "builderNodeDefinitionId" : "design.claude_design",
+  "targetNodeDefinitionId" : "design.claude_design",
+  "iterationId" : "iter-001",
+  "reportPhase" : "planned",
+  "plannedReadFiles" : [ ],
+  "plannedWriteFiles" : [ ],
+  "plannedPreviouslyReadFiles" : [ ],
+  "plannedRepeatedReadAvoidance" : [ ],
+  "actualReadFiles" : [ ],
+  "actualWriteFiles" : [ ],
+  "telemetryPending" : true,
+  "generatedAt" : "2026-10-23T01:20:01.220289Z"
+}

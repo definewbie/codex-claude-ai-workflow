@@ -10,6 +10,7 @@ import java.util.Optional;
 
 final class SessionCompactionSeedWriter {
     Optional<Path> write(
+            dev.dual.ledger.file.WorkflowFileLedger ledger,
             Path workspaceRoot,
             String workstreamId,
             Path runDir,
@@ -25,10 +26,10 @@ final class SessionCompactionSeedWriter {
         var workstreamDir = workspaceRoot.resolve(".agent").resolve("workstreams").resolve(workstreamId);
         if ("review_evidence_brief".equals(decision.seedKind())) {
             builder.append("## Review Evidence Brief\n\n");
-            WorkstreamMemoryProjection.appendReviewEvidenceBrief(builder, workstreamDir, workspaceRoot);
+            WorkstreamMemoryProjection.appendReviewEvidenceBrief(ledger, builder, workstreamDir, workspaceRoot);
         } else {
             builder.append("## Agent Handoff\n\n");
-            WorkstreamMemoryProjection.appendAgentHandoff(builder, workstreamDir, workspaceRoot);
+            WorkstreamMemoryProjection.appendAgentHandoff(ledger, builder, workstreamDir, workspaceRoot);
         }
         var path = runDir.resolve("prompts").resolve("session-compaction-seed.md");
         Files.createDirectories(path.getParent());

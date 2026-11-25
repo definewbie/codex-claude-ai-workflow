@@ -1,0 +1,8 @@
+{
+  "exit_code": 1,
+  "classification": "FAIL",
+  "source_unchanged": true,
+  "source_mismatches": [],
+  "failure": "AcpxAgentTransportTest.currentPermissionDenialIsTypedAndAbnormalReturnCancelsExactNamedSession: incomplete protocol fixture expected DENIED but actual CANCELLED",
+  "note": "No passing final result claimed; later whole clean run required"
+}

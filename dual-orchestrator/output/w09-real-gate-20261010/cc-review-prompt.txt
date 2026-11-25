@@ -1,0 +1,9 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的首次 W09 真实 Gate 阻塞做独立只读评审，遵守 AGENTS.md。
+
+入口：output/w09-real-gate-20261010/assessment.md；同目录有真实命令/账本快照、source-checks.json、停止记录与原记录引用。
+
+请自行重建会话创建→身份核验→prompt资格→失败固定→恢复/报告链。判断三种session身份的必需性与真实缺字段形态，检查是否误拒合法客户端、恢复原因是否同源，并核对Gate分类；不要预设作者结论。沿主调用/correction、两客户端及权限关联等兄弟入口检查严格身份仍应如何守住。
+
+给分级发现、证据、未核验范围及有界修复建议；按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 核对。优先复用现有owner与真实合法形态，不增平台或版本锁。
+
+不修改文件、不运行native/provider、不恢复本样本、不启动额外agent。

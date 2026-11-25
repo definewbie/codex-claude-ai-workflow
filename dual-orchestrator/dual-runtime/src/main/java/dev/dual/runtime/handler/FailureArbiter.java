@@ -15,8 +15,8 @@ public final class FailureArbiter {
             case CONTRACT_GAP, CONTRACT_AMBIGUITY -> "Revise the proposal and obtain new approvals before compiling";
             case IMPLEMENTATION_BUG -> "Repair within the approved contract, then run self-test";
             case VERIFICATION_INSUFFICIENT -> "Collect existing verification evidence in self-test";
-            case CONTEXT_INSUFFICIENT -> "Rebuild implementation context and address the missing prerequisites";
-            case TOOL_LIMITATION -> "Address tool prerequisites before retrying implementation";
+            case CONTEXT_INSUFFICIENT, TOOL_LIMITATION ->
+                    "Obtain human disposition of the missing prerequisites: collect evidence or explicitly authorize repair";
             case REVIEW_NOISE -> "Re-run acceptance review";
         };
         return new FailureClassification(category, "Validated explicit acceptance category: " + category,

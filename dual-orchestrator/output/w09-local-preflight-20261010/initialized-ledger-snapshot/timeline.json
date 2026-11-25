@@ -1,0 +1,30 @@
+{
+  "schemaVersion" : 1,
+  "commitSequence" : 1,
+  "workstreamId" : "ws-20261010T055644Z-6QCS",
+  "workflowInstanceId" : "wf-ws-20261010T055644Z-6QCS",
+  "workflowId" : "agent-lifecycle-terminal-delivery",
+  "definitionVersion" : 5,
+  "workflowStatus" : "RUNNING",
+  "activeNodeInstanceIds" : [ "node-context-intake_claude_brainstorm-001" ],
+  "openGateIds" : [ ],
+  "updatedAt" : "2026-10-10T05:56:44.696877Z",
+  "nodes" : [ {
+    "nodeInstanceId" : "node-context-intake_claude_brainstorm-001",
+    "nodeDefinitionId" : "context.intake_claude_brainstorm",
+    "displayName" : "context.intake_claude_brainstorm",
+    "kind" : "TASK",
+    "handlerType" : "context.build_package",
+    "status" : "READY",
+    "stageId" : "stage-context",
+    "iterationId" : "iter-001",
+    "inputRefs" : [ ],
+    "outputRefs" : [ ],
+    "runRef" : null,
+    "latestExecutionId" : "",
+    "startedAt" : null,
+    "finishedAt" : null,
+    "durationMs" : null,
+    "result" : { }
+  } ]
+}

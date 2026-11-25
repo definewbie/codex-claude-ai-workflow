@@ -15,7 +15,8 @@ public record AcpxRunResult(
         AcpxUsage usage,
         AcpxPromptCompletion promptCompletion,
         ProcessResult processResult,
-        List<AdapterSignal> adapterSignals
+        List<AdapterSignal> adapterSignals,
+        List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> toolObservations
 ) {
     public AcpxRunResult {
         command = command == null ? List.of() : List.copyOf(command);
@@ -25,6 +26,14 @@ public record AcpxRunResult(
             throw new IllegalArgumentException("processResult is required");
         }
         adapterSignals = adapterSignals == null ? List.of() : List.copyOf(adapterSignals);
+        toolObservations = toolObservations == null ? List.of() : List.copyOf(toolObservations);
+    }
+
+    /** Bootstrap/failed calls have no internal tool evidence; an empty list grants no verification success. */
+    public AcpxRunResult(Instant startedAt, Instant finishedAt, List<String> command,
+                         List<AcpxExecutionEvent> executionTimeline, AcpxUsage usage,
+                         AcpxPromptCompletion promptCompletion, ProcessResult processResult, List<AdapterSignal> adapterSignals) {
+        this(startedAt, finishedAt, command, executionTimeline, usage, promptCompletion, processResult, adapterSignals, List.of());
     }
 
     public int exitCode() {

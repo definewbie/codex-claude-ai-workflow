@@ -212,8 +212,8 @@ class WorkflowDefinitionLoaderTest {
         assertEquals("agent-lifecycle-terminal-delivery", definition.workflowId());
         assertEquals(5, definition.version());
         assertEquals("context.intake_claude_brainstorm", definition.entryNodeId());
-        assertEquals(31, definition.nodes().size());
-        assertEquals(56, definition.edges().size());
+        assertEquals(32, definition.nodes().size());
+        assertEquals(59, definition.edges().size());
     }
 
     @Test

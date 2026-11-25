@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RetryFailureContextTest {
     @TempDir Path root;
-    final WorkflowFileLedger ledger = new WorkflowFileLedger();
+    final WorkflowFileLedger ledger = LedgerTestFixture.ledger();
 
     @Test void boundedSnapshotSurvivesQueueAndRunningWithoutGrantOrNoteInjection() throws Exception {
         var paths = failed("large", "acpx.agent_run", "AGENT_OUTPUT_CONTRACT_VIOLATION",
@@ -95,7 +95,7 @@ class RetryFailureContextTest {
         var paths = new WorkstreamPaths(root.resolve(name), new DualId("ws-" + name));
         var definition = new WorkflowDefinition("diagnostic-fixture", 1, "first",
                 List.of(new NodeDefinition("first", NodeKind.TASK, handler, Map.of())), List.of());
-        ledger.initialize(paths, "wf-" + name, definition);
+        LedgerTestFixture.initialize(ledger, paths, "wf-" + name, definition);
         ledger.completeAndRoute(paths, definition, active(paths).nodeInstanceId(), NodeStatus.FAILED, reason,
                 List.of("old-output.json"), Map.of("reason", reason, "run_id", "run-fixture", "parse_error", diagnostic));
         return paths;

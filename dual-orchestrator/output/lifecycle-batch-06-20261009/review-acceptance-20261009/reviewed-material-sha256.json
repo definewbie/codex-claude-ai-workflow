@@ -1,0 +1,17 @@
+{
+  "output/lifecycle-batch-06-20261009/wiring-candidate/cc-review-prompt.md": "955e3b482cbb8d2ec3074777eb50e92c645f0c3c5f3d58ab0618fa1db133192a",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/preflight-material-sha256.json": "1def8661ef87ed02cd60765d14f313c504b1b96173d2e4daa99f5ab54816e054",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/documentation-incremental.patch": "80bd18da06df4ec94407e6b19a9a1904f8173b99d4c0e1053894caaa02ed8015",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/examples.json": "482da2d6aa59b7988544ca4872bdadbffcf99fcc59c425cd221653dafda751e9",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/affected-scope.json": "495403c6907f0cd2319eeadd9a06007215227515a121046ab5b7b838e1d294e1",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/documentation-changes.json": "aedeb1cbd84aee84161a786a8423bf32cbbb674c9e078569869be9d77833104a",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/baseline.json": "15a712858895fdf37d74c60547e6badcf5c8f27c8458366617155d9d03f1a80e",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/self-review.md": "4d34eae2e1eb31d7a94a7069658a955724b331fe46051e7ffa4a11a505a34e5b",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/source-checks.json": "961ef4572786b8d109a34b2d8792c5754ccf2afd403776899e4894b45001aac2",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/verification.json": "99c3aca5fb5807819565244ef4ba9a97f0c0c594c40d1f5a3511872e3291b97e",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/documents-before-text.json": "d0c7303e714ccfafb2f016dab0614358ddb89345f9da5148d37d46f3153b5ca5",
+  "output/lifecycle-batch-06-20261009/wiring-candidate/protocol.md": "77c10cfad64a5b1c76f6de72feef02ba5af2830947eb2d6bfc93f3a677152038",
+  "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "cfa5de82e94bf32870765ec8d02a73b68db87a3a0ee1234b191d2d91088e80e0",
+  "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "1c7d7a64e7f083bd7bba1c4dd2c840e9b1198ec9687e7ff59e704036a3b1134b",
+  "output/lifecycle-batch-06-20261009/preflight.md": "bfabca48079f426ea400cb7419958a4f01e876f02749832e2876d41cc090676e"
+}

@@ -1,0 +1,18 @@
+{
+  "config_source_files": {
+    "global": {
+      "path": "/Users/kriswang/.acpx/config.json",
+      "exists": true,
+      "sha256": "6213952d843458bda48342d9d132587177dc6279f1f5f63799bde1e81185f6d6"
+    },
+    "project": {
+      "path": "/private/tmp/dual-w09-newlines-20261010/worktree/.acpxrc.json",
+      "exists": false,
+      "sha256": null
+    }
+  },
+  "agent_launch_spec_matches_reviewed": true,
+  "wrapper_sha256": "0aa69b6f1ff164f7282d6a58c83ffb902db5d417609ebb1d5827857f5db1abd9",
+  "dist_sha256": "e6c7915a4b46eec6fe338c7f71efdb28658d64d3f43d38907e4919e84bc17854",
+  "true_native_handshake_not_yet_observed": true
+}

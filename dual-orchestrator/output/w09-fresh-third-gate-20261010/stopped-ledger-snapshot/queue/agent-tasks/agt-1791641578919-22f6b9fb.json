@@ -1,0 +1,42 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1791641578919-22f6b9fb",
+  "workflowExecutionId" : "wfe-1791641578843-7211643a",
+  "nodeInstanceId" : "node-design-claude_design-013",
+  "nodeDefinitionId" : "design.claude_design",
+  "nodeKind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "agent" : "claude",
+  "session" : "claude-main",
+  "promptTemplate" : "design-claude",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "acpx.agent_run",
+    "agent" : "claude",
+    "session" : "claude-main",
+    "prompt_template" : "design-claude",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "agent" : "claude",
+      "session" : "claude-main",
+      "permission_profile" : "observe",
+      "prompt_template" : "design-claude",
+      "expected_artifact" : "design_result",
+      "artifact_compiler" : "agent_output_contract_compiler",
+      "allowed_stage_outcomes" : [ "READY", "BLOCKED" ],
+      "required_contract_phase" : "GOAL"
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 5
+  },
+  "nodeExecutionId" : "nxe-1791641578925-ee92193a",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-10T14:12:58.919940Z",
+  "claimedAt" : "2026-10-10T14:12:58.933344Z",
+  "completedAt" : "2026-10-10T14:16:16.105301Z"
+}

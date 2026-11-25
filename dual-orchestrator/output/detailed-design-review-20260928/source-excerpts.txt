@@ -1,0 +1,1017 @@
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/configure-acpx.sh
+
+20: EXPECTED_PATCH_SHA256="4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e"
+21: EXPECTED_POLICY_SCHEMA="claude_execution_policy.v2"
+22: SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+23: REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+24: ACPX_EXECUTABLE="${DUAL_ACPX_EXECUTABLE:-$REPO_ROOT/.tools/acpx-e1/bin/acpx}"
+25: CLAUDE_ACP_COMMAND="${DUAL_CLAUDE_ACP_COMMAND:-$SCRIPT_DIR/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0}"
+26: CONFIG_PATH="${ACPX_CONFIG_PATH:-$HOME/.acpx/config.json}"
+27: 
+83: main() {
+84:   require_command node
+85:   [[ -x "$ACPX_EXECUTABLE" ]] || fail "Patched acpx is missing: $ACPX_EXECUTABLE. Run ./scripts/install-acpx-e1.sh"
+86:   CODEX_ACP_COMMAND="${DUAL_CODEX_ACP_COMMAND:-npx -y @agentclientprotocol/codex-acp@1.10.0}"
+87:   check_acpx_version
+88:   check_acpx_build_identity
+89:   write_config
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/tools/acpx-e1/manifest.json
+
+1: {
+2:   "schema_version": "acpx_e1_patch_manifest.v1",
+3:   "upstream_repository": "https://github.com/openclaw/acpx.git",
+4:   "upstream_tag": "v0.13.2",
+5:   "upstream_tag_object": "a5db336c1f886fb722b6ba5a4a9898181fe1a92a",
+6:   "upstream_commit": "fd173f04aa1b56f9e3f5ca5190c034ddcae28792",
+7:   "upstream_npm_tarball_sha256": "b483b20ea1db5ffdeb0eb2e3105283ffda0b88ccf37e034d500522aaeef8d12b",
+8:   "patch_ref": "patches/acpx-v0.13.2-e1-policy-transport.patch",
+9:   "patch_sha256": "4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e",
+10:   "policy_schema": "claude_execution_policy.v2",
+11:   "claude_agent_acp_version": "0.70.0",
+12:   "build_identity_command": "acpx build-info --json"
+13: }
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/audit/build-info.json
+
+1: {"upstream_commit":"fd173f04aa1b56f9e3f5ca5190c034ddcae28792","patch_sha256":"41ee5f00c95dc07fc113fbac171270204ca98c842e9fb6838df900f4109e8d2c","policy_schema":"claude_execution_policy.v2"}
+
+## /Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/package.json
+
+1: {
+2:   "name": "@agentclientprotocol/codex-acp",
+3:   "publishConfig": {
+4:     "access": "public"
+5:   },
+6:   "version": "1.10.0",
+7:   "description": "",
+8:   "main": "dist/index.js",
+9:   "bin": {
+10:     "codex-acp": "dist/index.js"
+11:   },
+12:   "files": [
+13:     "dist/index.js",
+14:     "README.md",
+15:     "LICENSE",
+16:     "package.json"
+17:   ],
+18:   "scripts": {
+19:     "prepublishOnly": "npm run build",
+20:     "build": "node build.mjs",
+21:     "bundle:all": "npm run bundle:linux-x64 && npm run bundle:linux-arm64 && npm run bundle:darwin-x64 && npm run bundle:darwin-arm64 && npm run bundle:win-x64 && npm run bundle:win-arm64",
+22:     "bundle:linux-x64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-linux-x64-baseline --outfile dist/bin/codex-acp-x64-linux",
+23:     "bundle:linux-arm64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-linux-arm64 --outfile dist/bin/codex-acp-arm64-linux",
+24:     "bundle:darwin-x64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-darwin-x64-baseline --outfile dist/bin/codex-acp-x64-darwin",
+25:     "bundle:darwin-arm64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-darwin-arm64 --outfile dist/bin/codex-acp-arm64-darwin",
+26:     "bundle:win-x64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-windows-x64-baseline --outfile dist/bin/codex-acp-x64-windows.exe",
+27:     "bundle:win-arm64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-windows-arm64 --outfile dist/bin/codex-acp-arm64-windows.exe",
+28:     "package:all": "npm run package:linux-x64 && npm run package:linux-arm64 && npm run package:darwin-x64 && npm run package:darwin-arm64 && npm run package:win-x64 && npm run package:win-arm64",
+29:     "package:linux-x64": "cd dist/bin && zip codex-acp-x64-linux.zip codex-acp-x64-linux",
+30:     "package:linux-arm64": "cd dist/bin && zip codex-acp-arm64-linux.zip codex-acp-arm64-linux",
+31:     "package:darwin-x64": "cd dist/bin && zip codex-acp-x64-darwin.zip codex-acp-x64-darwin",
+32:     "package:darwin-arm64": "cd dist/bin && zip codex-acp-arm64-darwin.zip codex-acp-arm64-darwin",
+33:     "package:win-x64": "cd dist/bin && zip codex-acp-x64-windows.zip codex-acp-x64-windows.exe",
+34:     "package:win-arm64": "cd dist/bin && zip codex-acp-arm64-windows.zip codex-acp-arm64-windows.exe",
+35:     "start": "node --import tsx src/index.ts",
+36:     "example:simple-client": "node --import tsx examples/simple-client.ts",
+37:     "example:steering": "node --import tsx examples/steering.ts",
+38:     "example:steering:multistep": "node --import tsx examples/steering.ts",
+39:     "generate-types": "./node_modules/.bin/codex app-server generate-ts --out src/app-server",
+40:     "release:preflight": "bash scripts/release-preflight.sh",
+41:     "test": "vitest run --no-file-parallelism --retry=2",
+42:     "test:e2e": "npm run build && RUN_E2E_TESTS=true vitest run --no-file-parallelism --retry=2 src/__tests__/CodexACPAgent/e2e",
+43:     "test:watch": "vitest",
+44:     "typecheck": "tsc --noEmit && tsc --noEmit -p examples/tsconfig.json",
+45:     "codex-test": "tsx .claude/skills/run-codex/scripts/run-codex-test.ts"
+46:   },
+47:   "homepage": "https://github.com/agentclientprotocol/codex-acp#readme",
+48:   "bugs": {
+49:     "url": "https://github.com/agentclientprotocol/codex-acp/issues"
+50:   },
+51:   "repository": {
+52:     "type": "git",
+53:     "url": "git+https://github.com/agentclientprotocol/codex-acp.git"
+54:   },
+55:   "keywords": [],
+56:   "author": "Agent Client Protocol",
+57:   "license": "Apache-2.0",
+58:   "type": "module",
+59:   "devDependencies": {
+60:     "@types/node": "^26.1.0",
+61:     "esbuild": "^0.28.2",
+62:     "mcp-hello-world": "^1.1.2",
+63:     "tsx": "^4.23.12",
+64:     "typescript": "^7.0.2",
+65:     "vitest": "^4.1.11"
+66:   },
+67:   "dependencies": {
+68:     "@agentclientprotocol/sdk": "^1.4.0",
+69:     "@openai/codex": "^0.153.3",
+70:     "diff": "^9.0.0",
+71:     "open": "^11.0.1",
+72:     "vscode-jsonrpc": "^9.0.1",
+73:     "zod": "^4.0.0"
+74:   }
+75: }
+
+## /Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex/package.json
+
+1: {
+2:   "name": "@openai/codex",
+3:   "version": "0.153.4",
+4:   "description": "Codex CLI is a coding agent from OpenAI that runs locally on your computer.",
+5:   "license": "Apache-2.0",
+6:   "bin": {
+7:     "codex": "bin/codex.js"
+8:   },
+9:   "type": "module",
+10:   "engines": {
+11:     "node": ">=16"
+12:   },
+13:   "files": [
+14:     "bin/codex.js"
+15:   ],
+16:   "repository": {
+17:     "type": "git",
+18:     "url": "git+https://github.com/openai/codex.git",
+19:     "directory": "codex-cli"
+20:   },
+21:   "packageManager": "pnpm@10.34.5+sha512.a4ee05f2f73658255bd6a89859c065a45c28a57daefae2c893a168ee2b73168c37b91e83e57ea67654ad03f03031746430e8bce38e362e042605fb8abc80192e",
+22:   "optionalDependencies": {
+23:     "@openai/codex-linux-x64": "npm:@openai/codex@0.153.4-linux-x64",
+24:     "@openai/codex-linux-arm64": "npm:@openai/codex@0.153.4-linux-arm64",
+25:     "@openai/codex-darwin-x64": "npm:@openai/codex@0.153.4-darwin-x64",
+26:     "@openai/codex-darwin-arm64": "npm:@openai/codex@0.153.4-darwin-arm64",
+27:     "@openai/codex-win32-x64": "npm:@openai/codex@0.153.4-win32-x64",
+28:     "@openai/codex-win32-arm64": "npm:@openai/codex@0.153.4-win32-arm64"
+29:   }
+30: }
+
+## /Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js
+
+27215:     this.sandboxMode = sandboxMode;
+27216:   }
+27217:   static ReadOnly = new _AgentMode(
+27218:     "read-only",
+27219:     "Ask for approval",
+27220:     "Always ask to edit external files and use the internet",
+27221:     "standard",
+27222:     "on-request",
+27223:     "user",
+27224:     {
+27225:       type: "workspaceWrite",
+27226:       writableRoots: [],
+27227:       networkAccess: false,
+27228:       excludeTmpdirEnvVar: false,
+27229:       excludeSlashTmp: false
+27230:     },
+27231:     "workspace-write"
+27232:   );
+27233:   static Agent = new _AgentMode(
+27234:     "agent",
+27235:     "Approve for me",
+27236:     "Only ask for actions detected as potentially unsafe",
+27237:     "auto_review",
+27238:     "on-request",
+27239:     "auto_review",
+27240:     {
+27241:       type: "workspaceWrite",
+27242:       writableRoots: [],
+27243:       networkAccess: false,
+27244:       excludeTmpdirEnvVar: false,
+27245:       excludeSlashTmp: false
+27246:     },
+27247:     "workspace-write"
+27248:   );
+27249:   static AgentFullAccess = new _AgentMode(
+27250:     "agent-full-access",
+27251:     "Full access",
+27252:     "Unrestricted access to the internet and any file on your computer",
+27253:     "full_access",
+27254:     "never",
+27255:     "user",
+27256:     { "type": "dangerFullAccess" },
+27257:     "danger-full-access"
+27258:   );
+27259:   static DEFAULT_AGENT_MODE = _AgentMode.Agent;
+27260:   toSessionMode() {
+27261:     return {
+27262:       id: this.id,
+27263:       name: this.name,
+27264:       description: this.description,
+27265:       _meta: { kind: this.kind }
+27266:     };
+27267:   }
+27268:   toSessionModeState() {
+27269:     return {
+27270:       availableModes: _AgentMode.all().map((mode) => mode.toSessionMode()),
+27271:       currentModeId: this.id
+27272:     };
+27273:   }
+27274:   toConfigOption() {
+27275:     return {
+27276:       id: MODE_CONFIG_ID,
+27277:       name: "Mode",
+27278:       description: "Approval and sandboxing preset for the session",
+27279:       category: "mode",
+27280:       type: "select",
+27281:       currentValue: this.id,
+27282:       options: _AgentMode.all().map((mode) => ({
+27283:         value: mode.id,
+27284:         name: mode.name,
+27285:         description: mode.description,
+27286:         _meta: { kind: mode.kind }
+27287:       }))
+27288:     };
+27289:   }
+27290:   static all() {
+27291:     return [_AgentMode.ReadOnly, _AgentMode.Agent, _AgentMode.AgentFullAccess];
+27292:   }
+27293:   static find(modeId) {
+27294:     const match = _AgentMode.all().find((m) => m.id === modeId);
+27295:     return match ?? null;
+27296:   }
+27297:   static getInitialAgentMode() {
+27298:     const predefinedAgentMode = process.env["INITIAL_AGENT_MODE"];
+27299:     if (predefinedAgentMode) {
+27300:       return _AgentMode.find(predefinedAgentMode) ?? _AgentMode.DEFAULT_AGENT_MODE;
+27301:     } else {
+27302:       return _AgentMode.DEFAULT_AGENT_MODE;
+27303:     }
+27304:   }
+27305: };
+27306: 
+28406:   async newSession(request) {
+28407:     const additionalDirectories = readAdditionalDirectories(request.cwd, request.additionalDirectories, request._meta);
+28408:     await this.refreshSkills(request.cwd, additionalDirectories);
+28409:     const response = await this.codexClient.threadStart({
+28410:       config: await this.createSessionConfig(request.cwd, additionalDirectories, request.mcpServers),
+28411:       modelProvider: this.getModelProvider(),
+28412:       cwd: request.cwd
+28413:     });
+28414:     const codexModels = await this.fetchAvailableModels();
+28415:     if (codexModels.length === 0) {
+28416:       throw new Error("Codex did not return any models");
+28417:     }
+28656:     const input = buildPromptItems(request.prompt);
+28657:     const effort = modelId.effort;
+28658:     await this.refreshSkills(cwd, additionalDirectories);
+28659:     if (shouldCancel?.()) {
+28660:       return null;
+28661:     }
+28662:     return await this.codexClient.runTurn({
+28663:       threadId: request.sessionId,
+28664:       input,
+28665:       approvalPolicy: agentMode.approvalPolicy,
+28666:       approvalsReviewer: agentMode.approvalsReviewer,
+28667:       sandboxPolicy: addAdditionalDirectoriesToSandboxPolicy(agentMode.sandboxPolicy, additionalDirectories),
+28668:       summary: disableSummary ? "none" : "auto",
+28669:       effort,
+28670:       model: modelId.model,
+28671:       serviceTier
+28672:     }, onTurnStarted);
+28673:   }
+28674:   async runAgentFileChangeReport(params) {
+28675:     if (params.signal?.aborted) {
+28676:       return createUnavailableAgentFileChangeReport(params.requestId, "cancelled");
+28677:     }
+28678:     const budget = new AgentFileChangeReportBudget(params.signal);
+28679:     let forkThreadId = null;
+28680:     let auditTurnId = null;
+28681:     let auditTurnCompleted = false;
+28682:     let lateStopReason = null;
+28683:     try {
+28684:       const forkPromise = this.codexClient.threadFork({
+28685:         threadId: params.sessionId,
+28686:         lastTurnId: params.turnId,
+28687:         cwd: params.workspace.cwd,
+28688:         approvalPolicy: "never",
+28689:         sandbox: "read-only",
+28690:         developerInstructions: AGENT_FILE_CHANGE_REPORT_DEVELOPER_INSTRUCTIONS,
+28691:         ephemeral: true
+28692:       });
+28693:       void forkPromise.then((fork2) => {
+28694:         if (lateStopReason !== null && forkThreadId === null) {
+28695:           void this.unsubscribeAgentFileChangeReportThread(fork2.thread.id, budget);
+28696:         }
+28697:       }, () => {
+28698:       });
+28699:       const fork = await budget.wait(forkPromise);
+28700:       forkThreadId = fork.thread.id;
+28701:       const turnPromise = this.codexClient.runTurn({
+28702:         threadId: forkThreadId,
+28703:         input: [{
+28704:           type: "text",
+28705:           text: createAgentFileChangeReportPrompt(params.workspace),
+28706:           text_elements: []
+28707:         }],
+28708:         cwd: params.workspace.cwd,
+28709:         approvalPolicy: "never",
+28710:         sandboxPolicy: { type: "readOnly", networkAccess: false },
+28711:         summary: "none",
+28712:         outputSchema: AGENT_FILE_CHANGE_REPORT_OUTPUT_SCHEMA
+28713:       }, (turnId) => {
+28714:         auditTurnId = turnId;
+28715:         if (lateStopReason !== null && forkThreadId !== null) {
+28716:           void this.interruptAgentFileChangeReport(forkThreadId, turnId, lateStopReason, budget);
+
+## /Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/package.json
+
+1: {
+2:   "name": "@agentclientprotocol/claude-agent-acp",
+3:   "publishConfig": {
+4:     "access": "public"
+5:   },
+6:   "version": "0.70.0",
+7:   "description": "An ACP-compatible coding agent powered by the Claude Agent SDK (TypeScript)",
+8:   "main": "dist/lib.js",
+9:   "types": "dist/lib.d.ts",
+10:   "bin": {
+11:     "claude-agent-acp": "dist/index.js"
+12:   },
+13:   "type": "module",
+14:   "exports": {
+15:     ".": {
+16:       "types": "./dist/lib.d.ts",
+17:       "import": "./dist/lib.js"
+18:     },
+19:     "./*": "./*"
+20:   },
+21:   "files": [
+22:     "dist/",
+23:     "!dist/tests/",
+24:     "README.md",
+25:     "LICENSE",
+26:     "package.json"
+27:   ],
+28:   "scripts": {
+29:     "build": "tsc",
+30:     "start": "node dist/index.js",
+31:     "dev": "npm run build && npm run start",
+32:     "example:simple-client": "node --experimental-strip-types --disable-warning=ExperimentalWarning examples/simple-client.ts",
+33:     "lint": "eslint src --ext .ts",
+34:     "lint:fix": "eslint src --ext .ts --fix",
+35:     "format": "prettier --write .",
+36:     "format:check": "prettier --check .",
+37:     "check": "npm run lint && npm run format:check",
+38:     "release:preflight": "bash scripts/release-preflight.sh",
+39:     "test": "vitest",
+40:     "test:integration": "RUN_INTEGRATION_TESTS=true vitest run",
+41:     "test:run": "vitest run",
+42:     "test:coverage": "vitest run --coverage",
+43:     "prepublishOnly": "npm run build"
+44:   },
+45:   "keywords": [
+46:     "claude",
+47:     "acp",
+48:     "agent",
+49:     "anthropic",
+50:     "typescript",
+51:     "sdk",
+52:     "code"
+53:   ],
+54:   "homepage": "https://github.com/agentclientprotocol/claude-agent-acp#readme",
+55:   "bugs": {
+56:     "url": "https://github.com/agentclientprotocol/claude-agent-acp/issues"
+57:   },
+58:   "repository": {
+59:     "type": "git",
+60:     "url": "git+https://github.com/agentclientprotocol/claude-agent-acp.git"
+61:   },
+62:   "author": "Zed Industries",
+63:   "license": "Apache-2.0",
+64:   "engines": {
+65:     "node": ">=22"
+66:   },
+67:   "dependencies": {
+68:     "@agentclientprotocol/sdk": "1.3.0",
+69:     "@anthropic-ai/claude-agent-sdk": "0.3.232",
+70:     "zod": "^3.25.0 || ^4.0.0"
+71:   },
+72:   "devDependencies": {
+73:     "@anthropic-ai/sdk": "0.117.1",
+74:     "@eslint/js": "10.0.1",
+75:     "@tsconfig/node22": "22.0.5",
+76:     "@types/node": "26.2.0",
+77:     "@typescript-eslint/eslint-plugin": "8.67.0",
+78:     "@typescript-eslint/parser": "8.67.0",
+79:     "eslint": "10.8.1",
+80:     "eslint-config-prettier": "10.1.8",
+81:     "globals": "17.11.0",
+82:     "prettier": "3.9.6",
+83:     "ts-node": "10.9.2",
+84:     "typescript": "6.0.3",
+85:     "vitest": "4.1.10"
+86:   }
+87: }
+
+## /Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/package.json
+
+1: {
+2:   "name": "@anthropic-ai/claude-agent-sdk",
+3:   "version": "0.3.232",
+4:   "main": "sdk.mjs",
+5:   "types": "sdk.d.ts",
+6:   "exports": {
+7:     ".": {
+8:       "types": "./sdk.d.ts",
+9:       "default": "./sdk.mjs"
+10:     },
+11:     "./extract": {
+12:       "types": "./extractFromBunfs.d.ts",
+13:       "default": "./extractFromBunfs.js"
+14:     },
+15:     "./browser": {
+16:       "types": "./browser-sdk.d.ts",
+17:       "default": "./browser-sdk.js"
+18:     },
+19:     "./bridge": {
+20:       "types": "./bridge.d.ts",
+21:       "default": "./bridge.mjs"
+22:     },
+23:     "./sdk-tools": {
+24:       "types": "./sdk-tools.d.ts"
+25:     },
+26:     "./sdk-tools.js": {
+27:       "types": "./sdk-tools.d.ts"
+28:     }
+29:   },
+30:   "engines": {
+31:     "node": ">=18.0.0"
+32:   },
+33:   "type": "module",
+34:   "author": "Anthropic <support@anthropic.com>",
+35:   "license": "SEE LICENSE IN README.md",
+36:   "description": "SDK for building AI agents with Claude Code's capabilities. Programmatically interact with Claude to build autonomous agents that can understand codebases, edit files, and execute workflows.",
+37:   "homepage": "https://github.com/anthropics/claude-agent-sdk-typescript",
+38:   "repository": {
+39:     "type": "git",
+40:     "url": "https://github.com/anthropics/claude-agent-sdk-typescript.git"
+41:   },
+42:   "bugs": {
+43:     "url": "https://github.com/anthropics/claude-agent-sdk-typescript/issues"
+44:   },
+45:   "keywords": [
+46:     "ai",
+47:     "agent",
+48:     "sdk",
+49:     "claude",
+50:     "anthropic",
+51:     "automation",
+52:     "code-generation"
+53:   ],
+54:   "peerDependencies": {
+55:     "@anthropic-ai/sdk": ">=0.93.0",
+56:     "@modelcontextprotocol/sdk": "^1.29.0",
+57:     "zod": "^4.0.0"
+58:   },
+59:   "optionalDependencies": {
+60:     "@anthropic-ai/claude-agent-sdk-linux-x64": "0.3.232",
+61:     "@anthropic-ai/claude-agent-sdk-linux-arm64": "0.3.232",
+62:     "@anthropic-ai/claude-agent-sdk-linux-x64-musl": "0.3.232",
+63:     "@anthropic-ai/claude-agent-sdk-linux-arm64-musl": "0.3.232",
+64:     "@anthropic-ai/claude-agent-sdk-darwin-x64": "0.3.232",
+65:     "@anthropic-ai/claude-agent-sdk-darwin-arm64": "0.3.232",
+66:     "@anthropic-ai/claude-agent-sdk-win32-x64": "0.3.232",
+67:     "@anthropic-ai/claude-agent-sdk-win32-arm64": "0.3.232"
+68:   },
+69:   "files": [
+70:     "sdk.mjs",
+71:     "sdk.d.ts",
+72:     "sdk-tools.d.ts",
+73:     "agentSdkTypes.d.ts",
+74:     "bridge.mjs",
+75:     "bridge.d.ts",
+76:     "browser-sdk.js",
+77:     "browser-sdk.d.ts",
+78:     "extractFromBunfs.js",
+79:     "extractFromBunfs.d.ts",
+80:     "manifest.json",
+81:     "manifest.zst.json"
+82:   ],
+83:   "claudeCodeVersion": "2.1.232"
+84: }
+
+## /Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js
+
+4750:                 systemPrompt = customPrompt;
+4751:             }
+4752:             else if (typeof customPrompt === "object" &&
+4753:                 customPrompt !== null &&
+4754:                 !Array.isArray(customPrompt)) {
+4755:                 // Forward all preset options (append, excludeDynamicSections, and
+4756:                 // anything the SDK adds later) while locking type/preset.
+4757:                 systemPrompt = {
+4758:                     ...customPrompt,
+4759:                     type: "preset",
+4760:                     preset: "claude_code",
+4761:                 };
+4762:             }
+4763:         }
+4764:         const permissionMode = resolvePermissionMode(settingsManager.getSettings().permissions?.defaultMode, this.logger);
+4765:         // Extract options from _meta if provided
+4766:         const sessionMeta = params._meta;
+4767:         const userProvidedOptions = sessionMeta?.claudeCode?.options;
+4768:         const forwardSubagentText = supportsSubagentTranscript(this.clientCapabilities) ||
+4769:             userProvidedOptions?.forwardSubagentText === true;
+4770:         // Configure thinking behavior from environment variable
+4771:         const thinking = resolveThinkingConfig(process.env.MAX_THINKING_TOKENS, this.logger);
+4772:         // Parse model configuration from environment (e.g. Bedrock model overrides)
+4773:         const modelConfig = parseModelConfig(process.env.CLAUDE_MODEL_CONFIG);
+4774:         // Elicitation modes the connected client advertised. We only forward
+4775:         // elicitations (and only re-enable AskUserQuestion) for modes the client
+4776:         // can actually render.
+4850:         const env = {
+4851:             ...process.env,
+4852:             ...userProvidedOptions?.env,
+4853:             // Client-managed LLM routing: `providers/set` config wins, else the
+4854:             // legacy gateway auth request. Routing is baked into the query at
+4855:             // creation; provider updates recreate loaded queries between turns.
+4856:             ...providerEnv,
+4857:             // Opt-in to session state events like when the agent is idle
+4858:             CLAUDE_CODE_EMIT_SESSION_STATE_EVENTS: "1",
+4859:         };
+4860:         // Scopes the context-window cache to this query's backend (see
+4861:         // `contextWindowCache`). Derived from the same `env` object handed to the
+4862:         // SDK, so per-session `_meta` env routing and ambient process-env routing
+4863:         // are distinguished exactly as the CLI will see them.
+4864:         const providerCacheKey = providerCacheKeyFor(env);
+4865:         this.logger.log(`[session/query] sessionId=${sessionId} resume=${creationOpts?.resume ?? "none"} apiType=${resolvedProvider?.apiType ?? "native"} baseUrl=${resolvedProvider?.baseUrl ?? "native"}`);
+4866:         const options = {
+4867:             systemPrompt,
+4868:             settingSources: ["user", "project", "local"],
+4869:             ...(thinking !== undefined && { thinking }),
+4870:             ...userProvidedOptions,
+4871:             ...(settings && { settings }),
+4872:             env,
+4873:             // Override certain fields that must be controlled by ACP
+4874:             cwd: params.cwd,
+4875:             includePartialMessages: true,
+4876:             forwardSubagentText,
+4877:             mcpServers: {
+4878:                 ...(userProvidedOptions?.mcpServers || {}),
+4879:                 ...mcpServers,
+4880:                 ...(fileChangeAuditSupport
+4881:                     ? { [FILE_CHANGE_AUDIT_SERVER_NAME]: fileChangeAuditSupport.mcpServer }
+4882:                     : {}),
+4883:             },
+4884:             // If we want bypassPermissions to be an option, we have to allow it here.
+4885:             // But it doesn't work in root mode, so we only activate it if it will work.
+4886:             allowDangerouslySkipPermissions: ALLOW_BYPASS,
+4887:             permissionMode,
+4888:             canUseTool: this.canUseTool(sessionId),
+4889:             // Forward MCP elicitation requests onto ACP elicitation. Only attached
+4890:             // when the client advertised support, so non-supporting clients keep the
+4891:             // SDK's default (auto-decline) behavior. (AskUserQuestion is handled in
+4892:             // canUseTool, not here.)
+4893:             ...(elicitationSupport.form || elicitationSupport.url
+4894:                 ? { onElicitation: this.handleMcpElicitation(sessionId, elicitationSupport) }
+4895:                 : {}),
+4896:             // Render the CLI's refusal-fallback consent prompt ("<model> declined —
+4897:             // retry with <fallback>?") as an ACP form elicitation. Declaring the
+4898:             // kind is the opt-in: the CLI never emits an undeclared dialog, and the
+4899:             // flow instead degrades to the classic refusal error ending the turn.
+4900:             // Gated on form elicitation since that's the only ACP surface that can
+4901:             // present a choice outside a tool call.
+4902:             ...(elicitationSupport.form
+4903:                 ? {
+4904:                     onUserDialog: this.handleUserDialog(sessionId),
+4905:                     supportedDialogKinds: [REFUSAL_FALLBACK_DIALOG_KIND],
+4906:                 }
+4907:                 : {}),
+4908:             pathToClaudeCodeExecutable: process.env.CLAUDE_CODE_EXECUTABLE ?? (await claudeCliPath()),
+4909:             extraArgs: {
+4910:                 ...userProvidedOptions?.extraArgs,
+4911:                 "replay-user-messages": "",
+4912:             },
+4913:             disallowedTools: [...(userProvidedOptions?.disallowedTools || []), ...disallowedTools],
+4914:             tools,
+4915:             hooks: {
+4916:                 ...userProvidedOptions?.hooks,
+4917:                 ...(fileChangeAuditSupport
+4918:                     ? {
+4919:                         PreToolUse: [
+4920:                             ...(userProvidedOptions?.hooks?.PreToolUse || []),
+4921:                             { hooks: [fileChangeAuditSupport.preToolUseHook] },
+4922:                         ],
+4923:                     }
+4924:                     : {}),
+4925:                 PostToolUse: [
+4926:                     ...(userProvidedOptions?.hooks?.PostToolUse || []),
+4927:                     {
+4928:                         hooks: [
+4929:                             createPostToolUseHook({
+4930:                                 onEnterPlanMode: async () => {
+4931:                                     await this.client.sessionUpdate({
+4932:                                         sessionId,
+4933:                                         update: {
+4934:                                             sessionUpdate: "current_mode_update",
+4935:                                             currentModeId: "plan",
+4936:                                         },
+4937:                                     });
+4938:                                     await this.updateConfigOption(sessionId, MODE_CONFIG_ID, "plan");
+4939:                                 },
+4940:                             }),
+4941:                         ],
+4942:                     },
+4943:                 ],
+4944:                 ...(fileChangeAuditSupport
+4945:                     ? {
+4946:                         Stop: [
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/claude-execution-policy.ts
+
+70:   const parsed = JSON.parse(raw) as unknown;
+71:   const policy = requireObject(parsed, "claude execution policy");
+72:   assertExactKeys(policy, POLICY_KEYS, "claude execution policy");
+73:   assertText(policy, "schema_version", CLAUDE_EXECUTION_POLICY_SCHEMA);
+74:   assertIdentifier(policy, "workstream_id");
+75:   assertIdentifier(policy, "node_instance_id");
+76:   assertIdentifier(policy, "run_id");
+77:   assertText(policy, "network_transport_owner", NETWORK_TRANSPORT_OWNER);
+78:   assertEmptyArray(policy.setting_sources, "setting_sources");
+79:   assertGeneratedAt(policy.generated_at);
+80: 
+81:   const sdkSandbox = validatedSandboxOptions(policy.sandbox);
+82:   assertDeniedEnvironment(policy.provider_subprocess_denied_env_names);
+83:   if (containsSecretLikeValue(policy)) {
+84:     throw new Error("claude execution policy contains a secret-like value");
+85:   }
+86:   return {
+87:     settingSources: [],
+88:     sandbox: sdkSandbox,
+89:     managedSettings: {
+90:       sandbox: managedSandboxOptions(sdkSandbox),
+91:       permissions: {
+92:         deny: [
+93:           // Disabling auto-allow alone still permits Claude Code's read-only shell shortcuts.
+94:           ...(sdkSandbox.autoAllowBashIfSandboxed ? [] : ["Bash"]),
+95:           ...(requireObject(sdkSandbox.filesystem, "filesystem").denyWrite as string[])
+96:             .flatMap((entry) => [`Edit(/${entry})`, `Edit(/${entry}/**)`]),
+97:         ],
+98:       },
+99:     },
+100:   };
+101: }
+102: 
+103: function validatedSandboxOptions(value: unknown): JsonObject {
+104:   const sandbox = requireObject(value, "sandbox");
+158:   const filesystem = requireObject(value, "sandbox.filesystem");
+159:   assertExactKeys(filesystem, FILESYSTEM_KEYS, "sandbox.filesystem");
+160:   const allowRead = requireCanonicalPaths(filesystem.allow_read, "sandbox.filesystem.allow_read");
+161:   const allowWrite = requireCanonicalPaths(
+162:     filesystem.allow_write,
+163:     "sandbox.filesystem.allow_write",
+164:   );
+165:   const denyRead = requireCanonicalPaths(filesystem.deny_read, "sandbox.filesystem.deny_read");
+166:   const denyWrite = requireCanonicalPaths(filesystem.deny_write, "sandbox.filesystem.deny_write");
+167:   if (allowRead.length === 0 || allowWrite.length === 0) {
+168:     throw new Error("sandbox filesystem allow lists must not be empty");
+169:   }
+170:   return { allowRead, allowWrite, denyRead, denyWrite };
+171: }
+172: 
+173: function assertDeniedEnvironment(value: unknown): void {
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts
+
+648:     };
+649: 
+650:     this.filesystem = new FileSystemHandlers({
+651:       cwd: this.options.cwd,
+652:       permissionMode: this.options.permissionMode,
+653:       nonInteractivePermissions: this.options.nonInteractivePermissions,
+654:       onOperation: (operation) => {
+655:         this.eventHandlers.onClientOperation?.(operation);
+656:       },
+657:     });
+658:     this.terminalManager = new TerminalManager({
+659:       cwd: this.options.cwd,
+660:       permissionMode: this.options.permissionMode,
+661:       nonInteractivePermissions: this.options.nonInteractivePermissions,
+662:       onOperation: (operation) => {
+663:         this.eventHandlers.onClientOperation?.(operation);
+664:       },
+665:     });
+666:   }
+667: 
+2314:   private async handleReadTextFile(params: ReadTextFileRequest): Promise<ReadTextFileResponse> {
+2315:     try {
+2316:       return await this.filesystem.readTextFile(params);
+2317:     } catch (error) {
+2318:       this.recordPermissionError(params.sessionId, error);
+2319:       throw error;
+2320:     }
+2321:   }
+2322: 
+2323:   private async handleWriteTextFile(params: WriteTextFileRequest): Promise<WriteTextFileResponse> {
+2324:     try {
+2325:       return await this.filesystem.writeTextFile(params);
+2326:     } catch (error) {
+2327:       this.recordPermissionError(params.sessionId, error);
+2328:       throw error;
+2329:     }
+2330:   }
+2331: 
+2332:   private async handleCreateTerminal(
+2333:     params: CreateTerminalRequest,
+2334:   ): Promise<CreateTerminalResponse> {
+2335:     try {
+2336:       return await this.terminalManager.createTerminal(params);
+2337:     } catch (error) {
+2338:       this.recordPermissionError(params.sessionId, error);
+2339:       throw error;
+2340:     }
+2341:   }
+2342: 
+2343:   private async handleTerminalOutput(
+2344:     params: TerminalOutputRequest,
+2345:   ): Promise<TerminalOutputResponse> {
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/filesystem.ts
+
+122:       });
+123:       throw error;
+124:     }
+125:   }
+126: 
+127:   async writeTextFile(params: WriteTextFileRequest): Promise<WriteTextFileResponse> {
+128:     const filePath = this.resolvePathWithinRoot(params.path);
+129:     const preview = toWritePreview(params.content);
+130:     const summary = `write_text_file: ${filePath}`;
+131: 
+132:     this.emitOperation({
+133:       method: "fs/write_text_file",
+134:       status: "running",
+135:       summary,
+136:       details: preview,
+137:       timestamp: nowIso(),
+138:     });
+139: 
+140:     try {
+141:       if (!(await this.isWriteApproved(filePath, preview))) {
+142:         throw new PermissionDeniedError("Permission denied for fs/write_text_file");
+143:       }
+144: 
+145:       await fs.mkdir(path.dirname(filePath), { recursive: true });
+146:       await fs.writeFile(filePath, params.content, "utf8");
+147: 
+148:       this.emitOperation({
+149:         method: "fs/write_text_file",
+150:         status: "completed",
+151:         summary,
+152:         details: preview,
+153:         timestamp: nowIso(),
+154:       });
+155:       return {};
+156:     } catch (error) {
+157:       const message = error instanceof Error ? error.message : String(error);
+158:       this.emitOperation({
+159:         method: "fs/write_text_file",
+160:         status: "failed",
+161:         summary,
+162:         details: message,
+163:         timestamp: nowIso(),
+164:       });
+165:       throw error;
+166:     }
+167:   }
+168: 
+169:   private async isWriteApproved(filePath: string, preview: string): Promise<boolean> {
+170:     if (this.permissionMode === "approve-all") {
+171:       return true;
+172:     }
+173:     if (this.permissionMode === "deny-all") {
+174:       return false;
+175:     }
+176:     if (
+177:       this.usesDefaultConfirmWrite &&
+178:       this.nonInteractivePermissions === "fail" &&
+179:       !canPromptForPermission()
+180:     ) {
+181:       throw new PermissionPromptUnavailableError();
+182:     }
+183:     return await this.confirmWrite(filePath, preview);
+184:   }
+185: 
+186:   private resolvePathWithinRoot(rawPath: string): string {
+187:     if (!path.isAbsolute(rawPath)) {
+188:       throw new Error(`Path must be absolute: ${rawPath}`);
+189:     }
+190:     const resolved = path.resolve(rawPath);
+191:     if (!isWithinRoot(this.rootDir, resolved)) {
+192:       throw new Error(`Path is outside allowed cwd subtree: ${resolved}`);
+193:     }
+194:     return resolved;
+195:   }
+196: 
+197:   private sliceContent(
+198:     content: string,
+199:     line: number | null | undefined,
+200:     limit: number | null | undefined,
+201:   ): string {
+202:     if (line == null && limit == null) {
+203:       return content;
+204:     }
+205: 
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java
+
+481:     private void validateExecutionPolicyBinding(String agent, AcpxRunRequest request) throws IOException {
+482:         var binding = request.claudeExecutionPolicy();
+483:         if (!"claude".equals(agent)) {
+484:             if (binding != null) {
+485:                 throw new IOException("Claude execution policy cannot be used by agent " + agent);
+486:             }
+487:             return;
+488:         }
+489:         if (binding == null) {
+490:             return;
+491:         }
+492:         if (request.approveAll()) {
+493:             throw new IOException("NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
+494:         }
+495:         binding.verify(request.workdir());
+496:     }
+497: 
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java
+
+1: package dev.dual.runtime.handler;
+2: 
+3: import com.fasterxml.jackson.databind.ObjectMapper;
+4: import dev.dual.core.workflow.NodeResult;
+5: import dev.dual.core.workflow.NodeStatus;
+6: 
+7: import java.util.LinkedHashSet;
+8: import java.util.LinkedHashMap;
+9: import java.util.List;
+10: import java.util.Map;
+11: import java.util.Set;
+12: 
+13: public final class ReviewDecisionHandler implements DecisionHandler {
+14:     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+15: 
+16:     @Override
+17:     public String type() {
+18:         return "review.decision";
+19:     }
+20: 
+21:     @Override
+22:     public NodeResult evaluate(DecisionContext context) throws Exception {
+23:         var read = AgentEvidenceIndex.latestDecisionFromRefs(
+24:                 context.workspaceRoot(),
+25:                 context.workstreamId(),
+26:                 context.instance().inputRefs(),
+27:                 OBJECT_MAPPER
+28:         );
+29:         if (read.missing()) {
+30:             return failed("MISSING_CONTRACT_SIDECAR",
+31:                     "No agent output contract sidecar found in decision input refs.", context, Set.of(), read);
+32:         }
+33:         if (read.entry() == null) {
+34:             return failed("INVALID_CONTRACT_SIDECAR", read.message(), context,
+35:                     allowedDecisions(context.definition().id()), read);
+36:         }
+37:         var document = read.entry().document();
+38:         if ("implement.self_test_decision".equals(context.definition().id())
+39:                 && !"self_test_report".equals(document.sourceArtifactType())) {
+40:             return failed("INVALID_CONTRACT_SIDECAR", "self-test decision requires a self_test_report",
+41:                     context, allowedDecisions(context.definition().id()), read);
+42:         }
+43:         var allowed = allowedDecisions(context.definition().id());
+44:         var decision = document.decision().trim();
+45:         if (decision.isBlank()) {
+46:             return failed("INVALID_CONTRACT_SIDECAR", "contract sidecar missing required decision",
+47:                     context, allowed, read);
+48:         }
+49:         if (!allowed.contains(decision)) {
+50:             return failed("INVALID_DECISION",
+51:                     "Unsupported decision for " + context.definition().id() + ": " + decision,
+52:                     context, allowed, read);
+53:         }
+54:         var facts = new LinkedHashMap<String, Object>(Map.of(
+55:                 "decision", decision,
+56:                 "source", "contract-sidecar",
+57:                 "summary", document.summary()));
+58:         if ("self_test_report".equals(document.sourceArtifactType())) {
+59:             if ("SELF_TEST_COMPLETE".equals(decision)) {
+60:                 var violation = AgentContractSemantics.validateOutputContract(document);
+61:                 if (violation.isPresent()) {
+62:                     return failed("INVALID_CONTRACT_SIDECAR", violation.get().message(), context, allowed, read);
+63:                 }
+64:             }
+65:             facts.put("continuation_kind", switch (decision) {
+66:                 case "SELF_TEST_COMPLETE" -> "COMPLETE";
+67:                 case "SELF_TEST_INCOMPLETE" -> document.mustFix().isEmpty()
+68:                         ? "HUMAN_REVIEW" : "IMPLEMENTATION_REPAIR";
+69:                 case "BLOCKED" -> "HUMAN_REVIEW";
+70:                 default -> throw new IllegalStateException("unsupported self-test decision: " + decision);
+71:             });
+72:         }
+73:         return NodeResult.completed(decision, context.instance().inputRefs(), facts);
+74:     }
+75: 
+76:     private NodeResult failed(String reason, String message, DecisionContext context,
+77:                               Set<String> allowed, AgentEvidenceIndex.DecisionRead read) {
+78:         return new NodeResult(reason, NodeStatus.FAILED, List.of(), Map.of(
+79:                 "reason", reason,
+80:                 "message", message,
+81:                 "input_refs", context.instance().inputRefs(),
+82:                 "allowed_decisions", List.copyOf(allowed),
+83:                 "contract_values", read.entry() == null ? Map.of() : read.entry().document().control(),
+84:                 "parse_error", read.errorCode().isBlank() ? Map.of() : Map.of(
+85:                         "code", read.errorCode(), "message", read.message(), "path", read.path())
+86:         ), message);
+87:     }
+88: 
+89:     private Set<String> allowedDecisions(String nodeId) {
+90:         if (ContractRegistry.hasContract(nodeId)) {
+91:             return ContractRegistry.forNode(nodeId).allowedDecisions();
+92:         }
+93:         return new LinkedHashSet<>(List.of("PASS", "NEEDS_REVISION", "BLOCKED"));
+94:     }
+95: 
+96: }
+
+## /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java
+
+136:         definitionRequire(edges.size() == 1, "exactly one " + outcome + " edge required for " + source);
+137:         return edges.getFirst().to();
+138:     }
+139: 
+140:     private static void definitionRequire(boolean valid, String message) {
+141:         if (!valid) throw new IllegalArgumentException("AUTHORED_DEFINITION_INVALID: " + message);
+142:     }
+143: 
+144:     Snapshot prepare(String nodeInstanceId, String runId) throws IOException {
+145:         var node = node(nodeInstanceId);
+146:         require(participates(node.nodeDefinitionId()), "AUTHORED_ROLE_UNSUPPORTED");
+147:         var contractResolution = TaskContractProjectionVerifier.resolve(root, ws);
+148:         require(contractResolution.failure() == null && contractResolution.qualified().isPresent(), "AUTHORED_CONTRACT_NOT_QUALIFIED");
+149:         var qualified = contractResolution.qualified().orElseThrow();
+150:         var contract = new ContractIdentity(qualified.compileNodeInstanceId(), qualified.approvalGateRef(), qualified.approvalEventId(),
+151:                 new Reference(qualified.contractRef(), qualified.sha256()), new Reference(qualified.resolutionRef(), qualified.resolutionSha256()));
+152:         require(events.stream().anyMatch(event -> event.id().equals(contract.approvalEventId())), "AUTHORED_CONTRACT_OUTSIDE_HISTORY");
+153:         Approval design = null, plan = null;
+154:         Candidate parent = null, subject = null;
+155:         Reference trigger = null;
+156:         List<Obligation> obligations = List.of();
+157:         var id = node.nodeDefinitionId();
+158:         if (!id.equals(Stage.DESIGN.author) && !id.equals(Stage.DESIGN.reviewer)) design = approval(Stage.DESIGN);
+159:         if (id.equals("implement.claude_implement") || id.equals("implement.claude_self_test_report")) plan = approval(Stage.PLAN);
+160:         for (var stage : Stage.values()) {
+161:             if (id.equals(stage.author)) {
+162:                 var baseline = baseline(stage, node, new HashSet<>());
+163:                 parent = baseline.parent(); trigger = baseline.trigger(); obligations = baseline.obligations();
+164:             } else if (id.equals(stage.reviewer)) {
+165:                 subject = reviewSubject(stage, node);
+166:                 obligations = baseline(stage, node(subject.nodeInstanceId()), new HashSet<>()).obligations();
+167:             }
+168:         }
+169:         var snapshot = new Snapshot(ws, nodeInstanceId, id, runId, through, contract, design, plan, parent, subject, trigger, obligations);
+170:         var origins = events.stream().filter(event -> event.type().equals("node_routed")
+171:                 && nodeInstanceId.equals(text(event.payload().get("node_instance_id")))).toList();
+172:         require(origins.size() <= 1, "AUTHORED_NODE_ORIGIN_NOT_UNIQUE");
+173:         if (!origins.isEmpty() && origins.getFirst().sequence() < through) {
+174:             // Node creation, not execution retry, fixes the semantic input epoch.
+175:             var original = new AuthoredStageLineageResolver(root, ws, origins.getFirst().sequence()).prepare(nodeInstanceId, runId);
+176:             require(snapshot.withHistoryThrough(original.historyThrough()).equals(original), "AUTHORED_NODE_AUTHORITY_CHANGED");
+177:             return original;
+178:         }
+179:         return snapshot;
+180:     }
+181: 
+182:     Approval approval(Stage stage) throws IOException {
+183:         Event last = null;
+184:         for (var event : events) {
+185:             if (!event.type().equals("node_routed")) continue;
+186:             var to = text(event.payload().get("to"));
+187:             var target = definition.node(to);
+188:             if (target.kind() == NodeKind.GATE && stage.purpose.equals(text(target.config().get("gate_purpose")))) last = event;
+189:         }
+190:         require(last != null, "AUTHORED_APPROVAL_MISSING: " + stage.purpose);
+191:         var gate = gate(last);
+192:         require(gate.node().status() == NodeStatus.COMPLETED && gate.document().status().equals("resolved"), "AUTHORED_APPROVAL_NOT_COMPLETED");
+193:         require(text(gate.document().result().get("human_action")).equals("approved"), "AUTHORED_NOT_APPROVED");
+194:         require(routedAfter(last, gate.node(), "approved"), "AUTHORED_APPROVAL_NOT_ROUTED");
+195:         return new Approval(gate.reference(), last.id(), gateSubject(stage, gate));
+196:     }
+197: 
+198:     private boolean routedAfter(Event origin, NodeInstanceDocument source, String outcome) throws IOException {
+199:         for (var event : events) {
+200:             if (event.sequence() <= origin.sequence() || !event.type().equals("node_routed")) continue;
+201:             // A later occurrence of the same gate cannot supply this occurrence's completion.
+202:             if (source.nodeDefinitionId().equals(text(event.payload().get("to")))) return false;
+203:             if (!source.nodeDefinitionId().equals(text(event.payload().get("from")))
+204:                     || !outcome.equals(text(event.payload().get("outcome")))) continue;
+205:             var successor = node(text(event.payload().get("node_instance_id")));
+206:             require(successor.nodeDefinitionId().equals(text(event.payload().get("to")))
+207:                     && successor.iterationId().equals(source.iterationId())
+208:                     && successor.inputRefs().equals(source.outputRefs()), "AUTHORED_APPROVAL_SUCCESSOR_MISMATCH");
+209:             edge(source.nodeDefinitionId(), outcome, successor.nodeDefinitionId());
+210:             return true;
+211:         }
+212:         return false;
+213:     }

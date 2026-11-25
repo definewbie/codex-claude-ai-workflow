@@ -209,11 +209,12 @@ class AgentExecutionHealthTest {
     void currentPermissionDenialIsRecordedWithoutStoppingTheTurnEarly() {
         var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(1), Duration.ofSeconds(60));
         var stream = new AcpxSessionStreamProjector();
-        health.observe(stream.accept(0, AcpxStreamWireLine.parse("""
-                {"jsonrpc":"2.0","id":9,"method":"session/request_permission","params":{"toolCall":{"title":"Run tests","rawInput":{"command":"mvn test"}}}}
-                """)).orElseThrow());
+        health.observe(stream.accept(0, AcpxStreamWireLine.parse("{\"jsonrpc\":\"2.0\",\"id\":99,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s\"}}" )).orElseThrow());
         health.observe(stream.accept(1, AcpxStreamWireLine.parse("""
-                {"jsonrpc":"2.0","id":9,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                {"jsonrpc":"2.0","id":9,"method":"session/request_permission","params":{"sessionId":"s","toolCall":{"toolCallId":"t","kind":"execute","title":"Run tests","rawInput":{"command":"mvn test"}},"options":[{"optionId":"opaque","kind":"reject_once"}]}}
+                """)).orElseThrow());
+        health.observe(stream.accept(2, AcpxStreamWireLine.parse("""
+                {"jsonrpc":"2.0","id":9,"result":{"outcome":{"outcome":"selected","optionId":"opaque"}}}
                 """)).orElseThrow());
 
         var assessment = health.assess(Duration.ofSeconds(2));
@@ -223,4 +224,14 @@ class AgentExecutionHealthTest {
         assertEquals(AdapterSignalType.PERMISSION_BLOCKED, assessment.signals().get(0).type());
         assertTrue(assessment.signals().get(0).message().contains("mvn test"));
     }
+    @Test void persistedHumanWaitPausesOnlyStallAndDoesNotSuppressTypedFailure() {
+        var health = new AgentExecutionHealth(catalog, Duration.ofSeconds(1), Duration.ofSeconds(5));
+        health.observe(streamEvent(0, "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/prompt\",\"params\":{}}"), Duration.ZERO);
+        assertEquals(AgentExecutionHealth.Status.HEALTHY, health.assess(Duration.ofSeconds(60), true).status());
+        assertEquals(AgentExecutionHealth.Status.HEALTHY, health.assess(Duration.ofSeconds(61), false).status());
+        assertEquals(AdapterSignalType.PROCESS_STALLED, health.assess(Duration.ofSeconds(67), false).signal().type());
+        health.observe(streamEvent(1, "{\"jsonrpc\":\"2.0\",\"method\":\"session/prompt/failed\",\"error\":\"Internal error: API Error: 529 rate limit\"}"), Duration.ofSeconds(68));
+        assertEquals(AdapterSignalType.RATE_LIMITED, health.assess(Duration.ofSeconds(70), true).signal().type());
+    }
+
 }

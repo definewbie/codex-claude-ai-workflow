@@ -1,0 +1,41 @@
+{
+  "reviewed_candidate": {
+    "schema_version": 1,
+    "stage": "design",
+    "author_occurrence": "design-author-001",
+    "reviewer_occurrence": "design-review-001",
+    "decision_occurrence": "design-decision-001",
+    "author_artifact": {
+      "ref": "examples/design-author.json",
+      "sha256": "f40fc12b3bb907a331df9ab3ba93ceabddbe70ce3e63fcb26aad044fc2f6fdde"
+    },
+    "review_artifact": {
+      "ref": "examples/design-review.json",
+      "sha256": "9c7ee98ba912f5f8bf12cab04c91d1b06214a4d35c8472d835ae099ab3e111ed"
+    },
+    "review_decision": "READY",
+    "contract": {
+      "phase": "GOAL",
+      "epoch": 1,
+      "ref": "examples/goal-contract.json",
+      "sha256": "9228634ffafa7d603eaad06f16efa7a7f66feb07890548bfc49acfd0eec5c768"
+    },
+    "checks": [
+      {
+        "rule_id": "review.subject.and.route",
+        "rule_version": "2",
+        "result": "PASSED",
+        "input_refs": [
+          {
+            "ref": "examples/design-author.json",
+            "sha256": "f40fc12b3bb907a331df9ab3ba93ceabddbe70ce3e63fcb26aad044fc2f6fdde"
+          },
+          {
+            "ref": "examples/design-review.json",
+            "sha256": "9c7ee98ba912f5f8bf12cab04c91d1b06214a4d35c8472d835ae099ab3e111ed"
+          }
+        ]
+      }
+    ]
+  }
+}

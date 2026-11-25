@@ -1,0 +1,34 @@
+{
+  "exit": 0,
+  "suites": [
+    {
+      "name": "dev.dual.runtime.handler.AgentResultPromptContractTest",
+      "tests": "16",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "dev.dual.runtime.handler.VerificationReadinessTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "dev.dual.runtime.handler.PhasedContractContinuationTest",
+      "tests": "13",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest",
+      "tests": "33",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "not_added_to_full_reactor": true
+}

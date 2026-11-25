@@ -1,0 +1,8 @@
+{
+  "pid": 67978,
+  "argv": [
+    "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+    "rev-parse",
+    "HEAD^{tree}"
+  ]
+}

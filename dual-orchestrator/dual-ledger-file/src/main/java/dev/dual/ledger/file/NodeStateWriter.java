@@ -27,11 +27,11 @@ final class NodeStateWriter {
     }
 
     NodeInstanceDocument loadNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
-        return objectMapper.readValue(paths.nodeJson(nodeInstanceId).toFile(), NodeInstanceDocument.class);
+        return jsonWriter.read(paths.nodeJson(nodeInstanceId), NodeInstanceDocument.class);
     }
 
     WorkflowCurrentDocument loadCurrent(WorkstreamPaths paths) throws IOException {
-        return objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);
+        return jsonWriter.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
     }
 
     NodeInstanceDocument markRunning(WorkstreamPaths paths, String nodeInstanceId, long pid) throws IOException {
@@ -97,6 +97,8 @@ final class NodeStateWriter {
         if (node.status() != NodeStatus.FAILED) {
             throw new IOException("auto-retry only applies to FAILED nodes, got: " + node.status());
         }
+        if ("UNKNOWN".equals(node.result().get("external_effect")))
+            throw new IOException("unknown external effect requires explicit recovery adjudication");
         var countValue = LedgerUtils.resultValueOrDefault(node.result(), "auto_retry_count", 0);
         int retryCount = (countValue instanceof Number n) ? n.intValue() : 0;
         var retry = new NodeInstanceDocument(
@@ -202,6 +204,13 @@ final class NodeStateWriter {
                 "public_websearch_approved");
     }
 
+    void retryAdjudicatedNode(WorkstreamPaths paths, String note, Map<String, Object> decision) throws IOException {
+        if (!"AUTHORIZE_NEW_ATTEMPT".equals(decision.get("disposition"))
+                || !Boolean.TRUE.equals(decision.get("accept_duplicate_effect_risk")))
+            throw new IOException("explicit duplicate-effect risk acceptance is required");
+        retryActiveNode(paths, note, Map.of("recovery_adjudication", decision), "unknown_execution_retry_authorized");
+    }
+
     private void retryActiveNode(
             WorkstreamPaths paths,
             String note,
@@ -216,6 +225,9 @@ final class NodeStateWriter {
         if (node.status() != NodeStatus.FAILED && node.status() != NodeStatus.BLOCKED) {
             throw new IOException("active node is not retryable: " + node.nodeDefinitionId() + " (" + node.status() + ")");
         }
+        if ("UNKNOWN".equals(node.result().get("external_effect"))
+                && !"unknown_execution_retry_authorized".equals(eventType))
+            throw new IOException("ordinary retry cannot authorize an unknown external effect");
         var retryResult = new LinkedHashMap<String, Object>();
         retryResult.put("retry_of_status", node.status().name());
         retryResult.put("retry_note", note == null ? "" : note);
@@ -319,7 +331,7 @@ final class NodeStateWriter {
                 || !Files.isRegularFile(runPath)) {
             throw new IOException("permission escalation run metadata is invalid: " + runRef);
         }
-        var run = objectMapper.readTree(runPath.toFile());
+        var run = jsonWriter.readTree(runPath);
         var timeline = run.path("executionTimeline");
         if (!timeline.isArray()) {
             throw new IOException("permission escalation execution timeline is missing");
@@ -377,8 +389,7 @@ final class NodeStateWriter {
             throw new IOException("active recovery node is not a replayable classification misroute");
         }
 
-        var iteration = objectMapper.readValue(
-                paths.iterationJson(failed.iterationId()).toFile(), WorkflowIterationDocument.class);
+        var iteration = jsonWriter.read(paths.iterationJson(failed.iterationId()), WorkflowIterationDocument.class);
         if (!failed.nodeDefinitionId().equals(iteration.targetNodeDefinitionId())
                 || iteration.triggerNodeInstanceId().isBlank()) {
             throw new IOException("failed node does not have an authoritative classification trigger");
@@ -394,10 +405,10 @@ final class NodeStateWriter {
         GateDocument recoveryGate = null;
         for (var gateId : current.openGateIds()) {
             var gatePath = paths.gateJson(gateId);
-            if (!java.nio.file.Files.isRegularFile(gatePath)) {
+            if (!jsonWriter.exists(gatePath)) {
                 continue;
             }
-            var candidate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);
+            var candidate = jsonWriter.read(gatePath, GateDocument.class);
             if (failed.nodeInstanceId().equals(candidate.nodeInstanceId()) && "open".equals(candidate.status())) {
                 recoveryGate = candidate;
                 break;
@@ -585,6 +596,10 @@ final class NodeStateWriter {
     }
 
     void abortRecovery(WorkstreamPaths paths, String note) throws IOException {
+        abortRecovery(paths, note, false);
+    }
+
+    void abortRecovery(WorkstreamPaths paths, String note, boolean adjudicatedUnknown) throws IOException {
         var current = loadCurrent(paths);
         if (current.status() != WorkflowStatus.WAITING_FOR_RECOVERY) {
             throw new IOException("workflow is not waiting for recovery: " + current.status());
@@ -593,6 +608,8 @@ final class NodeStateWriter {
             throw new IOException("no active recovery node to abort");
         }
         var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
+        if ("UNKNOWN".equals(node.result().get("external_effect")) && !adjudicatedUnknown)
+            throw new IOException("unknown execution requires a stopped-executor adjudication before abort");
         var eventId = LedgerUtils.nextEventId(current.lastEventId());
         eventLog.appendEvent(paths, eventId, "workflow_aborted", Map.of(
                 "node", node.nodeDefinitionId(),
@@ -626,7 +643,9 @@ final class NodeStateWriter {
             throw new IOException("no active recovery node to close");
         }
         var node = loadNode(paths, current.activeNodeInstanceIds().get(0));
-        var iteration = objectMapper.readValue(paths.iterationJson(node.iterationId()).toFile(), WorkflowIterationDocument.class);
+        if ("UNKNOWN".equals(node.result().get("external_effect")))
+            throw new IOException("unknown execution cannot be closed as a mistaken iteration; explicit adjudication is required");
+        var iteration = jsonWriter.read(paths.iterationJson(node.iterationId()), WorkflowIterationDocument.class);
         if (!"approved".equals(iteration.triggerAction())) {
             throw new IOException("active iteration was not started by a final gate approval: " + iteration.iterationId());
         }
@@ -664,10 +683,10 @@ final class NodeStateWriter {
 
         for (var gateId : current.openGateIds()) {
             var gatePath = paths.gateJson(gateId);
-            if (!java.nio.file.Files.isRegularFile(gatePath)) {
+            if (!jsonWriter.exists(gatePath)) {
                 continue;
             }
-            var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);
+            var gate = jsonWriter.read(gatePath, GateDocument.class);
             jsonWriter.write(gatePath, gate.resolved("close_mistaken_iteration", note));
         }
 

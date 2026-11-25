@@ -27,18 +27,21 @@ public final class StatusCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        var status = new FileLedgerStore().loadStatus(workdir.toAbsolutePath().normalize(), workstreamId);
+        var workspaceRoot = workdir.toAbsolutePath().normalize();
+        var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
+        var ledger = CliLedgerFactory.create();
+        var observedDelivery = new DeliveryApplicationService(ledger).view(workspaceRoot, workstreamId, null);
+        try (var snapshot = ledger.readSession(paths)) {
+        var workflowLedger = snapshot.ledger();
+        var status = snapshot.store().loadStatus(workspaceRoot, workstreamId);
 
         System.out.println("Workstream: " + status.workstream().workstreamId());
         System.out.println("Workspace: " + status.workspace().effectiveWorkdir());
         System.out.println("Branch: " + status.workspace().branch());
         System.out.println("Ledger: " + status.workstreamDir());
 
-        var workspaceRoot = workdir.toAbsolutePath().normalize();
-        var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
         var hasWorkflowCurrent = Files.exists(paths.workflowCurrentJson());
         if (hasWorkflowCurrent) {
-            var workflowLedger = CliLedgerFactory.create();
             var current = workflowLedger.loadCurrent(paths);
             System.out.println();
             System.out.println("Workflow:");
@@ -66,7 +69,7 @@ public final class StatusCommand implements Callable<Integer> {
             }
         }
 
-        var delivery = new DeliveryApplicationService().view(workspaceRoot, workstreamId, null);
+        var delivery = DeliveryApplicationService.inSnapshot(observedDelivery, workflowLedger, paths);
         System.out.println();
         System.out.println("Delivery:");
         System.out.println("  Status: " + delivery.status());
@@ -83,6 +86,11 @@ public final class StatusCommand implements Callable<Integer> {
         if (!delivery.commit().isBlank()) System.out.println("  Commit: " + delivery.commit());
         System.out.println("  Can merge: " + delivery.canMerge());
         System.out.println("  Can finalize: " + delivery.canFinalize());
+        System.out.println("  Stop basis: " + delivery.stopBasis());
+        System.out.println("  Next action: " + delivery.nextAction());
+        for (var command : delivery.nextCommands()) System.out.println("  Command: " + command);
+        if (!delivery.resolutionTemplate().isEmpty()) System.out.println("  Resolution template: "
+                + new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(delivery.resolutionTemplate()));
 
         if (showLegacy || !hasWorkflowCurrent) {
             System.out.println();
@@ -95,6 +103,11 @@ public final class StatusCommand implements Callable<Integer> {
             System.out.println("  Resume command: " + status.checkpoint().resumeCommand());
         }
         return 0;
+        } catch (dev.dual.ledger.file.WorkstreamLockedException busy) {
+            System.out.println("BUSY: " + busy.getMessage()); return 2;
+        } catch (dev.dual.ledger.file.LedgerSession.PendingCommitException pending) {
+            System.out.println("PENDING: " + pending.getMessage()); return 2;
+        }
     }
 
     private static String runningPidStatus(Object value) {

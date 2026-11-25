@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "workstream_id": "ws-20261011T044656Z-BMDJ",
+  "run_id": "run-1791694259389",
+  "node_id": "intake.codex_product_review",
+  "result": {
+    "artifact_type": "agent_output_contract",
+    "decision": "NEEDS_REVISION",
+    "summary": "函数行为与标准库约束已完整保留，但实际输入输出证据要求和候选文件的审批边界需要修订。",
+    "lifecycle_status": "READY",
+    "blocking": true,
+    "checks": [
+      "先检查 Review Evidence Brief，再依据 Required Review Subject 中完整的类型化提案逐项核对用户要求。",
+      "产品视角：目标、至少八类输入、精确期望及幂等性均已覆盖。",
+      "架构视角：纯字符串函数与标准库方案适合任务，但 NG-3 将建议文件集合写入非目标边界，提前限制了设计与计划。",
+      "最终用户视角：README 导入及混合换行示例要求明确，但测试汇总不能单独证明实际输入输出。",
+      "未要求提案重复编排器的输出或路由协议，未进行代码审查或文件修改。"
+    ],
+    "evidence": [
+      "objective、C-1、AC-1 和 TR-1 保留了换行转换、其他字符不变及重复规范化行为。",
+      "AC-2 和 TR-2 要求实际命令、测试数量及零失败错误，但没有明确要求提供实际执行案例的输入与输出。",
+      "NG-3 将建议的三个文件之外的内容排除，仅允许执行阶段另行追加；用户要求最终文件与操作在设计、计划后单独批准。",
+      "AC-3 和 TR-3 要求读取源码与文档或执行示例支持一致性结论。"
+    ],
+    "missing_evidence": [],
+    "must_fix": [
+      "在 AC-2 或 TR-2 中绑定实际案例输入、实际输出、期望输出与测试源码的对应证据，并明确不要求工具独立测量真实退出码。",
+      "修订 NG-3，保留三个路径的候选性质，允许设计与计划形成最终精确路径及 CREATE/MODIFY 清单，再提交单独的 EXECUTION 批准。"
+    ],
+    "contract_obligations": [
+      {
+        "id": "CO-AC2-EVIDENCE",
+        "text": "实际执行测试，提供可与源码案例核对的实际输入、实际输出、明确覆盖数及零 failure/error 的真实测试结果；完成状态或文字结论不能替代这些证据，不要求工具独立测量真实退出码。"
+      },
+      {
+        "id": "CO-SCOPE-AUTHORITY",
+        "text": "当前三个文件是建议，不是 GOAL 阶段固定的实现文件集合；设计与计划形成最终候选清单，实现前单独批准逐项列明精确仓库相对路径及 CREATE/MODIFY 的 EXECUTION scope.included，只有该清单授权仓库修改。"
+      }
+    ],
+    "acceptance_notes": [
+      "当前属于需求评审，尚无实现或测试运行证据本身不构成本阶段阻塞。",
+      "跟踪文件清单为空，无需为评审新增产品证据文件。",
+      "现有信息足以修订提案，无需增加人工产品决策。"
+    ],
+    "open_risks": [],
+    "changed_files": [],
+    "verification_summary": "已完成基于所提供提案的需求映射与审批边界核对；未读取额外文件、执行测试或修改仓库。",
+    "failure": {
+      "category_hint": "契约要求缺失与范围边界偏移",
+      "verification_remediation": "NONE",
+      "contract_gaps": [
+        "AC-2/TR-2 未完整绑定实际输入输出证据及无需独立真实退出码的验证边界。",
+        "NG-3 将候选文件集合固化为非目标限制，未准确保留设计、计划后单独批准最终文件集合的要求。"
+      ],
+      "out_of_scope_files": [],
+      "missing_tests": [],
+      "context_gaps": [],
+      "reason": "上述两项影响验收证据充分性与后续范围授权，应先修订共享任务契约。"
+    },
+    "reread_reasons": []
+  }
+}

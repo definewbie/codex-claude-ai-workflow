@@ -1,0 +1,24 @@
+{
+  "usage_updates": [
+    {
+      "sessionUpdate": "usage_update",
+      "used": 0,
+      "size": 1000000
+    },
+    {
+      "sessionUpdate": "usage_update",
+      "used": 16203,
+      "size": 1000000
+    },
+    {
+      "sessionUpdate": "usage_update",
+      "used": 0,
+      "size": 1000000
+    }
+  ],
+  "native_usage_record": {
+    "cumulative_token_usage": {},
+    "request_token_usage": {}
+  },
+  "kind": "partial live native observation; not completed run usage"
+}

@@ -1,0 +1,8 @@
+{
+  "tests": 17,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "successful": true,
+  "scope": "Offline operator candidate; no Java/provider/native Gate execution"
+}

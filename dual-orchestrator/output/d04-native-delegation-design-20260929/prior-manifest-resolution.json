@@ -1,0 +1,144 @@
+{
+  "files": [
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/assessment.md",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/assessment.md",
+      "sha256": "611015a67df64b10b71b99d94f460b42332f92d441ead14fde33d107b325a09e"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/baseline.json",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/baseline.json",
+      "sha256": "24ac97f6dd25ea242d04d56902091baca9850e7460763269679f6c38a4611bd9"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "sha256": "18d72c6c205f7551224709e315bdf2a6754f43e9e6d71f148d07c42e2b3d374e"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "sha256": "3b4deac8f77b4d2d43c9cb3fea74db0009c8df7f91764e620b0df46694f795c5"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "sha256": "1196a1b814cc4449497ed5af2009b54f6242e929aa552c35f274ca1b079bee5c"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/cc-review.txt",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/cc-review.txt",
+      "sha256": "90b2575886e915c0aa9cb4e1b932c4a6f546fcb6e4119d0e090076ac282a8df3"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/cc-source-review.txt",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/cc-source-review.txt",
+      "sha256": "b5eb0d5bdae3a4f4781abccba451bcebc89e01182ad357f4921f1a8617b15942"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/documentation.diff",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/documentation.diff",
+      "sha256": "35fbdf2c73471e729f96245ae4dadbabaebe7f01aec5a62a71e9e7f99f212025"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/material-verification.json",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/material-verification.json",
+      "sha256": "33cffb27250f55ae9535bd6c33b3810456fc2fe122d8c4a73ea95c88c4ca2611"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/prior-manifest-resolution.json",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/prior-manifest-resolution.json",
+      "sha256": "040ab298a18793350e266017c3829997d24a3a950fe71eefa0c8768cf0ba67c6"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-fetch-r2.json",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-fetch-r2.json",
+      "sha256": "755f2451d8354409c54f3c19e2454449595189fb11d5e2c9f04040c4ac9aa8c9"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-fetch-r3.json",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-fetch-r3.json",
+      "sha256": "c25cc8195b38882c24e2c1308740bfbc82f51cabad8d871bb169ba546985f86b"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-fetch-r4.json",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-fetch-r4.json",
+      "sha256": "b1e2e9a1ea9afa108566ada4d8800f4de943a05136978adb8ae69db5ba73128b"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-fetch-r5.json",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-fetch-r5.json",
+      "sha256": "032f0aedd5f7e3791afb3099c6dc11fa84576e5eeb838df56c31ffbe6457c17f"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-fetch.json",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-fetch.json",
+      "sha256": "1e25335229b55d5f250bfede476b8bc3421ec0b16a036106e37f32c5fda94436"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-index.json",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/source-index.json",
+      "sha256": "79922daf37e316104e6d69feb472489dacd6edac55e9423b942131b830fe8ade"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/core/src/hook_runtime.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/core/src/hook_runtime.rs",
+      "sha256": "87b678af0f9ea87e0de6041fe82f9f90315b0b18c10524731deba9b7f9841f1e"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/engine/command_runner.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/engine/command_runner.rs",
+      "sha256": "c3913ff8ee6f449f07ce3c69bb2f194ad8aef2ce13b83e693165d74329ca3e14"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/engine/discovery.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/engine/discovery.rs",
+      "sha256": "fd05ee932079df2b5128f170beaf0d8e5c8630a56eadbcf9de9f25806e772b04"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/engine/dispatcher.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/engine/dispatcher.rs",
+      "sha256": "47db17f4eaab89841947d9e7887fbefa6bc40fb41d08e70caab10fd4c1fd0e42"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/engine/mod.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/engine/mod.rs",
+      "sha256": "fbee148f9c3287798ecdd641066d56a69d8b4263be727c62615843244c4a6791"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/events/pre_tool_use.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/events/pre_tool_use.rs",
+      "sha256": "11a421933eac6f78749470b221c4b30eeb71e5cd75e8f091f06067da7c1652e6"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/lib.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/lib.rs",
+      "sha256": "df594069f8ed09e14bece62ec5f1404c8fa9df88c9131d513d382b895a52a5f4"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/registry.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/registry.rs",
+      "sha256": "4c9e29f146fd409a515d198ae86c46d1852e8e84d4a0f3bcd73c45548311c160"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/schema.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/verified-source/codex-rs/hooks/src/schema.rs",
+      "sha256": "7b5c817c279709bc5092f8b6e6147788ff369e90818ce5debee93eb25ce5de89"
+    },
+    {
+      "path": "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-native-delegation-design-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "sha256": "48d497d17da84a2acead88922c7a360ccbaa732fc9f176bd0699f859212b450b"
+    },
+    {
+      "path": "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-native-delegation-design-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "sha256": "2c2642c05b65e42571772581cbf8f0b8a89aba1a3a170ed02ea91df44ad2007b"
+    },
+    {
+      "path": "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-native-delegation-design-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "sha256": "2c00c393943e180cc37358cf4b8f988b200003a98ec166b82b02cf6227a525a1"
+    }
+  ]
+}

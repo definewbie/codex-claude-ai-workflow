@@ -1,0 +1,9 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 W09 第二次真实 Gate 停止做独立受影响评审，遵守 AGENTS.md。
+
+入口：output/w09-fresh-second-gate-20261010/assessment.md；原账本定位见 instance-location.json，停止快照、协议用量对照及源码锚点在同目录。
+
+自行重建会话→主响应/格式修正→proposal追溯→固定失败/恢复，以及请求用量→run聚合→预算链。判断 Gate 分类，程序材料引用与产品路径语义应怎样对齐、空仓库合法路径是否成立；核对两次用量错归属的证据与前向修复方向。不要预设模型或validator一定有错，不放宽scope/身份/批准，不恢复样本。
+
+检查完整transition、写入失败切面与兄弟入口；按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给分级发现、证据及未核验范围，并区分原修复已证与整条主流程未证。优先现有owner内的有界接线，注意ROI。
+
+只读；不启动额外agent、native/provider，不改代码/文档/账本。本轮不授权重试、第三例或实施。

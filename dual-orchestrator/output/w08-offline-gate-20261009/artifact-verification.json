@@ -1,0 +1,127 @@
+{
+  "status": "PASS_OFFLINE_PACKAGE_AND_CLI_VALIDATION",
+  "test_run": false,
+  "package_tests_skipped": true,
+  "cli_only_no_provider": [
+    {
+      "command": [
+        "java",
+        "-jar",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+        "--help"
+      ],
+      "exit": 0,
+      "log": "output/w08-offline-gate-20261009/cli-offline-0.log"
+    },
+    {
+      "command": [
+        "java",
+        "-jar",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+        "workflow",
+        "validate",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"
+      ],
+      "exit": 0,
+      "log": "output/w08-offline-gate-20261009/cli-offline-1.log"
+    },
+    {
+      "command": [
+        "java",
+        "-jar",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+        "workflow",
+        "validate",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json"
+      ],
+      "exit": 0,
+      "log": "output/w08-offline-gate-20261009/cli-offline-2.log"
+    },
+    {
+      "command": [
+        "java",
+        "-jar",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+        "workflow",
+        "validate",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"
+      ],
+      "exit": 0,
+      "log": "output/w08-offline-gate-20261009/cli-offline-3.log"
+    }
+  ],
+  "jar_sha256": {
+    "dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar": "2c990d150c51c5b119bf0af9284c6d0cb40decb633d824ce65ec1e44ee1da649",
+    "dual-server/target/dual-server-0.1.0-SNAPSHOT.jar": "e16da2237cfcf3d5a45988de5230b27a2a702704c75dfb9ecefcd2811faa1f43",
+    "dual-flow-liteflow/target/dual-flow-liteflow-0.1.0-SNAPSHOT.jar": "3740f858507b2bd0c90149343fc73d8f17d96b00d515b9bd0ed58ecd941df823",
+    "dual-ledger-file/target/dual-ledger-file-0.1.0-SNAPSHOT.jar": "047459240e9c8f8993420d6c04b41d6e19cd0f6a2daec7fd1a50502f36b5e2dc",
+    "dual-adapter-acpx/target/dual-adapter-acpx-0.1.0-SNAPSHOT.jar": "68001282fe9c669bf184a0ca21d1d6bf9b79ec77fecf494b4ba01911a2e10006",
+    "dual-runtime/target/dual-runtime-0.1.0-SNAPSHOT.jar": "b491b28af8ea199dff8e2edbdfc0ae2cd0bc413bf3643c773de685bcb621cb25",
+    "dual-runtime/target/dual-runtime-0.1.0-SNAPSHOT-tests.jar": "3e3c7bf205d317b1931278230bdd3a2ad55dae144d5de3b72a9f4dde629b6c43",
+    "dual-adapter-git/target/dual-adapter-git-0.1.0-SNAPSHOT.jar": "c0790bf7b84cc4018b406a0cf3a18fc0a9b685cef5064fc011117f6faa2b26cc",
+    "dual-core/target/dual-core-0.1.0-SNAPSHOT.jar": "94024f7ac9cee0aaafb29d8fd23e2eff2a3772d950f235f3c873642e6bab3a0b"
+  },
+  "embedded_module_identity": [
+    {
+      "distribution": "dual-cli",
+      "module": "dual-runtime",
+      "matches_current_module_jar": true
+    },
+    {
+      "distribution": "dual-cli",
+      "module": "dual-adapter-acpx",
+      "matches_current_module_jar": true
+    },
+    {
+      "distribution": "dual-cli",
+      "module": "dual-ledger-file",
+      "matches_current_module_jar": true
+    },
+    {
+      "distribution": "dual-cli",
+      "module": "dual-adapter-git",
+      "matches_current_module_jar": true
+    },
+    {
+      "distribution": "dual-cli",
+      "module": "dual-core",
+      "matches_current_module_jar": true
+    },
+    {
+      "distribution": "dual-cli",
+      "module": "dual-flow-liteflow",
+      "matches_current_module_jar": true
+    },
+    {
+      "distribution": "dual-server",
+      "module": "dual-runtime",
+      "matches_current_module_jar": true
+    },
+    {
+      "distribution": "dual-server",
+      "module": "dual-adapter-acpx",
+      "matches_current_module_jar": true
+    },
+    {
+      "distribution": "dual-server",
+      "module": "dual-ledger-file",
+      "matches_current_module_jar": true
+    },
+    {
+      "distribution": "dual-server",
+      "module": "dual-adapter-git",
+      "matches_current_module_jar": true
+    },
+    {
+      "distribution": "dual-server",
+      "module": "dual-core",
+      "matches_current_module_jar": true
+    },
+    {
+      "distribution": "dual-server",
+      "module": "dual-flow-liteflow",
+      "matches_current_module_jar": true
+    }
+  ],
+  "not_proven": "actual launched topology or provider behaviour; current artifacts contain known W07 stale scope wording and must be rebuilt after its correction"
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1791636510762-1ce1f135",
+  "agentTaskId" : "agt-1791636510756-c66d345b",
+  "workflowExecutionId" : "wfe-1791636510709-89eaaa43",
+  "nodeInstanceId" : "node-context-intake_claude_brainstorm-001",
+  "nodeDefinitionId" : "context.intake_claude_brainstorm",
+  "handlerType" : "context.build_package",
+  "status" : "SUCCEEDED",
+  "pid" : 45724,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_claude_brainstorm-001.md" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-10T12:48:29.577Z",
+      "input_identity" : "2b59756efb370657e363bda841a64fbb1901fc46bb1c56d5025c695c55cb6f58",
+      "executor_pid" : 45724
+    },
+    "context_package" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_claude_brainstorm-001.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20261010T124812Z-XCZL/context/node-context-intake_claude_brainstorm-001.json",
+    "target_node" : "intake.claude_brainstorm",
+    "profile" : "intake",
+    "sections" : [ "task_contract", "ledger_pointers" ],
+    "input_ref_count" : 0,
+    "generated_at" : "2026-10-10T12:48:30.810714Z",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-10T12:48:30.762544Z",
+  "finishedAt" : "2026-10-10T12:48:30.820690Z",
+  "durationMs" : 58
+}

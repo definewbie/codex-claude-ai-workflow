@@ -1,0 +1,14 @@
+Human gate decided
+Workstream: ws-20260912T081920Z-KPPZ
+Action: approve
+Running workflow until next gate...
+Step 1: gate.contract_review -> WAITING_FOR_HUMAN (resumed workflow)
+
+Next actions:
+  1. Read the current review packet:
+     dualctl review show --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260912T081920Z-KPPZ ws-20260912T081920Z-KPPZ
+     packet: /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260912T081920Z-KPPZ/.agent/workstreams/ws-20260912T081920Z-KPPZ/reviews/node-gate-contract_review-013.md
+  2. Choose one action after review:
+Then: dualctl approve --run --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260912T081920Z-KPPZ ws-20260912T081920Z-KPPZ
+Or:   dualctl review decide --action clarify --note 'DECISION_NOTE' --run --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260912T081920Z-KPPZ ws-20260912T081920Z-KPPZ
+Or:   dualctl review decide --action reject --note 'DECISION_NOTE' --run --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260912T081920Z-KPPZ ws-20260912T081920Z-KPPZ

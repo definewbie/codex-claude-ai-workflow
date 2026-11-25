@@ -1,0 +1,32 @@
+     2 AM 54\u00b0. rain drop 25% \u00b7 3 AM 54\u00b0. rain drop
+  20% \u00b7
+     4 AM 54\u00b0. rain drop 20% \u00b7 5 AM 53\u00b0. rain drop
+  20% \u00b7 ...
+  ```
+
+  Final Answer: Today in Zurich, it looks **cloudy with periods of
+  rain and
+  temperatures around 14–19°C. Some forecasts also suggest light
+  rain / showers
+  with a high chance of precipitation.
+
+
+  For more details, you can check the full forecast
+  [here](https://www.accuweather.com/en/ch/zurich/316622/weather-
+  forecast/316622).
+
+  > Finished trace.
+
+Now you understand how powerful ReAct can be. It’s not just that the agent
+alternates between thinking and acting, but that the reasoning itself becomes
+part of the state. This recursive process enables agents to adapt, refine their
+strategies, and explain their choices. In practice, it allows even relatively
+small models to perform complex tasks more reliably, while making their
+decision-making process transparent.
+
+Together, CoT, ToT, and ReAct illustrate how different reasoning strategies
+can shape the intelligence of your agents. Each approach has its strengths:
+CoT offers transparency and reliability, ToT explores multiple alternatives
+before committing, and ReAct closes the loop by combining reasoning with
+tool use. Table 2-3 gives you a consolidated overview of these reasoning
+patterns along with tips for when they’re most useful.

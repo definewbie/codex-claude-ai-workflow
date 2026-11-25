@@ -52,6 +52,7 @@ final class AgentResultDocumentProjector {
                 }
                 evidenceDefaults(document);
                 document.put("task_contract_proposal", taskContractProposalMap(resolvedProposal));
+                if (derivation != null) document.put("proposal_derivation", derivation.toMap());
             }
             case AgentResultEnvelope.TaskContractRevisionPatchResult ignored -> {
                 if (resolvedProposal == null || derivation == null) {
@@ -92,6 +93,7 @@ final class AgentResultDocumentProjector {
                 document.put("plan_artifact", planArtifact(plan));
             }
             case AgentResultEnvelope.SelfTestResult selfTest -> {
+                document.put("verification_checks", selfTest.verificationChecks());
                 document.put("lifecycle_status", selfTest.lifecycleStatus());
                 document.put("blocking", false);
                 document.put("checks_run", selfTest.checksRun());
@@ -103,10 +105,13 @@ final class AgentResultDocumentProjector {
                 document.put("verification_summary", selfTest.verificationSummary());
                 evidenceDefaultsIfAbsent(document);
             }
-            case AgentResultEnvelope.AcceptanceReviewResult review -> evidenceFields(
+            case AgentResultEnvelope.AcceptanceReviewResult review -> {
+                document.put("verification_checks", review.verificationChecks());
+                evidenceFields(
                     document, review.lifecycleStatus(), review.blocking(), review.checks(), review.evidence(),
                     review.missingEvidence(), review.mustFix(), review.acceptanceNotes(), review.openRisks(),
                     review.changedFiles(), review.verificationSummary(), review.failure());
+            }
             case AgentResultEnvelope.StageHandoffResult handoff -> {
                 document.put("lifecycle_status", handoff.lifecycleStatus());
                 document.put("blocking", false);
@@ -212,9 +217,12 @@ final class AgentResultDocumentProjector {
         var plan = result.plan();
         var document = new LinkedHashMap<String, Object>();
         document.put("artifact_type", "plan_artifact");
-        document.put("schema_version", 1);
+        document.put("schema_version", 2);
         document.put("implementation_steps", plan.implementationSteps());
         document.put("edit_files", plan.editFiles());
+        document.put("files", plan.files());
+        document.put("verification_bindings", plan.verificationBindings());
+        document.put("authority_refs", plan.authorityRefs());
         document.put("reference_files", plan.referenceFiles());
         document.put("file_level_changes", plan.fileLevelChanges());
         document.put("validation_plan", plan.validationPlan());

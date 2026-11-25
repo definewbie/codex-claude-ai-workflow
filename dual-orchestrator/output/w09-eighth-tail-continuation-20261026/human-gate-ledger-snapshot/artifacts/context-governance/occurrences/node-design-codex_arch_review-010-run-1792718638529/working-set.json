@@ -1,0 +1,15 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "working_set",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "design",
+  "nodeInstanceId" : "node-design-codex_arch_review-010",
+  "nodeDefinitionId" : "design.codex_arch_review",
+  "targetNodeDefinitionId" : "design.codex_arch_review",
+  "iterationId" : "iter-001",
+  "coreFiles" : [ ],
+  "supportingFiles" : [ ],
+  "allowedWriteFiles" : [ ],
+  "forbiddenScope" : [ ".git/**", ".agent/workstreams/**/workflow/**", ".agent/workstreams/**/nodes/**", "business source writes" ],
+  "generatedAt" : "2026-10-23T01:23:58.612611Z"
+}

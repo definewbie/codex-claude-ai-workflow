@@ -1,0 +1,15 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "repo_map",
+  "workstreamId" : "ws-20261010T055644Z-6QCS",
+  "generatedAt" : "2026-10-10T06:43:30.626807Z",
+  "effectiveWorkdir" : "/private/tmp/dual-w09-newlines-20261010/worktree",
+  "baseCommit" : "",
+  "source" : "git_tracked_inventory",
+  "inventoryHead" : "6081fc1888db9a6a61291a7d0822537d8a0f89ff",
+  "inventorySha256" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "inventoryPathCount" : 0,
+  "files" : [ ],
+  "fileCount" : 0,
+  "truncated" : false
+}

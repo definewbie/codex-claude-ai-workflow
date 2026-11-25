@@ -1,0 +1,58 @@
+{
+  "kind": "review material identity, not runtime authority",
+  "note": "incremental.patch/changed-files cover src/resources/POM only. Worklist section13 and progress-and-decision Oct7 section are documentation appendices; existing unrelated dirty contents were not reverted.",
+  "files": [
+    {
+      "path": "output/lifecycle-batch-03-20260930/boundaries-20261007/checkpoint.md",
+      "sha256": "cdc882de0397a690018f9f79fdbddc8aceb1fca5f66d202790f3773e1e60ec28"
+    },
+    {
+      "path": "output/lifecycle-batch-03-20260930/boundaries-20261007/cc-review-prompt.md",
+      "sha256": "17dbd838ac445e01f6f8c84052c40d607460fa37bd6d365a0bb2cb8d9701b131"
+    },
+    {
+      "path": "output/lifecycle-batch-03-20260930/boundaries-20261007/transition-plan.md",
+      "sha256": "444434e13ade053af383f6b8e513c8841c7dd6e4f66b3978c44865f0671d1e76"
+    },
+    {
+      "path": "output/lifecycle-batch-03-20260930/boundaries-20261007/verification.json",
+      "sha256": "457bee13986136fdaa5290316eb5fd8bd2f8a326211d0bc7ddab65859585c7df"
+    },
+    {
+      "path": "output/lifecycle-batch-03-20260930/boundaries-20261007/changed-files.json",
+      "sha256": "2140b65545682ee3dc47c399413ebed75ec0a45c90717406af3464e3f9452e45"
+    },
+    {
+      "path": "output/lifecycle-batch-03-20260930/boundaries-20261007/incremental.patch",
+      "sha256": "38728a0ff032f6d818969fa7dc4bdf7108a1f501fdf6ea256c0d2dc54a4bdbd1"
+    },
+    {
+      "path": "output/lifecycle-batch-03-20260930/boundaries-20261007/native-identity-findings.md",
+      "sha256": "41ee4471c8ee82c60c8b365784ec9be87c01bf4d2e87490141af5443ddc275dd"
+    },
+    {
+      "path": "output/lifecycle-batch-03-20260930/boundaries-20261007/native-identity-source-index.json",
+      "sha256": "490e816239f6caa4847de604640c689468d08d942cf4e79ae00711c3797568ff"
+    },
+    {
+      "path": "output/lifecycle-batch-03-20260930/boundaries-20261007/before-source.json",
+      "sha256": "7ae65a263384ad2471528678d6debf9e2644d65383abbc4268b13fe6b8e06830"
+    },
+    {
+      "path": "output/lifecycle-batch-03-20260930/boundaries-20261007/final3-pre-reactor-sha256.json",
+      "sha256": "20663b3f5206623610e1abff77be42ee498ac1fb275f1376edd4ca11e0f5c1bb"
+    },
+    {
+      "path": "output/lifecycle-batch-03-20260930/boundaries-20261007/final3-after-reactor-sha256.json",
+      "sha256": "20663b3f5206623610e1abff77be42ee498ac1fb275f1376edd4ca11e0f5c1bb"
+    },
+    {
+      "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "sha256": "942e2b68a7f21127ef1308b6218c1e2b763b28d00a465f3d0f3631e79e87ad4b"
+    },
+    {
+      "path": "output/lifecycle-batch-03-20260930/progress-and-decision.md",
+      "sha256": "c1273320df1d76b45dab9803568fc18b89c2e8f21d0dbf0b91ddf2621d5f1d00"
+    }
+  ]
+}

@@ -15,14 +15,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ExecutionNetworkGrantStoreTest {
     @TempDir Path temp;
-    final WorkflowFileLedger ledger = new WorkflowFileLedger();
-    final ExecutionNetworkGrantStore store = new ExecutionNetworkGrantStore();
+    final WorkflowFileLedger ledger = LedgerTestFixture.ledger();
+    final ExecutionNetworkGrantStore store = new ExecutionNetworkGrantStore(ledger);
 
     @Test void gateContextAndSiblingExecutionRouteToOneClaimWithoutResolvingTheGate() throws Exception {
         var paths = fixture();
-        var before = Files.readString(paths.workflowCurrentJson());
+        var before = ledger.loadCurrent(paths);
         var ref = store.approve(paths, "verify.tests", List.of("packages.example.org"), "resolve approved dependencies");
-        assertEquals(before, Files.readString(paths.workflowCurrentJson()));
+        var after = ledger.loadCurrent(paths);
+        assertEquals(before.status(), after.status());
+        assertEquals(before.activeNodeInstanceIds(), after.activeNodeInstanceIds());
+        assertEquals(before.openGateIds(), after.openGateIds());
+        assertEquals(before.commitSequence() + 1, after.commitSequence());
         assertFalse((boolean) store.view(paths).get("canApprove"));
         assertTrue((boolean) store.view(paths).get("canCancel"));
         assertThrows(IOException.class, () -> store.approve(paths, "verify.tests", List.of("other.example.org"), "duplicate"));
@@ -38,11 +42,11 @@ class ExecutionNetworkGrantStoreTest {
         assertEquals("verify.tests", test.nodeDefinitionId());
         assertEquals(ref, test.inputTransition().get(ExecutionNetworkGrantStore.REF_KEY));
         ledger.markRunning(paths, test.nodeInstanceId(), 1);
-        var claim = new ExecutionNetworkGrantStore().claim(paths, test.nodeInstanceId(), "run-test");
+        var claim = new ExecutionNetworkGrantStore(ledger).claim(paths, test.nodeInstanceId(), "run-test");
         assertEquals(List.of("packages.example.org"), claim.domains());
         store.verifyClaim(paths, claim, test.nodeInstanceId(), "run-test");
         assertThrows(IOException.class, () -> store.verifyClaim(paths, claim, test.nodeInstanceId(), "run-other"));
-        assertNull(new ExecutionNetworkGrantStore().claim(paths, test.nodeInstanceId(), "run-after-crash"));
+        assertNull(new ExecutionNetworkGrantStore(ledger).claim(paths, test.nodeInstanceId(), "run-after-crash"));
         complete(paths);
         assertEquals(NodeKind.GATE, active(paths).kind());
         assertFalse(active(paths).inputTransition().containsKey(ExecutionNetworkGrantStore.REF_KEY));
@@ -102,7 +106,7 @@ class ExecutionNetworkGrantStoreTest {
         var first = store.claim(paths, node.nodeInstanceId(), "run-1");
         ledger.completeAndRoute(paths, ledger.loadDefinition(paths), node.nodeInstanceId(), NodeStatus.FAILED, "failed", List.of(), Map.of());
         var secondRef = store.approve(paths, node.nodeDefinitionId(), List.of("packages.example.org"), "replacement");
-        new ExecutionNetworkGrantStore().verifyClaim(paths, first, node.nodeInstanceId(), "run-1");
+        new ExecutionNetworkGrantStore(ledger).verifyClaim(paths, first, node.nodeInstanceId(), "run-1");
         ledger.retryActiveNode(paths, "second retry");
         ledger.markRunning(paths, node.nodeInstanceId(), 1);
         var second = store.claim(paths, node.nodeInstanceId(), "run-2");
@@ -169,7 +173,7 @@ class ExecutionNetworkGrantStoreTest {
                 new EdgeDefinition("build.code", "completed", "verify.tests"),
                 new EdgeDefinition("verify.tests", "completed", "gate.finish"),
                 new EdgeDefinition("gate.finish", "approve", "after.gate")));
-        ledger.initialize(paths, "wf-grant", definition);
+        LedgerTestFixture.initialize(ledger, paths, "wf-grant", definition);
         complete(paths);
         return paths;
     }

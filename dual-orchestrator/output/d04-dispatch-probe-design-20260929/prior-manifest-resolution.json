@@ -1,0 +1,10 @@
+{
+  "priorManifest": "dual-orchestrator/output/d04-hard-limit-interfaces-20260929/review-package.json",
+  "sha256": "9a7228026f1628313e57b09424f90ff724907feab3737d6147076266081ca767",
+  "snapshots": {
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  },
+  "allMatched": 32
+}

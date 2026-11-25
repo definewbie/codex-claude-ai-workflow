@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "kind": "SYNTHETIC_ENVIRONMENT_REFERENCE",
+  "executor": "AGENT",
+  "environment_id": "local-python-fixture",
+  "available": true,
+  "identity": "example-only-not-production-proof"
+}

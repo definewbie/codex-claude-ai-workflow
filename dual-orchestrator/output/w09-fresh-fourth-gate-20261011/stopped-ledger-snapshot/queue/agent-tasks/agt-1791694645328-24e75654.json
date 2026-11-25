@@ -1,0 +1,42 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1791694645328-24e75654",
+  "workflowExecutionId" : "wfe-1791694645254-9af3082b",
+  "nodeInstanceId" : "node-intake-codex_product_review-009",
+  "nodeDefinitionId" : "intake.codex_product_review",
+  "nodeKind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "agent" : "codex",
+  "session" : "codex-reviewer",
+  "promptTemplate" : "intake-codex-product-review",
+  "contextPackageRef" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-intake_codex_product_review-008.md",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "acpx.agent_run",
+    "agent" : "codex",
+    "session" : "codex-reviewer",
+    "prompt_template" : "intake-codex-product-review",
+    "context_package_ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-intake_codex_product_review-008.md",
+    "expected_contract" : "",
+    "node_config" : {
+      "agent" : "codex",
+      "session" : "codex-reviewer",
+      "permission_profile" : "review",
+      "prompt_template" : "intake-codex-product-review",
+      "review_subject_artifact" : "task_contract_proposal",
+      "expected_artifact" : "agent_output_contract",
+      "artifact_compiler" : "agent_output_contract_compiler",
+      "allowed_stage_outcomes" : [ "READY", "NEEDS_REVISION", "BLOCKED" ]
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 5
+  },
+  "nodeExecutionId" : "nxe-1791694645333-215e4e6d",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-11T04:57:25.328489Z",
+  "claimedAt" : "2026-10-11T04:57:25.341987Z",
+  "completedAt" : "2026-10-11T04:57:58.424863Z"
+}

@@ -1,0 +1,201 @@
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java
++++ dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java
+@@ -27,6 +27,16 @@
+     public static final String REQUIRED = "VERIFICATION_READINESS_REQUIRED";
+     private static final String EVENT = "verification_readiness_recorded";
+     private static final String RULE = "verification-readiness-v1";
++    // Shared projection of the existing binding contract; never a readiness fact or approval.
++    static final String PLAN_BINDING_INSTRUCTION =
++            "When binding a current verification readiness declaration, copy its `method` exactly as the decoded JSON string; "
++                    + "do not append, paraphrase or normalize whitespace. "
++                    + "Put criterion-specific examples, assertions, commands and report/code checks in `plan.validation_plan`, labeled with approved criterion IDs. "
++                    + "These details must preserve the declared method, executor, environment, evidence kind, detail_owner and approved acceptance requirements; "
++                    + "they are not execution evidence or approval. "
++                    + "If no current declaration supports the required method, report the missing readiness without inventing references; "
++                    + "a different method needs a new operator declaration and the existing review/approval path. "
++                    + "Illustrative method/reference values in the JSON example are placeholders, not registered readiness. ";
+     private static final ObjectMapper JSON = new ObjectMapper().registerModule(new JavaTimeModule());
+ 
+     public enum Action { RECORD, WITHDRAW }
+@@ -196,6 +206,7 @@
+             return "## Verification readiness declarations\n\n"
+                     + "These are operator declarations of prerequisites, not execution results, successful tests or grants. "
+                     + "Bind exact refs only where criterion, method, executor and environment match. "
++                    + PLAN_BINDING_INSTRUCTION
+                     + "If prerequisites are missing, describe the missing items without inventing references.\n\n"
+                     + JSON.writerWithDefaultPrettyPrinter().writeValueAsString(entries) + "\n\n";
+         });
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
++++ dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
+@@ -92,7 +92,8 @@
+ 
+     private static String verificationInstruction(AgentResultEnvelope.AgentResult result) {
+         if (result instanceof AgentResultEnvelope.PlanResult)
+-            return "\nEach verification_binding must explicitly set actual_exit_required (boolean) and expected_exit_code (integer or null). "
++            return "\n" + VerificationReadiness.PLAN_BINDING_INSTRUCTION
++                    + "Each verification_binding must explicitly set actual_exit_required (boolean) and expected_exit_code (integer or null). "
+                     + "Derive these from the approved acceptance requirements before execution; never weaken a required exit check. "
+                     + "expected_exit_code requires actual_exit_required=true. Operator declarations cannot supply measured process exits.";
+         if (!(result instanceof AgentResultEnvelope.SelfTestResult) && !(result instanceof AgentResultEnvelope.AcceptanceReviewResult)) return "";
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java
++++ dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultPromptContractTest.java
+@@ -11,6 +11,21 @@
+ class AgentResultPromptContractTest {
+     private final AgentResultEnvelopeParser parser = new AgentResultEnvelopeParser();
+     private final AgentResultEnvelopeValidator validator = new AgentResultEnvelopeValidator();
++
++    @Test
++    void planPromptSeparatesRegisteredMethodFromCriterionDetails() {
++        var prompt = AgentResultPromptContract.render("ws", "run", "plan.claude_plan",
++                "READY_FOR_PLAN_REVIEW", Set.of("READY_FOR_PLAN_REVIEW"));
++        assertTrue(prompt.contains("copy its `method` exactly as the decoded JSON string"));
++        assertTrue(prompt.contains("do not append, paraphrase or normalize whitespace"));
++        assertTrue(prompt.contains("in `plan.validation_plan`, labeled with approved criterion IDs"));
++        assertTrue(prompt.contains("not execution evidence or approval"));
++        assertTrue(prompt.contains("placeholders, not registered readiness"));
++        assertTrue(prompt.contains("never weaken a required exit check"));
++        var design = AgentResultPromptContract.render("ws", "run", "design.claude_design",
++                "READY_FOR_ARCH_REVIEW", Set.of("READY_FOR_ARCH_REVIEW"));
++        assertFalse(design.contains("copy its `method`"), "do not impose the plan schema on design");
++    }
+ 
+     @Test
+     void fullRevisionEnumeratesTheSameClosedResponseFieldsAsInitialIntake() {
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/VerificationReadinessTest.java
++++ dual-runtime/src/test/java/dev/dual/runtime/handler/VerificationReadinessTest.java
+@@ -19,6 +19,42 @@
+ class VerificationReadinessTest {
+     @TempDir Path temporary;
+     static final ObjectMapper JSON = new ObjectMapper().findAndRegisterModules();
++
++    @Test void readinessContextSeparatesFixedMethodFromDetailsWithoutInventingReadiness() throws Exception {
++        var f = new Fixture(temporary);
++        var empty = VerificationReadiness.context(f.ledger, f.root, f.ws, f.goal());
++        assertTrue(empty.contains("copy its `method` exactly as the decoded JSON string"));
++        assertTrue(empty.contains("in `plan.validation_plan`, labeled with approved criterion IDs"));
++        assertTrue(empty.contains("report the missing readiness without inventing references"));
++        var request = f.request("literal", VerificationReadiness.Action.RECORD, null);
++        var ref = VerificationReadiness.record(f.ledger, f.root, f.ws, request);
++        var events = Files.readAllBytes(f.paths.eventsJsonl());
++        var bytes = Files.readAllBytes(f.root.resolve(ref.ref()));
++        var context = VerificationReadiness.context(f.ledger, f.root, f.ws, f.goal());
++        assertTrue(context.contains(ref.sha256()));
++        assertTrue(context.contains(request.method()));
++        assertArrayEquals(events, Files.readAllBytes(f.paths.eventsJsonl()));
++        assertArrayEquals(bytes, Files.readAllBytes(f.root.resolve(ref.ref())));
++        f.validate(ref);
++    }
++
++    @Test void usefulSuffixAndWhitespaceStillCannotChangeTheRegisteredMethod() throws Exception {
++        var f = new Fixture(temporary);
++        var ref = VerificationReadiness.record(f.ledger, f.root, f.ws, f.request("literal", VerificationReadiness.Action.RECORD, null));
++        var bindings = f.bindings(ref);
++        var original = bindings.getFirst();
++        var goal = f.goal();
++        for (var suffix : List.of("; AC-1: inspect the exact assertion", " ", "\n")) {
++            var changed = new TaskContract.VerificationBinding(original.criterionId(), original.method() + suffix,
++                    original.executor(), original.environmentRefs(), original.authorityRefs(), original.evidenceKind(),
++                    original.feasibilityRefs(), original.detailOwner(), original.actualExitRequired(), original.expectedExitCode());
++            try (var read = f.ledger.readSession(f.paths)) {
++                assertThrows(IOException.class, () -> VerificationReadiness.validateBindings(read.ledger(), f.root, f.ws,
++                        goal, List.of(changed, bindings.getLast())));
++            }
++        }
++        f.validate(ref);
++    }
+ 
+     @Test void registerThenReuseDoesNotApproveAndDuplicateResponseIsStable() throws Exception {
+         var f = new Fixture(temporary);
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java
++++ dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java
+@@ -16,6 +16,38 @@
+ /** Offline lifecycle test: fixture-approved GOAL, real handlers/ledger; deterministic provider outputs. */
+ class PhasedContractContinuationTest {
+     @TempDir Path root;
++
++    @ParameterizedTest
++    @ValueSource(booleans = {false, true})
++    void criterionDetailsReachReviewAndImplementationButMethodSuffixCannotAdvance(boolean appendToMethod) throws Exception {
++        var f = new Flow(root);
++        f.verificationDetails = List.of("AC-1: assert the exact result before display rounding",
++                "AC-2: assert invalid input is rejected; inspect the real report");
++        f.methodSuffix = appendToMethod ? "; AC-1: inspect the exact assertion" : "";
++        f.untilPause();
++        assertEquals("gate.plan", f.node(), "missing readiness must retain the legal recording path");
++        f.recordReadiness();
++        ReviewGateActions.resolve(f.base.ledger, f.base.paths, "revise", "Bind the registered method; keep AC details in validation_plan");
++        f.untilPause();
++        var reviewInput = f.inputs.get("plan.codex_plan_review").render(root);
++        for (var detail : f.verificationDetails) assertTrue(reviewInput.contains(detail));
++        assertFalse(f.calls.contains("implement.claude_implement"));
++        if (appendToMethod) {
++            assertEquals("gate.plan", f.node());
++            assertEquals(VerificationReadiness.REQUIRED, f.planDecision().result().get("readiness_reason"));
++            return;
++        }
++        assertEquals("gate.contract_review", f.node());
++        var candidate = TaskContractProjectionVerifier.executionCandidate(f.base.ledger, root, f.base.ws,
++                f.base.ledger.loadCurrent(f.base.paths).activeNodeInstanceIds().getFirst(), true);
++        assertTrue(candidate.contract().verificationBindings().stream().allMatch(b -> b.method().equals("run project tests")));
++        ReviewGateActions.resolve(f.base.ledger, f.base.paths, "approve", "Approve this exact EXECUTION scope");
++        f.untilPause();
++        assertEquals(WorkflowStatus.COMPLETED, f.base.ledger.loadCurrent(f.base.paths).status());
++        var implementationInput = f.inputs.get("implement.claude_implement").render(root);
++        for (var detail : f.verificationDetails) assertTrue(implementationInput.contains(detail));
++        assertEquals(1, Collections.frequency(f.calls, "implement.claude_implement"));
++    }
+ 
+     @ParameterizedTest
+     @ValueSource(strings = {"revise", "approve"})
+@@ -278,6 +310,8 @@
+ 
+     static final class Flow {
+         boolean actualExitRequired;
++        String methodSuffix = "";
++        List<String> verificationDetails = List.of();
+         final VerificationReadinessTest.Fixture base;
+         final WorkflowRuntime runtime;
+         final List<String> calls = new ArrayList<>();
+@@ -376,10 +410,11 @@
+                 var bindings = readiness == null ? List.of("AC-1", "AC-2").stream().map(id -> new TaskContract.VerificationBinding(
+                         id, "run project tests", TaskContract.Executor.AGENT, List.of(), List.of(),
+                         TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(), "verification-owner", false, null)).toList() : base.bindings(readiness);
+-                bindings = bindings.stream().map(b -> new TaskContract.VerificationBinding(b.criterionId(), b.method(), b.executor(),
++                bindings = bindings.stream().map(b -> new TaskContract.VerificationBinding(b.criterionId(), b.method() + methodSuffix, b.executor(),
+                         b.environmentRefs(), b.authorityRefs(), b.evidenceKind(), b.feasibilityRefs(), b.detailOwner(),
+                         actualExitRequired, actualExitRequired ? 0 : null)).toList();
+                 plan.set("verification_bindings", JSON.valueToTree(bindings)); plan.putArray("authority_refs");
++                if (!verificationDetails.isEmpty()) plan.set("validation_plan", JSON.valueToTree(verificationDetails));
+             }
+             var output = dir.resolve("outputs/result.json"); JSON.writeValue(output.toFile(), envelope);
+             if (failPublication) {
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java
++++ dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java
+@@ -24,6 +24,27 @@
+ class AcpxAgentResultAcquirerTest {
+     @TempDir
+     Path tempDir;
++
++    @Test
++    void planCorrectionRetainsFixedMethodAndDetailResponsibilitiesWithoutExtraAttempts() throws Exception {
++        var valid = strictEnvelope("plan.claude_plan", "run-1");
++        var malformed = "NON_JSON_PREFIX " + valid;
++        for (var second : List.of(valid, malformed)) {
++            var transport = new ScriptedTransport(validResult("request-1", malformed, 0),
++                    validResult("request-2", second, 0));
++            var requests = requests("plan-method-correction");
++            var acquisition = new AcpxAgentResultAcquirer(transport).acquire("claude",
++                    requests.initial(), requests.correction(), correctionPrompt("plan.claude_plan", "run-1"),
++                    "ws-test", "run-1", ContractRegistry.forNode("plan.claude_plan"));
++            var prompt = Files.readString(requests.correction().promptPath());
++            assertTrue(prompt.contains("copy its `method` exactly as the decoded JSON string"));
++            assertTrue(prompt.contains("in `plan.validation_plan`, labeled with approved criterion IDs"));
++            assertTrue(prompt.contains("never weaken a required exit check"));
++            assertTrue(prompt.contains("This is the only contract-correction attempt"));
++            assertEquals(second.equals(valid), acquisition.finalParse().valid());
++            assertEquals(2, transport.calls);
++        }
++    }
+ 
+     @Test
+     void unknownRevisionResponseFieldReachesOnlyOneCorrectionWithExactLegalKeys() throws Exception {

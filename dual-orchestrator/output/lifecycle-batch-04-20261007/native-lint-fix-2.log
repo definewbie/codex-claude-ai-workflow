@@ -1,0 +1,3 @@
+src/cli/queue/permission-replies.ts:130:8: error eslint(complexity): method `reply` has a complexity of 10. Maximum allowed is 8.
+src/cli/queue/messages.ts:545:1: error eslint(complexity): function `parseSubmitRequest` has a complexity of 9. Maximum allowed is 8.
+src/acp/client.ts:2035:45: error eslint(complexity): private async method `handleExactPermissionRequest` has a complexity of 10. Maximum allowed is 8.

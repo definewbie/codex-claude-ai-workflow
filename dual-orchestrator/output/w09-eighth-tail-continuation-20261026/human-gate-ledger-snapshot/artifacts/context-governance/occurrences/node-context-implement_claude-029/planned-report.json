@@ -1,0 +1,20 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "context_governance_report",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "implement",
+  "nodeInstanceId" : "node-context-implement_claude-029",
+  "nodeDefinitionId" : "context.implement_claude",
+  "builderNodeDefinitionId" : "context.implement_claude",
+  "targetNodeDefinitionId" : "implement.claude_implement",
+  "iterationId" : "iter-003",
+  "reportPhase" : "planned",
+  "plannedReadFiles" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "plannedWriteFiles" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "plannedPreviouslyReadFiles" : [ ],
+  "plannedRepeatedReadAvoidance" : [ ],
+  "actualReadFiles" : [ ],
+  "actualWriteFiles" : [ ],
+  "telemetryPending" : true,
+  "generatedAt" : "2026-10-25T22:36:14.513614Z"
+}

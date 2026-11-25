@@ -1,0 +1,4932 @@
+{
+  "method": "Operational retained ledgers only. Join previous unused failure by recovery gate ID, not by adjacent event or symptom. Observe until next retry of same node_instance_id. TASK_SUCCEEDED_ONLY does not prove node result admission, workflow completion, delivery or causality. Absence of retry is observation-window absence, not proof permanent failure. Notes are statements, not verified interventions.",
+  "sourceInventory": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/cross-month-ledger-review-20261102/inventory.json",
+  "sourceInventorySha256": "4ec6c88af6c179f20ed2cc626710fe1c8bdbe8541c3216e03381a7e6cc7706bb",
+  "counts": {
+    "cases": 158,
+    "failures": 170,
+    "retries": 95,
+    "exactGatePairs": 85,
+    "unmatchedRetries": 10,
+    "results": {
+      "NO_EXACT_SUCCESS_WITNESS": 4,
+      "TASK_SUCCEEDED_ONLY": 53,
+      "FAILED_AGAIN_SAME_GATE": 38
+    }
+  },
+  "records": [
+    {
+      "workstream": "ws-20260602T081345Z-SHXP",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260602T081345Z-SHXP/.agent/workstreams/ws-20260602T081345Z-SHXP/events.jsonl",
+      "ledgerSha256": "ec73f165855497780968524efc4f2d9c94dc60155901cc7b5a8fb18f829e1f9f",
+      "retry": {
+        "event_id": "evt-000006",
+        "ts": "2026-06-02T09:06:10.305930Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "intake.decision",
+          "recovery_gate_ids": [
+            "recovery-node-intake-decision-004"
+          ],
+          "note": "decision sidecar fallback fixed",
+          "node_instance_id": "node-intake-decision-004",
+          "previous_status": "FAILED"
+        },
+        "line": 6
+      },
+      "precedingFailureExactGate": null,
+      "nextFailureSameGate": null,
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "NO_EXACT_SUCCESS_WITNESS",
+      "caseSnapshotStatus": "RUNNING",
+      "lastEventLine": 45
+    },
+    {
+      "workstream": "ws-20260604T063104Z-H878",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260604T063104Z-H878/.agent/workstreams/ws-20260604T063104Z-H878/events.jsonl",
+      "ledgerSha256": "d926c45c7c206e84ecff7292a5568e3e55c3aa59efcf6283a9f25f3c1997678a",
+      "retry": {
+        "event_id": "evt-000003",
+        "ts": "2026-06-04T07:08:15.526122Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "intake.claude_brainstorm",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "note": "complete stdout accepted after reconnect policy update",
+          "node_instance_id": "node-intake-claude_brainstorm-001"
+        },
+        "line": 3
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000002",
+        "ts": "2026-06-04T06:32:37.684444Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 2
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "NO_EXACT_SUCCESS_WITNESS",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 12
+    },
+    {
+      "workstream": "ws-20260616T015200Z-73J9",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260616T015200Z-73J9/.agent/workstreams/ws-20260616T015200Z-73J9/events.jsonl",
+      "ledgerSha256": "e6fb47c283f612882aaba27627ab4f17034bf75536105c801a0d51da1916b819",
+      "retry": {
+        "event_id": "evt-000003",
+        "ts": "2026-06-16T02:00:45.125527Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "acpx claude session reconnect; retry same node",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "node": "intake.claude_brainstorm",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-intake-claude_brainstorm-001"
+        },
+        "line": 6
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000002",
+        "ts": "2026-06-16T01:59:57.106154Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 5
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781575254062-5924779a",
+          "ts": "2026-06-16T02:02:41.535593Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "agent_task_id": "agt-1781575254062-5924779a",
+            "node_execution_id": "nxe-1781575254082-fb5aa9cd",
+            "node": "intake.claude_brainstorm",
+            "status": "SUCCEEDED"
+          },
+          "line": 9
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 38
+    },
+    {
+      "workstream": "ws-20260616T015200Z-73J9",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260616T015200Z-73J9/.agent/workstreams/ws-20260616T015200Z-73J9/events.jsonl",
+      "ledgerSha256": "e6fb47c283f612882aaba27627ab4f17034bf75536105c801a0d51da1916b819",
+      "retry": {
+        "event_id": "evt-000012",
+        "ts": "2026-06-16T02:09:06.203424Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-design-claude_design-010"
+          ],
+          "note": "acpx claude reconnect at design; retry same node once",
+          "node_instance_id": "node-design-claude_design-010",
+          "previous_status": "FAILED",
+          "node": "design.claude_design"
+        },
+        "line": 34
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000011",
+        "ts": "2026-06-16T02:08:20.540685Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.claude_design",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-design-claude_design-010"
+        },
+        "line": 33
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000013",
+        "ts": "2026-06-16T02:10:42.561368Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.claude_design",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-design-claude_design-010"
+        },
+        "line": 38
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781575758472-b5260f55",
+          "ts": "2026-06-16T02:10:42.549179Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "design.claude_design",
+            "status": "SUCCEEDED",
+            "node_instance_id": "node-design-claude_design-010",
+            "agent_task_id": "agt-1781575758472-b5260f55",
+            "node_execution_id": "nxe-1781575758497-c73ee5d9"
+          },
+          "line": 37
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 38
+    },
+    {
+      "workstream": "ws-20260616T023157Z-ERHM",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260616T023157Z-ERHM/.agent/workstreams/ws-20260616T023157Z-ERHM/events.jsonl",
+      "ledgerSha256": "1d894796d6abf68b7238619ac39aeb19337f6c79156099b8bddf11dabb49edb5",
+      "retry": {
+        "event_id": "evt-000003",
+        "ts": "2026-06-16T02:42:52.776445Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-intake-claude_brainstorm-001",
+          "note": "acpx claude session reported reconnect during intake; retry same node after recoverable runtime interruption",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "node": "intake.claude_brainstorm",
+          "previous_status": "FAILED"
+        },
+        "line": 6
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000002",
+        "ts": "2026-06-16T02:42:06.742975Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_OUTPUT_INTERRUPTED",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 5
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-16T02:46:04.603730Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 10
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781577781033-26ec3b69",
+          "ts": "2026-06-16T02:46:04.596067Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "intake.claude_brainstorm",
+            "node_execution_id": "nxe-1781577781049-dc06c633",
+            "agent_task_id": "agt-1781577781033-26ec3b69",
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "status": "SUCCEEDED"
+          },
+          "line": 9
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 20
+    },
+    {
+      "workstream": "ws-20260616T023157Z-ERHM",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260616T023157Z-ERHM/.agent/workstreams/ws-20260616T023157Z-ERHM/events.jsonl",
+      "ledgerSha256": "1d894796d6abf68b7238619ac39aeb19337f6c79156099b8bddf11dabb49edb5",
+      "retry": {
+        "event_id": "evt-000005",
+        "ts": "2026-06-16T02:47:24.247883Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "intake.claude_brainstorm",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "note": "recreated acpx claude-main session in effective worktree after repeated reconnect failures",
+          "node_instance_id": "node-intake-claude_brainstorm-001"
+        },
+        "line": 11
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-16T02:46:04.603730Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 10
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000006",
+        "ts": "2026-06-16T02:50:45.900067Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 15
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781578061938-946bf332",
+          "ts": "2026-06-16T02:50:45.892975Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "status": "SUCCEEDED",
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "agent_task_id": "agt-1781578061938-946bf332",
+            "node_execution_id": "nxe-1781578061953-13300b54",
+            "node": "intake.claude_brainstorm"
+          },
+          "line": 14
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 20
+    },
+    {
+      "workstream": "ws-20260616T023157Z-ERHM",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260616T023157Z-ERHM/.agent/workstreams/ws-20260616T023157Z-ERHM/events.jsonl",
+      "ledgerSha256": "1d894796d6abf68b7238619ac39aeb19337f6c79156099b8bddf11dabb49edb5",
+      "retry": {
+        "event_id": "evt-000007",
+        "ts": "2026-06-16T03:15:58.900350Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "intake.claude_brainstorm",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "note": "retry after Claude/GLM runtime appears stable again",
+          "node_instance_id": "node-intake-claude_brainstorm-001"
+        },
+        "line": 16
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000006",
+        "ts": "2026-06-16T02:50:45.900067Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 15
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000008",
+        "ts": "2026-06-16T03:19:12.798030Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 20
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781579770599-1b7b2900",
+          "ts": "2026-06-16T03:19:12.788680Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "intake.claude_brainstorm",
+            "node_execution_id": "nxe-1781579770617-0da5e54f",
+            "agent_task_id": "agt-1781579770599-1b7b2900",
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "status": "SUCCEEDED"
+          },
+          "line": 19
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 20
+    },
+    {
+      "workstream": "ws-20260616T065917Z-FETC",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260616T065917Z-FETC/.agent/workstreams/ws-20260616T065917Z-FETC/events.jsonl",
+      "ledgerSha256": "5d50537da06db7769465d6b2b09390ba8cf28a587967fefb8de6c64fd0c9d3bc",
+      "retry": {
+        "event_id": "evt-000003",
+        "ts": "2026-06-16T07:03:32.254441Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-intake-claude_brainstorm-001",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "node": "intake.claude_brainstorm",
+          "previous_status": "FAILED"
+        },
+        "line": 6
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000002",
+        "ts": "2026-06-16T07:02:25.607055Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_OVERLOADED",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 5
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-16T07:06:43.912133Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_OVERLOADED",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 10
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781593421470-3c3befb6",
+          "ts": "2026-06-16T07:06:43.902405Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "agent_task_id": "agt-1781593421470-3c3befb6",
+            "node_execution_id": "nxe-1781593421488-ce34080a",
+            "node": "intake.claude_brainstorm",
+            "status": "SUCCEEDED"
+          },
+          "line": 9
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 15
+    },
+    {
+      "workstream": "ws-20260616T065917Z-FETC",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260616T065917Z-FETC/.agent/workstreams/ws-20260616T065917Z-FETC/events.jsonl",
+      "ledgerSha256": "5d50537da06db7769465d6b2b09390ba8cf28a587967fefb8de6c64fd0c9d3bc",
+      "retry": {
+        "event_id": "evt-000005",
+        "ts": "2026-06-16T11:33:48.115989Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node_instance_id": "node-intake-claude_brainstorm-001",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "node": "intake.claude_brainstorm"
+        },
+        "line": 11
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-16T07:06:43.912133Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_OVERLOADED",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 10
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000006",
+        "ts": "2026-06-16T11:39:11.747082Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 15
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781609647670-fafcdd82",
+          "ts": "2026-06-16T11:39:11.736609Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "status": "SUCCEEDED",
+            "node": "intake.claude_brainstorm",
+            "node_execution_id": "nxe-1781609647690-309bcfc5",
+            "agent_task_id": "agt-1781609647670-fafcdd82"
+          },
+          "line": 14
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 15
+    },
+    {
+      "workstream": "ws-20260617T011857Z-5QV3",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T011857Z-5QV3/.agent/workstreams/ws-20260617T011857Z-5QV3/events.jsonl",
+      "ledgerSha256": "e7f8ca3fd3ff5d135da5732cf3fc114b6eedfbd16020adb1c65669ededc56b73",
+      "retry": {
+        "event_id": "evt-000008",
+        "ts": "2026-06-17T01:31:11.599003Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-intake-claude_brainstorm-005",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-005"
+          ],
+          "node": "intake.claude_brainstorm",
+          "previous_status": "FAILED"
+        },
+        "line": 23
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000007",
+        "ts": "2026-06-17T01:30:08.154318Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-005"
+        },
+        "line": 22
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000009",
+        "ts": "2026-06-17T01:39:34.593767Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-005"
+        },
+        "line": 27
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781659891824-2ace0f46",
+          "ts": "2026-06-17T01:39:34.580932Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "agent_task_id": "agt-1781659891824-2ace0f46",
+            "node_instance_id": "node-intake-claude_brainstorm-005",
+            "status": "SUCCEEDED",
+            "node": "intake.claude_brainstorm",
+            "node_execution_id": "nxe-1781659891847-c7f2493d"
+          },
+          "line": 26
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 27
+    },
+    {
+      "workstream": "ws-20260617T053546Z-R6SL",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T053546Z-R6SL/.agent/workstreams/ws-20260617T053546Z-R6SL/events.jsonl",
+      "ledgerSha256": "0433fb2c9383f815ce7f37a6126020a45e80f77ed185f07bdc808ce0ecdcaacd",
+      "retry": {
+        "event_id": "evt-000003",
+        "ts": "2026-06-17T05:36:52.724579Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "node": "intake.claude_brainstorm",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-intake-claude_brainstorm-001",
+          "note": ""
+        },
+        "line": 6
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000002",
+        "ts": "2026-06-17T05:35:53.505899Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 5
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-17T05:37:05.241735Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 10
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781674622437-1fcdbeee",
+          "ts": "2026-06-17T05:37:05.235355Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "intake.claude_brainstorm",
+            "status": "SUCCEEDED",
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "agent_task_id": "agt-1781674622437-1fcdbeee",
+            "node_execution_id": "nxe-1781674622454-16d0ec67"
+          },
+          "line": 9
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 10
+    },
+    {
+      "workstream": "ws-20260617T062107Z-P492",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T062107Z-P492/.agent/workstreams/ws-20260617T062107Z-P492/events.jsonl",
+      "ledgerSha256": "7d0b3acca078b53b5e35247dea4621296c112b5b4cdb644a21cec850e8e26e6f",
+      "retry": {
+        "event_id": "evt-000003",
+        "ts": "2026-06-17T10:54:08.007216Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "note": "",
+          "node_instance_id": "node-intake-claude_brainstorm-001",
+          "previous_status": "FAILED",
+          "node": "intake.claude_brainstorm"
+        },
+        "line": 6
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000002",
+        "ts": "2026-06-17T06:21:14.124490Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 5
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-17T10:54:23.769693Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 10
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781693658779-39fbccbb",
+          "ts": "2026-06-17T10:54:23.761953Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "agent_task_id": "agt-1781693658779-39fbccbb",
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "status": "SUCCEEDED",
+            "node": "intake.claude_brainstorm",
+            "node_execution_id": "nxe-1781693658798-c516ee10"
+          },
+          "line": 9
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 97
+    },
+    {
+      "workstream": "ws-20260617T062107Z-P492",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T062107Z-P492/.agent/workstreams/ws-20260617T062107Z-P492/events.jsonl",
+      "ledgerSha256": "7d0b3acca078b53b5e35247dea4621296c112b5b4cdb644a21cec850e8e26e6f",
+      "retry": {
+        "event_id": "evt-000005",
+        "ts": "2026-06-17T10:56:32.445027Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-intake-claude_brainstorm-001",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ]
+        },
+        "line": 11
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-17T10:54:23.769693Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 10
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781693808263-e1e50f99",
+          "ts": "2026-06-17T11:01:44.728669Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "agent_task_id": "agt-1781693808263-e1e50f99",
+            "node_execution_id": "nxe-1781693808281-c7b90b89",
+            "node": "intake.claude_brainstorm",
+            "status": "SUCCEEDED"
+          },
+          "line": 14
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 97
+    },
+    {
+      "workstream": "ws-20260617T062107Z-P492",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T062107Z-P492/.agent/workstreams/ws-20260617T062107Z-P492/events.jsonl",
+      "ledgerSha256": "7d0b3acca078b53b5e35247dea4621296c112b5b4cdb644a21cec850e8e26e6f",
+      "retry": {
+        "event_id": "evt-000009",
+        "ts": "2026-06-17T11:24:01.932721Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "intake.codex_product_review",
+          "recovery_gate_ids": [
+            "recovery-node-intake-codex_product_review-007"
+          ],
+          "note": "",
+          "node_instance_id": "node-intake-codex_product_review-007"
+        },
+        "line": 24
+      },
+      "precedingFailureExactGate": null,
+      "nextFailureSameGate": {
+        "event_id": "evt-000010",
+        "ts": "2026-06-17T11:24:06.377615Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-007"
+        },
+        "line": 28
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781695442912-5edfacef",
+          "ts": "2026-06-17T11:24:06.369342Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "agent_task_id": "agt-1781695442912-5edfacef",
+            "node_instance_id": "node-intake-codex_product_review-007",
+            "status": "SUCCEEDED",
+            "node": "intake.codex_product_review",
+            "node_execution_id": "nxe-1781695442933-c556f275"
+          },
+          "line": 27
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 97
+    },
+    {
+      "workstream": "ws-20260617T062107Z-P492",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T062107Z-P492/.agent/workstreams/ws-20260617T062107Z-P492/events.jsonl",
+      "ledgerSha256": "7d0b3acca078b53b5e35247dea4621296c112b5b4cdb644a21cec850e8e26e6f",
+      "retry": {
+        "event_id": "evt-000011",
+        "ts": "2026-06-17T11:24:57.044023Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "intake.codex_product_review",
+          "recovery_gate_ids": [
+            "recovery-node-intake-codex_product_review-007"
+          ],
+          "note": "",
+          "node_instance_id": "node-intake-codex_product_review-007"
+        },
+        "line": 29
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000010",
+        "ts": "2026-06-17T11:24:06.377615Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-007"
+        },
+        "line": 28
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000012",
+        "ts": "2026-06-17T11:25:30.982179Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-007"
+        },
+        "line": 33
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781695497995-5a97e28c",
+          "ts": "2026-06-17T11:25:30.973107Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1781695498015-31995aad",
+            "agent_task_id": "agt-1781695497995-5a97e28c",
+            "node_instance_id": "node-intake-codex_product_review-007",
+            "status": "SUCCEEDED",
+            "node": "intake.codex_product_review"
+          },
+          "line": 32
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 97
+    },
+    {
+      "workstream": "ws-20260617T062107Z-P492",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T062107Z-P492/.agent/workstreams/ws-20260617T062107Z-P492/events.jsonl",
+      "ledgerSha256": "7d0b3acca078b53b5e35247dea4621296c112b5b4cdb644a21cec850e8e26e6f",
+      "retry": {
+        "event_id": "evt-000013",
+        "ts": "2026-06-17T11:26:53.792621Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-intake-codex_product_review-007",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-codex_product_review-007"
+          ],
+          "node": "intake.codex_product_review",
+          "previous_status": "FAILED"
+        },
+        "line": 34
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000012",
+        "ts": "2026-06-17T11:25:30.982179Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-007"
+        },
+        "line": 33
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781695614754-91630dd6",
+          "ts": "2026-06-17T11:27:45.092740Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1781695614775-246767c1",
+            "agent_task_id": "agt-1781695614754-91630dd6",
+            "node_instance_id": "node-intake-codex_product_review-007",
+            "status": "SUCCEEDED",
+            "node": "intake.codex_product_review"
+          },
+          "line": 37
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 97
+    },
+    {
+      "workstream": "ws-20260617T062107Z-P492",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T062107Z-P492/.agent/workstreams/ws-20260617T062107Z-P492/events.jsonl",
+      "ledgerSha256": "7d0b3acca078b53b5e35247dea4621296c112b5b4cdb644a21cec850e8e26e6f",
+      "retry": {
+        "event_id": "evt-000020",
+        "ts": "2026-06-17T11:30:56.387781Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-design-claude_design-018"
+          ],
+          "note": "",
+          "node_instance_id": "node-design-claude_design-018",
+          "previous_status": "FAILED",
+          "node": "design.claude_design"
+        },
+        "line": 54
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000019",
+        "ts": "2026-06-17T11:29:01.718898Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.claude_design",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-design-claude_design-018"
+        },
+        "line": 53
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000021",
+        "ts": "2026-06-17T11:33:20.991425Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.claude_design",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-design-claude_design-018"
+        },
+        "line": 58
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781695857357-538b1067",
+          "ts": "2026-06-17T11:33:20.976004Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "design.claude_design",
+            "node_execution_id": "nxe-1781695857383-242ecc6c",
+            "agent_task_id": "agt-1781695857357-538b1067",
+            "node_instance_id": "node-design-claude_design-018",
+            "status": "SUCCEEDED"
+          },
+          "line": 57
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 97
+    },
+    {
+      "workstream": "ws-20260617T062107Z-P492",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T062107Z-P492/.agent/workstreams/ws-20260617T062107Z-P492/events.jsonl",
+      "ledgerSha256": "7d0b3acca078b53b5e35247dea4621296c112b5b4cdb644a21cec850e8e26e6f",
+      "retry": {
+        "event_id": "evt-000022",
+        "ts": "2026-06-17T11:34:14.071312Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-design-claude_design-018",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-design-claude_design-018"
+          ],
+          "node": "design.claude_design",
+          "previous_status": "FAILED"
+        },
+        "line": 59
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000021",
+        "ts": "2026-06-17T11:33:20.991425Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.claude_design",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-design-claude_design-018"
+        },
+        "line": 58
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781696055051-a01671e3",
+          "ts": "2026-06-17T11:36:49.728301Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_instance_id": "node-design-claude_design-018",
+            "agent_task_id": "agt-1781696055051-a01671e3",
+            "node_execution_id": "nxe-1781696055074-b22a8435",
+            "node": "design.claude_design",
+            "status": "SUCCEEDED"
+          },
+          "line": 62
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 97
+    },
+    {
+      "workstream": "ws-20260617T062107Z-P492",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T062107Z-P492/.agent/workstreams/ws-20260617T062107Z-P492/events.jsonl",
+      "ledgerSha256": "7d0b3acca078b53b5e35247dea4621296c112b5b4cdb644a21cec850e8e26e6f",
+      "retry": {
+        "event_id": "evt-000031",
+        "ts": "2026-06-17T11:41:14.675692Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "design.codex_arch_review",
+          "recovery_gate_ids": [
+            "recovery-node-design-codex_arch_review-029"
+          ],
+          "note": "",
+          "node_instance_id": "node-design-codex_arch_review-029"
+        },
+        "line": 89
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000030",
+        "ts": "2026-06-17T11:40:37.645966Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.codex_arch_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-design-codex_arch_review-029"
+        },
+        "line": 88
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781696475702-4a49b3a0",
+          "ts": "2026-06-17T11:43:22.081949Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "design.codex_arch_review",
+            "node_execution_id": "nxe-1781696475734-f5bac3d6",
+            "agent_task_id": "agt-1781696475702-4a49b3a0",
+            "node_instance_id": "node-design-codex_arch_review-029",
+            "status": "SUCCEEDED"
+          },
+          "line": 92
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 97
+    },
+    {
+      "workstream": "ws-20260617T142005Z-9GQY",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T142005Z-9GQY/.agent/workstreams/ws-20260617T142005Z-9GQY/events.jsonl",
+      "ledgerSha256": "90f387e77276c15adb694b5daff254891ae0a3e2c07ad6aec3fc73373cfed165",
+      "retry": {
+        "event_id": "evt-000003",
+        "ts": "2026-06-17T14:21:48.512130Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-intake-claude_brainstorm-001",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "node": "intake.claude_brainstorm",
+          "previous_status": "FAILED"
+        },
+        "line": 6
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000002",
+        "ts": "2026-06-17T14:20:41.335382Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 5
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-17T14:22:22.555351Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 10
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781706109470-52b7ed2c",
+          "ts": "2026-06-17T14:22:22.548133Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1781706109489-6fcfcb37",
+            "agent_task_id": "agt-1781706109470-52b7ed2c",
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "status": "SUCCEEDED",
+            "node": "intake.claude_brainstorm"
+          },
+          "line": 9
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 32
+    },
+    {
+      "workstream": "ws-20260617T142005Z-9GQY",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T142005Z-9GQY/.agent/workstreams/ws-20260617T142005Z-9GQY/events.jsonl",
+      "ledgerSha256": "90f387e77276c15adb694b5daff254891ae0a3e2c07ad6aec3fc73373cfed165",
+      "retry": {
+        "event_id": "evt-000005",
+        "ts": "2026-06-17T14:30:55.371089Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-intake-claude_brainstorm-001",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "node": "intake.claude_brainstorm",
+          "previous_status": "FAILED"
+        },
+        "line": 11
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-17T14:22:22.555351Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 10
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000006",
+        "ts": "2026-06-17T14:32:42.239473Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_PERMISSION_BLOCKED",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 15
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781706664644-c90d324c",
+          "ts": "2026-06-17T14:32:42.230380Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "status": "SUCCEEDED",
+            "node": "intake.claude_brainstorm",
+            "node_execution_id": "nxe-1781706664662-073b14ab",
+            "agent_task_id": "agt-1781706664644-c90d324c",
+            "node_instance_id": "node-intake-claude_brainstorm-001"
+          },
+          "line": 14
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 32
+    },
+    {
+      "workstream": "ws-20260617T142005Z-9GQY",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260617T142005Z-9GQY/.agent/workstreams/ws-20260617T142005Z-9GQY/events.jsonl",
+      "ledgerSha256": "90f387e77276c15adb694b5daff254891ae0a3e2c07ad6aec3fc73373cfed165",
+      "retry": {
+        "event_id": "evt-000007",
+        "ts": "2026-06-17T14:37:25.695485Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-intake-claude_brainstorm-001",
+          "previous_status": "FAILED",
+          "node": "intake.claude_brainstorm",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "note": ""
+        },
+        "line": 16
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000006",
+        "ts": "2026-06-17T14:32:42.239473Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_PERMISSION_BLOCKED",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 15
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781707055127-659ecdcb",
+          "ts": "2026-06-17T14:44:59.606374Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "status": "SUCCEEDED",
+            "node": "intake.claude_brainstorm",
+            "node_execution_id": "nxe-1781707055147-2d6fae33",
+            "agent_task_id": "agt-1781707055127-659ecdcb",
+            "node_instance_id": "node-intake-claude_brainstorm-001"
+          },
+          "line": 19
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 32
+    },
+    {
+      "workstream": "ws-20260618T004045Z-6VPL",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T004045Z-6VPL/.agent/workstreams/ws-20260618T004045Z-6VPL/events.jsonl",
+      "ledgerSha256": "94460ffa276d6844a7e9764af6df48ff329e120589cf18d7270bd2c1742543a4",
+      "retry": {
+        "event_id": "evt-000021",
+        "ts": "2026-06-18T01:10:28.329188Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-019"
+          ],
+          "node": "implement.claude_implement",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-implement-claude_implement-019",
+          "note": ""
+        },
+        "line": 67
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000020",
+        "ts": "2026-06-18T01:09:33.855221Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-019"
+        },
+        "line": 66
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781745041129-2a28fdf3",
+          "ts": "2026-06-18T01:19:08.681492Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1781745041157-ccd85eb5",
+            "node": "implement.claude_implement",
+            "status": "SUCCEEDED",
+            "node_instance_id": "node-implement-claude_implement-019",
+            "agent_task_id": "agt-1781745041129-2a28fdf3"
+          },
+          "line": 70
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 87
+    },
+    {
+      "workstream": "ws-20260618T013540Z-AT6N",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T013540Z-AT6N/.agent/workstreams/ws-20260618T013540Z-AT6N/events.jsonl",
+      "ledgerSha256": "d7be2d36b0c0b08df072ecfe8ca23bc821f7421cad00b7805a65c8958694471f",
+      "retry": {
+        "event_id": "evt-000003",
+        "ts": "2026-06-18T01:46:40.258686Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "",
+          "node_instance_id": "node-intake-claude_brainstorm-001",
+          "previous_status": "FAILED",
+          "node": "intake.claude_brainstorm",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ]
+        },
+        "line": 6
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000002",
+        "ts": "2026-06-18T01:45:32.711498Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 5
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-18T01:57:02.140645Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 10
+      },
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781747215278-a53728d4",
+          "ts": "2026-06-18T01:57:02.131302Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1781747215295-d193f886",
+            "agent_task_id": "agt-1781747215278-a53728d4",
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "status": "SUCCEEDED",
+            "node": "intake.claude_brainstorm"
+          },
+          "line": 9
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 10
+    },
+    {
+      "workstream": "ws-20260618T020149Z-M6Y9",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T020149Z-M6Y9/.agent/workstreams/ws-20260618T020149Z-M6Y9/events.jsonl",
+      "ledgerSha256": "fd17168fbb5d4e18e4f1e670e2d3a84b761c963cc74ee3b22896f90073d26cef",
+      "retry": {
+        "event_id": "evt-000008",
+        "ts": "2026-06-18T02:16:28.405312Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-intake-claude_brainstorm-005",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-005"
+          ]
+        },
+        "line": 22
+      },
+      "precedingFailureExactGate": null,
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781748996901-118e146e",
+          "ts": "2026-06-18T02:18:41.323481Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1781748996924-b4a0a530",
+            "node": "intake.claude_brainstorm",
+            "status": "SUCCEEDED",
+            "node_instance_id": "node-intake-claude_brainstorm-005",
+            "agent_task_id": "agt-1781748996901-118e146e"
+          },
+          "line": 25
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 112
+    },
+    {
+      "workstream": "ws-20260618T020149Z-M6Y9",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T020149Z-M6Y9/.agent/workstreams/ws-20260618T020149Z-M6Y9/events.jsonl",
+      "ledgerSha256": "fd17168fbb5d4e18e4f1e670e2d3a84b761c963cc74ee3b22896f90073d26cef",
+      "retry": {
+        "event_id": "evt-000015",
+        "ts": "2026-06-18T02:22:51.487683Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "contract.compile",
+          "recovery_gate_ids": [
+            "recovery-node-contract-compile-013"
+          ],
+          "note": "",
+          "node_instance_id": "node-contract-compile-013"
+        },
+        "line": 44
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000014",
+        "ts": "2026-06-18T02:19:46.592689Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "contract.compile",
+          "node_status": "FAILED",
+          "outcome": "TASK_CONTRACT_PROPOSAL_INVALID",
+          "recovery_gate_id": "recovery-node-contract-compile-013"
+        },
+        "line": 43
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781749379303-0772a5fa",
+          "ts": "2026-06-18T02:22:59.379907Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "contract.compile",
+            "status": "SUCCEEDED",
+            "node_instance_id": "node-contract-compile-013",
+            "agent_task_id": "agt-1781749379303-0772a5fa",
+            "node_execution_id": "nxe-1781749379327-3dd6702d"
+          },
+          "line": 47
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 112
+    },
+    {
+      "workstream": "ws-20260618T020149Z-M6Y9",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T020149Z-M6Y9/.agent/workstreams/ws-20260618T020149Z-M6Y9/events.jsonl",
+      "ledgerSha256": "fd17168fbb5d4e18e4f1e670e2d3a84b761c963cc74ee3b22896f90073d26cef",
+      "retry": {
+        "event_id": "evt-000021",
+        "ts": "2026-06-18T02:28:11.567084Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-design-codex_arch_review-019"
+          ],
+          "node": "design.codex_arch_review",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-design-codex_arch_review-019"
+        },
+        "line": 62
+      },
+      "precedingFailureExactGate": null,
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781749702270-5080ba58",
+          "ts": "2026-06-18T02:29:03.746617Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1781749702297-0f87357d",
+            "node": "design.codex_arch_review",
+            "status": "SUCCEEDED",
+            "node_instance_id": "node-design-codex_arch_review-019",
+            "agent_task_id": "agt-1781749702270-5080ba58"
+          },
+          "line": 65
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 112
+    },
+    {
+      "workstream": "ws-20260618T043104Z-U9R7",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T043104Z-U9R7/.agent/workstreams/ws-20260618T043104Z-U9R7/events.jsonl",
+      "ledgerSha256": "ac885310c29c7eeb2da234837992936784af52ab1b35036f3e91f6651179e897",
+      "retry": {
+        "event_id": "evt-000008",
+        "ts": "2026-06-18T04:38:23.168350Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "intake.claude_brainstorm",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-005"
+          ],
+          "note": "",
+          "node_instance_id": "node-intake-claude_brainstorm-005"
+        },
+        "line": 23
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000007",
+        "ts": "2026-06-18T04:35:41.313831Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-005"
+        },
+        "line": 22
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781757514448-66ab7841",
+          "ts": "2026-06-18T04:41:21.737007Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "agent_task_id": "agt-1781757514448-66ab7841",
+            "status": "SUCCEEDED",
+            "node": "intake.claude_brainstorm",
+            "node_instance_id": "node-intake-claude_brainstorm-005",
+            "node_execution_id": "nxe-1781757514467-4a61110d",
+            "error": ""
+          },
+          "line": 26
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 39
+    },
+    {
+      "workstream": "ws-20260618T044540Z-7HHS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T044540Z-7HHS/.agent/workstreams/ws-20260618T044540Z-7HHS/events.jsonl",
+      "ledgerSha256": "cf5933c3d46f90c24be972eeb60185bed2ec2a6bf35e104e12ee16d2f37bf71c",
+      "retry": {
+        "event_id": "evt-000017",
+        "ts": "2026-06-18T04:57:10.802122Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-design-codex_arch_review-015",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-design-codex_arch_review-015"
+          ],
+          "node": "design.codex_arch_review",
+          "previous_status": "FAILED"
+        },
+        "line": 54
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000016",
+        "ts": "2026-06-18T04:55:46.483650Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.codex_arch_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-design-codex_arch_review-015"
+        },
+        "line": 53
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000018",
+        "ts": "2026-06-18T04:58:27.451834Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.codex_arch_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-design-codex_arch_review-015"
+        },
+        "line": 58
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 352
+    },
+    {
+      "workstream": "ws-20260618T044540Z-7HHS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T044540Z-7HHS/.agent/workstreams/ws-20260618T044540Z-7HHS/events.jsonl",
+      "ledgerSha256": "cf5933c3d46f90c24be972eeb60185bed2ec2a6bf35e104e12ee16d2f37bf71c",
+      "retry": {
+        "event_id": "evt-000019",
+        "ts": "2026-06-18T05:00:30.096335Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-design-codex_arch_review-015",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-design-codex_arch_review-015"
+          ],
+          "node": "design.codex_arch_review",
+          "previous_status": "FAILED"
+        },
+        "line": 59
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000018",
+        "ts": "2026-06-18T04:58:27.451834Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.codex_arch_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-design-codex_arch_review-015"
+        },
+        "line": 58
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781758837909-60124e07",
+          "ts": "2026-06-18T05:02:02.520283Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "design.codex_arch_review",
+            "node_instance_id": "node-design-codex_arch_review-015",
+            "node_execution_id": "nxe-1781758837932-73d49d9a",
+            "error": "",
+            "agent_task_id": "agt-1781758837909-60124e07",
+            "status": "SUCCEEDED"
+          },
+          "line": 62
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 352
+    },
+    {
+      "workstream": "ws-20260618T044540Z-7HHS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T044540Z-7HHS/.agent/workstreams/ws-20260618T044540Z-7HHS/events.jsonl",
+      "ledgerSha256": "cf5933c3d46f90c24be972eeb60185bed2ec2a6bf35e104e12ee16d2f37bf71c",
+      "retry": {
+        "event_id": "evt-000030",
+        "ts": "2026-06-18T05:07:21.973597Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-implement-claude_implement-028",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-028"
+          ],
+          "node": "implement.claude_implement",
+          "previous_status": "FAILED"
+        },
+        "line": 94
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000029",
+        "ts": "2026-06-18T05:05:12.925176Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_PERMISSION_BLOCKED",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-028"
+        },
+        "line": 93
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000031",
+        "ts": "2026-06-18T05:11:04.160179Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-028"
+        },
+        "line": 98
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 352
+    },
+    {
+      "workstream": "ws-20260618T044540Z-7HHS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T044540Z-7HHS/.agent/workstreams/ws-20260618T044540Z-7HHS/events.jsonl",
+      "ledgerSha256": "cf5933c3d46f90c24be972eeb60185bed2ec2a6bf35e104e12ee16d2f37bf71c",
+      "retry": {
+        "event_id": "evt-000032",
+        "ts": "2026-06-18T05:13:06.447633Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-028"
+          ],
+          "note": "",
+          "node_instance_id": "node-implement-claude_implement-028"
+        },
+        "line": 99
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000031",
+        "ts": "2026-06-18T05:11:04.160179Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-028"
+        },
+        "line": 98
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781759596426-5853ad44",
+          "ts": "2026-06-18T05:16:52.161071Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "agent_task_id": "agt-1781759596426-5853ad44",
+            "status": "SUCCEEDED",
+            "node": "implement.claude_implement",
+            "node_instance_id": "node-implement-claude_implement-028",
+            "node_execution_id": "nxe-1781759596451-322f2245",
+            "error": ""
+          },
+          "line": 102
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 352
+    },
+    {
+      "workstream": "ws-20260618T044540Z-7HHS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T044540Z-7HHS/.agent/workstreams/ws-20260618T044540Z-7HHS/events.jsonl",
+      "ledgerSha256": "cf5933c3d46f90c24be972eeb60185bed2ec2a6bf35e104e12ee16d2f37bf71c",
+      "retry": {
+        "event_id": "evt-000038",
+        "ts": "2026-06-18T05:28:01.441391Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "acceptance.codex_verifier_review",
+          "recovery_gate_ids": [
+            "recovery-node-acceptance-codex_verifier_review-036"
+          ],
+          "note": "",
+          "node_instance_id": "node-acceptance-codex_verifier_review-036"
+        },
+        "line": 120
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000037",
+        "ts": "2026-06-18T05:20:12.235651Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "acceptance.codex_verifier_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-acceptance-codex_verifier_review-036"
+        },
+        "line": 119
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781760489118-a00d1f7a",
+          "ts": "2026-06-18T05:31:24.930123Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "error": "",
+            "agent_task_id": "agt-1781760489118-a00d1f7a",
+            "status": "SUCCEEDED",
+            "node": "acceptance.codex_verifier_review",
+            "node_instance_id": "node-acceptance-codex_verifier_review-036",
+            "node_execution_id": "nxe-1781760489147-fe238a74"
+          },
+          "line": 123
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 352
+    },
+    {
+      "workstream": "ws-20260618T044540Z-7HHS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T044540Z-7HHS/.agent/workstreams/ws-20260618T044540Z-7HHS/events.jsonl",
+      "ledgerSha256": "cf5933c3d46f90c24be972eeb60185bed2ec2a6bf35e104e12ee16d2f37bf71c",
+      "retry": {
+        "event_id": "evt-000048",
+        "ts": "2026-06-18T05:36:15.931538Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "design.codex_arch_review",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-design-codex_arch_review-046",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-design-codex_arch_review-046"
+          ]
+        },
+        "line": 153
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000047",
+        "ts": "2026-06-18T05:33:56.918973Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.codex_arch_review",
+          "node_status": "FAILED",
+          "outcome": "AGENT_OUTPUT_CONTRACT_VIOLATION",
+          "recovery_gate_id": "recovery-node-design-codex_arch_review-046"
+        },
+        "line": 152
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781760985252-7c4aa870",
+          "ts": "2026-06-18T05:39:03.656418Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "design.codex_arch_review",
+            "node_instance_id": "node-design-codex_arch_review-046",
+            "node_execution_id": "nxe-1781760985281-292287ac",
+            "error": "",
+            "agent_task_id": "agt-1781760985252-7c4aa870",
+            "status": "SUCCEEDED"
+          },
+          "line": 156
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 352
+    },
+    {
+      "workstream": "ws-20260618T044540Z-7HHS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T044540Z-7HHS/.agent/workstreams/ws-20260618T044540Z-7HHS/events.jsonl",
+      "ledgerSha256": "cf5933c3d46f90c24be972eeb60185bed2ec2a6bf35e104e12ee16d2f37bf71c",
+      "retry": {
+        "event_id": "evt-000060",
+        "ts": "2026-06-18T05:45:31.915174Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-plan-codex_plan_review-058"
+          ],
+          "note": "",
+          "node_instance_id": "node-plan-codex_plan_review-058",
+          "previous_status": "FAILED",
+          "node": "plan.codex_plan_review"
+        },
+        "line": 192
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000059",
+        "ts": "2026-06-18T05:44:49.321176Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "plan.codex_plan_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-plan-codex_plan_review-058"
+        },
+        "line": 191
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781761539487-586daf9b",
+          "ts": "2026-06-18T05:48:22.737710Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1781761539487-586daf9b",
+            "error": "",
+            "node_execution_id": "nxe-1781761539523-2ffefcd6",
+            "node_instance_id": "node-plan-codex_plan_review-058",
+            "node": "plan.codex_plan_review"
+          },
+          "line": 195
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 352
+    },
+    {
+      "workstream": "ws-20260618T044540Z-7HHS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T044540Z-7HHS/.agent/workstreams/ws-20260618T044540Z-7HHS/events.jsonl",
+      "ledgerSha256": "cf5933c3d46f90c24be972eeb60185bed2ec2a6bf35e104e12ee16d2f37bf71c",
+      "retry": {
+        "event_id": "evt-000096",
+        "ts": "2026-06-18T06:15:52.409684Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "plan.claude_plan",
+          "recovery_gate_ids": [
+            "recovery-node-plan-claude_plan-093"
+          ],
+          "note": "",
+          "node_instance_id": "node-plan-claude_plan-093"
+        },
+        "line": 314
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000095",
+        "ts": "2026-06-18T06:10:52.850669Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "plan.claude_plan",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-plan-claude_plan-093"
+        },
+        "line": 313
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781763361549-1019b18c",
+          "ts": "2026-06-18T06:17:55.599969Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1781763361593-63dad689",
+            "node_instance_id": "node-plan-claude_plan-093",
+            "node": "plan.claude_plan",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1781763361549-1019b18c",
+            "error": ""
+          },
+          "line": 317
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 352
+    },
+    {
+      "workstream": "ws-20260618T044540Z-7HHS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T044540Z-7HHS/.agent/workstreams/ws-20260618T044540Z-7HHS/events.jsonl",
+      "ledgerSha256": "cf5933c3d46f90c24be972eeb60185bed2ec2a6bf35e104e12ee16d2f37bf71c",
+      "retry": {
+        "event_id": "evt-000105",
+        "ts": "2026-06-18T06:34:34.949902Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-plan-codex_plan_review-103",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-plan-codex_plan_review-103"
+          ],
+          "node": "plan.codex_plan_review",
+          "previous_status": "FAILED"
+        },
+        "line": 344
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000104",
+        "ts": "2026-06-18T06:24:52.538363Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "plan.codex_plan_review",
+          "node_status": "FAILED",
+          "outcome": "AGENT_OUTPUT_CONTRACT_VIOLATION",
+          "recovery_gate_id": "recovery-node-plan-codex_plan_review-103"
+        },
+        "line": 343
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781764481845-a467af34",
+          "ts": "2026-06-18T06:37:39.588555Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "agent_task_id": "agt-1781764481845-a467af34",
+            "status": "SUCCEEDED",
+            "node": "plan.codex_plan_review",
+            "node_instance_id": "node-plan-codex_plan_review-103",
+            "node_execution_id": "nxe-1781764481897-26111c86",
+            "error": ""
+          },
+          "line": 347
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 352
+    },
+    {
+      "workstream": "ws-20260618T063836Z-FX4L",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T063836Z-FX4L/.agent/workstreams/ws-20260618T063836Z-FX4L/events.jsonl",
+      "ledgerSha256": "161f8590460fb0752154c2dc75b30ab1b23238421504fe40d4f61070be6571e0",
+      "retry": {
+        "event_id": "evt-000005",
+        "ts": "2026-06-18T06:45:20.041276Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-intake-codex_product_review-003",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-codex_product_review-003"
+          ],
+          "node": "intake.codex_product_review",
+          "previous_status": "FAILED"
+        },
+        "line": 14
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-18T06:41:42.308118Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_RATE_LIMIT",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-003"
+        },
+        "line": 13
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000006",
+        "ts": "2026-06-18T06:46:01.483732Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_RATE_LIMIT",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-003"
+        },
+        "line": 18
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 45
+    },
+    {
+      "workstream": "ws-20260618T063836Z-FX4L",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T063836Z-FX4L/.agent/workstreams/ws-20260618T063836Z-FX4L/events.jsonl",
+      "ledgerSha256": "161f8590460fb0752154c2dc75b30ab1b23238421504fe40d4f61070be6571e0",
+      "retry": {
+        "event_id": "evt-000007",
+        "ts": "2026-06-18T06:48:01.747458Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "recovery_gate_ids": [
+            "recovery-node-intake-codex_product_review-003"
+          ],
+          "note": "",
+          "node_instance_id": "node-intake-codex_product_review-003",
+          "previous_status": "FAILED"
+        },
+        "line": 19
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000006",
+        "ts": "2026-06-18T06:46:01.483732Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_RATE_LIMIT",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-003"
+        },
+        "line": 18
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781765289445-33ce88f3",
+          "ts": "2026-06-18T06:50:10.420727Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "intake.codex_product_review",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1781765289445-33ce88f3",
+            "error": "",
+            "node_execution_id": "nxe-1781765289466-be12e118",
+            "node_instance_id": "node-intake-codex_product_review-003"
+          },
+          "line": 22
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 45
+    },
+    {
+      "workstream": "ws-20260618T063836Z-FX4L",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T063836Z-FX4L/.agent/workstreams/ws-20260618T063836Z-FX4L/events.jsonl",
+      "ledgerSha256": "161f8590460fb0752154c2dc75b30ab1b23238421504fe40d4f61070be6571e0",
+      "retry": {
+        "event_id": "evt-000014",
+        "ts": "2026-06-18T06:55:13.446543Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "intake.codex_product_review",
+          "recovery_gate_ids": [
+            "recovery-node-intake-codex_product_review-012"
+          ],
+          "note": "",
+          "node_instance_id": "node-intake-codex_product_review-012"
+        },
+        "line": 41
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000013",
+        "ts": "2026-06-18T06:54:29.043995Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-012"
+        },
+        "line": 40
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000015",
+        "ts": "2026-06-18T06:56:30.435789Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-012"
+        },
+        "line": 45
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 45
+    },
+    {
+      "workstream": "ws-20260618T092922Z-2UWS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T092922Z-2UWS/.agent/workstreams/ws-20260618T092922Z-2UWS/events.jsonl",
+      "ledgerSha256": "0546f6dc43e2e0c48e8524ae287a4de1dccc4c6448331839308e4c0fede47928",
+      "retry": {
+        "event_id": "evt-000003",
+        "ts": "2026-06-18T09:31:42.480680Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node_instance_id": "node-intake-claude_brainstorm-001",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-001"
+          ],
+          "node": "intake.claude_brainstorm"
+        },
+        "line": 6
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000002",
+        "ts": "2026-06-18T09:29:59.177Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-001"
+        },
+        "line": 5
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781775113326-04d4ba71",
+          "ts": "2026-06-18T09:33:55.258361Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "error": "",
+            "agent_task_id": "agt-1781775113326-04d4ba71",
+            "status": "SUCCEEDED",
+            "node": "intake.claude_brainstorm",
+            "node_instance_id": "node-intake-claude_brainstorm-001",
+            "node_execution_id": "nxe-1781775113343-ff19cf03"
+          },
+          "line": 9
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 222
+    },
+    {
+      "workstream": "ws-20260618T092922Z-2UWS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T092922Z-2UWS/.agent/workstreams/ws-20260618T092922Z-2UWS/events.jsonl",
+      "ledgerSha256": "0546f6dc43e2e0c48e8524ae287a4de1dccc4c6448331839308e4c0fede47928",
+      "retry": {
+        "event_id": "evt-000010",
+        "ts": "2026-06-18T09:39:51.843098Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-intake-claude_brainstorm-007",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-007"
+          ]
+        },
+        "line": 28
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000009",
+        "ts": "2026-06-18T09:36:17.100132Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-007"
+        },
+        "line": 27
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781775603489-0a707a10",
+          "ts": "2026-06-18T09:42:32.548686Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "intake.claude_brainstorm",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1781775603489-0a707a10",
+            "error": "",
+            "node_execution_id": "nxe-1781775603507-7275a97b",
+            "node_instance_id": "node-intake-claude_brainstorm-007"
+          },
+          "line": 31
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 222
+    },
+    {
+      "workstream": "ws-20260618T092922Z-2UWS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T092922Z-2UWS/.agent/workstreams/ws-20260618T092922Z-2UWS/events.jsonl",
+      "ledgerSha256": "0546f6dc43e2e0c48e8524ae287a4de1dccc4c6448331839308e4c0fede47928",
+      "retry": {
+        "event_id": "evt-000014",
+        "ts": "2026-06-18T09:46:17.827114Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "recovery_gate_ids": [
+            "recovery-node-intake-codex_product_review-012"
+          ],
+          "note": "",
+          "node_instance_id": "node-intake-codex_product_review-012",
+          "previous_status": "FAILED"
+        },
+        "line": 41
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000013",
+        "ts": "2026-06-18T09:43:41.792177Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-012"
+        },
+        "line": 40
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000015",
+        "ts": "2026-06-18T09:47:43.210274Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "AGENT_OUTPUT_CONTRACT_VIOLATION",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-012"
+        },
+        "line": 45
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 222
+    },
+    {
+      "workstream": "ws-20260618T092922Z-2UWS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T092922Z-2UWS/.agent/workstreams/ws-20260618T092922Z-2UWS/events.jsonl",
+      "ledgerSha256": "0546f6dc43e2e0c48e8524ae287a4de1dccc4c6448331839308e4c0fede47928",
+      "retry": {
+        "event_id": "evt-000016",
+        "ts": "2026-06-18T09:50:35.907293Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-intake-codex_product_review-012"
+          ],
+          "node": "intake.codex_product_review",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-intake-codex_product_review-012"
+        },
+        "line": 46
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000015",
+        "ts": "2026-06-18T09:47:43.210274Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "AGENT_OUTPUT_CONTRACT_VIOLATION",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-012"
+        },
+        "line": 45
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781776246048-ade24a5a",
+          "ts": "2026-06-18T09:51:25.082380Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1781776246048-ade24a5a",
+            "error": "",
+            "node_execution_id": "nxe-1781776246072-5c887527",
+            "node_instance_id": "node-intake-codex_product_review-012",
+            "node": "intake.codex_product_review"
+          },
+          "line": 49
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 222
+    },
+    {
+      "workstream": "ws-20260618T092922Z-2UWS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T092922Z-2UWS/.agent/workstreams/ws-20260618T092922Z-2UWS/events.jsonl",
+      "ledgerSha256": "0546f6dc43e2e0c48e8524ae287a4de1dccc4c6448331839308e4c0fede47928",
+      "retry": {
+        "event_id": "evt-000038",
+        "ts": "2026-06-18T10:01:20.276252Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-acceptance-codex_verifier_review-036",
+          "previous_status": "FAILED",
+          "node": "acceptance.codex_verifier_review",
+          "recovery_gate_ids": [
+            "recovery-node-acceptance-codex_verifier_review-036"
+          ],
+          "note": ""
+        },
+        "line": 120
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000037",
+        "ts": "2026-06-18T10:00:29.305670Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "acceptance.codex_verifier_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-acceptance-codex_verifier_review-036"
+        },
+        "line": 119
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781776888848-f1d5e4a3",
+          "ts": "2026-06-18T10:03:53.083937Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "error": "",
+            "node_execution_id": "nxe-1781776888877-ad5e2afa",
+            "node_instance_id": "node-acceptance-codex_verifier_review-036",
+            "node": "acceptance.codex_verifier_review",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1781776888848-f1d5e4a3"
+          },
+          "line": 123
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 222
+    },
+    {
+      "workstream": "ws-20260618T092922Z-2UWS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260618T092922Z-2UWS/.agent/workstreams/ws-20260618T092922Z-2UWS/events.jsonl",
+      "ledgerSha256": "0546f6dc43e2e0c48e8524ae287a4de1dccc4c6448331839308e4c0fede47928",
+      "retry": {
+        "event_id": "evt-000053",
+        "ts": "2026-06-18T10:10:46.394887Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "plan.codex_plan_review",
+          "recovery_gate_ids": [
+            "recovery-node-plan-codex_plan_review-051"
+          ],
+          "note": "",
+          "node_instance_id": "node-plan-codex_plan_review-051"
+        },
+        "line": 170
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000052",
+        "ts": "2026-06-18T10:10:00.037179Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "plan.codex_plan_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-plan-codex_plan_review-051"
+        },
+        "line": 169
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781777455167-31906897",
+          "ts": "2026-06-18T10:13:02.451431Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "plan.codex_plan_review",
+            "node_instance_id": "node-plan-codex_plan_review-051",
+            "node_execution_id": "nxe-1781777455198-22d76ab9",
+            "error": "",
+            "agent_task_id": "agt-1781777455167-31906897",
+            "status": "SUCCEEDED"
+          },
+          "line": 173
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 222
+    },
+    {
+      "workstream": "ws-20260619T020553Z-6KA4",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260619T020553Z-6KA4/.agent/workstreams/ws-20260619T020553Z-6KA4/events.jsonl",
+      "ledgerSha256": "27b20b6f753a201ae2eb97a6d5a84107e2420b021fc6106b824dcbacbf201a56",
+      "retry": {
+        "event_id": "evt-000005",
+        "ts": "2026-06-19T02:16:39.561244Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "",
+          "node_instance_id": "node-intake-codex_product_review-003",
+          "previous_status": "FAILED",
+          "node": "intake.codex_product_review",
+          "recovery_gate_ids": [
+            "recovery-node-intake-codex_product_review-003"
+          ]
+        },
+        "line": 14
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000004",
+        "ts": "2026-06-19T02:12:08.999234Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_SESSION_MISSING",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-003"
+        },
+        "line": 13
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781835407343-5b335188",
+          "ts": "2026-06-19T02:17:52.739362Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "intake.codex_product_review",
+            "node_instance_id": "node-intake-codex_product_review-003",
+            "node_execution_id": "nxe-1781835407361-f9afcd78",
+            "error": "",
+            "agent_task_id": "agt-1781835407343-5b335188",
+            "status": "SUCCEEDED"
+          },
+          "line": 17
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 91
+    },
+    {
+      "workstream": "ws-20260619T020553Z-6KA4",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260619T020553Z-6KA4/.agent/workstreams/ws-20260619T020553Z-6KA4/events.jsonl",
+      "ledgerSha256": "27b20b6f753a201ae2eb97a6d5a84107e2420b021fc6106b824dcbacbf201a56",
+      "retry": {
+        "event_id": "evt-000019",
+        "ts": "2026-06-19T02:37:21.338417Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "plan.codex_plan_review",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-plan-codex_plan_review-017",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-plan-codex_plan_review-017"
+          ]
+        },
+        "line": 59
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000018",
+        "ts": "2026-06-19T02:36:29.796254Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "plan.codex_plan_review",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-plan-codex_plan_review-017"
+        },
+        "line": 58
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1781836648827-35b192fa",
+          "ts": "2026-06-19T02:39:23.216954Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1781836648852-8066a017",
+            "error": "",
+            "agent_task_id": "agt-1781836648827-35b192fa",
+            "status": "SUCCEEDED",
+            "node": "plan.codex_plan_review",
+            "node_instance_id": "node-plan-codex_plan_review-017"
+          },
+          "line": 62
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 91
+    },
+    {
+      "workstream": "ws-20260619T020553Z-6KA4",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260619T020553Z-6KA4/.agent/workstreams/ws-20260619T020553Z-6KA4/events.jsonl",
+      "ledgerSha256": "27b20b6f753a201ae2eb97a6d5a84107e2420b021fc6106b824dcbacbf201a56",
+      "retry": {
+        "event_id": "evt-000025",
+        "ts": "2026-06-19T02:53:39.184076Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-023"
+          ],
+          "node": "implement.claude_implement",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-implement-claude_implement-023"
+        },
+        "line": 77
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000024",
+        "ts": "2026-06-19T02:50:26.013762Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 76
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000026",
+        "ts": "2026-06-19T02:54:20.048063Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 81
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 91
+    },
+    {
+      "workstream": "ws-20260619T020553Z-6KA4",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260619T020553Z-6KA4/.agent/workstreams/ws-20260619T020553Z-6KA4/events.jsonl",
+      "ledgerSha256": "27b20b6f753a201ae2eb97a6d5a84107e2420b021fc6106b824dcbacbf201a56",
+      "retry": {
+        "event_id": "evt-000027",
+        "ts": "2026-06-19T03:10:44.538401Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-023"
+          ],
+          "note": "bounded reconnect recovery after adapter fix",
+          "node_instance_id": "node-implement-claude_implement-023"
+        },
+        "line": 82
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000026",
+        "ts": "2026-06-19T02:54:20.048063Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 81
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000028",
+        "ts": "2026-06-19T03:11:29.316666Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 86
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 91
+    },
+    {
+      "workstream": "ws-20260619T020553Z-6KA4",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260619T020553Z-6KA4/.agent/workstreams/ws-20260619T020553Z-6KA4/events.jsonl",
+      "ledgerSha256": "27b20b6f753a201ae2eb97a6d5a84107e2420b021fc6106b824dcbacbf201a56",
+      "retry": {
+        "event_id": "evt-000029",
+        "ts": "2026-06-19T03:12:47.714148Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-implement-claude_implement-023",
+          "note": "rebuilt claude-main after reconnect",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-023"
+          ],
+          "node": "implement.claude_implement",
+          "previous_status": "FAILED"
+        },
+        "line": 87
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000028",
+        "ts": "2026-06-19T03:11:29.316666Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 86
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000030",
+        "ts": "2026-06-19T03:13:28.035703Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "RECOVERABLE_AGENT_RECONNECT",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 91
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 91
+    },
+    {
+      "workstream": "ws-20260622T235255Z-PRF7",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260622T235255Z-PRF7/.agent/workstreams/ws-20260622T235255Z-PRF7/events.jsonl",
+      "ledgerSha256": "7b3b09d5e9b048a9072d1b4a97736f1bc0c29e2c15560713f32233663e595b1f",
+      "retry": {
+        "event_id": "evt-000026",
+        "ts": "2026-06-23T02:10:45.666007Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-plan-claude_plan-024"
+          ],
+          "note": "stale-running-after-manual-pause",
+          "node_instance_id": "node-plan-claude_plan-024",
+          "previous_status": "FAILED",
+          "node": "plan.claude_plan"
+        },
+        "line": 84
+      },
+      "precedingFailureExactGate": null,
+      "nextFailureSameGate": {
+        "event_id": "evt-000027",
+        "ts": "2026-06-23T02:13:14.066445Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "plan.claude_plan",
+          "node_status": "FAILED",
+          "outcome": "AGENT_OUTPUT_CONTRACT_VIOLATION",
+          "recovery_gate_id": "recovery-node-plan-claude_plan-024"
+        },
+        "line": 88
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 93
+    },
+    {
+      "workstream": "ws-20260622T235255Z-PRF7",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260622T235255Z-PRF7/.agent/workstreams/ws-20260622T235255Z-PRF7/events.jsonl",
+      "ledgerSha256": "7b3b09d5e9b048a9072d1b4a97736f1bc0c29e2c15560713f32233663e595b1f",
+      "retry": {
+        "event_id": "evt-000028",
+        "ts": "2026-06-23T02:18:06.322369Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-plan-claude_plan-024",
+          "note": "acpx-reconnect-before-prompt-safe-retry",
+          "recovery_gate_ids": [
+            "recovery-node-plan-claude_plan-024"
+          ],
+          "node": "plan.claude_plan",
+          "previous_status": "FAILED"
+        },
+        "line": 89
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000027",
+        "ts": "2026-06-23T02:13:14.066445Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "plan.claude_plan",
+          "node_status": "FAILED",
+          "outcome": "AGENT_OUTPUT_CONTRACT_VIOLATION",
+          "recovery_gate_id": "recovery-node-plan-claude_plan-024"
+        },
+        "line": 88
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000029",
+        "ts": "2026-06-23T02:20:28.088799Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "plan.claude_plan",
+          "node_status": "FAILED",
+          "outcome": "AGENT_OUTPUT_CONTRACT_VIOLATION",
+          "recovery_gate_id": "recovery-node-plan-claude_plan-024"
+        },
+        "line": 93
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 93
+    },
+    {
+      "workstream": "ws-20260626T133943Z-BDGM",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260626T133943Z-BDGM/.agent/workstreams/ws-20260626T133943Z-BDGM/events.jsonl",
+      "ledgerSha256": "0804e93e33b274ff67b592435df58f1284e613e4717d6173743147660a6b121a",
+      "retry": {
+        "event_id": "evt-000027",
+        "ts": "2026-06-26T14:16:06.652611Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-025"
+          ],
+          "note": "",
+          "node_instance_id": "node-implement-claude_implement-025",
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement"
+        },
+        "line": 88
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000026",
+        "ts": "2026-06-26T14:14:51.433663Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "AGENT_OUTPUT_CONTRACT_VIOLATION",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-025"
+        },
+        "line": 87
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1782483395521-452677fd",
+          "ts": "2026-06-26T14:17:43.938836Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1782483395521-452677fd",
+            "error": "",
+            "node_execution_id": "nxe-1782483395583-583aba3c",
+            "node_instance_id": "node-implement-claude_implement-025",
+            "node": "implement.claude_implement"
+          },
+          "line": 91
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 174
+    },
+    {
+      "workstream": "ws-20260626T133943Z-BDGM",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260626T133943Z-BDGM/.agent/workstreams/ws-20260626T133943Z-BDGM/events.jsonl",
+      "ledgerSha256": "0804e93e33b274ff67b592435df58f1284e613e4717d6173743147660a6b121a",
+      "retry": {
+        "event_id": "evt-000038",
+        "ts": "2026-06-26T15:19:19.010898Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-036"
+          ],
+          "note": "",
+          "node_instance_id": "node-implement-claude_implement-036",
+          "previous_status": "FAILED"
+        },
+        "line": 127
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000037",
+        "ts": "2026-06-26T14:35:02.481609Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "AGENT_OUTPUT_CONTRACT_VIOLATION",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-036"
+        },
+        "line": 126
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1782487187804-c9d26792",
+          "ts": "2026-06-26T15:24:20.500335Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "implement.claude_implement",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1782487187804-c9d26792",
+            "error": "",
+            "node_execution_id": "nxe-1782487187843-b32d7457",
+            "node_instance_id": "node-implement-claude_implement-036"
+          },
+          "line": 130
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 174
+    },
+    {
+      "workstream": "ws-20260701T085130Z-TFF4",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260701T085130Z-TFF4/.agent/workstreams/ws-20260701T085130Z-TFF4/events.jsonl",
+      "ledgerSha256": "f8d8aa52a7529fc867d23e83cccc4ae56b77982b3eb0e406c990ae811e72fd99",
+      "retry": {
+        "event_id": "evt-000016",
+        "ts": "2026-07-01T13:05:29.724853Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "design.claude_design",
+          "recovery_gate_ids": [
+            "recovery-node-design-claude_design-014"
+          ],
+          "note": "",
+          "node_instance_id": "node-design-claude_design-014"
+        },
+        "line": 50
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000015",
+        "ts": "2026-07-01T13:03:40.977494Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.claude_design",
+          "node_status": "FAILED",
+          "outcome": "session_bootstrap_failed",
+          "recovery_gate_id": "recovery-node-design-claude_design-014"
+        },
+        "line": 49
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "NO_EXACT_SUCCESS_WITNESS",
+      "caseSnapshotStatus": "RUNNING",
+      "lastEventLine": 52
+    },
+    {
+      "workstream": "ws-20260705T210447Z-U5VW",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260705T210447Z-U5VW/.agent/workstreams/ws-20260705T210447Z-U5VW/events.jsonl",
+      "ledgerSha256": "80d24f3ae31055fc54d5e559480781edc5e56093f56e4c713ef2b3ff74f545d6",
+      "retry": {
+        "event_id": "evt-000006",
+        "ts": "2026-07-05T21:08:42.933493Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-intake-codex_product_review-004"
+          ],
+          "note": "",
+          "node_instance_id": "node-intake-codex_product_review-004",
+          "previous_status": "FAILED",
+          "node": "intake.codex_product_review"
+        },
+        "line": 18
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000005",
+        "ts": "2026-07-05T21:07:12.195683Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "session_bootstrap_failed",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-004"
+        },
+        "line": 17
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1783285744122-40d17e72",
+          "ts": "2026-07-05T21:10:07.615537Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "error": "",
+            "agent_task_id": "agt-1783285744122-40d17e72",
+            "status": "SUCCEEDED",
+            "node": "intake.codex_product_review",
+            "node_instance_id": "node-intake-codex_product_review-004",
+            "node_execution_id": "nxe-1783285744156-ae60ce78"
+          },
+          "line": 21
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 77
+    },
+    {
+      "workstream": "ws-20260708T043128Z-FUMK",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T043128Z-FUMK/.agent/workstreams/ws-20260708T043128Z-FUMK/events.jsonl",
+      "ledgerSha256": "ee39b176089535f38793c91dac23ba92f79b11b773884d8f6ec87feeb40b6667",
+      "retry": {
+        "event_id": "evt-000004",
+        "ts": "2026-07-08T07:56:16.447661Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-002"
+          ],
+          "note": "",
+          "node_instance_id": "node-intake-claude_brainstorm-002",
+          "previous_status": "FAILED",
+          "node": "intake.claude_brainstorm"
+        },
+        "line": 11
+      },
+      "precedingFailureExactGate": null,
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1783497384510-226cf791",
+          "ts": "2026-07-08T07:58:57.558180Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1783497384556-b1b7bfcb",
+            "error": "",
+            "agent_task_id": "agt-1783497384510-226cf791",
+            "status": "SUCCEEDED",
+            "node": "intake.claude_brainstorm",
+            "node_instance_id": "node-intake-claude_brainstorm-002"
+          },
+          "line": 15
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "RUNNING",
+      "lastEventLine": 213
+    },
+    {
+      "workstream": "ws-20260708T043128Z-FUMK",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T043128Z-FUMK/.agent/workstreams/ws-20260708T043128Z-FUMK/events.jsonl",
+      "ledgerSha256": "ee39b176089535f38793c91dac23ba92f79b11b773884d8f6ec87feeb40b6667",
+      "retry": {
+        "event_id": "evt-000018",
+        "ts": "2026-07-08T08:15:49.896352Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-plan-claude_plan-016",
+          "previous_status": "FAILED",
+          "node": "plan.claude_plan",
+          "recovery_gate_ids": [
+            "recovery-node-plan-claude_plan-016"
+          ],
+          "note": ""
+        },
+        "line": 61
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000017",
+        "ts": "2026-07-08T08:04:21.245248Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "plan.claude_plan",
+          "node_status": "FAILED",
+          "outcome": "INPUT_INCOMPLETE",
+          "recovery_gate_id": "recovery-node-plan-claude_plan-016"
+        },
+        "line": 60
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1783498558559-4fe26434",
+          "ts": "2026-07-08T08:20:15.210850Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "error": "",
+            "agent_task_id": "agt-1783498558559-4fe26434",
+            "status": "SUCCEEDED",
+            "node": "plan.claude_plan",
+            "node_instance_id": "node-plan-claude_plan-016",
+            "node_execution_id": "nxe-1783498558637-56eb9e88"
+          },
+          "line": 65
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "RUNNING",
+      "lastEventLine": 213
+    },
+    {
+      "workstream": "ws-20260708T043128Z-FUMK",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T043128Z-FUMK/.agent/workstreams/ws-20260708T043128Z-FUMK/events.jsonl",
+      "ledgerSha256": "ee39b176089535f38793c91dac23ba92f79b11b773884d8f6ec87feeb40b6667",
+      "retry": {
+        "event_id": "evt-000026",
+        "ts": "2026-07-08T08:25:53.565629Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-024"
+          ],
+          "note": "",
+          "node_instance_id": "node-implement-claude_implement-024"
+        },
+        "line": 90
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000025",
+        "ts": "2026-07-08T08:21:12.553905Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "INPUT_INCOMPLETE",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-024"
+        },
+        "line": 89
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000027",
+        "ts": "2026-07-08T08:34:03.933937Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "process_timed_out",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-024"
+        },
+        "line": 95
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "RUNNING",
+      "lastEventLine": 213
+    },
+    {
+      "workstream": "ws-20260708T043128Z-FUMK",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T043128Z-FUMK/.agent/workstreams/ws-20260708T043128Z-FUMK/events.jsonl",
+      "ledgerSha256": "ee39b176089535f38793c91dac23ba92f79b11b773884d8f6ec87feeb40b6667",
+      "retry": {
+        "event_id": "evt-000028",
+        "ts": "2026-07-08T13:25:43.950073Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "",
+          "node_instance_id": "node-implement-claude_implement-024",
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-024"
+          ]
+        },
+        "line": 96
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000027",
+        "ts": "2026-07-08T08:34:03.933937Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "process_timed_out",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-024"
+        },
+        "line": 95
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1783517162270-7fa206af",
+          "ts": "2026-07-08T13:29:01.068635Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1783517162353-6df0a559",
+            "node_instance_id": "node-implement-claude_implement-024",
+            "node": "implement.claude_implement",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1783517162270-7fa206af",
+            "error": ""
+          },
+          "line": 100
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "RUNNING",
+      "lastEventLine": 213
+    },
+    {
+      "workstream": "ws-20260708T043128Z-FUMK",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260708T043128Z-FUMK/.agent/workstreams/ws-20260708T043128Z-FUMK/events.jsonl",
+      "ledgerSha256": "ee39b176089535f38793c91dac23ba92f79b11b773884d8f6ec87feeb40b6667",
+      "retry": {
+        "event_id": "evt-000034",
+        "ts": "2026-07-08T14:09:06.869553Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-acceptance-codex_verifier_review-032",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-acceptance-codex_verifier_review-032"
+          ],
+          "node": "acceptance.codex_verifier_review",
+          "previous_status": "FAILED"
+        },
+        "line": 120
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000033",
+        "ts": "2026-07-08T13:32:50.076568Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "acceptance.codex_verifier_review",
+          "node_status": "FAILED",
+          "outcome": "INPUT_INCOMPLETE",
+          "recovery_gate_id": "recovery-node-acceptance-codex_verifier_review-032"
+        },
+        "line": 119
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1783519761879-cefab0e1",
+          "ts": "2026-07-08T14:10:41.023415Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1783519761964-ee5ed05e",
+            "node_instance_id": "node-acceptance-codex_verifier_review-032",
+            "node": "acceptance.codex_verifier_review",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1783519761879-cefab0e1",
+            "error": ""
+          },
+          "line": 124
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "RUNNING",
+      "lastEventLine": 213
+    },
+    {
+      "workstream": "ws-20260709T100534Z-2TCS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260709T100534Z-2TCS/.agent/workstreams/ws-20260709T100534Z-2TCS/events.jsonl",
+      "ledgerSha256": "9f44c96b0ed7530d3873c9244723e21d77b9ab9a4f693cfcde75c1daa2bdde64",
+      "retry": {
+        "event_id": "evt-000006",
+        "ts": "2026-07-09T10:10:13.865048Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-intake-codex_product_review-004",
+          "previous_status": "FAILED",
+          "node": "intake.codex_product_review",
+          "recovery_gate_ids": [
+            "recovery-node-intake-codex_product_review-004"
+          ],
+          "note": ""
+        },
+        "line": 20
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000005",
+        "ts": "2026-07-09T10:09:24.441727Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.codex_product_review",
+          "node_status": "FAILED",
+          "outcome": "agent_reconnect_required",
+          "recovery_gate_id": "recovery-node-intake-codex_product_review-004"
+        },
+        "line": 19
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1783591836417-2469733d",
+          "ts": "2026-07-09T10:11:36.855913Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "intake.codex_product_review",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1783591836417-2469733d",
+            "error": "",
+            "node_execution_id": "nxe-1783591836468-590f51d0",
+            "node_instance_id": "node-intake-codex_product_review-004"
+          },
+          "line": 24
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 121
+    },
+    {
+      "workstream": "ws-20260709T100534Z-2TCS",
+      "ledger": "/Users/kriswang/work/projects/ai/cancer-clinic-agent-runs/ws-20260709T100534Z-2TCS/.agent/workstreams/ws-20260709T100534Z-2TCS/events.jsonl",
+      "ledgerSha256": "9f44c96b0ed7530d3873c9244723e21d77b9ab9a4f693cfcde75c1daa2bdde64",
+      "retry": {
+        "event_id": "evt-000018",
+        "ts": "2026-07-09T11:37:40.110615Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "plan.claude_plan",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-plan-claude_plan-016",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-plan-claude_plan-016"
+          ]
+        },
+        "line": 61
+      },
+      "precedingFailureExactGate": null,
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1783597080541-1ef3ff68",
+          "ts": "2026-07-09T11:41:02.951087Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "error": "",
+            "node_execution_id": "nxe-1783597080609-f9093cad",
+            "node_instance_id": "node-plan-claude_plan-016",
+            "node": "plan.claude_plan",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1783597080541-1ef3ff68"
+          },
+          "line": 65
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 121
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000020",
+        "ts": "2026-08-18T02:20:39.336562Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "Retry after human requirement revision context compatibility fix eb2ed93",
+          "node_instance_id": "node-intake-claude_brainstorm-017",
+          "previous_status": "FAILED",
+          "node": "intake.claude_brainstorm",
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-017"
+          ]
+        },
+        "line": 62
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000019",
+        "ts": "2026-08-18T01:48:11.509933Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-017"
+        },
+        "line": 61
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000021",
+        "ts": "2026-08-18T02:25:28.491733Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-017"
+        },
+        "line": 66
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000022",
+        "ts": "2026-08-18T02:28:57.406303Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-intake-claude_brainstorm-017"
+          ],
+          "node": "intake.claude_brainstorm",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-intake-claude_brainstorm-017",
+          "note": "Retry with fresh session after full human revision obligation projection 3afce50"
+        },
+        "line": 67
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000021",
+        "ts": "2026-08-18T02:25:28.491733Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "intake.claude_brainstorm",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-intake-claude_brainstorm-017"
+        },
+        "line": 66
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1787020150749-57d14211",
+          "ts": "2026-08-18T02:31:26.316337Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "intake.claude_brainstorm",
+            "node_instance_id": "node-intake-claude_brainstorm-017",
+            "node_execution_id": "nxe-1787020150793-f81f0634",
+            "error": "",
+            "agent_task_id": "agt-1787020150749-57d14211",
+            "status": "SUCCEEDED"
+          },
+          "line": 70
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000039",
+        "ts": "2026-08-18T04:44:07.933982Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "design.codex_arch_review",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-design-codex_arch_review-037",
+          "note": "Retry once with a fresh Codex session after confirmed upstream network disconnect",
+          "recovery_gate_ids": [
+            "recovery-node-design-codex_arch_review-037"
+          ]
+        },
+        "line": 121
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000038",
+        "ts": "2026-08-18T03:13:16.057185Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.codex_arch_review",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-design-codex_arch_review-037"
+        },
+        "line": 120
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1787028254101-83f4a3df",
+          "ts": "2026-08-18T04:47:14.993881Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_instance_id": "node-design-codex_arch_review-037",
+            "node": "design.codex_arch_review",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1787028254101-83f4a3df",
+            "error": "",
+            "node_execution_id": "nxe-1787028254154-4693a930"
+          },
+          "line": 124
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000056",
+        "ts": "2026-08-18T05:07:48.959753Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "plan.claude_plan",
+          "recovery_gate_ids": [
+            "recovery-node-plan-claude_plan-054"
+          ],
+          "note": "Retry once with a fresh Claude session after a read-only composite shell permission denial prevented bounded correction",
+          "node_instance_id": "node-plan-claude_plan-054"
+        },
+        "line": 171
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000055",
+        "ts": "2026-08-18T05:05:31.502475Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "plan.claude_plan",
+          "node_status": "FAILED",
+          "outcome": "permission_blocked",
+          "recovery_gate_id": "recovery-node-plan-claude_plan-054"
+        },
+        "line": 170
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1787029677838-d2621a44",
+          "ts": "2026-08-18T05:11:17.653281Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "agent_task_id": "agt-1787029677838-d2621a44",
+            "status": "SUCCEEDED",
+            "node": "plan.claude_plan",
+            "node_instance_id": "node-plan-claude_plan-054",
+            "node_execution_id": "nxe-1787029677904-90c9896f",
+            "error": ""
+          },
+          "line": 174
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000069",
+        "ts": "2026-08-18T06:51:22.710461Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "Continue once in the same quiescent Claude session from the three valid project skeleton files after the first 600-second implementation window expired before a terminal contract",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-067"
+          ],
+          "node": "implement.claude_implement",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-implement-claude_implement-067"
+        },
+        "line": 214
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000068",
+        "ts": "2026-08-18T06:49:13.581672Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-067"
+        },
+        "line": 213
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000070",
+        "ts": "2026-08-18T07:01:33.506083Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-067"
+        },
+        "line": 218
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000071",
+        "ts": "2026-08-18T07:02:34.425872Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-implement-claude_implement-067",
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-067"
+          ],
+          "note": "Final bounded continuation: 46 of 61 contract files exist with no out-of-scope files; complete only README.md and the 14 missing business test files, then return the terminal AgentResultEnvelope without re-planning"
+        },
+        "line": 219
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000070",
+        "ts": "2026-08-18T07:01:33.506083Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-067"
+        },
+        "line": 218
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000072",
+        "ts": "2026-08-18T07:19:41.807231Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-067"
+        },
+        "line": 223
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000073",
+        "ts": "2026-08-18T07:21:08.143593Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "Terminalization only: all 61 scoped contract files now exist with no out-of-scope files. Do not edit business files or re-plan; immediately return the strict IMPLEMENTED AgentResultEnvelope so self-test can own verification.",
+          "node_instance_id": "node-implement-claude_implement-067",
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-067"
+          ]
+        },
+        "line": 224
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000072",
+        "ts": "2026-08-18T07:19:41.807231Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-067"
+        },
+        "line": 223
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1787037675159-d01a50b7",
+          "ts": "2026-08-18T07:28:29.470457Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1787037675159-d01a50b7",
+            "error": "",
+            "node_execution_id": "nxe-1787037675246-0ef5e923",
+            "node_instance_id": "node-implement-claude_implement-067",
+            "node": "implement.claude_implement"
+          },
+          "line": 227
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000076",
+        "ts": "2026-08-18T07:40:48.901999Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "implement.claude_self_test_report",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-implement-claude_self_test_report-074",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_self_test_report-074"
+          ]
+        },
+        "line": 233
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000075",
+        "ts": "2026-08-18T07:35:06.571513Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_self_test_report",
+          "node_status": "FAILED",
+          "outcome": "rate_limited",
+          "recovery_gate_id": "recovery-node-implement-claude_self_test_report-074"
+        },
+        "line": 232
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000077",
+        "ts": "2026-08-18T07:41:19.502625Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_self_test_report",
+          "node_status": "FAILED",
+          "outcome": "agent_reconnect_required",
+          "recovery_gate_id": "recovery-node-implement-claude_self_test_report-074"
+        },
+        "line": 237
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000078",
+        "ts": "2026-08-18T07:41:55.983774Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "",
+          "node_instance_id": "node-implement-claude_self_test_report-074",
+          "previous_status": "FAILED",
+          "node": "implement.claude_self_test_report",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_self_test_report-074"
+          ]
+        },
+        "line": 238
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000077",
+        "ts": "2026-08-18T07:41:19.502625Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_self_test_report",
+          "node_status": "FAILED",
+          "outcome": "agent_reconnect_required",
+          "recovery_gate_id": "recovery-node-implement-claude_self_test_report-074"
+        },
+        "line": 237
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000079",
+        "ts": "2026-08-18T07:42:22.825879Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_self_test_report",
+          "node_status": "FAILED",
+          "outcome": "agent_reconnect_required",
+          "recovery_gate_id": "recovery-node-implement-claude_self_test_report-074"
+        },
+        "line": 242
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000080",
+        "ts": "2026-08-18T08:22:25.683440Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "implement.claude_self_test_report",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_self_test_report-074"
+          ],
+          "note": "",
+          "node_instance_id": "node-implement-claude_self_test_report-074"
+        },
+        "line": 243
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000079",
+        "ts": "2026-08-18T07:42:22.825879Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_self_test_report",
+          "node_status": "FAILED",
+          "outcome": "agent_reconnect_required",
+          "recovery_gate_id": "recovery-node-implement-claude_self_test_report-074"
+        },
+        "line": 242
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000081",
+        "ts": "2026-08-18T08:33:00.120273Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_self_test_report",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_self_test_report-074"
+        },
+        "line": 247
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000082",
+        "ts": "2026-08-18T08:34:50.364296Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "",
+          "node_instance_id": "node-implement-claude_self_test_report-074",
+          "previous_status": "FAILED",
+          "node": "implement.claude_self_test_report",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_self_test_report-074"
+          ]
+        },
+        "line": 248
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000081",
+        "ts": "2026-08-18T08:33:00.120273Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_self_test_report",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_self_test_report-074"
+        },
+        "line": 247
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1787042104303-708bffed",
+          "ts": "2026-08-18T08:43:37.391925Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_instance_id": "node-implement-claude_self_test_report-074",
+            "node": "implement.claude_self_test_report",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1787042104303-708bffed",
+            "error": "",
+            "node_execution_id": "nxe-1787042104385-b34793dd"
+          },
+          "line": 251
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000089",
+        "ts": "2026-08-18T09:14:34.677478Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-implement-claude_self_test_report-087",
+          "note": "Local deterministic verification completed: mvn test passed 96/96 after bounded product and test-harness fixes.",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_self_test_report-087"
+          ],
+          "node": "implement.claude_self_test_report",
+          "previous_status": "FAILED"
+        },
+        "line": 270
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000088",
+        "ts": "2026-08-18T09:03:47.886908Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_self_test_report",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_self_test_report-087"
+        },
+        "line": 269
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1787044495745-8d8a7da1",
+          "ts": "2026-08-18T09:16:44.217196Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "agent_task_id": "agt-1787044495745-8d8a7da1",
+            "status": "SUCCEEDED",
+            "node": "implement.claude_self_test_report",
+            "node_instance_id": "node-implement-claude_self_test_report-087",
+            "node_execution_id": "nxe-1787044495832-1d301f29",
+            "error": ""
+          },
+          "line": 273
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000093",
+        "ts": "2026-08-18T09:18:53.202805Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-implement-artifact_validation-091",
+          "note": "Removed the sole out-of-contract test config file by consolidating identical beans into declared IntegrationTestBase; mvn test remains 96/96.",
+          "recovery_gate_ids": [
+            "recovery-node-implement-artifact_validation-091"
+          ],
+          "node": "implement.artifact_validation",
+          "previous_status": "FAILED"
+        },
+        "line": 283
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000092",
+        "ts": "2026-08-18T09:17:13.755017Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.artifact_validation",
+          "node_status": "FAILED",
+          "outcome": "CHANGE_SCOPE_VIOLATION",
+          "recovery_gate_id": "recovery-node-implement-artifact_validation-091"
+        },
+        "line": 282
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1787044747010-bd2e690f",
+          "ts": "2026-08-18T09:19:07.970532Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "implement.artifact_validation",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1787044747010-bd2e690f",
+            "error": "",
+            "node_execution_id": "nxe-1787044747101-a8647883",
+            "node_instance_id": "node-implement-artifact_validation-091"
+          },
+          "line": 286
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260818T011340Z-WA53",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260818T011340Z-WA53/.agent/workstreams/ws-20260818T011340Z-WA53/events.jsonl",
+      "ledgerSha256": "756343a5f8212621bc0a97cb1915c9e94a3904370d44ba82dbf0a24f49b84d55",
+      "retry": {
+        "event_id": "evt-000096",
+        "ts": "2026-08-18T09:22:43.657717Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "context.acceptance_codex_verifier_review",
+          "recovery_gate_ids": [
+            "recovery-node-context-acceptance_codex_verifier_review-094"
+          ],
+          "note": "Acceptance TaskContract is 2009 tokens within the 6500 total budget; raised the mandatory full-contract section limit to 2500 with focused regression coverage.",
+          "node_instance_id": "node-context-acceptance_codex_verifier_review-094"
+        },
+        "line": 292
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000095",
+        "ts": "2026-08-18T09:19:25.563935Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "context.acceptance_codex_verifier_review",
+          "node_status": "FAILED",
+          "outcome": "failed",
+          "recovery_gate_id": "recovery-node-context-acceptance_codex_verifier_review-094"
+        },
+        "line": 291
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1787044977806-26ea65d6",
+          "ts": "2026-08-18T09:22:58.062636Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_instance_id": "node-context-acceptance_codex_verifier_review-094",
+            "node_execution_id": "nxe-1787044977896-34b5387a",
+            "error": "",
+            "agent_task_id": "agt-1787044977806-26ea65d6",
+            "status": "SUCCEEDED",
+            "node": "context.acceptance_codex_verifier_review"
+          },
+          "line": 295
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 362
+    },
+    {
+      "workstream": "ws-20260828T054556Z-AHBV",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260828T054556Z-AHBV/.agent/workstreams/ws-20260828T054556Z-AHBV/events.jsonl",
+      "ledgerSha256": "ba1639464f9872a084a60ebd3b2169e69dc595c7ec67942c52e1ce3aa15629ff",
+      "retry": {
+        "event_id": "evt-000011",
+        "ts": "2026-08-28T09:28:52.536646Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "Retry with strict root-closure ETL and typed WebSearch escalation policy",
+          "recovery_gate_ids": [
+            "recovery-node-design-claude_design-009"
+          ],
+          "node": "design.claude_design",
+          "previous_status": "FAILED",
+          "node_instance_id": "node-design-claude_design-009"
+        },
+        "line": 33
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000010",
+        "ts": "2026-08-28T06:57:40.914032Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.claude_design",
+          "node_status": "FAILED",
+          "outcome": "permission_blocked",
+          "recovery_gate_id": "recovery-node-design-claude_design-009"
+        },
+        "line": 32
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1787909344662-39ba88b2",
+          "ts": "2026-08-28T09:35:16.073474Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "design.claude_design",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1787909344662-39ba88b2",
+            "error": "",
+            "node_execution_id": "nxe-1787909344702-48170438",
+            "node_instance_id": "node-design-claude_design-009"
+          },
+          "line": 36
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 160
+    },
+    {
+      "workstream": "ws-20260828T054556Z-AHBV",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260828T054556Z-AHBV/.agent/workstreams/ws-20260828T054556Z-AHBV/events.jsonl",
+      "ledgerSha256": "ba1639464f9872a084a60ebd3b2169e69dc595c7ec67942c52e1ce3aa15629ff",
+      "retry": {
+        "event_id": "evt-000026",
+        "ts": "2026-08-28T10:02:25.681279Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "Retry implementation with corrected acpx edit permission mapping",
+          "node_instance_id": "node-implement-claude_implement-024",
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-024"
+          ]
+        },
+        "line": 80
+      },
+      "precedingFailureExactGate": null,
+      "nextFailureSameGate": {
+        "event_id": "evt-000027",
+        "ts": "2026-08-28T10:12:55.378457Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-024"
+        },
+        "line": 84
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 160
+    },
+    {
+      "workstream": "ws-20260828T054556Z-AHBV",
+      "ledger": "/Users/kriswang/work/projects/ai/captcha-auth-app-agent-runs/ws-20260828T054556Z-AHBV/.agent/workstreams/ws-20260828T054556Z-AHBV/events.jsonl",
+      "ledgerSha256": "ba1639464f9872a084a60ebd3b2169e69dc595c7ec67942c52e1ce3aa15629ff",
+      "retry": {
+        "event_id": "evt-000028",
+        "ts": "2026-08-28T10:13:41.875477Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-024"
+          ],
+          "note": "",
+          "node_instance_id": "node-implement-claude_implement-024",
+          "previous_status": "FAILED"
+        },
+        "line": 85
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000027",
+        "ts": "2026-08-28T10:12:55.378457Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-024"
+        },
+        "line": 84
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1787912032425-aa186a68",
+          "ts": "2026-08-28T10:19:43.374479Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "implement.claude_implement",
+            "node_instance_id": "node-implement-claude_implement-024",
+            "node_execution_id": "nxe-1787912032479-8722c4ca",
+            "error": "",
+            "agent_task_id": "agt-1787912032425-aa186a68",
+            "status": "SUCCEEDED"
+          },
+          "line": 88
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "COMPLETED",
+      "lastEventLine": 160
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ledgerSha256": "791e8fd02349761533ed5c8773ac1a2d6a7174ebdefaec7aaf53747088c8b39d",
+      "retry": {
+        "event_id": "evt-000025",
+        "ts": "2026-08-29T13:21:50.562389Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node_instance_id": "node-implement-claude_implement-023",
+          "note": "",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-023"
+          ],
+          "node": "implement.claude_implement"
+        },
+        "line": 77
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000024",
+        "ts": "2026-08-29T13:20:36.549493Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 76
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "NO_EXACT_SUCCESS_WITNESS",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 173
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ledgerSha256": "791e8fd02349761533ed5c8773ac1a2d6a7174ebdefaec7aaf53747088c8b39d",
+      "retry": {
+        "event_id": "evt-000027",
+        "ts": "2026-09-02T10:17:28.585478Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-023"
+          ],
+          "note": "旧 Claude session 已关闭；policy transport 与 persistent binding replacement guard 已更新，按 retrySafe 标记重试同一实现节点。",
+          "node_instance_id": "node-implement-claude_implement-023"
+        },
+        "line": 81
+      },
+      "precedingFailureExactGate": null,
+      "nextFailureSameGate": {
+        "event_id": "evt-000028",
+        "ts": "2026-09-02T10:17:42.126335Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "session_bootstrap_failed",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 85
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 173
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ledgerSha256": "791e8fd02349761533ed5c8773ac1a2d6a7174ebdefaec7aaf53747088c8b39d",
+      "retry": {
+        "event_id": "evt-000029",
+        "ts": "2026-09-02T10:18:46.093920Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-023"
+          ],
+          "note": "已确认失败发生在 provider 前：PATH acpx 不支持 E1 policy 参数；改用 Doctor 校验通过的 reviewed acpx fork 81acbb74。",
+          "node_instance_id": "node-implement-claude_implement-023"
+        },
+        "line": 86
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000028",
+        "ts": "2026-09-02T10:17:42.126335Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "session_bootstrap_failed",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 85
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000030",
+        "ts": "2026-09-02T10:29:21.943172Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 90
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 173
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ledgerSha256": "791e8fd02349761533ed5c8773ac1a2d6a7174ebdefaec7aaf53747088c8b39d",
+      "retry": {
+        "event_id": "evt-000031",
+        "ts": "2026-09-02T10:55:05.680236Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-023"
+          ],
+          "note": "用户已明确授权在 retrySafe=false 且测试编译失败的已知风险下再执行一次同节点 provider retry；仅修复 Jackson 测试编译、运行完整测试并完成结构化交付，不扩大范围。",
+          "node_instance_id": "node-implement-claude_implement-023"
+        },
+        "line": 91
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000030",
+        "ts": "2026-09-02T10:29:21.943172Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 90
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000032",
+        "ts": "2026-09-02T10:55:31.000524Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 95
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 173
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ledgerSha256": "791e8fd02349761533ed5c8773ac1a2d6a7174ebdefaec7aaf53747088c8b39d",
+      "retry": {
+        "event_id": "evt-000033",
+        "ts": "2026-09-02T10:56:33.974007Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-implement-claude_implement-023",
+          "note": "上一次恢复在 provider 前被 CLAUDE_EXECUTION_POLICY_CONFLICT 拒绝，未消费已授权 provider retry；冲突旧 session 已关闭，现以 fresh session 执行该次授权。",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-023"
+          ],
+          "node": "implement.claude_implement",
+          "previous_status": "FAILED"
+        },
+        "line": 96
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000032",
+        "ts": "2026-09-02T10:55:31.000524Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-023"
+        },
+        "line": 95
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1788346607154-54196a78",
+          "ts": "2026-09-02T11:05:05.455750Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node": "implement.claude_implement",
+            "node_instance_id": "node-implement-claude_implement-023",
+            "node_execution_id": "nxe-1788346607211-d5842fc7",
+            "error": "",
+            "agent_task_id": "agt-1788346607154-54196a78",
+            "status": "SUCCEEDED"
+          },
+          "line": 99
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 173
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ledgerSha256": "791e8fd02349761533ed5c8773ac1a2d6a7174ebdefaec7aaf53747088c8b39d",
+      "retry": {
+        "event_id": "evt-000040",
+        "ts": "2026-09-02T11:11:47.060674Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-038"
+          ],
+          "note": "self-test 已将 18 个测试错误正式路由到新 repair iteration；该节点首次启动在 provider 前被旧 session policy conflict 拒绝，旧 session 已关闭。依据用户对后续同类恢复操作的 standing authorization，重试此 repair 节点。",
+          "node_instance_id": "node-implement-claude_implement-038"
+        },
+        "line": 118
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000039",
+        "ts": "2026-09-02T11:10:35.942484Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-038"
+        },
+        "line": 117
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1788347523018-8d766626",
+          "ts": "2026-09-02T11:16:22.290467Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_instance_id": "node-implement-claude_implement-038",
+            "node_execution_id": "nxe-1788347523082-596259e3",
+            "error": "",
+            "agent_task_id": "agt-1788347523018-8d766626",
+            "status": "SUCCEEDED",
+            "node": "implement.claude_implement"
+          },
+          "line": 121
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 173
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ledgerSha256": "791e8fd02349761533ed5c8773ac1a2d6a7174ebdefaec7aaf53747088c8b39d",
+      "retry": {
+        "event_id": "evt-000044",
+        "ts": "2026-09-03T08:37:19.557628Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "recovery_gate_ids": [
+            "recovery-node-implement-self_test_decision-042"
+          ],
+          "note": "Route the latest typed self-test failure to the workflow-declared human implementation repair gate.",
+          "node_instance_id": "node-implement-self_test_decision-042",
+          "previous_status": "BLOCKED",
+          "node": "implement.self_test_decision"
+        },
+        "line": 131
+      },
+      "precedingFailureExactGate": null,
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1788424676441-dd62b1d9",
+          "ts": "2026-09-03T08:37:56.578716Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "error": "",
+            "agent_task_id": "agt-1788424676441-dd62b1d9",
+            "status": "SUCCEEDED",
+            "node": "implement.self_test_decision",
+            "node_instance_id": "node-implement-self_test_decision-042",
+            "node_execution_id": "nxe-1788424676503-c60f6e07"
+          },
+          "line": 134
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 173
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ledgerSha256": "791e8fd02349761533ed5c8773ac1a2d6a7174ebdefaec7aaf53747088c8b39d",
+      "retry": {
+        "event_id": "evt-000051",
+        "ts": "2026-09-03T09:46:27.858011Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-implement-claude_implement-049",
+          "note": "Retry after verifying the prior attempt used PATH acpx 0.11.0, which lacks the reviewed E1 policy flags; force the reviewed acpx 0.13.2 binary.",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-049"
+          ],
+          "node": "implement.claude_implement",
+          "previous_status": "FAILED"
+        },
+        "line": 147
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000050",
+        "ts": "2026-09-03T09:43:38.543813Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "session_bootstrap_failed",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-049"
+        },
+        "line": 146
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000052",
+        "ts": "2026-09-03T09:57:15.892514Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-049"
+        },
+        "line": 151
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 173
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ledgerSha256": "791e8fd02349761533ed5c8773ac1a2d6a7174ebdefaec7aaf53747088c8b39d",
+      "retry": {
+        "event_id": "evt-000053",
+        "ts": "2026-09-03T09:58:13.873040Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-implement-claude_implement-049",
+          "note": "Retry once after a reviewed occurrence completed product edits but returned no final AgentResultEnvelope; preserve current scope and finish tests plus structured delivery only.",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-049"
+          ],
+          "node": "implement.claude_implement",
+          "previous_status": "FAILED"
+        },
+        "line": 152
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000052",
+        "ts": "2026-09-03T09:57:15.892514Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-049"
+        },
+        "line": 151
+      },
+      "nextFailureSameGate": {
+        "event_id": "evt-000054",
+        "ts": "2026-09-03T10:08:48.803544Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-049"
+        },
+        "line": 156
+      },
+      "taskWitnesses": [],
+      "exactSourceRoutes": [],
+      "result": "FAILED_AGAIN_SAME_GATE",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 173
+    },
+    {
+      "workstream": "ws-20260829T122452Z-9BZG",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/events.jsonl",
+      "ledgerSha256": "791e8fd02349761533ed5c8773ac1a2d6a7174ebdefaec7aaf53747088c8b39d",
+      "retry": {
+        "event_id": "evt-000055",
+        "ts": "2026-09-03T12:13:37.490674Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "note": "",
+          "node_instance_id": "node-implement-claude_implement-049",
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-049"
+          ]
+        },
+        "line": 157
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000054",
+        "ts": "2026-09-03T10:08:48.803544Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-049"
+        },
+        "line": 156
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1788437649757-90b0ad60",
+          "ts": "2026-09-03T12:27:50.492250Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1788437649757-90b0ad60",
+            "error": "",
+            "node_execution_id": "nxe-1788437649826-a14193e5",
+            "node_instance_id": "node-implement-claude_implement-049",
+            "node": "implement.claude_implement"
+          },
+          "line": 160
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 173
+    },
+    {
+      "workstream": "ws-20260904T040052Z-3B2P",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T040052Z-3B2P/.agent/workstreams/ws-20260904T040052Z-3B2P/events.jsonl",
+      "ledgerSha256": "31964751a4e540dac5730cffd3f96fc8e904095f0ed6ff3f311d231cb0f6b697",
+      "retry": {
+        "event_id": "evt-000016",
+        "ts": "2026-09-04T04:54:19.413417Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node_instance_id": "node-design-claude_design-014",
+          "note": "Retry after restoring reviewed acpx environment; prior attempt failed before provider start.",
+          "recovery_gate_ids": [
+            "recovery-node-design-claude_design-014"
+          ],
+          "node": "design.claude_design",
+          "previous_status": "FAILED"
+        },
+        "line": 50
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000015",
+        "ts": "2026-09-04T04:52:34.038183Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.claude_design",
+          "node_status": "FAILED",
+          "outcome": "session_bootstrap_failed",
+          "recovery_gate_id": "recovery-node-design-claude_design-014"
+        },
+        "line": 49
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1788497660452-374a705a",
+          "ts": "2026-09-04T05:01:04.675389Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_instance_id": "node-design-claude_design-014",
+            "node_execution_id": "nxe-1788497660495-00cce716",
+            "error": "",
+            "agent_task_id": "agt-1788497660452-374a705a",
+            "status": "SUCCEEDED",
+            "node": "design.claude_design"
+          },
+          "line": 53
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 121
+    },
+    {
+      "workstream": "ws-20260904T131724Z-PNBV",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260904T131724Z-PNBV/.agent/workstreams/ws-20260904T131724Z-PNBV/events.jsonl",
+      "ledgerSha256": "d448c48a94bd6523296f488a9aee43718fd62b5e76d08b7d261e375fe58fc039",
+      "retry": {
+        "event_id": "evt-000016",
+        "ts": "2026-09-04T14:04:10.831517Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node_instance_id": "node-design-claude_design-014",
+          "note": "恢复已验证的 acpx 运行环境；上次在 provider session 创建前失败，零 provider 调用、零 token。",
+          "recovery_gate_ids": [
+            "recovery-node-design-claude_design-014"
+          ],
+          "node": "design.claude_design"
+        },
+        "line": 50
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000015",
+        "ts": "2026-09-04T14:02:37.497570Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "design.claude_design",
+          "node_status": "FAILED",
+          "outcome": "session_bootstrap_failed",
+          "recovery_gate_id": "recovery-node-design-claude_design-014"
+        },
+        "line": 49
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1788530663526-3ab013e0",
+          "ts": "2026-09-04T14:14:09.106364Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "node_execution_id": "nxe-1788530663564-4a0b71be",
+            "node_instance_id": "node-design-claude_design-014",
+            "node": "design.claude_design",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1788530663526-3ab013e0",
+            "error": ""
+          },
+          "line": 53
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_HUMAN",
+      "lastEventLine": 120
+    },
+    {
+      "workstream": "ws-20260906T130900Z-SPM9",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260906T130900Z-SPM9/.agent/workstreams/ws-20260906T130900Z-SPM9/events.jsonl",
+      "ledgerSha256": "07535bd24f4e481cf1c68fbd8858b23282faba531867819ea6a76098d0e2d6f1",
+      "retry": {
+        "event_id": "evt-000044",
+        "ts": "2026-09-06T14:49:04.804379Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "previous_status": "FAILED",
+          "node": "implement.claude_implement",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_implement-042"
+          ],
+          "note": "用户明确授权修复并继续当前节点。原 run-1788703780643 在仍有进展时被总 deadline 取消，已有产品文件保留；使用已通过 1403 项测试的新包，关闭 Dual 总 deadline，保留进展与故障检测。仅重试本节点，原合同/设计/计划和 scope 不变，不自动重试后续事故。",
+          "node_instance_id": "node-implement-claude_implement-042"
+        },
+        "line": 135
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000043",
+        "ts": "2026-09-06T14:30:05.531554Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_implement",
+          "node_status": "FAILED",
+          "outcome": "process_timed_out",
+          "recovery_gate_id": "recovery-node-implement-claude_implement-042"
+        },
+        "line": 134
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1788706182170-e0bb1489",
+          "ts": "2026-09-06T15:16:49.394892Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "error": "",
+            "node_execution_id": "nxe-1788706182230-092c25a6",
+            "node_instance_id": "node-implement-claude_implement-042",
+            "node": "implement.claude_implement",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1788706182170-e0bb1489"
+          },
+          "line": 138
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "RUNNING",
+      "lastEventLine": 223
+    },
+    {
+      "workstream": "ws-20260909T151234Z-BXWV",
+      "ledger": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl",
+      "ledgerSha256": "5b889c7776a9622b9cc5ace82946fa4bfb950d0ba0e2aa57901625ce8ad35e92",
+      "retry": {
+        "event_id": "evt-000049",
+        "ts": "2026-09-09T23:51:23.793532Z",
+        "event_type": "node_retry_requested",
+        "payload": {
+          "node": "implement.claude_self_test_report",
+          "recovery_gate_ids": [
+            "recovery-node-implement-claude_self_test_report-047"
+          ],
+          "note": "已检查parse诊断：自测最终JSON的verification_summary缺结束引号，自动纠正仍失败。原Maven测试已结束，当前7份XML合计49测试/5失败/27错误/0跳过，禁止沿用中段无失败猜测。仅一次同节点重试，读取最终测试证据并输出完整结构化结果；不修改源码、不后台启动后提前返回、不伪造通过。保留现有离线缓存，不扩大范围。",
+          "node_instance_id": "node-implement-claude_self_test_report-047",
+          "previous_status": "FAILED"
+        },
+        "line": 152
+      },
+      "precedingFailureExactGate": {
+        "event_id": "evt-000048",
+        "ts": "2026-09-09T23:49:19.273730Z",
+        "event_type": "node_failed",
+        "payload": {
+          "node": "implement.claude_self_test_report",
+          "node_status": "FAILED",
+          "outcome": "agent_result_missing_or_invalid",
+          "recovery_gate_id": "recovery-node-implement-claude_self_test_report-047"
+        },
+        "line": 151
+      },
+      "nextFailureSameGate": null,
+      "taskWitnesses": [
+        {
+          "event_id": "agent-task-succeeded-agt-1788997906449-9025049d",
+          "ts": "2026-09-10T00:18:41.546704Z",
+          "event_type": "agent_task_completed",
+          "payload": {
+            "error": "",
+            "node_execution_id": "nxe-1788997906513-26b6fa82",
+            "node_instance_id": "node-implement-claude_self_test_report-047",
+            "node": "implement.claude_self_test_report",
+            "status": "SUCCEEDED",
+            "agent_task_id": "agt-1788997906449-9025049d"
+          },
+          "line": 155
+        }
+      ],
+      "exactSourceRoutes": [],
+      "result": "TASK_SUCCEEDED_ONLY",
+      "caseSnapshotStatus": "WAITING_FOR_RECOVERY",
+      "lastEventLine": 335
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "resultSha256": "d88aa02f724d9ad1907808ede992cfdd3baa7a6c73e8b2d3dd732086365f2f42",
+  "continueWithinGate": true,
+  "verdict": "PASS_READ_ONLY_SLICE_ONLY",
+  "evidence": [
+    "request-02.json child identity/policy",
+    "request-05.json real random read and three OS rejections plus never escalation rejection",
+    "request-07.json native child completed state",
+    "fixture.json and result.json protected hashes"
+  ],
+  "scope": "Not full D04 freeze or general absence-of-background proof",
+  "processObservation": "No process command matching fixture at post-run inspection; all tested tool commands synchronously exited",
+  "expectedScriptError": "Escalation denial is the final negative operation; not a malformed-protocol failure",
+  "recordedAt": "2026-09-30T02:34:32.953830+00:00"
+}

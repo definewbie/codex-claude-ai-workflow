@@ -1,0 +1,12 @@
+{
+  "scope": "business working tree, git excludes program artifacts by repository policy",
+  "command": [
+    "git",
+    "status",
+    "--porcelain",
+    "--untracked-files=all"
+  ],
+  "stdout": "",
+  "product_changes": false,
+  "does_not_prove": "all ignored control files unmodified or OS isolation"
+}

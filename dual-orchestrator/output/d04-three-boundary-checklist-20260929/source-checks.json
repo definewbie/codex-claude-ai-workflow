@@ -1,0 +1,74 @@
+{
+  "scope": "static targeted source inspection only, no execution or coverage claim",
+  "files": [
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactValidateHandler.java",
+      "sha256": "39718472d0b22854c3f8be610cd2ff1efc8b50a2bd3876bc5bd6b04fe2f9683c",
+      "excerpts": [
+        {
+          "start": 31,
+          "end": 53,
+          "text": "31:     @Override\n32:     public NodeResult execute(TaskContext context) throws Exception {\n33:         var qualified = qualifiedContract(context);\n34:         if (qualified.failure() != null) {\n35:             return qualificationFailure(qualified.failure());\n36:         }\n37:         var evidenceDir = context.workspaceRoot()\n38:                 .resolve(\".agent\")\n39:                 .resolve(\"workstreams\")\n40:                 .resolve(context.workstreamId())\n41:                 .resolve(\"artifacts\")\n42:                 .resolve(\"git-evidence\");\n43:         Files.createDirectories(evidenceDir);\n44: \n45:         var evidence = collectEvidence(context.workspaceRoot(), context.workstreamId(), evidenceDir);\n46:         writeEvidenceJson(evidenceDir.resolve(\"git-evidence.json\"), evidence);\n47:         var evaluation = evaluateChangeScope(evidence, qualified.contract());\n48:         var evaluationPath = evidenceDir.resolve(\"change-scope-evaluation.json\");\n49:         OBJECT_MAPPER.writeValue(evaluationPath.toFile(), evaluation);\n50:         var occurrence = ChangeScopeEvaluationArtifact.publish(\n51:                 context.workspaceRoot(),\n52:                 context.workstreamId(),\n53:                 context.instance().nodeInstanceId(),"
+        },
+        {
+          "start": 100,
+          "end": 118,
+          "text": "100:         if (!evaluation.passed()) {\n101:             var outcome = evaluation.status() == ChangeScopeEvaluation.Status.UNAVAILABLE\n102:                     ? \"CHANGE_SCOPE_EVIDENCE_UNAVAILABLE\"\n103:                     : \"CHANGE_SCOPE_VIOLATION\";\n104:             var error = evaluation.error() == null\n105:                     ? \"actual Git changes do not satisfy TaskContract.scope\"\n106:                     : evaluation.error();\n107:             if (evaluation.status() == ChangeScopeEvaluation.Status.FAIL && routesScopeViolation(context)) {\n108:                 if (qualified.reference() != null) {\n109:                     result.putAll(TaskContractRevisionContextResolver.captureScopeReworkBaseline(\n110:                             context.workspaceRoot(), context.workstreamId(), qualified.reference(), occurrence));\n111:                 }\n112:                 result.put(\"change_scope_disposition\", \"CHANGE_SCOPE_VIOLATION\");\n113:                 result.put(\"change_scope_message\", error);\n114:                 return new NodeResult(outcome, NodeStatus.COMPLETED, outputRefs, result, null);\n115:             }\n116:             return new NodeResult(outcome, NodeStatus.FAILED, outputRefs, result, error);\n117:         }\n118:         return NodeResult.completed(\"completed\", outputRefs, result);"
+        },
+        {
+          "start": 500,
+          "end": 510,
+          "text": "500:         if (!evidence.available()) {\n501:             return ChangeScopeEvaluation.unavailable(\"Git evidence is unavailable\");\n502:         }\n503:         if (evidence.comparisonRange() == null || evidence.comparisonRange().isBlank()) {\n504:             return ChangeScopeEvaluation.unavailable(\"Workspace base commit is unavailable\");\n505:         }\n506:         if (contract == null) {\n507:             return ChangeScopeEvaluation.unavailable(\"TaskContract artifact is missing\");\n508:         }\n509:         return ChangeScopeEvaluator.evaluate(contract, evidence.actualChanges());\n510:     }"
+        },
+        {
+          "start": 531,
+          "end": 538,
+          "text": "531:         var resolution = TaskContractProjectionVerifier.resolve(context.workspaceRoot(), context.workstreamId());\n532:         if (resolution.failure() != null) {\n533:             return new QualifiedContract(null, resolution.failure());\n534:         }\n535:         return resolution.qualified()\n536:                 .map(value -> new QualifiedContract(value.contract(), null, value))\n537:                 .orElseGet(() -> new QualifiedContract(null, TaskContractProjectionVerifier.Failure.of(\n538:                         \"APPROVAL_BINDING_MISSING\", \"change-scope validation requires an approved task contract\")));"
+        }
+      ]
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "sha256": "6adcf5239e41149ef37634826bbe3da22bab911e2ebfbb886b526238f95e296b",
+      "excerpts": [
+        {
+          "start": 75,
+          "end": 105,
+          "text": "75:     static void verifyResult(Path root, String workstreamId, String nodeId, AgentResultEnvelope.AgentResult result) throws IOException {\n76:         var refs = requiredReferences(root, workstreamId, nodeId);\n77:         if (refs.isEmpty()) return;\n78:         List<String> evidence = result instanceof AgentResultEnvelope.SelfTestResult self ? self.evidence()\n79:                 : result instanceof AgentResultEnvelope.AcceptanceReviewResult acceptance ? acceptance.evidence() : null;\n80:         if ((result instanceof AgentResultEnvelope.SelfTestResult || result instanceof AgentResultEnvelope.AcceptanceReviewResult)\n81:                 && (evidence == null || !evidence.containsAll(refs)))\n82:             throw new IOException(\"result.evidence must contain every exact bound material ref\");\n83:     }\n84: \n85:     public static NodeResult execute(Path root, String workstreamId, NodeInstanceDocument node, Execution execution)\n86:             throws Exception {\n87:         Guard guard;\n88:         try { guard = open(root, workstreamId, node); }\n89:         catch (IOException | IllegalArgumentException invalid) { return rejected(invalid); }\n90:         if (guard == null) return execution.run();\n91:         NodeResult result;\n92:         try { result = execution.run(); }\n93:         catch (Exception failure) {\n94:             try { guard.verify(); }\n95:             catch (IOException | IllegalArgumentException invalid) { return rejected(invalid); }\n96:             throw failure;\n97:         }\n98:         try { guard.verify(); }\n99:         catch (IOException | IllegalArgumentException invalid) { return rejected(invalid); }\n100:         return result;\n101:     }\n102: \n103:     /** Recheck at sidecar publication too, including cold or direct validator calls. */\n104:     static void verify(Path root, String workstreamId, String nodeId) throws IOException {\n105:         var paths = new WorkstreamPaths(root, new DualId(workstreamId));"
+        },
+        {
+          "start": 170,
+          "end": 202,
+          "text": "170:     record Guard(Path root, WorkstreamPaths paths, Path approvalFile, String approvalSha, Path gateFile,\n171:                  String gateSha, String nodeId, EvidenceCollectionBaseline baseline, EvidenceSubmission submission) {\n172:         void verify() throws IOException {\n173:             requireCanonical(root, approvalFile);\n174:             if (!approvalSha.equals(TaskContractArtifactWriter.sha256(approvalFile)))\n175:                 throw new IOException(\"collection approval changed during execution\");\n176:             requireCanonical(root, gateFile);\n177:             if (!gateSha.equals(TaskContractArtifactWriter.sha256(gateFile)))\n178:                 throw new IOException(\"collection gate changed during execution\");\n179:             var node = MAPPER.readValue(paths.nodeJson(nodeId).toFile(), NodeInstanceDocument.class);\n180:             if (!baseline.gateNodeInstanceId().equals(node.inputTransition().get(\"evidence_collection_gate\"))\n181:                     || !approvalSha.equals(node.inputTransition().get(\"evidence_collection_gate_sha256\")))\n182:                 throw new IOException(\"collection execution lost its approval binding\");\n183:             if (!baseline.contractRef().equals(\".agent/workstreams/\" + paths.workstreamId().value() + \"/artifacts/task-contract.json\"))\n184:                 throw new IOException(\"collection contract belongs to another workstream\");\n185:             verifySource(root, baseline);\n186:             if (submission != null) {\n187:                 var manifest = ExternalVerificationEvidence.verify(paths, submission);\n188:                 var approval = MAPPER.readValue(approvalFile.toFile(), NodeInstanceDocument.class);\n189:                 if (!manifest.note().equals(approval.result().get(\"note\"))) throw new IOException(\"material note mismatch\");\n190:             }\n191:         }\n192:     }\n193: \n194:     static void verifySource(Path root, EvidenceCollectionBaseline baseline) throws IOException {\n195:         var contract = root.resolve(baseline.contractRef());\n196:         requireCanonical(root, contract);\n197:         if (!baseline.contractSha256().equals(TaskContractArtifactWriter.sha256(contract)))\n198:             throw new IOException(\"collection approved contract changed\");\n199:         var actual = EvidenceCollectionSource.capture(root, baseline.paths());\n200:         if (!actual.head().equals(baseline.head()) || !actual.indexSha256().equals(baseline.indexSha256())\n201:                 || !actual.paths().equals(baseline.paths()) || !actual.sha256().equals(baseline.sourceSha256()))\n202:             throw new IOException(\"product source differs from the human-approved collection baseline\");"
+        }
+      ]
+    },
+    {
+      "path": "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExternalVerificationEvidence.java",
+      "sha256": "6442114b49b0b4a7edae7f1535f8d43b2c372d5695ca7b865a8fa16853c82ee8",
+      "excerpts": [
+        {
+          "start": 37,
+          "end": 45,
+          "text": "37:     public static EvidenceSubmission submit(WorkflowFileLedger ledger, WorkstreamPaths paths, Reference preparation,\n38:                                              String requestId, List<Path> files, Declaration execution, String note) throws IOException {\n39:         if (blank(note) || requestId == null || !requestId.matches(\"[A-Za-z0-9._-]{1,80}\")\n40:                 || files == null || files.isEmpty() || files.size() > 32 || execution == null)\n41:             throw new IOException(\"submission requires request id, note, declaration, and 1-32 explicit files\");\n42:         var prepared = readPreparation(paths, preparation);\n43:         if (execution.startedAt().isBefore(prepared.recordedAt()))\n44:             throw new IOException(\"declared execution precedes preparation; timestamps are operator declarations, not machine proof\");\n45:         EvidenceCollection.verifySource(paths.workspaceRoot(), prepared.baseline());"
+        },
+        {
+          "start": 65,
+          "end": 95,
+          "text": "65:         var submission = new EvidenceSubmission(requestId, preparation.ref(), preparation.sha256(),\n66:                 reference.ref(), reference.sha256(), prepared.baseline());\n67:         try (var lock = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(paths.workstreamId().value(), \"submit evidence\"))) {\n68:             verify(paths, submission);\n69:             var definition = ledger.loadDefinition(paths);\n70:             var gateNode = ledger.loadNode(paths, prepared.baseline().gateNodeInstanceId());\n71:             // Only a fully routed prior decision is idempotent. Partial gate writes never authorize another route.\n72:             if (gateNode.status() == NodeStatus.COMPLETED) {\n73:                 var prior = JSON.convertValue(gateNode.result().get(\"external_evidence\"), EvidenceSubmission.class);\n74:                 if (!submission.equals(prior) || !\"submit_evidence\".equals(gateNode.result().get(\"human_action\")))\n75:                     throw new IOException(\"gate already resolved with different evidence\");\n76:                 var gate = JSON.readValue(paths.gateJson(\"gate-\" + gateNode.nodeInstanceId()).toFile(), GateDocument.class);\n77:                 if (!\"resolved\".equals(gate.status()) || !gateNode.nodeInstanceId().equals(gate.nodeInstanceId())\n78:                         || !\"submit_evidence\".equals(gate.result().get(\"human_action\"))\n79:                         || !note.equals(gate.result().get(\"note\")) || !note.equals(gateNode.result().get(\"note\")))\n80:                     throw new IOException(\"inconsistent prior evidence decision\");\n81:                 var routed = false;\n82:                 try (var lines = Files.lines(paths.eventsJsonl())) {\n83:                     for (var iterator = lines.iterator(); iterator.hasNext();) {\n84:                         var line = iterator.next();\n85:                         if (line.isBlank()) continue;\n86:                         var event = JSON.readTree(line);\n87:                         if (\"node_routed\".equals(event.path(\"event_type\").asText())\n88:                                 && gateNode.nodeInstanceId().equals(event.path(\"payload\").path(\"transition\")\n89:                                 .path(\"evidence_collection_gate\").asText())) routed = true;\n90:                     }\n91:                 }\n92:                 if (!routed) throw new IOException(\"partial evidence decision; no automatic recovery\");\n93:                 return prior;\n94:             }\n95:             var currentBaseline = EvidenceCollection.captureBaseline(ledger, paths, definition, \"submit_evidence\");"
+        }
+      ]
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-boundary-review-20260929-r2/review-disposition.md",
+      "sha256": "336507a9e3d46e42797c6a53ddf6da88f91cbb18365be1b280894f04a3250887",
+      "excerpts": [
+        {
+          "start": 28,
+          "end": 33,
+          "text": "28: ## 3. 对评审中三处推断的收窄\n29: \n30: 1. Claude 原生拒绝文案的 “in subagents as well as here” 是引擎自述，不能当作实际运行子代理的 sibling 证明。本轮没有启动子 agent；已证明当前会话的隐藏 Agent 及其他所列调用被拒，未实测后代会话继承。\n31: 2. `is_error?: boolean` 只表明字段可省略，不能单凭省略判成功。既有离线重判还要求正确消息类型、实际 call ID/结果、oracle 内容与文件身份相符，并保留错误/缺失结果的负对照；没有以类型声明替代正向行为证据。\n32: 3. collaboration 是实际请求 `additional_tools` 的独立顶层 namespace；不是 Code Mode 的嵌套工具。“All nested tools are available” 不能证明它可经 `tools.*` 调用。真实暴露本身成立，但调用通道及限制必须分别核验。\n33: "
+        }
+      ]
+    }
+  ]
+}

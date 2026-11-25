@@ -1,0 +1,13 @@
+{
+  "gate_result": "IN_PROGRESS_AWAITING_CURRENT_GOAL_DECISION",
+  "domain_status": "WAITING_FOR_HUMAN",
+  "workstream": "ws-20261011T044656Z-BMDJ",
+  "actual_tokens": 103724,
+  "completed_calls": 4,
+  "remaining_tokens": 1596276,
+  "remaining_calls": 14,
+  "active_seconds": 275.131,
+  "next": "user approve/revise current requirement proposal; then original compile/design",
+  "budget_stop": false,
+  "no_new_model_calls_while_waiting": true
+}

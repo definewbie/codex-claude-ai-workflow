@@ -1,11 +1,10 @@
 package dev.dual.adapter.acpx;
 
 import dev.dual.core.workflow.NodeResult;
+import dev.dual.runtime.handler.AgentExecutionResultFacts;
 import dev.dual.core.workflow.NodeStatus;
 import dev.dual.core.execution.AdapterSignal;
 import dev.dual.core.execution.AgentExecutionTimelineEventKind;
-import dev.dual.runtime.handler.AgentExecutionAttemptReconciler;
-import dev.dual.runtime.handler.AgentExecutionAttemptTimeoutPolicy;
 import dev.dual.runtime.handler.AgentRunGovernanceContext;
 import dev.dual.runtime.handler.AgentResultPromptContract;
 import dev.dual.runtime.handler.ContractRegistry;
@@ -27,15 +26,11 @@ import java.util.Map;
 public final class AcpxAgentTaskHandler implements TaskHandler {
     private final AcpxAgentResultAcquirer resultAcquirer;
     private final boolean prepareOnly;
-    private final AgentPromptRenderer promptRenderer;
+    private final AcpxAgentTransport transport;
     private final AgentRunMetadataWriter metadataWriter;
     private final AcpxUsageReader usageReader;
-    private final TaskContractRevisionContextResolver revisionContextResolver =
-            new TaskContractRevisionContextResolver();
     // Closes a started execution that never reached the completion finalizer. This is the same
     // closer used by workflow recovery, so both paths replay the same durable execution facts.
-    private final AgentExecutionAttemptReconciler attemptReconciler =
-            new AgentExecutionAttemptReconciler(new AgentExecutionAttemptTimeoutPolicy().timeout());
     private final PromptManifestWriter promptManifestWriter;
     private final SessionCompactionPolicy sessionCompactionPolicy = new SessionCompactionPolicy();
     private final SessionCompactionSeedWriter sessionCompactionSeedWriter = new SessionCompactionSeedWriter();
@@ -57,8 +52,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             throw new IllegalArgumentException("usageReader is required");
         }
         this.resultAcquirer = new AcpxAgentResultAcquirer(transport);
+        this.transport = transport;
         this.prepareOnly = prepareOnly;
-        this.promptRenderer = new AgentPromptRenderer();
         this.metadataWriter = new AgentRunMetadataWriter();
         this.usageReader = usageReader;
         this.promptManifestWriter = java.util.Objects.requireNonNull(promptManifestWriter);
@@ -89,7 +84,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         }
         var paths = new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot(),
                 new dev.dual.core.id.DualId(context.workstreamId()));
-        var current = new dev.dual.ledger.file.WorkflowFileLedger().loadCurrent(paths);
+        var current = context.ledger().loadCurrent(paths);
         if (current.status() != dev.dual.core.workflow.WorkflowStatus.RUNNING
                 || !current.activeNodeInstanceIds().contains(context.instance().nodeInstanceId())
                 || !current.openGateIds().isEmpty()) {
@@ -108,188 +103,215 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
 
     @Override
     public NodeResult execute(TaskContext context) throws Exception {
-        var agent = configText(context, "agent");
-        if (!"claude".equals(agent) && !"codex".equals(agent)) {
-            throw new IllegalArgumentException("unsupported agent: " + agent);
-        }
-        var configuredSession = configText(context, "session");
-        var promptTemplate = configText(context, "prompt_template");
-        var runId = "run-" + Instant.now().toEpochMilli();
-        var e1Enabled = "claude".equals(agent) && hasNamedPermissionProfile(context);
-        var emissionContext = proposalEmissionContext(context);
-        if (emissionContext.failed() != null) {
-            return emissionContext.failed();
-        }
-        var agentResultContract = agentResultContractPrompt(
-                context, runId, emissionContext.context());
-        var sessionScopeConfigValue = context.definition().config().get("session_scope");
-        var nodeConfigScope = sessionScopeConfigValue instanceof String text ? text.trim() : "";
-        var sessionDecision = e1Enabled
-                ? SessionScopePolicy.occurrenceBound(
-                        configuredSession,
-                        context.workstreamId(),
-                        context.instance().stageId(),
-                        context.instance().iterationId(),
-                        runId)
-                : SessionScopePolicy.resolve(
-                        agent,
-                        configuredSession,
-                        context.workstreamId(),
-                        context.instance().stageId(),
-                        context.instance().iterationId(),
-                        runId,
-                        nodeConfigScope.isBlank() ? null : nodeConfigScope);
-        var compactionDecision = sessionCompactionPolicy.decide(
-                agent,
-                context.definition().id(),
-                context.workstreamId(),
-                runId,
-                configuredSession,
-                sessionDecision,
-                context.workspaceRoot()
-        );
-        if (e1Enabled && compactionDecision.enabled()) {
-            compactionDecision = new SessionCompactionPolicy.Decision(
-                    compactionDecision.mode(),
-                    true,
-                    sessionDecision.sessionName(),
-                    sessionDecision.segmentKey(),
-                    compactionDecision.seedKind(),
-                    compactionDecision.reason() + "; occurrence-bound session retained"
+        boolean providerDispatchStarted = false;
+        try {
+            var agent = configText(context, "agent");
+            if (!"claude".equals(agent) && !"codex".equals(agent)) {
+                throw new IllegalArgumentException("unsupported agent: " + agent);
+            }
+            var configuredSession = configText(context, "session");
+            var promptTemplate = configText(context, "prompt_template");
+            var runId = "run-" + Instant.now().toEpochMilli();
+            var e1Enabled = "claude".equals(agent) && hasNamedPermissionProfile(context);
+            var emissionContext = proposalEmissionContext(context);
+            if (emissionContext.failed() != null) {
+                return emissionContext.failed();
+            }
+            var agentResultContract = agentResultContractPrompt(
+                    context, runId, emissionContext.context());
+            var sessionScopeConfigValue = context.definition().config().get("session_scope");
+            var nodeConfigScope = sessionScopeConfigValue instanceof String text ? text.trim() : "";
+            var sessionDecision = e1Enabled
+                    ? SessionScopePolicy.occurrenceBound(
+                            configuredSession,
+                            context.workstreamId(),
+                            context.instance().stageId(),
+                            context.instance().iterationId(),
+                            runId)
+                    : SessionScopePolicy.resolve(
+                            agent,
+                            configuredSession,
+                            context.workstreamId(),
+                            context.instance().stageId(),
+                            context.instance().iterationId(),
+                            runId,
+                            nodeConfigScope.isBlank() ? null : nodeConfigScope);
+            var compactionDecision = sessionCompactionPolicy.decide(
+                    agent,
+                    context.definition().id(),
+                    context.workstreamId(),
+                    runId,
+                    configuredSession,
+                    sessionDecision,
+                    context.workspaceRoot()
             );
-        }
-        var session = compactionDecision.enabled() ? compactionDecision.sessionName() : sessionDecision.sessionName();
-        var sessionMeta = SessionMeta.from(
-                sessionDecision,
-                context.instance().stageId(),
-                context.instance().iterationId()
-        );
-        var runDir = context.workspaceRoot()
-                .resolve(".agent")
-                .resolve("workstreams")
-                .resolve(context.workstreamId())
-                .resolve("runs")
-                .resolve(runId);
-        var promptPath = runDir.resolve("prompts").resolve(promptTemplate + ".md");
-        var outputPath = runDir.resolve("outputs").resolve(promptTemplate + ".json");
-        var transcriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".transcript.log");
-        var stderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".stderr.log");
-        var initialOutputPath = runDir.resolve("outputs").resolve(promptTemplate + ".attempt-1.json");
-        var correctionPromptPath = runDir.resolve("prompts").resolve(promptTemplate + ".contract-correction.md");
-        var correctionOutputPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.json");
-        var correctionTranscriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.transcript.log");
-        var correctionStderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.stderr.log");
-        Files.createDirectories(promptPath.getParent());
-        Files.createDirectories(outputPath.getParent());
-        var seedPath = sessionCompactionSeedWriter.write(
-                context.workspaceRoot(),
-                context.workstreamId(),
-                runDir,
-                compactionDecision
-        ).orElse(null);
-        var inputRefs = new java.util.ArrayList<>(context.instance().inputRefs());
-        AgentRunGovernanceContext.PreparedContext governanceContext;
-        try {
-            governanceContext = AgentRunGovernanceContext.ensureQualified(context, runId);
-            inputRefs.add(governanceContext.contextRef());
-        } catch (AgentRunGovernanceContext.QualificationException failure) {
-            return new NodeResult(
-                    AgentRunGovernanceContext.QUALIFICATION_FAILURE_OUTCOME,
-                    NodeStatus.FAILED,
-                    List.of(),
-                    Map.of("error", failure.getMessage()),
-                    failure.getMessage());
-        } catch (AgentRunGovernanceContext.AuthoredContextException failure) {
-            return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
-                    Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
-        }
-        String retryInstruction;
-        try {
-            retryInstruction = retryFailureInstruction(context);
-        } catch (java.io.IOException failure) {
-            return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
-                    Map.of("failure_code", "RETRY_FAILURE_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
-        }
-        if (seedPath != null) {
-            inputRefs.add(context.workspaceRoot().relativize(seedPath).toString());
-        }
-        var compactionMeta = SessionCompactionMeta.from(compactionDecision, context.workspaceRoot(), seedPath);
-        var effectivePermissionProfile = permissionProfile(context);
-        if (e1Enabled && effectivePermissionProfile.approveAll()) {
-            throw new IllegalStateException(
-                    "NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
-        }
-        var networkGrant = e1Enabled && !prepareOnly
-                ? new dev.dual.ledger.file.ExecutionNetworkGrantStore().claimIfPresent(
-                        new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot().toRealPath(),
-                                new dev.dual.core.id.DualId(context.workstreamId())), context.instance().nodeInstanceId(), runId)
-                : null;
-        var executionPolicy = e1Enabled
-                ? ClaudeExecutionPolicy.write(
+            if (e1Enabled && compactionDecision.enabled()) {
+                compactionDecision = new SessionCompactionPolicy.Decision(
+                        compactionDecision.mode(),
+                        true,
+                        sessionDecision.sessionName(),
+                        sessionDecision.segmentKey(),
+                        compactionDecision.seedKind(),
+                        compactionDecision.reason() + "; occurrence-bound session retained"
+                );
+            }
+            var session = compactionDecision.enabled() ? compactionDecision.sessionName() : sessionDecision.sessionName();
+            var sessionMeta = SessionMeta.from(
+                    sessionDecision,
+                    context.instance().stageId(),
+                    context.instance().iterationId()
+            );
+            var runDir = context.workspaceRoot()
+                    .resolve(".agent")
+                    .resolve("workstreams")
+                    .resolve(context.workstreamId())
+                    .resolve("runs")
+                    .resolve(runId);
+            var promptPath = runDir.resolve("prompts").resolve(promptTemplate + ".md");
+            var outputPath = runDir.resolve("outputs").resolve(promptTemplate + ".json");
+            var transcriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".transcript.log");
+            var stderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".stderr.log");
+            var initialOutputPath = runDir.resolve("outputs").resolve(promptTemplate + ".attempt-1.json");
+            var correctionPromptPath = runDir.resolve("prompts").resolve(promptTemplate + ".contract-correction.md");
+            var correctionOutputPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.json");
+            var correctionTranscriptPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.transcript.log");
+            var correctionStderrPath = runDir.resolve("outputs").resolve(promptTemplate + ".contract-correction.stderr.log");
+            Files.createDirectories(promptPath.getParent());
+            Files.createDirectories(outputPath.getParent());
+            var seedPath = sessionCompactionSeedWriter.write(
+                    context.ledger(), context.workspaceRoot(),
+                    context.workstreamId(),
+                    runDir,
+                    compactionDecision
+            ).orElse(null);
+            var inputRefs = new java.util.ArrayList<>(context.instance().inputRefs());
+            AgentRunGovernanceContext.PreparedContext governanceContext;
+            try {
+                governanceContext = AgentRunGovernanceContext.ensureQualified(context, runId);
+                inputRefs.add(governanceContext.contextRef());
+            } catch (AgentRunGovernanceContext.QualificationException failure) {
+                return failure.result();
+            } catch (AgentRunGovernanceContext.AuthoredContextException failure) {
+                return AgentExecutionResultFacts.inputPreparationFailed("REQUIRED_AGENT_EVIDENCE_MISSING",
+                        "AUTHORED_CONTEXT_INVALID", List.of(failure.getMessage()));
+            }
+            String retryInstruction;
+            try {
+                retryInstruction = retryFailureInstruction(context);
+            } catch (java.io.IOException failure) {
+                return AgentExecutionResultFacts.inputPreparationFailed("REQUIRED_AGENT_EVIDENCE_MISSING",
+                        "RETRY_FAILURE_CONTEXT_INVALID", List.of(failure.getMessage()));
+            }
+            if (seedPath != null) {
+                inputRefs.add(context.workspaceRoot().relativize(seedPath).toString());
+            }
+            var compactionMeta = SessionCompactionMeta.from(compactionDecision, context.workspaceRoot(), seedPath);
+            var effectivePermissionProfile = permissionProfile(context);
+            if (e1Enabled && effectivePermissionProfile.approveAll()) {
+                throw new IllegalStateException(
+                        "NETWORK_AUTHORITY_NOT_CONFIGURED: approveAll cannot be combined with E1 policy");
+            }
+            var networkGrant = e1Enabled && !prepareOnly
+                    ? new dev.dual.ledger.file.ExecutionNetworkGrantStore(context.ledger()).claimIfPresent(
+                            new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot().toRealPath(),
+                                    new dev.dual.core.id.DualId(context.workstreamId())), context.instance().nodeInstanceId(), runId)
+                    : null;
+            var executionPolicy = e1Enabled
+                    ? ClaudeExecutionPolicy.write(
+                            context.workspaceRoot(),
+                            context.workstreamId(),
+                            context.instance().nodeInstanceId(),
+                            runId,
+                            runDir,
+                            effectivePermissionProfile, networkGrant)
+                    : null;
+            var rendered = withExternalResearchGuidance(new AgentPromptRenderer(context.ledger()).renderWithSections(
+                    context.workspaceRoot(),
+                    context.workstreamId(),
+                    runId,
+                    context.definition().id(),
+                    promptTemplate,
+                    inputRefs,
+                    agentResultContract,
+                    governanceContext.trustedTaskContractPayload().orElse(null)
+            ), effectivePermissionProfile);
+            if (!retryInstruction.isEmpty()) {
+                var sections = new ArrayList<>(rendered.sections());
+                sections.add(new AgentPromptRenderer.PromptSection("Previous rejected execution", "retry_diagnostic",
+                        context.instance().nodeInstanceId(), retryInstruction, "advisory failure context; not approval", true));
+                rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + retryInstruction, List.copyOf(sections));
+            }
+            var authored = governanceContext.authoredContext().orElse(null);
+            try {
+                if (authored != null) {
+                    var body = authored.render(context.workspaceRoot());
+                    var sections = new ArrayList<>(rendered.sections());
+                    sections.add(new AgentPromptRenderer.PromptSection(
+                            dev.dual.runtime.handler.AuthoredExecutionContext.SECTION_NAME, "typed_authored_context",
+                            context.instance().nodeInstanceId(), body, "required approved and revision inputs", true));
+                    rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + body, List.copyOf(sections));
+                    agentResultContract += "\n\n" + body;
+                }
+            } catch (java.io.IOException | IllegalArgumentException failure) {
+                return AgentExecutionResultFacts.inputPreparationFailed("REQUIRED_AGENT_EVIDENCE_MISSING",
+                        "AUTHORED_CONTEXT_INVALID", List.of(failure.getMessage()));
+            }
+            var collectionInstruction = dev.dual.runtime.handler.EvidenceCollection.promptInstruction(
+                    context.ledger(),                     context.workspaceRoot(), context.workstreamId(), context.instance().nodeInstanceId());
+            if (collectionInstruction.isPresent()) {
+                var instruction = collectionInstruction.orElseThrow();
+                var sections = new ArrayList<>(rendered.sections());
+                sections.add(new AgentPromptRenderer.PromptSection("Evidence collection boundary", "human_collection",
+                        context.instance().nodeInstanceId(), instruction, "source-preserving evidence collection", true));
+                rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + instruction, List.copyOf(sections));
+                agentResultContract += "\n\n" + instruction;
+            }
+            // Storage failures retain the ordinary adapter IO path, not evidence-violation semantics.
+            Files.writeString(promptPath, rendered.content(), StandardCharsets.UTF_8);
+            promptManifestWriter.write(
+                    PromptManifestWriter.manifestPathFor(promptPath), context.workstreamId(), runId,
+                    context.definition().id(), agent, promptTemplate, promptPath, rendered.sections(), authored);
+            try {
+                if (authored != null) {
+                    dev.dual.runtime.handler.AuthoredExecutionContext.verifyManifest(context.workspaceRoot(),
+                            PromptManifestWriter.manifestPathFor(promptPath), authored);
+                }
+            } catch (java.io.IOException | IllegalArgumentException failure) {
+                return AgentExecutionResultFacts.inputPreparationFailed("REQUIRED_AGENT_EVIDENCE_MISSING",
+                        "AUTHORED_CONTEXT_INVALID", List.of(failure.getMessage()));
+            }
+
+            if (prepareOnly) {
+                metadataWriter.writePrepared(
                         context.workspaceRoot(),
                         context.workstreamId(),
-                        context.instance().nodeInstanceId(),
+                        context.definition().id(),
+                        agent,
+                        session,
+                        promptTemplate,
                         runId,
                         runDir,
-                        effectivePermissionProfile, networkGrant)
-                : null;
-        var rendered = withExternalResearchGuidance(promptRenderer.renderWithSections(
-                context.workspaceRoot(),
-                context.workstreamId(),
-                runId,
-                context.definition().id(),
-                promptTemplate,
-                inputRefs,
-                agentResultContract,
-                governanceContext.trustedTaskContractPayload().orElse(null)
-        ), effectivePermissionProfile);
-        if (!retryInstruction.isEmpty()) {
-            var sections = new ArrayList<>(rendered.sections());
-            sections.add(new AgentPromptRenderer.PromptSection("Previous rejected execution", "retry_diagnostic",
-                    context.instance().nodeInstanceId(), retryInstruction, "advisory failure context; not approval", true));
-            rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + retryInstruction, List.copyOf(sections));
-        }
-        var authored = governanceContext.authoredContext().orElse(null);
-        try {
-            if (authored != null) {
-                var body = authored.render(context.workspaceRoot());
-                var sections = new ArrayList<>(rendered.sections());
-                sections.add(new AgentPromptRenderer.PromptSection(
-                        dev.dual.runtime.handler.AuthoredExecutionContext.SECTION_NAME, "typed_authored_context",
-                        context.instance().nodeInstanceId(), body, "required approved and revision inputs", true));
-                rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + body, List.copyOf(sections));
-                agentResultContract += "\n\n" + body;
+                        promptPath,
+                        outputPath,
+                        transcriptPath,
+                        stderrPath,
+                        sessionMeta,
+                        compactionMeta,
+                        executionPolicy
+                );
+                return NodeResult.completed("completed", List.of(
+                        context.workspaceRoot().relativize(promptPath).toString(),
+                        governanceContext.repositoryFactBinding().ref()), Map.of(
+                        "run_id", runId,
+                        "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
+                        "agent", agent,
+                        "session", session,
+                        "repository_fact_binding_ref", governanceContext.repositoryFactBinding().ref(),
+                        "repository_fact_binding_sha256", governanceContext.repositoryFactBinding().sha256(),
+                        "prepared", true
+                ));
             }
-        } catch (java.io.IOException | IllegalArgumentException failure) {
-            return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
-                    Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
-        }
-        var collectionInstruction = dev.dual.runtime.handler.EvidenceCollection.promptInstruction(
-                context.workspaceRoot(), context.workstreamId(), context.instance().nodeInstanceId());
-        if (collectionInstruction.isPresent()) {
-            var instruction = collectionInstruction.orElseThrow();
-            var sections = new ArrayList<>(rendered.sections());
-            sections.add(new AgentPromptRenderer.PromptSection("Evidence collection boundary", "human_collection",
-                    context.instance().nodeInstanceId(), instruction, "source-preserving evidence collection", true));
-            rendered = new AgentPromptRenderer.RenderedPrompt(rendered.content() + "\n\n" + instruction, List.copyOf(sections));
-            agentResultContract += "\n\n" + instruction;
-        }
-        // Storage failures retain the ordinary adapter IO path, not evidence-violation semantics.
-        Files.writeString(promptPath, rendered.content(), StandardCharsets.UTF_8);
-        promptManifestWriter.write(
-                PromptManifestWriter.manifestPathFor(promptPath), context.workstreamId(), runId,
-                context.definition().id(), agent, promptTemplate, promptPath, rendered.sections(), authored);
-        try {
-            if (authored != null) {
-                dev.dual.runtime.handler.AuthoredExecutionContext.verifyManifest(context.workspaceRoot(),
-                        PromptManifestWriter.manifestPathFor(promptPath), authored);
-            }
-        } catch (java.io.IOException | IllegalArgumentException failure) {
-            return new NodeResult("REQUIRED_AGENT_EVIDENCE_MISSING", NodeStatus.FAILED, List.of(),
-                    Map.of("failure_code", "AUTHORED_CONTEXT_INVALID", "error", failure.getMessage()), failure.getMessage());
-        }
 
-        if (prepareOnly) {
             metadataWriter.writePrepared(
                     context.workspaceRoot(),
                     context.workstreamId(),
@@ -307,190 +329,209 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
                     compactionMeta,
                     executionPolicy
             );
-            return NodeResult.completed("completed", List.of(
-                    context.workspaceRoot().relativize(promptPath).toString(),
-                    governanceContext.repositoryFactBinding().ref()), Map.of(
-                    "run_id", runId,
-                    "run_metadata", context.workspaceRoot().relativize(runDir.resolve("run.json")).toString(),
-                    "agent", agent,
-                    "session", session,
-                    "repository_fact_binding_ref", governanceContext.repositoryFactBinding().ref(),
-                    "repository_fact_binding_sha256", governanceContext.repositoryFactBinding().sha256(),
-                    "prepared", true
-            ));
-        }
-
-        metadataWriter.writePrepared(
-                context.workspaceRoot(),
-                context.workstreamId(),
-                context.definition().id(),
-                agent,
-                session,
-                promptTemplate,
-                runId,
-                runDir,
-                promptPath,
-                outputPath,
-                transcriptPath,
-                stderrPath,
-                sessionMeta,
-                compactionMeta,
-                executionPolicy
-        );
-        var request = new AcpxRunRequest(
-                context.workspaceRoot(),
-                session,
-                promptPath,
-                transcriptPath,
-                stderrPath,
-                effectivePermissionProfile,
-                event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event),
-                executionPolicy
-        );
-        var correctionRequest = new AcpxRunRequest(
-                context.workspaceRoot(),
-                session,
-                correctionPromptPath,
-                correctionTranscriptPath,
-                correctionStderrPath,
-                AcpxPermissionProfile.contractCorrection(),
-                event -> metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event),
-                executionPolicy
-        );
-        var authoritySnapshot = ChangeBoundaryAuthoritySnapshot.capture(
-                context.workspaceRoot(),
-                context.workstreamId(),
-                request.permissionProfile().approveAll()
-        );
-        try {
-            var acquisition = resultAcquirer.acquire(
-                    agent,
-                    request,
-                    correctionRequest,
-                    agentResultContract,
-                    context.workstreamId(),
-                    runId,
-                    ContractRegistry.hasContract(context.definition().id())
-                            ? ContractRegistry.forNode(context.definition().id())
-                            : null,
-                    authored == null ? List.of() : authored.obligations().stream()
-                            .map(dev.dual.runtime.handler.AuthoredExecutionContext.Obligation::id).toList()
-            );
-            var finalResult = acquisition.finalResult();
-            var runTimeline = new ArrayList<>(acquisition.executionTimeline());
-            var initialUsage = usageFor(agent, acquisition.initialResult(), promptPath, stderrPath);
-            var correctionUsage = acquisition.correctionAttempted()
-                    ? usageFor(agent, acquisition.correctionResult(), correctionPromptPath, correctionStderrPath)
+            var verificationSource = governanceContext.qualifiedTaskContract().isPresent()
+                    && governanceContext.qualifiedTaskContract().orElseThrow().phase() == dev.dual.core.contract.TaskContract.Phase.EXECUTION
+                    ? dev.dual.runtime.handler.VerificationEvidence.prepare(context)
                     : null;
-            var usage = acquisition.correctionAttempted()
-                    ? AcpxUsage.aggregatePromptOccurrences(initialUsage, correctionUsage)
-                    : initialUsage;
-            var finalArtifact = acquisition.finalCandidate();
-            if (acquisition.correctionAttempted()) {
-                Files.writeString(
-                        initialOutputPath,
-                        acquisition.initialCandidate(),
-                        StandardCharsets.UTF_8
-                );
-                Files.writeString(correctionOutputPath, finalArtifact, StandardCharsets.UTF_8);
+            var preparedBinding = new java.util.LinkedHashMap<String, Object>();
+            preparedBinding.put("run", new com.fasterxml.jackson.databind.ObjectMapper().readTree(runDir.resolve("run.json").toFile()));
+            preparedBinding.put("contract_ref", governanceContext.taskContractRef());
+            preparedBinding.put("contract_sha256", governanceContext.taskContractSha256());
+            preparedBinding.put("native_invocation", transport.invocationInputs(agent, context.workspaceRoot(), session));
+            preparedBinding.put("allowed_request_options", List.of(
+                    transport.requestOptions(agent, context.workspaceRoot(), effectivePermissionProfile, executionPolicy, true),
+                    transport.requestOptions(agent, context.workspaceRoot(), AcpxPermissionProfile.contractCorrection(), executionPolicy)));
+            if (transport.permissionBudgetMillis(effectivePermissionProfile) > 0)
+                preparedBinding.put("native_permission_budget_ms", transport.permissionBudgetMillis(effectivePermissionProfile));
+            if (verificationSource != null) preparedBinding.put("verification_source", verificationSource);
+            var preparedInputs = new ArrayList<Path>(List.of(promptPath, PromptManifestWriter.manifestPathFor(promptPath),
+                    context.workspaceRoot().resolve(governanceContext.repositoryFactBinding().ref())));
+            if (emissionContext.captured()!=null && emissionContext.captured().binding()!=null) {
+                preparedBinding.put("contract_revision",emissionContext.captured().binding().toMap());
+                preparedInputs.addAll(emissionContext.captured().inputs());
             }
-            if (finalResult.promptCompletion().completed()) {
-                Files.writeString(outputPath, finalArtifact, StandardCharsets.UTF_8);
-                appendTimelineEvent(
-                        runTimeline,
-                        finalResult.startedAt(),
-                        AgentExecutionTimelineEventKind.ARTIFACT_EXTRACTED,
-                        "adapter"
-                );
-            }
-            var effectiveTranscriptPath = acquisition.correctionAttempted() ? correctionTranscriptPath : transcriptPath;
-            var effectiveStderrPath = acquisition.correctionAttempted() ? correctionStderrPath : stderrPath;
-            var outputComplete = finalResult.promptCompletion().completed();
-            var acquisitionDocument = acquisition.toDocument(
+            var preparedRun = dev.dual.runtime.handler.AgentRunCommitProtocol.prepare(context, runDir,preparedInputs,preparedBinding);
+            var commandEvents = new ArrayList<AcpxExecutionEvent>();
+            AcpxExecutionEventSink events = event -> {
+                try { dev.dual.runtime.handler.AgentRunCommitProtocol.commandEvent(context, preparedRun, event.kind().wireName(), event.details()); }
+                catch (java.io.IOException failure) { throw new java.io.UncheckedIOException(failure); }
+                if (java.util.Set.of(dev.dual.core.execution.AgentExecutionTimelineEventKind.COMMAND_INTENT,
+                        dev.dual.core.execution.AgentExecutionTimelineEventKind.COMMAND_RESULT,
+                        dev.dual.core.execution.AgentExecutionTimelineEventKind.NATIVE_PERMISSION_REQUEST,
+                        dev.dual.core.execution.AgentExecutionTimelineEventKind.NATIVE_PERMISSION_REPLY).contains(event.kind())) commandEvents.add(event);
+                metadataWriter.appendExecutionEvent(runDir.resolve("run.json"), event);
+            };
+            var permissionEvents = new AcpxExecutionEventSink() {
+                public void accept(AcpxExecutionEvent event) { events.accept(event); }
+                public boolean permissionRepliesEnabled() { return true; }
+                public void permissionRequest(Map<String, Object> request) throws java.io.IOException {
+                    dev.dual.runtime.handler.NativePermissionRequests.record(context, preparedRun, request);
+                }
+                public java.util.Optional<Map<String, Object>> permissionReply(String key) throws java.io.IOException {
+                    return dev.dual.runtime.handler.NativePermissionRequests.commit(context, preparedRun, key);
+                }
+                public void permissionObservation(String key, String phase, Map<String, Object> observation) throws java.io.IOException {
+                    dev.dual.runtime.handler.NativePermissionRequests.observe(context, preparedRun, key, phase, observation);
+                }
+                public boolean permissionRepliesClosed() throws java.io.IOException {
+                    return dev.dual.runtime.handler.NativePermissionRequests.closed(context, preparedRun);
+                }
+            };
+            var request = new AcpxRunRequest(
                     context.workspaceRoot(),
-                    acquisition.correctionAttempted() ? initialOutputPath : outputPath,
-                    correctionOutputPath,
-                    initialUsage,
-                    correctionUsage
-            );
-            metadataWriter.writeCompleted(
-                    context.workspaceRoot(),
-                    context.workstreamId(),
-                    context.definition().id(),
-                    agent,
                     session,
-                    promptTemplate,
-                    runId,
-                    runDir,
                     promptPath,
-                    outputPath,
-                    effectiveStderrPath,
                     transcriptPath,
-                    finalResult,
-                    runTimeline,
-                    usage,
-                    sessionMeta,
-                    compactionMeta,
-                    acquisitionDocument,
-                    governanceContext.repositoryFactBinding(),
-                    governanceContext,
+                    stderrPath,
+                    effectivePermissionProfile,
+                    permissionEvents,
                     executionPolicy
             );
-            var candidate = NodeResult.completed(
-                    "completed",
-                    evidenceOutputRefs(
-                            context,
-                            outputPath,
-                            transcriptPath,
-                            stderrPath,
-                            governanceContext.repositoryFactBinding().ref()),
-                    resultFacts(
-                            context,
-                            runDir,
-                            transcriptPath,
-                            finalResult,
-                            agent,
-                            session,
-                            runId,
-                            outputComplete,
-                            governanceContext.repositoryFactBinding()
-                    )
+            var correctionRequest = new AcpxRunRequest(
+                    context.workspaceRoot(),
+                    session,
+                    correctionPromptPath,
+                    correctionTranscriptPath,
+                    correctionStderrPath,
+                    AcpxPermissionProfile.contractCorrection(),
+                    events,
+                    executionPolicy
             );
-            if (acquisition.correctionValidation() != null && !acquisition.correctionValidation().valid()) {
-                candidate = dev.dual.runtime.handler.AgentExecutionResultFacts.rejectAgentResult(candidate,
-                        String.join("; ", acquisition.correctionValidation().errors()));
-            }
-            return authoritySnapshot.enforce(candidate);
-        } catch (Exception failure) {
-            // If the transport persisted evidence and completion writing failed, replay that
-            // evidence to a typed terminal disposition before propagating the handler failure.
+            var authoritySnapshot = ChangeBoundaryAuthoritySnapshot.capture(
+                    context.workspaceRoot(),
+                    context.workstreamId(),
+                    request.permissionProfile().approveAll(),
+                    governanceContext.taskContractRef()
+            );
+            dev.dual.runtime.handler.AgentRunCommitProtocol.qualifyDispatch(context, preparedRun);
+            // Once committing intent starts, storage/transport errors must not be reported as no dispatch.
+            providerDispatchStarted = true;
+            dev.dual.runtime.handler.AgentRunCommitProtocol.beginExternalCall(context, preparedRun);
             try {
-                closeInFlightExecutionIfStarted(runDir.resolve("run.json"));
-            } catch (Exception reconciliationFailure) {
-                failure.addSuppressed(reconciliationFailure);
+                var acquisition = resultAcquirer.acquire(
+                        agent,
+                        request,
+                        correctionRequest,
+                        agentResultContract,
+                        context.workstreamId(),
+                        runId,
+                        ContractRegistry.hasContract(context.definition().id())
+                                ? ContractRegistry.forNode(context.definition().id())
+                                : null,
+                        authored == null ? List.of() : authored.obligations().stream()
+                                .map(dev.dual.runtime.handler.AuthoredExecutionContext.Obligation::id).toList()
+                );
+                var finalResult = acquisition.finalResult();
+                var runTimeline = new ArrayList<>(acquisition.executionTimeline());
+                runTimeline.addAll(commandEvents);
+                runTimeline.sort(java.util.Comparator.comparing(AcpxExecutionEvent::observedAt));
+                var initialUsage = usageFor(agent, acquisition.initialResult(), transcriptPath, stderrPath);
+                var correctionUsage = acquisition.correctionAttempted()
+                        ? usageFor(agent, acquisition.correctionResult(), correctionTranscriptPath, correctionStderrPath)
+                        : null;
+                var usage = acquisition.correctionAttempted()
+                        ? AcpxUsage.aggregatePromptOccurrences(initialUsage, correctionUsage)
+                        : initialUsage;
+                var finalArtifact = acquisition.finalCandidate();
+                if (acquisition.correctionAttempted()) {
+                    Files.writeString(
+                            initialOutputPath,
+                            acquisition.initialCandidate(),
+                            StandardCharsets.UTF_8
+                    );
+                    Files.writeString(correctionOutputPath, finalArtifact, StandardCharsets.UTF_8);
+                }
+                if (finalResult.promptCompletion().completed()) {
+                    Files.writeString(outputPath, finalArtifact, StandardCharsets.UTF_8);
+                    appendTimelineEvent(
+                            runTimeline,
+                            finalResult.startedAt(),
+                            AgentExecutionTimelineEventKind.ARTIFACT_EXTRACTED,
+                            "adapter"
+                    );
+                }
+                var effectiveTranscriptPath = acquisition.correctionAttempted() ? correctionTranscriptPath : transcriptPath;
+                var effectiveStderrPath = acquisition.correctionAttempted() ? correctionStderrPath : stderrPath;
+                var outputComplete = finalResult.promptCompletion().completed();
+                var acquisitionDocument = acquisition.toDocument(
+                        context.workspaceRoot(),
+                        acquisition.correctionAttempted() ? initialOutputPath : outputPath,
+                        correctionOutputPath,
+                        initialUsage,
+                        correctionUsage
+                );
+                metadataWriter.writeCompleted(
+                        context.workspaceRoot(),
+                        context.workstreamId(),
+                        context.definition().id(),
+                        agent,
+                        session,
+                        promptTemplate,
+                        runId,
+                        runDir,
+                        promptPath,
+                        outputPath,
+                        effectiveStderrPath,
+                        transcriptPath,
+                        finalResult,
+                        runTimeline,
+                        usage,
+                        sessionMeta,
+                        compactionMeta,
+                        acquisitionDocument,
+                        governanceContext.repositoryFactBinding(),
+                        governanceContext,
+                        executionPolicy
+                );
+                var candidate = NodeResult.completed(
+                        "completed",
+                        evidenceOutputRefs(
+                                context,
+                                outputPath,
+                                transcriptPath,
+                                stderrPath,
+                                governanceContext.repositoryFactBinding().ref()),
+                        resultFacts(
+                                context,
+                                runDir,
+                                transcriptPath,
+                                finalResult,
+                                agent,
+                                session,
+                                runId,
+                                outputComplete,
+                                governanceContext.repositoryFactBinding()
+                        )
+                );
+                // Correction cannot supply new semantic execution evidence for the original result.
+                candidate = dev.dual.runtime.handler.VerificationEvidence.record(context, preparedRun, verificationSource,
+                        agent, acquisition.initialResult().toolObservations(), candidate);
+                if (acquisition.correctionValidation() != null && !acquisition.correctionValidation().valid()) {
+                    candidate = dev.dual.runtime.handler.AgentExecutionResultFacts.rejectAgentResult(candidate,
+                            String.join("; ", acquisition.correctionValidation().errors()));
+                }
+                return authoritySnapshot.enforce(candidate);
+            } catch (Exception failure) {
+                // Preserve the original failure; bound R01/R02/R03 decides recovery, never mutable run.json.
+                var guarded = authoritySnapshot.enforce(new NodeResult(
+                        "AGENT_HANDLER_FAILED",
+                        NodeStatus.FAILED,
+                        List.of(),
+                        Map.of(),
+                        failure.getMessage()
+                ));
+                if (Boolean.TRUE.equals(guarded.result().get("change_boundary_authority_tampered"))) {
+                    return guarded;
+                }
+                throw failure;
             }
-            var guarded = authoritySnapshot.enforce(new NodeResult(
-                    "AGENT_HANDLER_FAILED",
-                    NodeStatus.FAILED,
-                    List.of(),
-                    Map.of(),
-                    failure.getMessage()
-            ));
-            if (Boolean.TRUE.equals(guarded.result().get("change_boundary_authority_tampered"))) {
-                return guarded;
-            }
-            throw failure;
+        } catch (Exception failure) {
+            if (providerDispatchStarted) throw failure;
+            if (failure instanceof AgentRunGovernanceContext.QualificationException qualification)
+                return qualification.result();
+            return AgentExecutionResultFacts.inputPreparationFailed("INPUT_PREPARATION_FAILED",
+                    failure.getClass().getName(), List.of(String.valueOf(failure.getMessage())));
         }
-    }
-
-    private void closeInFlightExecutionIfStarted(Path runJson) throws Exception {
-        // A run that never started a process is correctly left untouched. If durable closure
-        // itself fails, attach that failure to the original exception instead of hiding a
-        // second ledger contradiction.
-        if (runJson == null || !Files.isRegularFile(runJson)) {
-            return;
-        }
-        attemptReconciler.reconcile(runJson);
     }
 
     private record ChangeBoundaryAuthoritySnapshot(
@@ -500,7 +541,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         static ChangeBoundaryAuthoritySnapshot capture(
                 Path workspaceRoot,
                 String workstreamId,
-                boolean protect
+                boolean protect,
+                String qualifiedContractRef
         ) throws Exception {
             var root = workspaceRoot.toAbsolutePath().normalize();
             if (!protect) {
@@ -508,7 +550,8 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             }
             var workstreamDir = root.resolve(".agent/workstreams").resolve(workstreamId).normalize();
             var protectedPaths = new ArrayList<Path>();
-            protectedPaths.add(workstreamDir.resolve("artifacts/task-contract.json"));
+            if (qualifiedContractRef != null && !qualifiedContractRef.isBlank())
+                protectedPaths.add(root.resolve(qualifiedContractRef).normalize());
             protectedPaths.add(workstreamDir.resolve("workstream.json"));
             var workspacesDir = workstreamDir.resolve("workspaces");
             protectedPaths.add(workspacesDir);
@@ -579,10 +622,10 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         }
     }
 
-    private AcpxUsage usageFor(String agent, AcpxRunResult result, java.nio.file.Path promptPath, java.nio.file.Path stderrPath) {
+    private AcpxUsage usageFor(String agent, AcpxRunResult result, java.nio.file.Path transcriptPath, java.nio.file.Path stderrPath) {
         return result.usage() != null
                 ? result.usage()
-                : usageReader.read(agent, promptPath, stderrPath).orElse(null);
+                : usageReader.read(agent, result.promptCompletion(), transcriptPath, stderrPath).orElse(null);
     }
 
     private static String agentResultContractPrompt(
@@ -608,28 +651,20 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
     }
 
     private ProposalEmissionResolution proposalEmissionContext(TaskContext context) {
-        if (!"intake.claude_brainstorm".equals(context.definition().id())) {
-            return new ProposalEmissionResolution(
-                    AgentResultPromptContract.ProposalEmissionContext.notApplicable(), null);
+        if (!"intake.claude_brainstorm".equals(context.definition().id()))
+            return new ProposalEmissionResolution(AgentResultPromptContract.ProposalEmissionContext.notApplicable(),null,null);
+        try {
+            var captured=new TaskContractRevisionContextResolver(context.ledger()).captureRevision(context);
+            var prompt=AgentResultPromptContract.proposalEmissionContext(captured.context()).withGoalReproposal(
+                    captured.binding()!=null && captured.binding().allowedForms().contains("GOAL_REPROPOSAL"));
+            return new ProposalEmissionResolution(prompt,captured,null);
+        } catch (java.io.IOException invalid) {
+            return new ProposalEmissionResolution(null,null,AgentExecutionResultFacts.inputPreparationFailed(
+                    "TASK_CONTRACT_REVISION_CONTEXT_INVALID","TASK_CONTRACT_REVISION_CONTEXT_INVALID",List.of(invalid.getMessage())));
         }
-        var resolved = revisionContextResolver.resolveForIteration(
-                context.workspaceRoot(), context.workstreamId(), context.instance().iterationId());
-        if (!resolved.valid()) {
-            return new ProposalEmissionResolution(null, new NodeResult(
-                    "TASK_CONTRACT_REVISION_CONTEXT_INVALID",
-                    NodeStatus.FAILED,
-                    List.of(),
-                    Map.of("errors", resolved.errors()),
-                    "task contract revision context could not be resolved"));
-        }
-        return new ProposalEmissionResolution(
-                AgentResultPromptContract.proposalEmissionContext(resolved.context()), null);
     }
-
-    private record ProposalEmissionResolution(
-            AgentResultPromptContract.ProposalEmissionContext context,
-            NodeResult failed
-    ) {}
+    private record ProposalEmissionResolution(AgentResultPromptContract.ProposalEmissionContext context,
+            dev.dual.runtime.handler.ContractRevisionBinding.Captured captured,NodeResult failed) {}
 
     private static void appendTimelineEvent(
             List<AcpxExecutionEvent> timeline,
@@ -736,8 +771,9 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
             String repositoryFactBindingRef
     ) {
         var refs = new java.util.ArrayList<String>();
-        refs.add(context.workspaceRoot().relativize(stderrPath).toString());
-        refs.add(context.workspaceRoot().relativize(transcriptPath).toString());
+        // A session/compatibility failure can precede the prompt process. Do not invent transcript evidence.
+        if (Files.isRegularFile(stderrPath)) refs.add(context.workspaceRoot().relativize(stderrPath).toString());
+        if (Files.isRegularFile(transcriptPath)) refs.add(context.workspaceRoot().relativize(transcriptPath).toString());
         if (Files.exists(outputPath)) {
             refs.add(context.workspaceRoot().relativize(outputPath).toString());
         }
@@ -783,6 +819,7 @@ public final class AcpxAgentTaskHandler implements TaskHandler {
         fact.put("source", signal.source());
         fact.put("sessionId", signal.sessionId());
         fact.put("superseded", signal.superseded());
+            if (signal.operationRef() != null) fact.put("operationRef", signal.operationRef());
         return Map.copyOf(fact);
     }
 

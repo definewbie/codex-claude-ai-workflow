@@ -1,0 +1,77 @@
+{
+  "checks": [
+    {
+      "pid": 41973,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    },
+    {
+      "pid": 42010,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    },
+    {
+      "pid": 42057,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    },
+    {
+      "pid": 42059,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    },
+    {
+      "pid": 42454,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    },
+    {
+      "pid": 42491,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    },
+    {
+      "pid": 43211,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    },
+    {
+      "pid": 43215,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    },
+    {
+      "pid": 44904,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    },
+    {
+      "pid": 44995,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    },
+    {
+      "pid": 45036,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    },
+    {
+      "pid": 45038,
+      "exit": 1,
+      "observation": "",
+      "absent": true
+    }
+  ],
+  "scope": "known parent/native PIDs only; absence not general subtree proof"
+}

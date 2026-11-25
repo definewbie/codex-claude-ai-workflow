@@ -1,0 +1,74 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-design-claude_design-036",
+  "nodeDefinitionId" : "design.claude_design",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "FAILED",
+  "stageId" : "stage-design",
+  "iterationId" : "iter-006",
+  "inputRefs" : [ ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171190662/outputs/design-codex-review.stderr.log", ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171190662/outputs/design-codex-review.transcript.log", ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171190662/outputs/design-codex-review.json", ".agent/workstreams/ws-20260911T231749Z-GCTW/artifacts/context-governance/occurrences/node-design-codex_arch_review-033-run-1789171190662/binding.json", ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171190662/outputs/design-codex-review.contract.json" ],
+  "inputTransition" : {
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "transition_type" : "normal",
+    "condition" : "unconditional",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171318596/outputs/design-claude.stderr.log", ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171318596/outputs/design-claude.transcript.log", ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171318596/outputs/design-claude.json", ".agent/workstreams/ws-20260911T231749Z-GCTW/artifacts/context-governance/occurrences/node-design-claude_design-036-run-1789171318596/binding.json", ".agent/workstreams/ws-20260911T231749Z-GCTW/artifacts/contract-failures/node-design-claude_design-036.json", ".agent/workstreams/ws-20260911T231749Z-GCTW/artifacts/contract-failures/node-design-claude_design-036.md" ],
+  "result" : {
+    "run_id" : "run-1789171318596",
+    "run_metadata" : ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171318596/run.json",
+    "agent" : "claude",
+    "session" : "claude-main-ws-20260911T231749Z-GCTW-run-1789171318596",
+    "exit_code" : 0,
+    "transcript_ref" : ".agent/workstreams/ws-20260911T231749Z-GCTW/runs/run-1789171318596/outputs/design-claude.transcript.log",
+    "output_complete" : true,
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20260911T231749Z-GCTW/artifacts/context-governance/occurrences/node-design-claude_design-036-run-1789171318596/binding.json",
+    "repository_fact_binding_sha256" : "c8ccb3d5764478e1729b0f79766990f2be02e22125ce52d667cfd8826886ed70",
+    "process_usability" : "EXITED_ZERO",
+    "adapter_signals" : [ ],
+    "reason" : "AGENT_OUTPUT_CONTRACT_VIOLATION",
+    "contract_node_id" : "design.claude_design",
+    "contract_required_keys" : [ "decision", "summary" ],
+    "contract_allowed_decisions" : [ "READY_FOR_ARCH_REVIEW" ],
+    "parse_error" : {
+      "details" : {
+        "errors" : [ "AUTHORED_RESPONSE_ID_INVALID" ]
+      },
+      "code" : "AGENT_RESULT_CONTRACT_VIOLATION",
+      "message" : "AgentResultEnvelope failed contract validation: [AUTHORED_RESPONSE_ID_INVALID]"
+    },
+    "contract_failure_diagnostic_ref" : ".agent/workstreams/ws-20260911T231749Z-GCTW/artifacts/contract-failures/node-design-claude_design-036.json",
+    "contract_failure_diagnostic_markdown_ref" : ".agent/workstreams/ws-20260911T231749Z-GCTW/artifacts/contract-failures/node-design-claude_design-036.md",
+    "message" : "AgentResultEnvelope failed contract validation: [AUTHORED_RESPONSE_ID_INVALID]",
+    "agent_execution_result_contract" : {
+      "present" : true,
+      "valid" : false,
+      "decision" : "",
+      "summary" : "",
+      "validationError" : "AgentResultEnvelope failed contract validation: [AUTHORED_RESPONSE_ID_INVALID]"
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "design_result",
+      "required" : true,
+      "present" : false,
+      "valid" : false,
+      "path" : "",
+      "errorCode" : "AGENT_RESULT_CONTRACT_VIOLATION",
+      "errorMessage" : "AgentResultEnvelope failed contract validation: [AUTHORED_RESPONSE_ID_INVALID]"
+    } ],
+    "agent_execution_outcome" : {
+      "status" : "OUTPUT_INCOMPLETE",
+      "primaryReason" : "agent_result_missing_or_invalid",
+      "nodeMaySucceed" : false,
+      "retryPolicy" : "MANUAL_ONLY",
+      "recoveryCategory" : "OUTPUT_INCOMPLETE",
+      "operatorMessage" : "The final ACP assistant message did not contain a valid AgentResultEnvelope.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789171318542-4d480c87",
+  "startedAt" : "2026-09-12T00:01:58.580545Z",
+  "finishedAt" : "2026-09-12T00:07:59.874219Z"
+}

@@ -1,0 +1,9 @@
+{
+  "user_message": "批准",
+  "in_reply_to": "当前GOAL需求批准请求：增加90天累计资金费率追平阈值，服务计算/CLI展示，证据不足不产数；不改原建议、不扩交易/Web。",
+  "gate": "gate-node-gate-human_requirement_review-006",
+  "subject_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793026771764/outputs/intake-claude-brainstorm.contract.json",
+  "subject_sha256": "a3f1b1e0eddc12720355d7db51b4b59b7c17ec61519b40009dc80154266cb772",
+  "scope": "GOAL only; not EXECUTION or delivery/commit delegation",
+  "recorded_at": "2026-10-26T23:10:43.327792+08:00"
+}

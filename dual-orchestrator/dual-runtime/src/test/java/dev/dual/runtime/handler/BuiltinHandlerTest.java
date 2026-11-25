@@ -38,12 +38,12 @@ class BuiltinHandlerTest {
     @Test
     void humanGateReturnsWaitingResult() throws Exception {
         var handler = new HumanReviewGateHandler();
-        var result = handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        var result = handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 "ws",
                 gateDefinition(),
-                node("gate.human_design_approval", NodeKind.GATE, "human.review"), "READY"
-        ));
+                node("gate.human_design_approval", NodeKind.GATE, "human.review"),
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.WAITING, result.status());
         assertEquals("open", result.outcome());
@@ -54,11 +54,16 @@ class BuiltinHandlerTest {
     void configuredHumanGateFailsBeforePublishingPacketWithoutContractQualification() {
         var definition = new NodeDefinition(
                 "gate.human_design_approval", NodeKind.GATE, "human.review",
-                Map.of("requires_approved_task_contract", true));
+                Map.of("required_contract_phase", "EXECUTION"));
         var gate = node("gate.human_design_approval", NodeKind.GATE, "human.review");
 
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(tempDir, "ws", definition, gate, "READY")));
+                new GateHandler.GateContext(tempDir,
+                "ws",
+                definition,
+                gate,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
         assertFalse(Files.exists(tempDir.resolve(".agent/workstreams/ws/reviews")));
     }
 
@@ -74,8 +79,12 @@ class BuiltinHandlerTest {
 
         for (var definition : definitions) {
             var instance = node(definition.id(), NodeKind.GATE, "human.review");
-            var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
-                    tempDir, "ws", definition, instance, "READY"));
+            var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(tempDir,
+                "ws",
+                definition,
+                instance,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
             assertEquals(List.of("approve", "revise"), result.result().get("allowed_actions"));
             var packetBase = tempDir.resolve(".agent/workstreams/ws/reviews/" + instance.nodeInstanceId());
@@ -99,12 +108,12 @@ class BuiltinHandlerTest {
         var gateNode = node("gate.human_design_approval", NodeKind.GATE, "human.review", List.of(inputRef));
 
         var handler = new HumanReviewGateHandler();
-        var result = handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        var result = handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode, "READY"
-        ));
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var packetJsonRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".json";
@@ -153,8 +162,12 @@ class BuiltinHandlerTest {
                 """);
         var gateNode = node("gate.human_requirement_review", NodeKind.GATE, "human.review", List.of(reviewRef));
 
-        new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
-                tempDir, "ws", gateDefinition(), gateNode, "READY"));
+        new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var packetDir = tempDir.resolve(".agent/workstreams/ws/reviews");
         var markdown = Files.readString(packetDir.resolve(gateNode.nodeInstanceId() + ".md"));
@@ -185,7 +198,12 @@ class BuiltinHandlerTest {
                 }
                 """.formatted(inputRef), StandardCharsets.UTF_8);
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
-        var context = new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gateNode, "READY");
+        var context = new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger());
 
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(context));
         assertFalse(Files.exists(tempDir.resolve(
@@ -213,8 +231,12 @@ class BuiltinHandlerTest {
                         "max_revisions", 1,
                         "current_revision_count", 1));
 
-        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
-                tempDir, "ws", gateDefinition(), gateNode, "BLOCKED"));
+        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode,
+                "BLOCKED",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.WAITING, result.status());
         var packet = Files.readString(tempDir.resolve(
@@ -237,8 +259,12 @@ class BuiltinHandlerTest {
         var gateNode = node(
                 "gate.human_design_approval", NodeKind.GATE, "human.review", List.of(inputRef));
 
-        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
-                tempDir, "ws", gateDefinition(), gateNode, "BLOCKED"));
+        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode,
+                "BLOCKED",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.WAITING, result.status());
     }
@@ -279,7 +305,12 @@ class BuiltinHandlerTest {
                     List.of(inputRef),
                     invalidResult);
             assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                    new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gateNode, "BLOCKED")));
+                    new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode,
+                "BLOCKED",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
         }
         assertFalse(Files.exists(tempDir.resolve(
                 ".agent/workstreams/ws/reviews/node-gate-human_implementation_repair.json")));
@@ -340,6 +371,7 @@ class BuiltinHandlerTest {
         Files.writeString(evidenceDir.resolve("diff.stat"), "1 file changed, 12 insertions(+)\n", StandardCharsets.UTF_8);
         Files.writeString(deliveryDir.resolve("pr-body.md"), "# PR Body\n\nVerification complete.\n", StandardCharsets.UTF_8);
 
+        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws");
         var inputRef = writeOutput("acceptance-codex-review.md", """
                 # Codex Acceptance
 
@@ -361,12 +393,12 @@ class BuiltinHandlerTest {
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
 
         var handler = new HumanReviewGateHandler();
-        handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 "ws",
-                gateDefinition(),
-                gateNode, "READY"
-        ));
+                new NodeDefinition("gate.human_acceptance", NodeKind.GATE, "human.review", Map.of("required_contract_phase", "EXECUTION")),
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
@@ -374,9 +406,9 @@ class BuiltinHandlerTest {
         assertTrue(markdown.contains("## Operator Guidance"));
         assertTrue(markdown.contains("Recommended Action: approve"));
         assertTrue(markdown.contains("Improve treatment record empty state"));
-        assertTrue(markdown.contains("## Requirement Resolution"));
-        assertTrue(markdown.contains("Should review be mandatory?"));
-        assertTrue(markdown.contains("Yes, mandatory review was approved."));
+        assertFalse(markdown.contains("## Requirement Resolution"), "this GOAL has no negotiated questions; loose legacy resolution is not evidence");
+        assertFalse(markdown.contains("Should review be mandatory?"));
+        assertFalse(markdown.contains("Yes, mandatory review was approved."));
         assertTrue(markdown.contains("ACCEPT_WITH_NOTES"));
         assertTrue(markdown.contains("Implementation satisfies the contract"));
         assertTrue(markdown.contains("WeChat UI was not manually exercised"));
@@ -419,12 +451,12 @@ class BuiltinHandlerTest {
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
 
         var handler = new HumanReviewGateHandler();
-        handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode, "READY"
-        ));
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
@@ -457,12 +489,12 @@ class BuiltinHandlerTest {
 
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
         var failure = assertThrows(IllegalStateException.class, () ->
-                new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
-                        tempDir,
-                        "ws",
-                        gateDefinition(),
-                        gateNode, "READY"
-                )));
+                new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
 
         assertTrue(failure.getMessage().contains("lineage"));
         assertFalse(Files.exists(tempDir.resolve(
@@ -495,12 +527,12 @@ class BuiltinHandlerTest {
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
 
         var handler = new HumanReviewGateHandler();
-        handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode, "READY"
-        ));
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
@@ -540,12 +572,12 @@ class BuiltinHandlerTest {
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
 
         var handler = new HumanReviewGateHandler();
-        handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode, "READY"
-        ));
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
@@ -582,12 +614,12 @@ class BuiltinHandlerTest {
         var gateNode = node("gate.human_acceptance", NodeKind.GATE, "human.review", withDeliveryCandidate(inputRef));
 
         var handler = new HumanReviewGateHandler();
-        handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode, "READY"
-        ));
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
@@ -618,12 +650,12 @@ class BuiltinHandlerTest {
         var gateNode = node("gate.human_requirement_review", NodeKind.GATE, "human.review", List.of(inputRef));
 
         var handler = new HumanReviewGateHandler();
-        handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode, "READY"
-        ));
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
@@ -658,12 +690,12 @@ class BuiltinHandlerTest {
         ));
 
         var handler = new HumanReviewGateHandler();
-        handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode, "READY"
-        ));
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
@@ -685,12 +717,12 @@ class BuiltinHandlerTest {
                 List.of("../outside-review-secret.md"));
 
         var handler = new HumanReviewGateHandler();
-        handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode, "READY"
-        ));
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
@@ -718,12 +750,12 @@ class BuiltinHandlerTest {
         var gateNode = node("gate.human_requirement_review", NodeKind.GATE, "human.review", List.of(inputRef));
 
         var handler = new HumanReviewGateHandler();
-        handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 "ws",
                 gateDefinition(),
-                gateNode, "READY"
-        ));
+                gateNode,
+                "READY",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var packetRef = ".agent/workstreams/ws/reviews/" + gateNode.nodeInstanceId() + ".md";
         var markdown = Files.readString(tempDir.resolve(packetRef), StandardCharsets.UTF_8);
@@ -744,31 +776,15 @@ class BuiltinHandlerTest {
 
     @Test
     void reviewDecisionRoutesFromContractSidecarInputRef() throws Exception {
-        var output = writeOutput("codex-review.contract.json", """
-                {
-                  "artifact_type": "agent_output_contract",
-                  "node_id": "plan.codex_plan_review",
-                  "decision": "READY_TO_IMPLEMENT",
-                  "summary": "plan is ready",
-                  "control": {
-                    "decision": "READY_TO_IMPLEMENT",
-                    "summary": "plan is ready"
-                  }
-                }
-                """);
-        var handler = new ReviewDecisionHandler();
-        var plan = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("plan.decision"),
-                node("plan.decision", NodeKind.DECISION, "review.decision", List.of(output))
-        ));
-
+        var fixture = new AuthoredStageSequenceTest.Fixture(tempDir, "README.md", AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, "ws");
+        var context = fixture.before("plan.decision");
+        var plan = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(tempDir, "ws",
+                context.definition(), context.instance(), context.ledger()));
         assertEquals("READY_TO_IMPLEMENT", plan.outcome());
         assertEquals(NodeStatus.COMPLETED, plan.status());
         assertEquals("contract-sidecar", plan.result().get("source"));
-        assertEquals(List.of(output), plan.outputRefs(),
-                "decision nodes must preserve the review artifact so revision routes can pass feedback to the next agent");
+        assertTrue(plan.result().containsKey("reviewed_candidate"));
+        assertEquals(context.instance().inputRefs(), plan.outputRefs());
     }
 
     @Test
@@ -785,9 +801,7 @@ class BuiltinHandlerTest {
                       "missing_evidence": ["External device verification record"]
                     }
                     """.formatted(needsCode ? "[\"Correct transaction rollback\"]" : "[]"));
-            var result = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(
-                    tempDir, "ws", decisionDefinition("implement.self_test_decision"),
-                    node("implement.self_test_decision", NodeKind.DECISION, "review.decision", List.of(output))));
+            var result = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("implement.self_test_decision"), node("implement.self_test_decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
             assertEquals(NodeStatus.COMPLETED, result.status());
             assertEquals(needsCode ? "IMPLEMENTATION_REPAIR" : "HUMAN_REVIEW",
                     result.result().get("continuation_kind"));
@@ -811,12 +825,7 @@ class BuiltinHandlerTest {
                 }
                 """);
 
-        var result = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("implement.self_test_decision"),
-                node("implement.self_test_decision", NodeKind.DECISION, "review.decision", List.of(output))
-        ));
+        var result = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("implement.self_test_decision"), node("implement.self_test_decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("SELF_TEST_INCOMPLETE", result.outcome());
@@ -840,11 +849,7 @@ class BuiltinHandlerTest {
         json.put("workstream_id", "ws-other");
         mapper.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), json);
 
-        var result = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("plan.decision"),
-                node("plan.decision", NodeKind.DECISION, "review.decision", List.of(output))));
+        var result = new ReviewDecisionHandler().evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("plan.decision"), node("plan.decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("INVALID_CONTRACT_SIDECAR", result.outcome());
@@ -874,12 +879,7 @@ class BuiltinHandlerTest {
                 }
                 """);
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("intake.decision"),
-                node("intake.decision", NodeKind.DECISION, "review.decision", List.of(output, sidecar))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("intake.decision"), node("intake.decision", NodeKind.DECISION, "review.decision", List.of(output, sidecar)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("READY_FOR_PRODUCT_REVIEW", result.outcome());
@@ -890,12 +890,7 @@ class BuiltinHandlerTest {
     void reviewDecisionFailsWhenContractSidecarIsMissing() throws Exception {
         var output = writeOutput("codex-review.md", "# Review\nNo control block.\n");
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("intake.decision"),
-                node("intake.decision", NodeKind.DECISION, "review.decision", List.of(output))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("intake.decision"), node("intake.decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("MISSING_CONTRACT_SIDECAR", result.outcome());
@@ -911,12 +906,7 @@ class BuiltinHandlerTest {
                 }
                 """);
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("design.decision"),
-                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("design.decision"), node("design.decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("INVALID_CONTRACT_SIDECAR", result.outcome());
@@ -939,12 +929,7 @@ class BuiltinHandlerTest {
                 }
                 """);
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("design.decision"),
-                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("design.decision"), node("design.decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("INVALID_DECISION", result.outcome());
@@ -960,12 +945,7 @@ class BuiltinHandlerTest {
                 ```
                 """);
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("design.decision"),
-                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("design.decision"), node("design.decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("MISSING_CONTRACT_SIDECAR", result.outcome());
@@ -989,12 +969,7 @@ class BuiltinHandlerTest {
                 }
                 """);
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("design.decision"),
-                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output, sidecar))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("design.decision"), node("design.decision", NodeKind.DECISION, "review.decision", List.of(output, sidecar)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("NEEDS_REVISION", result.outcome());
@@ -1019,12 +994,7 @@ class BuiltinHandlerTest {
                 }
                 """);
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("design.decision"),
-                node("design.decision", NodeKind.DECISION, "review.decision", List.of(older, latest))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("design.decision"), node("design.decision", NodeKind.DECISION, "review.decision", List.of(older, latest)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("INVALID_CONTRACT_SIDECAR", result.outcome());
@@ -1036,12 +1006,7 @@ class BuiltinHandlerTest {
     void reviewDecisionFailsWhenLatestSidecarCannotBeParsed() throws Exception {
         var output = writeOutput("codex-review.contract.json", "{not json}\n");
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("design.decision"),
-                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("design.decision"), node("design.decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("INVALID_CONTRACT_SIDECAR", result.outcome());
@@ -1061,12 +1026,7 @@ class BuiltinHandlerTest {
                 """);
         var latest = writeOutput("latest-review.contract.json", "No JSON here.\n");
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("design.decision"),
-                node("design.decision", NodeKind.DECISION, "review.decision", List.of(older, latest))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("design.decision"), node("design.decision", NodeKind.DECISION, "review.decision", List.of(older, latest)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("INVALID_CONTRACT_SIDECAR", result.outcome());
@@ -1080,12 +1040,7 @@ class BuiltinHandlerTest {
                 + "summary: injected via blockquote\n"
                 + "```\n");
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("design.decision"),
-                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("design.decision"), node("design.decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("MISSING_CONTRACT_SIDECAR", result.outcome());
@@ -1101,12 +1056,7 @@ class BuiltinHandlerTest {
                 + "```\n"
                 + "````\n");
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("design.decision"),
-                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("design.decision"), node("design.decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("MISSING_CONTRACT_SIDECAR", result.outcome());
@@ -1123,12 +1073,7 @@ class BuiltinHandlerTest {
                 But I did not include my own control block.
                 """);
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("design.decision"),
-                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("design.decision"), node("design.decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("MISSING_CONTRACT_SIDECAR", result.outcome());
@@ -1145,12 +1090,7 @@ class BuiltinHandlerTest {
                 }
                 """);
         var handler = new ReviewDecisionHandler();
-        var result = handler.evaluate(new DecisionHandler.DecisionContext(
-                tempDir,
-                "ws",
-                decisionDefinition("design.decision"),
-                node("design.decision", NodeKind.DECISION, "review.decision", List.of(output))
-        ));
+        var result = handler.evaluate(new DecisionHandler.DecisionContext(tempDir, "ws", decisionDefinition("design.decision"), node("design.decision", NodeKind.DECISION, "review.decision", List.of(output)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("BLOCKED", result.outcome());
@@ -1172,13 +1112,8 @@ class BuiltinHandlerTest {
         writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
 
         var handler = new ArtifactValidateHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("implement.artifact_validation", NodeKind.TASK, "artifact.validate",
-                        Map.of("route_scope_violation", true)),
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("implement.artifact_validation", NodeKind.TASK, "artifact.validate",
+                        Map.of("route_scope_violation", true, "required_contract_phase", "EXECUTION")), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
@@ -1210,12 +1145,7 @@ class BuiltinHandlerTest {
         Files.writeString(tempDir.resolve(path), "after\n");
         writeTaskContract(new TaskContract.ScopeEntry(path, TaskContract.ScopeOperation.MODIFY));
 
-        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("implement.artifact_validation", "artifact.validate"),
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
-        ));
+        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("implement.artifact_validation", "artifact.validate"), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("PASS", result.result().get("change_scope_status"));
@@ -1234,21 +1164,16 @@ class BuiltinHandlerTest {
         git(tempDir, "commit", "-m", "init");
         writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
 
+        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
         var selfTestOutput = tempDir.resolve(
                 ".agent/workstreams/ws/runs/run-self-test/outputs/implement-claude-self-test.json");
         Files.createDirectories(selfTestOutput.getParent());
         writeAgentOutputWithSidecar(selfTestOutput, "SELF_TEST_COMPLETE: node --test passed.");
         var selfTestSidecarRef = workspaceRef(AgentOutputContractSidecar.pathFor(selfTestOutput));
-        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
 
         var handler = new ArtifactValidateHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("implement.artifact_validation", "artifact.validate"),
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate", List.of(
-                        workspaceRef(selfTestOutput), selfTestSidecarRef))
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("implement.artifact_validation", "artifact.validate"), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate", List.of(
+                        workspaceRef(selfTestOutput), selfTestSidecarRef)), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertTrue(result.outputRefs().contains(selfTestSidecarRef),
@@ -1270,38 +1195,14 @@ class BuiltinHandlerTest {
         git(tempDir, "add", "README.md", "src.txt");
         git(tempDir, "commit", "-m", "agent implementation");
 
-        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
-        var workspacesDir = workstreamDir.resolve("workspaces");
-        Files.createDirectories(workspacesDir);
-        Files.writeString(workstreamDir.resolve("workstream.json"), """
-                {
-                  "schemaVersion": 1,
-                  "workstreamId": "ws",
-                  "primaryWorkspaceId": "wsp-test"
-                }
-                """, StandardCharsets.UTF_8);
-        Files.writeString(workspacesDir.resolve("wsp-test.json"), """
-                {
-                  "schemaVersion": 1,
-                  "workspaceId": "wsp-test",
-                  "workstreamId": "ws",
-                  "branch": "ai/ws",
-                  "baseBranch": "master",
-                  "baseCommit": "%s"
-                }
-                """.formatted(baseCommit), StandardCharsets.UTF_8);
+        writeWorkspaceBase(baseCommit);
         writeTaskContract(
                 new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY),
                 new TaskContract.ScopeEntry("src.txt", TaskContract.ScopeOperation.CREATE)
         );
 
         var handler = new ArtifactValidateHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("implement.artifact_validation", "artifact.validate"),
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("implement.artifact_validation", "artifact.validate"), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals(true, result.result().get("has_changes"));
@@ -1333,12 +1234,7 @@ class BuiltinHandlerTest {
         writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.CREATE));
 
         var handler = new ArtifactValidateHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("implement.artifact_validation", "artifact.validate"),
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("implement.artifact_validation", "artifact.validate"), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals(1, result.result().get("changed_file_count"));
@@ -1367,12 +1263,7 @@ class BuiltinHandlerTest {
         ));
 
         var handler = new ArtifactValidateHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("implement.artifact_validation", "artifact.validate"),
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("implement.artifact_validation", "artifact.validate"), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals(1, result.result().get("hygiene_warning_count"));
@@ -1387,14 +1278,12 @@ class BuiltinHandlerTest {
 
     @Test
     void artifactValidationFailsClosedWhenGitEvidenceIsUnavailable() throws Exception {
+        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.CREATE));
+        // Approval fixture now has a real repository; remove Git availability only after preparing it.
+        Files.move(tempDir.resolve(".git"), tempDir.resolve(".agent/git-unavailable-fixture"));
         var handler = new ArtifactValidateHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("implement.artifact_validation", NodeKind.TASK, "artifact.validate",
-                        Map.of("route_scope_violation", true)),
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("implement.artifact_validation", NodeKind.TASK, "artifact.validate",
+                        Map.of("route_scope_violation", true, "required_contract_phase", "EXECUTION")), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("CHANGE_SCOPE_EVIDENCE_UNAVAILABLE", result.outcome());
@@ -1423,12 +1312,7 @@ class BuiltinHandlerTest {
         git(tempDir, "commit", "-m", "implementation");
         writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
 
-        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("implement.artifact_validation", "artifact.validate"),
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
-        ));
+        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("implement.artifact_validation", "artifact.validate"), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("CHANGE_SCOPE_EVIDENCE_UNAVAILABLE", result.outcome());
@@ -1447,27 +1331,19 @@ class BuiltinHandlerTest {
         writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
         Files.writeString(tempDir.resolve("README.md"), "after\n");
 
-        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("implement.artifact_validation", "artifact.validate"),
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
-        ));
+        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("implement.artifact_validation", "artifact.validate"), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
-        assertEquals("CHANGE_SCOPE_EVIDENCE_UNAVAILABLE", result.outcome());
-        assertEquals("UNAVAILABLE", result.result().get("change_scope_status"));
-        assertTrue(result.errorMessage().contains("TaskContract artifact is missing"));
+        assertEquals(TaskContractProjectionVerifier.FAILURE_OUTCOME, result.outcome());
+        assertTrue(result.outputRefs().isEmpty());
     }
 
     @Test
     void configuredControlHandlersFailBeforeEvidenceSideEffectsWithoutContractQualification() throws Exception {
         var artifactDefinition = new NodeDefinition(
                 "implement.artifact_validation", NodeKind.TASK, "artifact.validate",
-                Map.of("requires_approved_task_contract", true));
-        var artifactResult = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
-                tempDir, "ws", artifactDefinition,
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")));
+                Map.of("required_contract_phase", "EXECUTION"));
+        var artifactResult = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(tempDir, "ws", artifactDefinition, node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, artifactResult.status());
         assertEquals(TaskContractProjectionVerifier.FAILURE_OUTCOME, artifactResult.outcome());
@@ -1475,10 +1351,8 @@ class BuiltinHandlerTest {
 
         var failureDefinition = new NodeDefinition(
                 "acceptance.failure_classify", NodeKind.TASK, "acceptance.failure_classify",
-                Map.of("requires_approved_task_contract", true));
-        var failureResult = new FailureClassifyHandler().execute(new TaskHandler.TaskContext(
-                tempDir, "ws", failureDefinition,
-                node("acceptance.failure_classify", NodeKind.TASK, "acceptance.failure_classify")));
+                Map.of("required_contract_phase", "EXECUTION"));
+        var failureResult = new FailureClassifyHandler().execute(new TaskHandler.TaskContext(tempDir, "ws", failureDefinition, node("acceptance.failure_classify", NodeKind.TASK, "acceptance.failure_classify"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, failureResult.status());
         assertEquals(TaskContractProjectionVerifier.FAILURE_OUTCOME, failureResult.outcome());
@@ -1499,12 +1373,7 @@ class BuiltinHandlerTest {
         Files.writeString(tempDir.resolve("unexpected.txt"), "outside contract\n");
         writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
 
-        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("implement.artifact_validation", "artifact.validate"),
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
-        ));
+        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("implement.artifact_validation", "artifact.validate"), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("CHANGE_SCOPE_VIOLATION", result.outcome());
@@ -1517,29 +1386,19 @@ class BuiltinHandlerTest {
 
     @Test
     void configuredArtifactValidationRoutesViolationWithOccurrenceEvidence() throws Exception {
-        git(tempDir, "init");
-        git(tempDir, "config", "user.email", "dual@example.test");
-        git(tempDir, "config", "user.name", "Dual Test");
-        Files.writeString(tempDir.resolve("README.md"), "before\n");
-        git(tempDir, "add", "README.md");
-        git(tempDir, "commit", "-m", "init");
-        writeWorkspaceBase(gitOutput(tempDir, "rev-parse", "HEAD").trim());
-        Files.writeString(tempDir.resolve("unexpected.txt"), "outside contract\n");
-        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
-        var definition = new NodeDefinition(
-                "implement.artifact_validation", NodeKind.TASK, "artifact.validate",
-                Map.of("route_scope_violation", true));
-        var instance = node("implement.artifact_validation", NodeKind.TASK, "artifact.validate");
-
-        var result = new ArtifactValidateHandler().execute(
-                new TaskHandler.TaskContext(tempDir, "ws", definition, instance));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("CHANGE_SCOPE_VIOLATION", result.outcome());
-        assertEquals("CHANGE_SCOPE_VIOLATION", result.result().get("change_scope_disposition"));
-        var occurrenceRef = String.valueOf(result.result().get("change_scope_evaluation_ref"));
-        assertTrue(result.outputRefs().contains(occurrenceRef));
-        assertTrue(occurrenceRef.contains("/occurrences/" + instance.nodeInstanceId() + "/"));
+        var f = new AcceptanceRepairSequenceTest.Fixture(tempDir, "SCOPE_ADDITION", "tool.py");
+        f.until("implement.artifact_validation");
+        var id = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst();
+        f.step();
+        var node = f.ledger.loadNode(f.paths, id);
+        assertEquals(NodeStatus.COMPLETED, node.status());
+        assertEquals("CHANGE_SCOPE_VIOLATION", node.result().get("change_scope_disposition"));
+        var occurrenceRef = String.valueOf(node.result().get("change_scope_evaluation_ref"));
+        assertTrue(node.outputRefs().contains(occurrenceRef));
+        assertTrue(occurrenceRef.contains("/occurrences/" + id + "/"));
+        assertTrue(node.result().containsKey("scope_rework_baseline"));
+        f.until("gate.human_implementation_repair");
+        assertEquals("gate.human_implementation_repair", f.currentNode());
     }
 
     @Test
@@ -1556,8 +1415,12 @@ class BuiltinHandlerTest {
                         NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
         var gate = node("gate.human_implementation_repair", NodeKind.GATE, "human.review", List.of(reference.ref()));
 
-        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(
-                tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION"));
+        var result = new HumanReviewGateHandler().openOrInspect(new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gate,
+                "CHANGE_SCOPE_VIOLATION",
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.WAITING, result.status());
         var packet = Files.readString(tempDir.resolve(String.valueOf(result.result().get("review_packet_json"))));
@@ -1566,32 +1429,62 @@ class BuiltinHandlerTest {
                 scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
                         NodeStatus.FAILED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+                new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gate,
+                "CHANGE_SCOPE_VIOLATION",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
         mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
                 scopeProducer(sourceId, reference, "wrong.validation", "artifact.validate",
                         NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+                new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gate,
+                "CHANGE_SCOPE_VIOLATION",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
         mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
                 scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
                         NodeStatus.COMPLETED, "iter-002", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+                new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gate,
+                "CHANGE_SCOPE_VIOLATION",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
         mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
                 scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
                         NodeStatus.COMPLETED, "iter-001", List.of(), "CHANGE_SCOPE_VIOLATION"));
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+                new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gate,
+                "CHANGE_SCOPE_VIOLATION",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
         mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
                 scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
                         NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "wrong"));
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+                new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gate,
+                "CHANGE_SCOPE_VIOLATION",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
         mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
                 scopeProducer(sourceId, reference, "implement.artifact_validation", "wrong.handler",
                         NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+                new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gate,
+                "CHANGE_SCOPE_VIOLATION",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
         mapper.writeValue(nodesDir.resolve(sourceId + ".json").toFile(),
                 scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
                         NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
@@ -1599,22 +1492,42 @@ class BuiltinHandlerTest {
         Files.writeString(sourcePath, Files.readString(sourcePath).replace(
                 reference.sha256(), "0".repeat(64)));
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+                new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gate,
+                "CHANGE_SCOPE_VIOLATION",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
         var second = ChangeScopeEvaluationArtifact.publish(tempDir, "ws", "node-second", evaluation);
         var multiple = node("gate.human_implementation_repair", NodeKind.GATE, "human.review",
                 List.of(reference.ref(), second.ref()));
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), multiple, "CHANGE_SCOPE_VIOLATION")));
+                new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                multiple,
+                "CHANGE_SCOPE_VIOLATION",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
         var stableOnly = node("gate.human_implementation_repair", NodeKind.GATE, "human.review",
                 List.of(".agent/workstreams/ws/artifacts/git-evidence/change-scope-evaluation.json"));
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), stableOnly, "CHANGE_SCOPE_VIOLATION")));
+                new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                stableOnly,
+                "CHANGE_SCOPE_VIOLATION",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
         mapper.writeValue(sourcePath.toFile(),
                 scopeProducer(sourceId, reference, "implement.artifact_validation", "artifact.validate",
                         NodeStatus.COMPLETED, "iter-001", List.of(reference.ref()), "CHANGE_SCOPE_VIOLATION"));
         Files.delete(tempDir.resolve(reference.ref()));
         assertThrows(IllegalStateException.class, () -> new HumanReviewGateHandler().openOrInspect(
-                new GateHandler.GateContext(tempDir, "ws", gateDefinition(), gate, "CHANGE_SCOPE_VIOLATION")));
+                new GateHandler.GateContext(tempDir,
+                "ws",
+                gateDefinition(),
+                gate,
+                "CHANGE_SCOPE_VIOLATION",
+                dev.dual.runtime.RuntimeTestLedger.ledger())));
     }
 
     @Test
@@ -1629,12 +1542,7 @@ class BuiltinHandlerTest {
         Files.writeString(tempDir.resolve("README.md"), "after\n");
         writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.CREATE));
 
-        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("implement.artifact_validation", "artifact.validate"),
-                node("implement.artifact_validation", NodeKind.TASK, "artifact.validate")
-        ));
+        var result = new ArtifactValidateHandler().execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("implement.artifact_validation", "artifact.validate"), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("CHANGE_SCOPE_VIOLATION", result.outcome());
@@ -1659,20 +1567,15 @@ class BuiltinHandlerTest {
         Files.writeString(evidence, "{\"available\":true}\n");
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("context.design_codex_arch_review", NodeKind.TASK, "context.build_package", Map.of(
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("context.design_codex_arch_review", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "design.codex_arch_review",
                         "purpose", "Package design for Codex."
-                )),
-                node(
+                )), node(
                         "context.design_codex_arch_review",
                         NodeKind.TASK,
                         "context.build_package",
                         List.of(".agent/workstreams/ws/runs/run-001/outputs/design.md", designRef)
-                )
-        ));
+                ), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
@@ -1692,7 +1595,7 @@ class BuiltinHandlerTest {
 
     @Test
     void contextPackageIncludesRoutedAgentOutputAfterHumanGate() throws Exception {
-        AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
+        var authorized = AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var planOutput = workstreamDir.resolve("runs/run-002/outputs/plan-codex-review.json");
         Files.createDirectories(planOutput.getParent());
@@ -1700,15 +1603,9 @@ class BuiltinHandlerTest {
         writeAgentOutputWithSidecar(planOutput, "READY_TO_IMPLEMENT with one note.");
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
-                        "target_node", "implement.claude_implement"
-                )),
-                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of(
-                        workspaceRef(planOutput)))
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
+                        "required_contract_phase", "EXECUTION", "target_node", "implement.claude_implement"
+                )), contextDisplayNode(authorized.instance(), List.of(workspaceRef(planOutput))), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Implement approved plan."));
@@ -1718,7 +1615,7 @@ class BuiltinHandlerTest {
 
     @Test
     void contextPackageUsesProfileToKeepImplementationContextFocused() throws Exception {
-        AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
+        var authorized = AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var planOutput = workstreamDir.resolve("runs/run-002/outputs/plan-codex-review.json");
         var evidence = workstreamDir.resolve("artifacts/git-evidence/git-evidence.json");
@@ -1730,16 +1627,10 @@ class BuiltinHandlerTest {
         Files.writeString(evidence.getParent().resolve("diff.stat"), "1 file changed\n");
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
-                        "target_node", "implement.claude_implement",
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
+                        "required_contract_phase", "EXECUTION", "target_node", "implement.claude_implement",
                         "profile", "implementation"
-                )),
-                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of(
-                        workspaceRef(planOutput)))
-        ));
+                )), contextDisplayNode(authorized.instance(), List.of(workspaceRef(planOutput))), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals("implementation", result.result().get("profile"));
         assertTrue(((List<?>) result.result().get("sections")).contains("recent_agent_outputs"));
@@ -1763,19 +1654,14 @@ class BuiltinHandlerTest {
         Files.writeString(output, "abcdefghijklmnopqrstuvwxyz\n");
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("context.custom", NodeKind.TASK, "context.build_package", Map.of(
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("context.custom", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "custom.agent",
                         "profile", "implementation",
                         "include_sections", List.of("requirement", "input_artifacts"),
                         "max_snippet_chars", 10,
                         "max_recent_agent_outputs", 1
-                )),
-                node("context.custom", NodeKind.TASK, "context.build_package",
-                        List.of(".agent/workstreams/ws/artifacts/long.txt"))
-        ));
+                )), node("context.custom", NodeKind.TASK, "context.build_package",
+                        List.of(".agent/workstreams/ws/artifacts/long.txt")), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("Included Sections: requirement, input_artifacts"));
@@ -1789,7 +1675,7 @@ class BuiltinHandlerTest {
 
     @Test
     void contextPackageIncludesHumanGateFeedbackFromNodeResult() throws Exception {
-        AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
+        var authorized = AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var nodesDir = workstreamDir.resolve("nodes");
         Files.createDirectories(nodesDir);
@@ -1817,25 +1703,20 @@ class BuiltinHandlerTest {
                 """);
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
-                        "target_node", "implement.claude_implement"
-                )),
-                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
+                        "required_contract_phase", "EXECUTION", "target_node", "implement.claude_implement"
+                )), contextDisplayNode(authorized.instance(), List.of()), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("## Human Feedback"));
-        assertTrue(markdown.contains("gate.human_design_approval"));
-        assertTrue(markdown.contains("Action: revise"));
-        assertTrue(markdown.contains("Codex Must Fix: narrow the implementation scope before coding."));
+        assertTrue(markdown.contains("gate.contract_review"));
+        assertTrue(markdown.contains("Fixture approves this candidate"));
+        assertFalse(markdown.contains("Codex Must Fix: narrow the implementation scope before coding."), "unbound historical notes must not become current approval feedback");
     }
 
     @Test
     void contextPackageIncludesRecentWorkflowIterationHistory() throws Exception {
-        AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
+        var authorized = AuthoredInputFixture.before(tempDir, "ws", "implement.claude_implement", "run-implement");
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         var iterationsDir = workstreamDir.resolve("iterations");
         Files.createDirectories(iterationsDir);
@@ -1872,14 +1753,9 @@ class BuiltinHandlerTest {
                 """);
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
-                        "target_node", "implement.claude_implement"
-                )),
-                node("context.implement_claude", NodeKind.TASK, "context.build_package", List.of())
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("context.implement_claude", NodeKind.TASK, "context.build_package", Map.of(
+                        "required_contract_phase", "EXECUTION", "target_node", "implement.claude_implement"
+                )), contextDisplayNode(authorized.instance(), List.of()), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("## Iteration History"));
@@ -1899,17 +1775,12 @@ class BuiltinHandlerTest {
                 "Start the next batch by reviewing A6 before writing code. Keep scope narrow.");
 
         var handler = new PromptGenerateNextStageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"),
-                node(
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"), node(
                         "stage.generate_next_prompt",
                         NodeKind.TASK,
                         "prompt.generate_next_stage",
                         List.of(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.json")
-                )
-        ));
+                ), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var promptRef = ".agent/workstreams/ws/artifacts/next-stage/next-stage-prompt.md";
@@ -1954,17 +1825,12 @@ class BuiltinHandlerTest {
                 tempDir, "ws", handoff.resolveSibling("stage-claude-handoff.contract.json"));
 
         var handler = new PromptGenerateNextStageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"),
-                node(
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"), node(
                         "stage.generate_next_prompt",
                         NodeKind.TASK,
                         "prompt.generate_next_stage",
                         List.of(".agent/workstreams/ws/runs/run-004/outputs/stage-claude-handoff.json")
-                )
-        ));
+                ), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("structured-handoff", result.result().get("mode"));
@@ -1996,17 +1862,12 @@ class BuiltinHandlerTest {
                 "Merge this completed smoke fixture change.");
 
         var handler = new PromptGenerateNextStageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"),
-                node(
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"), node(
                         "stage.generate_next_prompt",
                         NodeKind.TASK,
                         "prompt.generate_next_stage",
                         List.of(".agent/workstreams/ws/runs/run-005/outputs/stage-claude-handoff.json")
-                )
-        ));
+                ), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals(true, result.result().get("used_suggested_prompt_section"));
@@ -2034,73 +1895,19 @@ class BuiltinHandlerTest {
 
     @Test
     void finalReportHandlerGeneratesAcceptanceReport() throws Exception {
-        var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
-        var selfTest = workstreamDir.resolve("runs/run-010/outputs/implement-claude-self-test.md");
-        var acceptance = workstreamDir.resolve("runs/run-011/outputs/acceptance-codex-review.md");
-        var evidence = workstreamDir.resolve("artifacts/git-evidence/git-evidence.json");
-        Files.createDirectories(selfTest.getParent());
-        Files.createDirectories(acceptance.getParent());
-        Files.createDirectories(evidence.getParent());
-        Files.writeString(workstreamDir.resolve("requirement.md"), "Ship the accepted lifecycle batch.\n");
-        Files.writeString(selfTest, "[tool] raw self-test transcript should not appear.\n");
-        Files.writeString(selfTest.resolveSibling("implement-claude-self-test.contract.json"), """
-                {
-                  "node_id": "implement.claude_self_test_report",
-                  "decision": "SELF_TEST_COMPLETE",
-                  "stage_outcome": "READY",
-                  "summary": "Developer self-test passed.",
-                  "verification_summary": "Self-test evidence is sufficient.",
-                  "evidence": ["unit tests passed"],
-                  "missing_evidence": [],
-                  "must_fix": [],
-                  "open_risks": [],
-                  "acceptance_notes": []
-                }
-                """);
-        Files.writeString(acceptance, "[tool] raw acceptance transcript should not appear.\n");
-        Files.writeString(acceptance.resolveSibling("acceptance-codex-review.contract.json"), """
-                {
-                  "node_id": "acceptance.codex_verifier_review",
-                  "decision": "ACCEPT",
-                  "stage_outcome": "ACCEPTED",
-                  "summary": "Codex accepts the implementation.",
-                  "verification_summary": "Acceptance evidence is sufficient.",
-                  "evidence": ["diff matches contract"],
-                  "missing_evidence": [],
-                  "must_fix": [],
-                  "open_risks": [],
-                  "acceptance_notes": []
-                }
-                """);
-        Files.writeString(evidence, "{\"available\":true,\"hasChanges\":true}\n");
-        Files.writeString(evidence.getParent().resolve("changed-files.txt"), "README.md\n");
-        var lineage = CompletionEvidenceLineageFixture.prepare(tempDir, "ws");
-
-        var handler = new ReportGenerateFinalHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("acceptance.generate_final_report", "report.generate_final"),
-                lineage.reportNode()
-        ));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        assertEquals("completed", result.outcome());
-        assertEquals(".agent/workstreams/ws/reports/iter-001-final-report.md", result.result().get("report_path"));
-        assertTrue(result.outputRefs().contains(".agent/workstreams/ws/reports/latest-final-report.md"));
-
-        var markdown = Files.readString(tempDir.resolve(".agent/workstreams/ws/reports/iter-001-final-report.md"));
+        var f = new AcceptanceRepairSequenceTest.Fixture(tempDir, "IMPLEMENTATION_BUG", "tool.py");
+        f.acceptanceCount = 1; // This sequence's independent verifier accepts its first candidate.
+        f.until("acceptance.generate_final_report");
+        var id = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst();
+        f.step();
+        var node = f.ledger.loadNode(f.paths, id);
+        assertEquals(NodeStatus.COMPLETED, node.status());
+        var markdown = Files.readString(f.root.resolve(node.result().get("report_path").toString()));
         assertTrue(markdown.contains("# Dual Final Report"));
-        assertTrue(markdown.contains("Ship the accepted lifecycle batch."));
-        assertTrue(markdown.contains("Developer self-test passed."));
-        assertTrue(markdown.contains("Codex accepts the implementation."));
-        assertTrue(markdown.contains("Stage Outcome:** ACCEPTED"));
-        assertTrue(markdown.contains("unit tests passed"));
-        assertTrue(markdown.contains("diff matches contract"));
-        assertFalse(markdown.contains("raw self-test transcript should not appear"));
-        assertFalse(markdown.contains("raw acceptance transcript should not appear"));
-        assertTrue(markdown.contains("changed-files.txt"));
-        assertTrue(markdown.contains("\"hasChanges\":true"));
+        assertTrue(markdown.contains("ACCEPTED"));
+        assertTrue(node.outputRefs().stream().anyMatch(ref -> ref.endsWith("latest-final-report.md")));
+        assertEquals(1, java.util.Collections.frequency(f.calls, "acceptance.codex_verifier_review"));
+        assertTrue(f.calls.contains("implement.claude_self_test_report"));
     }
 
     @Test
@@ -2143,12 +1950,7 @@ class BuiltinHandlerTest {
                 """.formatted(tempDir));
 
         var handler = new DeliveryPrepareHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("delivery.prepare_pr", "delivery.prepare_pr"),
-                node("delivery.prepare_pr", NodeKind.TASK, "delivery.prepare_pr")
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("delivery.prepare_pr", "delivery.prepare_pr"), node("delivery.prepare_pr", NodeKind.TASK, "delivery.prepare_pr"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals("completed", result.outcome());
@@ -2179,14 +1981,9 @@ class BuiltinHandlerTest {
         // No requirement.md written
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("ctx.no-req", NodeKind.TASK, "context.build_package", Map.of(
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("ctx.no-req", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "next.agent"
-                )),
-                node("ctx.no-req", NodeKind.TASK, "context.build_package", List.of())
-        ));
+                )), node("ctx.no-req", NodeKind.TASK, "context.build_package", List.of()), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
@@ -2200,14 +1997,9 @@ class BuiltinHandlerTest {
         Files.writeString(workstreamDir.resolve("requirement.md"), "Test.\n");
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("ctx.default", NodeKind.TASK, "context.build_package", Map.of(
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("ctx.default", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "next.agent"
-                )),
-                node("ctx.default", NodeKind.TASK, "context.build_package", List.of())
-        ));
+                )), node("ctx.default", NodeKind.TASK, "context.build_package", List.of()), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals("full", result.result().get("profile"));
         var sections = (List<?>) result.result().get("sections");
@@ -2229,17 +2021,12 @@ class BuiltinHandlerTest {
         Files.writeString(longOutput, "x".repeat(5000));
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("ctx.trunc", NodeKind.TASK, "context.build_package", Map.of(
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("ctx.trunc", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "next.agent",
                         "max_snippet_chars", 100,
                         "include_sections", List.of("requirement", "input_artifacts", "recent_agent_outputs")
-                )),
-                node("ctx.trunc", NodeKind.TASK, "context.build_package",
-                        List.of(".agent/workstreams/ws/artifacts/big.txt"))
-        ));
+                )), node("ctx.trunc", NodeKind.TASK, "context.build_package",
+                        List.of(".agent/workstreams/ws/artifacts/big.txt")), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains(".agent/workstreams/ws/artifacts/big.txt"));
@@ -2254,15 +2041,10 @@ class BuiltinHandlerTest {
         Files.writeString(workstreamDir.resolve("requirement.md"), "Missing ref test.\n");
 
         var handler = new ContextBuildPackageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                new NodeDefinition("ctx.missing", NodeKind.TASK, "context.build_package", Map.of(
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("ctx.missing", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "next.agent"
-                )),
-                node("ctx.missing", NodeKind.TASK, "context.build_package",
-                        List.of(".agent/workstreams/ws/runs/nonexistent/output.md"))
-        ));
+                )), node("ctx.missing", NodeKind.TASK, "context.build_package",
+                        List.of(".agent/workstreams/ws/runs/nonexistent/output.md")), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("artifact unavailable or not a file"));
@@ -2270,18 +2052,14 @@ class BuiltinHandlerTest {
 
     @Test
     void finalReportWithoutCompletionEvidenceFailsClosed() throws Exception {
+        writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY));
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws");
         Files.createDirectories(workstreamDir);
         // Only requirement, no runs, no git evidence
         Files.writeString(workstreamDir.resolve("requirement.md"), "Minimal report.\n");
 
         var handler = new ReportGenerateFinalHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("acceptance.generate_final_report", "report.generate_final"),
-                node("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final")
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("acceptance.generate_final_report", "report.generate_final"), node("acceptance.generate_final_report", NodeKind.TASK, "report.generate_final"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals(CompletionEvidenceLineageResolver.GOAL_NOT_CONFIGURED,
@@ -2297,13 +2075,8 @@ class BuiltinHandlerTest {
         writeHandoffSidecar(handoff, "Done with this batch.", "");
 
         var handler = new PromptGenerateNextStageHandler();
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws",
-                taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"),
-                node("stage.generate_next_prompt", NodeKind.TASK, "prompt.generate_next_stage",
-                        List.of(".agent/workstreams/ws/runs/run-050/outputs/handoff.json"))
-        ));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", taskDefinition("stage.generate_next_prompt", "prompt.generate_next_stage"), node("stage.generate_next_prompt", NodeKind.TASK, "prompt.generate_next_stage",
+                        List.of(".agent/workstreams/ws/runs/run-050/outputs/handoff.json")), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         assertEquals(false, result.result().get("used_suggested_prompt_section"));
@@ -2408,7 +2181,9 @@ class BuiltinHandlerTest {
     }
 
     private static NodeDefinition taskDefinition(String id, String handler) {
-        return new NodeDefinition(id, NodeKind.TASK, handler, Map.of());
+        return new NodeDefinition(id, NodeKind.TASK, handler,
+                java.util.Set.of("artifact.validate", "acceptance.failure_classify", "report.generate_final").contains(handler)
+                        ? Map.of("required_contract_phase", "EXECUTION") : Map.of());
     }
 
     private static dev.dual.ledger.file.NodeInstanceDocument scopeProducer(
@@ -2498,55 +2273,21 @@ class BuiltinHandlerTest {
         return List.copyOf(refs);
     }
 
-    private void writeTaskContract(TaskContract.ScopeEntry... entries) throws Exception {
-        var artifactsDir = tempDir.resolve(".agent/workstreams/ws/artifacts");
-        Files.createDirectories(artifactsDir);
-        var contract = new TaskContract(
-                "task-ws",
-                1,
-                Instant.parse("2026-07-26T00:00:00Z"),
-                "Validate implementation changes",
-                new TaskContract.Scope(List.of(entries), List.of()),
-                List.of("The requested change is implemented", "No undeclared files are changed"),
-                List.of("Run focused tests"),
-                List.of("Keep the change bounded"),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                ContractStatus.READY_FOR_REVIEW,
-                1,
-                new TaskContract.Source("requirement.md", "test")
-        );
-        new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .writerWithDefaultPrettyPrinter()
-                .writeValue(artifactsDir.resolve("task-contract.json").toFile(), contract);
+    private NodeInstance contextDisplayNode(NodeInstance actual, List<String> refs) {
+        return new NodeInstance(actual.nodeInstanceId(), actual.nodeDefinitionId(), actual.kind(), actual.handlerType(),
+                actual.status(), actual.stageId(), actual.iterationId(), refs, actual.outputRefs(), actual.result(), actual.runRef(), actual.startedAt(), actual.finishedAt());
     }
 
-    private void writeWorkspaceBase(String baseCommit) throws Exception {
-        var workstreamDir = tempDir.resolve(".agent/workstreams/ws");
-        var workspacesDir = workstreamDir.resolve("workspaces");
-        Files.createDirectories(workspacesDir);
-        Files.writeString(workstreamDir.resolve("workstream.json"), """
-                {
-                  "schemaVersion": 1,
-                  "workstreamId": "ws",
-                  "primaryWorkspaceId": "wsp-test"
-                }
-                """);
-        Files.writeString(workspacesDir.resolve("wsp-test.json"), """
-                {
-                  "schemaVersion": 1,
-                  "workspaceId": "wsp-test",
-                  "workstreamId": "ws",
-                  "branch": "test",
-                  "baseBranch": "main",
-                  "baseCommit": "%s"
-                }
-                """.formatted(baseCommit));
+    private String fixtureBaseCommit;
+    private void writeTaskContract(TaskContract.ScopeEntry... entries) throws Exception {
+        var f = ApprovedExecutionTestFixture.create(tempDir, "ws", List.of(entries));
+        var path = f.paths.workstreamDir().resolve("workspaces/workspace-readiness.json");
+        var mapper = new ObjectMapper();
+        var workspace = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(path.toFile());
+        workspace.put("baseCommit", fixtureBaseCommit == null ? "" : fixtureBaseCommit);
+        mapper.writeValue(path.toFile(), workspace);
     }
+    private void writeWorkspaceBase(String baseCommit) { fixtureBaseCommit = baseCommit; }
 
     private String writeOutput(String name, String content) throws Exception {
         var path = tempDir.resolve(".agent").resolve("workstreams").resolve("ws").resolve("runs").resolve("run-001").resolve("outputs").resolve(name);

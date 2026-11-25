@@ -1,0 +1,9 @@
+{
+  "observedDate": "2026-09-29",
+  "loggedIn": true,
+  "authMethod": "oauth_token",
+  "apiProvider": "firstParty",
+  "serverAuthentication": "UNVERIFIED",
+  "credentialContentReadOrLogged": false,
+  "providerTasks": 0
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "lastProjectId" : "target-868bea16",
+  "projects" : [ {
+    "projectId" : "target-868bea16",
+    "name" : "target",
+    "repoRoot" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target",
+    "agentRunsDir" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target-agent-runs",
+    "lastOpenedAt" : "2026-10-23T00:54:32.067489Z",
+    "workstreams" : [ {
+      "workstreamId" : "ws-20261023T005431Z-9YYF",
+      "effectiveWorkdir" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+      "title" : "# 换行规范化函数",
+      "status" : "created",
+      "updatedAt" : "2026-10-23T00:54:32.067489Z"
+    } ]
+  } ]
+}

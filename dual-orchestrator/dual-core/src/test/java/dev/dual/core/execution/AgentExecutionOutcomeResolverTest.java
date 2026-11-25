@@ -14,6 +14,32 @@ class AgentExecutionOutcomeResolverTest {
     private final AgentExecutionOutcomeResolver resolver = new AgentExecutionOutcomeResolver();
 
     @Test
+    void completeArtifactsCannotInventProofThatAnUnidentifiedDeniedOperationWasOptional() {
+        var outcome = resolve(ProcessResult.nonZeroComplete(5), AgentResultContractResult.valid("SELF_TEST_COMPLETE"),
+                List.of(ArtifactContractResult.requiredValid("self_test_report")),
+                List.of(AdapterSignal.of(AdapterSignalType.PERMISSION_BLOCKED)));
+        assertEquals("permission_blocked", outcome.primaryReason());
+        assertFalse(outcome.nodeMaySucceed());
+    }
+
+    @Test
+    void incompleteProcessIsPrimaryAcrossMissingEnvelopeAndInvalidArtifactCombinations() {
+        for (var process : List.of(ProcessResult.nonZeroIncomplete(5), ProcessResult.killedAfterRecoverableSignal())) {
+            for (var envelope : List.of(AgentResultContractResult.valid("READY"), AgentResultContractResult.missing())) {
+                for (var artifact : List.of(ArtifactContractResult.requiredValid("candidate"),
+                        ArtifactContractResult.requiredMissing("candidate"))) {
+                    var outcome = resolve(process, envelope, List.of(artifact), List.of());
+                    assertEquals("process_output_incomplete", outcome.primaryReason());
+                    assertFalse(outcome.nodeMaySucceed());
+                    var blocked = resolve(process, envelope, List.of(artifact),
+                            List.of(AdapterSignal.of(AdapterSignalType.RATE_LIMITED)));
+                    assertEquals("rate_limited", blocked.primaryReason());
+                }
+            }
+        }
+    }
+
+    @Test
     void processOkAgentResultValidArtifactValidSucceeds() {
         var outcome = resolve(
                 ProcessResult.exitedZero(),
@@ -158,14 +184,16 @@ class AgentExecutionOutcomeResolverTest {
 
     @Test
     void deniedOptionalToolCannotOverrideCompleteValidatedEvidence() {
-        var signal = AdapterSignal.of(AdapterSignalType.PERMISSION_BLOCKED);
-
-        var outcome = resolve(
-                ProcessResult.nonZeroComplete(5),
+        var op = new AdapterSignal.OperationRef("s", "p", "r", "t", 1, 2, "read",
+                AdapterSignal.digest("params"), "request", AdapterSignal.digest("request"), "decision", AdapterSignal.digest("decision"));
+        var signal = new AdapterSignal(AdapterSignalType.PERMISSION_BLOCKED, "denied", 2, "acpx_stream", "s", false, op);
+        var ref = new dev.dual.core.contract.TaskContract.Reference("contract.json", AdapterSignal.digest("contract"));
+        var assessment = new AgentExecutionEvidence.PermissionAssessment(signal, ref, List.of("ac-1"), List.of(ref),
+                "permission_nonessential.v1", AgentExecutionEvidence.PermissionDisposition.PROVEN_NONESSENTIAL, "", "run", "execution");
+        var evidence = new AgentExecutionEvidence(ProcessResult.nonZeroComplete(5),
                 AgentResultContractResult.valid("READY_FOR_ARCH_REVIEW"),
-                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
-                List.of(signal)
-        );
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")), List.of(signal), List.of(assessment));
+        var outcome = resolver.resolve(evidence);
 
         assertEquals(AgentExecutionOutcomeStatus.SUCCESS_WITH_WARNINGS, outcome.status());
         assertEquals("completed_with_adapter_or_process_warnings", outcome.primaryReason());
@@ -281,7 +309,7 @@ class AgentExecutionOutcomeResolverTest {
     }
 
     @Test
-    void nonZeroIncompleteWithValidAgentResultButMissingArtifactFailsContract() {
+    void nonZeroIncompleteWithValidAgentResultButMissingArtifactKeepsProcessFailure() {
         var outcome = resolve(
                 ProcessResult.nonZeroIncomplete(5),
                 AgentResultContractResult.valid("READY_FOR_PRODUCT_REVIEW"),
@@ -289,8 +317,9 @@ class AgentExecutionOutcomeResolverTest {
                 List.of()
         );
 
-        assertEquals(AgentExecutionOutcomeStatus.CONTRACT_FAILED, outcome.status());
-        assertEquals(RecoveryCategory.ARTIFACT_CONTRACT_FAILURE, outcome.recoveryCategory());
+        assertEquals(AgentExecutionOutcomeStatus.OUTPUT_INCOMPLETE, outcome.status());
+        assertEquals("process_output_incomplete", outcome.primaryReason());
+        assertEquals(RecoveryCategory.OUTPUT_INCOMPLETE, outcome.recoveryCategory());
     }
 
     @Test

@@ -1,0 +1,69 @@
+{
+  "checked_at": "2026-10-09T08:06:55.601158+08:00",
+  "status": "MATERIAL_CONSISTENCY_CHECK_ONLY_NOT_DESIGN_PASS",
+  "source_inputs_checked": 653,
+  "source_input_changes": [],
+  "source_file_additions": [],
+  "source_file_removals": [],
+  "documentation_changes": [
+    {
+      "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "before_sha256": "9d109f8a49df53d2ec50026d263f83ae25392c02bb4b4ecb3d6c82fdc314fa57",
+      "after_sha256": "cfa5de82e94bf32870765ec8d02a73b68db87a3a0ee1234b191d2d91088e80e0",
+      "operation": "MODIFY_DOCUMENT_ONLY"
+    },
+    {
+      "path": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "before_sha256": "f0fb3f823c74061f4f44778b206bc14efd9f0907191f020a43efca76347ede79",
+      "after_sha256": "1c7d7a64e7f083bd7bba1c4dd2c840e9b1198ec9687e7ff59e704036a3b1134b",
+      "operation": "MODIFY_DOCUMENT_ONLY"
+    },
+    {
+      "path": "output/lifecycle-batch-06-20261009/preflight.md",
+      "before_sha256": "cc1bf8686cbea6a6a88da7321462632d3e6b64d49f3affd47e1491bce1c5c7e1",
+      "after_sha256": "bfabca48079f426ea400cb7419958a4f01e876f02749832e2876d41cc090676e",
+      "operation": "MODIFY_DOCUMENT_ONLY"
+    }
+  ],
+  "examples_checked": 4,
+  "conditional_existing_paths_checked": 24,
+  "source_anchors_checked": 11,
+  "links": [
+    {
+      "from_file": "output/lifecycle-batch-06-20261009/wiring-candidate/protocol.md",
+      "target": "examples.json",
+      "exists": true
+    },
+    {
+      "from_file": "output/lifecycle-batch-06-20261009/wiring-candidate/protocol.md",
+      "target": "affected-scope.json",
+      "exists": true
+    },
+    {
+      "from_file": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "target": "../../output/lifecycle-batch-06-20261009/wiring-candidate/protocol.md",
+      "exists": true
+    },
+    {
+      "from_file": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "target": "../../output/lifecycle-batch-06-20261009/wiring-candidate/protocol.md",
+      "exists": true
+    },
+    {
+      "from_file": "output/lifecycle-batch-06-20261009/preflight.md",
+      "target": "wiring-candidate/protocol.md",
+      "exists": true
+    }
+  ],
+  "test_runs": 0,
+  "git_experiments": 0,
+  "native_provider_runs": 0,
+  "agents_spawned": 0,
+  "implementation_started": false,
+  "independent_review": "AWAITING_CC",
+  "unknowns": [
+    "Operator stop-declaration trust boundary not independently reviewed",
+    "Callback and view-composition behavior NOT RUN"
+  ],
+  "next_action": "One combined affected-scope CC design review; implementation requires subsequent authorization."
+}

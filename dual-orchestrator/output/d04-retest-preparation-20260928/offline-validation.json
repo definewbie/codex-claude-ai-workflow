@@ -1,0 +1,48 @@
+{
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_probe_guard.py"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "test_complete_observation_requires_independent_review (test_probe_guard.GuardTests.test_complete_observation_requires_independent_review) ... ok\ntest_expected_permission_failure_is_evidence_not_initialization_error (test_probe_guard.GuardTests.test_expected_permission_failure_is_evidence_not_initialization_error) ... ok\ntest_external_tool_or_unknown_tool_stops (test_probe_guard.GuardTests.test_external_tool_or_unknown_tool_stops) ... ok\ntest_historical_unavailable_host_stops_before_replayed_turn_start (test_probe_guard.GuardTests.test_historical_unavailable_host_stops_before_replayed_turn_start) ... ok\ntest_only_exact_known_warning_is_exempt (test_probe_guard.GuardTests.test_only_exact_known_warning_is_exempt) ... ok\ntest_sixth_distinct_command_triggers_threshold (test_probe_guard.GuardTests.test_sixth_distinct_command_triggers_threshold) ... ok\ntest_stop_actually_terminates_owned_process_group_and_tolerates_exit (test_probe_guard.GuardTests.test_stop_actually_terminates_owned_process_group_and_tolerates_exit) ... ok\ntest_successful_exit_and_denied_json_without_commands_is_invalid (test_probe_guard.GuardTests.test_successful_exit_and_denied_json_without_commands_is_invalid) ... ok\ntest_timeout_change_and_stderr_are_stop_conditions (test_probe_guard.GuardTests.test_timeout_change_and_stderr_are_stop_conditions) ... ok\ntest_usage_after_stop_is_preserved_without_clearing_failure (test_probe_guard.GuardTests.test_usage_after_stop_is_preserved_without_clearing_failure) ... ok\n\n----------------------------------------------------------------------\nRan 10 tests in 0.003s\n\nOK\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "run-model-probe.py"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"status\": \"PREPARED_NOT_RUN\", \"binaryIdentityMatched\": true, \"hostExecutable\": true, \"budgetStatus\": \"PENDING_USER_CONFIRMATION\", \"providerCalls\": 0}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "run-model-probe.py",
+        "--run"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Budget not confirmed: no provider process started\n",
+      "expected": "budget refusal before model process"
+    }
+  ],
+  "newProviderCalls": 0,
+  "modelStartExists": false,
+  "budgetStatus": "PENDING_USER_CONFIRMATION",
+  "fileIdentities": {
+    "probe_guard.py": "89ae562560f07d9da15f77634c1f9b218df5f37c4360003f0a11c58a9470fa86",
+    "run-model-probe.py": "3a9e72d87666de157447466940e2369a5df2f5ad86ff19167f487e3c2996a283",
+    "test_probe_guard.py": "bdebc87867aeb79f245a294c75fb1d941fe687c8f3b996d640f6f9d313082e08",
+    "verification-gate.md": "15f88851f96ab913d4f43b90427f2067dfef4864b1b8b9de7ce0014b4aa19303"
+  }
+}

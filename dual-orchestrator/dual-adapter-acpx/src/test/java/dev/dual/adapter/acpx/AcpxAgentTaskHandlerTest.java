@@ -41,6 +41,68 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AcpxAgentTaskHandlerTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"protocol", "session_show", "session_ensure"})
+    void incompatibleNativeInterfacePersistsItsFactsAndRecoversWithoutSendingAProviderPrompt(String fault) throws Exception {
+        var ws = "ws-interface";
+        var workstream = tempDir.resolve(".agent/workstreams/" + ws);
+        Files.createDirectories(workstream);
+        Files.writeString(workstream.resolve("requirement.md"), "Clarify a small task.\n");
+        var executable = tempDir.resolve("interface-fixture.sh");
+        var build = OBJECT_MAPPER.writeValueAsString(Map.of("upstream_commit", ReviewedAcpxBuildIdentity.UPSTREAM_COMMIT,
+                "patch_sha256", ReviewedAcpxBuildIdentity.PATCH_SHA256, "policy_schema", ReviewedAcpxBuildIdentity.POLICY_SCHEMA));
+        Files.writeString(executable, "#!/bin/sh\nprintf 'command\\n' >> commands\n"
+                + "if [ \"$1\" = build-info ]; then printf '%s\\n' '" + build + "'; exit 0; fi\n"
+                + (fault.equals("session_show") ? "case \" $* \" in *' sessions show '*) exit 1;; esac\n" : fault.equals("session_ensure") ? "case \" $* \" in *' sessions ensure '*|*' sessions new '*) exit 1;; esac\n" : "")
+                + SessionMetadataFixture.RESPONSE.replace("\"protocolVersion\":1", "\"protocolVersion\":99")
+                + "case \" $* \" in *' -f '*) printf prompt >> provider-prompts;; esac\nprintf '[done] end_turn\\n'\n");
+        assertTrue(executable.toFile().setExecutable(true));
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude", "session", "claude-main", "prompt_template", "intake-claude-brainstorm"));
+        var context = taskContext(tempDir, ws, definition, readyInstance(definition.id()));
+        var candidate = new AcpxAgentTaskHandler(new AcpxAgentTransport(executable.toString()), false).execute(context);
+        var commands = Files.readAllBytes(tempDir.resolve("commands"));
+        var finished = finishAndRoute(context, candidate);
+        assertEquals(NodeStatus.FAILED, finished.status());
+        var facts = OBJECT_MAPPER.valueToTree(finished.result());
+        var expectedReason = fault.equals("protocol") ? "adapter_incompatible" : "session_bootstrap_failed";
+        assertEquals(expectedReason, facts.path("agent_execution_outcome").path("primaryReason").asText());
+        assertFalse(Files.exists(tempDir.resolve("provider-prompts")));
+        assertFalse(finished.outputRefs().stream().anyMatch(ref -> ref.endsWith("intake-claude-brainstorm.md")
+                || ref.endsWith(".transcript.log")), "pre-prompt failure has diagnostics, not a transcript or model candidate");
+        var run = OBJECT_MAPPER.readTree(tempDir.resolve(facts.path("run_metadata").asText()).toFile());
+        assertEquals(!fault.equals("session_ensure"), run.path("executionTimeline").toString().contains("session_compatibility"));
+        if (fault.equals("protocol")) assertTrue(run.path("executionTimeline").toString().contains("UNKNOWN"));
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(tempDir, new dev.dual.core.id.DualId(ws));
+        assertEquals(dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY, context.ledger().loadCurrent(paths).status());
+        var assessment = dev.dual.ledger.file.RecoveryAssessment.from(context.ledger().loadNode(paths,
+                context.instance().nodeInstanceId()), tempDir, ws);
+        assertEquals(fault.equals("protocol") ? "agent_interface_incompatible" : "agent_session_recovery", assessment.classification());
+        assertFalse(assessment.retrySafe());
+        var child = new ProcessBuilder(Path.of(System.getProperty("java.home"), "bin/java").toString(), "-cp",
+                System.getProperty("java.class.path"), ReadNativeFailureMain.class.getName(), tempDir.toString(), ws).redirectErrorStream(true);
+        child.environment().put("DUAL_ACPX_EXECUTABLE", "/not-launched/upgraded-entry");
+        child.environment().put("CLAUDE_CODE_EXECUTABLE", "/not-launched/upgraded-native");
+        var process = child.start();
+        assertTrue(process.waitFor(30, java.util.concurrent.TimeUnit.SECONDS));
+        var observed = new String(process.getInputStream().readAllBytes());
+        assertEquals(0, process.exitValue(), observed);
+        assertEquals(expectedReason, observed.trim());
+        assertTrue(java.util.Arrays.equals(commands, Files.readAllBytes(tempDir.resolve("commands"))));
+    }
+
+    public static class ReadNativeFailureMain {
+        public static void main(String[] args) throws Exception {
+            var paths = new dev.dual.ledger.file.WorkstreamPaths(Path.of(args[0]), new dev.dual.core.id.DualId(args[1]));
+            var ledger = AcpxTestLedger.ledger();
+            var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+            var execution = ledger.latestNodeExecution(paths, node).orElseThrow();
+            var fixed = dev.dual.runtime.handler.AgentRunCommitProtocol.readCompletion(paths, execution);
+            dev.dual.runtime.RecordedExecutionRecovery.recover(ledger, paths, execution);
+            System.out.print(new ObjectMapper().valueToTree(fixed.result()).path("agent_execution_outcome").path("primaryReason").asText());
+        }
+    }
+
     @Test
     void invalidRevisionContextStopsBeforeProviderDispatch() throws Exception {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-invalid-revision");
@@ -56,7 +118,7 @@ class AcpxAgentTaskHandlerTest {
                 null, null, null);
 
         var result = new AcpxAgentTaskHandler(new ThrowingTransport(), false).execute(
-                new TaskHandler.TaskContext(tempDir, "ws-invalid-revision", definition, instance));
+                new TaskHandler.TaskContext(tempDir, "ws-invalid-revision", definition, instance, AcpxTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_REVISION_CONTEXT_INVALID", result.outcome());
@@ -176,9 +238,14 @@ class AcpxAgentTaskHandlerTest {
         ));
         var instance = readyInstance("implement.claude_implement");
 
-        var first = handler.execute(taskContext(tempDir, "ws-adjacent-e1", definition, instance));
-        Thread.sleep(5L);
-        var second = handler.execute(taskContext(tempDir, "ws-adjacent-e1", definition, instance));
+        var firstContext = taskContext(tempDir, "ws-adjacent-e1", definition, instance);
+        var first = handler.execute(firstContext);
+        var finalized = finishAndRoute(firstContext, first);
+        assertEquals(NodeStatus.COMPLETED, finalized.status(), finalized.result().toString());
+        var next = new NodeDefinition("implement.claude_self_test_report", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude", "session", "claude-main", "session_scope", "workstream",
+                "permission_profile", "implement", "prompt_template", "implement-claude-self-test"));
+        var second = handler.execute(taskContext(tempDir, "ws-adjacent-e1", next, readyInstance(next.id())));
 
         assertEquals(NodeStatus.COMPLETED, first.status());
         assertEquals(NodeStatus.COMPLETED, second.status());
@@ -230,10 +297,10 @@ class AcpxAgentTaskHandlerTest {
                 "session", "claude-main",
                 "permission_profile", "observe",
                 "prompt_template", "design-claude",
-                "requires_approved_task_contract", true));
+                "required_contract_phase", "GOAL"));
         var instance = readyInstance(definition.id());
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-unqualified", definition, instance));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-unqualified", definition, instance, AcpxTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED", result.outcome());
@@ -257,10 +324,10 @@ class AcpxAgentTaskHandlerTest {
 
         var candidate = handler.execute(taskContext(
                 tempDir, "ws-correction", definition, instance));
-        var validated = new ArtifactContractValidator().validate(
+        var validated = new ArtifactContractValidator(AcpxTestLedger.ledger()).validate(
                 tempDir,
                 "ws-correction",
-                instance.nodeInstanceId(),
+                currentNode("ws-correction"),
                 definition,
                 instance.inputRefs(),
                 candidate
@@ -318,6 +385,7 @@ class AcpxAgentTaskHandlerTest {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-schema-correction");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Verify the completed README change.\n");
+        Files.writeString(tempDir.resolve("README.md"), "Completed fixture README change\n");
 
         var transport = new SchemaContractCorrectionTransport();
         var handler = new AcpxAgentTaskHandler(transport, false);
@@ -340,10 +408,10 @@ class AcpxAgentTaskHandlerTest {
                 definition,
                 instance
         ));
-        var validated = new ArtifactContractValidator().validate(
+        var validated = new ArtifactContractValidator(AcpxTestLedger.ledger()).validate(
                 tempDir,
                 "ws-schema-correction",
-                instance.nodeInstanceId(),
+                currentNode("ws-schema-correction"),
                 definition,
                 instance.inputRefs(),
                 candidate
@@ -370,7 +438,7 @@ class AcpxAgentTaskHandlerTest {
         var authoredSnapshot = OBJECT_MAPPER.treeToValue(authoredManifest.get("authoredContext"),
                 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot.class);
         var requiredBody = authoredSnapshot.render(tempDir);
-        assertTrue(authoredSnapshot.approvedPlan() != null);
+        assertTrue(authoredSnapshot.reviewedPlan() != null);
         assertTrue(transport.initialPrompt.contains(requiredBody));
         assertTrue(transport.correctionPrompt.contains(requiredBody.stripTrailing()),
                 "correction must receive the same approved body (its renderer strips trailing whitespace), not just refs");
@@ -392,6 +460,7 @@ class AcpxAgentTaskHandlerTest {
         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-schema-correction-fails");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Verify the completed README change.\n");
+        Files.writeString(tempDir.resolve("README.md"), "Completed fixture README change\n");
 
         var transport = new SchemaContractCorrectionTransport(false);
         var definition = new NodeDefinition(
@@ -412,10 +481,10 @@ class AcpxAgentTaskHandlerTest {
                 definition,
                 instance
         ));
-        var validated = new ArtifactContractValidator().validate(
+        var validated = new ArtifactContractValidator(AcpxTestLedger.ledger()).validate(
                 tempDir,
                 "ws-schema-correction-fails",
-                instance.nodeInstanceId(),
+                currentNode("ws-schema-correction-fails"),
                 definition,
                 instance.inputRefs(),
                 candidate
@@ -935,6 +1004,101 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
+    void primaryAndCorrectionPersistTheirOwnUsageBeforeAggregation() throws Exception {
+        var dir = tempDir.resolve(".agent/workstreams/ws-usage-pair");
+        Files.createDirectories(dir);
+        Files.writeString(dir.resolve("requirement.md"), "Create a small product.");
+        var sessions = tempDir.resolve("paired-sessions");
+        Files.createDirectories(sessions);
+        var record = "33333333-3333-4333-8333-333333333333";
+        var stream = sessions.resolve(record + ".stream.ndjson");
+        var transport = new AcpxAgentTransport() {
+            private AcpxRunResult response(AcpxRunRequest request, String id, long total, boolean correction) throws java.io.IOException {
+                Files.createDirectories(request.stdoutPath().getParent());
+                Files.writeString(request.stdoutPath(), "");
+                Files.writeString(request.stderrPath(), "[acpx] session paired (" + record + ")\n");
+                var frame = "{\"jsonrpc\":\"2.0\",\"id\":\"" + id + "\",\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"native-pair\",\"prompt\":[{\"type\":\"text\",\"text\":\"trimmed wire\"}]}}\n"
+                        + "{\"jsonrpc\":\"2.0\",\"id\":\"" + id + "\",\"result\":{\"stopReason\":\"end_turn\",\"usage\":{\"inputTokens\":" + total + ",\"outputTokens\":0,\"totalTokens\":" + total + "}}}\n";
+                Files.writeString(stream, frame, java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+                var answer = completionJson(request, "READY_FOR_PRODUCT_REVIEW");
+                if (!correction) answer = "Explanation before JSON\n" + answer;
+                return fixtureResult(0, Instant.parse("2026-10-10T00:00:00Z"), Instant.parse("2026-10-10T00:00:01Z"),
+                        List.of("local-fixture"), List.of(), null, new AcpxPromptCompletion(id, "end_turn", answer, "native-pair"));
+            }
+            @Override public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+                return response(request, "3", 36945, false);
+            }
+            @Override AcpxRunResult runAgentResultCorrection(String agent, AcpxRunRequest request) throws java.io.IOException {
+                assertTrue(Files.readString(request.promptPath()).contains("Never copy .agent/ or .git/ references into evidence_refs"));
+                return response(request, "4", 26548, true);
+            }
+        };
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude", "session", "claude-main", "prompt_template", "intake-claude-brainstorm"));
+        var result = new AcpxAgentTaskHandler(transport, false, new AcpxUsageReader(sessions, 1, 0))
+                .execute(taskContext(tempDir, "ws-usage-pair", definition, readyInstance(definition.id())));
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var path = tempDir.resolve((String) result.result().get("run_metadata"));
+        var persisted = OBJECT_MAPPER.readTree(path.toFile());
+        var occurrences = persisted.path("agentResultAcquisition").path("occurrences");
+        assertEquals(2, occurrences.size());
+        assertEquals("3", occurrences.get(0).path("requestId").asText());
+        assertEquals(36945, occurrences.get(0).path("usage").path("totalTokens").asLong());
+        assertEquals("4", occurrences.get(1).path("requestId").asText());
+        assertEquals(26548, occurrences.get(1).path("usage").path("totalTokens").asLong());
+        assertEquals(63493, persisted.path("usage").path("totalTokens").asLong());
+        assertEquals("MULTI_PROMPT_SUM", persisted.path("usage").path("attribution").asText());
+    }
+
+    @Test
+    void reinitializedConnectionAndCorrectionKeepCurrentTranscriptUsage() throws Exception {
+        var dir = tempDir.resolve(".agent/workstreams/ws-reused-usage");
+        Files.createDirectories(dir);
+        Files.writeString(dir.resolve("requirement.md"), "Create a small product.");
+        var sessions = tempDir.resolve("reused-sessions");
+        Files.createDirectories(sessions);
+        var record = "33333333-3333-4333-8333-333333333333";
+        var stream = sessions.resolve(record + ".stream.ndjson");
+        var transport = new AcpxAgentTransport() {
+            private AcpxRunResult response(AcpxRunRequest request, String id, long total, boolean correction) throws java.io.IOException {
+                Files.createDirectories(request.stdoutPath().getParent());
+                
+                Files.writeString(request.stderrPath(), "[acpx] session paired (" + record + ")\n");
+                var frame = "{\"jsonrpc\":\"2.0\",\"id\":\"" + id + "\",\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"native-pair\",\"prompt\":[{\"type\":\"text\",\"text\":\"trimmed wire\"}]}}\n"
+                        + "{\"jsonrpc\":\"2.0\",\"id\":\"" + id + "\",\"result\":{\"stopReason\":\"end_turn\",\"usage\":{\"inputTokens\":" + total + ",\"outputTokens\":0,\"totalTokens\":" + total + "}}}\n";
+                Files.writeString(request.stdoutPath(), frame.substring(frame.indexOf("\n") + 1));
+                Files.writeString(stream, frame, java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+                var answer = completionJson(request, "READY_FOR_PRODUCT_REVIEW");
+                if (!correction) answer = "Explanation before JSON\n" + answer;
+                return fixtureResult(0, Instant.parse("2026-10-10T00:00:00Z"), Instant.parse("2026-10-10T00:00:01Z"),
+                        List.of("local-fixture"), List.of(), null, new AcpxPromptCompletion(id, "end_turn", answer, "native-pair"));
+            }
+            @Override public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
+                return response(request, "3", 36945, false);
+            }
+            @Override AcpxRunResult runAgentResultCorrection(String agent, AcpxRunRequest request) throws java.io.IOException {
+                assertTrue(Files.readString(request.promptPath()).contains("Never copy .agent/ or .git/ references into evidence_refs"));
+                return response(request, "3", 26548, true);
+            }
+        };
+        var definition = new NodeDefinition("intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of(
+                "agent", "claude", "session", "claude-main", "prompt_template", "intake-claude-brainstorm"));
+        var result = new AcpxAgentTaskHandler(transport, false, new AcpxUsageReader(sessions, 1, 0))
+                .execute(taskContext(tempDir, "ws-reused-usage", definition, readyInstance(definition.id())));
+        assertEquals(NodeStatus.COMPLETED, result.status());
+        var path = tempDir.resolve((String) result.result().get("run_metadata"));
+        var persisted = OBJECT_MAPPER.readTree(path.toFile());
+        var occurrences = persisted.path("agentResultAcquisition").path("occurrences");
+        assertEquals(2, occurrences.size());
+        assertEquals("3", occurrences.get(0).path("requestId").asText());
+        assertEquals(36945, occurrences.get(0).path("usage").path("totalTokens").asLong());
+        assertEquals("3", occurrences.get(1).path("requestId").asText());
+        assertEquals(26548, occurrences.get(1).path("usage").path("totalTokens").asLong());
+        assertEquals(63493, persisted.path("usage").path("totalTokens").asLong());
+        assertEquals("MULTI_PROMPT_SUM", persisted.path("usage").path("attribution").asText());
+    }
+
+    @Test
     void completedAgentRunRecordsAcpxUsageFromSessionStream() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         var sessionsDir = tempDir.resolve("sessions");
@@ -1153,7 +1317,8 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "design-codex-review",
                 "permission_profile", "review"
         ));
-        var base = readyInstance("design.codex_arch_review");
+        var claimed = taskContext(tempDir, "ws-test", definition, readyInstance(definition.id()));
+        var base = claimed.instance();
         var approval = Map.<String, Object>ofEntries(
                 Map.entry("schema_version", 1),
                 Map.entry("type", "PUBLIC_WEBSEARCH"),
@@ -1173,7 +1338,7 @@ class AcpxAgentTaskHandlerTest {
                 base.stageId(), base.iterationId(), base.inputRefs(), base.outputRefs(),
                 Map.of("permission_approval", approval), base.runRef(), base.startedAt(), base.finishedAt());
 
-        var execution = new AcpxAgentTaskHandler(transport, false).execute(taskContext(tempDir, "ws-test", definition, approved));
+        var execution = new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(tempDir, "ws-test", definition, approved, claimed.ledger()));
 
         assertTrue(transport.lastPermissionProfile.autoApprovedTools().contains("WebSearch"));
         assertFalse(transport.lastPermissionProfile.autoApprovedTools().contains("WebFetch"));
@@ -1192,22 +1357,23 @@ class AcpxAgentTaskHandlerTest {
                 "agent", "claude", "session", "claude-main", "permission_profile", "implement",
                 "prompt_template", "implement-claude"));
         var definition = new dev.dual.core.workflow.WorkflowDefinition("custom", 1, nodeDefinition.id(), List.of(nodeDefinition), List.of());
-        var ledger = new dev.dual.ledger.file.WorkflowFileLedger();
-        ledger.initialize(paths, "wf-network", definition);
+        var ledger = AcpxTestLedger.ledger();
+        AcpxTestLedger.initialize(ledger, paths, "wf-network", definition);
         Files.writeString(paths.workstreamDir().resolve("requirement.md"), "Validate approved dependencies.\n");
         var nodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
         ledger.completeAndRoute(paths, definition, nodeId, NodeStatus.FAILED, "AGENT_OUTPUT_CONTRACT_VIOLATION", List.of(),
                 Map.of("reason", "AGENT_OUTPUT_CONTRACT_VIOLATION", "parse_error",
                         Map.of("code", "INVALID_OUTPUT", "message", "Provide the required checks", "details", Map.of())));
-        var store = new dev.dual.ledger.file.ExecutionNetworkGrantStore();
+        var store = new dev.dual.ledger.file.ExecutionNetworkGrantStore(ledger);
         var ref = store.approve(paths, nodeDefinition.id(), List.of("packages.example.org"), "approved dependency resolution");
         ledger.retryActiveNode(paths, "retry with operator grant");
-        ledger.markRunning(paths, nodeId, 1);
+        AcpxTestLedger.claim(new TaskHandler.TaskContext(root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId), ledger));
         var transport = new CapturingApprovalTransport();
         transport.uncontracted = true;
+        transport.failedProcess = true;
         var pendingBytes = Files.readString(root.resolve(ref));
         var prepared = new AcpxAgentTaskHandler(transport, true).execute(new TaskHandler.TaskContext(
-                root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));
+                root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId), AcpxTestLedger.ledger()));
         assertNull(transport.lastExecutionPolicy, "prepare-only must not call the provider");
         assertEquals(pendingBytes, Files.readString(root.resolve(ref)), "prepare-only cannot consume authority");
         assertTrue(Files.readString(root.resolve((String) prepared.result().get("run_metadata"))
@@ -1219,7 +1385,7 @@ class AcpxAgentTaskHandlerTest {
                 .put("schema_version", 2);
         new ObjectMapper().writeValue(paths.nodeJson(nodeId).toFile(), damaged);
         var rejected = new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(
-                root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));
+                root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId), AcpxTestLedger.ledger()));
         assertEquals(NodeStatus.FAILED, rejected.status());
         assertEquals("RETRY_FAILURE_CONTEXT_INVALID", rejected.result().get("failure_code"));
         assertNull(transport.lastExecutionPolicy);
@@ -1236,7 +1402,7 @@ class AcpxAgentTaskHandlerTest {
                 }
                 new ObjectMapper().writeValue(paths.workflowCurrentJson().toFile(), invalidCurrent);
                 var invalidState = new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(
-                        root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));
+                        root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId), AcpxTestLedger.ledger()));
                 assertEquals("RETRY_FAILURE_CONTEXT_INVALID", invalidState.result().get("failure_code"), fault);
                 assertNull(transport.lastExecutionPolicy, fault);
                 assertEquals(pendingBytes, Files.readString(root.resolve(ref)), fault);
@@ -1248,8 +1414,8 @@ class AcpxAgentTaskHandlerTest {
         var preparedPolicy = root.resolve(preparedMetadata.path("executionAuthority").path("policyRef").asText());
         assertTrue(new ObjectMapper().readTree(preparedPolicy.toFile()).path("sandbox").path("network").path("allowed_domains").isEmpty());
         Thread.sleep(2L);
-        new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(
-                root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));
+        var grantedContext = new TaskHandler.TaskContext(root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId), ledger);
+        var grantedResult = new AcpxAgentTaskHandler(transport, false).execute(grantedContext);
         var granted = transport.lastExecutionPolicy;
         assertNotNull(granted);
         granted.verify(root);
@@ -1260,13 +1426,13 @@ class AcpxAgentTaskHandlerTest {
         var metadata = new ObjectMapper().readTree(paths.runsDir().resolve(granted.runId()).resolve("run.json").toFile());
         assertEquals(ref, metadata.path("executionAuthority").path("networkGrant").path("grantRef").asText());
 
-        ledger.completeAndRoute(paths, definition, nodeId, NodeStatus.FAILED, "failed", List.of(), Map.of());
+        assertEquals(NodeStatus.FAILED, finishAndRoute(grantedContext, grantedResult).status());
         ledger.retryActiveNode(paths, "a second retry is not a second approval");
         assertFalse(ledger.loadNode(paths, nodeId).result().containsKey("retry_failure_context"),
                 "a subsequent process failure must not retain the older contract diagnostic");
-        ledger.markRunning(paths, nodeId, 1);
+        AcpxTestLedger.claim(new TaskHandler.TaskContext(root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId), ledger));
         new AcpxAgentTaskHandler(transport, false).execute(new TaskHandler.TaskContext(
-                root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId)));
+                root, "ws-network", nodeDefinition, ledger.loadCoreNode(paths, nodeId), AcpxTestLedger.ledger()));
         var ungranted = transport.lastExecutionPolicy;
         assertNull(ungranted.networkGrant());
         assertTrue(new ObjectMapper().readTree(root.resolve(ungranted.ref()).toFile())
@@ -1279,7 +1445,6 @@ class AcpxAgentTaskHandlerTest {
 
     @Test
     void implementationAgentCannotRewriteTaskContractAuthority() throws Exception {
-        writeChangeBoundaryControlFacts("ws-test");
         var handler = new AcpxAgentTaskHandler(
                 new ControlFactTamperingTransport(ControlFactTamperingTransport.Target.TASK_CONTRACT),
                 false
@@ -1302,12 +1467,11 @@ class AcpxAgentTaskHandlerTest {
         assertEquals("CHANGE_BOUNDARY_AUTHORITY_TAMPERED", result.outcome());
         assertEquals(true, result.result().get("change_boundary_authority_tampered"));
         assertTrue(((List<?>) result.result().get("changed_control_facts")).stream()
-                .anyMatch(path -> path.toString().endsWith("artifacts/task-contract.json")));
+                .anyMatch(path -> path.toString().contains("/artifacts/contracts/") && path.toString().endsWith("/task-contract.json")));
     }
 
     @Test
     void implementationAgentCannotRewriteWorkspaceBaseAuthority() throws Exception {
-        writeChangeBoundaryControlFacts("ws-test");
         var handler = new AcpxAgentTaskHandler(
                 new ControlFactTamperingTransport(ControlFactTamperingTransport.Target.WORKSPACE),
                 false
@@ -1329,15 +1493,13 @@ class AcpxAgentTaskHandlerTest {
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("CHANGE_BOUNDARY_AUTHORITY_TAMPERED", result.outcome());
         assertTrue(((List<?>) result.result().get("changed_control_facts")).stream()
-                .anyMatch(path -> path.toString().endsWith("workspaces/wsp-test.json")));
+                .anyMatch(path -> path.toString().endsWith("workspaces/workspace-readiness.json")));
     }
 
     @Test
-    void implementationAgentCannotCreateWorkspaceAuthority() throws Exception {
-        writeChangeBoundaryControlFacts("ws-test");
-        Files.delete(tempDir.resolve(".agent/workstreams/ws-test/workspaces/wsp-test.json"));
+    void implementationAgentCannotCreateAdditionalWorkspaceAuthority() throws Exception {
         var handler = new AcpxAgentTaskHandler(
-                new ControlFactTamperingTransport(ControlFactTamperingTransport.Target.WORKSPACE),
+                new ControlFactTamperingTransport(ControlFactTamperingTransport.Target.WORKSPACE_ADDITION),
                 false
         );
         var definition = new NodeDefinition("implement.claude_implement", NodeKind.TASK, "acpx.agent_run", Map.of(
@@ -1390,10 +1552,10 @@ class AcpxAgentTaskHandlerTest {
         );
 
         var candidate = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
-        var validated = new ArtifactContractValidator().validate(
+        var validated = new ArtifactContractValidator(AcpxTestLedger.ledger()).validate(
                 tempDir,
                 "ws-test",
-                instance.nodeInstanceId(),
+                currentNode("ws-test"),
                 definition,
                 instance.inputRefs(),
                 candidate
@@ -1428,7 +1590,7 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
-    void deniedOptionalToolWithProseWrappedFencedArtifactCompletesWithWarnings() throws Exception {
+    void completeFencedArtifactDoesNotProveUnassociatedDeniedToolNonessential() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-non-zero-correction");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
@@ -1444,16 +1606,16 @@ class AcpxAgentTaskHandlerTest {
         var candidate = new AcpxAgentTaskHandler(transport, false).execute(
                 taskContext(tempDir, "ws-non-zero-correction", definition, instance)
         );
-        var result = new ArtifactContractValidator().validate(
+        var result = new ArtifactContractValidator(AcpxTestLedger.ledger()).validate(
                 tempDir,
                 "ws-non-zero-correction",
-                instance.nodeInstanceId(),
+                currentNode("ws-non-zero-correction"),
                 definition,
                 instance.inputRefs(),
                 candidate
         );
 
-        assertEquals(NodeStatus.COMPLETED, result.status());
+        assertEquals(NodeStatus.FAILED, result.status());
         assertEquals(1, transport.initialCalls);
         assertEquals(0, transport.correctionCalls);
         var runMetadata = OBJECT_MAPPER.readTree(
@@ -1469,20 +1631,20 @@ class AcpxAgentTaskHandlerTest {
                 acquisition.path("occurrences").get(0).path("presentationDisposition").asText());
 
         var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, result);
-        assertEquals(NodeStatus.COMPLETED, finalized.status());
+        assertEquals(NodeStatus.FAILED, finalized.status());
         var finalizedMetadata = OBJECT_MAPPER.readTree(
                 tempDir.resolve((String) finalized.result().get("run_metadata")).toFile()
         );
-        assertEquals("SUCCESS_WITH_WARNINGS",
+        assertEquals("RECOVERABLE_ADAPTER_FAILURE",
                 finalizedMetadata.path("executionOutcome").path("status").asText());
-        assertEquals("completed_with_adapter_or_process_warnings",
+        assertEquals("permission_blocked",
                 finalizedMetadata.path("executionOutcome").path("primaryReason").asText());
         assertEquals("PERMISSION_BLOCKED",
                 finalizedMetadata.path("executionOutcome").path("secondarySignals").get(0).path("type").asText());
     }
 
     @Test
-    void deniedOptionalToolWithOnlyMissingRootClosureCompletesWithWarnings() throws Exception {
+    void recoveredRootClosureDoesNotProveUnassociatedDeniedToolNonessential() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-root-closure-warning");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
@@ -1498,16 +1660,16 @@ class AcpxAgentTaskHandlerTest {
         var candidate = new AcpxAgentTaskHandler(transport, false).execute(
                 taskContext(tempDir, "ws-root-closure-warning", definition, instance)
         );
-        var validated = new ArtifactContractValidator().validate(
+        var validated = new ArtifactContractValidator(AcpxTestLedger.ledger()).validate(
                 tempDir,
                 "ws-root-closure-warning",
-                instance.nodeInstanceId(),
+                currentNode("ws-root-closure-warning"),
                 definition,
                 instance.inputRefs(),
                 candidate
         );
 
-        assertEquals(NodeStatus.COMPLETED, validated.status());
+        assertEquals(NodeStatus.FAILED, validated.status());
         assertEquals(1, transport.initialCalls);
         assertEquals(0, transport.correctionCalls);
         var runMetadata = OBJECT_MAPPER.readTree(
@@ -1520,11 +1682,11 @@ class AcpxAgentTaskHandlerTest {
         assertTrue(acquisition.path("occurrences").get(0).path("contractDecodable").asBoolean());
 
         var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(tempDir, validated);
-        assertEquals(NodeStatus.COMPLETED, finalized.status());
+        assertEquals(NodeStatus.FAILED, finalized.status());
         var finalizedMetadata = OBJECT_MAPPER.readTree(
                 tempDir.resolve((String) finalized.result().get("run_metadata")).toFile()
         );
-        assertEquals("SUCCESS_WITH_WARNINGS",
+        assertEquals("RECOVERABLE_ADAPTER_FAILURE",
                 finalizedMetadata.path("executionOutcome").path("status").asText());
         assertEquals("PERMISSION_BLOCKED",
                 finalizedMetadata.path("executionOutcome").path("secondarySignals").get(0).path("type").asText());
@@ -1815,7 +1977,7 @@ class AcpxAgentTaskHandlerTest {
     }
 
     @Test
-    void startedRunIsClosedToTerminalWhenHandlerFailsBeforeFinalizer() throws Exception {
+    void startedRunWithoutFinalResultRemainsUnknownAndCannotAutoRetry() throws Exception {
         var workstreamDir = tempDir.resolve(".agent").resolve("workstreams").resolve("ws-test");
         Files.createDirectories(workstreamDir);
         Files.writeString(workstreamDir.resolve("requirement.md"), "Clarify the request first.\n");
@@ -1829,13 +1991,16 @@ class AcpxAgentTaskHandlerTest {
                 "prompt_template", "intake-claude-brainstorm"
         ));
 
-        assertThrows(java.io.IOException.class, () -> handler.execute(taskContext(
-                tempDir,
-                "ws-test",
-                definition,
-                readyInstance("intake.claude_brainstorm")
-        )));
-
+        var context = taskContext(tempDir, "ws-test", definition, readyInstance(definition.id()));
+        assertThrows(java.io.IOException.class, () -> handler.execute(context));
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(tempDir, new dev.dual.core.id.DualId("ws-test"));
+        var ledger = context.ledger();
+        var claim = ledger.latestNodeExecution(paths, ledger.loadNode(paths, context.instance().nodeInstanceId())).orElseThrow();
+        dev.dual.runtime.handler.AgentRunCommitProtocol.releaseExecutor(ledger, paths, claim);
+        var recovered = dev.dual.runtime.RecordedExecutionRecovery.recover(ledger, paths, claim);
+        assertEquals(dev.dual.core.workflow.WorkflowStatus.WAITING_FOR_RECOVERY, recovered.status());
+        assertEquals("UNKNOWN", ledger.loadNode(paths, context.instance().nodeInstanceId()).result().get("external_effect"));
+        assertThrows(java.io.IOException.class, () -> ledger.retryActiveNode(paths, "cannot infer no effects from dead pid"));
         var runMetadataPath = Files.walk(workstreamDir.resolve("runs"))
                 .filter(path -> path.getFileName().toString().equals("run.json"))
                 .findFirst()
@@ -1844,10 +2009,8 @@ class AcpxAgentTaskHandlerTest {
         // The started execution must NOT be left as a bare "prepared" illusion.
         assertNotEquals("prepared", runMetadata.path("status").asText(),
                 "a started execution whose handler failed before the finalizer must be closed, not left prepared");
-        assertEquals("INTERRUPTED", runMetadata.path("executionOutcome").path("status").asText(),
-                "the closer must converge a dead-pid started run to INTERRUPTED");
-        assertEquals(99_999_989L, runMetadata.path("processResult").path("pid").asLong(),
-                "the closer must persist the transport-owned process pid of the started execution");
+        assertTrue(runMetadata.path("executionOutcome").isMissingNode() || runMetadata.path("executionOutcome").isNull(),
+                "unknown external result must not be fabricated as a terminal process result");
         assertTrue(runMetadata.path("usage").isMissingNode() || runMetadata.path("usage").isNull(),
                 "the closer must not fabricate provider usage");
         assertTrue(runMetadata.path("agentResultAcquisition").isMissingNode()
@@ -1934,10 +2097,10 @@ class AcpxAgentTaskHandlerTest {
         } finally {
             System.setProperty("user.home", originalUserHome);
         }
-        var validated = new ArtifactContractValidator().validate(
+        var validated = new ArtifactContractValidator(AcpxTestLedger.ledger()).validate(
                 tempDir,
                 "ws-large-stream",
-                instance.nodeInstanceId(),
+                currentNode("ws-large-stream"),
                 definition,
                 instance.inputRefs(),
                 candidate
@@ -2068,11 +2231,12 @@ class AcpxAgentTaskHandlerTest {
                 .replace("__TEST_HOME__", sessionsDir.getParent().getParent().toString())
                 .replace("__WORKDIR__", sessionsDir.getParent().getParent().toString())
                 .replace("__STRICT_FIXTURE__", strictResultFixture.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
         assertTrue(fakeAcpx.toFile().setExecutable(true));
     }
 
     @Test
-    void rejectsUnsupportedAgent() {
+    void rejectsUnsupportedAgent() throws Exception {
         var handler = new AcpxAgentTaskHandler(new AcpxAgentTransport(), true);
         var definition = new NodeDefinition("design.bad_agent", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "unknown",
@@ -2095,9 +2259,11 @@ class AcpxAgentTaskHandlerTest {
                 null
         );
 
-        var error = assertThrows(IllegalArgumentException.class, () ->
-                handler.execute(taskContext(tempDir, "ws-test", definition, instance)));
-        assertTrue(error.getMessage().contains("unsupported agent"));
+        var result = handler.execute(taskContext(tempDir, "ws-test", definition, instance));
+        assertEquals(NodeStatus.FAILED, result.status());
+        assertEquals("INPUT_PREPARATION_FAILED", result.outcome());
+        assertEquals(IllegalArgumentException.class.getName(), result.result().get("failure_code"));
+        assertTrue(result.errorMessage().contains("unsupported agent"));
     }
 
     private static final class CompletingExitFiveTransport extends AcpxAgentTransport {
@@ -2238,7 +2404,7 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-09-02T00:00:00Z");
             return completedResult(
-                    request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
+                    request, 0, now, List.of("acpx", "claude"), sessions.size() == 1 ? "IMPLEMENTED" : "SELF_TEST_COMPLETE");
         }
     }
 
@@ -2343,11 +2509,25 @@ class AcpxAgentTaskHandlerTest {
             calls++;
             sessions.add(request.sessionName());
             prepareLogs(request);
-            initialArtifact = completionJson(request, "SELF_TEST_COMPLETE")
+            var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(completionJson(request, "SELF_TEST_COMPLETE"));
+            var manifest = OBJECT_MAPPER.readTree(PromptManifestWriter.manifestPathFor(request.promptPath()).toFile());
+            var snapshot = OBJECT_MAPPER.treeToValue(manifest.get("authoredContext"), dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot.class);
+            var contract = OBJECT_MAPPER.readTree(request.workdir().resolve(snapshot.contract().contract().ref()).toFile());
+            var checks = ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.get("result")).putArray("verification_checks");
+            for (var binding : contract.findValue("verification_bindings")) {
+                var check = checks.addObject().put("criterion_id", binding.path("criterion_id").asText())
+                        .put("assertion", "Observed the fixture README").put("execution_ref", "CURRENT");
+                check.putArray("tool_call_ids").add("read-readme"); check.putArray("material_refs");
+            }
+            var content = Files.readString(request.workdir().resolve("README.md"));
+            var observations = List.of(new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("fixture-session", "read-readme", "fixture.read", "read",
+                    OBJECT_MAPPER.valueToTree(Map.of("path", "README.md")), OBJECT_MAPPER.valueToTree(Map.of("content", content)),
+                    "completed", null, null, "", false, List.of()));
+            initialArtifact = OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
                     .replace("    \"missing_evidence\" : [ ],\n", "");
             initialPrompt = Files.readString(request.promptPath());
             var now = Instant.parse("2026-07-26T00:00:00Z");
-            return fixtureResult(
+            var initialResult = fixtureResult(
                     0,
                     now,
                     now.plusSeconds(1),
@@ -2356,6 +2536,8 @@ class AcpxAgentTaskHandlerTest {
                     null,
                     new AcpxPromptCompletion("fixture-schema-initial", "end_turn", initialArtifact)
             );
+            return new AcpxRunResult(initialResult.startedAt(), initialResult.finishedAt(), initialResult.command(), initialResult.executionTimeline(),
+                    initialResult.usage(), initialResult.promptCompletion(), initialResult.processResult(), initialResult.adapterSignals(), observations);
         }
 
         @Override
@@ -2623,7 +2805,7 @@ class AcpxAgentTaskHandlerTest {
         // P1: run.json 必须记录 session scope 决策，便于 benchmark 解释 token 变化
         assertTrue(runMetadata.contains("\"sessionScope\" : \"workstream\""), runMetadata);
         assertTrue(runMetadata.contains("\"sessionSegmentKey\" :"), runMetadata);
-        assertTrue(runMetadata.contains("\"stage\" : \"stage-test\""), runMetadata);
+        assertTrue(runMetadata.contains("\"stage\" : \"stage-intake\""), runMetadata);
         assertTrue(runMetadata.contains("\"semanticIteration\" : \"iter-001\""), runMetadata);
         // session name 恒含 workstreamId，永不裸名
         assertTrue(runMetadata.contains("\"session\" : \"claude-main-ws-sess\""), runMetadata);
@@ -2781,13 +2963,15 @@ class AcpxAgentTaskHandlerTest {
         var ws = "ws-qualified-memory";
         var definition = new NodeDefinition("design.codex_arch_review", NodeKind.TASK, "acpx.agent_run", Map.of(
                 "agent", "codex", "session", "codex-main", "prompt_template", "design-codex-review",
-                "requires_approved_task_contract", true));
+                "required_contract_phase", "GOAL"));
         var context = taskContext(tempDir, ws, definition, readyInstance(definition.id()));
         var candidate = new AcpxAgentTaskHandler(new RejectionEnvelopeTransport(), false).execute(context);
         assertEquals(NodeStatus.COMPLETED, candidate.status(), candidate.result().toString());
         // The adapter acquired an envelope; ArtifactContractValidator has not published it yet.
         var memory = Files.readString(tempDir.resolve(".agent/workstreams/" + ws + "/memory/workstream-memory.json"));
-        assertTrue(memory.contains("repo/relative/new.ext"), "qualified contract scope remains available");
+        assertFalse(memory.contains("repo/relative/new.ext"), "GOAL does not authorize the proposed exact file scope");
+        assertTrue(memory.contains("qualified_projection"), "qualified contract provenance remains available");
+        assertTrue(memory.contains("GOAL"), "proposal memory must retain GOAL phase");
         assertFalse(memory.contains("NEEDS_REVISION"), "unpublished reviewer decision must not enter memory");
         assertFalse(memory.contains("refresh token on expiry"), "unpublished issue must not enter memory");
     }
@@ -2816,22 +3000,34 @@ class AcpxAgentTaskHandlerTest {
             NodeDefinition definition,
             NodeInstance instance
     ) throws Exception {
-        if ("intake.claude_brainstorm".equals(definition.id())) {
-            var iterationsDir = workspaceRoot.resolve(".agent/workstreams")
-                    .resolve(workstreamId)
-                    .resolve("iterations");
-            Files.createDirectories(iterationsDir);
-            var iteration = WorkflowIterationDocument.initial(
-                    definition.id(), Instant.parse("2026-08-10T00:00:00Z"));
-            new ObjectMapper().registerModule(new JavaTimeModule()).writerWithDefaultPrettyPrinter()
-                    .writeValue(iterationsDir.resolve(instance.iterationId() + ".json").toFile(), iteration);
-        }
-        var context = new TaskHandler.TaskContext(workspaceRoot, workstreamId, definition, instance);
+        var ledger = AcpxTestLedger.ledger();
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
+        var context = new TaskHandler.TaskContext(workspaceRoot, workstreamId, definition, instance, ledger);
         if (java.util.Set.of("design.claude_design", "design.codex_arch_review", "plan.claude_plan",
                 "plan.codex_plan_review", "implement.claude_implement", "implement.claude_self_test_report").contains(definition.id())) {
             return AuthoredAdapterFixture.before(context);
         }
-        return context;
+        if (!Files.exists(paths.workflowDefinitionJson()))
+            AcpxTestLedger.initialize(ledger, paths, "wf-" + workstreamId,
+                    new dev.dual.core.workflow.WorkflowDefinition("adapter-fixture", 1, definition.id(), List.of(definition), List.of()));
+        var active = ledger.loadCoreNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+        return AcpxTestLedger.claim(new TaskHandler.TaskContext(workspaceRoot, workstreamId, definition, active, ledger));
+    }
+
+    private NodeResult finishAndRoute(TaskHandler.TaskContext context, NodeResult candidate) throws Exception {
+        var ledger = context.ledger();
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(context.workspaceRoot(), new dev.dual.core.id.DualId(context.workstreamId()));
+        var result = new ArtifactContractValidator(ledger).validateAndFinalize(context.workspaceRoot(), context.workstreamId(),
+                context.instance().nodeInstanceId(), context.definition(), context.instance().inputRefs(), candidate);
+        var claim = ledger.latestNodeExecution(paths, ledger.loadNode(paths, context.instance().nodeInstanceId())).orElseThrow();
+        dev.dual.runtime.handler.AgentRunCommitProtocol.complete(context.workspaceRoot(), ledger, paths, claim, result);
+        dev.dual.runtime.RecordedExecutionRecovery.recover(ledger, paths, claim);
+        return result;
+    }
+
+    private String currentNode(String ws) throws Exception {
+        return AcpxTestLedger.ledger().loadCurrent(new dev.dual.ledger.file.WorkstreamPaths(tempDir,
+                new dev.dual.core.id.DualId(ws))).activeNodeInstanceIds().getFirst();
     }
 
     private void writeCompactionMetrics(String workstreamId, long claudeCachedReadTokens, long codexCachedReadTokens)
@@ -2861,35 +3057,12 @@ class AcpxAgentTaskHandlerTest {
                 """.formatted(claudeCachedReadTokens + codexCachedReadTokens, claudeCachedReadTokens, codexCachedReadTokens));
     }
 
-    private void writeChangeBoundaryControlFacts(String workstreamId) throws Exception {
-        var workstreamDir = tempDir.resolve(".agent/workstreams").resolve(workstreamId);
-        Files.createDirectories(workstreamDir.resolve("artifacts"));
-        Files.createDirectories(workstreamDir.resolve("workspaces"));
-        Files.writeString(workstreamDir.resolve("artifacts/task-contract.json"), """
-                {
-                  "id":"task-test","version":1,"created_at":"2026-07-26T00:00:00Z",
-                  "objective":"Implement the approved change.","status":"READY_FOR_REVIEW",
-                  "scope":{"included":[{"path":"README.md","operation":"MODIFY"}],"excluded":[]},
-                  "acceptance_criteria":["approved change works","scope stays fixed"],
-                  "test_requirements":["run tests"],"constraints":["only approved files"],
-                  "non_goals":[],"risk_areas":[],"ambiguity_notes":[],"human_questions":[],
-                  "compilation_pass":1
-                }
-                """);
-        Files.writeString(workstreamDir.resolve("workstream.json"), """
-                {"primaryWorkspaceId":"wsp-test"}
-                """);
-        Files.writeString(workstreamDir.resolve("workspaces/wsp-test.json"), """
-                {"baseCommit":"1111111111111111111111111111111111111111"}
-                """);
-        Files.writeString(workstreamDir.resolve("requirement.md"), "Implement the approved change.\n");
-    }
-
     private static final class CapturingApprovalTransport extends AcpxAgentTransport {
         Boolean lastApproveAll;
         AcpxPermissionProfile lastPermissionProfile;
         ClaudeExecutionPolicy.Binding lastExecutionPolicy;
         boolean uncontracted;
+        boolean failedProcess;
 
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
@@ -2913,7 +3086,8 @@ class AcpxAgentTaskHandlerTest {
             Files.writeString(request.stderrPath(), "");
             var now = Instant.parse("2026-06-01T00:00:00Z");
             if (uncontracted) return fixtureResult(0, now, now.plusSeconds(1), List.of("acpx", "claude"), List.of(), null,
-                    new AcpxPromptCompletion("fixture", "end_turn", "{}"));
+                    new AcpxPromptCompletion("fixture", "end_turn", "{}"), failedProcess
+                            ? List.of(new AdapterSignal(AdapterSignalType.RATE_LIMITED, "fixture rate limit", 0, "fixture", "", false)) : List.of());
             return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
         }
 
@@ -2944,7 +3118,8 @@ class AcpxAgentTaskHandlerTest {
     private static final class ControlFactTamperingTransport extends AcpxAgentTransport {
         enum Target {
             TASK_CONTRACT,
-            WORKSPACE
+            WORKSPACE,
+            WORKSPACE_ADDITION
         }
 
         private final Target target;
@@ -2956,9 +3131,12 @@ class AcpxAgentTaskHandlerTest {
         @Override
         public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException {
             var workstreamDir = request.workdir().resolve(".agent/workstreams/ws-test");
-            var targetPath = target == Target.TASK_CONTRACT
-                    ? workstreamDir.resolve("artifacts/task-contract.json")
-                    : workstreamDir.resolve("workspaces/wsp-test.json");
+            var manifest = OBJECT_MAPPER.readTree(PromptManifestWriter.manifestPathFor(request.promptPath()).toFile());
+            var targetPath = switch (target) {
+                case TASK_CONTRACT -> request.workdir().resolve(manifest.at("/authoredContext/contract/contract/ref").asText());
+                case WORKSPACE -> workstreamDir.resolve("workspaces/workspace-readiness.json");
+                case WORKSPACE_ADDITION -> workstreamDir.resolve("workspaces/unapproved-workspace.json");
+            };
             Files.writeString(targetPath, "{\"tampered\":true}\n");
             Files.createDirectories(request.stdoutPath().getParent());
             Files.writeString(request.stdoutPath(), "");
@@ -3232,12 +3410,15 @@ class AcpxAgentTaskHandlerTest {
                     .replace("\"", "\\\"")
                     .replace("\n", "\\n");
             Files.writeString(sessionsDir.resolve(sessionId + ".stream.ndjson"), """
-                    {"jsonrpc":"2.0","id":7,"method":"session/prompt","params":{"prompt":[{"type":"text","text":"%s"}]}}
-                    {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"usage_update","used":110,"size":200000,"cost":{"amount":0.25,"currency":"USD"}}}}
+                    {"jsonrpc":"2.0","id":7,"method":"session/prompt","params":{"sessionId":"native-usage","prompt":[{"type":"text","text":"%s"}]}}
+                    {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"native-usage","update":{"sessionUpdate":"usage_update","used":110,"size":200000,"cost":{"amount":0.25,"currency":"USD"}}}}
                     {"jsonrpc":"2.0","id":7,"result":{"usage":{"inputTokens":100,"outputTokens":5,"cachedReadTokens":1000,"cachedWriteTokens":2,"totalTokens":1107}}}
                     """.formatted(promptText));
             var now = Instant.parse("2026-06-01T00:00:00Z");
-            return completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
+            var result = completedResult(request, 0, now, List.of("acpx", "claude"), "READY_FOR_PRODUCT_REVIEW");
+            return new AcpxRunResult(result.startedAt(), result.finishedAt(), result.command(), result.executionTimeline(),
+                    result.usage(), new AcpxPromptCompletion("7", "end_turn", result.promptCompletion().finalAssistantMessage(), "native-usage"),
+                    result.processResult(), result.adapterSignals(), result.toolObservations());
         }
     }
 

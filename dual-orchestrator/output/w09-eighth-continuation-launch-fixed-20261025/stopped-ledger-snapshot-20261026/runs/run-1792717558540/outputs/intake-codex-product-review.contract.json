@@ -1,0 +1,65 @@
+{
+  "artifact_type" : "agent_output_contract",
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "run_id" : "run-1792717558540",
+  "node_id" : "intake.codex_product_review",
+  "node_instance_id" : "node-intake-codex_product_review-004",
+  "handler_type" : "acpx.agent_run",
+  "decision" : "READY_FOR_PRODUCT_REVIEW",
+  "summary" : "提案完整保留用户需求、验收证据要求和实施授权边界，可以进入后续目标审批与设计计划。",
+  "required_keys" : [ "summary", "decision" ],
+  "allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW", "NEEDS_REVISION", "BLOCKED" ],
+  "source_output_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json",
+  "source_artifact_type" : "agent_output_contract",
+  "generated_at" : "2026-10-23T01:06:42.200642Z",
+  "control" : {
+    "summary" : "提案完整保留用户需求、验收证据要求和实施授权边界，可以进入后续目标审批与设计计划。",
+    "decision" : "READY_FOR_PRODUCT_REVIEW"
+  },
+  "control_source" : {
+    "kind" : "strict_agent_result_envelope"
+  },
+  "lifecycle_status" : "READY",
+  "blocking" : false,
+  "checks" : [ "产品完整性：objective、AC-1 与 C-1 明确保留函数签名、换行转换范围、其他字符不变、末尾换行状态和幂等性。", "架构适配：标准库纯函数适合本任务，第三方依赖、外部服务和机器配置修改均被明确排除。", "最终用户体验：AC-3 与 TR-3 要求 README 提供导入及混合换行输入输出，并以实际读取或执行支持一致性结论。", "验证要求：AC-1、AC-2 与 TR-1、TR-2 覆盖输入类别、明确期望、实际执行、覆盖数及零失败零错误，保留无需独立测量退出码的要求。", "范围授权：C-3 明确当前路径仅为提案，实施前仍需确认并批准具体路径与 CREATE/MODIFY 操作。", "协议归属：未要求产品提案重复编排器负责的输出封装与路由协议。" ],
+  "evidence" : [ "已先审阅 Review Evidence Brief；其中尚无已批准任务契约投影或累计审查结论，本次审查对象为 Required Review Subject 提供的完整 task_contract_proposal。", "提案 AC-1 明确列出全部输入类别，并要求精确期望和重复规范化结果不变。", "提案 AC-2 明确禁止以测试完成状态或文字结论替代实际输入输出与测试结果。", "提案 C-2、C-3 分别承接环境限制和实施前单独批准文件操作的要求。", "提供的仓库事实报告跟踪文件数为零，因此不要求提供现存产品文件引用。" ],
+  "missing_evidence" : [ ],
+  "must_fix" : [ ],
+  "acceptance_notes" : [ "本次认可的是 intake 提案完整性，不代表已经授权实施或已经通过代码与测试验收。", "后续 EXECUTION 批准的 scope.included 必须是精确路径及操作组成的穷尽授权集合；若导入方案需要新增文件，应先将具体路径和操作纳入审批。", "后续验证需核对实际输入类别与测试源码，不能仅凭 Ran N tests 推断覆盖充分；提案已明确要求执行输出与源码案例相符。" ],
+  "open_risks" : [ ],
+  "changed_files" : [ ],
+  "verification_summary" : "依据用户原始请求及所提供的完整提案完成产品、架构和用户视角审查，未发现当前阶段的阻断缺口；未修改文件或执行实现测试。",
+  "failure" : {
+    "category_hint" : "",
+    "verification_remediation" : "NONE",
+    "contract_gaps" : [ ],
+    "out_of_scope_files" : [ ],
+    "missing_tests" : [ ],
+    "context_gaps" : [ ],
+    "reason" : ""
+  },
+  "checks_run" : [ ],
+  "checks_skipped" : [ ],
+  "contract_obligations" : [ ],
+  "reread_reasons" : [ ],
+  "review_subject" : {
+    "schema_version" : 1,
+    "artifact_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.contract.json",
+    "producer_node_id" : "intake.claude_brainstorm",
+    "producer_node_instance_id" : "node-intake-claude_brainstorm-002",
+    "sha256" : "cd7b184f400271deea36266d6b5d111e4cb6684a236f3e03f67b5ab989852d83",
+    "proposal_id" : "node-intake-claude_brainstorm-002:cd7b184f400271de",
+    "workstream_id" : "ws-20261023T005431Z-9YYF"
+  },
+  "stage_outcome" : "READY",
+  "stage_outcome_source" : "declared_status",
+  "evidence_state" : {
+    "blocking" : false,
+    "evidence_count" : 5,
+    "missing_evidence_count" : 0,
+    "must_fix_count" : 0,
+    "acceptance_note_count" : 3,
+    "open_risk_count" : 0
+  }
+}

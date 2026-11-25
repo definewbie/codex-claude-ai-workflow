@@ -1,0 +1,119 @@
+{
+  "historical_materials_equal": true,
+  "selected_native_bytes_unchanged": true,
+  "source_inputs": 659,
+  "source_equal_after_test_package_materials": true,
+  "changed_files_identity_verified": 31,
+  "head_unchanged": "3362eb421514e75fdc4332f570df5bf274b3725e",
+  "new_document_links": [
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "changed-files.json",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "incremental.patch",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "before/",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "consumer-and-transition-map.md",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "verification-coverage.md",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "implementation-boundaries.md",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "counterproof-results.json",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "test-results.json",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "release-identity.json",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "artifact-verification.json",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "review-and-reflection.md",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "historical-preservation.json",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "selected-native-bytes-recheck.json",
+      "exists": true
+    },
+    {
+      "document": "output/w09-revision-forward-fix-20261014/assessment.md",
+      "target": "cc-review-prompt.txt",
+      "exists": true
+    },
+    {
+      "document": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "target": "../../output/w09-revision-forward-fix-20261014/assessment.md",
+      "exists": true
+    },
+    {
+      "document": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "target": "../../output/w09-revision-forward-fix-20261014/release-identity.json",
+      "exists": true
+    },
+    {
+      "document": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "target": "../../output/w09-revision-forward-fix-20261014/assessment.md",
+      "exists": true
+    },
+    {
+      "document": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "target": "../../output/w09-revision-forward-fix-20261014/consumer-and-transition-map.md",
+      "exists": true
+    },
+    {
+      "document": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "target": "../../output/w09-revision-forward-fix-20261014/review-and-reflection.md",
+      "exists": true
+    },
+    {
+      "document": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "target": "../../output/w09-revision-forward-fix-20261014/release-identity.json",
+      "exists": true
+    },
+    {
+      "document": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "target": "../../output/w09-revision-forward-fix-20261014/cc-review-prompt.txt",
+      "exists": true
+    }
+  ],
+  "provider_native_runs": 0,
+  "extra_agents": 0,
+  "sixth_case_started": false,
+  "assessment_is_author_self_review_not_independent_PASS": true
+}

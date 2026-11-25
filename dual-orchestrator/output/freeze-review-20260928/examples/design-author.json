@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "workstream_id": "EXAMPLE",
+  "node_instance_id": "design-author-001",
+  "artifact_type": "design_result",
+  "decision": "DESIGN_COMPLETE",
+  "planned_files": [
+    {
+      "path": "src/convert.py",
+      "operation": "CREATE",
+      "responsibility": "转换与校验"
+    },
+    {
+      "path": "tests/test_convert.py",
+      "operation": "CREATE",
+      "responsibility": "正反断言"
+    }
+  ],
+  "goal_contract": {
+    "ref": "examples/goal-contract.json",
+    "sha256": "9228634ffafa7d603eaad06f16efa7a7f66feb07890548bfc49acfd0eec5c768"
+  }
+}

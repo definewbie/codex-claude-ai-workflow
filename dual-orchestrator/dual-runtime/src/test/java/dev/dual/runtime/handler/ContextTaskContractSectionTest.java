@@ -78,30 +78,9 @@ class ContextTaskContractSectionTest {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Build the feature.", StandardCharsets.UTF_8);
 
-        // Create task-contract.json
-        var artifactsDir = wsDir.resolve("artifacts");
-        Files.createDirectories(artifactsDir);
-
-        var contract = new TaskContract(
-                "tc-001", 1, Instant.now(), "Test objective",
-                new TaskContract.Scope(
-                        List.of(new TaskContract.ScopeEntry(
-                                "file1.java", TaskContract.ScopeOperation.MODIFY)),
-                        List.of("file2.java")),
-                List.of("AC1", "AC2"),
-                List.of("TR1"),
-                List.of("Use Java"),
-                List.of("No Python"),
-                List.of(), List.of(), List.of(),
-                ContractStatus.READY_FOR_REVIEW, 1,
-                new TaskContract.Source("requirement.md", "contract_compiler")
-        );
-
-        var mapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        mapper.writeValue(artifactsDir.resolve("task-contract.json").toFile(), contract);
-        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
+        var fixture = new AuthoredStageSequenceTest.Fixture(tempDir, "file1.java",
+                AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, "ws-ctx");
+        var approved = fixture.before("implement.claude_implement");
 
         // Also create git evidence for the acceptance profile
         var evidenceDir = wsDir.resolve("artifacts/git-evidence");
@@ -109,15 +88,11 @@ class ContextTaskContractSectionTest {
         Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
 
         var handler = new ContextBuildPackageHandler();
-        var context = new TaskHandler.TaskContext(
-                tempDir, "ws-ctx",
-                new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.of(
+        var context = new TaskHandler.TaskContext(tempDir, "ws-ctx", new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "next.node",
-                        "profile", "acceptance"
-                )),
-                new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",
-                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
-        );
+                        "profile", "acceptance", "required_contract_phase", "EXECUTION"
+                )), new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",
+                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null), dev.dual.runtime.RuntimeTestLedger.ledger());
 
         var result = handler.execute(context);
 
@@ -128,16 +103,16 @@ class ContextTaskContractSectionTest {
 
         assertTrue(markdown.contains("TaskContract"),
                 "Context package should contain TaskContract section header");
-        assertTrue(markdown.contains("Test objective"),
+        assertTrue(markdown.contains("Verify output"),
                 "Context package should contain the objective text");
-        assertTrue(markdown.contains("AC1"),
+        assertTrue(markdown.contains("AC-1"),
                 "Context package should contain acceptance criteria");
-        assertTrue(markdown.contains("AC2"),
+        assertTrue(markdown.contains("AC-2"),
                 "Context package should contain acceptance criteria");
     }
 
     @Test
-    void acceptancePackageWithoutTaskContractRendersPlaceholder() throws Exception {
+    void acceptanceConsumerCannotOmitItsRequiredContractPhase() throws Exception {
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Build the feature.", StandardCharsets.UTF_8);
 
@@ -145,26 +120,22 @@ class ContextTaskContractSectionTest {
         Files.createDirectories(evidenceDir);
         Files.writeString(evidenceDir.resolve("git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
         Files.writeString(evidenceDir.resolve("diff.stat"), "1 file changed\n", StandardCharsets.UTF_8);
-        Files.writeString(wsDir.resolve("events.jsonl"), "", StandardCharsets.UTF_8);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        var definition = new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.of("target_node", "next.node", "profile", "acceptance"));
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger,
+                new dev.dual.ledger.file.WorkstreamPaths(tempDir, new dev.dual.core.id.DualId("ws-ctx")), "wf-thin",
+                new dev.dual.core.workflow.WorkflowDefinition("thin", 1, definition.id(), List.of(definition), List.of()));
 
         var handler = new ContextBuildPackageHandler();
-        var context = new TaskHandler.TaskContext(
-                tempDir, "ws-ctx",
-                new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.of(
+        var context = new TaskHandler.TaskContext(tempDir, "ws-ctx", new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.of(
                         "target_node", "next.node",
                         "profile", "acceptance"
-                )),
-                new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",
-                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null)
-        );
+                )), new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",
+                        NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null), dev.dual.runtime.RuntimeTestLedger.ledger());
 
-        var result = handler.execute(context);
-
-        assertEquals(NodeStatus.COMPLETED, result.status(), "Baseline workflow acceptance context should not require task-contract.json");
-        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")), StandardCharsets.UTF_8);
-        assertTrue(markdown.contains("TaskContract"),
-                "Context package should keep a stable TaskContract section");
-        assertTrue(markdown.contains("(not available)"),
-                "Missing task contract should be visible to the reviewer as unavailable");
+        var failure = org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> handler.execute(context));
+        assertTrue(failure.getMessage().contains("required_contract_phase"));
+        org.junit.jupiter.api.Assertions.assertFalse(Files.exists(wsDir.resolve("context/node-001.md")),
+                "placeholder display policy cannot waive qualification");
     }
 }

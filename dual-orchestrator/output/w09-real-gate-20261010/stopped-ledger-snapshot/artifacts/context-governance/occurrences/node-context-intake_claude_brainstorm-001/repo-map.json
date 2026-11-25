@@ -1,0 +1,15 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "repo_map",
+  "workstreamId" : "ws-20261010T055644Z-6QCS",
+  "generatedAt" : "2026-10-10T06:43:07.608777Z",
+  "effectiveWorkdir" : "/private/tmp/dual-w09-newlines-20261010/worktree",
+  "baseCommit" : "",
+  "source" : "task_contract_scope+git_evidence",
+  "inventoryHead" : "",
+  "inventorySha256" : "",
+  "inventoryPathCount" : 0,
+  "files" : [ ],
+  "fileCount" : 0,
+  "truncated" : false
+}

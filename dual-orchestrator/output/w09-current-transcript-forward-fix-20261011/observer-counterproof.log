@@ -1,0 +1,20 @@
+test_same_rpc_id_after_reinitialize_is_two_calls_and_history_append_stays_valid (test_gate_observer.ObserverTest.test_same_rpc_id_after_reinitialize_is_two_calls_and_history_append_stays_valid) ... FAIL
+
+======================================================================
+FAIL: test_same_rpc_id_after_reinitialize_is_two_calls_and_history_append_stays_valid (test_gate_observer.ObserverTest.test_same_rpc_id_after_reinitialize_is_two_calls_and_history_append_stays_valid)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-current-transcript-forward-fix-20261011/mutants/observer-global-history/test_gate_observer.py", line 47, in test_same_rpc_id_after_reinitialize_is_two_calls_and_history_append_stays_valid
+    value = self.measure()
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-current-transcript-forward-fix-20261011/mutants/observer-global-history/test_gate_observer.py", line 38, in measure
+    return g.measure(self.root,self.ledger,self.sessions)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-current-transcript-forward-fix-20261011/mutants/observer-global-history/gate_support.py", line 88, in measure
+    assert len(prompts) == len(results) == 1, 'Ambiguous request/result'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Ambiguous request/result
+
+----------------------------------------------------------------------
+Ran 1 test in 0.004s
+
+FAILED (failures=1)

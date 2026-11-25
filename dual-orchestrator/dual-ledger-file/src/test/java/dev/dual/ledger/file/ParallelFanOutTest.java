@@ -28,7 +28,7 @@ class ParallelFanOutTest {
 
     @BeforeEach
     void setup() {
-        ledger = new WorkflowFileLedger();
+        ledger = LedgerTestFixture.ledger();
     }
 
     @Test
@@ -36,7 +36,7 @@ class ParallelFanOutTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-fanout"));
         Files.createDirectories(paths.workstreamDir());
         var def = definitionWithParallelEdges();
-        ledger.initialize(paths, "inst-001", def);
+        LedgerTestFixture.initialize(ledger, paths, "inst-001", def);
 
         // Complete the entry node — should fan out to both node_b and node_c
         ledger.completeAndRoute(paths, def, firstActiveNodeId(paths), NodeStatus.COMPLETED, "DONE",
@@ -65,7 +65,7 @@ class ParallelFanOutTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-fanout2"));
         Files.createDirectories(paths.workstreamDir());
         var def = definitionWithParallelEdges();
-        ledger.initialize(paths, "inst-002", def);
+        LedgerTestFixture.initialize(ledger, paths, "inst-002", def);
 
         // Fan out
         ledger.completeAndRoute(paths, def, firstActiveNodeId(paths), NodeStatus.COMPLETED, "DONE",
@@ -87,7 +87,7 @@ class ParallelFanOutTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-fanout3"));
         Files.createDirectories(paths.workstreamDir());
         var def = definitionWithParallelEdges();
-        ledger.initialize(paths, "inst-003", def);
+        LedgerTestFixture.initialize(ledger, paths, "inst-003", def);
 
         // Fan out
         ledger.completeAndRoute(paths, def, firstActiveNodeId(paths), NodeStatus.COMPLETED, "DONE",
@@ -113,7 +113,7 @@ class ParallelFanOutTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-join"));
         Files.createDirectories(paths.workstreamDir());
         var def = definitionWithJoin();
-        ledger.initialize(paths, "inst-join", def);
+        LedgerTestFixture.initialize(ledger, paths, "inst-join", def);
 
         ledger.completeAndRoute(paths, def, firstActiveNodeId(paths), NodeStatus.COMPLETED, "DONE",
                 List.of(), Map.of());
@@ -139,7 +139,7 @@ class ParallelFanOutTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-join-chain"));
         Files.createDirectories(paths.workstreamDir());
         var def = definitionWithBranchChainJoin();
-        ledger.initialize(paths, "inst-join-chain", def);
+        LedgerTestFixture.initialize(ledger, paths, "inst-join-chain", def);
 
         ledger.completeAndRoute(paths, def, firstActiveNodeId(paths), NodeStatus.COMPLETED, "DONE",
                 List.of(), Map.of());

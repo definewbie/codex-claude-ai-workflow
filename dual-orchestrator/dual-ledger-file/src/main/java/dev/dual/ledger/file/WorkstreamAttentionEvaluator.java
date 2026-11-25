@@ -316,7 +316,9 @@ public final class WorkstreamAttentionEvaluator {
                     "critical",
                     "Agent output incomplete",
                     assessment.reason(),
-                    "Inspect the agent output contract, then retry the same active node.",
+                    "RETRY_AFTER_EXTERNAL_FIX".equals(assessment.retryReadiness())
+                            ? "Inspect the recorded agent process and external failure before a manual retry."
+                            : "Inspect the agent output contract, then retry the same active node.",
                     assessment.suggestedCommand(),
                     assessment.retrySafe(),
                     current.status().name(),

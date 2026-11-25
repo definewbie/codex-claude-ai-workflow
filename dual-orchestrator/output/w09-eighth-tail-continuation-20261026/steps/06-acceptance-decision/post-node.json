@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-acceptance-decision-036",
+  "nodeDefinitionId": "acceptance.decision",
+  "kind": "DECISION",
+  "handlerType": "review.decision",
+  "status": "COMPLETED",
+  "stageId": "stage-acceptance",
+  "iterationId": "iter-003",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/binding.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/verification-observations.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.contract.json"
+  ],
+  "inputTransition": {
+    "transition_type": "normal",
+    "required": true,
+    "source_node_instance_id": "node-acceptance-codex_verifier_review-035",
+    "source_node_sha256": "6b55fa7bae9751e36a302371f56bb6efcd23f1757a777439b92a865deb6f9a46",
+    "purpose": "Only verified complete self-test evidence may enter artifact validation.",
+    "condition": "unconditional"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/binding.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/verification-observations.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.contract.json"
+  ],
+  "result": {
+    "summary": "三个获批文件满足 AC-1～AC-3，独立执行测试与文档示例全部通过。",
+    "source": "contract-sidecar",
+    "decision": "ACCEPT"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1792977684166-cdb67674",
+  "startedAt": "2026-10-26T01:21:24.178251Z",
+  "finishedAt": "2026-10-26T01:21:24.424331Z"
+}

@@ -1,0 +1,526 @@
+{
+  "baseline": "implementation-before-source-text.json (dirty workspace)",
+  "entries": [
+    {
+      "path": ".tools/acpx-e1/source/CHANGELOG.md",
+      "before_sha256": "20de06cd9f5ff2f4d998ec72dc45e0a7292766e4d46c836355b725bc5b2e079b",
+      "after_sha256": "4797052177592052e0c4b084120ae61f9a8c475c687eb5c65df4d8fa22416536",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/agents/Claude.md",
+      "before_sha256": "daa68dffbac397520368a6be332666964617e73b566cbb11f1dbab1fc94fc468",
+      "after_sha256": "109412ba906be56aea9b87a146a17a48fb58963f1821e56c6e59e8d79665cebf",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/agents/Codex.md",
+      "before_sha256": "0ace524608f0795d0460ef16e40095da9d348bc267ca2d808c3d524173006492",
+      "after_sha256": "8c0c5243d41719c6869ce8a4de2461ef1fd268bc211850ea601eb71ed4e9268a",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/docs/CLI.md",
+      "before_sha256": "7ebee98711f09e295086dfa4a66d564b93808d53b4751268a3ab21b1737a0038",
+      "after_sha256": "459b8330501268db11e73c961aa5ec48c3efa5aff93a39ec3df44702d0a5cf33",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/skills/acpx/SKILL.md",
+      "before_sha256": "39785579db048ed27ca67d6fd085bef8589b66162060f36a6e921a682601dbf0",
+      "after_sha256": "7229d6583babd767e431001f62ebabc4c362553667a2be9330a8f357b7c526ad",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/acp/claude-execution-policy.ts",
+      "before_sha256": "a5bc64a537e5ef5fa316935481a47a22b5e5bd35e09f6cc1827352eba150b2f9",
+      "after_sha256": "aa33163a96b7edcdb843d8e870f57df07c9ef7bfdae2d662a9ade0e8b050887b",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/acp/client.ts",
+      "before_sha256": "d727f05adfa38beadbc4214fbbc5a14c864dfa1eead4dd5e2a0a734a63e65a88",
+      "after_sha256": "3f4204143fd1de4d160d74f4b74a966ffa6e5a12b9b682bb5a594a9309c443b5",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/acp/terminal-manager.ts",
+      "before_sha256": "cfc45722970c870175f1534335dd79d8b7f9b4e26b748746f097d282986c5196",
+      "after_sha256": "dba76c7db789ba0ed98b4ae54fcdaeeca99666aa33ada292c8aec89914a89d5d",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/cli/command-handlers.ts",
+      "before_sha256": "61a99412d54e8f28aae60a5b1c57b432c655681ae129bd8a03937e2f673150ba",
+      "after_sha256": "f5043c98f9f3b2312baed8d48ed0ffb4e2d40b14583e42a580abb3119b629ff4",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/cli/command-registration.ts",
+      "before_sha256": "652cca1d437749aa97fddb4acf2b2f5135f50766644293eb4f9c30051573504f",
+      "after_sha256": "da85215e7b28d0416ac7d1c659bdbfb908be97882e048a509737b6533599f89a",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/cli/flags.ts",
+      "before_sha256": "5e8aa11e042c48ae1056cc02e5c850c8f1e1d8bdd87eaeb3247966e0fc0ea6e8",
+      "after_sha256": "d1da4ef7f21567e8e541f97d5d9f13d8215bea2b0e0b17cf1bc4a5ef8dd77d06",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/cli/queue/ipc-server.ts",
+      "before_sha256": "fc4b19e89178f4f2da6c826a456e891fb67fe4173aa20fa7089cd9ab9983395e",
+      "after_sha256": "ff44f5a7865d1d32a80c72e6f9a3924af37e94744b2a838fb440b1e69a5f3a03",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/cli/queue/ipc.ts",
+      "before_sha256": "8b73437883f6149d73d25f6b5b40094c19ccccba7bf5ab7843eabf397af8a58f",
+      "after_sha256": "e5c134f544dc66d53124a2c96dbfefadf36d760ad5c7f7e75515d79feeaec13a",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/cli/queue/messages.ts",
+      "before_sha256": "c6d4f0fb3f3ed524b8f169460b6734208d21d3316e158ee42c7fce9544cd88ea",
+      "after_sha256": "fffce4f426ecb8fb046294a3d238921e9b8131dd5340d3c93616feae8da72460",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/cli/queue/permission-replies.ts",
+      "before_sha256": null,
+      "after_sha256": "4dde4ac2383c0ae36935e2706eda4a2a61bc94c4886c048d514c19936b70fa9a",
+      "before_origin": "new file; absence checked against saved source inventory",
+      "change": "CREATE"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/cli/session/contracts.ts",
+      "before_sha256": "2708c7b3ba7474f81a52446b7a95acd49c2122543d5fbefb34468778b4ebb5c8",
+      "after_sha256": "b779f4a1bb98559b0225541d969e11b847f5322aae947e6cbe4c58cb658ab447",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/cli/session/queue-owner-runtime.ts",
+      "before_sha256": "41bfb42527fe043ff921550b21758443fdf4f1e73f8aa3b3056239be3e3b3c87",
+      "after_sha256": "33aeed887156701589cc6e5c605f63c48621aa90a521a8a6a4400a65d7a2edf3",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/e1-build-info.generated.ts",
+      "before_sha256": "4c2255586f4fd741a21b2993f7f50c7dffb7d4437d282aca6e0cf5d82b68df54",
+      "after_sha256": "019a40c38640044a11d1c10c66a406cb43743dbe11f0a066278a8788a48eee3a",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/filesystem.ts",
+      "before_sha256": "46e7eee0d04ff262029958a232ea68acc4279c84f3e10c4941dc0a12013d5bba",
+      "after_sha256": "0a7bc0e11a00f4ecad6659a8f92466cf82dd6e83737cdd800c0111bdeab17f70",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/permissions.ts",
+      "before_sha256": "b20f3f5b60cf1f6a57e61deb15b89c16168e76018e519e36446e6de1f5247ddc",
+      "after_sha256": "fb685a2033c62628a5d81d90c3cd91519dbdf9c99d688ca40675578627d31ebf",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/runtime/engine/reconnect.ts",
+      "before_sha256": "20b8acbe53acca3956517b241876c0a9cf1dd6daae2c5a1264cf63063e13499a",
+      "after_sha256": "2155ec29b327feeee448f993f5dacabdfcede2cb6dc1c7dd717e14aba7dfc9bb",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/src/types.ts",
+      "before_sha256": "4729bb92952d3bb383afdf3f5ecc6591a6a8fb5a22b0e96d72cb0e156dcebfdc",
+      "after_sha256": "3e7d49604a93b7615e42fe5afea3b6353362456bc2586b2e4896f943e31da2da",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/test/claude-execution-policy.test.ts",
+      "before_sha256": "e15b67c04dfdae9a98a60dfecad5c8ec8c0317528c6ddb82ac42e36a8e339461",
+      "after_sha256": "3ee0aadaffac1e9ab7442d1949abf62b3d33dcdd33df67dba5942fcd0abe0cca",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/test/client.test.ts",
+      "before_sha256": "668c5f52d6f1f65709e7cb2812bca1cc436276ed45bdf91abc64b7bfc68088c8",
+      "after_sha256": "f65f80825e87edde0cc2803c5a68ccbe515eb1f3b59f9d646a8c9d72a943de02",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": ".tools/acpx-e1/source/test/permission-cli.test.ts",
+      "before_sha256": null,
+      "after_sha256": "5317f40f0388534cc9b3e2b7aca4d51c73eb78ac654ad9ece6d05ac1b304b1d7",
+      "before_origin": "new file; absence checked against saved source inventory",
+      "change": "CREATE"
+    },
+    {
+      "path": ".tools/acpx-e1/source/test/permission-replies.test.ts",
+      "before_sha256": null,
+      "after_sha256": "d5e0acfd6ed2cb0a37eb34b34d2bd506f8c8043a545820318ec7c9e725debe07",
+      "before_origin": "new file; absence checked against saved source inventory",
+      "change": "CREATE"
+    },
+    {
+      "path": ".tools/acpx-e1/source/test/spawn-options.test.ts",
+      "before_sha256": "82408ce5a3aaea713f9bde7e5c33af3f1d7346484cda51a4488a5c6cece73c20",
+      "after_sha256": "33a0e825854515ee3dc1190bd5c26fec7a73097019e3301f646834df0db98806",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "before_sha256": "80466b00dd884e5604c438fbab11ad92c01fd7b1a99271d30fa8b1b87f3286d0",
+      "after_sha256": "35a2592a945776f7ea50ab9c535be99f2429618f188649e43fe8fa21f7dfda4f",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "docs/reference.md",
+      "before_sha256": "fe62bf79ca95e063f5a51294a53908586d3530870a067fa023f4adf84d79d633",
+      "after_sha256": "03b6d93ddbaba446f1f936ff3e61b6493e5dad012156b3ea03998a183b4c226b",
+      "before_origin": "reverse_reconstructed; not measured before implementation",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+      "before_sha256": "8565e7d8e346e7d4ada5f8346b6856b5a3cd947273e02a5e1d0db527c7f9dd9e",
+      "after_sha256": "96605a104dcf58873680153bb06acd0dea8562cbb2f87877b60f2881ceb9a7e1",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java",
+      "before_sha256": "94e4368278082c07fb60e6b8fd10455644e0f5f9d5fc2c77fb922ed8ad4fe703",
+      "after_sha256": "3dfd8d2531fab9c496145d8818be233c23e4687c961b444600021cb9b2eae8cf",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxExecutionEventSink.java",
+      "before_sha256": "27801f9763f8a63a4f48ad6e94dd5bc075b1e08f44fcdf34f0dec5b7e2115f11",
+      "after_sha256": "08b06551ff15d8e4e2086447ead53a821a84d353070229908bccebc7790b25be",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxExecutionRecovery.java",
+      "before_sha256": "18e4739a5362f21953267f1fe75c9303505e93c19c71417081b97afcae5ced19",
+      "after_sha256": "53002f61213bfb521d9c13eb066c299c9927d5a35a8ee2ce5a204d22f8ac3b7e",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java",
+      "before_sha256": "731580ce4c5a091ad30705eb68c7cb0c65123dc05237634bb30d099d78bf5703",
+      "after_sha256": "5cb774d609ef12c590fa6978137a6b23379aecbe03e1589529bce63e2cf1a042",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentExecutionHealth.java",
+      "before_sha256": "1e76d155518c2501f4a2f3389607cfa65e80f04b51c6a72a9217c7a965708631",
+      "after_sha256": "e92e2e326bd37badf9bcf1cbd4800a15cc92a5adb3945919809d62dd0ccbaf11",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentLifecycleEventReader.java",
+      "before_sha256": "5d393f214a0662d1c88805dcf3a4b7748d4fc74394b7037021d3d6247d92aec5",
+      "after_sha256": "ad29825eee93b5c0b87d3771dd9b8521ea5b37681e6456c009ed75a046019a06",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ReviewedAcpxBuildIdentity.java",
+      "before_sha256": "643b54a1c94a0f2fdf6583507674971af29a820bdc068839ac37765ac84b1f61",
+      "after_sha256": "6439b7b039ab2cd67cee353d7ad0480552b30d7449515513a1c48e127ede07a1",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentExecutionHealthTest.java",
+      "before_sha256": "6301ef73bde6be121ca8daf3e46a14bf675c8b226d5db1ab92e47555ec30451c",
+      "after_sha256": "55e797dcf9e16d54cce2afc3f4e292789ce89425fc6b744689fd74b921a1ad10",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java",
+      "before_sha256": "f4c36f175c3e8d808217f422355f1ac1865ad5c52fccf8093fff5035a7fa0d58",
+      "after_sha256": "3b8a8cf0269a92c907b1ea463f64c6a8eeb9d346289829d7c607aab81ada4e72",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionStreamTest.java",
+      "before_sha256": null,
+      "after_sha256": "fd0e7905b0501d550fb598f4329124c9b91f4a8953963c1b00ba426068bfa2ff",
+      "before_origin": "new file; absence checked against saved source inventory",
+      "change": "CREATE"
+    },
+    {
+      "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionTransportSequenceTest.java",
+      "before_sha256": null,
+      "after_sha256": "03c7f3c2b84f18f49e79d1fbc92d24fd2b38f77f27b424baf22f376cfef736eb",
+      "before_origin": "new file; absence checked against saved source inventory",
+      "change": "CREATE"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/DualCtlCommand.java",
+      "before_sha256": "c03818dec1929029c0fc85155f2ff650436359a8769304b30dbf0d55584cfbb2",
+      "after_sha256": "5929a33e8746f55f6e7ef8ce73e453a53bbaccb885b71257cdbcf9f058641ac6",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/PermissionsCommand.java",
+      "before_sha256": null,
+      "after_sha256": "d08c96c52b59a17c5698c7b2084505d8f6e1d89991885c7bc6a5f20d4b27e63f",
+      "before_origin": "new file; absence checked against saved source inventory",
+      "change": "CREATE"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/SummaryCommand.java",
+      "before_sha256": "a737bf571317c01ab34bb5e6df646722ee203d2f1ce91e723dbd82a1e17622e6",
+      "after_sha256": "3420db95f607eeb562c3cd286cb3a7fcbcdf1f207a0da656ff4c3c291d8ba1dc",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-cli/src/test/java/dev/dual/cli/NativePermissionCliTest.java",
+      "before_sha256": null,
+      "after_sha256": "5db8786b84099753a21b78f84b1bb3cca19ee9a8c9ac1df33362876ebdb6398f",
+      "before_origin": "new file; absence checked against saved source inventory",
+      "change": "CREATE"
+    },
+    {
+      "path": "dual-core/src/main/java/dev/dual/core/execution/AdapterSignalType.java",
+      "before_sha256": "cbfb3d70b384d06bf9b42eb25e5e22779735d6b4e2618e4d93bd581ea2503000",
+      "after_sha256": "99c7e1992ed4353cfba937321b54256e2e36e24dd58ae6a60a8c09ea4285c585",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-core/src/main/java/dev/dual/core/execution/AgentExecutionTimelineEventKind.java",
+      "before_sha256": "0f162d798174ed14c88917cd6026c880b941d80799b6b56e73450fe317b0bcce",
+      "after_sha256": "56a4b467f6ee1c778c715cc6e025b039e0cfd661d051d6380086f7998d13000c",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java",
+      "before_sha256": "e0a2cb356e230bf1cefd50165f82ea1ec3e48dadfe7d5e8d20d9f63446aaa7a9",
+      "after_sha256": "cf1c3849dee4509d4d0acb6f23a57439d9ff675efbf71437d5de61ee9e18fef9",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java",
+      "before_sha256": "0dc3eaa0da3999da253137387081d11c3336e0554da06a4fe7f8364257d383ee",
+      "after_sha256": "699b4f57690985fc331124201db7f30aacddd3f209519075321e334ffc5a94ee",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+      "before_sha256": "dfcca90d8317d164591d807e7ed8f501d0a28e58f4921f203df22a2fba848ddf",
+      "after_sha256": "42277520edb3017ac9dfe9d59570c1268dd0f3f47d48f5cf6456e26e212b2fd9",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-ledger-file/src/test/java/dev/dual/ledger/file/RecoveryAssessmentTest.java",
+      "before_sha256": "6e3b69c76956b73d5a036ff9e2443fed58f69f44664793f7a35a299c5ce50bce",
+      "after_sha256": "9cf52f3dabbda4977e6d7fea2fcb072834566cff950c4ae32d264599acc46435",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java",
+      "before_sha256": "512690b6e9b9336bbd11961aed95db9bf3c1441559b3f7005774182332e8a436",
+      "after_sha256": "86b156d91cb387897018bf353360cc3553c9e566c097606f490509cc3b4dc824",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/NativePermissionRequests.java",
+      "before_sha256": null,
+      "after_sha256": "aa90ceac8955c914355478a2a4b53e9fd9e4e44ed6c7a3fe01e58669b5014fe5",
+      "before_origin": "new file; absence checked against saved source inventory",
+      "change": "CREATE"
+    },
+    {
+      "path": "dual-runtime/src/test/java/dev/dual/ledger/file/InterruptedTestLedger.java",
+      "before_sha256": "994d10c6d428ae7d46c1b66ac4df051e274bed468d9c86295c67fce9ed53293f",
+      "after_sha256": "3d861c1b99e7107a4adfaad5fe86d5d4ec52e9e804b8f27c1c99f88549ff050a",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/NativePermissionSequenceTest.java",
+      "before_sha256": null,
+      "after_sha256": "bc6d1be71e3cbe94b7b6b774c38b43f8764dbaa384a1f9a06043671c182b66bf",
+      "before_origin": "new file; absence checked against saved source inventory",
+      "change": "CREATE"
+    },
+    {
+      "path": "dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+      "before_sha256": "7ba2bae642fe067e24ca69e54283fd34aa88b5c456409f937e796f10d318c9f2",
+      "after_sha256": "2d8de1be26dace7974c605688eb9ccae7c4af5e2ea3c13930c56447bebac83e3",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java",
+      "before_sha256": "517a9c0ad6bd63267b0540c4a13226d17567899fb4d1a2034e1b0ace4b195859",
+      "after_sha256": "0a0e893204c91fa8313fade65f14f17903dc743ebc10f6f1926be7892e77e139",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "before_sha256": "e5fe9e4d516decd226bf12e1e35d4f9f652c48a509bb562031a0956bbb85c658",
+      "after_sha256": "93772fa8c6df949d457a366ae4d6d0617ceb35b7d2844d155681b245def3ddee",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-server/src/main/resources/static/console.js",
+      "before_sha256": "84e28bf0a65b4c3881be55697b239522b516150d7f1975b3f80b0c31af82a6ed",
+      "after_sha256": "e57a394ead51ca29f45b7a2f27dc5f928c036480bf6e65ff179ee7aba45f8321",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-server/src/main/resources/static/index.html",
+      "before_sha256": "9a88f9c3683c58234bd2cd7c8a71acec0e5513ab49db92af64177ab3dc96d3f8",
+      "after_sha256": "207fdfa830639409a9d4c0102abbd33d9e0db00cf8b3e1f56669087f879df36d",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-server/src/main/resources/static/mgt/app.js",
+      "before_sha256": "447457842b26bed22e509caec344223ea1fd6ea5ac264dd51c702b00b93cd123",
+      "after_sha256": "18fbde99856db98de1117fbcf99c48527b2faa73b5cc5ded501ac1b08683d35c",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-server/src/main/resources/static/mgt/index.html",
+      "before_sha256": "7b280fe3b2bde582513c4e751d4d338e504fd13f98732ba13722302f617bb9a1",
+      "after_sha256": "8d69ca75b9d7dfd22cd9f99ce77f6f87ccabb965faad1b0a2e36eb1e0457bf92",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "dual-server/src/main/resources/static/native-permissions.js",
+      "before_sha256": null,
+      "after_sha256": "dbb098b2c002fe8e38f08bf0f40669fa2d13a04fb2cc31bec966577edf346508",
+      "before_origin": "new file; absence checked against saved source inventory",
+      "change": "CREATE"
+    },
+    {
+      "path": "dual-server/src/test/java/dev/dual/server/NativePermissionApiTest.java",
+      "before_sha256": null,
+      "after_sha256": "8c1ef4c91d61590e3821c2b7e20c7dd2d5095dd41bf6fb3e9fa0f0ec4650f9ed",
+      "before_origin": "new file; absence checked against saved source inventory",
+      "change": "CREATE"
+    },
+    {
+      "path": "dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+      "before_sha256": "b5ef8afac958d0b652ac6abdfcbd578eced93c4e41fc72605a7d27f00f013a8b",
+      "after_sha256": "9dde1264048a3836bb90fe9ce854a54e96bc097a13304cb20a624c1799cf92a5",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "scripts/configure-acpx.sh",
+      "before_sha256": "280ec1c4372d2f1fac9ea20ef9fbcac9ee00dcbaee713af1cd508b9989105938",
+      "after_sha256": "fe94a23a196ee32c17cf8c099cf424153373676a5190bbc7f6df4b3445d80ffc",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "scripts/fixtures/emit-strict-agent-result.py",
+      "before_sha256": "9a26e3e4bafff206ddf2db4d77c0bc3507a6a36760b838a6cbad1b82a5b2021b",
+      "after_sha256": "aeb33a5571ec43a99b305e3a4a8d9f710b5d354a23e613882227f408694f0d4d",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "tools/acpx-e1/manifest.json",
+      "before_sha256": "d75e2ab35d1e518319f12cf748da830616ad649efa427ce17d1296f2bfc7889f",
+      "after_sha256": "5e017f40404e17fdcf6b40eb58b4d9da57d6b3b55a6bf980dc99fd9384328111",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    },
+    {
+      "path": "tools/acpx-e1/patches/acpx-v0.13.2-e1-policy-transport.patch",
+      "before_sha256": "4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e",
+      "after_sha256": "1517f828d303ea720a7a153e6dc8c33265ba1ea100d2b9260c98327b5604468c",
+      "before_origin": "measured_implementation_before",
+      "change": "MODIFY"
+    }
+  ],
+  "count": 69,
+  "not_head_diff": true,
+  "unchanged_upstream_documents_excluded": [
+    ".tools/acpx-e1/source/docs/2026-02-17-agent-registry.md",
+    ".tools/acpx-e1/source/docs/2026-02-17-architecture.md",
+    ".tools/acpx-e1/source/docs/2026-02-17-session-management.md",
+    ".tools/acpx-e1/source/docs/2026-02-19-acp-coverage-roadmap.md",
+    ".tools/acpx-e1/source/docs/2026-02-19-mock-agent-testing.md",
+    ".tools/acpx-e1/source/docs/2026-02-22-openclaw-integration-plan.md",
+    ".tools/acpx-e1/source/docs/2026-02-23-session-identity-spec.md",
+    ".tools/acpx-e1/source/docs/2026-02-25-warm-session-owner-architecture.md",
+    ".tools/acpx-e1/source/docs/2026-02-27-acpx-session-model.md",
+    ".tools/acpx-e1/source/docs/2026-02-27-zed-thread-schema.md",
+    ".tools/acpx-e1/source/docs/2026-03-25-acpx-flows-architecture.md",
+    ".tools/acpx-e1/source/docs/2026-03-26-acpx-flow-trace-replay.md",
+    ".tools/acpx-e1/source/docs/2026-03-27-flow-replay-viewer.md",
+    ".tools/acpx-e1/source/docs/2026-03-28-acpx-flow-permission-requirements.md",
+    ".tools/acpx-e1/source/docs/2026-03-31-flow-replay-live-transport.md",
+    ".tools/acpx-e1/source/docs/2026-04-06-built-in-agent-launch-ownership.md",
+    ".tools/acpx-e1/source/docs/ACPX_ERROR_STRATEGY.md",
+    ".tools/acpx-e1/source/docs/VISION.md",
+    ".tools/acpx-e1/source/docs/agents.md",
+    ".tools/acpx-e1/source/docs/compare.md",
+    ".tools/acpx-e1/source/docs/config.md",
+    ".tools/acpx-e1/source/docs/custom-agents.md",
+    ".tools/acpx-e1/source/docs/exit-codes.md",
+    ".tools/acpx-e1/source/docs/flows.md",
+    ".tools/acpx-e1/source/docs/index.md",
+    ".tools/acpx-e1/source/docs/install.md",
+    ".tools/acpx-e1/source/docs/json-patch-plus.md",
+    ".tools/acpx-e1/source/docs/output-formats.md",
+    ".tools/acpx-e1/source/docs/permissions.md",
+    ".tools/acpx-e1/source/docs/prompting.md",
+    ".tools/acpx-e1/source/docs/quickstart.md",
+    ".tools/acpx-e1/source/docs/session-control.md",
+    ".tools/acpx-e1/source/docs/sessions.md"
+  ],
+  "registration_note": "worklist added after final reactor; documentation-only, outside tested input snapshot"
+}

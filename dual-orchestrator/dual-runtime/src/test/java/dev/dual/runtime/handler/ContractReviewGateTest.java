@@ -23,15 +23,14 @@ class ContractReviewGateTest {
         var f = new AcceptanceRepairSequenceTest.Fixture(tempDir, "CONTRACT_GAP", "tool.py");
         f.until("gate.human_requirement_review"); f.approve(); f.until("gate.contract_review");
         var node = f.ledger.loadNode(f.paths, f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst());
-        var result = handler.openOrInspect(new GateHandler.GateContext(
-                tempDir,
+        var result = handler.openOrInspect(new GateHandler.GateContext(tempDir,
                 f.ws,
                 f.ledger.loadDefinition(f.paths).node(node.nodeDefinitionId()),
                 new NodeInstance(node.nodeInstanceId(), node.nodeDefinitionId(), node.kind(), node.handlerType(),
                         node.status(), node.stageId(), node.iterationId(), node.inputRefs(), node.outputRefs(), node.result(),
                         node.runRef(), node.startedAt(), node.finishedAt()),
-                f.ledger.loadOpenGateForNode(f.paths, node.nodeInstanceId()).result().get("source_outcome").toString()
-        ));
+                f.ledger.loadOpenGateForNode(f.paths, node.nodeInstanceId()).result().get("source_outcome").toString(),
+                dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.WAITING, result.status());
         assertEquals("open", result.outcome());

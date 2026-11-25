@@ -1,0 +1,23 @@
+Workstream: ws-20261023T005431Z-9YYF
+Workspace: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree
+Branch: codex/w09-newlines-20261023-offline-08
+Ledger: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF
+
+Workflow:
+  Definition: agent-lifecycle-terminal-delivery@5
+  Status: COMPLETED
+  Active nodes: []
+  Open gates: []
+
+Delivery:
+  Status: COMMITTED
+  Reason:  - The recorded approved commit is current.
+  Target repo: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target
+  Candidate: .agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/candidate-5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb.json
+  Candidate SHA-256: 5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb
+  Changed files: 3
+  Commit: f8ec3d41cbe1cac554a78c3131372af434440691
+  Can merge: false
+  Can finalize: false
+  Stop basis: PROGRAM_OBSERVED_TERMINATION
+  Next action: The recorded approved commit is current.

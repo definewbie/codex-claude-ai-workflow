@@ -1,0 +1,442 @@
+{
+  ".tools/acpx-e1/source/src/acp/client.ts": {
+    "sha256": "3f4204143fd1de4d160d74f4b74a966ffa6e5a12b9b682bb5a594a9309c443b5",
+    "anchors": [
+      {
+        "line": 2066,
+        "text": "if (!this.exactPermissionStillCurrent(params.sessionId, signal, active)) {"
+      },
+      {
+        "line": 2073,
+        "text": "private exactPermissionStillCurrent("
+      }
+    ]
+  },
+  ".tools/acpx-e1/source/src/cli/queue/ipc.ts": {
+    "sha256": "e5c134f544dc66d53124a2c96dbfefadf36d760ad5c7f7e75515d79feeaec13a",
+    "anchors": [
+      {
+        "line": 557,
+        "text": "export async function sendNativePermissionReply("
+      }
+    ]
+  },
+  ".tools/acpx-e1/source/src/cli/queue/permission-replies.ts": {
+    "sha256": "4dde4ac2383c0ae36935e2706eda4a2a61bc94c4886c048d514c19936b70fa9a",
+    "anchors": [
+      {
+        "line": 40,
+        "text": "export class QueuePermissionReplies {"
+      }
+    ]
+  },
+  ".tools/acpx-e1/source/test/permission-replies.test.ts": {
+    "sha256": "d5e0acfd6ed2cb0a37eb34b34d2bd506f8c8043a545820318ec7c9e725debe07",
+    "anchors": [
+      {
+        "line": 198,
+        "text": "await sendNativePermissionReply(lease.sessionId, response(requests[1], \"deny-exact\")),"
+      },
+      {
+        "line": 202,
+        "text": "assert.equal(await sendNativePermissionReply(lease.sessionId, response(requests[0])), true);"
+      },
+      {
+        "line": 204,
+        "text": "assert.equal(await sendNativePermissionReply(lease.sessionId, response(requests[0])), false);"
+      },
+      {
+        "line": 206,
+        "text": "sendNativePermissionReply(lease.sessionId, {"
+      },
+      {
+        "line": 241,
+        "text": "await assert.rejects(sendNativePermissionReply(sessionId, response(requests[0])));"
+      }
+    ]
+  },
+  "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java": {
+    "sha256": "96605a104dcf58873680153bb06acd0dea8562cbb2f87877b60f2881ceb9a7e1",
+    "anchors": [
+      {
+        "line": 366,
+        "text": "public void permissionRequest(Map<String, Object> request) throws java.io.IOException {"
+      },
+      {
+        "line": 369,
+        "text": "public java.util.Optional<Map<String, Object>> permissionReply(String key) throws java.io.IOException {"
+      },
+      {
+        "line": 375,
+        "text": "public boolean permissionRepliesClosed() throws java.io.IOException {"
+      }
+    ]
+  },
+  "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java": {
+    "sha256": "3dfd8d2531fab9c496145d8818be233c23e4687c961b444600021cb9b2eae8cf",
+    "anchors": [
+      {
+        "line": 420,
+        "text": "} catch (NativePermissionBridgeException failure) {"
+      },
+      {
+        "line": 480,
+        "text": "failure instanceof NativePermissionBridgeException ? AdapterSignalType.NATIVE_PERMISSION_INTERRUPTED : AdapterSignalType.PROCESS_STALLED,"
+      },
+      {
+        "line": 847,
+        "text": "var permissionWait = new NativePermissionWait(agent, request, eventReader, timeline, startedAt);"
+      },
+      {
+        "line": 1392,
+        "text": "private final class NativePermissionWait {"
+      },
+      {
+        "line": 1400,
+        "text": "private final Map<String, Map<String, Object>> readyReplies = new java.util.LinkedHashMap<>();"
+      },
+      {
+        "line": 1401,
+        "text": "private final Set<String> externalAttempts = new java.util.HashSet<>();"
+      },
+      {
+        "line": 1404,
+        "text": "private NativePermissionWait(String agent, AcpxRunRequest request, AgentLifecycleEventReader reader, List<AcpxExecutionEvent> timeline, Instant started) {"
+      },
+      {
+        "line": 1411,
+        "text": "if (request.executionEventSink().permissionRepliesClosed()) throw new IOException(\"permission submissions closed; original stop must be reconciled\");"
+      },
+      {
+        "line": 1420,
+        "text": "request.executionEventSink().permissionRequest(nativeRequest); // R first; uncommitted BUSY retains this frame."
+      },
+      {
+        "line": 1431,
+        "text": "if (!readyReplies.containsKey(key)) {"
+      },
+      {
+        "line": 1432,
+        "text": "var committed = request.executionEventSink().permissionReply(key);"
+      },
+      {
+        "line": 1434,
+        "text": "readyReplies.put(key, committed.orElseThrow());"
+      },
+      {
+        "line": 1437,
+        "text": "send(key, readyReplies.get(key), deadline);"
+      },
+      {
+        "line": 1438,
+        "text": "pending.remove(key); readyReplies.remove(key); sendingKey = null;"
+      },
+      {
+        "line": 1442,
+        "text": "if (sendingKey != null && externalAttempts.contains(sendingKey))"
+      },
+      {
+        "line": 1443,
+        "text": "throw new NativePermissionBridgeException(\"permission IPC was attempted; busy result recording is UNKNOWN, never resent\", busy);"
+      },
+      {
+        "line": 1447,
+        "text": "throw new NativePermissionBridgeException(\"local permission lock remained busy until the finite budget expired\", busy);"
+      },
+      {
+        "line": 1450,
+        "text": "throw new NativePermissionBridgeException(\"native permission continuation stopped; do not resend or overlap the original execution\", error);"
+      },
+      {
+        "line": 1458,
+        "text": "if (request.executionEventSink().permissionRepliesClosed()) throw new IOException(\"C committed but X observed before sending\");"
+      },
+      {
+        "line": 1461,
+        "text": "if (!externalAttempts.add(key)) throw new IOException(\"permission IPC was already attempted; no resend\");"
+      },
+      {
+        "line": 1488,
+        "text": "} catch (IOException error) { throw new NativePermissionBridgeException(\"request ended but its final observation could not be recorded\", error); }"
+      },
+      {
+        "line": 1492,
+        "text": "private static final class NativePermissionBridgeException extends RuntimeException {"
+      },
+      {
+        "line": 1493,
+        "text": "private NativePermissionBridgeException(String message, Throwable cause) { super(message, cause); }"
+      }
+    ]
+  },
+  "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxExecutionEventSink.java": {
+    "sha256": "08b06551ff15d8e4e2086447ead53a821a84d353070229908bccebc7790b25be",
+    "anchors": [
+      {
+        "line": 11,
+        "text": "default void permissionRequest(java.util.Map<String, Object> request) throws java.io.IOException {"
+      },
+      {
+        "line": 14,
+        "text": "default java.util.Optional<java.util.Map<String, Object>> permissionReply(String key) throws java.io.IOException {"
+      },
+      {
+        "line": 18,
+        "text": "default boolean permissionRepliesClosed() throws java.io.IOException { return false; }"
+      }
+    ]
+  },
+  "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java": {
+    "sha256": "3b8a8cf0269a92c907b1ea463f64c6a8eeb9d346289829d7c607aab81ada4e72",
+    "anchors": [
+      {
+        "line": 186,
+        "text": "void nativeOnceChoiceContinuesThroughIndependentAcceptanceOrStopsWithoutPublication(boolean queued) throws Exception {"
+      },
+      {
+        "line": 352,
+        "text": "sink.permissionRequest(envelope);"
+      },
+      {
+        "line": 358,
+        "text": "var reply = sink.permissionReply(key).orElseThrow(); permissionCommits++;"
+      },
+      {
+        "line": 360,
+        "text": "assertTrue(sink.permissionReply(key).isEmpty(), \"the same callback cannot obtain a second send qualification\");"
+      }
+    ]
+  },
+  "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionStreamTest.java": {
+    "sha256": "fd0e7905b0501d550fb598f4329124c9b91f4a8953963c1b00ba426068bfa2ff",
+    "anchors": [
+      {
+        "line": 6,
+        "text": "class NativePermissionStreamTest {"
+      }
+    ]
+  },
+  "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionTransportSequenceTest.java": {
+    "sha256": "03c7f3c2b84f18f49e79d1fbc92d24fd2b38f77f27b424baf22f376cfef736eb",
+    "anchors": [
+      {
+        "line": 49,
+        "text": "public void permissionRequest(Map<String,Object> request) throws java.io.IOException { NativePermissionRequests.record(f.context(), prepared, request); announced.countDown(); }"
+      },
+      {
+        "line": 50,
+        "text": "public Optional<Map<String,Object>> permissionReply(String k) throws java.io.IOException {"
+      },
+      {
+        "line": 62,
+        "text": "public boolean permissionRepliesClosed() throws java.io.IOException {"
+      }
+    ]
+  },
+  "dual-cli/src/test/java/dev/dual/cli/NativePermissionCliTest.java": {
+    "sha256": "5db8786b84099753a21b78f84b1bb3cca19ee9a8c9ac1df33362876ebdb6398f",
+    "anchors": [
+      {
+        "line": 14,
+        "text": "class NativePermissionCliTest {"
+      }
+    ]
+  },
+  "dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java": {
+    "sha256": "cf1c3849dee4509d4d0acb6f23a57439d9ff675efbf71437d5de61ee9e18fef9",
+    "anchors": [
+      {
+        "line": 390,
+        "text": "boolean commitPermissionReply(WorkstreamPaths paths, NodeExecutionDocument expected, String key, Map<String, Object> commit)"
+      },
+      {
+        "line": 420,
+        "text": "void closeLivePermissionReplies(WorkstreamPaths paths, String executionId) throws IOException {"
+      },
+      {
+        "line": 444,
+        "text": "closeLivePermissionReplies(paths, executionId);"
+      }
+    ]
+  },
+  "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java": {
+    "sha256": "42277520edb3017ac9dfe9d59570c1268dd0f3f47d48f5cf6456e26e212b2fd9",
+    "anchors": [
+      {
+        "line": 741,
+        "text": "public boolean commitPermissionReply(WorkstreamPaths paths, NodeExecutionDocument execution, String key,"
+      },
+      {
+        "line": 744,
+        "text": "var fresh = executionLedgerWriter.commitPermissionReply(paths, execution, key, commit);"
+      },
+      {
+        "line": 750,
+        "text": "public void closeLivePermissionReplies(WorkstreamPaths paths, String executionId, String reason) throws IOException {"
+      },
+      {
+        "line": 755,
+        "text": "executionLedgerWriter.closeLivePermissionReplies(paths, executionId);"
+      }
+    ]
+  },
+  "dual-ledger-file/src/test/java/dev/dual/ledger/file/RecoveryAssessmentTest.java": {
+    "sha256": "9cf52f3dabbda4977e6d7fea2fcb072834566cff950c4ae32d264599acc46435",
+    "anchors": [
+      {
+        "line": 259,
+        "text": "assertEquals(\"WebSearch\", assessment.permissionRequest().get(\"toolName\"));"
+      },
+      {
+        "line": 260,
+        "text": "assertEquals(\"Mailpit latest stable Docker tag\", assessment.permissionRequest().get(\"query\"));"
+      },
+      {
+        "line": 377,
+        "text": "void unknownPermissionReceiptRequiresExternalReconciliationInsteadOfJsonRepairOrAutomaticRetry() {"
+      }
+    ]
+  },
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/NativePermissionRequests.java": {
+    "sha256": "aa90ceac8955c914355478a2a4b53e9fd9e4e44ed6c7a3fe01e58669b5014fe5",
+    "anchors": [
+      {
+        "line": 12,
+        "text": "public final class NativePermissionRequests {"
+      },
+      {
+        "line": 90,
+        "text": "var fresh = write.ledger().commitPermissionReply(paths, prepared.execution(), key, commit);"
+      },
+      {
+        "line": 118,
+        "text": "write.ledger().closeLivePermissionReplies(paths, executionId, reason);"
+      },
+      {
+        "line": 132,
+        "text": "write.ledger().closeLivePermissionReplies(paths, executionId, reason);"
+      }
+    ]
+  },
+  "dual-runtime/src/test/java/dev/dual/runtime/handler/NativePermissionSequenceTest.java": {
+    "sha256": "bc6d1be71e3cbe94b7b6b774c38b43f8764dbaa384a1f9a06043671c182b66bf",
+    "anchors": [
+      {
+        "line": 16,
+        "text": "class NativePermissionSequenceTest {"
+      },
+      {
+        "line": 90,
+        "text": "void everyCWritePrefixGrantsZeroReplyAndFixedReplayNeverGrantsNewlyCommitted(String point) throws Exception {"
+      },
+      {
+        "line": 138,
+        "text": "void XFailurePrefixesCannotInventCancellationAndFixedCompletionClosesNewReplies(String point) throws Exception {"
+      },
+      {
+        "line": 154,
+        "text": "@Test void anotherJvmCannotUseSavedDecisionEvenWhileTheOriginalExecutorIsAlive() throws Exception {"
+      },
+      {
+        "line": 164,
+        "text": "@Test void actualCommitBarrierKeepsXOutOfTheQualificationToCWindow() throws Exception {"
+      },
+      {
+        "line": 183,
+        "text": "void siblingMutationsCannotReplaceALiveApprovedRequest(String action) throws Exception {"
+      }
+    ]
+  },
+  "dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java": {
+    "sha256": "0a0e893204c91fa8313fade65f14f17903dc743ebc10f6f1926be7892e77e139",
+    "anchors": [
+      {
+        "line": 89,
+        "text": "public Map<String, Object> nativePermissions(@PathVariable String workstreamId, @RequestParam(defaultValue = \"\") String workdir) throws Exception {"
+      },
+      {
+        "line": 90,
+        "text": "return queryService.nativePermissions(workdirPath(workdir), workstreamId);"
+      },
+      {
+        "line": 94,
+        "text": "public Map<String, Object> nativePermissionDecision(@PathVariable String workstreamId, @RequestParam(defaultValue = \"\") String workdir,"
+      },
+      {
+        "line": 100,
+        "text": "public Map<String, Object> nativePermissionCancel(@PathVariable String workstreamId, @RequestParam(defaultValue = \"\") String workdir,"
+      }
+    ]
+  },
+  "dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java": {
+    "sha256": "93772fa8c6df949d457a366ae4d6d0617ceb35b7d2844d155681b245def3ddee",
+    "anchors": [
+      {
+        "line": 77,
+        "text": "public Map<String, Object> nativePermissions(Path root, String id) throws IOException {"
+      },
+      {
+        "line": 204,
+        "text": "if (!\"BUSY\".equals(view.get(\"status\")) && !\"PENDING\".equals(view.get(\"status\"))) view.put(\"nativePermissions\", nativePermissions(workspaceRoot, workstreamId));"
+      }
+    ]
+  },
+  "dual-server/src/test/java/dev/dual/server/NativePermissionApiTest.java": {
+    "sha256": "8c1ef4c91d61590e3821c2b7e20c7dd2d5095dd41bf6fb3e9fa0f0ec4650f9ed",
+    "anchors": [
+      {
+        "line": 14,
+        "text": "class NativePermissionApiTest {"
+      },
+      {
+        "line": 28,
+        "text": "var view=api.nativePermissions(\"run-protocol\",root.toString());"
+      },
+      {
+        "line": 32,
+        "text": "var busy=api.nativePermissions(\"run-protocol\",root.toString());"
+      },
+      {
+        "line": 35,
+        "text": "assertThrows(java.io.IOException.class, () -> api.nativePermissionDecision(\"run-protocol\",root.toString(),new WorkstreamApiController.NativePermissionDecision(prepared.execution()."
+      },
+      {
+        "line": 36,
+        "text": "var saved=api.nativePermissionDecision(\"run-protocol\",root.toString(),new WorkstreamApiController.NativePermissionDecision(prepared.execution().nodeExecutionId(),key,\"specific\",\"hu"
+      },
+      {
+        "line": 38,
+        "text": "assertEquals(\"DECISION_SAVED\", ((Map<?,?>)((List<?>)api.nativePermissions(\"run-protocol\",root.toString()).get(\"requests\")).getFirst()).get(\"status\"));"
+      },
+      {
+        "line": 42,
+        "text": "var pending=api.nativePermissions(\"run-protocol\",root.toString());"
+      },
+      {
+        "line": 45,
+        "text": "var stop=api.nativePermissionCancel(\"run-protocol\",root.toString(),new WorkstreamApiController.NativePermissionCancel(prepared.execution().nodeExecutionId(),\"stop\"));"
+      },
+      {
+        "line": 47,
+        "text": "assertEquals(false, ((Map<?,?>)((List<?>)api.nativePermissions(\"run-protocol\",root.toString()).get(\"requests\")).getFirst()).get(\"can_decide\"));"
+      }
+    ]
+  },
+  "dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java": {
+    "sha256": "9dde1264048a3836bb90fe9ce854a54e96bc097a13304cb20a624c1799cf92a5",
+    "anchors": [
+      {
+        "line": 926,
+        "text": "} finally { closeAndAwaitOwnedStream(ownedStream); }"
+      },
+      {
+        "line": 941,
+        "text": "closeAndAwaitOwnedStream(streamService);"
+      },
+      {
+        "line": 969,
+        "text": "private static void closeAndAwaitOwnedStream(WorkstreamStreamService service) throws Exception {"
+      }
+    ]
+  }
+}

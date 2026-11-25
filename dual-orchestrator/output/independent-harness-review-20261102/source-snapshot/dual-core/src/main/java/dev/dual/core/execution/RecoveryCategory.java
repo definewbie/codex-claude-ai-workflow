@@ -1,0 +1,11 @@
+package dev.dual.core.execution;
+
+public enum RecoveryCategory {
+    NONE,
+    ARTIFACT_CONTRACT_FAILURE,
+    OUTPUT_INCOMPLETE,
+    RECOVERABLE_ADAPTER_FAILURE,
+    NON_RECOVERABLE_ADAPTER_FAILURE,
+    TIMEOUT_OR_STALLED,
+    INTERRUPTED
+}

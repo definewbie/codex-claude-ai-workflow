@@ -1,0 +1,76 @@
+{
+  "exit": 0,
+  "totals": {
+    "tests": 108,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "module": "dual-adapter-acpx",
+      "suite": "dev.dual.adapter.acpx.AuthoredManifestDispatchTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "suite": "dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "suite": "dev.dual.adapter.acpx.AgentPromptRendererTest",
+      "tests": 38,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-runtime",
+      "suite": "dev.dual.runtime.handler.AgentResultPromptContractTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-runtime",
+      "suite": "dev.dual.runtime.handler.PhasedContractContinuationTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-runtime",
+      "suite": "dev.dual.runtime.handler.TypedPlanScopeTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-runtime",
+      "suite": "dev.dual.runtime.handler.TypedDesignScopeTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "module": "dual-runtime",
+      "suite": "dev.dual.runtime.handler.WorkflowIntegrationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "provider_runs": 0
+}

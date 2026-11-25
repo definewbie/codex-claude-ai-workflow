@@ -1,0 +1,8 @@
+{
+  "type": "function_call",
+  "id": "cancel_child",
+  "call_id": "cancel_child",
+  "namespace": "collaboration",
+  "name": "interrupt_agent",
+  "arguments": "{\"target\": \"/root/probe\"}"
+}

@@ -1,0 +1,52 @@
+"""Read-only pre-dispatch checks. Does not grant authorization or dispatch."""
+import datetime
+import hashlib
+import os
+import shutil
+import subprocess
+from pathlib import Path
+from gate_support import OUT, ROOT, read, write, sha, frozen_check, measure, planning
+from check_budget import check
+
+release = frozen_check()
+loc = read(OUT/'instance-location.json')
+workspace, ledger = Path(loc['workspace']), Path(loc['ledger'])
+assert read(OUT/'gate-local-preflight.json')['status']=='PASS_OFFLINE_PRECONDITIONS_AWAITING_RUN_APPROVAL'
+assert read(ledger/'workflow/current.json')==read(OUT/'initial-workflow-current.json'), 'Initial state drift'
+assert not list((ledger/'runs').glob('*/run.json')), 'Fresh case already executed'
+assert not list(ledger.rglob('pending/*.json')), 'Pending mutation'
+assert all(sha(ledger/p)==h for p,h in read(OUT/'initial-ledger-sha256.json')['files'].items())
+assert {str(p.relative_to(ledger)) for p in ledger.rglob('*') if p.is_file() and p.name!='.mutation.lock'}==set(read(OUT/'initial-ledger-sha256.json')['files']), 'Unexpected initial ledger files'
+assert not (workspace/'.acpxrc.json').exists()
+launch = read(OUT/'local-launch-selection.json')
+assert hashlib.sha256(os.environ.get('PATH','').encode()).hexdigest()==launch['process_path_sha256'], 'PATH drift'
+assert all(shutil.which(n)==p for n,p in launch['executables'].items()), 'Executable resolution drift'
+for dep in read(OUT/'host-environment-identity.json')['dependencies']:
+    assert sha(dep['path'])==dep['sha256'], 'Host environment drift'
+assert not any(read(p).get('cwd')==str(workspace) for p in (Path.home()/'.acpx/sessions').glob('*.json')), 'Native session already created'
+old = read(OUT/'old-execution-recheck.json')
+for row in old['sessions']:
+    meta = read(Path.home()/'.acpx/sessions'/(row['record_id']+'.json'))
+    assert meta['closed'] is True and meta['name']==row['name'], 'Prior named session is active'
+for row in old['known_pids']:
+    cp = subprocess.run(['rtk','proxy','ps','-p',str(row['pid']),'-o','pid=,lstart=,command='],capture_output=True,text=True)
+    assert cp.returncode==1 and not cp.stdout.strip(), 'Prior known PID present; inspect before dispatch'
+for role, location in [('target',Path(loc['target'])),('workspace',workspace)]:
+    for label,args in [('head',['rev-parse','HEAD']),('tree',['rev-parse','HEAD^{tree}']),
+                       ('common-dir',['rev-parse','--path-format=absolute','--git-common-dir']),
+                       ('status',['status','--porcelain']),('tracked',['ls-files'])]:
+        cp = subprocess.run(['rtk','proxy','git']+args,cwd=location,capture_output=True,text=True)
+        assert cp.returncode==0 and cp.stdout==(OUT/(role+'-'+label+'.stdout.txt')).read_text(), 'Initial target/workspace drift'
+observed = measure(workspace,ledger)
+assert observed['completed_calls']==0 and observed['actual_tokens']==0
+first = read(OUT/'budget.json')['stages'][0]['node']
+state = planning(first,observed,0)
+admission = check(state)
+assert admission['result']=='ALLOW_BUDGET_ONLY'
+authorization = read(OUT/'run-authorization.json')
+write(OUT/'pre-dispatch-recheck.json',dict(checked_at=datetime.datetime.now().astimezone().isoformat(),
+    status='PASS_READONLY_RECHECK',fresh_run_authorized=authorization['fresh_run_authorized'],
+    dispatch_performed=False,native_provider_calls=0,initial_current_unchanged=True,
+    budget_input=state,budget_result=admission,
+    next_action='USER_CURRENT_RUN_APPROVAL_REQUIRED' if not authorization['fresh_run_authorized'] else 'CURRENT_APPROVAL_MUST_BE_VERIFIED_BY_OPERATOR_BEFORE_ORIGINAL_RUNNER'))
+print('Read-only recheck PASS; run authorized='+str(authorization['fresh_run_authorized'])+'; no dispatch')

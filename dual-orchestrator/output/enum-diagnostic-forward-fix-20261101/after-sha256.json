@@ -1,0 +1,6 @@
+{
+  "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java": "b3818e10dd050c967715667e1ed3cfe3348c5fa1b3d66c7f6ac1351707d092fe",
+  "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java": "1a6f8a44297d31a7c38de94c389bcd190488b7d25f537f63925e47d063cbdc91",
+  "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeParserTest.java": "32b2b332f7fc301aaf4edf9522309d592f5809d522115ac19014aaeb663ee070",
+  "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java": "89a2db6cddf664df679bd7e0ab509c7c0882fef26bb593a38f7b7d6d83d9949a"
+}

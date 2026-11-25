@@ -1,0 +1,22 @@
+请对本次 W09「固定 method 与 validation_plan 分工」有界实施做只读合并受影响复审。不要预设结论；请先阅读仓库 AGENTS.md，使用 boundary-first-engineering，独立重建控制链，而不是只核对作者列出的断言。
+
+仓库：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow
+本批材料：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-readiness-method-forward-fix-20261028
+受审设计：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-readiness-method-boundary-audit-20261027/assessment.md
+
+用户授权本批实施、回归、独立重冻及给出复审提示词；没有授权续跑模型、改变预算、修改原案例或提交。原 workstream 为 ws-20261026T142203Z-7SNA，目前仍在 plan reviewer READY，尚无 EXECUTION 批准。原案例路径和保全范围见 preservation-before.json / preservation-result.json。
+
+优先阅读 assessment.md、implementation-boundaries.md、incremental.patch（基于本批开工前 dirty 工作区字节，不是 HEAD）、changed-files.json，再自行核对实际源码与消费入口。验证凭证分别是 red-result.json/red-reports、focused-result.json、historical-readonly-result.json、counterproof-result.json、test-results.json/reactor-reports、release-identity.json。不要将聚焦、先红、反证、历史对照或全模块数字相加。
+
+请重点判断：
+1. readiness.method、模型逐 AC 验证细节、实际执行观察的 owner 与 SoT 是否清晰；现有 validation_plan 是否足够；是否有更简单且更可靠的实现。
+2. 两处提示是否共享同一分工规则，并覆盖实际作者/返修/另一客户端复评输入及原一次 deny-all correction；是否存在误导示例、无声明时的死端或遗漏的 sibling。
+3. strict parser、精确 method/ref/SHA、GOAL/epoch/环境/期限/撤回、验收与退出码要求、EXECUTION 人批是否仍严格；是否允许通过 validation_plan 偷换方法或降低标准；既有程序证据检查与语义验收的证明边界是否诚实。
+4. 请从触发与权威 pre-state 走到每次 durable write / event / external effect、下一消费者和终态，核 retry/resume/abort/replay/冷 JVM、关键写点失败、新旧 binary 与历史 artifact。独立检查 Declared by、Proven by、Consumed by、Enforced before、Failure route、Cannot-bypass test 六维。
+5. 测试是否同时防非法放行和非法拒绝；历史材料是否只读，隔离 fixture 重新绑定身份是否被错误宣称为历史恢复；两个 mutant 是否真正命中目标断言；合成 provider/本地 fixture 是否被夸大为真实模型 E2E。
+6. 冻结 JAR 是否包含本次受测字节，源输入是否前后一致；原发行、案例、累计 2,034,803 token / 9 请求 / 1,979.9747878720627 活动秒及停止记录是否保全；是否暗中替换运行身份或借用旧授权。
+7. 生产面和永久复杂度是否符合 ROI。请区分本批离线实施/发行候选与当前案例续作条件；不要把本评审当作预算、业务批准或运行授权。
+
+允许按必要性做有界只读源码检查或隔离离线验证；不要启动原生客户端、真实 provider、原案例推进脚本，勿修改原 raw、账本、停止标记、发行或授权。无需为已有可信凭证重复跑全模块测试，不额外建立 agent 团队。
+
+请输出：独立结论（PASS/WARN/FAIL，自行裁定）、按严重度排序的发现与精确证据、六维和完整转换的缺口、未核验范围，以及下一步最小必要动作。自查不能替代你的独立判断。

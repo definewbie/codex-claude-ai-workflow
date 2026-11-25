@@ -1,0 +1,15 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "repo_map",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "generatedAt" : "2026-10-23T01:03:48.024857Z",
+  "effectiveWorkdir" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+  "baseCommit" : "",
+  "source" : "git_tracked_inventory",
+  "inventoryHead" : "c442fd02fb39d87481bbd940aa5f270947a72a60",
+  "inventorySha256" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "inventoryPathCount" : 0,
+  "files" : [ ],
+  "fileCount" : 0,
+  "truncated" : false
+}

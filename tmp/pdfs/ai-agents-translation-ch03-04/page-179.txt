@@ -1,0 +1,34 @@
+Model optimization and customization
+
+   Open models still offer the broadest form of control. While you can
+    fine-tune or customize a closed source model like GPT-4.1 via DPO or
+   RL, this model still exists only inside the vendor’s environment. You
+    don’t control the model weights, deployment, or runtime. In other
+   words, customization is possible, but you’re still vendor-locked in.
+   Open source models let you carry your improvements with you; closed
+   systems let you borrow flexibility, not own it.
+
+Performance
+
+   Closed source models often lead benchmark leaderboards due to
+    proprietary compute budgets and training data advantages. However, the
+   performance gap has narrowed significantly. Modern open architectures
+   such as Qwen3 or Kimi K2 come close in performance to proprietary
+   models. And with optimization techniques as you’ve read about in
+   Chapter 3 (see “The ART of Learning from Experience” and “Enabling
+   General-Purpose Agentic Programs Through Post-Training and Search-
+   Based Agents”), you can even train your models to improve their tool
+   usage or collaborate better as a team.
+
+Cost
+
+   As of early 2026 pricing, closed models can cost up to $150 for input
+   and $600 (o1-pro) for output per million tokens, while open models fall
+   around $0.3 for input and about $3 for output per million tokens when
+   used via low-cost cloud providers, even for models over 200B
+    parameters. In addition, when you host them yourself, trade-off
+   becomes operational. Open source deployments require GPUs, scaling
+    infrastructure, and ongoing maintenance. In the short term, managed
+   APIs can appear cheaper because they remove the need for specialized
+    staff, but in the long run, self-hosted open models usually yield a lower
+    total cost of ownership once scaled efficiently.

@@ -1,0 +1,21 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "stage_scope_policy",
+  "workstreamId" : "ws-20261010T124812Z-XCZL",
+  "stageId" : "design",
+  "nodeInstanceId" : "node-design-claude_design-013",
+  "nodeDefinitionId" : "design.claude_design",
+  "builderNodeDefinitionId" : "design.claude_design",
+  "targetNodeDefinitionId" : "design.claude_design",
+  "iterationId" : "iter-002",
+  "writeScope" : [ ],
+  "previouslyReadFiles" : [ ],
+  "readReusePolicy" : {
+    "avoidRepeatedReads" : [ ],
+    "requireReasonWhenRereading" : false,
+    "reasonField" : "",
+    "preferExistingEvidence" : true
+  },
+  "forbiddenScope" : [ ".git/**", ".agent/workstreams/**/workflow/**", ".agent/workstreams/**/nodes/**", "business source writes" ],
+  "generatedAt" : "2026-10-10T14:12:59.056506Z"
+}

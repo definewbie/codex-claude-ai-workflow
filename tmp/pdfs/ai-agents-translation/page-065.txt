@@ -1,0 +1,40 @@
+types of LLMs I suggest using. One important paradigm here is the handoff.
+A handoff defines how control shifts between agents: who speaks next, who
+acts next, and under what conditions. In LangGraph, nodes encode the logic
+of the agents, and edges represent the handoffs. By wiring multiple nodes
+together, you’re effectively building a MAS within a single graph. The
+shared state is the memory and context that all nodes operate on. How this
+wiring looks in practice for ToT is illustrated in Example 2-6.
+
+Example 2-6. Creating the graph for ToT
+graph = StateGraph(BlogState)
+graph.add_node("propose", propose_options)
+graph.add_node("reflect", reflect_and_select)
+graph.add_node("research", research_with_tools)
+graph.add_node("draft", draft_outline_and_intro)
+
+graph.add_edge(START, "propose")
+graph.add_edge("propose", "reflect")
+graph.add_edge("reflect", "research")
+graph.add_edge("research", "draft")
+graph.add_edge("draft", END)
+
+checkpointer = MemorySaver()
+app = graph.compile(checkpointer=checkpointer)
+
+   Small creative generator LLM
+
+   Stronger judge/reflector LLM
+
+   Tool-using researcher
+
+   Small writer model
+
+When you run the code, you’ll see different topics proposed, including
+reference links. To optimize the results further, you could implement a
+human-in-the-loop (see “Designing Human-in-the-Loop Workflows”)
+interaction to review and approve the actions.
+
+It’s tempting to think of CoT and ToT as just clever prompting hacks, but
+you’ve seen that they can be powerful engineering tools. Figure 2-2
+contrasts both approaches: on the left, a single agent reasoning with CoT;

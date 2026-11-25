@@ -17,13 +17,15 @@ public final class FileLedgerStore {
     private final AtomicJsonWriter jsonWriter;
     private final ObjectMapper objectMapper;
     private final ObjectMapper jsonlObjectMapper;
+    private final java.util.Map<String, String> runtimeIdentity;
 
     public FileLedgerStore() {
-        this(new AtomicJsonWriter());
+        this(new AtomicJsonWriter(), java.util.Map.of());
     }
 
-    FileLedgerStore(AtomicJsonWriter jsonWriter) {
+    FileLedgerStore(AtomicJsonWriter jsonWriter, java.util.Map<String, String> runtimeIdentity) {
         this.jsonWriter = jsonWriter;
+        this.runtimeIdentity = java.util.Map.copyOf(runtimeIdentity);
         this.objectMapper = jsonWriter.objectMapper();
         this.jsonlObjectMapper = jsonWriter.objectMapper().copy()
                 .disable(SerializationFeature.INDENT_OUTPUT);
@@ -48,7 +50,8 @@ public final class FileLedgerStore {
         Files.createDirectories(paths.workstreamDir().resolve("reports"));
         Files.createDirectories(paths.runsDir());
 
-        jsonWriter.write(paths.workstreamJson(), WorkstreamDocument.from(workstream));
+        if (runtimeIdentity.isEmpty()) throw new IllegalStateException("initialization requires a frozen runtime identity and write session");
+        jsonWriter.write(paths.workstreamJson(), WorkstreamDocument.from(workstream, runtimeIdentity));
         jsonWriter.write(paths.settingsJson(), settings);
         var workspaceDocument = WorkspaceDocument.from(workspace);
         var stageDocument = StageDocument.initialDesign(workstream.workstreamId().value(), workspace.workspaceId().value());
@@ -62,7 +65,7 @@ public final class FileLedgerStore {
         jsonWriter.write(paths.currentIterationJson(), iterationDocument);
         jsonWriter.write(paths.workstreamDir().resolve("checkpoints").resolve("checkpoint-initial.json"), checkpointDocument);
         jsonWriter.write(paths.currentCheckpointJson(), checkpointDocument);
-        Files.writeString(paths.requirementMarkdown(), requirement, StandardCharsets.UTF_8);
+        jsonWriter.writeBytes(paths.requirementMarkdown(), requirement.getBytes(StandardCharsets.UTF_8));
         appendTimeline(paths, TimelineEvent.of(
                 workstream.workstreamId(),
                 workspace.workspaceId(),
@@ -74,26 +77,20 @@ public final class FileLedgerStore {
 
     public WorkstreamStatusView loadStatus(Path workspaceRoot, String workstreamId) throws IOException {
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-        var workstream = objectMapper.readValue(paths.workstreamJson().toFile(), WorkstreamDocument.class);
-        var workspace = objectMapper.readValue(
-                paths.workspaceJson(new DualId(workstream.primaryWorkspaceId())).toFile(),
+        var workstream = jsonWriter.read(paths.workstreamJson(), WorkstreamDocument.class);
+        var workspace = jsonWriter.read(
+                paths.workspaceJson(new DualId(workstream.primaryWorkspaceId())),
                 WorkspaceDocument.class
         );
-        var stage = objectMapper.readValue(paths.currentStageJson().toFile(), StageDocument.class);
-        var iteration = objectMapper.readValue(paths.currentIterationJson().toFile(), IterationDocument.class);
-        var checkpoint = objectMapper.readValue(paths.currentCheckpointJson().toFile(), CheckpointDocument.class);
+        var stage = jsonWriter.read(paths.currentStageJson(), StageDocument.class);
+        var iteration = jsonWriter.read(paths.currentIterationJson(), IterationDocument.class);
+        var checkpoint = jsonWriter.read(paths.currentCheckpointJson(), CheckpointDocument.class);
         return new WorkstreamStatusView(paths.workstreamDir(), workstream, workspace, stage, iteration, checkpoint);
     }
 
     public void appendTimeline(WorkstreamPaths paths, TimelineEvent event) throws IOException {
         Files.createDirectories(paths.timelineJsonl().getParent());
         var line = jsonlObjectMapper.writeValueAsString(TimelineEventDocument.from(event)) + System.lineSeparator();
-        Files.writeString(
-                paths.timelineJsonl(),
-                line,
-                StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.APPEND
-        );
+        jsonWriter.appendEvents(paths.timelineJsonl(), line.getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -1,0 +1,49 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-design-decision-011"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000011",
+    "updatedAt": "2026-10-23T01:24:43.558043Z",
+    "commitSequence": 42
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-design-decision-011",
+    "nodeDefinitionId": "design.decision",
+    "kind": "DECISION",
+    "handlerType": "review.decision",
+    "status": "READY",
+    "stageId": "stage-design",
+    "iterationId": "iter-001",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.stderr.log",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-codex_arch_review-010-run-1792718638529/binding.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.contract.json"
+    ],
+    "inputTransition": {
+      "purpose": "Seed the first Claude intake run with repo-scope context.",
+      "source_node_sha256": "e7fed5a14b201b9ec48c8d5f8261fe4c843fbe95aca7bfc4d8a30e22bbdfbb71",
+      "source_node_instance_id": "node-design-codex_arch_review-010",
+      "required": true,
+      "transition_type": "normal",
+      "condition": "unconditional"
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 404.976
+}

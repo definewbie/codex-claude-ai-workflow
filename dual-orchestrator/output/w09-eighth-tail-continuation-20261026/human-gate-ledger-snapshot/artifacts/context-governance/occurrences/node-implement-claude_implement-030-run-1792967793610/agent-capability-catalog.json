@@ -1,0 +1,19 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "agent_capability_catalog",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "nodeDefinitionId" : "implement.claude_implement",
+  "capabilities" : [ {
+    "kind" : "direct_file_read",
+    "provider" : "Read",
+    "description" : "Direct file content retrieval tool."
+  }, {
+    "kind" : "token_filtered_shell",
+    "provider" : "rtk",
+    "description" : "Token-filtered shell command surface."
+  }, {
+    "kind" : "symbol_index",
+    "provider" : "codegraph",
+    "description" : "Symbol-level repository index."
+  } ]
+}

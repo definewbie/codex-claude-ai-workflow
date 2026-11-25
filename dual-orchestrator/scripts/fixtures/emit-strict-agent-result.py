@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
-"""Emit one controlled AgentResultEnvelope into an acpx session stream."""
+"""Emit a synthetic protocol fixture, not program verification evidence.
+
+Retained for the offline intake/large-stream adapter test. Legacy whole-lifecycle
+smoke runners are retired; SELF_TEST_COMPLETE/ACCEPT text here proves no execution.
+"""
 
 import argparse
 import json
 import os
-import re
+import sys
 from pathlib import Path
 import time
-
-
-def prompt_field(prompt: str, name: str) -> str:
-    matches = re.findall(rf'"{re.escape(name)}"\s*:\s*"([^"]+)"', prompt)
-    if not matches:
-        raise ValueError(f"strict result contract field is missing from prompt: {name}")
-    return matches[-1]
 
 
 def failure(category_hint: str = "", reason: str = "") -> dict:
@@ -24,6 +21,7 @@ def failure(category_hint: str = "", reason: str = "") -> dict:
         "missing_tests": [],
         "context_gaps": [],
         "reason": reason,
+        "verification_remediation": "NONE",
     }
 
 
@@ -127,6 +125,25 @@ def plan_result(include_plan: bool, scenario: str) -> dict:
         "verification_summary": "Controlled plan boundary result.",
         "failure": failure(),
         "plan": plan,
+        "revision_responses": [],
+    }
+
+
+def design_result() -> dict:
+    return {
+        "artifact_type": "design_result",
+        "decision": "READY_FOR_ARCH_REVIEW",
+        "summary": "Add goodbye() and its documentation within the approved two-file scope.",
+        "lifecycle_status": "READY",
+        "checks": ["Read the approved contract"],
+        "evidence": ["main.py", "README.md"],
+        "missing_evidence": [], "must_fix": [], "open_risks": [],
+        "verification_summary": "Design only; implementation and verification follow approval.",
+        "design": {"planned_files": [
+            {"path": "main.py", "operation": "MODIFY", "responsibility": "Implement goodbye()"},
+            {"path": "README.md", "operation": "MODIFY", "responsibility": "Document goodbye()"},
+        ]},
+        "revision_responses": [],
     }
 
 
@@ -142,6 +159,7 @@ def self_test_result() -> dict:
         "missing_evidence": [],
         "acceptance_notes": [],
         "verification_summary": "Controlled smoke self-test passed.",
+        "must_fix": [],
     }
 
 
@@ -191,6 +209,8 @@ def result_for(template: str, profile: str, scenario: str) -> dict:
 
     if template == "intake-claude-brainstorm.md":
         return task_proposal()
+    if template == "design-claude.md":
+        return design_result()
     if template == "plan-claude.md":
         return plan_result(
             not (profile == "semantic" and scenario == "plan-body"),
@@ -216,6 +236,23 @@ def result_for(template: str, profile: str, scenario: str) -> dict:
 
 
 def main() -> None:
+    if len(sys.argv) == 5 and sys.argv[1] == "--register-session":
+        record_id, name, cwd = sys.argv[2:]
+        path = Path.home() / ".acpx/sessions/index.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({"schema": "acpx.session-index.v1", "entries": [{
+            "acpxRecordId": record_id, "name": name, "cwd": cwd, "closed": False,
+            "lastUsedAt": "9999-12-31T23:59:59Z",
+        }]}), encoding="utf-8")
+        return
+    if sys.argv[1:] == ["--build-info"]:
+        # Simulated transport handshake only. This fixture does not prove native policy enforcement.
+        print(json.dumps({
+            "upstream_commit": "fd173f04aa1b56f9e3f5ca5190c034ddcae28792",
+            "patch_sha256": json.loads((Path(__file__).resolve().parents[2] / "tools/acpx-e1/manifest.json").read_text(encoding="utf-8"))["patch_sha256"],
+            "policy_schema": "claude_execution_policy.v2",
+        }))
+        return
     parser = argparse.ArgumentParser()
     parser.add_argument("--prompt", required=True)
     parser.add_argument("--template", required=True)
@@ -224,12 +261,13 @@ def main() -> None:
     parser.add_argument("--session-id", required=True)
     args = parser.parse_args()
 
-    prompt = Path(args.prompt).read_text(encoding="utf-8")
+    # A prompt can quote several older envelopes. Only this execution owns the response identity.
+    run = json.loads((Path(args.prompt).parent.parent / "run.json").read_text(encoding="utf-8"))
     envelope = {
         "schema_version": 1,
-        "workstream_id": prompt_field(prompt, "workstream_id"),
-        "run_id": prompt_field(prompt, "run_id"),
-        "node_id": prompt_field(prompt, "node_id"),
+        "workstream_id": run["workstreamId"],
+        "run_id": run["runId"],
+        "node_id": run["nodeId"],
         "result": result_for(args.template, args.profile, args.scenario),
     }
     assistant_message = json.dumps(envelope, ensure_ascii=False, separators=(",", ":"))

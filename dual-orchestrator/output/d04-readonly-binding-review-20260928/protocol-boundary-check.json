@@ -1,0 +1,66 @@
+{
+  "checkedAt": "2026-09-28T03:35:15.164828+00:00",
+  "codexAppServer": {
+    "clientRequestSource": "/private/tmp/dual-d04-schema-20260928/ClientRequest.json",
+    "clientRequestSha256": "05c82ead1a820c765c23d3a1d262e4ae54889785276ee1acf7c494141fd94d70",
+    "clientRoutes": [
+      {
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/RequestId"
+          },
+          "method": {
+            "enum": [
+              "fs/readFile"
+            ],
+            "title": "Fs/readFileRequestMethod",
+            "type": "string"
+          },
+          "params": {
+            "$ref": "#/definitions/FsReadFileParams"
+          }
+        },
+        "required": [
+          "id",
+          "method",
+          "params"
+        ],
+        "title": "Fs/readFileRequest",
+        "type": "object"
+      },
+      {
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/RequestId"
+          },
+          "method": {
+            "enum": [
+              "fs/readDirectory"
+            ],
+            "title": "Fs/readDirectoryRequestMethod",
+            "type": "string"
+          },
+          "params": {
+            "$ref": "#/definitions/FsReadDirectoryParams"
+          }
+        },
+        "required": [
+          "id",
+          "method",
+          "params"
+        ],
+        "title": "Fs/readDirectoryRequest",
+        "type": "object"
+      }
+    ],
+    "serverRequestSource": "/private/tmp/dual-d04-schema-20260928/ServerRequest.json",
+    "serverRequestSha256": "38bb1c9dbb1dda2a688a7c8712b04319fe6ee2ed28b54acd2f5fd341d25567ff",
+    "matchingServerRoutes": []
+  },
+  "acpClient": {
+    "source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts",
+    "sha256": "d727f05adfa38beadbc4214fbbc5a14c864dfa1eead4dd5e2a0a734a63e65a88",
+    "excerpt": "970:       .onNotification(methods.client.session.update, async ({ params }) => {\n971:         await this.handleSessionUpdate(params);\n972:       })\n973:       .onNotification(methods.client.elicitation.complete, async () => {})\n974:       .onRequest(methods.client.session.requestPermission, async ({ params }) => {\n975:         return await this.handlePermissionRequest(params);\n976:       })\n977:       .onRequest(methods.client.elicitation.create, async ({ params, requestId, signal }) => {\n978:         return await this.handleElicitationRequest(params, requestId, signal);\n979:       })\n980:       .onRequest(methods.client.fs.readTextFile, async ({ params }) => {\n981:         return await this.handleReadTextFile(params);\n982:       })\n983:       .onRequest(methods.client.fs.writeTextFile, async ({ params }) => {\n984:         return await this.handleWriteTextFile(params);\n985:       })\n986:       .onRequest(methods.client.terminal.create, async ({ params }) => {\n987:         return await this.handleCreateTerminal(params);\n988:       })\n989:       .onRequest(methods.client.terminal.output, async ({ params }) => {"
+  },
+  "conclusion": "Codex app-server client fs/readFile and fs/readDirectory are distinct from ACP client handler fs/read_text_file. No regular model tool availability or bridge is proven."
+}

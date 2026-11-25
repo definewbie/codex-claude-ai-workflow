@@ -1,0 +1,67 @@
+[
+  {
+    "path": "dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java",
+    "before_sha256": "bdf04636c25bedaf1a72142530051efde0c74d76070edd1e7a025d5c318a1462",
+    "after_sha256": "a625b8116716c43ddbb8907623708919ec5e83a923162acca08c680813a8e71d"
+  },
+  {
+    "path": "dual-core/src/test/java/dev/dual/core/execution/AgentExecutionOutcomeResolverTest.java",
+    "before_sha256": "bbee63c860ded6d28cad7e2f69ac25819e90658d8aaa48a9a4b463bd0003d435",
+    "after_sha256": "654731b5a3730f08e71e1d1f42aeee7ee72160a0f80a4ef1d1334f8880b969ff"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java",
+    "before_sha256": "d03f555639d356f89990eb0747019e7fed6e0bea2d6e2e4d81405cf1beca86d7",
+    "after_sha256": "352848814d5ad9fe2893721475fc64c16fd77e26acc219850a1e96055bce607a"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+    "before_sha256": "9ab613172eac3692a027586b88098744506377b799dc3b4645955a9d2964302f",
+    "after_sha256": "293ed4b428532636e3c3b6ae505700ab2c2a5f1dc54205fc891355b0e85b3cdf"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java",
+    "before_sha256": "f599616969156c626a453edea565aa0684c2a2421948f2a164728ce87063dec5",
+    "after_sha256": "2780cd10afbc62eb818dca095087eb01dcf2891f1c6e71020fc03b136cd9911c"
+  },
+  {
+    "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java",
+    "before_sha256": "247fcb9bc934dfdbfdf4f77215639c3cfe016054c3ce79b34474570a149d512a",
+    "after_sha256": "78ec781c7fb581d07a8c89e54aea99f0970b7f25fb94479501cdcde4f4e7c771"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java",
+    "before_sha256": "c235e339cae7ea042fb07cf5ff68f862c233b12a38c1bcb6fbc6b548ba074bb5",
+    "after_sha256": "e7de9f217b16716d6e63a3f583870496d31f70b273a5ac7e5deba8ad01f7b8f4"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java",
+    "before_sha256": "bec88a37710d06f283d823f7fefe087c5148108103b37100e08c9f4863fe7d8f",
+    "after_sha256": "f5e4439f4d6a890bbc542d3562a337c0bef576bed54c5b9da2b99b17f75d66ec"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java",
+    "before_sha256": "d3f4c41a41da14a225af3d0f862663435b933af7ed1de0c984a9041edce01d63",
+    "after_sha256": "73710f5db00bcfd8abff9ac18ae0333a1a5b055cebf63b1741d42757b5d6dd8e"
+  },
+  {
+    "path": "dual-cli/src/test/java/dev/dual/cli/RecoveryShowCommandTest.java",
+    "before_sha256": "877563b94c05ac8afe6f69eb43ae747f045fa2d63ccb9b3e859db37e017949c0",
+    "after_sha256": "c31932f71c3e88e6750e4aea0d1dca033fd36f36faa792b3a893b7114ea87f01"
+  },
+  {
+    "path": "dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java",
+    "before_sha256": "1ef858ebddbea9aa8744ece612f25f0b8df8ebcf6e7646104206d4fa06a0b277",
+    "after_sha256": "17d37ceb3f97dedc780de3c00918fbc131ad9751d55ba82e2993d00fff250213"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamAttentionEvaluator.java",
+    "before_sha256": "6f6f46ab7ad499d6d21064d0068a6cc4542b8ef77a7de42b3e5e8e8572c429b2",
+    "after_sha256": "a2279d9f308f5a5f48caaffb6eadeb85bcf450b1eb0fc6009beb00b6cfb40394"
+  },
+  {
+    "path": "dual-ledger-file/src/test/java/dev/dual/ledger/file/RecoveryAssessmentTest.java",
+    "before_sha256": "020e0b6310df8420a437c42e0605786f3552e7a7795c5085b5723177257b4ba2",
+    "after_sha256": "2523c20a6f51949a6bba1b238e26b50af51b2e7ce5cb7047810dac558c2ebb8d"
+  }
+]

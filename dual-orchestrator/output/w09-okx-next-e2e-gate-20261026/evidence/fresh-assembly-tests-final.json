@@ -1,0 +1,15 @@
+{
+  "exit": 0,
+  "elapsed_seconds": 12.53678579092957,
+  "scope": "17 fresh assembly tests plus 12 unchanged observer fixtures in one run; fake Java and synthetic post-call measurement, not native E2E",
+  "model_calls": 0,
+  "tests": 29,
+  "test_sources": {
+    "test_fresh_assembly.py": "e80aa500e336ed1d4c8cce13d075a8a95d5b320129091a530b16d43e3da75222",
+    "test_gate_observer.py": "5d6a067af41aa8944b4dbd482dac43e9c017920376223d1fe662f2d03e580232",
+    "admission.py": "e3c4790341d4041a60def075f077ab02bd1681b04e5b8e2eca365c3aafa1dc2e",
+    "run-one-step.py": "f8d7d07d436787461e04d170c61db9d51fdb6cd384732ccb57873bef8e9550b6",
+    "process_check.py": "a4db6f994ecac3c38a198f22d170227f7ab66ce3d53efca4524e05b9a850fb4a",
+    "gate_support.py": "22b709c9e5fa22abd7fdc9059ad9a988a8b8923d1600aa477f91f3f191ec09d5"
+  }
+}

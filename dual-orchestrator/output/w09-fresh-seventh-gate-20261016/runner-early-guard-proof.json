@@ -1,0 +1,11 @@
+{
+  "status": "PASS_OFFLINE_EARLY_GUARDS_ONLY",
+  "cases": [
+    "current authorization=false rejected",
+    "simulated current authorization=true plus actual offline preflight accepted",
+    "wrong old-case authority rejected"
+  ],
+  "no_authorization_file_mutated": true,
+  "no_dispatch_code_executed": true,
+  "actual_local_preflight_status": "PASS_OFFLINE_PRECONDITIONS_AWAITING_RUN_APPROVAL"
+}

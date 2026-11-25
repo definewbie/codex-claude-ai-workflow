@@ -1,0 +1,9 @@
+Step 1: gate.human_requirement_review -> WAITING_FOR_HUMAN (resumed workflow)
+
+Next actions:
+  1. Read the current review packet:
+     dualctl review show --workdir /private/tmp/dual-w09-newlines-20261010-fresh-03/worktree ws-20261010T124812Z-XCZL
+     packet: /private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL/reviews/node-gate-human_requirement_review-011.md
+  2. Choose one action after review:
+Then: dualctl approve --run --workdir /private/tmp/dual-w09-newlines-20261010-fresh-03/worktree ws-20261010T124812Z-XCZL
+Or:   dualctl revise --feedback-file feedback.md --run --workdir /private/tmp/dual-w09-newlines-20261010-fresh-03/worktree ws-20261010T124812Z-XCZL

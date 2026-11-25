@@ -1,0 +1,8 @@
+{
+  "classification": "EXPECTED_FAILURE_ON_OLD_INSTRUCTIONS",
+  "tests": 2,
+  "failures": 2,
+  "errors": 0,
+  "provider_calls": 0,
+  "proof": "qualified GOAL actual prompt contains old copy directive; qualified EXECUTION prompt lacks explicit exact approval directive"
+}

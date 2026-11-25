@@ -1,0 +1,17 @@
+{
+  "baselineFiles": 1319,
+  "unchangedFiles": 1316,
+  "changed": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "addedOutsideExcludedEvidence": [],
+  "sourceIdentityDrift": [],
+  "hostProbeAssertions": 7,
+  "providerCalls": 0,
+  "limitations": [
+    "direct host handler slice, not wire or native model execution",
+    "source identity list is targeted; not a full runtime dependency manifest"
+  ]
+}

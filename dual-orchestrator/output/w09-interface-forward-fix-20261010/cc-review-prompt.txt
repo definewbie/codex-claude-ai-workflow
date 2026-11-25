@@ -1,0 +1,9 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 本次 W09 首例后的前向修复、新发行和 fresh Gate 候选做只读受影响复审，遵守 AGENTS.md。
+
+入口：output/w09-interface-forward-fix-20261010/assessment.md；同目录含相对开工前 dirty 的 incremental.patch、测试/反证、release-identity、fresh-second-gate.md。首次真实失败材料在 output/w09-real-gate-20261010/assessment.md，原账本未修复或续作。
+
+请独立重建会话建立→资格→prompt→唯一 outcome→固定完成→恢复/摘要的控制链，检查合法缺席、严格必需身份、correction/重连/权限兄弟入口、写入失败和冷读。按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 核对，不预设作者结论。
+
+区分首次真实事实、本地协议/模拟 adapter、隔离反证、发行核验与仍未证的客户端主流程；判断是否存在误拒、原因漂移、权限或验收降级，以及 fresh Gate 的前提/预算/停止是否可执行。给分级发现、证据和未核验范围；区分修复认可、发行候选和真实运行授权。
+
+不要改代码/文档、运行客户端/provider、恢复首例、启动额外 agent 或扩展到无关历史与安全平台。

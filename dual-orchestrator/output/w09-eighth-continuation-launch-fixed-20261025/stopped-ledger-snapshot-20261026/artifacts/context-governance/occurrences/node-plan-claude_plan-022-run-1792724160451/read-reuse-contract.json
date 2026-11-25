@@ -1,0 +1,19 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "read_reuse_contract",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "plan",
+  "nodeInstanceId" : "node-plan-claude_plan-022",
+  "nodeDefinitionId" : "plan.claude_plan",
+  "targetNodeDefinitionId" : "plan.claude_plan",
+  "iterationId" : "iter-003",
+  "preferExistingEvidence" : true,
+  "avoidRepeatingReads" : [ ],
+  "reusableReadFiles" : [ ],
+  "invalidatedReadFiles" : [ ],
+  "allowedRereadFiles" : [ ],
+  "reuseSource" : "run_history",
+  "requireReasonWhenRereading" : false,
+  "reasonField" : "",
+  "generatedAt" : "2026-10-23T02:56:00.600568Z"
+}

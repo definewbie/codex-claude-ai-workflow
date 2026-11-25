@@ -1,0 +1,74 @@
+[
+  {
+    "sequence": 8,
+    "session_id": "10cb57b6-2dd3-4fa1-b3e4-5cffa79d216a",
+    "update": {
+      "sessionUpdate": "usage_update",
+      "used": 0,
+      "size": 1000000
+    }
+  },
+  {
+    "sequence": 6955,
+    "session_id": "10cb57b6-2dd3-4fa1-b3e4-5cffa79d216a",
+    "update": {
+      "sessionUpdate": "usage_update",
+      "used": 36195,
+      "size": 1000000
+    }
+  },
+  {
+    "sequence": 6956,
+    "session_id": "10cb57b6-2dd3-4fa1-b3e4-5cffa79d216a",
+    "update": {
+      "sessionUpdate": "usage_update",
+      "used": 0,
+      "size": 1000000
+    }
+  },
+  {
+    "sequence": 7834,
+    "session_id": "10cb57b6-2dd3-4fa1-b3e4-5cffa79d216a",
+    "update": {
+      "sessionUpdate": "usage_update",
+      "used": 43378,
+      "size": 1000000
+    }
+  },
+  {
+    "sequence": 7835,
+    "session_id": "10cb57b6-2dd3-4fa1-b3e4-5cffa79d216a",
+    "update": {
+      "sessionUpdate": "usage_update",
+      "used": 0,
+      "size": 1000000
+    }
+  },
+  {
+    "sequence": 14741,
+    "session_id": "10cb57b6-2dd3-4fa1-b3e4-5cffa79d216a",
+    "update": {
+      "sessionUpdate": "usage_update",
+      "used": 51158,
+      "size": 1000000
+    }
+  },
+  {
+    "sequence": 14742,
+    "session_id": "10cb57b6-2dd3-4fa1-b3e4-5cffa79d216a",
+    "update": {
+      "sessionUpdate": "usage_update",
+      "used": 51158,
+      "size": 1000000,
+      "cost": {
+        "amount": 0.623911,
+        "currency": "USD"
+      },
+      "_meta": {
+        "_claude/origin": {
+          "kind": "human"
+        }
+      }
+    }
+  }
+]

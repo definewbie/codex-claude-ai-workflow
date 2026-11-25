@@ -1,0 +1,18 @@
+id: 01a1664b-1ea2-7e72-824f-a15b70c68b84
+sessionId: 01a1664b-2902-7702-a04f-63ca9ddc4c2b
+agentSessionId: -
+agent: npx -y @agentclientprotocol/codex-acp@1.10.0
+cwd: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree
+name: codex-reviewer-ws-20261023T005431Z-9YYF
+created: 2026-10-23T01:06:01.694Z
+lastActivity: 2026-10-23T03:02:19.650Z
+lastPrompt: 2026-10-23T03:01:33.501Z
+closed: yes
+closedAt: 2026-10-23T03:05:19.691Z
+pid: -
+agentStartedAt: 2026-10-23T03:01:32.434Z
+lastExitCode: -
+lastExitSignal: -
+lastExitAt: -
+disconnectReason: -
+historyEntries: 10

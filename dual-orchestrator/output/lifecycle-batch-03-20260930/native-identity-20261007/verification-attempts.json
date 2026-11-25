@@ -1,0 +1,8 @@
+[
+  {
+    "attempt": 1,
+    "exit": 1,
+    "classification": "INVALID",
+    "cause": "Author supplied an import path one directory above project; source utility was not loaded; not production counterproof"
+  }
+]

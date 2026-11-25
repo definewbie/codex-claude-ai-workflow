@@ -1291,9 +1291,10 @@ candidate 由 `delivery.prepare_pr` 使用临时 Git index 生成，支持 track
 .agent/workstreams/<workstream_id>/delivery/merge.patch
 .agent/workstreams/<workstream_id>/delivery/changed-files.txt
 .agent/workstreams/<workstream_id>/delivery/excluded-files.txt
-.agent/workstreams/<workstream_id>/delivery/apply.stdout.log
-.agent/workstreams/<workstream_id>/delivery/apply.stderr.log
+
 ```
+
+stdout/stderr、真实退出码和进程身份保存在 `merge-plan.json` 的 operation 与对应 events 中，不承诺单独的日志文件。重复 merge 只重读/核对旧操作，不会重新应用。
 
 检查 target 中已暂存的精确候选后，由 operator 正常创建 Git commit。随后登记该 commit：
 
@@ -1304,12 +1305,24 @@ dualctl delivery finalize \
   <workstream_id>
 ```
 
-`delivery finalize` 要求 target clean、HEAD 等于给定 SHA、commit parent 等于 candidate base、commit tree 等于获批 `expectedResultTree`。通过后 `merge-plan.json` 进入 `COMMITTED`。旧的 `delivery commit` / `delivery create-pr` 旁路已删除；未来 push/PR 能力也必须消费同一 finalized commit，不能直接对当前 worktree 执行 `git add -A`。
+`delivery finalize` 先核旧应用停止依据（程序结束事实或显式人工确认），再要求 target clean、HEAD 等于给定 SHA、commit parent 等于 candidate base、commit tree 等于获批 `expectedResultTree`。通过后 `merge-plan.json` 进入 `COMMITTED`。旧的 `delivery commit` / `delivery create-pr` 旁路已删除；未来 push/PR 能力也必须消费同一 finalized commit，不能直接对当前 worktree 执行 `git add -A`。
 
 `dualctl status`、`dualctl summary` 与 operator API/UI 只消费 `DeliveryApplicationService.View`，不会直接解释
 `merge-plan.json`。该 view 先重验人工验收绑定的 candidate identity，再投影 delivery status、typed failure、target
 repo、candidate identity、commit 与 `canMerge/canFinalize`。workflow 尚未完成或 completion audit 未 ready 时显式显示
 `BLOCKED / WORKFLOW_NOT_DELIVERABLE`，但不把它解释为 workflow failure，也不开放 mutation command。
+
+出现 UNKNOWN 时先检查旧 Git 操作与目标现场，不能盲目重跑 merge。`status`/`summary`/两 UI 同源显示 `stopBasis`、`historicalStatus`、`currentActions`、`nextCommands` 与当前 `resolutionTemplate`。动作只在执行时重核后生效；过期/BUSY/pending 投影不能产生许可。
+
+人工裁定入口：
+
+```bash
+dualctl delivery resolve --workdir <effective_worktree> --decision <decision.json> <workstream_id>
+```
+
+从本次 status 输出的 `resolutionTemplate` 形成决定，保留 operation/candidate/批准/运行身份、plan SHA、代次与目标观察 SHA。填写唯一 `request_id`、`operator_note` 和 `disposition`：`CLOSE_APPLICATION` 单向关闭再次应用（`stop_basis:null` 仅关闭，不声称已停止）；`AUTHORIZE_NEW_APPLY` 仅在旧操作确认停止、目标仍为精确 base 时授权一次新尝试。人工停止声明要求实际核查方法、时间、`old_operation_stopped:true` 与明确接受 UNKNOWN/重复副作用风险，类型保持 `OPERATOR_CONFIRMED_STOPPED`，不会生成退出码；已知活动进程不能被声明覆盖。数据材料仅限本 workstream artifacts 的 UTF-8 JSON/Markdown（最多 1 MiB），引用须携 SHA，程序固定快照；请求 JSON 上限 64 KiB、未知或缺失字段拒绝。
+
+同 id 同完整决定幂等重读，即使原 plan SHA/代次已过期也不再发起应用；同 id 异决定拒绝。返回或送达不明时保留同一请求内容查验，不生成新 id 自动重试。关闭后仍可确认已存在的精确提交，但 commit 存在本身不证明旧 apply 结束。源码/目标漂移保留现场，不 reset/clean；no-change 候选不新增空交付能力。
 
 历史 `delivery.json` 不再由任何 current surface 读取；它只作为 frozen artifact 留在旧 workstream 中供人工审计。
 缺少 D1 candidate binding 的旧 workstream 显式投影 `BLOCKED / LEGACY_NOT_BOUND`，不会从旧 commit/PR 字段重建
@@ -1382,55 +1395,16 @@ dualctl status --workdir <effective_worktree> <workstream_id>
 - `.agent/workstreams/<workstream_id>/events.jsonl` 包含 `workflow_started`。
 - `status` 能看到 `Workflow: agent-lifecycle-full@4`。
 
-### Controlled Lifecycle Smoke
+### Offline Lifecycle Regression
 
-改 runtime、ledger、CLI 或 workflow routing 后，先跑这个。它会临时注入一个 controlled fake `acpx`，不调用真实 Claude/Codex，用来确定性验证完整生命周期 happy path：
-
-```bash
-cd dual-orchestrator
-./scripts/smoke-test.sh lifecycle --cleanup
-```
-
-预期：
-
-- workflow 从 `start --run` 跑到第一个 human gate。
-- 脚本自动 approve 中间 gate，并在最后 next-stage gate 执行 `review complete`。
-- full lifecycle 节点完成。
-- final report、delivery prepare artifact、next-stage prompt、handoff.json 都存在。
-- Git evidence 能看到 controlled implementation 对 `main.py` / `README.md` 的改动。
-
-这个 smoke 只验证编排主链路，不验证真实 Agent 能力。
-
-如果想保留 ledger 给 operator panel 查看，不要加 `--cleanup`：
+旧 `scripts/smoke-test.sh` 和 `scripts/semantic-boundary-smoke.sh` 已退役，所有参数均在构建、工作区创建、批准或原生调用之前退出 2。其模拟成功材料不符合当前 D05 的程序证据要求，不能用于当前 Gate。
 
 ```bash
 cd dual-orchestrator
-./scripts/smoke-test.sh lifecycle --skip-build
-java -jar dual-server/target/dual-server-0.1.0-SNAPSHOT.jar
+rtk proxy mvn -q clean test
 ```
 
-然后打开 `http://localhost:8080/`，把脚本输出里的 `Workspace` 粘到页面顶部的 `Effective workdir`。
-
-如果想让 smoke 在每个 human gate 停下来，改由 Operator Panel 完成人工审阅和 approve：
-
-```bash
-cd dual-orchestrator
-./scripts/smoke-test.sh --case contract-happy-path --manual-gates
-```
-
-脚本到达 gate 后会打印 Operator Panel 地址、effective workdir、workstream id 和 review packet 路径。你在页面里读完 `Human Review Packet`，点击 `Approve + Run`、`Revise + Run` 或最后一个 gate 的 `Complete`，再回到终端按 Enter。这个模式不会自动 approve gate。
-
-### Real acpx Smoke
-
-完整生命周期和 workflow variant 的脚本化 E2E 用法见 [Smoke Test E2E 使用说明](docs/testing/smoke-test-e2e.md)。其中 `scripts/smoke-test.sh --case all` 会顺序运行 `lifecycle` controlled case 以及 contract、full 两个真实 acpx case。
-
-真实 acpx case：
-
-```bash
-cd dual-orchestrator
-./scripts/smoke-test.sh --case contract-happy-path --cleanup
-./scripts/smoke-test.sh --case full-reject-classify-path --cleanup
-```
+该回归包括真实离线 ledger、批准、程序文件观察与冷读序列，原生协议帧仍是合成 fixture。它不证明真实 Claude/Codex 行为、浏览器交互或目标 Git 交付。当前验证入口与覆盖边界见 [验证说明](testing/smoke-test-e2e.md)；真实运行另需通过并批准 Verification Gate。
 
 ### Real Repository Lifecycle Case
 
@@ -1713,3 +1687,21 @@ workflow definition 中的 `handler_type` 没有注册到 `HandlerRegistry`。�
 - context package 已有 token-level budget-controlled governance pipeline（6 profile，priority-based degradation，adaptive compression，per-profile config overrides），但真实 tokenizer 仍待替换。
 - auto-retry 按 failure type 自动分类并指数退避重试，但还没有交互式修复向导。
 - notification 还没接入 Java 版。
+
+## 原生权限请求的人工续作
+
+在途许可只处理原生客户端实际提出的请求，不改变业务文件范围、独立验收或最终交付批准。启用在线等待前，使用维护的 acpx 补丁，并显式设置既有总调用上限 `DUAL_ACPX_COMMAND_TIMEOUT_SECONDS` 为正整数（秒）；默认 0 不启用在线许可等待，仍按非交互失败处理。此上限也包括人工等待时间，到期不会自动重发。
+
+查询实际请求及其一次选项：
+
+```sh
+dualctl permissions --workdir <workspace> <workstream>
+```
+
+仅使用查询返回的 `execution`、`request_key` 和原生 `optionId` 保存决定：
+
+```sh
+dualctl permissions --workdir <workspace> <workstream> --execution <execution> --request <request_key> --option <optionId> --note "本次决定"
+```
+
+保存决定不等于已发送、工具已完成或业务批准。原执行提交后只尝试回复一次；回执不明需要核对原执行，重启不补发许可。取消使用同一命令的 `--execution <execution> --cancel`，只关闭新许可提交，显示停止未确认；此前已提交的一次回复可能仍在途。主界面与管理界面消费同一请求状态，并只显示实际提供的一次选项。

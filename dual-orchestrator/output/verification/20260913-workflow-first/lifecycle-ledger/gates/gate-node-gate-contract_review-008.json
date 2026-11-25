@@ -1,0 +1,17 @@
+{
+  "schemaVersion" : 1,
+  "gateId" : "gate-node-gate-contract_review-008",
+  "nodeInstanceId" : "node-gate-contract_review-008",
+  "gateType" : "human.review",
+  "status" : "resolved",
+  "allowedActions" : [ "approve", "clarify", "reject" ],
+  "openedAt" : "2026-09-13T16:04:06.341246Z",
+  "resolvedAt" : "2026-09-13T16:04:08.113500Z",
+  "result" : {
+    "source_node_instance_id" : "node-contract-compile-007",
+    "subject_input_refs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract.md", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/contract-resolution.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/contract-resolution.md" ],
+    "source_outcome" : "completed",
+    "human_action" : "approved",
+    "note" : ""
+  }
+}

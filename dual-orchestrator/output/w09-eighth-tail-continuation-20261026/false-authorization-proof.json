@@ -1,0 +1,6 @@
+{
+  "exit": 1,
+  "stderr": "Traceback (most recent call last):\n  File \"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/run-one-step.py\", line 13, in <module>\n    authorize()\n    ~~~~~~~~~^^\n  File \"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/continuation.py\", line 17, in authorize\n    assert auth.get('continuation_run_authorized') is True, 'Continuation requires new human run approval'\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Continuation requires new human run approval\n",
+  "no_step_directory": true,
+  "model_calls": 0
+}

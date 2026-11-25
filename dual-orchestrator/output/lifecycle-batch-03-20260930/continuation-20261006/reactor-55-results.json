@@ -1,0 +1,1618 @@
+{
+  "invocation": "reactor-55",
+  "build_success": false,
+  "live_provider_runs": 0,
+  "totals": {
+    "tests": 1433,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suite_count": 156,
+  "modules": {
+    "dual-core": {
+      "tests": 123,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 16
+    },
+    "dual-ledger-file": {
+      "tests": 153,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 23
+    },
+    "dual-flow-liteflow": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 4
+    },
+    "dual-adapter-git": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 2
+    },
+    "dual-runtime": {
+      "tests": 707,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 78
+    },
+    "dual-adapter-acpx": {
+      "tests": 426,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 33
+    }
+  },
+  "suites": [
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.contract.TaskContractTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.contract.TaskContractTest.xml",
+      "sha256": "03fc1dce08632282520d1b3151bb70c32015732137d069ce415b0095cd643ba1"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.contract.PhasedContractTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.contract.PhasedContractTest.xml",
+      "sha256": "281817940904ed00d22693095d93612e1cb5f63115a0ea84c3449aeb419b553d"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.provider.ProviderPricingCatalogTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.provider.ProviderPricingCatalogTest.xml",
+      "sha256": "7587ec39f8c459504a48e32caf02a13d8d8a77da0fac8e7d0a59180e20272488"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.provider.ProviderCachePolicyTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.provider.ProviderCachePolicyTest.xml",
+      "sha256": "65392da5a69283fbb0647045161b52a17b684da7d8de39a2286706654f9a00e8"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.provider.ProviderBillingCsvCalibrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.provider.ProviderBillingCsvCalibrationTest.xml",
+      "sha256": "186c370ac45bbab64a3d418d5997601d3a5c9a8624979f9749f116b0c73145c8"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.execution.AgentExecutionOutcomeResolverTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionOutcomeResolverTest.xml",
+      "sha256": "1c21be0019eaef37e2a207a9cdbddc71a29954619f7b09fb39839cc9a94b89c0"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.execution.AgentExecutionFinalizerTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionFinalizerTest.xml",
+      "sha256": "cd9103def75915c850ef152463da8d091b8fb98c477b32ff9c532c8bb959c6f7"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.execution.AgentExecutionAttemptTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionAttemptTest.xml",
+      "sha256": "0b3ca2f321eea159a7307074a519199307a69bf33d4841ad67b5d151230538a8"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.arbitration.FailureClassificationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.arbitration.FailureClassificationTest.xml",
+      "sha256": "1f60fabd53e11a9f252917458b9851702f56d22048fde4fdcb7d8ca547412a86"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.workflow.WorkflowDefinitionTest",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.workflow.WorkflowDefinitionTest.xml",
+      "sha256": "736c6d741433730bc440cf13552da02e2812281c0aff90c8737b456bea51f4c1"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.workflow.EdgeDefinitionTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.workflow.EdgeDefinitionTest.xml",
+      "sha256": "ab31096ce526724421114d7ea59cdafde68f4835d5b285174441724455f0d1e9"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.workflow.HumanGateActionSemanticsTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.workflow.HumanGateActionSemanticsTest.xml",
+      "sha256": "4f8ecd339cf6bdb490b9475a0109178de14cc7d991b65b8c92c5cf1683b30492"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.workflow.EdgeConditionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.workflow.EdgeConditionTest.xml",
+      "sha256": "8311b3672b4600e2d9795522e695198a9f10b1c9dd8f850be9b138327d0b1d64"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest.xml",
+      "sha256": "96ec4827e85e20c73aa0951b052f63e55bbbce9711a260651337d9409bd5703c"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.id.DualIdGeneratorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.id.DualIdGeneratorTest.xml",
+      "sha256": "91198d08eab8121f486c9581e1878cfa87d6e0ef578db0eaaefe5c23c2f75c20"
+    },
+    {
+      "module": "dual-core",
+      "classname": "dev.dual.core.domain.PromptLanguageTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-core/TEST-dev.dual.core.domain.PromptLanguageTest.xml",
+      "sha256": "6c06535f0c38e2b70c3afbfc200547d3641ee43ef8c4ab0d6f8d59ba19b86e11"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.CheckpointDocumentTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.CheckpointDocumentTest.xml",
+      "sha256": "73d3562565c0804ed9c07d4b79ba51f118b44fa0f890cf2b3c27e71e20db6cd1"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.WorkstreamLockTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkstreamLockTest.xml",
+      "sha256": "bd680cc00bf402354c8d523879ba181ee9f9547640d65b9ff28dfd36a552894b"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.DeliveryMergePlanTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.DeliveryMergePlanTest.xml",
+      "sha256": "67d01010bb9640aafd7cd13c0460555e034c715ca5df9ff9937a57f8d6b067e4"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.FileLedgerStoreTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.FileLedgerStoreTest.xml",
+      "sha256": "6ca75db120d24c2c6b46cc34da412b8fddcb3878324faa6e2e2f4375749cadf9"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.IterationRefTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.IterationRefTest.xml",
+      "sha256": "86afdfcd2f4bb235636a96c4dff45bfde69da191cc519211fda1a531669a1daf"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest.xml",
+      "sha256": "f1cd87c66e5f68d9b2e667260a6a9dbdd3b8f685d4b4f54126215239a2fe9123"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.WorkflowCommitSequenceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkflowCommitSequenceTest.xml",
+      "sha256": "c3a9c8a1e6fedbe6acefeb7421daf2bffc98bf62f72d08f28fe42193a2a46349"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.LedgerMigratorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.LedgerMigratorTest.xml",
+      "sha256": "d52430c182260e8f35cecb66e311073aa5ef71233eef4c2886a0c7ac0438a37d"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.RecoveryAssessmentTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.RecoveryAssessmentTest.xml",
+      "sha256": "624acab8ff62c9730e19829deca1bf4c75616fc89b241ba2bb922996c9f5e3b9"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.WorkflowGateResolutionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkflowGateResolutionTest.xml",
+      "sha256": "0679c9a3a464b20e06abd76e73e153d007e91d4a7614c18b9aacbd2607db6b36"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.ConditionalEdgeRoutingTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.ConditionalEdgeRoutingTest.xml",
+      "sha256": "2af6b9b53eee144a3ef7a18d946c182e3b4862107ac89ddac7fa61053396096c"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest.xml",
+      "sha256": "7affb024aecccbdba8164ecff3c7e4dfbf2112af0e483b13e8a905711d27cad3"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.ParallelFanOutTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.ParallelFanOutTest.xml",
+      "sha256": "5e021665a5fff455f03cac927d16b8cfe43b5d05fe1375ea1443e62533d8c152"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.OperatorWorkspaceRegistryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.OperatorWorkspaceRegistryTest.xml",
+      "sha256": "a716f277cfaf931065fcb48200b4b1213c35ad2dab6b2ff4bdfd215e0f979f9b"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.DeliveryCandidateWriterTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.DeliveryCandidateWriterTest.xml",
+      "sha256": "55ab0f9e6070e3639958e2ec6604cc32f6524b0790520ae0e46a70aed3a32cd8"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.WorkflowFileLedgerTest",
+      "tests": 50,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.WorkflowFileLedgerTest.xml",
+      "sha256": "6d4f132811fa4997a30dc69ebeaadf8460d50573195aa553bb4cdd45d422c5a9"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.ExecutionConsistencyClassifierTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.ExecutionConsistencyClassifierTest.xml",
+      "sha256": "a4c44dbec7d4c54a6c5a0f56b914f975eceffb137fd92ea7a28ae2f2d272970c"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.ExecutionNetworkGrantStoreTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.ExecutionNetworkGrantStoreTest.xml",
+      "sha256": "990ea5ee0511f533238775d2841b65883b44ef4a457cd0095eae625df145b003"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.ExecutionClaimSequenceTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.ExecutionClaimSequenceTest.xml",
+      "sha256": "d3b0fbcc8aae0eafd0fc9001a83a2643d203e6df122726f7ea656407a3bdb082"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.MetricsProjectionWriterTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.MetricsProjectionWriterTest.xml",
+      "sha256": "0417f339493ba4449a6a752fb376c62e58293b7eac011cac0b5b81117577b749"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.HumanActionRequestTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.HumanActionRequestTest.xml",
+      "sha256": "3eca8af896744398c580f27d8574cc0c2040859301f779bbfd502a45f6eb2777"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.LedgerSessionTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.LedgerSessionTest.xml",
+      "sha256": "3bee019b13e57be5dd49026fc4cb1d69bef780225ee0d1b04a51186efe861712"
+    },
+    {
+      "module": "dual-ledger-file",
+      "classname": "dev.dual.ledger.file.RetryFailureContextTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-ledger-file/TEST-dev.dual.ledger.file.RetryFailureContextTest.xml",
+      "sha256": "dd90237d5be1ff981888af5af3f9a54c7c2800d3ca7e12864acd67fd44340216"
+    },
+    {
+      "module": "dual-flow-liteflow",
+      "classname": "dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest.xml",
+      "sha256": "b8133bfaa54f60aeff47453530bd14503bcf69691f55a982cfb214364495b724"
+    },
+    {
+      "module": "dual-flow-liteflow",
+      "classname": "dev.dual.flow.liteflow.FlowKernelProviderTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.FlowKernelProviderTest.xml",
+      "sha256": "286278921c78ee253cbb5c8df9e47b9b5f2bac4d4937cb8627e26924b1cceb5f"
+    },
+    {
+      "module": "dual-flow-liteflow",
+      "classname": "dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest.xml",
+      "sha256": "2be4c3847ab9c52c9d52e187756e28aab8e6888a69c9ab0e1c7cdec3b7303269"
+    },
+    {
+      "module": "dual-flow-liteflow",
+      "classname": "dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-flow-liteflow/TEST-dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest.xml",
+      "sha256": "5b082f63ca5991919aef84942f300ff00bb21bbe2b3a3171bc2f74df780b422f"
+    },
+    {
+      "module": "dual-adapter-git",
+      "classname": "dev.dual.adapter.git.GitPatchMergeServiceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-git/TEST-dev.dual.adapter.git.GitPatchMergeServiceTest.xml",
+      "sha256": "b0628b0d6830089f8080abd76cc5da8dad62c57f64066b56d012cc3acafe95d5"
+    },
+    {
+      "module": "dual-adapter-git",
+      "classname": "dev.dual.adapter.git.GitWorkspaceServiceTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-git/TEST-dev.dual.adapter.git.GitWorkspaceServiceTest.xml",
+      "sha256": "61a5fa8392cf05d5e9de98efc37a83150ab8b7a88635c4e27e5f6a39dcd988aa"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.LateContractRevisionContextTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.LateContractRevisionContextTest.xml",
+      "sha256": "bbcbeccdd0846dd2be2d07cf18a9cac74f39b18175c35c364f9b186909b6d1b9"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.PlanArtifactDocumentTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.PlanArtifactDocumentTest.xml",
+      "sha256": "3663f9524ed985adaae2bcdd5fd7ff3c9fea04b3d696d78f582793aeda159c30"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.TypedDesignScopeTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.TypedDesignScopeTest.xml",
+      "sha256": "609d5e57fcb82c8c47a2b03af4758e05817497f916e9569c123efcec47d27ba8"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.EvidenceCollectionSourceTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.EvidenceCollectionSourceTest.xml",
+      "sha256": "d4aacd8e58ff114182ca2640614505fa2cfae11ff948ba1939c33d240c18c188"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.TokenEstimatorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.TokenEstimatorTest.xml",
+      "sha256": "fc0830406acba915969056b9f260ffb478c53d0e67067f04a6d1c3816c95b0ae"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.TypedPlanScopeTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.TypedPlanScopeTest.xml",
+      "sha256": "c6652e9286130224bbbf69567a8dc6a3dd403ef9cbf631fd4a3e14bacd96e205"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest.xml",
+      "sha256": "f82ca6ffedd757fdf9d63a533bf20472a626ccd1de7a6d765271621f65503e26"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.TaskContractScopeResolverTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractScopeResolverTest.xml",
+      "sha256": "88b24b0e9668aea0e7ba51175dbff42f7632c38fbe811dee0b1bde4d1577f9b8"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.SelfTestContinuationSequenceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.SelfTestContinuationSequenceTest.xml",
+      "sha256": "e7be96577830b834253b1f92ad43f03359cd611e410de11974efc28b885745dc"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest.xml",
+      "sha256": "e817efcae069ffb2f543535b7de7c4b504f010cee6cf9efc43ae01623f049c0b"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest.xml",
+      "sha256": "cd0a9c818ef567a278bbbcccf783bf1f09abdba8b302e95a424f1d9c37ffb0d5"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.EvidenceCollectionSequenceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.EvidenceCollectionSequenceTest.xml",
+      "sha256": "c3608c12dbba72eb67a23058a7a9c27467fc15d7961b29c7343cb67db2510f02"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.HandlerRegistryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.HandlerRegistryTest.xml",
+      "sha256": "74c3c18c9cc1bd7a9f8808efb80dd3746fb57c866b5e303e6a690929510fb4c5"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AgentEvidenceIndexTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentEvidenceIndexTest.xml",
+      "sha256": "65bc7564b65a4e9dd47027d5e20db10a28c271a424b167197e69ac5217012f4a"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.FailureArbiterTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.FailureArbiterTest.xml",
+      "sha256": "e4a0fbc44b279ee5ebc1c816350a7ed0508aec7ea127168dd74f085dd0d3f50d"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.PhasedContractContinuationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.PhasedContractContinuationTest.xml",
+      "sha256": "c9cf9e7e0984beac7000660c72040b45c92cd48eb2e5400d9d44953d964efa61"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ContractRegistryTest",
+      "tests": 50,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractRegistryTest.xml",
+      "sha256": "f5d0088ca131bfa75c8991f789e5d97af0e6bd0f0aba5de47850a6394c01c000"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.TaskContractProjectionVerifierTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractProjectionVerifierTest.xml",
+      "sha256": "6f49ae2201a3f3a953dc2218dd25b1317115b84073049a101659b1b5ed4af0c7"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.LateProposalScopeTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.LateProposalScopeTest.xml",
+      "sha256": "b2dcd9d9c1270099032998738f136151b020286d8e9d741403e0375582d5b20e"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ContractReviewGateTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractReviewGateTest.xml",
+      "sha256": "0ce2917816c61dc3becba568ee48e745ecac9d04854c5f5a7693921407f78027"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AcceptanceRepairSequenceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AcceptanceRepairSequenceTest.xml",
+      "sha256": "9b6d0b78fedf339c8484ccd315e7216a6aebc4adc70bbf4abaa6f1ae018da4d1"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ContractRevisionDisplayTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractRevisionDisplayTest.xml",
+      "sha256": "b7b08af81492c9b03499834e8c2f872705497313986175a0c770d317b81f7776"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AuthoredRevisionCoverageTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredRevisionCoverageTest.xml",
+      "sha256": "071891d8decd61bf05f59c3d1b6060c3eed64b09ba2ce05f38990d1eb9cb4eca"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest.xml",
+      "sha256": "4c1e52d4da8a64785ed17d623291778fe0b50268f85b366a9194da804b7af6df"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.TaskContractArtifactWriterTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractArtifactWriterTest.xml",
+      "sha256": "9cfe9845b44faabd86642e6836fce31f732e8d0c61f60a3029031f0a164be6db"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ContextBudgetOverrideTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContextBudgetOverrideTest.xml",
+      "sha256": "527189f28338735655c49cffb9b85bd6a8598cc2f7da3935d6793adbd013a5f0"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.StageOutcomeCompilerTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.StageOutcomeCompilerTest.xml",
+      "sha256": "44c44c7472f81868130c0098a6724225c411e1fc03f76965ae7e57a77736f76a"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ExternalVerificationEvidenceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ExternalVerificationEvidenceTest.xml",
+      "sha256": "371f886ffea5614d846bd31db3e5624d31c66db26e4f3fd3445ab7be384779cc"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ReadinessRoutingDefinitionTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ReadinessRoutingDefinitionTest.xml",
+      "sha256": "b2512f3e731dedfe22451f09b1dd9212f562e0b7017e33a4e7266c23a92e8d77"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AuthoredBoundarySequenceTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredBoundarySequenceTest.xml",
+      "sha256": "a8c5cfd424d657a9db3421920f3896b1ddf8d31b94c41f07109787dfa81bd6d2"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ChangeScopeEvaluationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ChangeScopeEvaluationTest.xml",
+      "sha256": "b59e01d8064825b03533fe5141ba903e6ae2cba912c88b2e37225eb7181290b0"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.WorkflowIntegrationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.WorkflowIntegrationTest.xml",
+      "sha256": "52e2aa6b69e3db377f5f8553a97fcd8fef0d8a600514fc31f0815c6b4c3135f4"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AgentResultEnvelopeParserTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultEnvelopeParserTest.xml",
+      "sha256": "ed8d7fb151a2364a21fc9cd692164fc98da99d0fca454091c5170662fdede96e"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.VerificationReadinessTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.VerificationReadinessTest.xml",
+      "sha256": "dc900032d970a43edfe760c212675eb86a8538c6186a01d2ed4d083cc0c0eb7e"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AgentRunCommitProtocolTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentRunCommitProtocolTest.xml",
+      "sha256": "301e942250c5f898a0378243cb8f6d1d9e798cd4c426b16927c930b782503deb"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ContractLifecycleLedgerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractLifecycleLedgerTest.xml",
+      "sha256": "48b2d08db0619be9841f6786f82c53b03d0f1198f6ca6c9b78086f328728a056"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AcceptanceRepairInterruptionTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AcceptanceRepairInterruptionTest.xml",
+      "sha256": "0963ffadeac7685a77604df08c850dc7b80ab4c5ad7c143efd958984b9f60283"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AgentRunMetadataFinalizerTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentRunMetadataFinalizerTest.xml",
+      "sha256": "a37501a0a728bc98ab31a4c884ca2f114c1e3f6d751e22b2547f1ea9b11aeef7"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.FailureClassifyHandlerTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.FailureClassifyHandlerTest.xml",
+      "sha256": "379faf4787d53dcd3ad046245c3634f00873ab3d2c0c165f1b35807dae3ab987"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest.xml",
+      "sha256": "d94c8e708a4ae95d67b8d1707defee6b3df7df7808b0d985be294a258bb13943"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ContextBuildPackageHandlerTest",
+      "tests": 61,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContextBuildPackageHandlerTest.xml",
+      "sha256": "d53c1918298ff01f17118eb4b347c4847b34068a6e646179392770842fdcd058"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.LegacyContractConsumerRejectionTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.LegacyContractConsumerRejectionTest.xml",
+      "sha256": "63f032a54341d9ca66a303bfe85ec0619e828e65406247a5207c439388eb3967"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ContractCompileHandlerTest",
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContractCompileHandlerTest.xml",
+      "sha256": "62c4d43b610b6e8e690c14d3746c7563e47a6e302e32a393ad9ffff7153936e3"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AuthoredStageSequenceTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredStageSequenceTest.xml",
+      "sha256": "282caa43c7d0748420681221da1848228d5b7d30b0538e5b58563abe49e7f0ef"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ReportGenerateFinalHandlerTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ReportGenerateFinalHandlerTest.xml",
+      "sha256": "312c49f2b3a0d0e2913d79325332c5927bd45bc899dbce7a1c0cf5a166c3bbbf"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ContextTaskContractSectionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ContextTaskContractSectionTest.xml",
+      "sha256": "f82a955e8676335a13d3ee8df29ee371aae62d18883e5a7b81cbf93241ecf597"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ReportTaskContractTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ReportTaskContractTest.xml",
+      "sha256": "0061a88fc850c00ee126e60c508e48eac587f8743e93efe73337f7ce5277b655"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.TypedContextPayloadBoundaryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.TypedContextPayloadBoundaryTest.xml",
+      "sha256": "75c1ed4cf1bffdc8b6509ce5218ce51596832c4d670162c38648a1a035bec4a6"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AuthoredDefinitionTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredDefinitionTest.xml",
+      "sha256": "57a8f2d812b05a32d91f7caf3b2cb258803f4497902131eefb29c3fc1f53e950"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.BuiltinHandlerTest",
+      "tests": 67,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.BuiltinHandlerTest.xml",
+      "sha256": "61b887cfd78144f3df8c758ccceab455172f76043f618fa1f4702711596837e0"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.TaskContractProposalValidatorTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractProposalValidatorTest.xml",
+      "sha256": "5302f4d51161611c4f56cbf5b9da32a648a0c857e4c650313d5e8063bfa4e122"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AgentContractSemanticsTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentContractSemanticsTest.xml",
+      "sha256": "c9d48717fa9c3878159a85b8e3e666309b38e058f14378f4e62fbfb56309eed5"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AgentResultPromptContractTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultPromptContractTest.xml",
+      "sha256": "4be0d568dafaa7b3e0ccdb94729c7ae1cd552c09e645272e1d9c901f0108774f"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ReportFailureClassificationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ReportFailureClassificationTest.xml",
+      "sha256": "9f01dcfea93c416f8ad17c1453879a9e4777c9ec054e543b2edfa664855b891e"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest.xml",
+      "sha256": "a7686dc4a5eccc1471875718d68d2c665e566cefa11b3a5ea61af10d47f476b9"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.ArtifactContractValidatorTest",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.ArtifactContractValidatorTest.xml",
+      "sha256": "b5d1118c81f619da79aaad67ab1719cf8ab62fa748c8ad917687d6f35c7426e3"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AuthoredRevisionContractTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AuthoredRevisionContractTest.xml",
+      "sha256": "10ef893bfaf941424bb9806ad9559a72b3ca7835c4b08faee8b9fc87b1aa89a6"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.WorkstreamMemoryProjectionTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.WorkstreamMemoryProjectionTest.xml",
+      "sha256": "84183bf55f88e240e5bcf1bff666a76b4f278ec131a2a0269cba593d0ba92881"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest.xml",
+      "sha256": "b70cc0eb16001e4e26ca0ed4b578dcf979d7c727c1494857f0ea1501dd0e49e4"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest.xml",
+      "sha256": "b5417297001aa85407604c320f4f6c3db06a2b333a447f2c4ab5be9c9a75e492"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.FailureClassifyRegistryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.FailureClassifyRegistryTest.xml",
+      "sha256": "561378d7b228510e0f4bc5abe78af32b2eb17684e6e0f2566541f5bb45bfcfa8"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest.xml",
+      "sha256": "19e75e126263817cd662bd3033f163f43b8810051699f092ab7c54431cd070be"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.WorkflowRuntimeTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.WorkflowRuntimeTest.xml",
+      "sha256": "b292d68a147c33d36e85f9659ddd2fd2c8b6b539df90fa798b429dccc701ced1"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.FrozenRuntimeIdentityTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.FrozenRuntimeIdentityTest.xml",
+      "sha256": "d6996c1d47ea276bbf69b4588a94d7ce7a2d946295185ba17e14923e76583d28"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.WorkflowRuntimeEventTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.WorkflowRuntimeEventTest.xml",
+      "sha256": "0cad9624cd304e70392cc60d22697b48c338d2494312bea7610e0c1aba4e384d"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest.xml",
+      "sha256": "e7b60c64fea27c0d0af1d1edde37d3b08bc4434f7451e8b9e2a7c64e8dfe6d30"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest.xml",
+      "sha256": "a1ee42f3df1a63d722f94e69af62914d356780ca83b3a457e9bd20df9a2938d4"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest.xml",
+      "sha256": "fcd234d8fd6062f7ca5d6dc96803a157ab2f6fc26080327f60df09e6dea57a6d"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest.xml",
+      "sha256": "04f0fd03dc68847578d5d54b170750ea23596c40a00738672abd775a5bca46b5"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest.xml",
+      "sha256": "be43637dbd99a1f1393dc5a6e08894de6a11a7958b0847d4175d6dafea86cc50"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest.xml",
+      "sha256": "dcc9837544f6175129f4b326a3651cb4690d426b1cc6d274b855e5ea37d32871"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest.xml",
+      "sha256": "ef3c88785fabebed5037594906c5958d2ddfd70cab6cf34afd55a44f04b31edb"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest.xml",
+      "sha256": "d8fe637cfdc8bf9b1ff0849cdf625a944c762020a6e15cde694d30034d7d294d"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest.xml",
+      "sha256": "e863c1435d7b1c057648a9b13450a3d3605c217851d95538fcf8155dde98d99f"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.RunningStateGuardTest",
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.RunningStateGuardTest.xml",
+      "sha256": "3b06c36b209c5538d9937047f4c6742806b250f118bb70e14ce08cb89f2b2edf"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.StaleRunningRecoveryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.StaleRunningRecoveryTest.xml",
+      "sha256": "a9548789374b5ad1550c16cfc05debdb4b314ebb40d9b5208b82e17199fdadd7"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.governance.AgentCapabilityCatalogTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.governance.AgentCapabilityCatalogTest.xml",
+      "sha256": "6a16925a6f12f4f6e8bf5e9d3d64f12faea74b7b621a854978723a3b6206f179"
+    },
+    {
+      "module": "dual-runtime",
+      "classname": "dev.dual.runtime.delivery.DeliveryApplicationServiceTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-runtime/TEST-dev.dual.runtime.delivery.DeliveryApplicationServiceTest.xml",
+      "sha256": "47c7394468471e0d64485e8bf0e097e6bee287f2a88e0bc5e5abb98ea3a01967"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxNativeCommandSequenceTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxNativeCommandSequenceTest.xml",
+      "sha256": "b2165fcb356828e08eeb3b1e93b2124d3800fc4d039156f9bf99c14a05f2648d"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxTranscriptToolUsageReaderTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxTranscriptToolUsageReaderTest.xml",
+      "sha256": "03545b19e84419a5fea23c6f6185dc5eb72427f3c19c54f4dbca02a6c0c02cd4"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.xml",
+      "sha256": "925909e655c4fd060569962ce798b1454b74d8c4a28b5df608b274598e1f7698"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.PromptManifestWriterTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.PromptManifestWriterTest.xml",
+      "sha256": "0702cab262412a056b2853e3e2f8216f1ac8a100d72e64349762443c9fbf84c3"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest",
+      "tests": 49,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.xml",
+      "sha256": "59770d85b7830cfab6ad2e4f8d7329f1f970674ee9d43bf4c1b2cc3674b11a14"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AuthoredManifestDispatchTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AuthoredManifestDispatchTest.xml",
+      "sha256": "0d83fe7c902948ec01ab658c9f07930d767e0b8a8d4e5dee1446103227b60ac6"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxProcessCleanupPolicyTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxProcessCleanupPolicyTest.xml",
+      "sha256": "699a7298214baf61361580f34a9acb38051238ecac7b316a74679a97a55dc3ca"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AgentRunnerKindTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentRunnerKindTest.xml",
+      "sha256": "93870458b00d3b5b272e0005d3156b48408942423931319264d98055b46ae19b"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.ContextGovernanceActualReportWriterTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ContextGovernanceActualReportWriterTest.xml",
+      "sha256": "6229572ab2c66858cf73c5468531487c9d8841625fa323f37ade31961437eadd"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxExecutionFactOwnershipBoundaryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxExecutionFactOwnershipBoundaryTest.xml",
+      "sha256": "556f1d56341a35f9dd0b1bc29ba623f49998be7d25c29193f6c376f61567a891"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxProviderMetadataTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxProviderMetadataTest.xml",
+      "sha256": "7ed37822ac1ea889516a9ab766111a66115870dc425b858aa13cc094edb09875"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.ClaudeExecutionPolicyTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ClaudeExecutionPolicyTest.xml",
+      "sha256": "b577684c9cd65bcaaccceedbb8d77c41c8e9b1a1dc09141a43f5df0aa954f05d"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxUsageReaderTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxUsageReaderTest.xml",
+      "sha256": "791cb386f9e338b0b8c67e47c0a78ed1323b894e3c162bb5d6563223c22116b9"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxAgentTransportTest",
+      "tests": 44,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxAgentTransportTest.xml",
+      "sha256": "1a30224beb262553474deaf4e66259187b7d16e73e00fdc66f9f4dc044d5e5d1"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.ToolUsageCapabilityClassifierTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ToolUsageCapabilityClassifierTest.xml",
+      "sha256": "f5a12b96c8079d047a1ce60f7fdb6dbb773fc466bbfe5a1d6d3fa568512da14e"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxSessionLifecycleTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxSessionLifecycleTest.xml",
+      "sha256": "6166e1c8afc73f2a7bc329e74b27f0b207fdfbf569f3ce42d23965203f537404"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.SessionCompactionSignalTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.SessionCompactionSignalTest.xml",
+      "sha256": "a185bbe8d0bcf72de7f842f2b81a96dea5fe8164343f8251166d8abe8429e59a"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AgentLifecycleEventReaderTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentLifecycleEventReaderTest.xml",
+      "sha256": "01aab98d86692cfd0deffcdd37178d5df9f3fea7adbc52a80d968779e8ece8a3"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.PromptTemplateConsistencyTest",
+      "tests": 53,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.PromptTemplateConsistencyTest.xml",
+      "sha256": "588660882e5aba7ae9664b184af9e641a41652f2f5e53ce3a393935dc6e870e5"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxSessionStreamProjectorTest.xml",
+      "sha256": "776cd9ae7ac768affa72e6f4710440c04d5acbd0185a0f4a4b9e4f065fbae09a"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest",
+      "tests": 31,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest.xml",
+      "sha256": "12448f6f2d1e73e001c8e4360cce7db14c94878d37fd1c768e63c04ccab8c4a7"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.SessionScopePolicyTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.SessionScopePolicyTest.xml",
+      "sha256": "ddff9f7f097131b1df4820068a458f8c9fefe5144e70be6e9664cee9b822c94b"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AgentExecutionHealthTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentExecutionHealthTest.xml",
+      "sha256": "53991b5f7cea4271c090d5f1ebf6221baf9081247128b54d58b0285b311df4c4"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.xml",
+      "sha256": "175954aa47f1cd9911edfdd27b8036f1e88dd8f9edc43d6f0ae83bd53ef9cfb1"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxFailureSignalCatalogTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxFailureSignalCatalogTest.xml",
+      "sha256": "d9919db6c8cc33b135264d25cadf3e3b1dac34530c578708ef794fd3e8c5dca3"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.xml",
+      "sha256": "2e0ab35537c10858be5c34dba95722a06c89fae93cc100553997e585c5c7ec58"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactoryTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactoryTest.xml",
+      "sha256": "770463d1a9237809b64a1b995e0538752b6d842bd1def38df9a71999c4214f2c"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AcpxExecutionEventTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxExecutionEventTest.xml",
+      "sha256": "346095dc6d44943d27674f1bf6a9ea322a16e4380f0b7416b181bcab5de94231"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.RetryFailureContextSequenceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.RetryFailureContextSequenceTest.xml",
+      "sha256": "41481edca0152b28c9f8d0cf0518d361190b8104dccb7ee828bb4f225a4e823d"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.AgentPromptRendererTest",
+      "tests": 36,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AgentPromptRendererTest.xml",
+      "sha256": "cd19b3e469b0cf79bcf3556b21274a78a2af0695d1e2f83d91adff57b3679d7b"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest.xml",
+      "sha256": "ab731fe0dda5d2220d37e3b3aef0265343e9b8e03ea0cec7457599a632dac7a1"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.ReadFileSummaryTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.ReadFileSummaryTest.xml",
+      "sha256": "17c5ef8c41ee281c159d85c002ae215bb99d471f50aeaba0c42f7a3d73250862"
+    },
+    {
+      "module": "dual-adapter-acpx",
+      "classname": "dev.dual.adapter.acpx.SessionCompactionPolicyTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml": "reactor-55-reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.SessionCompactionPolicyTest.xml",
+      "sha256": "37a130b894257f130db3cf73db0355861ecf13771df1f7b731d8faf3a56fb71c"
+    }
+  ]
+}

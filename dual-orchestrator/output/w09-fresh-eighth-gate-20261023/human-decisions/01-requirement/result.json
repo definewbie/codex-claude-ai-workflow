@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "rtk",
+    "proxy",
+    "java",
+    "-jar",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015/release/dual-cli-0.1.0-SNAPSHOT.jar",
+    "review",
+    "approve",
+    "--workdir=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+    "--note=用户已批准当前需求与验收标准，仅允许形成GOAL并进入设计；具体产品文件写权限仍须EXECUTION批准。",
+    "ws-20261023T005431Z-9YYF"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 1.453,
+  "native_calls": 0,
+  "automatic_run": false
+}

@@ -1,0 +1,16 @@
+✔ AcpClient partial runtime option updates preserve permission policy (1.354667ms)
+✔ AcpClient snapshots permission policies at configuration boundaries (0.144ms)
+✔ AcpClient client-method permission errors update permission stats (0.416375ms)
+✔ exact permission ask returns the offered option and exposes the original RPC signal (0.425625ms)
+✔ exact permission ask never falls back after callback failure or invalid choice (0.385416ms)
+✔ exact lane retains auto reads and explicit denial without asking a human (0.152083ms)
+✔ exact lane refuses stale RPCs, unowned sessions and replies after cancellation (0.186958ms)
+✔ concurrent asks retain exact per-request allow/deny decisions; repeats never send twice (2.017959ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 111.016292

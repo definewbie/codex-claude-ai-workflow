@@ -1,0 +1,20 @@
+请对 W09“第八例续作启动选择收敛”做只读合并受影响复审。先读工作区 AGENTS.md 与相应边界检查要求；不要沿作者自评预设结论。不要更改原包/ledger/配置/授权/停止，不发 prompt，不初始化原生会话，不运行真实 Java 步骤、不提交。需要复跑测试时仅用隔离的临时夹具；不启动候选真实续作。
+
+工作区：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow
+候选包：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025
+原第八例：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023
+前续作包：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024
+受审设计：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-launch-reconciliation-design-20261025/wiring-design.zh-CN.txt
+
+目标是 P0：解除 operator 检查与实际启动两套选择的误拒，同时保住实际程序/配置身份、原两stop、累计170万/18/3600、人门与UNKNOWN。不是改Java或接Relay。
+
+建议先看 assessment.txt、transition-and-consumers.txt、changed-files.json/incremental.patch、gate-candidate.txt/config-impact-map.txt，再自行从脚本与原始证据重建完整 transition，不只复核作者列出的断言：
+1. E 是否从受审选择只构造一次；实际解释器、ps/rtk、Java Popen、wrapper Node、两个入口是否真正消费它？有无父PATH硬比较残留、检查后另解析/另拼环境、漏掉override或实际字节的旁路？同时检验合法环境不被误拒和非法漂移不被放行。
+2. 核验后Popen前程序消失，两种窗口及其持久结果、停止、后续拒绝是否可靠？逐写入检查目录/pre-state/Popen/PID/result/receipt的失败、进程重启与冷读；外部未知不得借重试或local失败假定零副作用。
+3. 新授权是否默认false，绑定正确workstream/checkpoint、limits、候选launch SHA，不能复用旧true或代替业务批准？两个历史stop是否保留，新stop和pending/terminal guard能否被绕过？
+4. 账目是否唯一、无遗漏或重复：原848242/10，851758是余额；56条继承时间+新回执，含前续作成功/失败重核和诊断；原source ref/SHA、规范化工具wall时长与真实run时长是否区分？储备尾链和原预算判据是否仍有效？
+5. 配置三项未豁免差异的影响/首个必要观察点是否具体、边界诚实？当前Codex/config候选不享有旧版行为证明；不读出/扩散敏感值，不把路径相同当字节相同。
+6. 独立核验证据：最终38单轮、21算术、4隔离反证、实际未授权拒绝、实际只读重核、保全清单。真实本地替身链与实际Java/native E2E是否有混称？错误轮次、合成usage、未运行部分是否如实？有无更小的必要方案，或本批引入超过收益的永久复杂度？
+
+必须逐项给 end-to-end invariant：Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test；缺项就标未闭合。区分 MODELED/PROJECTED/VALIDATED/ENFORCED/PROVEN的适用范围。
+请给独立结论与按严重度排列的发现，引用真实文件/行或原始工件；说明未核验范围，并分别裁定：离线实施、装配候选、新组合的待决定事项、运行授权。评审本身不授运行。最后给最小必要下一步，不重复扩充平台或实验。

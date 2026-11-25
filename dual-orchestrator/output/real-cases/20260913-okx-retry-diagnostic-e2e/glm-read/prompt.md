@@ -1,0 +1,1 @@
+Use Read exactly once to read /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/real-cases/20260913-okx-retry-diagnostic-e2e/glm-read/nonce.txt. No other tools. Reply only with JSON {"nonce":"<file contents>"}.

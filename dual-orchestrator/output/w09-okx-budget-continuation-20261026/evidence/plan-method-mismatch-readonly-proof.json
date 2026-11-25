@@ -1,0 +1,102 @@
+{
+  "status": "DETERMINISTIC_OFFLINE_SOURCE_PREDICATE_MISMATCH",
+  "jvm_qualifier_invoked": false,
+  "source_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java",
+  "source_sha256": "240c007625d039a19d60fb62a810107769dc73742e2a7ec925b7495ce9ae11ab",
+  "source_anchors": [
+    {
+      "line": 152,
+      "text": "require(request.criterionIds().contains(binding.criterionId()) && request.method().equals(binding.method())"
+    },
+    {
+      "line": 154,
+      "text": "&& request.detailOwner().equals(binding.detailOwner()), \"readiness does not support the planned verification\");"
+    }
+  ],
+  "plan_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.plan.json",
+  "plan_sha256": "e7bffc3bedbea71f685cc606341dbb07b0422a46094280d5c3c9917157822ced",
+  "registered_readiness_ref": {
+    "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/verification-readiness/okx-ac-availability-20261027-01.json",
+    "sha256": "1212daf7ab19146a19336a41ac32668c60a31d76f48a6bf0292d361006129d08"
+  },
+  "model_calls": 0,
+  "rows": [
+    {
+      "criterion_id": "AC-1",
+      "exact_method_match": false,
+      "method_starts_with_registered_text": true,
+      "registered_method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。",
+      "candidate_method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。本条目逐项绑定 AC-1：代码审查确认分子=既有 simpleEarnIncome+knownCost（SmartArbitrageCosts.knownTotal() 口径，不重复计费）、分母=request.hedgedShortNotional()、除法显式使用 CALCULATION_CONTEXT（MathContext.DECIMAL128）；PhaseOneAssessmentServiceTest 以 BigDecimal 原值断言除不尽场景（分子 200、名义 3000）isEqualByComparingTo 独立写定字面量 0.06666666666666666666666666666666667 且 precision()==34，断言前无 setScale、期望值不经服务公式重算；结果保持整个 90 天累计资金费率口径，无 APR 化或按结算次数/假定 8 小时间隔换算。",
+      "added_suffix": "本条目逐项绑定 AC-1：代码审查确认分子=既有 simpleEarnIncome+knownCost（SmartArbitrageCosts.knownTotal() 口径，不重复计费）、分母=request.hedgedShortNotional()、除法显式使用 CALCULATION_CONTEXT（MathContext.DECIMAL128）；PhaseOneAssessmentServiceTest 以 BigDecimal 原值断言除不尽场景（分子 200、名义 3000）isEqualByComparingTo 独立写定字面量 0.06666666666666666666666666666666667 且 precision()==34，断言前无 setScale、期望值不经服务公式重算；结果保持整个 90 天累计资金费率口径，无 APR 化或按结算次数/假定 8 小时间隔换算。",
+      "environment_ref_matches": true,
+      "feasibility_ref_matches": true,
+      "executor_matches": true,
+      "evidence_kind_matches": true,
+      "detail_owner_matches": true,
+      "actual_exit_required": false,
+      "expected_exit_code": null
+    },
+    {
+      "criterion_id": "AC-2",
+      "exact_method_match": false,
+      "method_starts_with_registered_text": true,
+      "registered_method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。",
+      "candidate_method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。本条目逐项绑定 AC-2：独立样例（资金 20000、APR 0.0365、期限 90 天、完整成本 20、对冲名义 10000）断言对照收益 180、阈值原值 isEqualByComparingTo 0.02；累计费率 0.019/0.020/0.021 对应原值增量 -10/0/+10 与建议 PREFER_SIMPLE_EARN/PREFER_SIMPLE_EARN/MICRO_VALIDATE_ARBITRAGE；成对防绕过 0.0199999999 与 0.0200000001 展示完全相同（资金费持有收益率=2.000000%、90天累计资金费率阈值=2.000000%、相对简单赚币增量=0.00 USDT、资金费率净收益=180.00 USDT）但原始增量 -0.000001/+0.000001 分别保持 PREFER_SIMPLE_EARN（首次实盘上限为空）与 MICRO_VALIDATE_ARBITRAGE（上限 5000）语义；零已知成本（阈值 0.018）、零 APR（阈值 0.002）、负资金费率与除不尽精度场景全覆盖，不以舍入后的 CLI 数字重新决定建议。",
+      "added_suffix": "本条目逐项绑定 AC-2：独立样例（资金 20000、APR 0.0365、期限 90 天、完整成本 20、对冲名义 10000）断言对照收益 180、阈值原值 isEqualByComparingTo 0.02；累计费率 0.019/0.020/0.021 对应原值增量 -10/0/+10 与建议 PREFER_SIMPLE_EARN/PREFER_SIMPLE_EARN/MICRO_VALIDATE_ARBITRAGE；成对防绕过 0.0199999999 与 0.0200000001 展示完全相同（资金费持有收益率=2.000000%、90天累计资金费率阈值=2.000000%、相对简单赚币增量=0.00 USDT、资金费率净收益=180.00 USDT）但原始增量 -0.000001/+0.000001 分别保持 PREFER_SIMPLE_EARN（首次实盘上限为空）与 MICRO_VALIDATE_ARBITRAGE（上限 5000）语义；零已知成本（阈值 0.018）、零 APR（阈值 0.002）、负资金费率与除不尽精度场景全覆盖，不以舍入后的 CLI 数字重新决定建议。",
+      "environment_ref_matches": true,
+      "feasibility_ref_matches": true,
+      "executor_matches": true,
+      "evidence_kind_matches": true,
+      "detail_owner_matches": true,
+      "actual_exit_required": false,
+      "expected_exit_code": null
+    },
+    {
+      "criterion_id": "AC-3",
+      "exact_method_match": false,
+      "method_starts_with_registered_text": true,
+      "registered_method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。",
+      "candidate_method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。本条目逐项绑定 AC-3：成本缺失、简单赚币条款未确认、窗口内无历史结算、期末保持策略开放四类情况下 breakEvenCumulativeFundingRate 为 Optional.empty 且原因沿既有 blockers/unknowns 文案输出，CLI 显示“90天累计资金费率阈值=无法精确计算”且不打印阈值数值，不填 0、不猜数、不给可行动的精确阈值；零与负 hedgedShortNotional 沿 PhaseOneAssessmentRequest 既有校验在读取事实前抛 IllegalArgumentException，事实查询以 AssertionError 证明未被读取。",
+      "added_suffix": "本条目逐项绑定 AC-3：成本缺失、简单赚币条款未确认、窗口内无历史结算、期末保持策略开放四类情况下 breakEvenCumulativeFundingRate 为 Optional.empty 且原因沿既有 blockers/unknowns 文案输出，CLI 显示“90天累计资金费率阈值=无法精确计算”且不打印阈值数值，不填 0、不猜数、不给可行动的精确阈值；零与负 hedgedShortNotional 沿 PhaseOneAssessmentRequest 既有校验在读取事实前抛 IllegalArgumentException，事实查询以 AssertionError 证明未被读取。",
+      "environment_ref_matches": true,
+      "feasibility_ref_matches": true,
+      "executor_matches": true,
+      "evidence_kind_matches": true,
+      "detail_owner_matches": true,
+      "actual_exit_required": false,
+      "expected_exit_code": null
+    },
+    {
+      "criterion_id": "AC-4",
+      "exact_method_match": false,
+      "method_starts_with_registered_text": true,
+      "registered_method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。",
+      "candidate_method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。本条目逐项绑定 AC-4：程序工具读取实际变更做语义检查，确认阈值仅由 PhaseOneAssessmentService 计算、经 PhaseOneAssessment typed 字段承载、AssessIncomeCliRunner 只按 percent() 格式化只读展示且无重算（既有 runnerDependsOnApplicationServiceNotInfrastructureMapper 测试钉住依赖结构）；CLI 完整证据单点 0.02 固定断言 contains(“90天累计资金费率阈值=2.000000%”) 并清楚标注不可用情况；docs/15-Funding-Rate-Break-Even-Threshold.md 为简体中文并包含 AC-2 样例、精度口径与限制；既有建议判定、首次实盘上限 5000 USDT、成本、风险与退出语义不变。",
+      "added_suffix": "本条目逐项绑定 AC-4：程序工具读取实际变更做语义检查，确认阈值仅由 PhaseOneAssessmentService 计算、经 PhaseOneAssessment typed 字段承载、AssessIncomeCliRunner 只按 percent() 格式化只读展示且无重算（既有 runnerDependsOnApplicationServiceNotInfrastructureMapper 测试钉住依赖结构）；CLI 完整证据单点 0.02 固定断言 contains(“90天累计资金费率阈值=2.000000%”) 并清楚标注不可用情况；docs/15-Funding-Rate-Break-Even-Threshold.md 为简体中文并包含 AC-2 样例、精度口径与限制；既有建议判定、首次实盘上限 5000 USDT、成本、风险与退出语义不变。",
+      "environment_ref_matches": true,
+      "feasibility_ref_matches": true,
+      "executor_matches": true,
+      "evidence_kind_matches": true,
+      "detail_owner_matches": true,
+      "actual_exit_required": false,
+      "expected_exit_code": null
+    },
+    {
+      "criterion_id": "AC-5",
+      "exact_method_match": false,
+      "method_starts_with_registered_text": true,
+      "registered_method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。",
+      "candidate_method": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。本条目逐项绑定 AC-5：在固定隔离基线 codex/w09-okx-break-even-20261026 @ 7c5facc 之上实施且改动严格限于批准的六文件；本次源码对应的完整 mvn -o clean test 回归（含既有非容器回归与全部 MySQL/Testcontainers 容器回归）以 Surefire XML/日志为程序依据全部通过、既有测试不回归、产品 CLI 退出语义不回归（原生状态/reported exit/actual exit 如实区分，不造 process exit，不以跳过或降级作数）；独立验收、当前交付批准、精确候选应用、人工或另行明确委派的 commit 与原 finalize 不因测试通过而视为完成。",
+      "added_suffix": "本条目逐项绑定 AC-5：在固定隔离基线 codex/w09-okx-break-even-20261026 @ 7c5facc 之上实施且改动严格限于批准的六文件；本次源码对应的完整 mvn -o clean test 回归（含既有非容器回归与全部 MySQL/Testcontainers 容器回归）以 Surefire XML/日志为程序依据全部通过、既有测试不回归、产品 CLI 退出语义不回归（原生状态/reported exit/actual exit 如实区分，不造 process exit，不以跳过或降级作数）；独立验收、当前交付批准、精确候选应用、人工或另行明确委派的 commit 与原 finalize 不因测试通过而视为完成。",
+      "environment_ref_matches": true,
+      "feasibility_ref_matches": true,
+      "executor_matches": true,
+      "evidence_kind_matches": true,
+      "detail_owner_matches": true,
+      "actual_exit_required": false,
+      "expected_exit_code": null
+    }
+  ],
+  "boundary": "Mandatory readiness method equality; no normalization or permissive match performed",
+  "interpretation_limit": "Shows failure of exact equality required by frozen source; not a new runtime exception, not a test of the full Java qualifier or production semantic equivalence."
+}

@@ -1,0 +1,112 @@
+{
+  "status": "CANDIDATE / NOT_A_COMPILED_CONTRACT / NO_AUTHORITY",
+  "criteria": [
+    {
+      "criterion_id": "AC-1",
+      "method": "python-unittest",
+      "executor": "AGENT",
+      "evidence_kind": "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+      "actual_exit_required": false,
+      "expected_exit_code": null,
+      "detail_owner": "verification-owner",
+      "environment_refs": "RUNTIME_REGISTERED_READINESS_REF_AND_SHA",
+      "authority_refs": [],
+      "feasibility_refs": "RUNTIME_REGISTERED_READINESS_REF_AND_SHA",
+      "expected_observation": "At least eight specified input/output cases and idempotence, from actual test/source observations.",
+      "evidence_check": {
+        "criterion_id": "AC-1",
+        "assertion": "FACTUAL_CRITERION_ASSERTION",
+        "execution_ref": "CURRENT_OR_EXACT_VALID_PRIOR_OBSERVATIONS_REF",
+        "tool_call_ids": "ACTUAL_CALL_IDS_OR_EMPTY_TO_SELECT_ALL_FIXED_RESULTS",
+        "material_refs": []
+      }
+    },
+    {
+      "criterion_id": "AC-2",
+      "method": "python-unittest",
+      "executor": "AGENT",
+      "evidence_kind": "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+      "actual_exit_required": false,
+      "expected_exit_code": null,
+      "detail_owner": "verification-owner",
+      "environment_refs": "RUNTIME_REGISTERED_READINESS_REF_AND_SHA",
+      "authority_refs": [],
+      "feasibility_refs": "RUNTIME_REGISTERED_READINESS_REF_AND_SHA",
+      "expected_observation": "Actual unittest output with run count and zero failures/errors; not a model summary.",
+      "evidence_check": {
+        "criterion_id": "AC-2",
+        "assertion": "FACTUAL_CRITERION_ASSERTION",
+        "execution_ref": "CURRENT_OR_EXACT_VALID_PRIOR_OBSERVATIONS_REF",
+        "tool_call_ids": "ACTUAL_CALL_IDS_OR_EMPTY_TO_SELECT_ALL_FIXED_RESULTS",
+        "material_refs": []
+      }
+    },
+    {
+      "criterion_id": "AC-3",
+      "method": "source-and-example-review",
+      "executor": "AGENT",
+      "evidence_kind": "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+      "actual_exit_required": false,
+      "expected_exit_code": null,
+      "detail_owner": "verification-owner",
+      "environment_refs": "RUNTIME_REGISTERED_READINESS_REF_AND_SHA",
+      "authority_refs": [],
+      "feasibility_refs": "RUNTIME_REGISTERED_READINESS_REF_AND_SHA",
+      "expected_observation": "Actually read README and implementation/test evidence; example input/output and import match code.",
+      "evidence_check": {
+        "criterion_id": "AC-3",
+        "assertion": "FACTUAL_CRITERION_ASSERTION",
+        "execution_ref": "CURRENT_OR_EXACT_VALID_PRIOR_OBSERVATIONS_REF",
+        "tool_call_ids": "ACTUAL_CALL_IDS_OR_EMPTY_TO_SELECT_ALL_FIXED_RESULTS",
+        "material_refs": []
+      }
+    }
+  ],
+  "same_method_criteria_can_share_one_readiness_record": [
+    "AC-1",
+    "AC-2"
+  ],
+  "readiness_fields": {
+    "schema": 1,
+    "requestId": "NEW_UNIQUE_ID",
+    "subject": "CURRENT_PLAN_OR_CONTRACT_WAITING_OCCURRENCE",
+    "goal": {
+      "ref": "ACTUAL_APPROVED_GOAL_REF",
+      "sha256": "ACTUAL_GOAL_SHA"
+    },
+    "epoch": "ACTUAL_GOAL_EPOCH",
+    "criterionIds": "EXACT_APPROVED_CRITERION_IDS_FOR_METHOD",
+    "method": "EXACT_METHOD_MATCH",
+    "executor": "AGENT",
+    "evidenceKind": "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+    "environment": {
+      "workspace": "ACTUAL_EFFECTIVE_WORKSPACE_REALPATH",
+      "identity": "DIGEST_OF_ACTUAL_SELECTED_ENVIRONMENT_AND_DEPENDENCIES",
+      "owner": "NAMED_GATE_OPERATOR",
+      "dependencies": [
+        {
+          "path": "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+          "sha256": "667f456638186ffffe0bf853d6d510b0d65b523b216161a7e179a50d14445407",
+          "absent": false
+        },
+        {
+          "path": "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/__init__.py",
+          "sha256": "7c22ee0c503b75aba5221e3e8189f9bf4632f85a43315ff841ec9d26a68e3551",
+          "absent": false
+        },
+        {
+          "path": "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py",
+          "sha256": "72b07de4133a7e39b2f6a7920465669aa04626f217e800779587bc0713fe002e",
+          "absent": false
+        }
+      ]
+    },
+    "statement": "OPERATOR_PREREQUISITE_DECLARATION_WITH_EXPLICIT_KNOWN_LIMITS",
+    "detailOwner": "verification-owner",
+    "lifetime": "AUTHORIZATION_EPOCH",
+    "expiresAt": null,
+    "action": "RECORD",
+    "supersedes": null
+  },
+  "not_run_native_capability": true
+}

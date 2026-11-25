@@ -1,0 +1,56 @@
+{
+  "checked_at": "2026-10-23T09:04:07.603716+08:00",
+  "root_pid": 71137,
+  "processes": [
+    {
+      "pid": 71137,
+      "ppid": 71134,
+      "pgid": 71124,
+      "command": "rtk proxy java -Xlog:class+load=debug:file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/02-intake-author/classloading.log:uptime,level,tags -jar /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015/release/dual-cli-0.1.0-SNAPSHOT.jar run --workdir=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree --max-steps 1 --dispatch-mode INLINE ws-20261023T005431Z-9YYF"
+    },
+    {
+      "pid": 71139,
+      "ppid": 71137,
+      "pgid": 71124,
+      "command": "/usr/bin/java -Xlog:class+load=debug:file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/steps/02-intake-author/classloading.log:uptime,level,tags -jar /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015/release/dual-cli-0.1.0-SNAPSHOT.jar run --workdir=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree --max-steps 1 --dispatch-mode INLINE ws-20261023T005431Z-9YYF"
+    },
+    {
+      "pid": 71189,
+      "ppid": 71139,
+      "pgid": 71124,
+      "command": "node /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist/cli.js --timeout 600 --ttl 1800 --prompt-retries 1 --approve-reads --non-interactive-permissions fail --permission-policy {\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"} --allowed-tools Read,Grep,Glob --no-terminal --claude-execution-policy-ref .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/execution-authority/claude-execution-policy.json --claude-execution-policy-sha256 757a18d86d71df12cc3fe353c84e4675d378cf4f7a86e3625b014ba431a8f317 claude -s claude-main-ws-20261023T005431Z-9YYF-run-1792717427983 -f /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/prompts/intake-claude-brainstorm.md"
+    },
+    {
+      "pid": 71190,
+      "ppid": 71189,
+      "pgid": 71190,
+      "command": "/usr/local/bin/node /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist/cli.js __queue-owner"
+    },
+    {
+      "pid": 71191,
+      "ppid": 71190,
+      "pgid": 71190,
+      "command": "npm exec @agentclientprotocol/claude-agent-acp@0.70.0"
+    },
+    {
+      "pid": 71216,
+      "ppid": 71191,
+      "pgid": 71190,
+      "command": "node /Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/.bin/claude-agent-acp"
+    },
+    {
+      "pid": 71237,
+      "ppid": 71216,
+      "pgid": 71190,
+      "command": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk-darwin-arm64/claude --output-format stream-json --verbose --input-format stream-json --permission-prompt-tool stdio --allowedTools Read,Grep,Glob --disallowedTools AskUserQuestion --tools default --setting-sources= --permission-mode default --allow-dangerously-skip-permissions --include-partial-messages --session-id=7bdcea18-5233-4263-9689-20327c9e56ab --managed-settings {\"sandbox\":{\"enabled\":true,\"failIfUnavailable\":true,\"allowUnsandboxedCommands\":false,\"autoAllowBashIfSandboxed\":false,\"network\":{\"strictAllowlist\":true,\"allowManagedDomainsOnly\":true,\"allowedDomains\":[],\"allowAllUnixSockets\":false,\"allowUnixSockets\":[]},\"filesystem\":{\"allowRead\":[\"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree\",\"/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T\"],\"allowWrite\":[\"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree\",\"/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T\"],\"denyRead\":[],\"denyWrite\":[\"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/nodes\",\"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/execution-authority\"]},\"credentials\":{\"envVars\":[{\"name\":\"ANTHROPIC_API_KEY\",\"mode\":\"deny\"},{\"name\":\"ANTHROPIC_AUTH_TOKEN\",\"mode\":\"deny\"},{\"name\":\"ANTHROPIC_BASE_URL\",\"mode\":\"deny\"}]}},\"permissions\":{\"deny\":[\"Bash\",\"Edit(//Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/nodes)\",\"Edit(//Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/nodes/**)\",\"Edit(//Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/execution-authority)\",\"Edit(//Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/execution-authority/**)\"]}} --replay-user-messages  --settings {\"sandbox\":{\"enabled\":true,\"failIfUnavailable\":true,\"allowUnsandboxedCommands\":false,\"autoAllowBashIfSandboxed\":false,\"network\":{\"strictAllowlist\":true,\"allowManagedDomainsOnly\":true,\"allowedDomains\":[],\"allowLocalBinding\":false,\"allowAllUnixSockets\":false,\"allowUnixSockets\":[]},\"filesystem\":{\"allowRead\":[\"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree\",\"/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T\"],\"allowWrite\":[\"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree\",\"/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T\"],\"denyRead\":[],\"denyWrite\":[\"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/nodes\",\"/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/execution-authority\"]},\"credentials\":{\"envVars\":[{\"name\":\"ANTHROPIC_API_KEY\",\"mode\":\"deny\"},{\"name\":\"ANTHROPIC_AUTH_TOKEN\",\"mode\":\"deny\"},{\"name\":\"ANTHROPIC_BASE_URL\",\"mode\":\"deny\"}]}}}"
+    }
+  ],
+  "actual_sdk_candidates": [
+    {
+      "pid": 71237,
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk-darwin-arm64/claude",
+      "sha256": "7b39c1588df919d001dea3ffd5651adb682f2451b5a0e18d42d4233296b53cc7"
+    }
+  ],
+  "scope": "This single successful local process snapshot and parent links only; not remote or arbitrary descendant-stop proof"
+}

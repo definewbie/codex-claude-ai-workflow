@@ -12,7 +12,6 @@ import dev.dual.ledger.file.WorkflowExecutionDocument;
 import dev.dual.ledger.file.WorkflowExecutionStatus;
 import dev.dual.ledger.file.WorkflowFileLedger;
 import dev.dual.ledger.file.WorkstreamPaths;
-import dev.dual.runtime.handler.AgentRunMetadataFinalizer;
 import dev.dual.runtime.handler.ArtifactContractValidator;
 import dev.dual.runtime.handler.DecisionHandler;
 import dev.dual.runtime.handler.GateHandler;
@@ -33,7 +32,6 @@ public final class AgentWorker {
     private final WorkflowFileLedger ledger;
     private final HandlerRegistry handlers;
     private final ArtifactContractValidator artifactContractValidator;
-    private final AgentRunMetadataFinalizer runMetadataFinalizer;
 
     public AgentWorker(WorkflowFileLedger ledger, HandlerRegistry handlers) {
         if (ledger == null) {
@@ -44,41 +42,45 @@ public final class AgentWorker {
         }
         this.ledger = ledger;
         this.handlers = handlers;
-        this.artifactContractValidator = new ArtifactContractValidator();
-        this.runMetadataFinalizer = new AgentRunMetadataFinalizer();
+        this.artifactContractValidator = new ArtifactContractValidator(ledger);
     }
 
     public AgentWorkerResult runOne(WorkflowCommand command) throws Exception {
         var paths = new WorkstreamPaths(command.workspaceRoot(), new DualId(command.workstreamId()));
-        var task = ledger.firstQueuedAgentTask(paths);
-        if (task.isEmpty()) {
-            var current = ledger.loadCurrent(paths);
-            return new AgentWorkerResult(command.workstreamId(), "", "", current.status(), false, "no queued agent task");
+        try (var local = ledger.writeSession(paths, "worker local recovery", java.util.UUID.randomUUID().toString())) { local.commit(); }
+        var recovering = RecordedExecutionRecovery.active(ledger, paths);
+        if (recovering.isPresent() && recovering.get().status() == dev.dual.ledger.file.NodeExecutionStatus.RUNNING) {
+            var recovered = RecordedExecutionRecovery.recover(ledger, paths, recovering.get());
+            return new AgentWorkerResult(command.workstreamId(), recovering.get().agentTaskId(), recovered.activeNode(),
+                    recovered.status(), false, recovered.message());
         }
-        return executeQueued(command, paths, task.get());
-    }
-
-    private AgentWorkerResult executeQueued(
-            WorkflowCommand command,
-            WorkstreamPaths paths,
-            AgentTaskDocument task
-    ) throws Exception {
-        var definition = ledger.loadDefinition(paths);
-        var current = ledger.loadCurrent(paths);
-        var nodeDoc = ledger.loadNode(paths, task.nodeInstanceId());
-        var nodeDefinition = definition.node(nodeDoc.nodeDefinitionId());
-        if (nodeDoc.status() != NodeStatus.RUNNING) {
-            return new AgentWorkerResult(command.workstreamId(), task.agentTaskId(), nodeDefinition.id(),
-                    current.status(), false, "queued task node is not running: " + nodeDoc.status());
+        AgentTaskDocument task;
+        NodeInstanceDocument nodeDoc;
+        NodeDefinition nodeDefinition;
+        dev.dual.core.workflow.WorkflowDefinition definition;
+        dev.dual.ledger.file.NodeExecutionDocument nodeExecution;
+        WorkflowExecutionDocument workflowExecution;
+        try (var mutation = ledger.writeSession(paths, "claim queued task", java.util.UUID.randomUUID().toString())) {
+            var scoped = mutation.ledger();
+            var current = scoped.loadCurrent(paths);
+            var queued = scoped.firstQueuedAgentTask(paths);
+            if (queued.isEmpty() || current.status().isTerminal())
+                return new AgentWorkerResult(command.workstreamId(), "", "", current.status(), false, "no eligible queued task");
+            task = queued.orElseThrow();
+            nodeDoc = scoped.loadNode(paths, task.nodeInstanceId());
+            definition = scoped.loadDefinition(paths);
+            nodeDefinition = definition.node(nodeDoc.nodeDefinitionId());
+            workflowExecution = scoped.startWorkflowExecution(paths, current, "worker");
+            nodeExecution = scoped.startNodeExecution(paths, workflowExecution.workflowExecutionId(), nodeDoc,
+                    task, ProcessHandle.current().pid());
+            task = scoped.markAgentTaskRunning(paths, task, nodeExecution.nodeExecutionId());
+            scoped.markRunning(paths, nodeDoc.nodeInstanceId(), ProcessHandle.current().pid());
+            mutation.commit();
         }
-
-        var workflowExecution = ledger.startWorkflowExecution(paths, current, "worker");
         var nodeExecutionIds = new ArrayList<String>();
         var finished = false;
         try {
-            var result = executeAndRecord(command, paths, workflowExecution, nodeExecutionIds, task, nodeDoc, nodeDefinition);
-            ledger.completeAndRoute(paths, definition, nodeDoc.nodeInstanceId(), result.status(), result.outcome(),
-                    result.outputRefs(), result.result());
+            var result = executeAndRecord(command, paths, workflowExecution, nodeExecutionIds, task, nodeDoc, nodeDefinition, nodeExecution);
             var next = ledger.loadCurrent(paths);
             openWaitingGates(command, paths, definition, next);
             var active = activeNodeDefinitionId(paths, next);
@@ -103,18 +105,32 @@ public final class AgentWorker {
             ArrayList<String> nodeExecutionIds,
             AgentTaskDocument task,
             NodeInstanceDocument nodeDoc,
-            NodeDefinition nodeDefinition
+            NodeDefinition nodeDefinition,
+            dev.dual.ledger.file.NodeExecutionDocument nodeExecution
     ) throws Exception {
-        long pid = ProcessHandle.current().pid();
-        var nodeExecution = ledger.startNodeExecution(paths, workflowExecution.workflowExecutionId(), nodeDoc, task, pid);
-        task = ledger.markAgentTaskRunning(paths, task, nodeExecution.nodeExecutionId());
         nodeExecutionIds.add(nodeExecution.nodeExecutionId());
-        ledger.markRunning(paths, nodeDoc.nodeInstanceId(), pid);
-        var node = ledger.loadCoreNode(paths, nodeDoc.nodeInstanceId());
         try {
-            var result = dev.dual.runtime.handler.EvidenceCollection.execute(command.workspaceRoot(),
-                    command.workstreamId(), nodeDoc, () -> executeNode(command, nodeDefinition, node));
-            result = artifactContractValidator.validate(
+        var node = ledger.loadCoreNode(paths, nodeDoc.nodeInstanceId());
+        if (nodeDefinition.kind() == NodeKind.DECISION
+                || handlers.task(nodeDefinition.handlerType()).localLedgerMutation()) {
+            try (var mutation = ledger.writeSession(paths, "local node result and routing", nodeExecution.nodeExecutionId())) {
+                var scoped = mutation.ledger();
+                var result = executeNode(command, nodeDefinition, scoped.loadCoreNode(paths, node.nodeInstanceId()), scoped);
+                result = new ArtifactContractValidator(scoped).validateAndFinalize(command.workspaceRoot(), command.workstreamId(),
+                        node.nodeInstanceId(), nodeDefinition, node.inputRefs(), result);
+                scoped.markAgentTaskFinished(paths, task, result);
+                scoped.finishNodeExecution(paths, nodeExecution, result);
+                WorkflowRuntime.emitDomainEvents(scoped, paths, nodeDefinition.id(), nodeDefinition.handlerType(),
+                        node.nodeInstanceId(), result);
+                scoped.completeAndRoute(paths, scoped.loadDefinition(paths), node.nodeInstanceId(), result.status(),
+                        result.outcome(), result.outputRefs(), result.result());
+                mutation.commit();
+                return result;
+            }
+        }
+            var result = dev.dual.runtime.handler.EvidenceCollection.execute(ledger, command.workspaceRoot(),
+                    command.workstreamId(), nodeDoc, () -> executeNode(command, nodeDefinition, node, ledger));
+            result = artifactContractValidator.validateAndFinalize(
                     command.workspaceRoot(),
                     command.workstreamId(),
                     node.nodeInstanceId(),
@@ -122,24 +138,40 @@ public final class AgentWorker {
                     node.inputRefs(),
                     result
             );
-            result = runMetadataFinalizer.finalizeNodeResult(command.workspaceRoot(), result);
-            ledger.markAgentTaskFinished(paths, task, result);
-            ledger.finishNodeExecution(paths, nodeExecution, result);
+            result = dev.dual.runtime.handler.AgentRunCommitProtocol.complete(command.workspaceRoot(), ledger, paths,
+                    nodeExecution, result);
+            if (result.result().containsKey("completion_ref"))
+                return AgentExecutionCompletion.commit(ledger, paths, nodeExecution, result);
+            try (var mutation = ledger.writeSession(paths, "complete queued task", nodeExecution.nodeExecutionId())) {
+                var scoped = mutation.ledger();
+                scoped.markAgentTaskFinished(paths, task, result);
+                scoped.finishNodeExecution(paths, nodeExecution, result);
+                WorkflowRuntime.emitDomainEvents(scoped, paths, nodeDefinition.id(), nodeDefinition.handlerType(),
+                        nodeDoc.nodeInstanceId(), result);
+                scoped.completeAndRoute(paths, scoped.loadDefinition(paths), nodeDoc.nodeInstanceId(), result.status(),
+                        result.outcome(), result.outputRefs(), result.result());
+                mutation.commit();
+            }
             return result;
         } catch (Exception nodeFailure) {
-            ledger.markAgentTaskFailed(paths, task, nodeFailure);
-            ledger.failNodeExecution(paths, nodeExecution, nodeFailure);
+            // Preserve any prepared L03; recovery must not replace it with a new exception transition.
+            try {
+                if ("acpx.agent_run".equals(nodeDefinition.handlerType()))
+                    dev.dual.runtime.handler.AgentRunCommitProtocol.releaseExecutor(ledger, paths, nodeExecution);
+                else AgentExecutionCompletion.recordHandlerFailure(ledger, paths, nodeExecution, nodeFailure);
+            }
+            catch (Exception releaseFailure) { nodeFailure.addSuppressed(releaseFailure); }
             throw nodeFailure;
         }
     }
 
-    private NodeResult executeNode(WorkflowCommand command, NodeDefinition nodeDefinition, dev.dual.core.workflow.NodeInstance node)
+    private NodeResult executeNode(WorkflowCommand command, NodeDefinition nodeDefinition, dev.dual.core.workflow.NodeInstance node, WorkflowFileLedger executionLedger)
             throws Exception {
         return switch (nodeDefinition.kind()) {
             case TASK -> handlers.task(nodeDefinition.handlerType())
-                    .execute(new TaskHandler.TaskContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
+                    .execute(new TaskHandler.TaskContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node, executionLedger));
             case DECISION -> handlers.decision(nodeDefinition.handlerType())
-                    .evaluate(new DecisionHandler.DecisionContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node));
+                    .evaluate(new DecisionHandler.DecisionContext(command.workspaceRoot(), command.workstreamId(), nodeDefinition, node, executionLedger));
             case GATE -> throw new IllegalStateException("gate nodes are not agent tasks");
         };
     }
@@ -163,7 +195,7 @@ public final class AgentWorker {
             handlers.gate(nodeDefinition.handlerType())
                     .openOrInspect(new GateHandler.GateContext(
                             command.workspaceRoot(), command.workstreamId(), nodeDefinition, node,
-                            sourceOutcome(paths, activeNodeId)));
+                            sourceOutcome(paths, activeNodeId), ledger));
         }
     }
 

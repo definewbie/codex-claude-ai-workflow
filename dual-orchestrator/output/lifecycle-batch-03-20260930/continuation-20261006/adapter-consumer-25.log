@@ -1,0 +1,807 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/7]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/7]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/7]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/7]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/7]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/7]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- jar:3.4.2:test-jar (shared-lifecycle-test-fixtures) @ dual-runtime ---
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.runtime.handler.AuthoredStageSequenceTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.24 s -- in dev.dual.runtime.handler.AuthoredStageSequenceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-acpx >---------------------
+[INFO] Building dual-adapter-acpx 0.1.0-SNAPSHOT                          [7/7]
+[INFO]   from dual-adapter-acpx/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-acpx ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 11 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-acpx ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-acpx ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-acpx ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 37 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-acpx ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest
+[ERROR] Tests run: 49, Failures: 25, Errors: 9, Skipped: 0, Time elapsed: 8.016 s <<< FAILURE! -- in dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.contractDiscoveryProfileAllowsReadAndSearchWithoutExecute -- Time elapsed: 0.104 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <false> but was: <null>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.contractDiscoveryProfileAllowsReadAndSearchWithoutExecute(AcpxAgentTaskHandlerTest.java:1060)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.unresolvedSessionRequestCannotUseEarlierCompletionToSuppressReconnect -- Time elapsed: 0.005 s <<< ERROR!
+java.lang.NullPointerException
+	at java.base/java.util.Objects.requireNonNull(Objects.java:220)
+	at java.base/sun.nio.fs.UnixFileSystem.getPath(UnixFileSystem.java:257)
+	at java.base/java.nio.file.Path.resolve(Path.java:513)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.unresolvedSessionRequestCannotUseEarlierCompletionToSuppressReconnect(AcpxAgentTaskHandlerTest.java:1658)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedRunSplitsRawTranscriptFromFinalArtifactOutput -- Time elapsed: 0.004 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedRunSplitsRawTranscriptFromFinalArtifactOutput(AcpxAgentTaskHandlerTest.java:859)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedRunPreservesFencedRawTranscriptButPersistsStrictCandidate -- Time elapsed: 0.005 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedRunPreservesFencedRawTranscriptButPersistsStrictCandidate(AcpxAgentTaskHandlerTest.java:915)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.typedPublicWebSearchApprovalAddsOnlyExactToolForOneRetry -- Time elapsed: 0.230 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.typedPublicWebSearchApprovalAddsOnlyExactToolForOneRetry(AcpxAgentTaskHandlerTest.java:1178)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.runMetadataRecordsSessionScopeStageAndIteration -- Time elapsed: 0.003 s <<< ERROR!
+java.nio.file.NoSuchFileException: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-14524853286847017630/.agent/workstreams/ws-sess/runs
+	at java.base/sun.nio.fs.UnixException.translateToIOException(UnixException.java:92)
+	at java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:106)
+	at java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:111)
+	at java.base/sun.nio.fs.UnixFileAttributeViews$Basic.readAttributes(UnixFileAttributeViews.java:57)
+	at java.base/sun.nio.fs.UnixFileSystemProvider.readAttributes(UnixFileSystemProvider.java:161)
+	at java.base/java.nio.file.Files.readAttributes(Files.java:1702)
+	at java.base/java.nio.file.FileTreeWalker.getAttributes(FileTreeWalker.java:216)
+	at java.base/java.nio.file.FileTreeWalker.visit(FileTreeWalker.java:268)
+	at java.base/java.nio.file.FileTreeWalker.walk(FileTreeWalker.java:306)
+	at java.base/java.nio.file.FileTreeIterator.<init>(FileTreeIterator.java:69)
+	at java.base/java.nio.file.Files.walk(Files.java:3540)
+	at java.base/java.nio.file.Files.walk(Files.java:3591)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.runMetadataRecordsSessionScopeStageAndIteration(AcpxAgentTaskHandlerTest.java:2619)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.recordsProviderConnectionFailureAsAdapterBoundaryFailure -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.recordsProviderConnectionFailureAsAdapterBoundaryFailure(AcpxAgentTaskHandlerTest.java:1771)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.deniedOptionalToolWithOnlyMissingRootClosureCompletesWithWarnings -- Time elapsed: 0.111 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.deniedOptionalToolWithOnlyMissingRootClosureCompletesWithWarnings(AcpxAgentTaskHandlerTest.java:1510)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.unvalidatedCompletionDoesNotEnterSemanticMemory -- Time elapsed: 0.008 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+unqualified stable contract must not enter semantic memory: {
+  "schemaVersion" : 1,
+  "artifactType" : "workstream_memory",
+  "workstreamId" : "ws-sem-run",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-intake-codex_product_review",
+  "iterationId" : "iter-001",
+  "decidedScope" : [ ],
+  "nonGoals" : [ ],
+  "decisions" : [ ],
+  "readFiles" : [ ],
+  "openIssues" : [ ],
+  "priorVerdicts" : [ ],
+  "priorFailures" : [ ],
+  "refsSemantics" : "latest_projection_refs",
+  "refs" : {
+    "workingSet" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/working-set.json",
+    "readReuseContract" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/read-reuse-contract.json",
+    "fileSummaries" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/file-summaries.json",
+    "fileRelevancePlan" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/file-relevance-plan.json",
+    "repositoryFactBinding" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/binding.json",
+    "stageScopePolicy" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/stage-scope-policy.json",
+    "repoMap" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/repo-map.json"
+  },
+  "generatedAt" : "2026-10-06T11:14:08.075679Z"
+} ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.unvalidatedCompletionDoesNotEnterSemanticMemory(AcpxAgentTaskHandlerTest.java:2773)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.treatsNonZeroExitAsCompletedWhenStdoutHasCompleteTerminalArtifact -- Time elapsed: 0.113 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: {run_id=run-1791285248149, run_metadata=.agent/workstreams/ws-test/runs/run-1791285248149/run.json, agent=claude, session=claude-main-ws-test-run-1791285248149, exit_code=5, transcript_ref=.agent/workstreams/ws-test/runs/run-1791285248149/outputs/design-claude.transcript.log, output_complete=true, repository_fact_binding_ref=.agent/workstreams/ws-test/artifacts/context-governance/occurrences/node-design-claude_design-005-run-1791285248149/binding.json, repository_fact_binding_sha256=bf0731fb30133a9630fb24483a987d5cb0c3465d4ae50d0e9799453ebe53b2da, process_usability=EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT, adapter_signals=[], reason=AGENT_OUTPUT_CONTRACT_VIOLATION, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], parse_error={message=AUTHORED_RUN_SNAPSHOT_MISMATCH, details={}, code=AUTHORED_CONTEXT_INVALID}, contract_failure_diagnostic_ref=.agent/workstreams/ws-test/artifacts/contract-failures/node-design.json, contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-test/artifacts/contract-failures/node-design.md, message=AUTHORED_RUN_SNAPSHOT_MISMATCH, agent_execution_result_contract={present=true, valid=true, decision=READY_FOR_ARCH_REVIEW, summary=, validationError=}, agent_execution_artifact_contract_results=[{contractType=design_result, required=true, present=true, valid=false, path=, errorCode=AUTHORED_CONTEXT_INVALID, errorMessage=AUTHORED_RUN_SNAPSHOT_MISMATCH}], agent_execution_outcome={status=CONTRACT_FAILED, primaryReason=required_artifact_contract_failed, nodeMaySucceed=false, retryPolicy=MANUAL_ONLY, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., secondarySignals=[]}} / The agent result was valid, but one or more required artifact projections failed validation. ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.treatsNonZeroExitAsCompletedWhenStdoutHasCompleteTerminalArtifact(AcpxAgentTaskHandlerTest.java:1403)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.nonImplementationAgentNodeRunsWithoutApproveAll -- Time elapsed: 0.003 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <false> but was: <null>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.nonImplementationAgentNodeRunsWithoutApproveAll(AcpxAgentTaskHandlerTest.java:1035)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.adjacentE1ExecutionsDoNotReuseAConflictingPolicySession -- Time elapsed: 0.654 s <<< ERROR!
+java.io.IOException: test must complete/retry the previous execution before requesting another claim
+	at dev.dual.adapter.acpx.AcpxTestLedger.claim(AcpxTestLedger.java:24)
+	at dev.dual.adapter.acpx.AuthoredAdapterFixture.before(AuthoredAdapterFixture.java:27)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.taskContext(AcpxAgentTaskHandlerTest.java:2834)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.adjacentE1ExecutionsDoNotReuseAConflictingPolicySession(AcpxAgentTaskHandlerTest.java:181)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completesWhenExitCodeIsZeroAndOutputIsCompleteDespiteReconnectStderr -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completesWhenExitCodeIsZeroAndOutputIsCompleteDespiteReconnectStderr(AcpxAgentTaskHandlerTest.java:1888)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedAgentRunRecordsAcpxUsageFromSessionStream -- Time elapsed: 0.003 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedAgentRunRecordsAcpxUsageFromSessionStream(AcpxAgentTaskHandlerTest.java:973)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.configuredPostContractNodeWithoutQualificationFailsBeforeTransportInvocation -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED> but was: <INPUT_PREPARATION_FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.configuredPostContractNodeWithoutQualificationFailsBeforeTransportInvocation(AcpxAgentTaskHandlerTest.java:239)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.startedRunIsClosedToTerminalWhenHandlerFailsBeforeFinalizer -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Expected java.io.IOException to be thrown, but nothing was thrown.
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.startedRunIsClosedToTerminalWhenHandlerFailsBeforeFinalizer(AcpxAgentTaskHandlerTest.java:1832)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.writesPromptAndReturnsPreparedWhenConfiguredForPrepareOnly -- Time elapsed: 0.077 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.writesPromptAndReturnsPreparedWhenConfiguredForPrepareOnly(AcpxAgentTaskHandlerTest.java:114)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.schemaMissingFieldUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes -- Time elapsed: 0.712 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.schemaMissingFieldUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes(AcpxAgentTaskHandlerTest.java:353)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.capturedLargeStreamKeepsOccurrenceFactsConsistentThroughFinalization -- Time elapsed: 0.048 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeResult[outcome=TASK_CONTRACT_REVISION_CONTEXT_INVALID, status=FAILED, outputRefs=[], result={errors=[revision snapshot unavailable, INVALID_LOCAL_COMMIT: missing workstream runtime identity], failure_code=TASK_CONTRACT_REVISION_CONTEXT_INVALID, input_preparation_failure={reason=TASK_CONTRACT_REVISION_CONTEXT_INVALID, code=TASK_CONTRACT_REVISION_CONTEXT_INVALID, retryPolicy=MANUAL_ONLY, providerInvoked=false, details=[revision snapshot unavailable, INVALID_LOCAL_COMMIT: missing workstream runtime identity]}, reason=TASK_CONTRACT_REVISION_CONTEXT_INVALID}, errorMessage=revision snapshot unavailable; INVALID_LOCAL_COMMIT: missing workstream runtime identity] ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.capturedLargeStreamKeepsOccurrenceFactsConsistentThroughFinalization(AcpxAgentTaskHandlerTest.java:1947)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedRunRecordsActualReadTelemetryWithoutReadPolicyFields -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: read telemetry must not replace the change-boundary decision ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedRunRecordsActualReadTelemetryWithoutReadPolicyFields(AcpxAgentTaskHandlerTest.java:2652)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.qualifiedAuthoredReviewStillExcludesUnvalidatedOutputFromMemory -- Time elapsed: 0.166 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: {errors=[legacy contract qualification flag is not supported: design.codex_arch_review], failure_code=java.lang.IllegalArgumentException, input_preparation_failure={reason=INPUT_PREPARATION_FAILED, code=java.lang.IllegalArgumentException, retryPolicy=MANUAL_ONLY, providerInvoked=false, details=[legacy contract qualification flag is not supported: design.codex_arch_review]}, reason=INPUT_PREPARATION_FAILED} ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.qualifiedAuthoredReviewStillExcludesUnvalidatedOutputFromMemory(AcpxAgentTaskHandlerTest.java:2789)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteWorkspaceBaseAuthority -- Time elapsed: 0.004 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.validateIdentity(LedgerSession.java:330)
+	at dev.dual.ledger.file.LedgerSession.validateWorkstreamIdentity(LedgerSession.java:334)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:277)
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:286)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:164)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:332)
+	at dev.dual.adapter.acpx.AuthoredAdapterFixture.before(AuthoredAdapterFixture.java:18)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.taskContext(AcpxAgentTaskHandlerTest.java:2834)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteWorkspaceBaseAuthority(AcpxAgentTaskHandlerTest.java:1322)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotCreateWorkspaceAuthority -- Time elapsed: 0.003 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.validateIdentity(LedgerSession.java:330)
+	at dev.dual.ledger.file.LedgerSession.validateWorkstreamIdentity(LedgerSession.java:334)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:277)
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:286)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:164)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:332)
+	at dev.dual.adapter.acpx.AuthoredAdapterFixture.before(AuthoredAdapterFixture.java:18)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.taskContext(AcpxAgentTaskHandlerTest.java:2834)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotCreateWorkspaceAuthority(AcpxAgentTaskHandlerTest.java:1350)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.runWritesExecutionTimeline -- Time elapsed: 0.002 s <<< ERROR!
+java.nio.file.NoSuchFileException: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-11646565418807630534/.agent/workstreams/ws-timeline/runs
+	at java.base/sun.nio.fs.UnixException.translateToIOException(UnixException.java:92)
+	at java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:106)
+	at java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:111)
+	at java.base/sun.nio.fs.UnixFileAttributeViews$Basic.readAttributes(UnixFileAttributeViews.java:57)
+	at java.base/sun.nio.fs.UnixFileSystemProvider.readAttributes(UnixFileSystemProvider.java:161)
+	at java.base/java.nio.file.Files.readAttributes(Files.java:1702)
+	at java.base/java.nio.file.FileTreeWalker.getAttributes(FileTreeWalker.java:216)
+	at java.base/java.nio.file.FileTreeWalker.visit(FileTreeWalker.java:268)
+	at java.base/java.nio.file.FileTreeWalker.walk(FileTreeWalker.java:306)
+	at java.base/java.nio.file.FileTreeIterator.<init>(FileTreeIterator.java:69)
+	at java.base/java.nio.file.Files.walk(Files.java:3540)
+	at java.base/java.nio.file.Files.walk(Files.java:3591)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.runWritesExecutionTimeline(AcpxAgentTaskHandlerTest.java:2739)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.prosePrefixedFinalMessageUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes -- Time elapsed: 0.093 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.prosePrefixedFinalMessageUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes(AcpxAgentTaskHandlerTest.java:270)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completesReconnectExitWhenStdoutHasCompleteTerminalArtifact -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completesReconnectExitWhenStdoutHasCompleteTerminalArtifact(AcpxAgentTaskHandlerTest.java:1563)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.operatorGrantFlowsThroughRealHandlerPolicyAndDoesNotSurviveRetry -- Time elapsed: 0.074 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: not <null>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertNotNull.failNull(AssertNotNull.java:49)
+	at org.junit.jupiter.api.AssertNotNull.assertNotNull(AssertNotNull.java:35)
+	at org.junit.jupiter.api.AssertNotNull.assertNotNull(AssertNotNull.java:30)
+	at org.junit.jupiter.api.Assertions.assertNotNull(Assertions.java:304)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.operatorGrantFlowsThroughRealHandlerPolicyAndDoesNotSurviveRetry(AcpxAgentTaskHandlerTest.java:1254)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.recordsSessionBootstrapFailureAsAdapterBoundaryFailure -- Time elapsed: 0.003 s <<< ERROR!
+java.lang.NullPointerException
+	at java.base/java.util.Objects.requireNonNull(Objects.java:220)
+	at java.base/sun.nio.fs.UnixFileSystem.getPath(UnixFileSystem.java:257)
+	at java.base/java.nio.file.Path.resolve(Path.java:513)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.recordsSessionBootstrapFailureAsAdapterBoundaryFailure(AcpxAgentTaskHandlerTest.java:1738)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.deniedOptionalToolWithProseWrappedFencedArtifactCompletesWithWarnings -- Time elapsed: 0.091 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.deniedOptionalToolWithProseWrappedFencedArtifactCompletesWithWarnings(AcpxAgentTaskHandlerTest.java:1456)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedAgentRunPrefersTransportUsageWhenNoAcpxSessionStreamExists -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.completedAgentRunPrefersTransportUsageWhenNoAcpxSessionStreamExists(AcpxAgentTaskHandlerTest.java:1005)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.handlerCannotFabricateExecutionFactsWhenTransportContractThrows -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Expected java.io.IOException to be thrown, but nothing was thrown.
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.handlerCannotFabricateExecutionFactsWhenTransportContractThrows(AcpxAgentTaskHandlerTest.java:1795)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.runWritesPromptManifestByDefault -- Time elapsed: 0.002 s <<< ERROR!
+java.nio.file.NoSuchFileException: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-7192943365881644283/.agent/workstreams/ws-manifest/runs
+	at java.base/sun.nio.fs.UnixException.translateToIOException(UnixException.java:92)
+	at java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:106)
+	at java.base/sun.nio.fs.UnixException.rethrowAsIOException(UnixException.java:111)
+	at java.base/sun.nio.fs.UnixFileAttributeViews$Basic.readAttributes(UnixFileAttributeViews.java:57)
+	at java.base/sun.nio.fs.UnixFileSystemProvider.readAttributes(UnixFileSystemProvider.java:161)
+	at java.base/java.nio.file.Files.readAttributes(Files.java:1702)
+	at java.base/java.nio.file.FileTreeWalker.getAttributes(FileTreeWalker.java:216)
+	at java.base/java.nio.file.FileTreeWalker.visit(FileTreeWalker.java:268)
+	at java.base/java.nio.file.FileTreeWalker.walk(FileTreeWalker.java:306)
+	at java.base/java.nio.file.FileTreeIterator.<init>(FileTreeIterator.java:69)
+	at java.base/java.nio.file.Files.walk(Files.java:3540)
+	at java.base/java.nio.file.Files.walk(Files.java:3591)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.runWritesPromptManifestByDefault(AcpxAgentTaskHandlerTest.java:2700)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteTaskContractAuthority -- Time elapsed: 0.002 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.validateIdentity(LedgerSession.java:330)
+	at dev.dual.ledger.file.LedgerSession.validateWorkstreamIdentity(LedgerSession.java:334)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:277)
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:286)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:164)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:332)
+	at dev.dual.adapter.acpx.AuthoredAdapterFixture.before(AuthoredAdapterFixture.java:18)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.taskContext(AcpxAgentTaskHandlerTest.java:2834)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteTaskContractAuthority(AcpxAgentTaskHandlerTest.java:1294)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.treatsReconnectStderrAsRecoverableFailureEvenWhenExitCodeIsZero -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.treatsReconnectStderrAsRecoverableFailureEvenWhenExitCodeIsZero(AcpxAgentTaskHandlerTest.java:1604)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest
+[ERROR] Tests run: 10, Failures: 1, Errors: 2, Skipped: 0, Time elapsed: 0.104 s <<< FAILURE! -- in dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest
+[ERROR] dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.typedDesignRetainsDecisionAndSummaryWithoutCopyingPlannedScope -- Time elapsed: 0.072 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: {run_id=run-1791285254221, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], parse_error={message=AUTHORED_RUN_SNAPSHOT_MISMATCH, details={}, code=AUTHORED_CONTEXT_INVALID}, contract_failure_diagnostic_ref=.agent/workstreams/ws-design/artifacts/contract-failures/node-design.json, contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-design/artifacts/contract-failures/node-design.md, message=AUTHORED_RUN_SNAPSHOT_MISMATCH, agent_execution_result_contract={present=true, valid=true, decision=READY_FOR_ARCH_REVIEW, summary=, validationError=}, agent_execution_artifact_contract_results=[{contractType=design_result, required=true, present=true, valid=false, path=, errorCode=AUTHORED_CONTEXT_INVALID, errorMessage=AUTHORED_RUN_SNAPSHOT_MISMATCH}]} ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.typedDesignRetainsDecisionAndSummaryWithoutCopyingPlannedScope(WorkstreamMemoryUpdaterTest.java:51)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.readFilesSummaryIsSemanticFromStructureNotMetadata -- Time elapsed: 0.003 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.MismatchedInputException: 
+Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/factory method to deserialize from String value ('refresh token on expiry')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 5, column: 41] (through reference chain: dev.dual.core.contract.TaskContract["acceptance_criteria"]->java.util.ArrayList[0])
+	at com.fasterxml.jackson.databind.exc.MismatchedInputException.from(MismatchedInputException.java:63)
+	at com.fasterxml.jackson.databind.DeserializationContext.reportInputMismatch(DeserializationContext.java:1754)
+	at com.fasterxml.jackson.databind.DeserializationContext.handleMissingInstantiator(DeserializationContext.java:1379)
+	at com.fasterxml.jackson.databind.deser.std.StdDeserializer._deserializeFromString(StdDeserializer.java:311)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromString(BeanDeserializerBase.java:1592)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeOther(BeanDeserializer.java:197)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:187)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer._deserializeFromArray(CollectionDeserializer.java:361)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer.deserialize(CollectionDeserializer.java:246)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer.deserialize(CollectionDeserializer.java:30)
+	at com.fasterxml.jackson.databind.deser.SettableBeanProperty.deserialize(SettableBeanProperty.java:543)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeWithErrorWrapping(BeanDeserializer.java:585)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:447)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3733)
+	at dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.readFilesSummaryIsSemanticFromStructureNotMetadata(WorkstreamMemoryUpdaterTest.java:291)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.updateMemoryPopulatesDecidedScopeAndNonGoalsFromTaskContract -- Time elapsed: 0.001 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.ValueInstantiationException: 
+Cannot construct instance of `dev.dual.core.contract.TaskContract`, problem: unsupported task contract schema: 0
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 11, column: 1]
+	at com.fasterxml.jackson.databind.exc.ValueInstantiationException.from(ValueInstantiationException.java:47)
+	at com.fasterxml.jackson.databind.DeserializationContext.instantiationException(DeserializationContext.java:2015)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.wrapAsJsonMappingException(StdValueInstantiator.java:622)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.rewrapCtorProblem(StdValueInstantiator.java:645)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:293)
+	at com.fasterxml.jackson.databind.deser.ValueInstantiator.createFromObjectWith(ValueInstantiator.java:301)
+	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:214)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:541)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3733)
+	at dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.updateMemoryPopulatesDecidedScopeAndNonGoalsFromTaskContract(WorkstreamMemoryUpdaterTest.java:162)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.IllegalArgumentException: unsupported task contract schema: 0
+	at dev.dual.core.contract.TaskContract.<init>(TaskContract.java:35)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.fasterxml.jackson.databind.introspect.AnnotatedConstructor.call(AnnotatedConstructor.java:126)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:291)
+	... 13 more
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   AcpxAgentTaskHandlerTest.capturedLargeStreamKeepsOccurrenceFactsConsistentThroughFinalization:1947 NodeResult[outcome=TASK_CONTRACT_REVISION_CONTEXT_INVALID, status=FAILED, outputRefs=[], result={errors=[revision snapshot unavailable, INVALID_LOCAL_COMMIT: missing workstream runtime identity], failure_code=TASK_CONTRACT_REVISION_CONTEXT_INVALID, input_preparation_failure={reason=TASK_CONTRACT_REVISION_CONTEXT_INVALID, code=TASK_CONTRACT_REVISION_CONTEXT_INVALID, retryPolicy=MANUAL_ONLY, providerInvoked=false, details=[revision snapshot unavailable, INVALID_LOCAL_COMMIT: missing workstream runtime identity]}, reason=TASK_CONTRACT_REVISION_CONTEXT_INVALID}, errorMessage=revision snapshot unavailable; INVALID_LOCAL_COMMIT: missing workstream runtime identity] ==> expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.completedAgentRunPrefersTransportUsageWhenNoAcpxSessionStreamExists:1005 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.completedAgentRunRecordsAcpxUsageFromSessionStream:973 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.completedRunPreservesFencedRawTranscriptButPersistsStrictCandidate:915 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.completedRunRecordsActualReadTelemetryWithoutReadPolicyFields:2652 read telemetry must not replace the change-boundary decision ==> expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.completedRunSplitsRawTranscriptFromFinalArtifactOutput:859 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.completesReconnectExitWhenStdoutHasCompleteTerminalArtifact:1563 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.completesWhenExitCodeIsZeroAndOutputIsCompleteDespiteReconnectStderr:1888 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.configuredPostContractNodeWithoutQualificationFailsBeforeTransportInvocation:239 expected: <TASK_CONTRACT_PROJECTION_QUALIFICATION_FAILED> but was: <INPUT_PREPARATION_FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.contractDiscoveryProfileAllowsReadAndSearchWithoutExecute:1060 expected: <false> but was: <null>
+[ERROR]   AcpxAgentTaskHandlerTest.deniedOptionalToolWithOnlyMissingRootClosureCompletesWithWarnings:1510 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.deniedOptionalToolWithProseWrappedFencedArtifactCompletesWithWarnings:1456 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.handlerCannotFabricateExecutionFactsWhenTransportContractThrows:1795 Expected java.io.IOException to be thrown, but nothing was thrown.
+[ERROR]   AcpxAgentTaskHandlerTest.nonImplementationAgentNodeRunsWithoutApproveAll:1035 expected: <false> but was: <null>
+[ERROR]   AcpxAgentTaskHandlerTest.operatorGrantFlowsThroughRealHandlerPolicyAndDoesNotSurviveRetry:1254 expected: not <null>
+[ERROR]   AcpxAgentTaskHandlerTest.prosePrefixedFinalMessageUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes:270 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.qualifiedAuthoredReviewStillExcludesUnvalidatedOutputFromMemory:2789 {errors=[legacy contract qualification flag is not supported: design.codex_arch_review], failure_code=java.lang.IllegalArgumentException, input_preparation_failure={reason=INPUT_PREPARATION_FAILED, code=java.lang.IllegalArgumentException, retryPolicy=MANUAL_ONLY, providerInvoked=false, details=[legacy contract qualification flag is not supported: design.codex_arch_review]}, reason=INPUT_PREPARATION_FAILED} ==> expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.recordsProviderConnectionFailureAsAdapterBoundaryFailure:1771 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.schemaMissingFieldUsesOneCorrectionAndOnlyCorrectedEnvelopeRoutes:353 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.startedRunIsClosedToTerminalWhenHandlerFailsBeforeFinalizer:1832 Expected java.io.IOException to be thrown, but nothing was thrown.
+[ERROR]   AcpxAgentTaskHandlerTest.treatsNonZeroExitAsCompletedWhenStdoutHasCompleteTerminalArtifact:1403 {run_id=run-1791285248149, run_metadata=.agent/workstreams/ws-test/runs/run-1791285248149/run.json, agent=claude, session=claude-main-ws-test-run-1791285248149, exit_code=5, transcript_ref=.agent/workstreams/ws-test/runs/run-1791285248149/outputs/design-claude.transcript.log, output_complete=true, repository_fact_binding_ref=.agent/workstreams/ws-test/artifacts/context-governance/occurrences/node-design-claude_design-005-run-1791285248149/binding.json, repository_fact_binding_sha256=bf0731fb30133a9630fb24483a987d5cb0c3465d4ae50d0e9799453ebe53b2da, process_usability=EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT, adapter_signals=[], reason=AGENT_OUTPUT_CONTRACT_VIOLATION, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], parse_error={message=AUTHORED_RUN_SNAPSHOT_MISMATCH, details={}, code=AUTHORED_CONTEXT_INVALID}, contract_failure_diagnostic_ref=.agent/workstreams/ws-test/artifacts/contract-failures/node-design.json, contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-test/artifacts/contract-failures/node-design.md, message=AUTHORED_RUN_SNAPSHOT_MISMATCH, agent_execution_result_contract={present=true, valid=true, decision=READY_FOR_ARCH_REVIEW, summary=, validationError=}, agent_execution_artifact_contract_results=[{contractType=design_result, required=true, present=true, valid=false, path=, errorCode=AUTHORED_CONTEXT_INVALID, errorMessage=AUTHORED_RUN_SNAPSHOT_MISMATCH}], agent_execution_outcome={status=CONTRACT_FAILED, primaryReason=required_artifact_contract_failed, nodeMaySucceed=false, retryPolicy=MANUAL_ONLY, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., secondarySignals=[]}} / The agent result was valid, but one or more required artifact projections failed validation. ==> expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.treatsReconnectStderrAsRecoverableFailureEvenWhenExitCodeIsZero:1604 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AcpxAgentTaskHandlerTest.typedPublicWebSearchApprovalAddsOnlyExactToolForOneRetry:1178 expected: <true> but was: <false>
+[ERROR]   AcpxAgentTaskHandlerTest.unvalidatedCompletionDoesNotEnterSemanticMemory:2773 unqualified stable contract must not enter semantic memory: {
+  "schemaVersion" : 1,
+  "artifactType" : "workstream_memory",
+  "workstreamId" : "ws-sem-run",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-intake-codex_product_review",
+  "iterationId" : "iter-001",
+  "decidedScope" : [ ],
+  "nonGoals" : [ ],
+  "decisions" : [ ],
+  "readFiles" : [ ],
+  "openIssues" : [ ],
+  "priorVerdicts" : [ ],
+  "priorFailures" : [ ],
+  "refsSemantics" : "latest_projection_refs",
+  "refs" : {
+    "workingSet" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/working-set.json",
+    "readReuseContract" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/read-reuse-contract.json",
+    "fileSummaries" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/file-summaries.json",
+    "fileRelevancePlan" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/file-relevance-plan.json",
+    "repositoryFactBinding" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/binding.json",
+    "stageScopePolicy" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/stage-scope-policy.json",
+    "repoMap" : ".agent/workstreams/ws-sem-run/artifacts/context-governance/occurrences/node-intake-codex_product_review-run-1791285248073/repo-map.json"
+  },
+  "generatedAt" : "2026-10-06T11:14:08.075679Z"
+} ==> expected: <true> but was: <false>
+[ERROR]   AcpxAgentTaskHandlerTest.writesPromptAndReturnsPreparedWhenConfiguredForPrepareOnly:114 expected: <true> but was: <false>
+[ERROR]   WorkstreamMemoryUpdaterTest.typedDesignRetainsDecisionAndSummaryWithoutCopyingPlannedScope:51 {run_id=run-1791285254221, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, contract_node_id=design.claude_design, contract_required_keys=[decision, summary], contract_allowed_decisions=[READY_FOR_ARCH_REVIEW], parse_error={message=AUTHORED_RUN_SNAPSHOT_MISMATCH, details={}, code=AUTHORED_CONTEXT_INVALID}, contract_failure_diagnostic_ref=.agent/workstreams/ws-design/artifacts/contract-failures/node-design.json, contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-design/artifacts/contract-failures/node-design.md, message=AUTHORED_RUN_SNAPSHOT_MISMATCH, agent_execution_result_contract={present=true, valid=true, decision=READY_FOR_ARCH_REVIEW, summary=, validationError=}, agent_execution_artifact_contract_results=[{contractType=design_result, required=true, present=true, valid=false, path=, errorCode=AUTHORED_CONTEXT_INVALID, errorMessage=AUTHORED_RUN_SNAPSHOT_MISMATCH}]} ==> expected: <COMPLETED> but was: <FAILED>
+[ERROR] Errors: 
+[ERROR]   AcpxAgentTaskHandlerTest.adjacentE1ExecutionsDoNotReuseAConflictingPolicySession:181->taskContext:2834 » IO test must complete/retry the previous execution before requesting another claim
+[ERROR]   AcpxAgentTaskHandlerTest.implementationAgentCannotCreateWorkspaceAuthority:1350->taskContext:2834 » IO INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+[ERROR]   AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteTaskContractAuthority:1294->taskContext:2834 » IO INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+[ERROR]   AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteWorkspaceBaseAuthority:1322->taskContext:2834 » IO INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+[ERROR]   AcpxAgentTaskHandlerTest.recordsSessionBootstrapFailureAsAdapterBoundaryFailure:1738 » NullPointer
+[ERROR]   AcpxAgentTaskHandlerTest.runMetadataRecordsSessionScopeStageAndIteration:2619 » NoSuchFile /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-14524853286847017630/.agent/workstreams/ws-sess/runs
+[ERROR]   AcpxAgentTaskHandlerTest.runWritesExecutionTimeline:2739 » NoSuchFile /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-11646565418807630534/.agent/workstreams/ws-timeline/runs
+[ERROR]   AcpxAgentTaskHandlerTest.runWritesPromptManifestByDefault:2700 » NoSuchFile /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-7192943365881644283/.agent/workstreams/ws-manifest/runs
+[ERROR]   AcpxAgentTaskHandlerTest.unresolvedSessionRequestCannotUseEarlierCompletionToSuppressReconnect:1658 » NullPointer
+[ERROR]   WorkstreamMemoryUpdaterTest.readFilesSummaryIsSemanticFromStructureNotMetadata:291 » MismatchedInput Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/factory method to deserialize from String value ('refresh token on expiry')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 5, column: 41] (through reference chain: dev.dual.core.contract.TaskContract["acceptance_criteria"]->java.util.ArrayList[0])
+[ERROR]   WorkstreamMemoryUpdaterTest.updateMemoryPopulatesDecidedScopeAndNonGoalsFromTaskContract:162 » ValueInstantiation Cannot construct instance of `dev.dual.core.contract.TaskContract`, problem: unsupported task contract schema: 0
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 11, column: 1]
+[INFO] 
+[ERROR] Tests run: 59, Failures: 26, Errors: 11, Skipped: 0
+[INFO] 
+[ERROR] There are test failures.
+
+See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target/surefire-reports for the individual test results.
+See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.243 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  0.029 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  0.053 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  0.014 s]
+[INFO] dual-runtime ....................................... SUCCESS [ 13.696 s]
+[INFO] dual-adapter-acpx .................................. SUCCESS [  9.446 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  23.624 s
+[INFO] Finished at: 2026-10-06T19:14:14+08:00
+[INFO] ------------------------------------------------------------------------

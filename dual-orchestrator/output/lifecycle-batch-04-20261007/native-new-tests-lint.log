@@ -1,0 +1,5 @@
+test/client.test.ts:99:13: error typescript(no-redundant-type-constituents): 'NodeJS.Signals' is an 'error' type that acts as 'any' and overrides all other types in this union type.
+test/client.test.ts:128:17: error typescript(no-redundant-type-constituents): 'NodeJS.Signals' is an 'error' type that acts as 'any' and overrides all other types in this union type.
+test/client.test.ts:129:12: error typescript(no-redundant-type-constituents): 'PassThrough' is an 'error' type that acts as 'any' and overrides all other types in this intersection type.
+test/client.test.ts:130:13: error typescript(no-redundant-type-constituents): 'PassThrough' is an 'error' type that acts as 'any' and overrides all other types in this intersection type.
+test/client.test.ts:131:13: error typescript(no-redundant-type-constituents): 'PassThrough' is an 'error' type that acts as 'any' and overrides all other types in this intersection type.

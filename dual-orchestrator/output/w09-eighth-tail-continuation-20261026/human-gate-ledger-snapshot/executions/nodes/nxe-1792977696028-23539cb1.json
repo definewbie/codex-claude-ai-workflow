@@ -1,0 +1,37 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792977696028-23539cb1",
+  "agentTaskId" : "agt-1792977696023-42a1dcf9",
+  "workflowExecutionId" : "wfe-1792977695915-057ac7da",
+  "nodeInstanceId" : "node-acceptance-generate_final_report-037",
+  "nodeDefinitionId" : "acceptance.generate_final_report",
+  "handlerType" : "report.generate_final",
+  "status" : "SUCCEEDED",
+  "pid" : 45060,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/reports/iter-003-final-report.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/reports/latest-final-report.md" ],
+  "result" : {
+    "claim" : {
+      "executor_pid" : 45060,
+      "input_identity" : "c1acf15fa0ffec7c14ea8c81b7c3589d553454dad858feff30861f18d19db9e2",
+      "executor_started_at" : "2026-10-26T01:21:34.795Z"
+    },
+    "report_path" : ".agent/workstreams/ws-20261023T005431Z-9YYF/reports/iter-003-final-report.md",
+    "latest_report_path" : ".agent/workstreams/ws-20261023T005431Z-9YYF/reports/latest-final-report.md",
+    "iteration_id" : "iter-003",
+    "generated_at" : "2026-10-26T01:21:36.444132Z",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-26T01:21:36.028452Z",
+  "finishedAt" : "2026-10-26T01:21:36.450707Z",
+  "durationMs" : 422
+}

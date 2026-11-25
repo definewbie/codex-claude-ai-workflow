@@ -1,0 +1,19 @@
+GRPO
+
+GRPO builds on a simple idea: a model learns better when it can compare its own
+answers. Instead of scoring each response with an absolute reward, GRPO collects
+several responses to the same query, ranks them, and learns from those relative
+rankings. Figure 3-3 shows a high-level overview of how this process works.
+
+
+
+
+
+  Figure 3-3. High-level GRPO mechanics: group-normalized rewards combined with a reference policy KL
+                                                   term.
+
+The process begins by sampling prompts and generating multiple completions
+from the current policy. Each completion is then evaluated by a reward function or
+judge model, which assigns an individual score ri. These scores are normalized
+within each group, centering and scaling their values to create a set of relative
+comparisons that serve as the update signal for the policy.

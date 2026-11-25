@@ -1,0 +1,19 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261011T141651Z-MBC2",
+  "updatedAt" : "2026-10-11T14:23:00.868355Z",
+  "items" : [ {
+    "id" : "agent_output_contract:dce008d3",
+    "type" : "agent_output_contract",
+    "stageId" : "intake",
+    "iterationId" : "",
+    "nodeInstanceId" : "node-intake-codex_product_review-004",
+    "nodeExecutionId" : "",
+    "sourceRef" : ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.contract.json",
+    "summary" : "功能语义与主要验收要求完整，但文件范围约束与提案性质冲突，且缺少退出码验证豁免。",
+    "claims" : [ "Decision: NEEDS_REVISION" ],
+    "files" : [ ],
+    "riskTags" : [ "消除文件范围的内部冲突：三个路径可保留为候选 scope.included，但目标和排除项不能提前锁定实现文件集合；最终精确路径及 CREATE/MODIFY 由后续 EXECUTION 单独批准。", "在 AC-2 或测试约束中明确不要求工具提供独立测量的真实退出码，同时保留实际输入输出、测试数量及零失败和零错误的证据要求。" ],
+    "status" : "available"
+  } ]
+}

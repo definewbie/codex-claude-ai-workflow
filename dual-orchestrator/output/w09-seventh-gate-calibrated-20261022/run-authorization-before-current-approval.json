@@ -1,0 +1,14 @@
+{
+  "case": "FRESH_SEVENTH",
+  "offline_preparation_authorized": true,
+  "fresh_run_authorized": false,
+  "user_request": "保留170万token上限，将校准结果并入第七例Gate，完成储备算术和启动前离线核验，材料齐备后给出CC复审提示词，暂不启动真实运行",
+  "proposed_budget": {
+    "total_tokens": 1700000,
+    "top_level_requests": 18,
+    "active_seconds": 3600
+  },
+  "budget_plan_confirmed": true,
+  "business_gate_approvals": false,
+  "previous_balance_inherited": false
+}

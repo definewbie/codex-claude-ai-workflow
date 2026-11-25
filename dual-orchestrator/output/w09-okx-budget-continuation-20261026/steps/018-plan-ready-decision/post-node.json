@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-plan-decision-020",
+  "nodeDefinitionId": "plan.decision",
+  "kind": "DECISION",
+  "handlerType": "review.decision",
+  "status": "COMPLETED",
+  "stageId": "stage-plan",
+  "iterationId": "iter-002",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1793030916946/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.contract.json"
+  ],
+  "inputTransition": {
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256": "5cf1395c38a444c0e370ca067dea1c5f50b13b2a5cd6c9448498d63a8f481910",
+    "source_node_instance_id": "node-plan-codex_plan_review-019",
+    "required": true,
+    "transition_type": "normal",
+    "condition": "unconditional"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1793030916946/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.contract.json"
+  ],
+  "result": {
+    "summary": "六文件计划与已复审设计一致，实施步骤、测试断言及验证责任明确，可进入精确 EXECUTION 范围审批。",
+    "source": "contract-sidecar",
+    "decision": "READY_TO_IMPLEMENT",
+    "reviewed_candidate": {
+      "stage": "plan",
+      "review_artifact": {
+        "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.contract.json",
+        "sha256": "0cbf1736ebeed6cae501037fa4673e3def212f37f425eb023f13d93318e14143"
+      },
+      "checks": [
+        {
+          "input_refs": [
+            {
+              "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030521008/outputs/plan-claude.contract.json",
+              "sha256": "517db5e9c27a95ff65e8d55ef666e4659b4de6c10f706abaa53aa1c1c4b5e46f"
+            },
+            {
+              "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.contract.json",
+              "sha256": "0cbf1736ebeed6cae501037fa4673e3def212f37f425eb023f13d93318e14143"
+            }
+          ],
+          "result": "PASSED",
+          "rule_id": "review.subject.and.route",
+          "rule_version": "2"
+        }
+      ],
+      "review_decision": "READY_TO_IMPLEMENT",
+      "author_occurrence": "node-plan-claude_plan-017",
+      "contract": {
+        "sha256": "41f643f07f822573dfa2a13e8f5ede75aa2efd83fdca3efa20130ca0ae2bf04f",
+        "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/task-contract.json",
+        "phase": "GOAL",
+        "epoch": 1
+      },
+      "author_artifact": {
+        "ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030521008/outputs/plan-claude.contract.json",
+        "sha256": "517db5e9c27a95ff65e8d55ef666e4659b4de6c10f706abaa53aa1c1c4b5e46f"
+      },
+      "schema_version": 1,
+      "reviewer_occurrence": "node-plan-codex_plan_review-019",
+      "decision_occurrence": "node-plan-decision-020"
+    },
+    "readiness_reason": "VERIFICATION_READINESS_REQUIRED",
+    "readiness_detail": "VERIFICATION_READINESS_REQUIRED: unexpected or duplicate criterion"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1793031043251-aa8eb23e",
+  "startedAt": "2026-10-26T16:10:43.262072Z",
+  "finishedAt": "2026-10-26T16:10:43.379719Z"
+}

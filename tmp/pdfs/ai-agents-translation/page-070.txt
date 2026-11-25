@@ -1,0 +1,38 @@
+Now you give the model two powers in Example 2-8. It can produce
+language tokens that act as thoughts L, and it can request structured tool
+calls A. Binding the tools makes these actions first-class outputs that the
+runtime can dispatch.
+
+Example 2-8. Init LLM
+model = ChatOpenAI(model="gpt-5.4-mini", temperature=0)
+model = model.bind_tools(TOOLS)
+
+                                                           ˆA  A   Binding tools to the model augments the action space to  =  ∪L.
+
+Example 2-9 is the policy step. It reads the entire message history, applies
+the system rules, and produces exactly one thing: a thought, or a tool call
+request, or both. You don’t branch here; you simply return what the model
+decided.
+
+Example 2-9. Call the model
+def call_model(state: AgentState, config: RunnableConfig) ->
+Dict[str, Any]:
+    response = model.invoke([SYSTEM_PROMPT] + state["messages"],
+config)
+    return {"messages": [response]}
+
+    Policy π(ct) →ˆat is model.invoke on the current context.
+   The reducer appends new messages, implementing ct+1 = (ct, ˆat).
+
+In Example 2-10 you translate intent into effect. Every requested tool call is
+executed deterministically, and its result is wrapped as a message. By
+pushing the observation into the same message stream, you let the next
+policy step reason over fresh evidence without special cases.
+
+Example 2-10. Execute tool calls
+def tool_node(state: AgentState) -> Dict[str, Any]:
+
+    last = state["messages"][-1]
+    outputs: list[ToolMessage] = []
+    for tc in getattr(last, "tool_calls", []) or []:
+        name = tc.get("name")

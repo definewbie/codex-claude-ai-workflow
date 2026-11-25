@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.runtime.handler.WorkflowIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.146 s -- in dev.dual.runtime.handler.WorkflowIntegrationTest

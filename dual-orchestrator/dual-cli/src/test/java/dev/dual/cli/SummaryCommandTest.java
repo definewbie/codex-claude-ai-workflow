@@ -33,7 +33,7 @@ class SummaryCommandTest {
         assertTrue(printed.contains("- Nodes: 2"));
         assertTrue(printed.contains("- Agent Runs: 1"));
         assertTrue(printed.contains("dualctl review show"));
-        assertTrue(printed.contains("| design.codex_arch_review | task | COMPLETED | iter-001 | 42 |"));
+        assertTrue(printed.contains("| design.codex_arch_review | TASK | COMPLETED | iter-001 | 42 |"));
         assertTrue(printed.contains("candidate-1=ACCEPTED"));
         assertTrue(printed.contains("- Calibration Apply Plans: 1"));
         assertTrue(printed.contains("- Delivery: BLOCKED"));
@@ -105,10 +105,51 @@ class SummaryCommandTest {
         var printed = captureStdout(command::call);
 
         assertTrue(printed.contains("- Delivery: BLOCKED"));
-        assertTrue(printed.contains("ACCEPTED_CANDIDATE_INVALID"));
+        assertTrue(printed.contains("LEGACY_NOT_BOUND"), printed);
         assertTrue(!printed.contains("Review the staged target diff"));
         assertTrue(!printed.contains("delivery finalize"));
         assertTrue(!printed.contains("dualctl delivery merge --workdir"));
+    }
+
+    @Test
+    void staleMetricsAndTimelineCannotOverrideTheCurrentLedger() throws Exception {
+        writeLedger("WAITING_FOR_HUMAN");
+        var root = tempDir.resolve(".agent/workstreams/ws-summary");
+        Files.writeString(root.resolve("metrics/workstream-metrics.json"),
+                "{\"commitSequence\":0,\"nodeCount\":999,\"workflowStatus\":\"COMPLETED\"}");
+        Files.writeString(root.resolve("timeline.json"), "{\"workflowStatus\":\"COMPLETED\",\"nodes\":[]}");
+        var command = new SummaryCommand();
+        command.workdir = tempDir;
+        command.workstreamId = "ws-summary";
+        var printed = captureStdout(command::call);
+        assertTrue(printed.contains("- Status: WAITING_FOR_HUMAN"));
+        assertTrue(printed.contains("- Metrics State: STALE"));
+        assertTrue(printed.contains("- Nodes: unavailable"));
+        assertTrue(printed.contains("design.codex_arch_review"));
+        var timeline = new TimelineCommand();
+        timeline.workdir = tempDir; timeline.workstreamId = "ws-summary"; timeline.raw = true;
+        var timelineJson = new com.fasterxml.jackson.databind.ObjectMapper().readTree(captureStdout(timeline::call));
+        assertEquals("WAITING_FOR_HUMAN", timelineJson.path("workflowStatus").asText());
+        assertEquals(2, timelineJson.path("nodes").size());
+    }
+
+    @Test
+    void busyAndPendingDoNotFallBackToPreviouslySuccessfulReports() throws Exception {
+        writeLedger("WAITING_FOR_HUMAN");
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(tempDir, new dev.dual.core.id.DualId("ws-summary"));
+        var before = Files.readString(paths.workflowCurrentJson());
+        var summary = new SummaryCommand(); summary.workdir = tempDir; summary.workstreamId = "ws-summary";
+        var timeline = new TimelineCommand(); timeline.workdir = tempDir; timeline.workstreamId = "ws-summary";
+        try (var lock = dev.dual.ledger.file.WorkstreamLock.acquire(paths.workstreamDir(),
+                dev.dual.ledger.file.LockOwner.currentProcess("ws-summary", "concurrent writer"))) {
+            org.junit.jupiter.api.Assertions.assertThrows(dev.dual.ledger.file.WorkstreamLockedException.class, summary::call);
+            org.junit.jupiter.api.Assertions.assertThrows(dev.dual.ledger.file.WorkstreamLockedException.class, timeline::call);
+        }
+        Files.createDirectories(paths.workstreamDir().resolve("pending"));
+        Files.writeString(paths.workstreamDir().resolve("pending/uncommitted.json"), "{}");
+        org.junit.jupiter.api.Assertions.assertThrows(dev.dual.ledger.file.LedgerSession.PendingCommitException.class, summary::call);
+        org.junit.jupiter.api.Assertions.assertThrows(dev.dual.ledger.file.LedgerSession.PendingCommitException.class, timeline::call);
+        assertEquals(before, Files.readString(paths.workflowCurrentJson()), "readers never replay pending bytes");
     }
 
     private void writeLedger(String status) throws Exception {
@@ -121,32 +162,28 @@ class SummaryCommandTest {
         Files.createDirectories(root.resolve("metrics"));
         Files.createDirectories(root.resolve("workflow"));
         Files.createDirectories(root.resolve("domain"));
-        Files.writeString(root.resolve("workstream.json"), """
-                {
-                  "schemaVersion": 1,
-                  "workstreamId": "ws-summary",
-                  "title": "summary test",
-                  "status": "created",
-                  "repository": {
-                    "originalWorkdir": "%s",
-                    "gitRoot": "%s"
-                  }
-                }
-                """.formatted(jsonPath(tempDir), jsonPath(tempDir)), StandardCharsets.UTF_8);
-        Files.writeString(root.resolve("workflow/current.json"), """
-                {
-                  "schemaVersion": 1,
-                  "workstreamId": "ws-summary",
-                  "workflowInstanceId": "wf-summary",
-                  "workflowId": "agent-lifecycle-contract",
-                  "definitionVersion": 2,
-                  "status": "%s",
-                  "activeNodeInstanceIds": ["node-gate-1"],
-                  "openGateIds": ["gate-node-gate-1"],
-                  "lastEventId": "evt-000001",
-                  "updatedAt": "2026-06-04T00:00:00Z"
-                }
-                """.formatted(status), StandardCharsets.UTF_8);
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(tempDir, new dev.dual.core.id.DualId("ws-summary"));
+        var ledger = CliLedgerFactory.create();
+        var definition = new dev.dual.core.workflow.WorkflowDefinition("summary", 1, "design.codex_arch_review",
+                java.util.List.of(new dev.dual.core.workflow.NodeDefinition("design.codex_arch_review",
+                        dev.dual.core.workflow.NodeKind.TASK, "acpx.agent_run", java.util.Map.of()),
+                        new dev.dual.core.workflow.NodeDefinition("review", dev.dual.core.workflow.NodeKind.GATE,
+                                "human.review", java.util.Map.of())),
+                java.util.List.of(new dev.dual.core.workflow.EdgeDefinition("design.codex_arch_review", "completed", "review")));
+        CliTestLedger.initialize(ledger, paths, "wf-summary", definition);
+        var first = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, definition, first, dev.dual.core.workflow.NodeStatus.COMPLETED,
+                "completed", java.util.List.of(), java.util.Map.of());
+        // Query fixture supplies deterministic timestamps; it never authorizes dispatch or delivery.
+        var mapper = new dev.dual.ledger.file.AtomicJsonWriter().objectMapper();
+        var node = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(paths.nodeJson(first).toFile());
+        node.put("startedAt", "2026-06-04T00:00:00Z");
+        node.put("finishedAt", "2026-06-04T00:00:00.042Z");
+        mapper.writeValue(paths.nodeJson(first).toFile(), node);
+        var current = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(paths.workflowCurrentJson().toFile());
+        current.put("status", status);
+        mapper.writeValue(paths.workflowCurrentJson().toFile(), current);
+        ledger.refreshProjections(paths);
         Files.writeString(root.resolve("domain/completion-audit.json"), """
                 {"status":"ready","gaps":[]}
                 """, StandardCharsets.UTF_8);
@@ -172,42 +209,6 @@ class SummaryCommandTest {
                   "status": "PROPOSED"
                 }
                 """, StandardCharsets.UTF_8);
-        Files.writeString(root.resolve("timeline.json"), """
-                {
-                  "schemaVersion": 1,
-                  "workstreamId": "ws-summary",
-                  "workflowId": "agent-lifecycle-contract",
-                  "definitionVersion": 2,
-                  "workflowStatus": "%s",
-                  "activeNodeInstanceIds": ["node-gate-1"],
-                  "openGateIds": ["gate-node-gate-1"],
-                  "updatedAt": "2026-06-04T00:00:00Z",
-                  "nodes": [
-                    {
-                      "nodeDefinitionId": "design.codex_arch_review",
-                      "kind": "task",
-                      "status": "COMPLETED",
-                      "iterationId": "iter-001",
-                      "durationMs": 42
-                    }
-                  ]
-                }
-                """.formatted(status), StandardCharsets.UTF_8);
-        Files.writeString(root.resolve("metrics/workstream-metrics.json"), """
-                {
-                  "schemaVersion": 1,
-                  "workstreamId": "ws-summary",
-                  "workflowStatus": "%s",
-                  "nodeCount": 2,
-                  "agentRunCount": 1,
-                  "gateCount": 1,
-                  "decisionCount": 0,
-                  "iterationCount": 1,
-                  "revisionCount": 0,
-                  "totalNodeDurationMs": 42
-                }
-                """.formatted(status), StandardCharsets.UTF_8);
-        Files.writeString(root.resolve("metrics/workstream-metrics.md"), "# Workstream Metrics\n", StandardCharsets.UTF_8);
     }
 
     private static String jsonPath(Path path) {

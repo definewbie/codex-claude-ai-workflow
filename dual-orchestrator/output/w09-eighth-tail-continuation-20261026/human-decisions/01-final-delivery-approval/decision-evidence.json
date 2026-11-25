@@ -1,0 +1,36 @@
+{
+  "raw_user_decision": "批准",
+  "approved_action": "approve current gate-node-gate-human_acceptance-039 and apply fixed delivery candidate through original owner",
+  "workstream": "ws-20261023T005431Z-9YYF",
+  "gate_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_acceptance-039.json",
+  "gate_sha256": "affafde431cbaf50bb65ce23af5016932f24ed41d3be953031681e327ead6d01",
+  "candidate_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/candidate-5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb.json",
+  "candidate_sha256": "5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb",
+  "files": [
+    "README.md",
+    "src/normalize_text.py",
+    "tests/test_normalize_text.py"
+  ],
+  "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target",
+  "commit_delegated": false,
+  "limits": {
+    "tokens": 3000000,
+    "requests": 18,
+    "active_seconds": 3600
+  },
+  "budget_not_reset": true,
+  "prior_stops_preserved": [
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/stop-required.json",
+      "sha256": "b0d1e123671e6f220469254109de3065a823eecf93dbc060be623b26d594fbcc"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/stop-required.json",
+      "sha256": "bcbd4ae0c3e6d47e618b8defe744b58af655f9c4aa98c8a7be8a562111fde80b"
+    },
+    {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/stop-required.json",
+      "sha256": "1a5f70d2096a87f86548686adc5f167d402d73e079a0cd44bc39aea4768c3e5f"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.runtime.handler.ContractCompileHandlerTest
+-------------------------------------------------------------------------------
+Tests run: 24, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.486 s <<< FAILURE! -- in dev.dual.runtime.handler.ContractCompileHandlerTest
+dev.dual.runtime.handler.ContractCompileHandlerTest.revisionCompilesOnlyWhenEveryTriggeredReviewObligationIsCovered(Path) -- Time elapsed: 0.023 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: {run_metadata=.agent/workstreams/ws-test-001/runs/run-revised/run.json, repository_fact_binding_ref=.agent/workstreams/ws-test-001/artifacts/context-governance/occurrences/node-revision-run-revised/binding.json, run_id=run-revised, repository_fact_binding_sha256=6a4125602cf2aa4451b156a7a12d7f859cc9fc846a6a36455ba5486f9952cc40, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, contract_node_id=intake.claude_brainstorm, contract_required_keys=[summary, decision], contract_allowed_decisions=[READY_FOR_PRODUCT_REVIEW], parse_error={message=program revision input could not be verified, code=TASK_CONTRACT_REVISION_BINDING_INVALID, details={errors=[java.io.IOException: missing or ambiguous R01]}}, contract_failure_diagnostic_ref=.agent/workstreams/ws-test-001/artifacts/contract-failures/node-revision.json, contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-test-001/artifacts/contract-failures/node-revision.md, message=program revision input could not be verified, agent_execution_result_contract={present=true, valid=true, decision=READY_FOR_PRODUCT_REVIEW, summary=, validationError=}, agent_execution_artifact_contract_results=[{contractType=agent_output_contract, required=true, present=true, valid=false, path=, errorCode=TASK_CONTRACT_REVISION_BINDING_INVALID, errorMessage=program revision input could not be verified}]} ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.ContractCompileHandlerTest.writeValidatedRevisionPatch(ContractCompileHandlerTest.java:764)
+	at dev.dual.runtime.handler.ContractCompileHandlerTest.revisionCompilesOnlyWhenEveryTriggeredReviewObligationIsCovered(ContractCompileHandlerTest.java:369)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+

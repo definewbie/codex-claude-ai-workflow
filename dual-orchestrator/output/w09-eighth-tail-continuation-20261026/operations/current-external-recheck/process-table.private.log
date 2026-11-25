@@ -1,0 +1,921 @@
+    1     0 Sat Sep 19 16:48:47 2026     /sbin/launchd
+  305     1 Sat Sep 19 16:49:07 2026     /usr/libexec/logd
+  306     1 Sat Sep 19 16:49:07 2026     /usr/libexec/smd
+  307     1 Sat Sep 19 16:49:07 2026     /usr/libexec/UserEventAgent (System)
+  309     1 Sat Sep 19 16:49:07 2026     /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/FSEvents.framework/Versions/A/Support/fseventsd
+  310     1 Sat Sep 19 16:49:07 2026     /System/Library/PrivateFrameworks/MediaRemote.framework/Support/mediaremoted
+  313     1 Sat Sep 19 16:49:07 2026     /usr/sbin/systemstats --daemon
+  315     1 Sat Sep 19 16:49:07 2026     /System/Library/PrivateFrameworks/MobileAccessoryUpdater.framework/Support/accessoryupdaterd 120
+  316     1 Sat Sep 19 16:49:07 2026     /usr/libexec/configd
+  317     1 Sat Sep 19 16:49:07 2026     endpointsecurityd
+  318     1 Sat Sep 19 16:49:07 2026     /System/Library/CoreServices/powerd.bundle/powerd
+  319     1 Sat Sep 19 16:49:07 2026     /usr/libexec/IOMFB_bics_daemon
+  321     1 Sat Sep 19 16:49:07 2026     /usr/libexec/amfid
+  325     1 Sat Sep 19 16:49:07 2026     /usr/libexec/keybagd -t 15
+  326     1 Sat Sep 19 16:49:07 2026     /System/Library/PrivateFrameworks/MobileSoftwareUpdate.framework/Support/softwareupdated
+  327     1 Sat Sep 19 16:49:07 2026     /System/Library/PrivateFrameworks/CoreSpeech.framework/corespeechd_system
+  329     1 Sat Sep 19 16:49:07 2026     /usr/libexec/watchdogd
+  333     1 Sat Sep 19 16:49:07 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Support/mds
+  334     1 Sat Sep 19 16:49:07 2026     /System/Library/CoreServices/iconservicesd
+  335     1 Sat Sep 19 16:49:07 2026     /usr/libexec/kernelmanagerd
+  336     1 Sat Sep 19 16:49:07 2026     /usr/libexec/diskarbitrationd
+  339     1 Sat Sep 19 16:49:07 2026     /usr/libexec/coreduetd
+  340     1 Sat Sep 19 16:49:07 2026     /usr/sbin/syslogd
+  343     1 Sat Sep 19 16:49:07 2026     /usr/libexec/thermalmonitord
+  344     1 Sat Sep 19 16:49:07 2026     /usr/libexec/opendirectoryd
+  346     1 Sat Sep 19 16:49:07 2026     /System/Library/PrivateFrameworks/ApplePushService.framework/apsd
+  347     1 Sat Sep 19 16:49:07 2026     /System/Library/CoreServices/launchservicesd
+  348     1 Sat Sep 19 16:49:07 2026     /usr/libexec/timed
+  349     1 Sat Sep 19 16:49:07 2026     /System/Library/PrivateFrameworks/MobileDevice.framework/Versions/A/Resources/usbmuxd -launchd
+  350     1 Sat Sep 19 16:49:07 2026     /usr/sbin/securityd -i
+  352     1 Sat Sep 19 16:49:07 2026     /usr/libexec/locationd
+  353     1 Sat Sep 19 16:49:07 2026     /usr/libexec/nesessionmanager
+  355     1 Sat Sep 19 16:49:07 2026     autofsd
+  356     1 Sat Sep 19 16:49:07 2026     /usr/libexec/dasd
+  358     1 Sat Sep 19 16:49:07 2026     /usr/sbin/distnoted daemon
+  359     1 Sat Sep 19 16:49:07 2026     /System/Library/PrivateFrameworks/AppleCredentialManager.framework/AppleCredentialManagerDaemon
+  362     1 Sat Sep 19 16:49:07 2026     /System/Library/CoreServices/logind
+  363     1 Sat Sep 19 16:49:07 2026     /System/Library/PrivateFrameworks/GenerationalStorage.framework/Versions/A/Support/revisiond
+  364     1 Sat Sep 19 16:49:07 2026     /usr/sbin/KernelEventAgent
+  365     1 Sat Sep 19 16:49:07 2026     /usr/libexec/usermanagerd -t 15
+  368     1 Sat Sep 19 16:49:07 2026     /usr/sbin/notifyd
+  369     1 Sat Sep 19 16:49:07 2026     /usr/libexec/sandboxd
+  370     1 Sat Sep 19 16:49:07 2026     /usr/libexec/corebrightnessd --launchd
+  371     1 Sat Sep 19 16:49:07 2026     /usr/libexec/AirPlayXPCHelper
+  372     1 Sat Sep 19 16:49:07 2026     /System/Library/Frameworks/CoreMediaIO.framework/Versions/A/Resources/com.apple.cmio.registerassistantservice
+  373     1 Sat Sep 19 16:49:08 2026     aslmanager
+  374     1 Sat Sep 19 16:49:08 2026     /usr/libexec/logd_helper
+  375     1 Sat Sep 19 16:49:08 2026     /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer -daemon
+  376     1 Sat Sep 19 16:49:08 2026     /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
+  377     1 Sat Sep 19 16:49:08 2026     /usr/sbin/cfprefsd daemon
+  378     1 Sat Sep 19 16:49:08 2026     /System/Library/CoreServices/loginwindow.app/Contents/MacOS/loginwindow console
+  379     1 Sat Sep 19 16:49:08 2026     /usr/libexec/runningboardd
+  380     1 Sat Sep 19 16:49:08 2026     /System/Library/PrivateFrameworks/CoreDuetContext.framework/Resources/contextstored
+  382     1 Sat Sep 19 16:49:08 2026     /System/Library/CoreServices/coreservicesd
+  383     1 Sat Sep 19 16:49:08 2026     /usr/libexec/lsd runAsRoot
+  384     1 Sat Sep 19 16:49:08 2026     /usr/libexec/powerexperienced
+  385     1 Sat Sep 19 16:49:08 2026     /usr/libexec/airportd
+  386     1 Sat Sep 19 16:49:08 2026     /System/Library/CoreServices/TimeMachine/backupd-helper -launchd
+  387     1 Sat Sep 19 16:49:08 2026     /usr/libexec/PowerUIAgent
+  388     1 Sat Sep 19 16:49:08 2026     /usr/libexec/trustd
+  389     1 Sat Sep 19 16:49:08 2026     /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/CarbonCore.framework/Versions/A/XPCServices/csnameddatad.xpc/Contents/MacOS/csnameddatad
+  390     1 Sat Sep 19 16:49:08 2026     /usr/sbin/coreaudiod
+  391     1 Sat Sep 19 16:49:08 2026     /usr/libexec/containermanagerd_system --runmode=privileged --user-container-mode=current --bundle-container-mode=global --bundle-container-owner=_appinstalld --system-container-mode=none
+  392     1 Sat Sep 19 16:49:08 2026     /usr/sbin/distnoted agent
+  393     1 Sat Sep 19 16:49:08 2026     /System/Library/CoreServices/liquiddetectiond.app/liquiddetectiond
+  394     1 Sat Sep 19 16:49:08 2026     /usr/libexec/apfsd
+  396     1 Sat Sep 19 16:49:08 2026     /System/Library/PrivateFrameworks/CoreAnalytics.framework/Support/analyticsd
+  397     1 Sat Sep 19 16:49:08 2026     /usr/libexec/nsurlsessiond --privileged
+  398     1 Sat Sep 19 16:49:08 2026     /usr/libexec/nehelper
+  399     1 Sat Sep 19 16:49:08 2026     /usr/libexec/usbd
+  400     1 Sat Sep 19 16:49:08 2026     /usr/libexec/biometrickitd --launchd
+  402     1 Sat Sep 19 16:49:08 2026     /usr/libexec/symptomsd
+  407     1 Sat Sep 19 16:49:08 2026     /System/Library/PrivateFrameworks/BiomeStreams.framework/Support/biomed
+  410     1 Sat Sep 19 16:49:08 2026     /System/Library/Frameworks/Security.framework/Versions/A/XPCServices/authd.xpc/Contents/MacOS/authd
+  411     1 Sat Sep 19 16:49:08 2026     /System/Library/PrivateFrameworks/SystemStatusServer.framework/Support/systemstatusd
+  412     1 Sat Sep 19 16:49:08 2026     /usr/libexec/trustdFileHelper
+  413     1 Sat Sep 19 16:49:08 2026     /usr/libexec/eligibilityd
+  414     1 Sat Sep 19 16:49:08 2026     /usr/libexec/hidd
+  417     1 Sat Sep 19 16:49:08 2026     /usr/sbin/distnoted agent
+  419     1 Sat Sep 19 16:49:08 2026     /usr/sbin/distnoted agent
+  421     1 Sat Sep 19 16:49:08 2026     /usr/libexec/secinitd
+  423     1 Sat Sep 19 16:49:08 2026     /usr/libexec/ApplicationFirewall/socketfilterfw
+  424     1 Sat Sep 19 16:49:08 2026     /usr/libexec/mobileassetd
+  447     1 Sat Sep 19 16:49:08 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+  451     1 Sat Sep 19 16:49:08 2026     /System/Library/Frameworks/SystemExtensions.framework/Versions/A/Helpers/sysextd
+  465     1 Sat Sep 19 16:49:09 2026     /System/Library/Frameworks/Security.framework/Versions/A/XPCServices/com.apple.CodeSigningHelper.xpc/Contents/MacOS/com.apple.CodeSigningHelper
+  466     1 Sat Sep 19 16:49:09 2026     /System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Resources/backgroundtaskmanagementd -daemon
+  467     1 Sat Sep 19 16:49:09 2026     /usr/sbin/distnoted agent
+  470     1 Sat Sep 19 16:49:09 2026     /System/Library/CoreServices/osanalyticshelper server-init
+  471     1 Sat Sep 19 16:49:09 2026     /usr/libexec/colorsync.displayservices
+  473     1 Sat Sep 19 16:49:09 2026     /System/Library/PrivateFrameworks/ModelCatalogRuntime.framework/Versions/A/modelcatalogd
+  474     1 Sat Sep 19 16:49:09 2026     /System/Library/PrivateFrameworks/PowerLog.framework/Versions/A/XPCServices/PerfPowerTelemetryClientRegistrationService.xpc/Contents/MacOS/PerfPowerTelemetryClientRegistrationService
+  477     1 Sat Sep 19 16:49:09 2026     /usr/libexec/colorsyncd
+  486     1 Sat Sep 19 16:49:09 2026     /usr/libexec/securityd_system
+  488     1 Sat Sep 19 16:49:09 2026     /usr/libexec/aneuserd
+  489     1 Sat Sep 19 16:49:09 2026     /usr/libexec/aned
+  490     1 Sat Sep 19 16:49:09 2026     /usr/libexec/online-auth-agent
+  492     1 Sat Sep 19 16:49:09 2026     /usr/sbin/appleh13camerad
+  493     1 Sat Sep 19 16:49:09 2026     /usr/libexec/cameracaptured
+  494     1 Sat Sep 19 16:49:09 2026     /System/Library/Frameworks/CoreMediaIO.framework/Versions/A/Resources/UVCAssistant.systemextension/Contents/MacOS/UVCAssistant
+  497     1 Sat Sep 19 16:49:09 2026     Core Audio Driver (MSTeamsAudioDevice.driver)
+  499     1 Sat Sep 19 16:49:09 2026     /usr/libexec/syspolicyd
+  501     1 Sat Sep 19 16:49:09 2026     /System/Library/Frameworks/AudioToolbox.framework/AudioComponentRegistrar -daemon
+  502     1 Sat Sep 19 16:49:09 2026     /System/Library/CoreServices/appleeventsd --server
+  503     1 Sat Sep 19 16:49:09 2026     /usr/sbin/mDNSResponder
+  504     1 Sat Sep 19 16:49:09 2026     /usr/sbin/WirelessRadioManagerd
+  506     1 Sat Sep 19 16:49:09 2026     /usr/libexec/findmybeaconingd
+  507     1 Sat Sep 19 16:49:09 2026     /System/Library/CoreServices/TimeMachine/backupd
+  508     1 Sat Sep 19 16:49:09 2026     /usr/libexec/audioclocksyncd
+  509     1 Sat Sep 19 16:49:09 2026     /usr/sbin/mDNSResponderHelper
+  511     1 Sat Sep 19 16:49:09 2026     /System/Library/PrivateFrameworks/GeoServices.framework/Versions/A/XPCServices/com.apple.geod.xpc/Contents/MacOS/com.apple.geod
+  513     1 Sat Sep 19 16:49:09 2026     /usr/libexec/countryd
+  514     1 Sat Sep 19 16:49:09 2026     /usr/sbin/distnoted agent
+  516     1 Sat Sep 19 16:49:09 2026     /usr/libexec/audioanalyticsd
+  518     1 Sat Sep 19 16:49:09 2026     /System/Library/CoreServices/Software Update.app/Contents/Resources/suhelperd
+  519     1 Sat Sep 19 16:49:09 2026     /usr/libexec/storagekitd
+  521     1 Sat Sep 19 16:49:09 2026     /usr/sbin/cfprefsd agent
+  522     1 Sat Sep 19 16:49:10 2026     /usr/libexec/modelmanagerd
+  523     1 Sat Sep 19 16:49:10 2026     /usr/libexec/trustd --agent
+  526     1 Sat Sep 19 16:49:10 2026     /usr/libexec/containermanagerd --runmode=agent --user-container-mode=current --bundle-container-mode=proxy --system-container-mode=none
+  527     1 Sat Sep 19 16:49:10 2026     /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/HIServices.framework/Versions/A/XPCServices/com.apple.hiservices-xpcservice.xpc/Contents/MacOS/com.apple.hiservices-xpcservice
+  528     1 Sat Sep 19 16:49:10 2026     /System/Library/Frameworks/GSS.framework/Helpers/GSSCred
+  529     1 Sat Sep 19 16:49:10 2026     /usr/libexec/searchpartyd
+  535     1 Sat Sep 19 16:49:10 2026     /System/Library/Frameworks/LocalAuthentication.framework/Support/coreauthd
+  536     1 Sat Sep 19 16:49:10 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mds_stores
+  537     1 Sat Sep 19 16:49:10 2026     /usr/sbin/distnoted agent
+  540     1 Sat Sep 19 16:49:10 2026     /System/Library/PrivateFrameworks/GeoServices.framework/Versions/A/XPCServices/com.apple.geod.xpc/Contents/MacOS/com.apple.geod
+  541     1 Sat Sep 19 16:49:10 2026     /usr/libexec/applekeystored
+  543     1 Sat Sep 19 16:49:10 2026     /usr/sbin/cfprefsd agent
+  544     1 Sat Sep 19 16:49:10 2026     /usr/libexec/trustd --agent
+  545     1 Sat Sep 19 16:49:10 2026     /System/Library/PrivateFrameworks/CoreKDL.framework/Support/corekdld
+  546     1 Sat Sep 19 16:49:10 2026     /usr/libexec/UserEventAgent (Aqua)
+  547     1 Sat Sep 19 16:49:10 2026     /usr/libexec/gamecontrollerd
+  548     1 Sat Sep 19 16:49:10 2026     /usr/libexec/seld
+  550     1 Sat Sep 19 16:49:10 2026     /usr/libexec/knowledge-agent
+  551     1 Sat Sep 19 16:49:10 2026     /System/Library/CoreServices/CoreServicesUIAgent.app/Contents/MacOS/CoreServicesUIAgent
+  552     1 Sat Sep 19 16:49:10 2026     /usr/sbin/universalaccessd launchd -s
+  553     1 Sat Sep 19 16:49:10 2026     /usr/libexec/pboard
+  554     1 Sat Sep 19 16:49:10 2026     /System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager
+  555     1 Sat Sep 19 16:49:10 2026     /usr/libexec/containermanagerd --runmode=agent --user-container-mode=current --bundle-container-mode=proxy --system-container-mode=none
+  556     1 Sat Sep 19 16:49:10 2026     /System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app/Contents/MacOS/BackgroundTaskManagementAgent
+  557     1 Sat Sep 19 16:49:10 2026     /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
+  558     1 Sat Sep 19 16:49:10 2026     /usr/libexec/lsd
+  559     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/CloudServices.framework/Helpers/com.apple.sbd
+  560     1 Sat Sep 19 16:49:11 2026     /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/CarbonCore.framework/Versions/A/XPCServices/csnameddatad.xpc/Contents/MacOS/csnameddatad
+  561     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/APFSUserAgent
+  563     1 Sat Sep 19 16:49:11 2026     /usr/libexec/nsurlsessiond
+  564     1 Sat Sep 19 16:49:11 2026     /System/Library/Frameworks/CoreTelephony.framework/Support/CommCenter -L
+  565     1 Sat Sep 19 16:49:11 2026     /usr/sbin/usernoted
+  566     1 Sat Sep 19 16:49:11 2026     /usr/libexec/routined LAUNCHED_BY_LAUNCHD
+  567     1 Sat Sep 19 16:49:11 2026     /usr/libexec/rapportd
+  568     1 Sat Sep 19 16:49:11 2026     /usr/libexec/secinitd
+  569     1 Sat Sep 19 16:49:11 2026     /usr/libexec/secd
+  570     1 Sat Sep 19 16:49:11 2026     /usr/sbin/distnoted agent
+  572     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/CoreLocationAgent.app/Contents/MacOS/CoreLocationAgent
+  573     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/talagentd
+  574     1 Sat Sep 19 16:49:11 2026     /usr/libexec/trustd --agent
+  575     1 Sat Sep 19 16:49:11 2026     /usr/libexec/containermanagerd --runmode=agent --user-container-mode=current --bundle-container-mode=proxy --system-container-mode=none
+  576     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/BiomeStreams.framework/Support/BiomeAgent
+  577     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/GenerativeExperiencesRuntime.framework/Versions/A/generativeexperiencesd
+  578     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/MediaAnalysis.framework/Versions/A/mediaanalysisd
+  579     1 Sat Sep 19 16:49:11 2026     /System/Library/Frameworks/Accounts.framework/Versions/A/Support/accountsd
+  580     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/IDS.framework/identityservicesd.app/Contents/MacOS/identityservicesd
+  581     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/TelephonyUtilities.framework/callservicesd
+  582     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/CloudKitDaemon.framework/Support/cloudd
+  583     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/SyncedDefaults.framework/Support/syncdefaultsd
+  584     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/UserNotificationsCore.framework/Support/usernotificationsd
+  585     1 Sat Sep 19 16:49:11 2026     /Applications/WeChat.app/Contents/MacOS/WeChat
+  586     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/HomeKitDaemon.framework/Support/homed
+  587     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/NewDeviceOutreach.framework/ndoagent
+  588     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/SiriInference.framework/Versions/A/siriinferenced
+  589     1 Sat Sep 19 16:49:11 2026     /System/Library/Frameworks/FinanceKit.framework/financed
+  590     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/UsageTracking.framework/Versions/A/UsageTrackingAgent
+  591     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/AssistantServices.framework/Versions/A/Support/assistantd
+  592     1 Sat Sep 19 16:49:11 2026     /usr/libexec/diagnosticextensionsd
+  594     1 Sat Sep 19 16:49:11 2026     /usr/libexec/triald
+  595     1 Sat Sep 19 16:49:11 2026     /usr/libexec/icloudmailagent
+  596     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/CoreCDP.framework/Versions/A/Resources/cdpd
+  597     1 Sat Sep 19 16:49:11 2026     /usr/libexec/ContinuityCaptureAgent server
+  598     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/sharedfilelistd
+  599     1 Sat Sep 19 16:49:11 2026     /System/Library/Frameworks/Security.framework/Versions/A/XPCServices/TrustedPeersHelper.xpc/Contents/MacOS/TrustedPeersHelper
+  601     1 Sat Sep 19 16:49:11 2026     /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal
+  602     1 Sat Sep 19 16:49:11 2026     /usr/libexec/rtcreportingd
+  603     1 Sat Sep 19 16:49:11 2026     /usr/libexec/transparencyd
+  604     1 Sat Sep 19 16:49:11 2026     /System/Library/Frameworks/CryptoTokenKit.framework/ctkd -tw
+  605     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/SiriTTSService.framework/sirittsd
+  606     1 Sat Sep 19 16:49:11 2026     /Applications/网易有道翻译.app/Contents/MacOS/网易有道翻译
+  607     1 Sat Sep 19 16:49:11 2026     /System/Library/Frameworks/CryptoTokenKit.framework/ctkd -st
+  608     1 Sat Sep 19 16:49:11 2026     /System/Library/Frameworks/LocalAuthentication.framework/Support/coreauthd
+  609     1 Sat Sep 19 16:49:11 2026     /usr/libexec/pkd
+  610     1 Sat Sep 19 16:49:11 2026     /Applications/Lark.app/Contents/MacOS/Feishu
+  611     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/Dock.app/Contents/MacOS/Dock
+  612     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/ControlCenter.app/Contents/MacOS/ControlCenter
+  613     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/SystemUIServer.app/Contents/MacOS/SystemUIServer
+  614     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/Finder.app/Contents/MacOS/Finder
+  617     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/audioaccessoryd
+  618     1 Sat Sep 19 16:49:11 2026     /usr/libexec/bluetoothuserd
+  619     1 Sat Sep 19 16:49:11 2026     /usr/sbin/systemsoundserverd
+  620     1 Sat Sep 19 16:49:11 2026     /usr/libexec/dmd
+  621     1 Sat Sep 19 16:49:11 2026     /System/Library/Frameworks/QuickLookUI.framework/Versions/A/XPCServices/QuickLookUIService.xpc/Contents/MacOS/QuickLookUIService
+  622     1 Sat Sep 19 16:49:11 2026     /System/Library/Frameworks/QuickLookThumbnailing.framework/Support/com.apple.quicklook.ThumbnailsAgent
+  623     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/WallpaperAgent.app/Contents/MacOS/WallpaperAgent
+  624     1 Sat Sep 19 16:49:11 2026     /usr/sbin/filecoordinationd
+  625     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/AppSSO.framework/Support/AppSSOAgent.app/Contents/MacOS/AppSSOAgent
+  626     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/VoiceShortcuts.framework/Versions/A/Support/siriactionsd
+  627     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/iCloudDriveCore.framework/Versions/A/Support/bird
+  628     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/SocialLayer.framework/sociallayerd.app/Contents/MacOS/sociallayerd
+  629     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/CoreSuggestions.framework/Versions/A/Support/suggestd
+  630     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/iconservicesagent
+  631     1 Sat Sep 19 16:49:11 2026     /System/Library/PrivateFrameworks/CalendarDaemon.framework/Support/calaccessd
+  632     1 Sat Sep 19 16:49:11 2026     /System/Library/CoreServices/Software Update.app/Contents/Resources/softwareupdated
+  633     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/ViewBridge.framework/Versions/A/XPCServices/ViewBridgeAuxiliary.xpc/Contents/MacOS/ViewBridgeAuxiliary
+  634     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/FileProvider.framework/Support/fileproviderd
+  635     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/AMPDevices.framework/Versions/A/Support/AMPDeviceDiscoveryAgent --launchd
+  636     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/AppSSO.framework/Support/AppSSODaemon
+  637     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/DoNotDisturbServer.framework/Support/donotdisturbd
+  638     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/CoreFollowUp.framework/Versions/A/Support/followupd
+  639     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/WirelessDiagnostics.framework/Support/awdd
+  640     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/ManagedSettings.framework/Versions/A/ManagedSettingsAgent
+  641     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/ApplicationServices.framework/Frameworks/ATS.framework/Support/fontd
+  642     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/ReplicatorCore.framework/Support/replicatord
+  643     1 Sat Sep 19 16:49:12 2026     /usr/libexec/wifip2pd
+  644     1 Sat Sep 19 16:49:12 2026     /usr/libexec/intelligentroutingd
+  645     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/TVIdleServices.framework/idleassetsd
+  646     1 Sat Sep 19 16:49:12 2026     /usr/libexec/wallpaperexportd
+  647     1 Sat Sep 19 16:49:12 2026     /System/Library/CoreServices/NotificationCenter.app/Contents/MacOS/NotificationCenter
+  648     1 Sat Sep 19 16:49:12 2026     /usr/libexec/nearbyd
+  649     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/CacheDelete.framework/deleted
+  650     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/MobileTimer.framework/Executables/mobiletimerd
+  651     1 Sat Sep 19 16:49:12 2026     /System/Library/CoreServices/Keychain Circle Notification.app/Contents/MacOS/Keychain Circle Notification
+  652     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/ProtectedCloudStorage.framework/Helpers/ProtectedCloudKeySyncing
+  653     1 Sat Sep 19 16:49:12 2026     /usr/libexec/replayd
+  655     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/AudioToolbox.framework/AudioComponentRegistrar
+  656     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/ExtensionFoundation.framework/Versions/A/XPCServices/extensionkitservice.xpc/Contents/MacOS/extensionkitservice
+  657     1 Sat Sep 19 16:49:12 2026     /System/Library/ExtensionKit/Extensions/WallpaperVideoExtension.appex/Contents/MacOS/WallpaperVideoExtension
+  658     1 Sat Sep 19 16:49:12 2026     /usr/libexec/findmylocateagent
+  659     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ATS.framework/Versions/A/Support/fontworker
+  660     1 Sat Sep 19 16:49:12 2026     /usr/sbin/distnoted agent
+  661     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecoderXPCService.xpc/Contents/MacOS/VTDecoderXPCService
+  662     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/ScreenTimeCore.framework/Versions/A/ScreenTimeAgent
+  663     1 Sat Sep 19 16:49:12 2026     /Library/Apple/System/Library/PrivateFrameworks/DeviceInterface.framework/Support/deviceinterfaced
+  664     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/ChronoCore.framework/Support/chronod
+  665     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/Contacts.framework/Support/contactsd
+  666     1 Sat Sep 19 16:49:12 2026     /usr/libexec/findmydeviced
+  667     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+  668     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/GeoServices.framework/Versions/A/XPCServices/com.apple.geod.xpc/Contents/MacOS/com.apple.geod
+  669     1 Sat Sep 19 16:49:12 2026     /usr/libexec/sharingd
+  670     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  671     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  672     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/Security.framework/Versions/A/Resources/CloudKeychainProxy.bundle/Contents/MacOS/CloudKeychainProxy
+  673     1 Sat Sep 19 16:49:12 2026     /usr/libexec/neagent
+  674     1 Sat Sep 19 16:49:12 2026     /usr/libexec/gamepolicyd
+  675     1 Sat Sep 19 16:49:12 2026     /System/Library/CoreServices/pbs
+  676     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/StatusKit.framework/StatusKitAgent
+  677     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+  678     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/FamilyCircle.framework/Versions/A/Resources/familycircled
+  679     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/EmailDaemon.framework/Versions/A/maild
+  680     1 Sat Sep 19 16:49:12 2026     /usr/libexec/appleaccountd
+  681     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/CommunicationsFilter.framework/CMFSyncAgent
+  682     1 Sat Sep 19 16:49:12 2026     /System/Library/Frameworks/ExtensionFoundation.framework/Versions/A/XPCServices/extensionkitservice.xpc/Contents/MacOS/extensionkitservice
+  683     1 Sat Sep 19 16:49:12 2026     /System/Library/CoreServices/ScopedBookmarkAgent
+  686     1 Sat Sep 19 16:49:12 2026     /System/Library/PrivateFrameworks/ContactsDonation.framework/Versions/A/Support/contactsdonationagent
+  687     1 Sat Sep 19 16:49:13 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd
+  688     1 Sat Sep 19 16:49:13 2026     /System/Library/PrivateFrameworks/PhotoLibraryServices.framework/Versions/A/Support/photolibraryd
+  689     1 Sat Sep 19 16:49:13 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  690     1 Sat Sep 19 16:49:13 2026     /usr/sbin/distnoted agent
+  691     1 Sat Sep 19 16:49:13 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+  692     1 Sat Sep 19 16:49:13 2026     /System/Library/PrivateFrameworks/ContextKit.framework/Versions/A/XPCServices/ContextService.xpc/Contents/MacOS/ContextService
+  693     1 Sat Sep 19 16:49:13 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  694     1 Sat Sep 19 16:49:13 2026     /System/Library/PrivateFrameworks/UserActivity.framework/Agents/useractivityd
+  695     1 Sat Sep 19 16:49:13 2026     /System/Library/CoreServices/Dock.app/Contents/XPCServices/com.apple.dock.extra.xpc/Contents/MacOS/com.apple.dock.extra
+  696     1 Sat Sep 19 16:49:13 2026     /System/Library/CoreServices/Spotlight.app/Contents/MacOS/Spotlight
+  697     1 Sat Sep 19 16:49:13 2026     /System/Library/PrivateFrameworks/IntlPreferences.framework/Support/localizationswitcherd
+  698     1 Sat Sep 19 16:49:13 2026     /System/Library/Frameworks/ExtensionFoundation.framework/Versions/A/XPCServices/extensionkitservice.xpc/Contents/MacOS/extensionkitservice
+  699     1 Sat Sep 19 16:49:13 2026     /System/Applications/Clock.app/Contents/PlugIns/WorldClockWidget.appex/Contents/MacOS/WorldClockWidget
+  700     1 Sat Sep 19 16:49:13 2026     /System/Library/Frameworks/InputMethodKit.framework/Resources/imklaunchagent
+  701     1 Sat Sep 19 16:49:13 2026     /System/Library/PrivateFrameworks/CoreParsec.framework/parsecd
+  702     1 Sat Sep 19 16:49:13 2026     /System/Library/PrivateFrameworks/CommerceKit.framework/Versions/A/Resources/commerce
+  703     1 Sat Sep 19 16:49:13 2026     /System/Library/CoreServices/UIKitSystem.app/Contents/MacOS/UIKitSystem system_app_start
+  704     1 Sat Sep 19 16:49:13 2026     /usr/libexec/networkserviceproxy
+  705     1 Sat Sep 19 16:49:13 2026     /System/Library/PrivateFrameworks/iTunesCloud.framework/Support/itunescloudd
+  707     1 Sat Sep 19 16:49:14 2026     /System/Library/PrivateFrameworks/AppleMediaServices.framework/Resources/amsaccountsd
+  708     1 Sat Sep 19 16:49:14 2026     /System/Library/PrivateFrameworks/AppleMediaServicesUI.framework/amsengagementd
+  710     1 Sat Sep 19 16:49:14 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  711     1 Sat Sep 19 16:49:14 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  713     1 Sat Sep 19 16:49:14 2026     /System/Applications/Stocks.app/Contents/PlugIns/StocksWidget.appex/Contents/MacOS/StocksWidget
+  714     1 Sat Sep 19 16:49:14 2026     /System/Applications/Calendar.app/Contents/PlugIns/CalendarWidgetExtension.appex/Contents/MacOS/CalendarWidgetExtension
+  715     1 Sat Sep 19 16:49:14 2026     /System/Library/PrivateFrameworks/iCloudNotification.framework/iCloudNotificationAgent
+  716     1 Sat Sep 19 16:49:14 2026     /System/Library/PrivateFrameworks/ContinuousDialogManagerService.framework/assistant_cdmd
+  717     1 Sat Sep 19 16:49:14 2026     /usr/libexec/linkd
+  718     1 Sat Sep 19 16:49:14 2026     /System/Library/CoreServices/WiFiAgent.app/Contents/MacOS/WiFiAgent
+  719     1 Sat Sep 19 16:49:14 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  720     1 Sat Sep 19 16:49:14 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  721     1 Sat Sep 19 16:49:14 2026     /usr/libexec/seserviced
+  722     1 Sat Sep 19 16:49:14 2026     /System/Library/PrivateFrameworks/WiFiPolicy.framework/XPCServices/WiFiCloudAssetsXPCService.xpc/Contents/MacOS/WiFiCloudAssetsXPCService
+  723     1 Sat Sep 19 16:49:14 2026     /usr/libexec/swtransparencyd
+  724     1 Sat Sep 19 16:49:15 2026     /usr/libexec/mobileactivationd
+  725     1 Sat Sep 19 16:49:15 2026     /System/Library/PrivateFrameworks/AuthKit.framework/Versions/A/Support/akd
+  726     1 Sat Sep 19 16:49:15 2026     /System/Library/Image Capture/Support/icdd
+  727     1 Sat Sep 19 16:49:15 2026     /System/Library/PrivateFrameworks/CoreADI.framework/adid
+  728     1 Sat Sep 19 16:49:15 2026     /System/Library/PrivateFrameworks/CoreSpeech.framework/corespeechd
+  729     1 Sat Sep 19 16:49:15 2026     /usr/libexec/milod
+  730     1 Sat Sep 19 16:49:15 2026     /System/Library/PrivateFrameworks/CloudTelemetry.framework/Versions/A/XPCServices/CloudTelemetryService.xpc/Contents/MacOS/CloudTelemetryService
+  733     1 Sat Sep 19 16:49:15 2026     /System/Library/PrivateFrameworks/MobileSoftwareUpdate.framework/Versions/A/XPCServices/com.apple.MobileSoftwareUpdate.CleanupPreparePathService.xpc/Contents/MacOS/com.apple.MobileSoftwareUpdate.CleanupPreparePathService
+  734     1 Sat Sep 19 16:49:15 2026     /usr/sbin/distnoted agent
+  735     1 Sat Sep 19 16:49:15 2026     /System/Library/PrivateFrameworks/AssetCacheServices.framework/Versions/A/XPCServices/AssetCacheLocatorService.xpc/Contents/MacOS/AssetCacheLocatorService -a
+  736     1 Sat Sep 19 16:49:15 2026     /usr/libexec/AssetCache/AssetCache
+  737     1 Sat Sep 19 16:49:15 2026     /System/Library/PrivateFrameworks/CloudTelemetry.framework/Versions/A/XPCServices/CloudTelemetryService.xpc/Contents/MacOS/CloudTelemetryService
+  738     1 Sat Sep 19 16:49:15 2026     /System/Library/Frameworks/Speech.framework/Versions/A/XPCServices/localspeechrecognition.xpc/Contents/MacOS/localspeechrecognition
+  740     1 Sat Sep 19 16:49:15 2026     /usr/libexec/symptomsd-diag
+  741     1 Sat Sep 19 16:49:15 2026     /usr/libexec/nfcd
+  742     1 Sat Sep 19 16:49:15 2026     /usr/libexec/gamecontrolleragentd
+  744     1 Sat Sep 19 16:49:15 2026     /System/Library/PrivateFrameworks/CoreDuetContext.framework/Resources/ContextStoreAgent
+  746     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/AssetCacheServicesExtensions.framework/XPCServices/AssetCacheTetheratorService.xpc/Contents/MacOS/AssetCacheTetheratorService
+  747     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/NearFieldPrivateServices.framework/Versions/A/XPCServices/NFStorageServer.xpc/Contents/MacOS/NFStorageServer
+  748     1 Sat Sep 19 16:49:16 2026     /usr/sbin/distnoted agent
+  750     1 Sat Sep 19 16:49:16 2026     /usr/sbin/spindump
+  751     1 Sat Sep 19 16:49:16 2026     /usr/libexec/spindump_agent
+  752     1 Sat Sep 19 16:49:16 2026     /System/Library/CoreServices/SubmitDiagInfo server-init
+  754     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/CacheDelete.framework/deleted_helper
+  755     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/SiriSuggestionsSupport.framework/Versions/A/XPCServices/SiriSuggestionsBookkeepingService.xpc/Contents/MacOS/SiriSuggestionsBookkeepingService
+  756     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/StocksKit.framework/XPCServices/StocksKitService.xpc/Contents/MacOS/StocksKitService
+  757     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/ModelCatalogRuntime.framework/Versions/A/ModelCatalogAgent
+  758     1 Sat Sep 19 16:49:16 2026     /usr/sbin/distnoted agent
+  759     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/MobileAccessoryUpdater.framework/XPCServices/UARPUpdaterServiceDisplay.xpc/Contents/MacOS/UARPUpdaterServiceDisplay
+  760     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/MobileAccessoryUpdater.framework/XPCServices/UARPUpdaterServiceHID.xpc/Contents/MacOS/UARPUpdaterServiceHID
+  761     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/MobileAccessoryUpdater.framework/XPCServices/UARPUpdaterServiceDFU.xpc/Contents/MacOS/UARPUpdaterServiceDFU
+  762     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/MobileAccessoryUpdater.framework/XPCServices/UARPUpdaterServiceAFU.xpc/Contents/MacOS/UARPUpdaterServiceAFU
+  763     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/MobileAccessoryUpdater.framework/XPCServices/UARPUpdaterServiceLegacyAudio.xpc/Contents/MacOS/UARPUpdaterServiceLegacyAudio
+  764     1 Sat Sep 19 16:49:16 2026     /System/Library/PrivateFrameworks/MobileAccessoryUpdater.framework/XPCServices/UARPUpdaterServiceUSBPD.xpc/Contents/MacOS/UARPUpdaterServiceUSBPD
+  766     1 Sat Sep 19 16:49:17 2026     /System/Library/PrivateFrameworks/MobileAccessoryUpdater.framework/XPCServices/ThunderboltAccessoryUpdaterService.xpc/Contents/MacOS/ThunderboltAccessoryUpdaterService
+  770     1 Sat Sep 19 16:49:17 2026     /System/Library/PrivateFrameworks/MobileAccessoryUpdater.framework/XPCServices/StandaloneHIDAudService.xpc/Contents/MacOS/StandaloneHIDAudService
+  771     1 Sat Sep 19 16:49:17 2026     /System/Library/PrivateFrameworks/TextInputUIMacHelper.framework/Versions/A/XPCServices/CursorUIViewService.xpc/Contents/MacOS/CursorUIViewService
+  772     1 Sat Sep 19 16:49:17 2026     /System/Library/Input Methods/PressAndHold.app/Contents/PlugIns/PAH_Extension.appex/Contents/MacOS/PAH_Extension -AppleLanguages ("zh-Hans-CN")
+  773     1 Sat Sep 19 16:49:17 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/CarbonComponentScannerXPC.xpc/Contents/MacOS/CarbonComponentScannerXPC
+  774     1 Sat Sep 19 16:49:17 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+  775     1 Sat Sep 19 16:49:17 2026     /usr/libexec/rosetta/oahd
+  778     1 Sat Sep 19 16:49:17 2026     /System/Library/CoreServices/ReportCrash agent
+  779     1 Sat Sep 19 16:49:17 2026     /usr/libexec/containermanagerd --runmode=agent --user-container-mode=current --bundle-container-mode=proxy --system-container-mode=none
+  781     1 Sat Sep 19 16:49:17 2026     /Applications/WeChat.app/Contents/Frameworks/crashpad_handler --no-rate-limit --database=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/crashinfo --annotation=ext_info={"app_call_name":"WeChat","app_name":"WeChat","app_path":"/Applications/WeChat.app/Contents/MacOS/WeChat","build_ver":"9","crash_notify":"1","input_action":2,"main_thread_id":"259","major_ver":"4","minor_ver":"1","module_name":"xwechat_mac","modules_dir":"/Applications/WeChat.app/Contents/MacOS","patch_ver":"58","product":"WeChat","report_type":"9999","restart_app_cmd":"","version":"4066646330"} --annotation=product=WeChat --handshake-fd=5
+  782     1 Sat Sep 19 16:49:18 2026     /usr/libexec/cryptexd
+  783     1 Sat Sep 19 16:49:18 2026     /System/Library/PrivateFrameworks/CallHistory.framework/Support/CallHistoryPluginHelper
+  784     1 Sat Sep 19 16:49:18 2026     /System/Library/PrivateFrameworks/TelephonyUtilities.framework/XPCServices/com.apple.FaceTime.FTConversationService.xpc/Contents/MacOS/com.apple.FaceTime.FTConversationService
+  785     1 Sat Sep 19 16:49:18 2026     /usr/sbin/distnoted agent
+  786     1 Sat Sep 19 16:49:18 2026     /System/Library/PrivateFrameworks/IMCore.framework/imagent.app/Contents/MacOS/imagent
+  787     1 Sat Sep 19 16:49:18 2026     /System/Library/PrivateFrameworks/CoreThreadCommissionerService.framework/CoreThreadCommissionerServiced
+  788     1 Sat Sep 19 16:49:18 2026     /System/Library/PrivateFrameworks/MediaRemote.framework/Support/mediaremoteagent
+  789     1 Sat Sep 19 16:49:18 2026     /usr/libexec/searchpartyuseragent
+  790     1 Sat Sep 19 16:49:18 2026     /usr/libexec/siriknowledged
+  791     1 Sat Sep 19 16:49:18 2026     /System/Library/PrivateFrameworks/CloudKitDaemon.framework/Support/cloudd --system
+  792     1 Sat Sep 19 16:49:18 2026     /usr/libexec/avconferenced
+  793     1 Sat Sep 19 16:49:18 2026     /System/Library/PrivateFrameworks/IMDPersistence.framework/XPCServices/IMDPersistenceAgent.xpc/Contents/MacOS/IMDPersistenceAgent
+  794     1 Sat Sep 19 16:49:18 2026     /System/Library/PrivateFrameworks/DeviceCheckInternal.framework/devicecheckd
+  795     1 Sat Sep 19 16:49:18 2026     /System/Library/DriverExtensions/com.apple.DriverKit-IOUserDockChannelSerial.dext/com.apple.DriverKit-IOUserDockChannelSerial com.apple.IOUserDockChannelSerial 0x1000010a7 com.apple.DriverKit-IOUserDockChannelSerial
+  796     1 Sat Sep 19 16:49:18 2026     /usr/libexec/kernelmanager_helper
+  797     1 Sat Sep 19 16:49:18 2026     /System/Library/DriverExtensions/com.apple.DriverKit-AppleBCMWLAN.dext/com.apple.DriverKit-AppleBCMWLAN com.apple.bcmwlan 0x1000010a9 com.apple.DriverKit-AppleBCMWLAN
+  798     1 Sat Sep 19 16:49:18 2026     /System/Library/DriverExtensions/com.apple.AppleUserHIDDrivers.dext/com.apple.AppleUserHIDDrivers com.apple.driverkit.AppleUserHIDDrivers 0x1000010aa com.apple.AppleUserHIDDrivers
+  801     1 Sat Sep 19 16:49:18 2026     /System/Library/PrivateFrameworks/CloudTelemetry.framework/Versions/A/XPCServices/CloudTelemetryService.xpc/Contents/MacOS/CloudTelemetryService
+  803     1 Sat Sep 19 16:49:18 2026     /usr/sbin/cron
+  804     1 Sat Sep 19 16:49:18 2026     /System/Library/PrivateFrameworks/CoreSymbolication.framework/coresymbolicationd
+  805     1 Sat Sep 19 16:49:18 2026     /System/Library/PrivateFrameworks/CallHistory.framework/Support/CallHistorySyncHelper
+  806     1 Sat Sep 19 16:49:18 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+  807   585 Sat Sep 19 16:49:19 2026     /Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/MacOS/WeChatAppEx --log-level=2 --lang=zh-CN --wechat-files-path=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files --product-id=1002 --wechat-sub-user-agent=MicroMessenger/7.0.20.1781(0x6700143B) MacWechat/3.8.7(0x13080712) UnifiedPCMacWechat(0xf264193a) --web-translate --appshim-flags=15 --client_version=4066646330 --wmpf_root_dir=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium --enable-applet-v3 --wmpf-drm-plugin-path --instance-index=0 --bundle-id=5A4RE8SF68.com.tencent.xinWeChat --mojo-platform-channel-handle=1858258245
+  808     1 Sat Sep 19 16:49:19 2026     automountd
+  815   807 Sat Sep 19 16:49:19 2026     /Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Frameworks/WeChatAppEx Framework.framework/Versions/C/Helpers/WeChatAppEx Helper.app/Contents/MacOS/WeChatAppEx Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=zh-CN --service-sandbox-type=network --client_version=4066646330 --enable-crash-reporter --wmpf_root_dir=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium --instance-index=0 --bundle-id=5A4RE8SF68.com.tencent.xinWeChat --product-id=1002 --disable-mojo-broker --shared-files --field-trial-handle=1718379636,r,15495935113087227693,12834215617061095522,262144 --enable-features=OverlayScrollbar,XWorker --disable-features=AudioServiceOutOfProcess,AutoupgradeMixedContent,BackForwardCache,DigitalGoodsApi,NotificationTriggers,PeriodicBackgroundSync,TFLiteLanguageDetectionEnabled,Vulkan,WebOTP --variations-seed-version --log-level=2 --seatbelt-client=17
+  816   807 Sat Sep 19 16:49:19 2026     /Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Frameworks/WeChatAppEx Framework.framework/Versions/C/Helpers/WeChatAppEx Helper (GPU).app/Contents/MacOS/WeChatAppEx Helper (GPU) --type=gpu-process --client_version=4066646330 --enable-crash-reporter --wmpf_root_dir=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium --instance-index=0 --bundle-id=5A4RE8SF68.com.tencent.xinWeChat --product-id=1002 --gpu-preferences=UAAAAAAAAAAgAAAEAAAAAAAAAAAAAAAAAABgAAEAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAA --disable-mojo-broker --shared-files --field-trial-handle=1718379636,r,15495935113087227693,12834215617061095522,262144 --enable-features=OverlayScrollbar,XWorker --disable-features=AudioServiceOutOfProcess,AutoupgradeMixedContent,BackForwardCache,DigitalGoodsApi,NotificationTriggers,PeriodicBackgroundSync,TFLiteLanguageDetectionEnabled,Vulkan,WebOTP --variations-seed-version --log-level=2 --seatbelt-client=17
+  817     1 Sat Sep 19 16:49:19 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  818     1 Sat Sep 19 16:49:19 2026     /System/Library/PrivateFrameworks/AXAssetLoader.framework/Support/axassetsd
+  819     1 Sat Sep 19 16:49:19 2026     /usr/libexec/SidecarRelay
+  820     1 Sat Sep 19 16:49:19 2026     /System/Library/PrivateFrameworks/WebPrivacy.framework/webprivacyd
+  822     1 Sat Sep 19 16:49:19 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU
+  823     1 Sat Sep 19 16:49:19 2026     /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/CVMServer
+  824     1 Sat Sep 19 16:49:19 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+  825     1 Sat Sep 19 16:49:19 2026     /System/Library/Frameworks/MediaAccessibility.framework/Versions/A/XPCServices/com.apple.accessibility.mediaaccessibilityd.xpc/Contents/MacOS/com.apple.accessibility.mediaaccessibilityd
+  826     1 Sat Sep 19 16:49:19 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+  827     1 Sat Sep 19 16:49:19 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+  829     1 Sat Sep 19 16:49:19 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+  831     1 Sat Sep 19 16:49:20 2026     /System/Library/CoreServices/UniversalControl.app/Contents/MacOS/UniversalControl
+  834     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+  835     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking
+  836     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+  837   610 Sat Sep 19 16:49:20 2026     /Applications/Lark.app/Contents/Frameworks/Lark Framework.framework/Versions/131.0.6778.268/Helpers/Lark Helper.app/Contents/MacOS/Lark Helper --aha-process-t=aha-service --type=monitor --block-unsubscribe-shell-api-event --enable-pre-read-liblark-dll --smc-metadata=1936548722,17105458696843286702,1463498167561042825,20971520 --enable-aha-gwp-asan-dump --mojo-platform-channel-handle=2428188217
+  838     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+  839     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+  840     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+  841     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+  842     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+  845     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/StoreKit.framework/Support/storekitagent
+  848   610 Sat Sep 19 16:49:20 2026     /Applications/Lark.app/Contents/Frameworks/Lark Framework.framework/Versions/131.0.6778.268/Helpers/Lark Helper (GPU).app/Contents/MacOS/Lark Helper (GPU) --type=gpu-process --no-sandbox --enable-aha-hardening=7 --string-annotations --start-stack-profiler --gpu-preferences=WAAAAAAAAAAgAAAEAAAAAAAAAAAAAAAAAABgAAEAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAABQAAABgAAAAAAAAAGAAAAAAAAAAUAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA= --browser-runtime --aha-multi-profile --shared-files --field-trial-handle=1718379636,r,6296874180014994584,897576609130537112,262144 --variations-seed-version --smc-metadata=1936548722,17105458696843286702,1463498167561042825,20971520
+  849     1 Sat Sep 19 16:49:20 2026     /usr/libexec/sysmond
+  850     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  851     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  852   610 Sat Sep 19 16:49:20 2026     /Applications/Lark.app/Contents/Frameworks/Lark Framework.framework/Versions/131.0.6778.268/Helpers/Lark Helper.app/Contents/MacOS/Lark Helper --type=utility --utility-sub-type=storage.mojom.StorageService --lang=zh-CN --service-sandbox-type=service --no-sandbox --enable-aha-hardening=7 --string-annotations --browser-runtime --aha-multi-profile --shared-files --field-trial-handle=1718379636,r,6296874180014994584,897576609130537112,262144 --variations-seed-version --smc-metadata=1936548722,17105458696843286702,1463498167561042825,20971520
+  854     1 Sat Sep 19 16:49:20 2026     /System/Library/PrivateFrameworks/SafariSafeBrowsing.framework/com.apple.Safari.SafeBrowsing.Service
+  855     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+  856   610 Sat Sep 19 16:49:20 2026     /Applications/Lark.app/Contents/Frameworks/Lark Framework.framework/Versions/131.0.6778.268/Helpers/Lark Helper.app/Contents/MacOS/Lark Helper --aha-process-t=aha-service --type=backend --task-jssdk-enabled --enable-backend-async-progress --no-proxy-server --enable-pre-read-liblark-dll --smc-metadata=1936548722,17105458696843286702,1463498167561042825,20971520 --aha-multi-profile --enable-process-container --enable-backend-async-progress --mojo-platform-channel-handle=261200338
+  860     1 Sat Sep 19 16:49:20 2026     /System/Library/Services/AppleSpell.service/Contents/MacOS/AppleSpell
+  861     1 Sat Sep 19 16:49:20 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  862     1 Sat Sep 19 16:49:21 2026     /System/Library/PrivateFrameworks/CascadeSets.framework/Versions/A/XPCServices/SetStoreUpdateService.xpc/Contents/MacOS/SetStoreUpdateService
+  863     1 Sat Sep 19 16:49:21 2026     /System/Library/PrivateFrameworks/WiFiPolicy.framework/XPCServices/WiFiCloudAssetsXPCService.xpc/Contents/MacOS/WiFiCloudAssetsXPCService
+  864     1 Sat Sep 19 16:49:21 2026     /usr/libexec/keyboardservicesd
+  865     1 Sat Sep 19 16:49:21 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+  866   610 Sat Sep 19 16:49:21 2026     /Applications/Lark.app/Contents/Frameworks/Lark Framework.framework/Versions/131.0.6778.268/Helpers/Lark Helper.app/Contents/MacOS/Lark Helper --type=utility --utility-sub-type=jash.mojom.JSRuntimeService --lang=zh-CN --service-sandbox-type=none --no-sandbox --js-runtime-verify-shellapi=strict --enable-js-runtime-shared-string --enable-codecache-in-js-runtime --enable-shellapi-new-tunnel --enable-process-container --enable-backend-async-progress --block-unsubscribe-shell-api-event --enable-aha-hardening=7 --string-annotations --browser-runtime --aha-multi-profile --shared-files --field-trial-handle=1718379636,r,6296874180014994584,897576609130537112,262144 --variations-seed-version --smc-metadata=1936548722,17105458696843286702,1463498167561042825,20971520
+  867   313 Sat Sep 19 16:49:21 2026     /usr/sbin/systemstats --logger-helper /private/var/db/systemstats
+  868     1 Sat Sep 19 16:49:21 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  870     1 Sat Sep 19 16:49:21 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdbulkimport -s mdworker-bundle -c MDSImporterBundleFinder -m com.apple.metadata.mdbulkimport
+  871     1 Sat Sep 19 16:49:22 2026     /usr/libexec/wifianalyticsd
+  875     1 Sat Sep 19 16:49:24 2026     /System/Library/PrivateFrameworks/CloudTelemetry.framework/Versions/A/XPCServices/CloudTelemetryService.xpc/Contents/MacOS/CloudTelemetryService
+  876     1 Sat Sep 19 16:49:24 2026     /System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XProtectBridgeService.xpc/Contents/MacOS/XProtectBridgeService
+  877     1 Sat Sep 19 16:49:24 2026     /System/Library/PrivateFrameworks/HearingCore.framework/heard
+  878     1 Sat Sep 19 16:49:24 2026     com.macpaw.CleanMyMac4.HealthMonitor
+  883     1 Sat Sep 19 16:49:24 2026     com.macpaw.CleanMyMac4.Menu
+  885     1 Sat Sep 19 16:49:24 2026     /System/Library/PrivateFrameworks/AskPermission.framework/Versions/A/Resources/askpermissiond
+  887     1 Sat Sep 19 16:49:24 2026     /System/Library/CoreServices/AirPlayUIAgent.app/Contents/MacOS/AirPlayUIAgent --launchd
+  888     1 Sat Sep 19 16:49:24 2026     /Users/kriswang/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main gateway run
+  891     1 Sat Sep 19 16:49:24 2026     /System/Library/CoreServices/diagnostics_agent
+  892     1 Sat Sep 19 16:49:24 2026     /System/Library/CoreServices/TextInputMenuAgent.app/Contents/MacOS/TextInputMenuAgent
+  895     1 Sat Sep 19 16:49:24 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  896     1 Sat Sep 19 16:49:24 2026     /System/Library/Frameworks/CryptoTokenKit.framework/ctkahp.bundle/Contents/MacOS/ctkahp -d
+  897     1 Sat Sep 19 16:49:24 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+  898     1 Sat Sep 19 16:49:24 2026     /System/Library/CoreServices/TextInputSwitcher.app/Contents/MacOS/TextInputSwitcher
+  899     1 Sat Sep 19 16:49:24 2026     /System/Library/Frameworks/CryptoTokenKit.framework/ctkahp.bundle/Contents/MacOS/ctkahp
+  902     1 Sat Sep 19 16:49:25 2026     /System/Library/Frameworks/ExtensionFoundation.framework/Versions/A/XPCServices/extensionkitservice.xpc/Contents/MacOS/extensionkitservice
+  905     1 Sat Sep 19 16:49:25 2026     /System/Applications/Calendar.app/Contents/Extensions/CalendarIntentsExtension.appex/Contents/MacOS/CalendarIntentsExtension
+  906     1 Sat Sep 19 16:49:25 2026     /System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/Contents/Extensions/SafariLinkExtension.appex/Contents/MacOS/SafariLinkExtension
+  908     1 Sat Sep 19 16:49:25 2026     /System/Applications/Messages.app/Contents/Extensions/MessagesActionExtension.appex/Contents/MacOS/MessagesActionExtension
+  913     1 Sat Sep 19 16:49:26 2026     /usr/libexec/captiveagent
+  915   610 Sat Sep 19 16:49:26 2026     /Applications/Lark.app/Contents/Frameworks/Lark Framework.framework/Versions/131.0.6778.268/Helpers/Lark Helper (Renderer).app/Contents/MacOS/Lark Helper (Renderer) --type=renderer --enable-aha-hardening=7 --string-annotations --no-sandbox --indexeddb-idle-check-seconds=5 --scene=profile_main --enable-run-before-paint --enable-renderer-jank-monitor --enable-native-resource-code-cache --block-unsubscribe-shell-api-event --enable-shellapi-new-tunnel --enable-shellapi-jsb-permission-no-http --enable-v8-callstack-check --enable-v8-callstack-check-block --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-main-frame-before-activation --renderer-client-id=10 --time-ticks-at-unix-epoch=-1789807716936237 --browser-runtime --aha-multi-profile --launch-time-ticks=49787839 --shared-files --field-trial-handle=1718379636,r,6296874180014994584,897576609130537112,262144 --variations-seed-version --smc-metadata=1936548722,17105458696843286702,1463498167561042825,20971520
+  928     1 Sat Sep 19 16:49:29 2026     /System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/XPCServices/com.apple.tonelibraryd.xpc/Contents/MacOS/com.apple.tonelibraryd
+  929     1 Sat Sep 19 16:49:29 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+  930     1 Sat Sep 19 16:49:29 2026     /usr/libexec/audiomxd
+  939     1 Sat Sep 19 16:49:30 2026     /System/Library/Frameworks/ClassKit.framework/Versions/A/progressd
+  959     1 Sat Sep 19 16:49:31 2026     /usr/libexec/naturallanguaged
+ 1122     1 Sat Sep 19 16:49:32 2026     /System/Library/PrivateFrameworks/LockdownMode.framework/Versions/A/XPCServices/lockdownmoded
+ 1123     1 Sat Sep 19 16:49:32 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.ComponentTagHelper.xpc/Contents/MacOS/com.apple.audio.ComponentTagHelper
+ 1124     1 Sat Sep 19 16:49:34 2026     /System/Library/PrivateFrameworks/SoftwareUpdate.framework/Resources/SoftwareUpdateNotificationManager.app/Contents/MacOS/SoftwareUpdateNotificationManager
+ 1125     1 Sat Sep 19 16:49:34 2026     /System/Library/PrivateFrameworks/FindMyMac.framework/Resources/FindMyMacd
+ 1126     1 Sat Sep 19 16:49:34 2026     /System/Library/PrivateFrameworks/TextToSpeechMauiSupport.framework/Versions/A/PlugIns/MauiAUSP.appex/Contents/MacOS/MauiAUSP -AppleLanguages ("zh-Hans-CN")
+ 1127     1 Sat Sep 19 16:49:34 2026     /System/Library/PrivateFrameworks/TextToSpeechKonaSupport.framework/Versions/A/PlugIns/KonaSynthesizer.appex/Contents/MacOS/KonaSynthesizer -AppleLanguages ("zh-Hans-CN")
+ 1128     1 Sat Sep 19 16:49:34 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+ 1129     1 Sat Sep 19 16:49:34 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+ 1130     1 Sat Sep 19 16:49:34 2026     /System/Library/PrivateFrameworks/TextToSpeech.framework/PlugIns/SiriAUSP.appex/Contents/MacOS/SiriAUSP -AppleLanguages ("zh-Hans-CN")
+ 1131     1 Sat Sep 19 16:49:34 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/AUCrashHandlerService.xpc/Contents/MacOS/AUCrashHandlerService
+ 1132     1 Sat Sep 19 16:49:34 2026     /System/Library/PrivateFrameworks/MacinTalk.framework/Versions/A/PlugIns/WardaSynthesizer_x86_64.appex/Contents/MacOS/WardaSynthesizer_x86_64 -AppleLanguages ("zh-Hans-CN")
+ 1133     1 Sat Sep 19 16:49:34 2026     /System/Library/PrivateFrameworks/MacinTalk.framework/Versions/A/PlugIns/WardaSynthesizer_arm64.appex/Contents/MacOS/WardaSynthesizer_arm64 -AppleLanguages ("zh-Hans-CN")
+ 1134     1 Sat Sep 19 16:49:34 2026     /System/Library/PrivateFrameworks/SiriTTSService.framework/Versions/A/XPCServices/com.apple.SiriTTSService.TrialProxy.xpc/Contents/MacOS/com.apple.SiriTTSService.TrialProxy
+ 1135     1 Sat Sep 19 16:49:34 2026     /System/Library/PrivateFrameworks/MacinTalk.framework/Versions/A/PlugIns/MacinTalkAUSP.appex/Contents/MacOS/MacinTalkAUSP -AppleLanguages ("zh-Hans-CN")
+ 1136     1 Sat Sep 19 16:49:34 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+ 1137     1 Sat Sep 19 16:49:35 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+ 1138     1 Sat Sep 19 16:49:35 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+ 1139     1 Sat Sep 19 16:49:35 2026     /System/Library/PrivateFrameworks/TextToSpeechVoiceBankingSupport.framework/Support/voicebankingd
+ 1140     1 Sat Sep 19 16:49:35 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+ 1141     1 Sat Sep 19 16:49:35 2026     /System/Library/CoreServices/CrashReporterSupportHelper server-init
+ 1143     1 Sat Sep 19 16:49:36 2026     /System/Library/PrivateFrameworks/GeoServices.framework/geodMachServiceBridge
+ 1144     1 Sat Sep 19 16:49:36 2026     /System/Library/PrivateFrameworks/AppStoreDaemon.framework/Support/appstoreagent
+ 1145     1 Sat Sep 19 16:49:36 2026     /System/Library/PrivateFrameworks/PackageKit.framework/Resources/installd
+ 1146     1 Sat Sep 19 16:49:36 2026     /System/Library/PrivateFrameworks/PackageKit.framework/Resources/system_installd
+ 1160     1 Sat Sep 19 16:49:38 2026     /System/Library/PrivateFrameworks/InstallCoordination.framework/Support/installcoordinationd
+ 1161     1 Sat Sep 19 16:49:38 2026     /System/Library/PrivateFrameworks/AppStoreDaemon.framework/Versions/A/XPCServices/com.apple.AppStoreDaemon.StorePrivilegedODRService.xpc/Contents/MacOS/com.apple.AppStoreDaemon.StorePrivilegedODRService
+ 1163     1 Sat Sep 19 16:49:39 2026     /System/Library/PrivateFrameworks/WeatherDaemon.framework/weatherd
+ 1164     1 Sat Sep 19 16:49:40 2026     /usr/libexec/promotedcontentd
+ 1165     1 Sat Sep 19 16:49:41 2026     /usr/libexec/fairplaydeviceidentityd
+ 1166     1 Sat Sep 19 16:49:42 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTEncoderXPCService.xpc/Contents/MacOS/VTEncoderXPCService
+ 1167   610 Sat Sep 19 16:49:42 2026     /Applications/Lark.app/Contents/Frameworks/Lark Framework.framework/Versions/131.0.6778.268/Helpers/Lark Helper.app/Contents/MacOS/Lark Helper --type=utility --utility-sub-type=audio.mojom.AudioService --lang=zh-CN --service-sandbox-type=audio --no-sandbox --message-loop-type-ui --enable-aha-hardening=7 --string-annotations --browser-runtime --aha-multi-profile --shared-files --field-trial-handle=1718379636,r,6296874180014994584,897576609130537112,262144 --variations-seed-version --smc-metadata=1936548722,17105458696843286702,1463498167561042825,20971520
+ 1168     1 Sat Sep 19 16:49:42 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+ 1169     1 Sat Sep 19 16:49:42 2026     /usr/libexec/triald_system
+ 1170     1 Sat Sep 19 16:49:43 2026     /Applications/Rectangle.app/Contents/MacOS/Rectangle
+ 1173     1 Sat Sep 19 16:49:48 2026     /System/Library/PrivateFrameworks/SiriAnalytics.framework/Versions/A/XPCServices/SAExtensionOrchestrator.xpc/Contents/MacOS/SAExtensionOrchestrator
+ 1174     1 Sat Sep 19 16:49:48 2026     /System/Library/Frameworks/ExtensionFoundation.framework/Versions/A/XPCServices/extensionkitservice.xpc/Contents/MacOS/extensionkitservice
+ 1175     1 Sat Sep 19 16:49:48 2026     /System/Library/ExtensionKit/Extensions/GMSSELFIngestor.appex/Contents/MacOS/GMSSELFIngestor
+ 1176     1 Sat Sep 19 16:49:48 2026     /System/Library/ExtensionKit/Extensions/IFTelemetrySELFIngestor.appex/Contents/MacOS/IFTelemetrySELFIngestor
+ 1177     1 Sat Sep 19 16:49:48 2026     /System/Library/ExtensionKit/Extensions/BiomeSELFIngestor.appex/Contents/MacOS/BiomeSELFIngestor
+ 1178     1 Sat Sep 19 16:49:48 2026     /System/Library/ExtensionKit/Extensions/IFTranscriptSELFIngestor.appex/Contents/MacOS/IFTranscriptSELFIngestor
+ 1179     1 Sat Sep 19 16:49:49 2026     /Applications/Shadowrocket.app/Contents/MacOS/Shadowrocket
+ 1180     1 Sat Sep 19 16:49:51 2026     /Applications/Shadowrocket.app/Contents/PlugIns/MacPacketTunnel.appex/Contents/MacOS/MacPacketTunnel -AppleLanguages ("zh-Hans-CN")
+ 1181     1 Sat Sep 19 16:49:51 2026     /usr/libexec/adprivacyd
+ 1187   610 Sat Sep 19 16:49:56 2026     /Applications/Lark.app/Contents/Frameworks/Lark Framework.framework/Versions/131.0.6778.268/Helpers/Lark Helper (Renderer).app/Contents/MacOS/Lark Helper (Renderer) --type=renderer --enable-aha-hardening=7 --string-annotations --no-sandbox --indexeddb-idle-check-seconds=5 --scene=profile_explorer --enable-run-before-paint --enable-renderer-jank-monitor --enable-native-resource-code-cache --block-unsubscribe-shell-api-event --enable-shellapi-new-tunnel --enable-shellapi-jsb-permission-no-http --enable-v8-callstack-check --enable-v8-callstack-check-block --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-main-frame-before-activation --renderer-client-id=19 --time-ticks-at-unix-epoch=-1789807716936237 --browser-runtime --aha-multi-profile --launch-time-ticks=80040951 --shared-files --field-trial-handle=1718379636,r,6296874180014994584,897576609130537112,262144 --variations-seed-version --smc-metadata=1936548722,17105458696843286702,1463498167561042825,20971520
+ 1188   610 Sat Sep 19 16:49:56 2026     /Applications/Lark.app/Contents/Frameworks/Lark Framework.framework/Versions/131.0.6778.268/Helpers/Lark Helper (Renderer).app/Contents/MacOS/Lark Helper (Renderer) --type=renderer --enable-aha-hardening=7 --string-annotations --no-sandbox --indexeddb-idle-check-seconds=5 --module=renderer-standard --scene=profile_explorer --enable-renderer-jank-monitor --enable-native-resource-code-cache --block-unsubscribe-shell-api-event --enable-shellapi-new-tunnel --enable-shellapi-jsb-permission-no-http --enable-v8-callstack-check --enable-v8-callstack-check-block --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-main-frame-before-activation --renderer-client-id=18 --time-ticks-at-unix-epoch=-1789807716936237 --browser-runtime --aha-multi-profile --launch-time-ticks=80041366 --shared-files --field-trial-handle=1718379636,r,6296874180014994584,897576609130537112,262144 --variations-seed-version --smc-metadata=1936548722,17105458696843286702,1463498167561042825,20971520
+ 1189   585 Sat Sep 19 16:50:05 2026     /Applications/WeChat.app/Contents/Frameworks/wxocr --base-bundle-id=5A4RE8SF68.com.tencent.xinWeChat --shared-files
+ 1190   807 Sat Sep 19 16:50:05 2026     /Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Frameworks/WeChatAppEx Framework.framework/Versions/C/Helpers/WeChatAppEx Helper.app/Contents/MacOS/WeChatAppEx Helper --type=utility --utility-sub-type=flue.mojom.ILinkServiceHost --lang=zh-CN --service-sandbox-type=none --client_version=4066646330 --enable-crash-reporter --wmpf_root_dir=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium --instance-index=0 --bundle-id=5A4RE8SF68.com.tencent.xinWeChat --product-id=1002 --disable-mojo-broker --shared-files --field-trial-handle=1718379636,r,15495935113087227693,12834215617061095522,262144 --enable-features=OverlayScrollbar,XWorker --disable-features=AudioServiceOutOfProcess,AutoupgradeMixedContent,BackForwardCache,DigitalGoodsApi,NotificationTriggers,PeriodicBackgroundSync,TFLiteLanguageDetectionEnabled,Vulkan,WebOTP --variations-seed-version --log-level=2
+ 1191   585 Sat Sep 19 16:50:05 2026     /Applications/WeChat.app/Contents/Frameworks/wxplayer --base-bundle-id=5A4RE8SF68.com.tencent.xinWeChat --app-data-dir=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data --shared-files
+ 1192   585 Sat Sep 19 16:50:05 2026     /Applications/WeChat.app/Contents/Frameworks/wxutility --base-bundle-id=5A4RE8SF68.com.tencent.xinWeChat --shared-files
+ 1194   807 Sat Sep 19 16:50:05 2026     /Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Frameworks/WeChatAppEx Framework.framework/Versions/C/Helpers/WeChatAppEx Helper (Renderer).app/Contents/MacOS/WeChatAppEx Helper (Renderer) --type=renderer --client_version=4066646330 --enable-crash-reporter --wmpf_root_dir=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium --instance-index=0 --bundle-id=5A4RE8SF68.com.tencent.xinWeChat --wmpf-render-type=6 --product-id=1002 --disable-notifications --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=6 --time-ticks-at-unix-epoch=-1789807716937585 --disable-mojo-broker --launch-time-ticks=88272286 --shared-files --field-trial-handle=1718379636,r,15495935113087227693,12834215617061095522,262144 --enable-features=OverlayScrollbar,XWorker --disable-features=AudioServiceOutOfProcess,AutoupgradeMixedContent,BackForwardCache,DigitalGoodsApi,NotificationTriggers,PeriodicBackgroundSync,TFLiteLanguageDetectionEnabled,Vulkan,WebOTP --variations-seed-version --log-level=2 --seatbelt-client=96
+ 1195   807 Sat Sep 19 16:50:05 2026     /Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Frameworks/WeChatAppEx Framework.framework/Versions/C/Helpers/WeChatAppEx Helper (Renderer).app/Contents/MacOS/WeChatAppEx Helper (Renderer) --type=renderer --client_version=4066646330 --enable-crash-reporter --wmpf_root_dir=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium --instance-index=0 --bundle-id=5A4RE8SF68.com.tencent.xinWeChat --wmpf-render-type=0 --product-id=1002 --disable-notifications --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=8 --time-ticks-at-unix-epoch=-1789807716937585 --disable-mojo-broker --launch-time-ticks=89001729 --shared-files --field-trial-handle=1718379636,r,15495935113087227693,12834215617061095522,262144 --enable-features=OverlayScrollbar,XWorker --disable-features=AudioServiceOutOfProcess,AutoupgradeMixedContent,BackForwardCache,DigitalGoodsApi,NotificationTriggers,PeriodicBackgroundSync,TFLiteLanguageDetectionEnabled,Vulkan,WebOTP --variations-seed-version --log-level=2 --seatbelt-client=132
+ 1196     1 Sat Sep 19 16:50:06 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+ 1197     1 Sat Sep 19 16:50:06 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+ 1198     1 Sat Sep 19 16:50:06 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTEncoderXPCService.xpc/Contents/MacOS/VTEncoderXPCService
+ 1199   807 Sat Sep 19 16:50:06 2026     /Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Frameworks/WeChatAppEx Framework.framework/Versions/C/Helpers/WeChatAppEx Helper (Renderer).app/Contents/MacOS/WeChatAppEx Helper (Renderer) --type=renderer --client_version=4066646330 --enable-crash-reporter --wmpf_root_dir=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium --instance-index=0 --bundle-id=5A4RE8SF68.com.tencent.xinWeChat --wmpf-render-type=0 --product-id=1002 --disable-notifications --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=9 --time-ticks-at-unix-epoch=-1789807716937585 --disable-mojo-broker --launch-time-ticks=89572538 --shared-files --field-trial-handle=1718379636,r,15495935113087227693,12834215617061095522,262144 --enable-features=OverlayScrollbar,XWorker --disable-features=AudioServiceOutOfProcess,AutoupgradeMixedContent,BackForwardCache,DigitalGoodsApi,NotificationTriggers,PeriodicBackgroundSync,TFLiteLanguageDetectionEnabled,Vulkan,WebOTP --variations-seed-version --log-level=2 --seatbelt-client=154
+ 1200     1 Sat Sep 19 16:50:06 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+ 1201     1 Sat Sep 19 16:50:08 2026     /usr/sbin/BTLEServerAgent
+ 1204     1 Sat Sep 19 16:50:13 2026     /System/Library/PrivateFrameworks/MobileAccessoryUpdater.framework/Support/fudHelperAgent
+ 1205     1 Sat Sep 19 16:50:16 2026     /System/Library/CoreServices/appplaceholdersyncd
+ 1237     1 Sat Sep 19 16:50:24 2026     /System/Cryptexes/App/usr/libexec/SafariLaunchAgent
+ 1241     1 Sat Sep 19 16:50:24 2026     /System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService
+ 1242     1 Sat Sep 19 16:50:25 2026     /System/Library/CoreServices/ReportCrash daemon
+ 1280     1 Sat Sep 19 16:50:43 2026     /System/Library/PrivateFrameworks/IASUtilities.framework/Versions/A/Resources/installerauthagent
+ 1281     1 Sat Sep 19 16:50:43 2026     /usr/libexec/NRDUpdated
+ 1286     1 Sat Sep 19 16:50:47 2026     /System/Library/PrivateFrameworks/Synapse.framework/Support/contentlinkingd
+ 1287     1 Sat Sep 19 16:50:47 2026     /usr/libexec/swcd
+ 1290     1 Sat Sep 19 16:50:52 2026     /private/var/db/com.apple.xpc.roleaccountd.staging/exec/16777230.118352620.xpc/Contents/MacOS/com.apple.NRD.UpdateBrainService
+ 1291     1 Sat Sep 19 16:50:52 2026     /usr/libexec/xpcroleaccountd -launchd
+ 1294     1 Sat Sep 19 16:50:53 2026     /usr/libexec/inputanalyticsd
+ 1295     1 Sat Sep 19 16:50:55 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/managedcorespotlightd
+ 1296     1 Sat Sep 19 16:50:55 2026     /System/Library/PrivateFrameworks/AssetCacheServices.framework/Versions/A/XPCServices/AssetCacheLocatorService.xpc/Contents/MacOS/AssetCacheLocatorService -d
+ 1303     1 Sat Sep 19 16:50:56 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+ 1304     1 Sat Sep 19 16:50:56 2026     /System/Library/PrivateFrameworks/StreamingZip.framework/Versions/A/XPCServices/com.apple.StreamingUnzipService.privileged.xpc/Contents/MacOS/com.apple.StreamingUnzipService.privileged
+ 1305     1 Sat Sep 19 16:50:57 2026     /System/Library/Frameworks/ExtensionFoundation.framework/Versions/A/XPCServices/extensionkitservice.xpc/Contents/MacOS/extensionkitservice
+ 1306     1 Sat Sep 19 16:50:57 2026     /System/Library/ExtensionKit/Extensions/PackageThumbnailExtension.appex/Contents/MacOS/PackageThumbnailExtension
+ 1312     1 Sat Sep 19 16:51:05 2026     /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/DictionaryServices.framework/Versions/A/XPCServices/com.apple.DictionaryServiceHelper.xpc/Contents/MacOS/com.apple.DictionaryServiceHelper
+ 1313     1 Sat Sep 19 16:51:05 2026     /System/Library/PrivateFrameworks/UIFoundation.framework/Versions/A/XPCServices/nsattributedstringagent.xpc/Contents/MacOS/nsattributedstringagent
+ 1314     1 Sat Sep 19 16:51:05 2026     /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/HIServices.framework/Versions/A/XPCServices/com.apple.hiservices-xpcservice.xpc/Contents/MacOS/com.apple.hiservices-xpcservice
+ 1315     1 Sat Sep 19 16:51:05 2026     /usr/sbin/cfprefsd agent
+ 1318     1 Sat Sep 19 16:51:06 2026     /System/Library/Frameworks/MediaAccessibility.framework/Versions/A/XPCServices/com.apple.accessibility.mediaaccessibilityd.xpc/Contents/MacOS/com.apple.accessibility.mediaaccessibilityd
+ 1320     1 Sat Sep 19 16:51:06 2026     /System/Library/PrivateFrameworks/UIFoundation.framework/Versions/A/XPCServices/nsattributedstringagent.xpc/Contents/MacOS/nsattributedstringagent
+ 1327     1 Sat Sep 19 16:51:10 2026     /System/Library/PrivateFrameworks/Install.framework/Frameworks/DistributionKit.framework/Versions/A/XPCServices/DistributionHelper.xpc/Contents/MacOS/DistributionHelper
+ 1331     1 Sat Sep 19 16:51:18 2026     /Applications/Caffeine.app/Contents/MacOS/Caffeine
+ 1332     1 Sat Sep 19 16:51:19 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/remotemanagementd
+ 1333     1 Sat Sep 19 16:51:19 2026     /System/Library/PrivateFrameworks/DataAccess.framework/Support/dataaccessd
+ 1334     1 Sat Sep 19 16:51:19 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/SecuritySubscriber.xpc/Contents/MacOS/SecuritySubscriber
+ 1335     1 Sat Sep 19 16:51:19 2026     /usr/libexec/keychainsharingmessagingd
+ 1336     1 Sat Sep 19 16:51:19 2026     /usr/sbin/distnoted agent
+ 1337     1 Sat Sep 19 16:51:19 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/InteractiveLegacyProfilesSubscriber.xpc/Contents/MacOS/InteractiveLegacyProfilesSubscriber
+ 1338     1 Sat Sep 19 16:51:19 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/ScreenSharingSubscriber.xpc/Contents/MacOS/ScreenSharingSubscriber
+ 1340     1 Sat Sep 19 16:51:19 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/LegacyProfilesSubscriber.xpc/Contents/MacOS/LegacyProfilesSubscriber
+ 1341     1 Sat Sep 19 16:51:19 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/PasscodeSettingsSubscriber.xpc/Contents/MacOS/PasscodeSettingsSubscriber
+ 1342     1 Sat Sep 19 16:51:20 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/DiskManagementSubscriber.xpc/Contents/MacOS/DiskManagementSubscriber
+ 1343     1 Sat Sep 19 16:51:20 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/SoftwareUpdateSubscriber.xpc/Contents/MacOS/SoftwareUpdateSubscriber
+ 1344     1 Sat Sep 19 16:51:20 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/ManagementTestSubscriber.xpc/Contents/MacOS/ManagementTestSubscriber
+ 1345     1 Sat Sep 19 16:51:20 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/ManagedConfigurationFilesSubscriber.xpc/Contents/MacOS/ManagedConfigurationFilesSubscriber
+ 1346     1 Sat Sep 19 16:51:23 2026     /System/Cryptexes/App/System/Library/CoreServices/SafariSupport.bundle/Contents/MacOS/SafariBookmarksSyncAgent
+ 1383     1 Sat Sep 19 16:52:26 2026     /usr/libexec/tipsd
+ 1419     1 Sat Sep 19 16:52:34 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker -s mdworker-sizing -c MDSSizingWorker -m com.apple.mdworker.sizing
+ 1498     1 Sat Sep 19 16:53:11 2026     /System/Library/CoreServices/Dock.app/Contents/XPCServices/DockHelper.xpc/Contents/MacOS/DockHelper
+ 2156     1 Sat Oct 24 16:02:50 2026     /System/Applications/Weather.app/Contents/PlugIns/WeatherWidget.appex/Contents/MacOS/WeatherWidget
+ 2189     1 Sat Sep 19 16:53:21 2026     /System/Library/PrivateFrameworks/UniversalAccess.framework/Versions/A/Resources/universalAccessAuthWarn.app/Contents/MacOS/universalAccessAuthWarn launchd -s
+ 3434     1 Sat Sep 19 16:54:30 2026     /System/Cryptexes/App/usr/libexec/PasswordBreachAgent
+ 3435     1 Sat Sep 19 16:54:30 2026     /usr/libexec/feedbackd
+ 3441     1 Sat Sep 19 16:54:47 2026     /usr/libexec/ASPCarryLog
+ 3462     1 Sat Sep 19 16:56:37 2026     /System/Library/Frameworks/LocalAuthentication.framework/Support/coreautha.bundle/Contents/MacOS/coreautha
+ 3472     1 Sat Sep 19 16:56:43 2026     /System/Library/PrivateFrameworks/PackageKit.framework/Versions/A/XPCServices/package_script_service.xpc/Contents/MacOS/package_script_service
+ 3523     1 Sat Sep 19 16:56:44 2026     /System/Library/Frameworks/ColorSync.framework/Support/colorsync.useragent
+ 3550     1 Sat Sep 19 16:56:45 2026     /System/Library/PrivateFrameworks/OnDeviceStorage.framework/Support/amsondevicestoraged
+ 3552     1 Sat Sep 19 16:56:45 2026     /usr/libexec/MTLAssetUpgraderD
+ 3553     1 Sat Sep 19 16:56:45 2026     /System/Library/Frameworks/MediaExtension.framework/Versions/A/Helpers/MENotificationAgent
+ 3556     1 Sat Sep 19 16:56:47 2026     Contents/Resources/ChatGPTHelper
+ 3570     1 Sat Sep 19 16:56:56 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+ 3571     1 Sat Sep 19 16:56:56 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+ 3573     1 Sat Sep 19 16:56:56 2026     /System/Cryptexes/App/usr/libexec/AuthenticationServicesAgent
+ 3574     1 Sat Sep 19 16:56:56 2026     cloudphotod
+ 3575     1 Sat Sep 19 16:56:57 2026     /Library/Apple/System/Library/CoreServices/XProtect.app/Contents/MacOS/XProtect
+ 3576     1 Sat Sep 19 16:56:57 2026     /usr/libexec/metrickitd
+ 3577     1 Sat Sep 19 16:56:57 2026     /usr/libexec/mmaintenanced
+ 3579     1 Sat Sep 19 16:56:57 2026     /System/Library/PrivateFrameworks/PhotoAnalysis.framework/Versions/A/Support/photoanalysisd
+ 3582     1 Sat Sep 19 17:13:51 2026     /Library/Apple/System/Library/CoreServices/XProtect.app/Contents/MacOS/XProtect
+ 3591     1 Sat Sep 19 17:14:17 2026     /System/Library/CoreServices/OSDUIHelper.app/Contents/MacOS/OSDUIHelper
+ 3618     1 Sat Sep 19 17:14:30 2026     /usr/libexec/trustd --agent
+ 3625     1 Sat Sep 19 17:23:00 2026     /System/Library/PrivateFrameworks/GeoServices.framework/Versions/A/XPCServices/com.apple.geod.xpc/Contents/MacOS/com.apple.geod
+ 3626     1 Sat Sep 19 17:23:00 2026     /usr/libexec/containermanagerd --runmode=agent --user-container-mode=current --bundle-container-mode=proxy --system-container-mode=none
+ 3909     1 Sat Sep 19 17:25:08 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker -s mdworker-sizing -c MDSSizingWorker -m com.apple.mdworker.sizing
+ 3911     1 Sat Sep 19 17:25:44 2026     /System/Library/PrivateFrameworks/GeoServices.framework/Versions/A/XPCServices/com.apple.geod.xpc/Contents/MacOS/com.apple.geod
+ 3912     1 Sat Sep 19 17:25:44 2026     /System/Library/CoreServices/PowerChime.app/Contents/MacOS/PowerChime
+ 3913     1 Sat Sep 19 17:25:44 2026     /usr/libexec/secinitd
+ 3914     1 Sat Sep 19 17:25:45 2026     /usr/sbin/cfprefsd agent
+ 3915     1 Sat Sep 19 17:25:45 2026     /usr/libexec/trustd --agent
+ 3916     1 Sat Sep 19 17:25:45 2026     /usr/libexec/containermanagerd --runmode=agent --user-container-mode=current --bundle-container-mode=proxy --system-container-mode=none
+ 3929     1 Sat Sep 19 17:42:22 2026     /usr/libexec/ospredictiond
+ 3930     1 Sat Sep 19 17:42:22 2026     /System/Library/PrivateFrameworks/CloudTelemetry.framework/Versions/A/XPCServices/CloudTelemetryService.xpc/Contents/MacOS/CloudTelemetryService
+ 3933     1 Sat Sep 19 17:42:23 2026     /System/Library/PrivateFrameworks/IntelligencePlatformCore.framework/Versions/A/intelligenceplatformd
+ 3934     1 Sat Sep 19 17:42:23 2026     /usr/libexec/betaenrollmentagent
+ 3935     1 Sat Sep 19 17:42:23 2026     /usr/libexec/betaenrollmentd
+ 3940     1 Sat Sep 19 17:42:24 2026     /usr/libexec/ciphermld
+ 3941     1 Sat Sep 19 17:42:24 2026     /System/Library/PrivateFrameworks/BusinessChatService.framework/businessservicesd
+ 3942     1 Sat Sep 19 17:42:24 2026     /System/Library/PrivateFrameworks/MessagesBlastDoorSupport.framework/Versions/A/XPCServices/MessagesBlastDoorService.xpc/Contents/MacOS/MessagesBlastDoorService
+ 3945     1 Sat Sep 19 17:42:29 2026     /System/Library/PrivateFrameworks/PerfPowerServicesReader.framework/Versions/A/XPCServices/PerfPowerTelemetryReaderService.xpc/Contents/MacOS/PerfPowerTelemetryReaderService
+ 3947     1 Sat Sep 19 17:42:34 2026     /usr/libexec/dprivacyd
+ 3948     1 Sat Sep 19 17:42:34 2026     /System/Library/PrivateFrameworks/CoreAnalytics.framework/Support/analyticsagent
+ 3949     1 Sat Sep 19 17:42:38 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+ 3950     1 Sat Sep 19 17:42:38 2026     /Applications/WeChat.app/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc/Contents/MacOS/Installer
+ 3951     1 Sat Sep 19 17:42:38 2026     /Applications/WeChat.app/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate com.tencent.xinWeChat /Users/kriswang kriswang
+ 3952     1 Sat Sep 19 17:42:38 2026     /Users/kriswang/Library/Caches/com.tencent.xinWeChat/org.sparkle-project.Sparkle/Launcher/tw3bPVNk5/Updater.app/Contents/MacOS/Updater /Applications/WeChat.app 0
+ 3957     1 Sat Sep 19 17:42:38 2026     /System/Library/PrivateFrameworks/PrivateCloudCompute.framework/privatecloudcomputed.app/Contents/MacOS/privatecloudcomputed
+ 3958     1 Sat Sep 19 17:42:38 2026     /System/Library/PrivateFrameworks/MapsSync.framework/mapssyncd
+ 3969     1 Sat Sep 19 17:42:54 2026     /usr/libexec/fskit_helper
+ 3981     1 Sat Sep 19 17:42:54 2026     /usr/sbin/cfprefsd agent
+ 4002     1 Sat Sep 19 17:43:10 2026     /usr/sbin/cfprefsd agent
+ 4003     1 Sat Sep 19 17:43:10 2026     /usr/sbin/cfprefsd agent
+ 4005     1 Sat Sep 19 17:43:10 2026     /System/Library/Frameworks/CoreSpotlight.framework/spotlightknowledged -x
+ 4008     1 Sat Sep 19 17:43:11 2026     /System/Library/PrivateFrameworks/KerberosHelper/Helpers/DiskUnmountWatcher
+ 4012     1 Sat Sep 19 17:43:26 2026     /usr/libexec/mlhostd
+ 4013     1 Sat Sep 19 17:43:26 2026     /usr/libexec/backgroundassets.user
+ 4014     1 Sat Sep 19 17:43:27 2026     /System/Library/Frameworks/ExtensionFoundation.framework/Versions/A/XPCServices/extensionkitservice.xpc/Contents/MacOS/extensionkitservice
+ 4047     1 Sat Sep 19 17:43:52 2026     /usr/libexec/mlruntimed
+ 4053     1 Sat Sep 19 17:44:37 2026     /System/Library/PrivateFrameworks/CoreRecents.framework/Versions/A/Support/recentsd
+ 4071     1 Sat Sep 19 17:46:27 2026     /System/Library/PrivateFrameworks/MediaAnalysisAccess.framework/Versions/A/XPCServices/mediaanalysisd-access.xpc/Contents/MacOS/mediaanalysisd-access
+ 4433     1 Mon Sep 28 08:04:42 2026     /System/Library/PrivateFrameworks/UIFoundation.framework/Versions/A/XPCServices/nsattributedstringagent.xpc/Contents/MacOS/nsattributedstringagent
+ 4866     1 Sat Sep 19 19:27:13 2026     /System/Library/CoreServices/ReportSystemMemory
+ 5564     1 Sat Sep 19 21:45:14 2026     /System/Library/PrivateFrameworks/GeoAnalytics.framework/geoanalyticsd
+ 5645     1 Sat Sep 19 21:54:31 2026     /usr/libexec/wifivelocityd
+ 5718     1 Sat Sep 19 22:02:54 2026     /System/Library/CoreServices/IOUIAgent.app/Contents/MacOS/IOUIAgent
+ 5720     1 Sat Sep 19 22:02:54 2026     /System/Library/CoreServices/UserNotificationCenter.app/Contents/MacOS/UserNotificationCenter
+ 5779     1 Sat Sep 19 22:10:43 2026     /System/Library/PrivateFrameworks/AmbientDisplay.framework/Versions/A/XPCServices/com.apple.AmbientDisplayAgent.xpc/Contents/MacOS/com.apple.AmbientDisplayAgent
+ 5780     1 Sat Sep 19 22:10:43 2026     /System/Library/Frameworks/ColorSync.framework/Versions/A/XPCServices/com.apple.ColorSyncXPCAgent.xpc/Contents/MacOS/com.apple.ColorSyncXPCAgent
+ 5788     1 Sat Sep 19 22:10:46 2026     /System/Library/CryptoTokenKit/com.apple.ifdreader.slotd/Contents/MacOS/com.apple.ifdreader
+ 5789     1 Sat Sep 19 22:10:46 2026     /System/Library/PrivateFrameworks/MobileDevice.framework/Resources/MobileDeviceUpdater.app/Contents/MacOS/MobileDeviceUpdater
+ 5801     1 Sat Sep 19 22:11:10 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+ 5803     1 Sat Sep 19 22:11:11 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+ 5804     1 Sat Sep 19 22:11:11 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+ 5805     1 Sat Sep 19 22:11:16 2026     /System/Library/PrivateFrameworks/CSExattrCrypto.framework/Versions/A/XPCServices/CSExattrCryptoService.xpc/Contents/MacOS/CSExattrCryptoService
+ 5806     1 Sat Sep 19 22:11:21 2026     /System/Library/Frameworks/QuickLookUI.framework/Versions/A/PlugIns/QLPreviewGenerationExtension.appex/Contents/MacOS/QLPreviewGenerationExtension -AppleLanguages ("zh-Hans-CN")
+ 5807     1 Sat Sep 19 22:11:24 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+ 5811     1 Sat Sep 19 22:11:26 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdwrite
+ 5820     1 Sat Sep 19 22:12:00 2026     /System/Library/Input Methods/SCIM.app/Contents/PlugIns/SCIM_Extension.appex/Contents/MacOS/SCIM_Extension -AppleLanguages ("zh-Hans-CN")
+ 6158     1 Sat Sep 19 22:13:49 2026     /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/SpeechSynthesis.framework/Versions/A/XPCServices/SpeechSynthesisServerXPC.xpc/Contents/MacOS/SpeechSynthesisServerXPC
+ 6765     1 Sat Sep 19 22:27:21 2026     /System/Library/ExtensionKit/Extensions/ImageThumbnailExtension.appex/Contents/MacOS/ImageThumbnailExtension
+ 6766     1 Sat Sep 19 22:27:21 2026     /System/Library/ExtensionKit/Extensions/OfficeThumbnailExtension.appex/Contents/MacOS/OfficeThumbnailExtension
+ 6767     1 Sat Sep 19 22:27:21 2026     /System/Library/Frameworks/CoreGraphics.framework/Versions/A/XPCServices/CGPDFService.xpc/Contents/MacOS/CGPDFService
+ 6768     1 Sat Sep 19 22:27:21 2026     /System/Library/ExtensionKit/Extensions/AudiovisualThumbnailExtension.appex/Contents/MacOS/AudiovisualThumbnailExtension
+ 6769     1 Sat Sep 19 22:27:21 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecoderXPCService.xpc/Contents/MacOS/VTDecoderXPCService
+ 6770     1 Sat Sep 19 22:27:21 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+ 6771     1 Sat Sep 19 22:27:21 2026     /System/Library/ExtensionKit/Extensions/WebThumbnailExtension.appex/Contents/MacOS/WebThumbnailExtension
+ 6772     1 Sat Sep 19 22:27:21 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU
+ 6774     1 Sat Sep 19 22:27:21 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+ 6778     1 Sat Sep 19 22:27:22 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+ 6779     1 Sat Sep 19 22:27:22 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+ 6787     1 Sat Sep 19 22:27:23 2026     /System/Library/ExtensionKit/Extensions/TextThumbnailExtension.appex/Contents/MacOS/TextThumbnailExtension
+ 6793     1 Sat Sep 19 22:27:34 2026     /System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService
+ 7396     1 Sat Sep 19 22:35:37 2026     /System/Library/PrivateFrameworks/AvatarPersistence.framework/Support/avatarsd
+ 7587     1 Sat Sep 19 22:41:09 2026     /System/Library/PrivateFrameworks/Categories.framework/Versions/A/XPCServices/CategoriesService.xpc/Contents/MacOS/CategoriesService
+ 8382     1 Sat Sep 19 22:52:56 2026     /usr/libexec/proactiveeventtrackerd
+ 8753     1 Sat Sep 19 23:00:07 2026     /usr/libexec/USBAgent
+ 8789     1 Sat Sep 19 23:00:21 2026     /usr/libexec/dprivacyd
+10980     1 Sun Sep 20 04:49:34 2026     /System/Library/CoreServices/EscrowSecurityAlert.app/Contents/MacOS/EscrowSecurityAlert
+10983     1 Sun Sep 20 04:49:51 2026     /usr/libexec/griddatad
+10984     1 Sun Sep 20 04:49:51 2026     /usr/libexec/tzd
+10985     1 Sun Sep 20 04:49:51 2026     /System/Library/PrivateFrameworks/IMDPersistence.framework/IMAutomaticHistoryDeletionAgent.app/Contents/MacOS/IMAutomaticHistoryDeletionAgent
+10986     1 Sun Sep 20 04:49:51 2026     /System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XProtectUpdateService.xpc/Contents/MacOS/XProtectUpdateService
+10988     1 Sun Sep 20 04:49:51 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/RemoteManagementAgent
+10989     1 Sun Sep 20 04:49:51 2026     /System/Library/PrivateFrameworks/SafariFoundation.framework/Versions/A/XPCServices/SafariConfigurationSubscriber.xpc/Contents/MacOS/SafariConfigurationSubscriber
+10990     1 Sun Sep 20 04:49:51 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/SecuritySubscriber.xpc/Contents/MacOS/SecuritySubscriber
+10991     1 Sun Sep 20 04:49:52 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/InteractiveLegacyProfilesSubscriber.xpc/Contents/MacOS/InteractiveLegacyProfilesSubscriber
+10992     1 Sun Sep 20 04:49:52 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/ScreenSharingSubscriber.xpc/Contents/MacOS/ScreenSharingSubscriber
+10997     1 Sun Sep 20 04:49:52 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/LegacyProfilesSubscriber.xpc/Contents/MacOS/LegacyProfilesSubscriber
+10998     1 Sun Sep 20 04:49:52 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/PasscodeSettingsSubscriber.xpc/Contents/MacOS/PasscodeSettingsSubscriber
+10999     1 Sun Sep 20 04:49:52 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/AccountSubscriber.xpc/Contents/MacOS/AccountSubscriber
+11000     1 Sun Sep 20 04:49:52 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/ManagementTestSubscriber.xpc/Contents/MacOS/ManagementTestSubscriber
+11001     1 Sun Sep 20 04:49:52 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/ASConfigurationSubscriber.xpc/Contents/MacOS/ASConfigurationSubscriber
+11004     1 Sun Sep 20 04:49:53 2026     /System/Library/PrivateFrameworks/RemoteManagement.framework/XPCServices/ManagedSettingsSubscriber.xpc/Contents/MacOS/ManagedSettingsSubscriber
+11005     1 Sun Sep 20 04:49:54 2026     /System/Library/PrivateFrameworks/AppleNeuralEngine.framework/XPCServices/ANEStorageMaintainer.xpc/Contents/MacOS/ANEStorageMaintainer
+11007     1 Sun Sep 20 04:49:54 2026     /System/Library/PrivateFrameworks/AppleNeuralEngine.framework/XPCServices/ANEStorageMaintainer.xpc/Contents/MacOS/ANEStorageMaintainer
+11008     1 Sun Sep 20 04:49:54 2026     /usr/sbin/distnoted agent
+11009     1 Sun Sep 20 04:49:54 2026     /usr/sbin/cfprefsd agent
+11010     1 Sun Sep 20 04:49:55 2026     /System/Library/PrivateFrameworks/CoreFP.framework/Versions/A/fairplayd
+11011     1 Sun Sep 20 04:49:57 2026     /usr/libexec/proactived
+11014     1 Sun Sep 20 04:49:58 2026     /usr/libexec/sysdiagnosed
+11030     1 Sun Sep 20 04:50:31 2026     /System/Library/PrivateFrameworks/AssistantServices.framework/Versions/A/XPCServices/media-indexer.xpc/Contents/MacOS/media-indexer
+11031     1 Sun Sep 20 04:50:31 2026     /System/Library/PrivateFrameworks/AMPLibrary.framework/Versions/A/Support/AMPLibraryAgent --launchd
+11032     1 Sun Sep 20 04:50:32 2026     /System/Library/PrivateFrameworks/PodcastServices.framework/XPCServices/PodcastContentService.xpc/Contents/MacOS/PodcastContentService
+11033     1 Sun Sep 20 04:50:32 2026     /System/Library/PrivateFrameworks/BookKit.framework/Versions/A/XPCServices/com.apple.BKAgentService.xpc/Contents/MacOS/com.apple.BKAgentService
+11034     1 Sun Sep 20 04:50:33 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+11035     1 Sun Sep 20 04:50:33 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+11036     1 Sun Sep 20 04:50:33 2026     /System/Library/PrivateFrameworks/AMPLibrary.framework/Versions/A/Support/AMPArtworkAgent --launchd
+12123     1 Wed Sep 30 16:24:59 2026     /Applications/Obsidian.app/Contents/MacOS/Obsidian
+12124 12123 Wed Sep 30 16:25:00 2026     /Applications/Obsidian.app/Contents/Frameworks/Obsidian Helper (GPU).app/Contents/MacOS/Obsidian Helper (GPU) --type=gpu-process --user-data-dir=/Users/kriswang/Library/Application Support/obsidian --gpu-preferences=UAAAAAAAAAAgAAAEAAAAAAAAAAAAAAAAAABgAAMAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAA --shared-files --field-trial-handle=1718379636,r,11037589308289389389,12292558399586951534,262144 --enable-features=PdfUseShowSaveFilePicker,ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma,SharedArrayBuffer --disable-features=MacWebContentsOcclusion,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts --variations-seed-version --log-level=3 --seatbelt-client=34
+12125 12123 Wed Sep 30 16:25:00 2026     /Applications/Obsidian.app/Contents/Frameworks/Obsidian Helper.app/Contents/MacOS/Obsidian Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=zh-CN --service-sandbox-type=network --user-data-dir=/Users/kriswang/Library/Application Support/obsidian --standard-schemes=app --secure-schemes=app --fetch-schemes=app --streaming-schemes=app --code-cache-schemes=app --shared-files --field-trial-handle=1718379636,r,11037589308289389389,12292558399586951534,262144 --enable-features=PdfUseShowSaveFilePicker,ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma,SharedArrayBuffer --disable-features=MacWebContentsOcclusion,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts --variations-seed-version --log-level=3 --seatbelt-client=34
+12126     1 Wed Sep 30 16:25:00 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+12127 12123 Wed Sep 30 16:25:00 2026     /Applications/Obsidian.app/Contents/Frameworks/Obsidian Helper (Renderer).app/Contents/MacOS/Obsidian Helper (Renderer) --type=renderer --user-data-dir=/Users/kriswang/Library/Application Support/obsidian --standard-schemes=app --secure-schemes=app --fetch-schemes=app --streaming-schemes=app --code-cache-schemes=app --app-path=/Applications/Obsidian.app/Contents/Resources/app.asar --no-sandbox --no-zygote --node-integration-in-worker --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=4 --time-ticks-at-unix-epoch=-1790324426361711 --launch-time-ticks=432274157864 --shared-files --field-trial-handle=1718379636,r,11037589308289389389,12292558399586951534,262144 --enable-features=PdfUseShowSaveFilePicker,ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma,SharedArrayBuffer --disable-features=MacWebContentsOcclusion,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts --variations-seed-version --log-level=3
+12128     1 Wed Sep 30 16:25:00 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+12704     1 Sun Sep 20 07:40:33 2026     /System/Library/PrivateFrameworks/Categories.framework/Versions/A/XPCServices/CategoriesService.xpc/Contents/MacOS/CategoriesService
+12705     1 Sun Sep 20 07:40:34 2026     /System/Library/PrivateFrameworks/ContextKit.framework/Versions/A/XPCServices/ContextService.xpc/Contents/MacOS/ContextService
+13308     1 Sun Sep 20 09:27:47 2026     /usr/libexec/microstackshot
+13746     1 Fri Oct  9 14:56:05 2026     /System/Library/PrivateFrameworks/SharingXPCServices.framework/Versions/A/XPCServices/SharingXPCHelper.xpc/Contents/MacOS/SharingXPCHelper
+13747     1 Fri Oct  9 14:56:05 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+13748     1 Fri Oct  9 14:56:07 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecoderXPCService.xpc/Contents/MacOS/VTDecoderXPCService
+13755     1 Fri Oct  9 14:56:23 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+14229     1 Wed Sep 30 16:37:53 2026     /System/Library/PrivateFrameworks/CoreSpeech.framework/Versions/A/XPCServices/CoreSpeechXPC.xpc/Contents/MacOS/CoreSpeechXPC
+14810     1 Sun Sep 20 13:05:53 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecoderXPCService.xpc/Contents/MacOS/VTDecoderXPCService
+14841     1 Sun Sep 20 13:23:14 2026     /System/Library/PrivateFrameworks/MessagesBlastDoorSupport.framework/Versions/A/XPCServices/MessagesBlastDoorService.xpc/Contents/MacOS/MessagesBlastDoorService
+14842     1 Sun Sep 20 13:23:15 2026     /System/Library/PrivateFrameworks/CoreSuggestions.framework/Versions/A/Support/reversetemplated
+14843     1 Sun Sep 20 13:23:15 2026     /System/Applications/Messages.app/Contents/PlugIns/Messages Assistant Extension.appex/Contents/MacOS/Messages Assistant Extension -AppleLanguages ("zh-Hans-CN")
+14844     1 Sun Sep 20 13:23:15 2026     /System/Library/PrivateFrameworks/People.framework/peopled
+14845     1 Sun Sep 20 13:23:15 2026     /usr/libexec/textunderstandingd
+15721     1 Sun Sep 20 16:59:45 2026     /System/Library/PrivateFrameworks/Noticeboard.framework/Versions/A/Resources/nbagent.app/Contents/MacOS/nbagent
+15724     1 Sun Sep 20 16:59:47 2026     /System/Library/PrivateFrameworks/Noticeboard.framework/Versions/A/Resources/nbstated
+15846     1 Sun Oct 25 19:08:20 2026     /System/Library/PrivateFrameworks/DesktopServicesPriv.framework/Versions/A/XPCServices/ArchiveService.xpc/Contents/MacOS/ArchiveService
+16035 20090 Sun Oct 25 21:26:34 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=1916 --launch-time-ticks=1957788680182 --shared-files --metrics-shmem-handle=1752395122,r,18224364596310617966,7953981658926042877,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190710781684054178 --seatbelt-client=47
+16050     1 Fri Oct  9 17:39:45 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+16051     1 Fri Oct  9 17:39:45 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+16069     1 Sun Oct 25 21:26:50 2026     /usr/libexec/PerfPowerServices
+16319     1 Sun Oct 25 21:28:35 2026     /Applications/ChatGPT.app/Contents/MacOS/ChatGPT
+16332     1 Sun Oct 25 21:28:36 2026     /System/Library/CoreServices/Dock.app/Contents/XPCServices/com.apple.dock.external.extra.arm64.xpc/Contents/MacOS/com.apple.dock.external.extra.arm64
+16338     1 Sun Oct 25 21:28:36 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/browser_crashpad_handler --monitor-self --monitor-self-annotation=ptype=crashpad-handler --database=/Users/kriswang/Library/Application Support/Codex/Crashpad --annotation=plat=OS X --annotation=prod=ChatGPT_Mac --annotation=ver=156.0.8078.48 --handshake-fd=5
+16340     1 Sun Oct 25 21:28:36 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/browser_crashpad_handler --no-periodic-tasks --monitor-self-annotation=ptype=crashpad-handler --database=/Users/kriswang/Library/Application Support/Codex/Crashpad --annotation=plat=OS X --annotation=prod=ChatGPT_Mac --annotation=ver=156.0.8078.48 --handshake-fd=4
+16350 16319 Sun Oct 25 21:28:37 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Service).app/Contents/MacOS/Codex (Service) --type=gpu-process --gpu-recent-crash-count=0 --user-data-dir=/Users/kriswang/Library/Application Support/Codex --start-stack-profiler --gpu-preferences=WAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAQAAAAAAAAAADAAAAAAAAADgAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAADAAAAAEAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --metrics-shmem-handle=1752395122,r,7881151619723202643,6590055534818573923,262144 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190708988185955192 --seatbelt-client=47
+16352 16319 Sun Oct 25 21:28:37 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Service).app/Contents/MacOS/Codex (Service) --type=utility --utility-sub-type=network.mojom.NetworkService --lang=zh-CN --service-sandbox-type=network --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --start-stack-profiler --shared-files --metrics-shmem-handle=1752395122,r,3280044163317592633,10154068622878136137,524288 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190708989122997041 --seatbelt-client=44
+16356 16319 Sun Oct 25 21:28:37 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Service).app/Contents/MacOS/Codex (Service) --type=utility --utility-sub-type=storage.mojom.StorageService --lang=zh-CN --service-sandbox-type=service --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --shared-files --metrics-shmem-handle=1752395122,r,14207988971673390527,2099752168316744301,524288 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190708990060038890 --seatbelt-client=62
+16514     1 Sun Sep 20 19:12:48 2026     /System/Library/Frameworks/ApplicationServices.framework/Frameworks/PrintCore.framework/Versions/A/printtool
+16522     1 Sun Sep 20 19:13:23 2026     /System/Library/PrivateFrameworks/ShareKit.framework/Versions/A/PlugIns/ShareSheetUI.appex/Contents/MacOS/ShareSheetUI -AppleLanguages ("zh-Hans-CN")
+16523     1 Sun Sep 20 19:13:25 2026     /System/Library/PrivateFrameworks/FinderKit.framework/Versions/A/PlugIns/AirDrop.appex/Contents/MacOS/AirDrop -AppleLanguages ("zh-Hans-CN")
+16524     1 Sun Sep 20 19:13:25 2026     /System/Library/Frameworks/QuickLookUI.framework/Versions/A/XPCServices/QuickLookUIService.xpc/Contents/MacOS/QuickLookUIService
+16540     1 Sun Sep 20 19:14:27 2026     /System/Library/Frameworks/SafariServices.framework/Versions/A/XPCServices/com.apple.SafariServices.xpc/Contents/MacOS/com.apple.SafariServices
+16553     1 Sun Sep 20 19:14:56 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+16554     1 Sun Sep 20 19:14:56 2026     /System/Library/PrivateFrameworks/MediaConversionService.framework/Versions/A/XPCServices/com.apple.photos.ImageConversionService.xpc/Contents/MacOS/com.apple.photos.ImageConversionService
+16555     1 Sun Sep 20 19:14:56 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecoderXPCService.xpc/Contents/MacOS/VTDecoderXPCService
+16938 16319 Sun Oct 25 21:28:40 2026     /Applications/ChatGPT.app/Contents/Resources/native/bare-modifier-monitor --key DoubleCommand --immediate
+16951 16319 Sun Oct 25 21:28:40 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer) --type=renderer --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --enable-blink-features=WebMCP --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=6 --launch-time-ticks=1957908730316 --shared-files --metrics-shmem-handle=1752395122,r,4141918807599045376,11071673777528400691,1572864 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190708991934122588 --seatbelt-client=160
+16952 16319 Sun Oct 25 21:28:40 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer) --type=renderer --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --enable-blink-features=WebMCP --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --launch-time-ticks=1957908777187 --shared-files --metrics-shmem-handle=1752395122,r,17251053336395586293,10489075468032262654,1572864 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190708990997080739 --seatbelt-client=140 --force-fieldtrials=WebRTC-Sctp-Snap/Enabled/WebRTC-IceHandshakeDtls/Enabled/WebRTC-ForceDtls13/Enabled/
+16953     1 Sun Oct 25 21:28:40 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+16954     1 Sun Oct 25 21:28:40 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+16955 16319 Sun Oct 25 21:28:41 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Service).app/Contents/MacOS/Codex (Service) --type=utility --utility-sub-type=audio.mojom.AudioService --lang=zh-CN --service-sandbox-type=audio --message-loop-type-ui --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --shared-files --metrics-shmem-handle=1752395122,r,5625977879734788648,13743850381763784084,524288 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190708992871164437 --seatbelt-client=140
+16956 16319 Sun Oct 25 21:28:41 2026     /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex -c features.code_mode_host=true app-server --analytics-default-enabled -c plugins.codex-app-tools@openai-bundled.mcp_servers.codex_app.enabled=true
+17111 16319 Sun Oct 25 21:28:47 2026     /Users/kriswang/.codex/computer-use/Codex Computer Use.app/Contents/MacOS/SkyComputerUseService
+17156 16319 Sun Oct 25 21:28:49 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer) --type=renderer --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --start-stack-profiler --enable-blink-features=WebMCP --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=9 --launch-time-ticks=1957917121166 --shared-files --metrics-shmem-handle=1752395122,r,5628308180995659896,12808852286515393327,1572864 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190708994745248135 --seatbelt-client=209 --force-fieldtrials=WebRTC-Sctp-Snap/Enabled/WebRTC-IceHandshakeDtls/Enabled/WebRTC-ForceDtls13/Enabled/
+17169 16319 Sun Oct 25 21:28:49 2026     /Users/kriswang/Library/Application Support/Codex/artifact-sessions/runtime-generations/generation-Rh9ZQ6/runtime/bin/node /Users/kriswang/Library/Application Support/Codex/artifact-sessions/runtime-generations/generation-Rh9ZQ6/runtime/node_modules/@oai/artifact-tool/dist/artifact-session/host-daemon.mjs
+17286 16319 Sun Oct 25 21:28:54 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer) --type=renderer --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --enable-blink-features=WebMCP --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=10 --launch-time-ticks=1957923053488 --shared-files --metrics-shmem-handle=1752395122,r,5593360033217561029,11568773366360731526,1572864 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190708995682289984 --seatbelt-client=208 --force-fieldtrials=WebRTC-Sctp-Snap/Enabled/WebRTC-IceHandshakeDtls/Enabled/WebRTC-ForceDtls13/Enabled/
+17365 16319 Sun Oct 25 21:28:55 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer) --type=renderer --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --enable-blink-features=WebMCP --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=13 --launch-time-ticks=1957923782467 --shared-files --metrics-shmem-handle=1752395122,r,10132058304729934064,3087566358297347451,1572864 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190708998493415531 --seatbelt-client=205
+17368 16319 Sun Oct 25 21:28:57 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer) --type=renderer --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --enable-blink-features=WebMCP --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=15 --launch-time-ticks=1957925244315 --shared-files --metrics-shmem-handle=1752395122,r,1045085009913330445,5982665861932926772,1572864 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190709000367499229 --seatbelt-client=205
+17483     1 Sun Oct 25 21:28:59 2026     /Users/kriswang/.cache/uv/archive-v0/img4JGjlenM_7RBCvvhIz/bin/python -c from serena.dashboard import SerenaDashboardTrayManager; SerenaDashboardTrayManager().run()
+17523 16956 Sun Oct 25 21:29:05 2026     /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node ./server.mjs
+17524 16956 Sun Oct 25 21:29:05 2026     /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl
+17526 16956 Sun Oct 25 21:29:05 2026     /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node /Applications/ChatGPT.app/Contents/Resources/cua_node/lib/node_modules/@oai/cua-repl/bin/cua-repl.mjs
+17528 16956 Sun Oct 25 21:29:05 2026     /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl
+17546 16956 Sun Oct 25 21:29:05 2026     /Users/kriswang/.local/bin/uv tool uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context codex
+17549 16956 Sun Oct 25 21:29:05 2026     /Users/kriswang/.pyenv/versions/3.13.0/bin/python3 /Users/kriswang/.pyenv/versions/3.13.0/bin/headroom mcp serve
+17638 17526 Sun Oct 25 21:29:05 2026     /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl
+18274   807 Wed Sep 30 18:20:01 2026     /Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Frameworks/WeChatAppEx Framework.framework/Versions/C/Helpers/WeChatAppEx Helper (Renderer).app/Contents/MacOS/WeChatAppEx Helper (Renderer) --type=renderer --client_version=4066646330 --enable-crash-reporter --wmpf_root_dir=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium --instance-index=0 --bundle-id=5A4RE8SF68.com.tencent.xinWeChat --wmpf-render-type=7 --product-id=1002 --disable-notifications --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=41 --time-ticks-at-unix-epoch=-1789807716937585 --disable-mojo-broker --launch-time-ticks=439174614993 --shared-files --field-trial-handle=1718379636,r,15495935113087227693,12834215617061095522,262144 --enable-features=OverlayScrollbar,XWorker --disable-features=AudioServiceOutOfProcess,AutoupgradeMixedContent,BackForwardCache,DigitalGoodsApi,NotificationTriggers,PeriodicBackgroundSync,TFLiteLanguageDetectionEnabled,Vulkan,WebOTP --variations-seed-version --log-level=2 --seatbelt-client=186
+18405   807 Wed Sep 30 18:27:34 2026     /Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Frameworks/WeChatAppEx Framework.framework/Versions/C/Helpers/WeChatAppEx Helper (Renderer).app/Contents/MacOS/WeChatAppEx Helper (Renderer) --type=renderer --client_version=4066646330 --enable-crash-reporter --wmpf_root_dir=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium --instance-index=0 --bundle-id=5A4RE8SF68.com.tencent.xinWeChat --wmpf-render-type=0 --product-id=1002 --disable-notifications --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=42 --time-ticks-at-unix-epoch=-1789807716937585 --disable-mojo-broker --launch-time-ticks=439628167863 --shared-files --field-trial-handle=1718379636,r,15495935113087227693,12834215617061095522,262144 --enable-features=OverlayScrollbar,XWorker --disable-features=AudioServiceOutOfProcess,AutoupgradeMixedContent,BackForwardCache,DigitalGoodsApi,NotificationTriggers,PeriodicBackgroundSync,TFLiteLanguageDetectionEnabled,Vulkan,WebOTP --variations-seed-version --log-level=2 --seatbelt-client=186
+19119 16319 Sun Oct 25 21:29:07 2026     /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex -c forced_login_method="chatgpt" exec-server --remote https://codex-cloud-environments.chatgpt.com/api --environment-id ccarenv_b64_Y2NhcmVudl82YWM1NzZhYzI3MjA4MTkxYjEzOTFkNTM1MzFlM2IxNA
+19271 17546 Sun Oct 25 21:29:09 2026     /Users/kriswang/.cache/uv/archive-v0/img4JGjlenM_7RBCvvhIz/bin/python /Users/kriswang/.cache/uv/archive-v0/img4JGjlenM_7RBCvvhIz/bin/serena start-mcp-server --project-from-cwd --context codex
+19289 19271 Sun Oct 25 21:29:11 2026     /Users/kriswang/.serena/language_servers/static/EclipseJDTLS/vscode-java-1.54.0-923/extension/jre/21.0.10-macosx-aarch64/bin/java --add-modules=ALL-SYSTEM --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.fs=ALL-UNNAMED -Declipse.application=org.eclipse.jdt.ls.core.id1 -Dosgi.bundles.defaultStartLevel=4 -Declipse.product=org.eclipse.jdt.ls.core.product -Djava.import.generatesMetadataFilesAtProjectRoot=false -Dfile.encoding=utf8 -noverify -XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Djava.lsp.joinOnCompletion=true -Xmx3G -Xms100m -Xlog:disable -Dlog.level=ALL -javaagent:/Users/kriswang/.serena/language_servers/static/EclipseJDTLS/vscode-java-1.54.0-923/extension/lombok/lombok-1.18.39-4050.jar -Djdt.core.sharedIndexLocation=/Users/kriswang/.serena/language_servers/static/lsp/EclipseJDTLS/sharedIndex -jar /Users/kriswang/.serena/language_servers/static/EclipseJDTLS/vscode-java-1.54.0-923/extension/server/plugins/org.eclipse.equinox.launcher_1.7.100.v20251111-0406.jar -configuration /Users/kriswang/.serena/language_servers/static/EclipseJDTLS/workspaces/26ef5a3b8ca21471a87f5ac70998a595/config_path -data /Users/kriswang/.serena/language_servers/static/EclipseJDTLS/workspaces/26ef5a3b8ca21471a87f5ac70998a595/data_dir
+19405     1 Sun Oct 25 21:29:23 2026     /System/Library/PrivateFrameworks/SiriTTSService.framework/Versions/A/XPCServices/com.apple.SiriTTSService.TrialProxy.xpc/Contents/MacOS/com.apple.SiriTTSService.TrialProxy
+19412 20090 Sun Oct 25 21:29:31 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=1923 --launch-time-ticks=1957959693173 --shared-files --metrics-shmem-handle=1752395122,r,5557316085037007958,916480550092861890,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190710788243347121 --seatbelt-client=47
+19453 20090 Sun Oct 25 21:29:44 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=1928 --launch-time-ticks=1957972420951 --shared-files --metrics-shmem-handle=1752395122,r,3093051086899671227,6963972328965604403,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190710792928556366 --seatbelt-client=260
+19482 16319 Sun Oct 25 21:31:37 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Service).app/Contents/MacOS/Codex (Service) --type=utility --utility-sub-type=on_device_model.mojom.OnDeviceModelService --lang=zh-CN --service-sandbox-type=on_device_model_execution --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --shared-files --metrics-shmem-handle=1752395122,r,10631097694835577046,7241976137485628015,524288 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190709006926792172 --seatbelt-client=230
+19659 16956 Sun Oct 25 21:32:23 2026     /Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex-code-mode-host
+19691 17638 Sun Oct 25 21:33:17 2026     /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex sandbox -c shell_environment_policy.inherit="all" -c default_permissions="node_repl" -c permissions.node_repl={filesystem = {"/Applications/ChatGPT.app/Contents/Resources/cua_node/bin" = "read", "/Applications/ChatGPT.app/Contents/Resources/cua_node/lib/node_modules" = "read", "/Users/kriswang/.codex/visualizations/2026/09/17/01a0ae98-5646-7063-8bc6-ced92caac238" = "write", "/Users/kriswang/.codex/visualizations/2026/09/17/01a0ae98-5646-7063-8bc6-ced92caac238/.agents" = "read", "/Users/kriswang/.codex/visualizations/2026/09/17/01a0ae98-5646-7063-8bc6-ced92caac238/.aws" = "read", "/Users/kriswang/.codex/visualizations/2026/09/17/01a0ae98-5646-7063-8bc6-ced92caac238/.codex" = "read", "/Users/kriswang/.codex/visualizations/2026/09/17/01a0ae98-5646-7063-8bc6-ced92caac238/.git" = "read", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow" = "write", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/.agents" = "read", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/.aws" = "read", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/.codex" = "read", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/.git" = "read", "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/.tmpyMbtpr" = "read", ":root" = "read", ":slash_tmp" = "write", ":tmpdir" = "write"}, network = {enabled = false}} -- /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node --experimental-vm-modules /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/.tmpyMbtpr/kernel.js --session-id ca5428c9f5bb4e58a7028e4611cf0f84 --working-dir /Users/kriswang/work/projects/ai/codex-claude-ai-workflow
+19692 17638 Sun Oct 25 21:33:17 2026     /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex sandbox -c shell_environment_policy.inherit="all" -c default_permissions="node_repl" -c permissions.node_repl={filesystem = {"/Applications/ChatGPT.app/Contents/Resources/cua_node/bin" = "read", "/Applications/ChatGPT.app/Contents/Resources/cua_node/lib/node_modules" = "read", "/Users/kriswang/.codex/visualizations/2026/09/17/01a0ae98-5646-7063-8bc6-ced92caac238" = "write", "/Users/kriswang/.codex/visualizations/2026/09/17/01a0ae98-5646-7063-8bc6-ced92caac238/.agents" = "read", "/Users/kriswang/.codex/visualizations/2026/09/17/01a0ae98-5646-7063-8bc6-ced92caac238/.aws" = "read", "/Users/kriswang/.codex/visualizations/2026/09/17/01a0ae98-5646-7063-8bc6-ced92caac238/.codex" = "read", "/Users/kriswang/.codex/visualizations/2026/09/17/01a0ae98-5646-7063-8bc6-ced92caac238/.git" = "read", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow" = "write", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/.agents" = "read", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/.aws" = "read", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/.codex" = "read", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/.git" = "read", "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/.tmpyMbtpr" = "read", ":root" = "read", ":slash_tmp" = "write", ":tmpdir" = "write"}, network = {enabled = false}} -- /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node --experimental-vm-modules /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/.tmpyMbtpr/trusted-worker.js /Users/kriswang/work/projects/ai/codex-claude-ai-workflow
+19693 19691 Sun Oct 25 21:33:17 2026     /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node --experimental-vm-modules /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/.tmpyMbtpr/kernel.js --session-id ca5428c9f5bb4e58a7028e4611cf0f84 --working-dir /Users/kriswang/work/projects/ai/codex-claude-ai-workflow
+19694 19692 Sun Oct 25 21:33:17 2026     /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node --experimental-vm-modules /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/.tmpyMbtpr/trusted-worker.js /Users/kriswang/work/projects/ai/codex-claude-ai-workflow
+19695 17638 Sun Oct 25 21:33:17 2026     /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex app-server --listen stdio://
+19809     1 Tue Oct  6 22:23:56 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+19810     1 Tue Oct  6 22:23:56 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+19842 16319 Sun Oct 25 21:33:40 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Renderer).app/Contents/MacOS/Codex (Renderer) --type=renderer --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --enable-blink-features=WebMCP --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=26 --launch-time-ticks=1958208552075 --shared-files --metrics-shmem-handle=1752395122,r,17324466257363373575,12977617315887246920,1572864 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190709010674959568 --seatbelt-client=251
+19845     1 Sun Oct 25 21:33:41 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTEncoderXPCService.xpc/Contents/MacOS/VTEncoderXPCService
+19846 16319 Sun Oct 25 21:33:41 2026     /Applications/ChatGPT.app/Contents/Frameworks/Codex Framework.framework/Versions/156.0.8078.48/Helpers/Codex (Service).app/Contents/MacOS/Codex (Service) --type=utility --utility-sub-type=video_capture.mojom.VideoCaptureService --lang=zh-CN --service-sandbox-type=none --message-loop-type-ui --user-data-dir=/Users/kriswang/Library/Application Support/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox --fetch-schemes=app,codex-sandbox --cors-schemes=codex-sandbox --streaming-schemes=app,codex-sandbox --shared-files --metrics-shmem-handle=1752395122,r,5610590138657941296,14920719794057143917,524288 --field-trial-handle=1718379636,r,2270842048461795659,16214630553810557993,262144 --enable-features=DevToolsWebMCPSupport,DocumentPolicyIncludeJSCallStacksInCrashReports,ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,OwlNativeCaret,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17709692243826201011,5273312803534231937,4 --trace-process-track-uuid=3190709011612001417
+19861     1 Mon Sep 21 04:23:22 2026     /System/Library/PrivateFrameworks/CloudTelemetry.framework/Versions/A/XPCServices/CloudTelemetryService.xpc/Contents/MacOS/CloudTelemetryService
+19912     1 Mon Sep 21 04:55:26 2026     /System/Library/PrivateFrameworks/MobileAccessoryUpdater.framework/XPCServices/EAUpdaterService.xpc/Contents/MacOS/EAUpdaterService
+20090     1 Fri Oct 16 05:26:59 2026     /Applications/Google Chrome.app/Contents/MacOS/Google Chrome --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --restart --restart
+20094     1 Fri Oct 16 05:27:04 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/chrome_crashpad_handler --monitor-self-annotation=ptype=crashpad-handler --database=/Users/kriswang/Library/Application Support/Google/Chrome/Crashpad --url=https://clients2.google.com/cr/report --annotation=channel= --annotation=plat=OS X --annotation=prod=Chrome_Mac --annotation=ver=155.0.8059.80 --handshake-fd=5
+20097 20090 Fri Oct 16 05:27:04 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif) --type=gpu-process --gpu-recent-crash-count=0 --gpu-preferences=WAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAQAAAAAAAAAADAAAAAAAAADgAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAADAAAAAEAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --metrics-shmem-handle=1752395122,r,10652802385169646188,14806710738527732181,262144 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190708988185955192 --seatbelt-client=23
+20098 20090 Fri Oct 16 05:27:04 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif) --type=utility --utility-sub-type=network.mojom.NetworkService --lang=zh-CN --service-sandbox-type=network --shared-files --metrics-shmem-handle=1752395122,r,13428264670924735196,15517791713236831661,524288 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190708989122997041 --seatbelt-client=20
+20099 20090 Fri Oct 16 05:27:04 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif) --type=utility --utility-sub-type=storage.mojom.StorageService --lang=zh-CN --service-sandbox-type=service --shared-files --metrics-shmem-handle=1752395122,r,4132753641199157587,16639607337705237195,524288 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190708990060038890 --seatbelt-client=45
+20101 20090 Fri Oct 16 05:27:04 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --extension-process --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=6 --launch-time-ticks=1507795781638 --shared-files --metrics-shmem-handle=1752395122,r,9588469696208565302,4040173828845644828,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190708991934122588 --seatbelt-client=113
+20107 20090 Fri Oct 16 05:27:04 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --extension-process --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=12 --launch-time-ticks=1507795799806 --shared-files --metrics-shmem-handle=1752395122,r,1493132870245100921,9523703634769085146,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190708997556373682 --seatbelt-client=29
+20108 20090 Fri Oct 16 05:27:04 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --extension-process --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=13 --launch-time-ticks=1507795801435 --shared-files --metrics-shmem-handle=1752395122,r,3105507575434074947,7791676923324382026,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190708998493415531 --seatbelt-client=29
+20110 20090 Fri Oct 16 05:27:04 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --top-chrome-webui --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=14 --launch-time-ticks=1507795965502 --shared-files --metrics-shmem-handle=1752395122,r,1662752536135610940,16109516262562488597,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190708999430457380 --seatbelt-client=100
+20112 20090 Fri Oct 16 05:27:04 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=15 --launch-time-ticks=1507795998749 --shared-files --metrics-shmem-handle=1752395122,r,6057641206936763344,4170313420206561470,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190709000367499229 --seatbelt-client=103
+20114 20090 Fri Oct 16 05:27:04 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --extension-process --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=49 --launch-time-ticks=1507796374891 --shared-files --metrics-shmem-handle=1752395122,r,4554140044523345448,18408482904521586068,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190709032226922095 --seatbelt-client=103
+20123 20090 Fri Oct 16 05:27:05 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=55 --launch-time-ticks=1507796476789 --shared-files --metrics-shmem-handle=1752395122,r,8375885631156053809,5112092719843504135,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190709037849173189 --seatbelt-client=132
+20124     1 Fri Oct 16 05:27:05 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+20125     1 Fri Oct 16 05:27:05 2026     /System/Library/PrivateFrameworks/SiriTTSService.framework/Versions/A/XPCServices/com.apple.SiriTTSService.TrialProxy.xpc/Contents/MacOS/com.apple.SiriTTSService.TrialProxy
+20148     1 Fri Oct 16 05:27:09 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTEncoderXPCService.xpc/Contents/MacOS/VTEncoderXPCService
+20155 20090 Fri Oct 16 05:27:16 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif) --type=utility --utility-sub-type=audio.mojom.AudioService --lang=zh-CN --service-sandbox-type=audio --message-loop-type-ui --shared-files --metrics-shmem-handle=1752395122,r,9406950541469029629,3400668296854932176,524288 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190709042534382434 --seatbelt-client=255
+20156 20090 Fri Oct 16 05:27:16 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif) --type=utility --utility-sub-type=video_capture.mojom.VideoCaptureService --lang=zh-CN --service-sandbox-type=none --message-loop-type-ui --shared-files --metrics-shmem-handle=1752395122,r,13831679682804516235,15276394881465926803,524288 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190709043471424283
+25145     1 Mon Sep 21 15:02:29 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+25146     1 Mon Sep 21 15:02:29 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+25896     1 Mon Sep 21 15:03:02 2026     /Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/@colbymchenry/codegraph/node_modules/@colbymchenry/codegraph-darwin-arm64/node --liftoff-only /Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/@colbymchenry/codegraph/node_modules/@colbymchenry/codegraph-darwin-arm64/lib/dist/bin/codegraph.js serve --mcp --path /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator
+27951     1 Mon Sep 21 15:26:08 2026     /System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/com.apple.appkit.xpc.openAndSavePanelService.xpc/Contents/MacOS/com.apple.appkit.xpc.openAndSavePanelService
+27952     1 Mon Sep 21 15:26:08 2026     /System/Library/Frameworks/QuickLookUI.framework/Versions/A/XPCServices/QuickLookUIService.xpc/Contents/MacOS/QuickLookUIService
+27954     1 Mon Sep 21 15:26:08 2026     /System/Library/PrivateFrameworks/CSExattrCrypto.framework/Versions/A/XPCServices/CSExattrCryptoService.xpc/Contents/MacOS/CSExattrCryptoService
+27958     1 Mon Sep 21 15:26:19 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+27959     1 Mon Sep 21 15:26:19 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+29541     1 Mon Sep 21 15:30:19 2026     /Library/Apple/System/Library/PrivateFrameworks/MobileDevice.framework/Versions/A/XPCServices/MDRemoteServiceSupport.xpc/Contents/MacOS/MDRemoteServiceSupport
+30672     1 Mon Oct 26 02:45:58 2026     /System/Library/PrivateFrameworks/CoreEmbeddedSpeechRecognition.framework/Versions/A/XPCServices/com.apple.siri.embeddedspeech.xpc/Contents/MacOS/com.apple.siri.embeddedspeech
+30697     1 Mon Oct 26 02:48:17 2026     /usr/libexec/remindd
+31686     1 Mon Sep 21 15:49:07 2026     /System/Library/PrivateFrameworks/PaperKit.framework/Contents/LinkedNotesUIService.app/Contents/MacOS/LinkedNotesUIService
+32515     1 Mon Sep 21 16:03:12 2026     /System/Applications/Books.app/Contents/PlugIns/BooksThumbnail.appex/Contents/MacOS/BooksThumbnail
+32793     1 Mon Sep 21 16:28:17 2026     /System/Library/Frameworks/ColorSync.framework/Versions/A/XPCServices/com.apple.ColorSyncXPCAgent.xpc/Contents/MacOS/com.apple.ColorSyncXPCAgent
+35139   610 Mon Oct 26 06:36:54 2026     /Applications/Lark.app/Contents/Frameworks/Lark Framework.framework/Versions/131.0.6778.268/Helpers/Lark Helper (Renderer).app/Contents/MacOS/Lark Helper (Renderer) --type=renderer --enable-aha-hardening=7 --string-annotations --no-sandbox --indexeddb-idle-check-seconds=5 --scene=profile_main --enable-run-before-paint --enable-renderer-jank-monitor --enable-native-resource-code-cache --block-unsubscribe-shell-api-event --enable-shellapi-new-tunnel --enable-shellapi-jsb-permission-no-http --enable-v8-callstack-check --enable-v8-callstack-check-block --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-main-frame-before-activation --renderer-client-id=7810 --time-ticks-at-unix-epoch=-1789807716936237 --browser-runtime --aha-multi-profile --launch-time-ticks=1990802723783 --shared-files --field-trial-handle=1718379636,r,6296874180014994584,897576609130537112,262144 --variations-seed-version --smc-metadata=1936548722,17105458696843286702,1463498167561042825,20971520
+36976     1 Mon Oct 26 06:48:42 2026     /Users/kriswang/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main gateway run --replace
+37199 36976 Mon Oct 26 06:49:57 2026     /usr/local/bin/node /Users/kriswang/.hermes/memos-plugin/dist/bridge.cjs --agent=hermes --no-viewer
+37611     1 Tue Sep 29 16:55:23 2026     /System/Library/ExtensionKit/Extensions/FontThumbnailExtension.appex/Contents/MacOS/FontThumbnailExtension
+38794     1 Tue Sep 29 17:05:32 2026     /System/Library/PrivateFrameworks/MobileInstallation.framework/Support/appinstalld
+38795     1 Tue Sep 29 17:05:32 2026     /System/Library/PrivateFrameworks/MobileInstallation.framework/XPCServices/com.apple.MobileInstallationHelperService.xpc/Contents/MacOS/com.apple.MobileInstallationHelperService
+38796     1 Tue Sep 29 17:05:32 2026     /usr/sbin/distnoted agent
+38803     1 Tue Sep 29 17:05:36 2026     /System/Library/PrivateFrameworks/CoreLSKD.framework/Versions/A/lskdd
+38999 20090 Thu Oct 22 22:54:14 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=1427 --launch-time-ticks=1854521194498 --shared-files --metrics-shmem-handle=1752395122,r,1243094835873107494,17227048832123076628,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190710323470590017 --seatbelt-client=74
+39085 20090 Thu Oct 22 22:55:01 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=1434 --launch-time-ticks=1854568222015 --shared-files --metrics-shmem-handle=1752395122,r,9222635001222903328,1033761829678394117,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190710330029882960 --seatbelt-client=131
+39109     1 Tue Sep 22 04:55:48 2026     /System/Library/PrivateFrameworks/GameControllerFoundation.framework/Versions/A/XPCServices/GameControllerConfigService.xpc/Contents/MacOS/GameControllerConfigService
+39510     1 Mon Oct 26 09:04:56 2026     /usr/libexec/biomesyncd
+40727     1 Mon Oct 26 09:13:58 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared
+40736     1 Mon Oct 26 09:13:58 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared
+40737     1 Mon Oct 26 09:13:58 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared
+40738     1 Mon Oct 26 09:13:59 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared
+40866     1 Mon Oct 26 09:14:40 2026     /System/Library/PrivateFrameworks/UniversalAccess.framework/Versions/A/Resources/AXVisualSupportAgent.app/Contents/MacOS/AXVisualSupportAgent launchd -s
+40869 20090 Mon Oct 26 09:14:52 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --extension-process --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=2092 --launch-time-ticks=2000280024299 --shared-files --metrics-shmem-handle=1752395122,r,12924910168867600516,15138534767798664434,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190710946603419602 --seatbelt-client=72
+40895     1 Mon Oct 26 09:15:07 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared
+40896     1 Mon Oct 26 09:15:07 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared
+40897     1 Mon Oct 26 09:15:07 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared
+40898     1 Mon Oct 26 09:15:07 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared
+40899     1 Mon Oct 26 09:15:07 2026     /System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared -s mdworker -c MDSImporterWorker -m com.apple.mdworker.shared
+40902 16956 Mon Oct 26 09:15:23 2026     rtk proxy /Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13 -B -
+40912 40902 Mon Oct 26 09:15:23 2026     /Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13 -B -
+40913 40912 Mon Oct 26 09:15:24 2026     /opt/homebrew/Cellar/rtk/0.42.3/bin/rtk proxy /bin/ps -axo pid=,ppid=,lstart=,command=
+40914 40913 Mon Oct 26 09:15:24 2026     /bin/ps -axo pid=,ppid=,lstart=,command=
+43686     1 Tue Sep 22 15:18:21 2026     /System/Library/PrivateFrameworks/CloudPhotoServices.framework/Versions/A/XPCServices/com.apple.CloudPhotosConfiguration.xpc/Contents/MacOS/com.apple.CloudPhotosConfiguration
+43692     1 Tue Sep 22 15:18:21 2026     /usr/libexec/studentd
+44407     1 Sat Oct 17 17:05:16 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+44429     1 Sat Oct 17 17:06:24 2026     /System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/com.apple.appkit.xpc.openAndSavePanelService.xpc/Contents/MacOS/com.apple.appkit.xpc.openAndSavePanelService
+44430     1 Sat Oct 17 17:06:24 2026     /System/Library/Frameworks/QuickLookUI.framework/Versions/A/XPCServices/QuickLookUIService.xpc/Contents/MacOS/QuickLookUIService
+44431     1 Sat Oct 17 17:06:24 2026     /System/Library/PrivateFrameworks/CSExattrCrypto.framework/Versions/A/XPCServices/CSExattrCryptoService.xpc/Contents/MacOS/CSExattrCryptoService
+44444     1 Sat Oct 17 17:07:16 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+44477     1 Sat Oct 17 17:08:00 2026     /System/Applications/Preview.app/Contents/MacOS/Preview
+44478     1 Sat Oct 17 17:08:01 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+44479     1 Sat Oct 17 17:08:01 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+44480     1 Sat Oct 17 17:08:01 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+44481     1 Sat Oct 17 17:08:02 2026     /System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/com.apple.appkit.xpc.openAndSavePanelService.xpc/Contents/MacOS/com.apple.appkit.xpc.openAndSavePanelService
+44482     1 Sat Oct 17 17:08:02 2026     /System/Library/Frameworks/QuickLookUI.framework/Versions/A/XPCServices/QuickLookUIService.xpc/Contents/MacOS/QuickLookUIService
+44483     1 Sat Oct 17 17:08:03 2026     /System/Library/Frameworks/ImageCaptureCore.framework/Versions/A/XPCServices/mscamerad-xpc.xpc/Contents/MacOS/mscamerad-xpc
+44484     1 Sat Oct 17 17:08:03 2026     /usr/libexec/ptpcamerad
+44678     1 Sat Oct 17 17:15:01 2026     /System/Library/PrivateFrameworks/IntelligencePlatformCompute.framework/Versions/A/XPCServices/IntelligencePlatformComputeService.xpc/Contents/MacOS/IntelligencePlatformComputeService
+44749     1 Sat Oct 17 17:15:55 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+45362     1 Tue Sep 22 16:41:30 2026     /usr/libexec/misagent
+47633 20090 Fri Oct 23 02:41:02 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --extension-process --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=1586 --launch-time-ticks=1868129919500 --shared-files --metrics-shmem-handle=1752395122,r,11523984273310849844,5696886803408810185,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190710472460244008 --seatbelt-client=126
+47634 20090 Fri Oct 23 02:41:02 2026     /Users/kriswang/.codex/plugins/cache/openai-bundled/chrome/latest/extension-host/macos/arm64/ChatGPT for Chrome chrome-extension://hehggadaopoacecdllhhajmbjkdcmajg/
+48458     1 Tue Sep 22 16:55:05 2026     /usr/sbin/BTLEServer
+48459     1 Tue Sep 22 16:55:05 2026     /System/Library/PrivateFrameworks/CoreAccessories.framework/Support/accessoryd
+48533     1 Tue Sep 22 17:00:44 2026     /usr/libexec/uarppersonalizationd
+50253 20090 Sat Oct 17 19:15:21 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=323 --launch-time-ticks=1593473797924 --shared-files --metrics-shmem-handle=1752395122,r,16401049228737386403,4268101142394228076,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190709288976388721 --seatbelt-client=236
+50303     1 Sat Oct 17 19:18:09 2026     /Applications/Typora.app/Contents/MacOS/Typora
+50304     1 Sat Oct 17 19:18:09 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU
+50306     1 Sat Oct 17 19:18:10 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking
+50307     1 Sat Oct 17 19:18:11 2026     /System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/com.apple.appkit.xpc.openAndSavePanelService.xpc/Contents/MacOS/com.apple.appkit.xpc.openAndSavePanelService
+50308     1 Sat Oct 17 19:18:11 2026     /System/Library/Frameworks/QuickLookUI.framework/Versions/A/XPCServices/QuickLookUIService.xpc/Contents/MacOS/QuickLookUIService
+50914     1 Sat Oct 17 19:57:28 2026     /Library/Apple/System/Library/CoreServices/XProtect.app/Contents/XPCServices/XProtectPluginService.xpc/Contents/MacOS/XProtectPluginService
+51004     1 Wed Sep 30 20:46:42 2026     /System/Library/PrivateFrameworks/SiriTTSService.framework/Versions/A/XPCServices/com.apple.SiriTTSService.TrialProxy.xpc/Contents/MacOS/com.apple.SiriTTSService.TrialProxy
+52904     1 Wed Oct  7 04:49:12 2026     /usr/libexec/tznotify
+52905     1 Sun Oct 18 11:07:02 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+52907     1 Wed Oct 14 22:50:25 2026     /Applications/IntelliJ IDEA.app/Contents/MacOS/idea
+52910     1 Sun Oct 18 11:07:17 2026     /System/Library/Frameworks/ColorSync.framework/Versions/A/XPCServices/com.apple.ColorSyncXPCAgent.xpc/Contents/MacOS/com.apple.ColorSyncXPCAgent
+52911     1 Sun Oct 18 11:07:22 2026     /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+52971     1 Wed Oct 14 22:50:26 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+52972     1 Wed Oct 14 22:50:26 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+53532 52907 Wed Oct 14 22:50:27 2026     /Applications/IntelliJ IDEA.app/Contents/bin/fsnotifier
+53607 52907 Wed Oct 14 22:50:30 2026     /Applications/IntelliJ IDEA.app/Contents/jbr/Contents/Frameworks/cef_server.app/Contents/MacOS/cef_server --port=6188 --logfile=/Users/kriswang/Library/Logs/JetBrains/IntelliJIdea2025.2/jcef_52907.log --loglevel=100 --params=/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/cef_server_params.txt
+53620 53607 Wed Oct 14 22:50:30 2026     /Applications/IntelliJ IDEA.app/Contents/jbr/Contents/Frameworks/cef_server.app/Contents/Frameworks/cef_server Helper (GPU).app/Contents/MacOS/cef_server Helper (GPU) --type=gpu-process --no-sandbox --framework-dir-path=/Applications/IntelliJ IDEA.app/Contents/jbr/Contents/Frameworks/Chromium Embedded Framework.framework --log-severity=disable --lang=en-US --user-data-dir=/Users/kriswang/Library/Caches/JetBrains/IntelliJIdea2025.2/jcef_cache --gpu-preferences=WAAAAAAAAAAgAAAEAAAAAAAAAAAAAAAAAABgAAAAAAA4AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaAcAAAAAAABoBwAAAAAAAHgCAABOAAAAcAIAAAAAAAB4AgAAAAAAAIACAAAAAAAAiAIAAAAAAACQAgAAAAAAAJgCAAAAAAAAoAIAAAAAAACoAgAAAAAAALACAAAAAAAAuAIAAAAAAADAAgAAAAAAAMgCAAAAAAAA0AIAAAAAAADYAgAAAAAAAOACAAAAAAAA6AIAAAAAAADwAgAAAAAAAPgCAAAAAAAAAAMAAAAAAAAIAwAAAAAAABADAAAAAAAAGAMAAAAAAAAgAwAAAAAAACgDAAAAAAAAMAMAAAAAAAA4AwAAAAAAAEADAAAAAAAASAMAAAAAAABQAwAAAAAAAFgDAAAAAAAAYAMAAAAAAABoAwAAAAAAAHADAAAAAAAAeAMAAAAAAACAAwAAAAAAAIgDAAAAAAAAkAMAAAAAAACYAwAAAAAAAKADAAAAAAAAqAMAAAAAAACwAwAAAAAAALgDAAAAAAAAwAMAAAAAAADIAwAAAAAAANADAAAAAAAA2AMAAAAAAADgAwAAAAAAAOgDAAAAAAAA8AMAAAAAAAD4AwAAAAAAAAAEAAAAAAAACAQAAAAAAAAQBAAAAAAAABgEAAAAAAAAIAQAAAAAAAAoBAAAAAAAADAEAAAAAAAAOAQAAAAAAABABAAAAAAAAEgEAAAAAAAAUAQAAAAAAABYBAAAAAAAAGAEAAAAAAAAaAQAAAAAAABwBAAAAAAAAHgEAAAAAAAAgAQAAAAAAACIBAAAAAAAAJAEAAAAAAAAmAQAAAAAAACgBAAAAAAAAKgEAAAAAAAAsAQAAAAAAAC4BAAAAAAAAMAEAAAAAAAAyAQAAAAAAADQBAAAAAAAANgEAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAEAAAAQAAAAAAAAAAAAAAACAAAAEAAAAAAAAAAAAAAAAwAAABAAAAAAAAAAAAAAAAYAAAAQAAAAAAAAAAAAAAAHAAAAEAAAAAAAAAAAAAAACAAAABAAAAAAAAAAAAAAAAkAAAAQAAAAAAAAAAAAAAALAAAAEAAAAAAAAAAAAAAADAAAABAAAAAAAAAAAAAAAA4AAAAQAAAAAAAAAAAAAAAPAAAAEAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAEAAAABAAAAEAAAAAAAAAABAAAAAgAAABAAAAAAAAAAAQAAAAMAAAAQAAAAAAAAAAEAAAAGAAAAEAAAAAAAAAABAAAABwAAABAAAAAAAAAAAQAAAAgAAAAQAAAAAAAAAAEAAAAJAAAAEAAAAAAAAAABAAAACwAAABAAAAAAAAAAAQAAAAwAAAAQAAAAAAAAAAEAAAAOAAAAEAAAAAAAAAABAAAADwAAABAAAAAAAAAAAQAAABAAAAAQAAAAAAAAAAQAAAAAAAAAEAAAAAAAAAAEAAAAAQAAABAAAAAAAAAABAAAAAIAAAAQAAAAAAAAAAQAAAADAAAAEAAAAAAAAAAEAAAABgAAABAAAAAAAAAABAAAAAcAAAAQAAAAAAAAAAQAAAAIAAAAEAAAAAAAAAAEAAAACQAAABAAAAAAAAAABAAAAAsAAAAQAAAAAAAAAAQAAAAMAAAAEAAAAAAAAAAEAAAADgAAABAAAAAAAAAABAAAAA8AAAAQAAAAAAAAAAQAAAAQAAAAEAAAAAAAAAAHAAAAAAAAABAAAAAAAAAABwAAAAEAAAAQAAAAAAAAAAcAAAACAAAAEAAAAAAAAAAHAAAAAwAAABAAAAAAAAAABwAAAAYAAAAQAAAAAAAAAAcAAAAHAAAAEAAAAAAAAAAHAAAACAAAABAAAAAAAAAABwAAAAkAAAAQAAAAAAAAAAcAAAALAAAAEAAAAAAAAAAHAAAADAAAABAAAAAAAAAABwAAAA4AAAAQAAAAAAAAAAcAAAAPAAAAEAAAAAAAAAAHAAAAEAAAABAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAgAAAABAAAAEAAAAAAAAAAIAAAAAgAAABAAAAAAAAAACAAAAAMAAAAQAAAAAAAAAAgAAAAGAAAAEAAAAAAAAAAIAAAABwAAABAAAAAAAAAACAAAAAgAAAAQAAAAAAAAAAgAAAAJAAAAEAAAAAAAAAAIAAAACwAAABAAAAAAAAAACAAAAAwAAAAQAAAAAAAAAAgAAAAOAAAAEAAAAAAAAAAIAAAADwAAABAAAAAAAAAACAAAABAAAAAQAAAAAAAAAAoAAAAAAAAAEAAAAAAAAAAKAAAAAQAAABAAAAAAAAAACgAAAAIAAAAQAAAAAAAAAAoAAAADAAAAEAAAAAAAAAAKAAAABgAAABAAAAAAAAAACgAAAAcAAAAQAAAAAAAAAAoAAAAIAAAAEAAAAAAAAAAKAAAACQAAABAAAAAAAAAACgAAAAsAAAAQAAAAAAAAAAoAAAAMAAAAEAAAAAAAAAAKAAAADgAAABAAAAAAAAAACgAAAA8AAAAQAAAAAAAAAAoAAAAQAAAACAAAAAAAAAAIAAAAAAAAAA== --disable-in-process-stack-traces --log-file=/Users/kriswang/Library/Logs/JetBrains/IntelliJIdea2025.2/jcef_52907.log --shared-files --field-trial-handle=1718379636,r,16186225684161185208,17869859426820193665,262144 --disable-features=SpareRendererForSitePerProcess --variations-seed-version
+53626 53607 Wed Oct 14 22:50:30 2026     /Applications/IntelliJ IDEA.app/Contents/jbr/Contents/Frameworks/cef_server.app/Contents/Frameworks/cef_server Helper.app/Contents/MacOS/cef_server Helper --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=service --no-sandbox --use-mock-keychain --framework-dir-path=/Applications/IntelliJ IDEA.app/Contents/jbr/Contents/Frameworks/Chromium Embedded Framework.framework --log-severity=disable --lang=en-US --user-data-dir=/Users/kriswang/Library/Caches/JetBrains/IntelliJIdea2025.2/jcef_cache --disable-in-process-stack-traces --log-file=/Users/kriswang/Library/Logs/JetBrains/IntelliJIdea2025.2/jcef_52907.log --shared-files --field-trial-handle=1718379636,r,16186225684161185208,17869859426820193665,262144 --disable-features=SpareRendererForSitePerProcess --variations-seed-version
+53627 53607 Wed Oct 14 22:50:30 2026     /Applications/IntelliJ IDEA.app/Contents/jbr/Contents/Frameworks/cef_server.app/Contents/Frameworks/cef_server Helper.app/Contents/MacOS/cef_server Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --no-sandbox --use-mock-keychain --framework-dir-path=/Applications/IntelliJ IDEA.app/Contents/jbr/Contents/Frameworks/Chromium Embedded Framework.framework --log-severity=disable --lang=en-US --user-data-dir=/Users/kriswang/Library/Caches/JetBrains/IntelliJIdea2025.2/jcef_cache --disable-in-process-stack-traces --log-file=/Users/kriswang/Library/Logs/JetBrains/IntelliJIdea2025.2/jcef_52907.log --shared-files --field-trial-handle=1718379636,r,16186225684161185208,17869859426820193665,262144 --disable-features=SpareRendererForSitePerProcess --variations-seed-version
+53632     1 Wed Oct 14 22:50:30 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+53637     1 Wed Oct 14 22:50:30 2026     /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService
+54268     1 Wed Sep 23 04:49:16 2026     /System/Library/CoreServices/Setup Assistant.app/Contents/Resources/mbuseragent
+54292     1 Wed Sep 23 04:50:12 2026     /usr/libexec/DataDetectorsSourceAccess
+57537     1 Wed Sep 23 12:31:24 2026     /System/Library/PrivateFrameworks/StreamingExtractor.framework/Versions/A/XPCServices/STExtractionService.privileged.xpc/Contents/MacOS/STExtractionService.privileged
+60268     1 Wed Sep 23 16:12:41 2026     /System/Library/CoreServices/sharedfilelistd
+64833     1 Mon Oct 19 08:42:48 2026     /usr/sbin/netbiosd
+67129     1 Tue Oct  6 14:15:50 2026     /usr/bin/ssh-agent -l
+67741     1 Wed Sep 23 21:44:12 2026     /System/Cryptexes/App/usr/libexec/com.apple.Safari.History
+67743     1 Wed Sep 23 21:44:12 2026     /System/Cryptexes/App/usr/libexec/SafariNotificationAgent
+67745     1 Wed Sep 23 21:44:12 2026     /System/Library/PrivateFrameworks/PassKitCore.framework/passd
+67749     1 Wed Sep 23 21:44:12 2026     /System/Library/Frameworks/Translation.framework/translationd
+70108   807 Sun Oct 11 11:41:22 2026     /Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Frameworks/WeChatAppEx Framework.framework/Versions/C/Helpers/WeChatAppEx Helper (Renderer).app/Contents/MacOS/WeChatAppEx Helper (Renderer) --type=renderer --client_version=4066646330 --enable-crash-reporter --wmpf_root_dir=/Users/kriswang/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium --instance-index=0 --bundle-id=5A4RE8SF68.com.tencent.xinWeChat --wmpf-render-type=5 --product-id=1002 --no-sandbox --disable-notifications --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=142 --time-ticks-at-unix-epoch=-1789807716937585 --disable-mojo-broker --launch-time-ticks=1193067187698 --shared-files --field-trial-handle=1718379636,r,15495935113087227693,12834215617061095522,262144 --enable-features=OverlayScrollbar,XWorker --disable-features=AudioServiceOutOfProcess,AutoupgradeMixedContent,BackForwardCache,DigitalGoodsApi,NotificationTriggers,PeriodicBackgroundSync,TFLiteLanguageDetectionEnabled,Vulkan,WebOTP --variations-seed-version --log-level=2
+70552     1 Mon Oct 19 22:10:52 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecoderXPCService.xpc/Contents/MacOS/VTDecoderXPCService
+70553     1 Mon Oct 19 22:10:52 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+71772     1 Mon Oct 19 22:13:55 2026     /Library/PrivilegedHelperTools/com.macpaw.CleanMyMac4.Agent
+71783     1 Mon Oct 19 22:13:57 2026     /System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/HIServices.framework/Versions/A/XPCServices/com.apple.hiservices-xpcservice.xpc/Contents/MacOS/com.apple.hiservices-xpcservice
+72199     1 Mon Oct 19 22:19:47 2026     /System/Library/CoreServices/Family.app/Contents/MacOS/Family
+72498     1 Mon Oct 19 22:26:06 2026     /usr/sbin/cfprefsd agent
+73185 20090 Mon Oct 19 22:47:16 2026     /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.80/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer) --type=renderer --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors --lang=zh-CN --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=581 --launch-time-ticks=1674503352613 --shared-files --metrics-shmem-handle=1752395122,r,15327708416285615027,6339085323906600833,1572864 --field-trial-handle=1718379636,r,12937566471828236493,9399353173676027260,262144 --variations-seed-version=20261015-090047.832000-production --pseudonymization-salt-handle=1935764596,r,11793013280267001761,12824002163226460473,4 --trace-process-track-uuid=3190709530733185763 --seatbelt-client=248
+74212     1 Mon Oct 19 23:09:14 2026     /System/Library/Frameworks/NetFS.framework/Versions/A/XPCServices/PlugInLibraryService.xpc/Contents/MacOS/PlugInLibraryService
+75975     1 Sun Sep 27 08:34:56 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+75976     1 Sun Sep 27 08:34:56 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecoderXPCService.xpc/Contents/MacOS/VTDecoderXPCService
+78004     1 Mon Oct 19 23:19:37 2026     /System/Library/Frameworks/CoreSpotlight.framework/spotlightknowledged -u
+78219     1 Sun Sep 27 21:18:57 2026     /System/Library/CoreServices/diagnosticservicesd
+78224     1 Sun Sep 27 21:19:13 2026     /usr/libexec/dirhelper
+78666     1 Wed Sep 30 09:44:14 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+78670     1 Wed Sep 30 09:44:41 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTEncoderXPCService.xpc/Contents/MacOS/VTEncoderXPCService
+79305     1 Sun Sep 27 21:48:01 2026     /System/Library/PrivateFrameworks/AppleNeuralEngine.framework/XPCServices/ANECompilerService.xpc/Contents/MacOS/ANECompilerService
+81568     1 Thu Oct  1 16:12:22 2026     /System/Library/PrivateFrameworks/BookDataStore.framework/Support/bookdatastored
+81570     1 Thu Oct  1 16:12:22 2026     /System/Library/PrivateFrameworks/BookLibraryCore.framework/Support/bookassetd
+85230     1 Wed Sep 30 12:17:53 2026     /usr/sbin/cfprefsd agent
+85587     1 Wed Oct 14 08:07:55 2026     /usr/libexec/ioupsd
+85589     1 Wed Oct 14 08:07:56 2026     /usr/sbin/bluetoothd
+85605     1 Wed Oct 14 08:08:09 2026     /System/Library/DriverExtensions/IOUserBluetoothSerialDriver.dext/IOUserBluetoothSerialDriver com.apple.IOUserBluetoothSerialDriver 0x1071f1f9c com.apple.IOUserBluetoothSerialDriver
+88255     1 Tue Oct 20 05:23:37 2026     /Library/Apple/System/Library/CoreServices/XProtect.app/Contents/XPCServices/XProtectPluginService.xpc/Contents/MacOS/XProtectPluginService
+95281     1 Wed Sep 30 12:32:32 2026     /usr/libexec/duetexpertd
+95840     1 Mon Sep 28 02:46:02 2026     /System/Library/PrivateFrameworks/AppleNeuralEngine.framework/XPCServices/ANECompilerService.xpc/Contents/MacOS/ANECompilerService
+95884     1 Fri Oct  2 14:36:18 2026     /System/Library/PrivateFrameworks/SafariFoundation.framework/Versions/A/XPCServices/CredentialProviderExtensionHelper.xpc/Contents/MacOS/CredentialProviderExtensionHelper
+96385     1 Fri Oct  2 15:08:08 2026     /usr/libexec/secd
+96386     1 Fri Oct  2 15:08:08 2026     /usr/libexec/secd
+96468     1 Fri Oct  2 15:08:13 2026     /usr/libexec/secd
+96582     1 Wed Sep 30 12:39:06 2026     /System/Library/PrivateFrameworks/AppPredictionFoundation.framework/Versions/A/XPCServices/AppPredictionIntentsHelperService.xpc/Contents/MacOS/AppPredictionIntentsHelperService
+97415     1 Fri Oct  2 15:41:43 2026     /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecoderXPCService.xpc/Contents/MacOS/VTDecoderXPCService
+97416     1 Fri Oct  2 15:41:43 2026     /System/Library/Frameworks/AudioToolbox.framework/XPCServices/com.apple.audio.SandboxHelper.xpc/Contents/MacOS/com.apple.audio.SandboxHelper
+98250     1 Fri Oct  2 16:17:09 2026     /System/Library/PrivateFrameworks/WiFiPolicy.framework/XPCServices/WiFiCloudAssetsXPCService.xpc/Contents/MacOS/WiFiCloudAssetsXPCService
+  323     1 Sat Sep 19 16:49:07 2026     /usr/libexec/remoted
+25133   601 Mon Sep 21 15:02:29 2026     login -pf kriswang
+25134 25133 Mon Sep 21 15:02:29 2026     -zsh
+44840   601 Tue Sep 29 18:38:15 2026     login -pfl kriswang /bin/bash -c exec -la zsh /bin/zsh
+44841 44840 Tue Sep 29 18:38:15 2026     -zsh
+45385 44841 Tue Sep 29 18:38:17 2026     claude --resume ea1753f4-5a32-46da-9300-f2c3a486ed48
+45410 45385 Tue Sep 29 18:38:18 2026     node /Users/kriswang/.nvm/versions/node/v22.21.0/bin/codegraph serve --mcp
+45420 45410 Tue Sep 29 18:38:18 2026     /Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/@colbymchenry/codegraph/node_modules/@colbymchenry/codegraph-darwin-arm64/node --liftoff-only /Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/@colbymchenry/codegraph/node_modules/@colbymchenry/codegraph-darwin-arm64/lib/dist/bin/codegraph.js serve --mcp
+42403   601 Tue Sep 29 18:35:08 2026     login -pfl kriswang /bin/bash -c exec -la zsh /bin/zsh
+42404 42403 Tue Sep 29 18:35:08 2026     -zsh
+65513 42404 Tue Oct  6 14:11:36 2026     claude
+65552 65513 Tue Oct  6 14:11:36 2026     node /Users/kriswang/.nvm/versions/node/v22.21.0/bin/codegraph serve --mcp
+65562 65552 Tue Oct  6 14:11:36 2026     /Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/@colbymchenry/codegraph/node_modules/@colbymchenry/codegraph-darwin-arm64/node --liftoff-only /Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/@colbymchenry/codegraph/node_modules/@colbymchenry/codegraph-darwin-arm64/lib/dist/bin/codegraph.js serve --mcp
+49936   601 Tue Sep 29 19:42:28 2026     login -pfl kriswang /bin/bash -c exec -la zsh /bin/zsh
+49937 49936 Tue Sep 29 19:42:28 2026     -zsh
+50479 49937 Tue Sep 29 19:42:32 2026     claude --resume ea1753f4-5a32-46da-9300-f2c3a486ed48
+50505 50479 Tue Sep 29 19:42:32 2026     node /Users/kriswang/.nvm/versions/node/v22.21.0/bin/codegraph serve --mcp
+50515 50505 Tue Sep 29 19:42:32 2026     /Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/@colbymchenry/codegraph/node_modules/@colbymchenry/codegraph-darwin-arm64/node --liftoff-only /Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/@colbymchenry/codegraph/node_modules/@colbymchenry/codegraph-darwin-arm64/lib/dist/bin/codegraph.js serve --mcp
+53646 52907 Wed Oct 14 22:50:30 2026     /bin/zsh --login -i
+40682   601 Mon Oct  5 21:07:08 2026     login -pfl kriswang /bin/bash -c exec -la zsh /bin/zsh
+40683 40682 Mon Oct  5 21:07:08 2026     -zsh
+67744   601 Tue Oct  6 14:18:13 2026     login -pfl kriswang /bin/bash -c exec -la zsh /bin/zsh
+67746 67744 Tue Oct  6 14:18:13 2026     -zsh
+67833   601 Mon Oct 19 19:14:39 2026     login -pfl kriswang /bin/bash -c exec -la zsh /bin/zsh
+67834 67833 Mon Oct 19 19:14:39 2026     -zsh
+68786 67834 Mon Oct 19 19:15:10 2026     claude
+68817 68786 Mon Oct 19 19:15:11 2026     node /Users/kriswang/.nvm/versions/node/v22.21.0/bin/codegraph serve --mcp
+68829 68817 Mon Oct 19 19:15:11 2026     /Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/@colbymchenry/codegraph/node_modules/@colbymchenry/codegraph-darwin-arm64/node --liftoff-only /Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/@colbymchenry/codegraph/node_modules/@colbymchenry/codegraph-darwin-arm64/lib/dist/bin/codegraph.js serve --mcp

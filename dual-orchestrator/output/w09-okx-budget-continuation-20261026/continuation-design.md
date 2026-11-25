@@ -1,0 +1,7 @@
+# Same-case 4M budget continuation
+SoT: original run/occurrence and workflow ledger; only operator budget authority amended by user.
+Original stop and all original package files remain byte-fixed. New package has its own stop guard.
+Order: snapshot original evidence/checkpoint/receipts -> freeze new budget and launch -> explicit current authorization -> readonly E/receipt/checkpoint/pending/usage/reserve recheck -> original Java one-step -> fixed run/R03/L03 -> receipt -> aggregate all usage/time -> reserve -> next original consumer.
+Failures before dispatch zero new provider effects; half step/unknown external response stops and goes original D06/D07; no automatic repeat; new stop always refuses. After first step only original historical runs must remain unchanged (workflow/current and history may legitimately advance).
+Model/author/reviewer outcomes remain typed and validated; no Java/acpx/contract/registry/source-of-truth change. Current business gates and commit remain user-owned.
+Declared: user current 4M approval. Proven: fixture suite + reader tests + readonly real checkpoint/receipts. Consumed: admission/one-step unique paths. Enforced before: step/Java/model invocation. Failure route: original D06/D07/stop; no authority inferred. Cannot-bypass: old/new stop, false/wrong authorization, changed original evidence/checkpoint, inherited usage/time loss, original E/window tests.

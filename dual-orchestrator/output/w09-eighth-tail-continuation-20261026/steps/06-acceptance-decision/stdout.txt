@@ -1,0 +1,6 @@
+Step 1: acceptance.generate_final_report -> RUNNING (resumed workflow)
+Stopped after --max-steps=1. Run again to continue.
+
+Next actions:
+  Continue running until the next gate, recovery, failure, or completion:
+     dualctl run --workdir /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree ws-20261023T005431Z-9YYF

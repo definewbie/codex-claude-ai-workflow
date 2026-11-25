@@ -1,0 +1,17 @@
+{
+  "exit": 0,
+  "stderr": "",
+  "elapsed_seconds": 0.04705220786854625,
+  "successful_complete_table": true,
+  "table_size": 925,
+  "known_step_parent_pids": [
+    34825,
+    34880,
+    34971
+  ],
+  "known_pids_present": [],
+  "matching_rows": [],
+  "raw_private_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/operations/stop-cleanup-20261026/process-table.private.log",
+  "raw_sha256": "cea0edccc7b0ee84f0f7bba55982e234e626a6f110221393ac3f187be709f0b1",
+  "scope": "Current successful observation only; does not prove arbitrary descendants stopped"
+}

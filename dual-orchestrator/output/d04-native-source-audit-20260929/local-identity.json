@@ -1,0 +1,209 @@
+{
+  "packages": [
+    {
+      "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex/package.json",
+      "sha256": "302ed64d0846795501768be9f60f78133688c0c09162c76e80a8a04b045664cb",
+      "content": {
+        "name": "@openai/codex",
+        "version": "0.153.4",
+        "description": "Codex CLI is a coding agent from OpenAI that runs locally on your computer.",
+        "license": "Apache-2.0",
+        "bin": {
+          "codex": "bin/codex.js"
+        },
+        "type": "module",
+        "engines": {
+          "node": ">=16"
+        },
+        "files": [
+          "bin/codex.js"
+        ],
+        "repository": {
+          "type": "git",
+          "url": "git+https://github.com/openai/codex.git",
+          "directory": "codex-cli"
+        },
+        "packageManager": "pnpm@10.34.5+sha512.a4ee05f2f73658255bd6a89859c065a45c28a57daefae2c893a168ee2b73168c37b91e83e57ea67654ad03f03031746430e8bce38e362e042605fb8abc80192e",
+        "optionalDependencies": {
+          "@openai/codex-linux-x64": "npm:@openai/codex@0.153.4-linux-x64",
+          "@openai/codex-linux-arm64": "npm:@openai/codex@0.153.4-linux-arm64",
+          "@openai/codex-darwin-x64": "npm:@openai/codex@0.153.4-darwin-x64",
+          "@openai/codex-darwin-arm64": "npm:@openai/codex@0.153.4-darwin-arm64",
+          "@openai/codex-win32-x64": "npm:@openai/codex@0.153.4-win32-x64",
+          "@openai/codex-win32-arm64": "npm:@openai/codex@0.153.4-win32-arm64"
+        }
+      }
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/package.json",
+      "sha256": "10c44fe0a22e0627fe3039dd37732b190ef6555a1abdd173c5a963520cff714f",
+      "content": {
+        "name": "@openai/codex",
+        "version": "0.153.4-darwin-arm64",
+        "license": "Apache-2.0",
+        "os": [
+          "darwin"
+        ],
+        "cpu": [
+          "arm64"
+        ],
+        "files": [
+          "vendor"
+        ],
+        "repository": {
+          "type": "git",
+          "url": "git+https://github.com/openai/codex.git",
+          "directory": "codex-cli"
+        },
+        "engines": {
+          "node": ">=16"
+        },
+        "packageManager": "pnpm@10.34.5+sha512.a4ee05f2f73658255bd6a89859c065a45c28a57daefae2c893a168ee2b73168c37b91e83e57ea67654ad03f03031746430e8bce38e362e042605fb8abc80192e"
+      }
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/package.json",
+      "sha256": "7addfe1ad54d5a39a6961dd9918b9256fcc22c5a1dbdd4c83f91a41dda182965",
+      "content": {
+        "name": "@agentclientprotocol/codex-acp",
+        "publishConfig": {
+          "access": "public"
+        },
+        "version": "1.10.0",
+        "description": "",
+        "main": "dist/index.js",
+        "bin": {
+          "codex-acp": "dist/index.js"
+        },
+        "files": [
+          "dist/index.js",
+          "README.md",
+          "LICENSE",
+          "package.json"
+        ],
+        "scripts": {
+          "prepublishOnly": "npm run build",
+          "build": "node build.mjs",
+          "bundle:all": "npm run bundle:linux-x64 && npm run bundle:linux-arm64 && npm run bundle:darwin-x64 && npm run bundle:darwin-arm64 && npm run bundle:win-x64 && npm run bundle:win-arm64",
+          "bundle:linux-x64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-linux-x64-baseline --outfile dist/bin/codex-acp-x64-linux",
+          "bundle:linux-arm64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-linux-arm64 --outfile dist/bin/codex-acp-arm64-linux",
+          "bundle:darwin-x64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-darwin-x64-baseline --outfile dist/bin/codex-acp-x64-darwin",
+          "bundle:darwin-arm64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-darwin-arm64 --outfile dist/bin/codex-acp-arm64-darwin",
+          "bundle:win-x64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-windows-x64-baseline --outfile dist/bin/codex-acp-x64-windows.exe",
+          "bundle:win-arm64": "bun build src/index.ts --minify --sourcemap --compile --target=bun-windows-arm64 --outfile dist/bin/codex-acp-arm64-windows.exe",
+          "package:all": "npm run package:linux-x64 && npm run package:linux-arm64 && npm run package:darwin-x64 && npm run package:darwin-arm64 && npm run package:win-x64 && npm run package:win-arm64",
+          "package:linux-x64": "cd dist/bin && zip codex-acp-x64-linux.zip codex-acp-x64-linux",
+          "package:linux-arm64": "cd dist/bin && zip codex-acp-arm64-linux.zip codex-acp-arm64-linux",
+          "package:darwin-x64": "cd dist/bin && zip codex-acp-x64-darwin.zip codex-acp-x64-darwin",
+          "package:darwin-arm64": "cd dist/bin && zip codex-acp-arm64-darwin.zip codex-acp-arm64-darwin",
+          "package:win-x64": "cd dist/bin && zip codex-acp-x64-windows.zip codex-acp-x64-windows.exe",
+          "package:win-arm64": "cd dist/bin && zip codex-acp-arm64-windows.zip codex-acp-arm64-windows.exe",
+          "start": "node --import tsx src/index.ts",
+          "example:simple-client": "node --import tsx examples/simple-client.ts",
+          "example:steering": "node --import tsx examples/steering.ts",
+          "example:steering:multistep": "node --import tsx examples/steering.ts",
+          "generate-types": "./node_modules/.bin/codex app-server generate-ts --out src/app-server",
+          "release:preflight": "bash scripts/release-preflight.sh",
+          "test": "vitest run --no-file-parallelism --retry=2",
+          "test:e2e": "npm run build && RUN_E2E_TESTS=true vitest run --no-file-parallelism --retry=2 src/__tests__/CodexACPAgent/e2e",
+          "test:watch": "vitest",
+          "typecheck": "tsc --noEmit && tsc --noEmit -p examples/tsconfig.json",
+          "codex-test": "tsx .claude/skills/run-codex/scripts/run-codex-test.ts"
+        },
+        "homepage": "https://github.com/agentclientprotocol/codex-acp#readme",
+        "bugs": {
+          "url": "https://github.com/agentclientprotocol/codex-acp/issues"
+        },
+        "repository": {
+          "type": "git",
+          "url": "git+https://github.com/agentclientprotocol/codex-acp.git"
+        },
+        "keywords": [],
+        "author": "Agent Client Protocol",
+        "license": "Apache-2.0",
+        "type": "module",
+        "devDependencies": {
+          "@types/node": "^26.1.0",
+          "esbuild": "^0.28.2",
+          "mcp-hello-world": "^1.1.2",
+          "tsx": "^4.23.12",
+          "typescript": "^7.0.2",
+          "vitest": "^4.1.11"
+        },
+        "dependencies": {
+          "@agentclientprotocol/sdk": "^1.4.0",
+          "@openai/codex": "^0.153.3",
+          "diff": "^9.0.0",
+          "open": "^11.0.1",
+          "vscode-jsonrpc": "^9.0.1",
+          "zod": "^4.0.0"
+        }
+      }
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/.package-lock.json",
+      "sha256": "1ee1d11fcc9d145cf7e03df6ef43dc1b7789567021f75e7f078a8b8b830671c1",
+      "packages": {
+        "node_modules/@agentclientprotocol/codex-acp": {
+          "version": "1.10.0",
+          "resolved": "https://registry.npmjs.org/@agentclientprotocol/codex-acp/-/codex-acp-1.10.0.tgz",
+          "integrity": "sha512-b4dDCPkH/GgHRb3JelXz4QdNirdoTjO3yYM1ImUJMxVXxgZLZMguEXNhZOH2G755UKzf6ZypiiC7UHe3fKgp2Q==",
+          "license": "Apache-2.0",
+          "dependencies": {
+            "@agentclientprotocol/sdk": "^1.4.0",
+            "@openai/codex": "^0.153.3",
+            "diff": "^9.0.0",
+            "open": "^11.0.1",
+            "vscode-jsonrpc": "^9.0.1",
+            "zod": "^4.0.0"
+          },
+          "bin": {
+            "codex-acp": "dist/index.js"
+          }
+        },
+        "node_modules/@openai/codex": {
+          "version": "0.153.4",
+          "resolved": "https://registry.npmjs.org/@openai/codex/-/codex-0.153.4.tgz",
+          "integrity": "sha512-wbHDmit7S/YvBGVX1DQmk13xtWblZ2cApeJ/pB7xDZ10Cna+DZc5ij7f0F4OxdsXN4FW1oLT48OpogUI1+8Y2w==",
+          "license": "Apache-2.0",
+          "bin": {
+            "codex": "bin/codex.js"
+          },
+          "engines": {
+            "node": ">=16"
+          },
+          "optionalDependencies": {
+            "@openai/codex-darwin-arm64": "npm:@openai/codex@0.153.4-darwin-arm64",
+            "@openai/codex-darwin-x64": "npm:@openai/codex@0.153.4-darwin-x64",
+            "@openai/codex-linux-arm64": "npm:@openai/codex@0.153.4-linux-arm64",
+            "@openai/codex-linux-x64": "npm:@openai/codex@0.153.4-linux-x64",
+            "@openai/codex-win32-arm64": "npm:@openai/codex@0.153.4-win32-arm64",
+            "@openai/codex-win32-x64": "npm:@openai/codex@0.153.4-win32-x64"
+          }
+        },
+        "node_modules/@openai/codex-darwin-arm64": {
+          "name": "@openai/codex",
+          "version": "0.153.4-darwin-arm64",
+          "resolved": "https://registry.npmjs.org/@openai/codex/-/codex-0.153.4-darwin-arm64.tgz",
+          "integrity": "sha512-B1qhN3fa1ay0R0wGziXqgwSkB5icpYChNKHhtBHff/0UtSTC7z+l8aTtvMlGjH3E8HEvY3+njIJelM9CAAoVWg==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "Apache-2.0",
+          "optional": true,
+          "os": [
+            "darwin"
+          ],
+          "engines": {
+            "node": ">=16"
+          }
+        }
+      }
+    }
+  ],
+  "binary": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+  "binarySha256": "b973d440acac501fd2594a43e7ca9ce41e0a65b9dfb28d0d7a7837c99e1261e3",
+  "host": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex-code-mode-host",
+  "hostSha256": "d8a2222e017342718d16a5dbe092921c628961f812f62f42036b8d960e1ffe56",
+  "sourceCommit": "NOT_ESTABLISHED"
+}

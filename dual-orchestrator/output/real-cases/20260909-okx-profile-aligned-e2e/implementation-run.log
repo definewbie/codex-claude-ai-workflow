@@ -1,0 +1,12 @@
+Human gate approved
+Workstream: ws-20260909T113923Z-FZ8K
+Running workflow until next gate...
+Step 1: implement.claude_implement -> RUNNING (resumed workflow)
+Step 2: implement.claude_implement -> WAITING_FOR_RECOVERY (workflow stopped at FAILED)
+
+Next actions:
+  1. Inspect the recovery summary:
+     dualctl recovery show --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K ws-20260909T113923Z-FZ8K
+     summary: /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K/.agent/workstreams/ws-20260909T113923Z-FZ8K/recovery/current-failure.md
+  2. Inspect the agent output contract, then retry the same active node.
+     dualctl retry --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K ws-20260909T113923Z-FZ8K

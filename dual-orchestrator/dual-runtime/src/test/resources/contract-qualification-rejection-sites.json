@@ -1,0 +1,719 @@
+{
+  "status": "REJECTION_SITE_INDEX_ONLY",
+  "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+  "sha256": "4c963675c7a44027bcf1a06813f164d81741def2dd22ed4a3b2be6967aab57c7",
+  "count": 71,
+  "meaning": "Test-only actual rejection inventory. Mapping is not comparable-input proof. Original inventory preserved in output. No runtime loading.",
+  "rows": [
+    {
+      "site_id": "C01",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.requiresContract",
+      "line": 56,
+      "kind": "throw",
+      "original_arguments": "\"legacy contract qualification flag is not supported: \" + definition.id()",
+      "proposed_rule_id": "typed-passthrough-or-no-runtime-context.requiresContract",
+      "coverage": "EXPLICIT_UNCOVERED_PASSTHROUGH",
+      "uncovered_reason": "Definition-only rejection has no runtime/decision context, or the branch forwards an already typed failure. No separate PASSED/NOT_CHECKED is inferred; missing actual check evidence remains UNKNOWN."
+    },
+    {
+      "site_id": "C02",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase",
+      "line": 64,
+      "kind": "throw",
+      "original_arguments": "\"required_contract_phase is missing: \" + definition.id()",
+      "proposed_rule_id": "typed-passthrough-or-no-runtime-context.requiredPhase",
+      "coverage": "EXPLICIT_UNCOVERED_PASSTHROUGH",
+      "uncovered_reason": "Definition-only rejection has no runtime/decision context, or the branch forwards an already typed failure. No separate PASSED/NOT_CHECKED is inferred; missing actual check evidence remains UNKNOWN."
+    },
+    {
+      "site_id": "C03",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.requiredPhase",
+      "line": 66,
+      "kind": "throw",
+      "original_arguments": "\"invalid contract phase: \" + definition.id()",
+      "proposed_rule_id": "typed-passthrough-or-no-runtime-context.requiredPhase",
+      "coverage": "EXPLICIT_UNCOVERED_PASSTHROUGH",
+      "uncovered_reason": "Definition-only rejection has no runtime/decision context, or the branch forwards an already typed failure. No separate PASSED/NOT_CHECKED is inferred; missing actual check evidence remains UNKNOWN."
+    },
+    {
+      "site_id": "C04",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve",
+      "line": 80,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.SNAPSHOT_AVAILABLE, \"CONTRACT_SNAPSHOT_UNAVAILABLE\", io",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolve.dynamic_diagnostic_or_i_o_failure",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "SNAPSHOT_AVAILABLE"
+    },
+    {
+      "site_id": "C05",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolve",
+      "line": 80,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.SNAPSHOT_AVAILABLE, \"CONTRACT_SNAPSHOT_UNAVAILABLE\", failure.getMessage()",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolve.dynamic_diagnostic_or_i_o_failure",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "SNAPSHOT_AVAILABLE"
+    },
+    {
+      "site_id": "C06",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 98,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.GOAL_EPOCH, \"CONTRACT_EPOCH_INVALID\", \"GOAL authorization epoch is missing or duplicated\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_authorization_epoch_is_missing_or_duplicated",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_EPOCH"
+    },
+    {
+      "site_id": "C07",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 103,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.GOAL_OUTPUTS, \"OUTPUT_REF_MISMATCH\", \"GOAL compile does not publish its occurrence artifacts\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_compile_does_not_publish_its_occurrence_artifacts",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_OUTPUTS"
+    },
+    {
+      "site_id": "C08",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 114,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.GOAL_IDENTITY, \"GOAL_CONTRACT_INVALID\", \"GOAL identity, shape or immutable bytes do not match its compiler\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_identity_shape_or_immutable_bytes_do_not_match_its_compiler",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_IDENTITY"
+    },
+    {
+      "site_id": "C09",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 119,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.GOAL_APPROVAL_BYTES, \"GOAL_APPROVAL_INVALID\", \"GOAL approval reference is not an unchanged workstream gate\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_approval_reference_is_not_an_unchanged_workstream_gate",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_APPROVAL_BYTES"
+    },
+    {
+      "site_id": "C10",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 133,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.GOAL_APPROVAL_ROUTE, \"GOAL_APPROVAL_INVALID\", \"GOAL compiler is not routed from the matching completed human decision\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_compiler_is_not_routed_from_the_matching_completed_human_decision",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_APPROVAL_ROUTE"
+    },
+    {
+      "site_id": "C11",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 137,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.GOAL_REVIEW_SUBJECT, \"GOAL_SUBJECT_INVALID\", \"approved review subject is not verifiable\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.approved_review_subject_is_not_verifiable",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_REVIEW_SUBJECT"
+    },
+    {
+      "site_id": "C12",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 142,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.GOAL_PROPOSAL_BYTES, \"GOAL_SUBJECT_INVALID\", \"GOAL does not bind the approved proposal bytes\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_does_not_bind_the_approved_proposal_bytes",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_PROPOSAL_BYTES"
+    },
+    {
+      "site_id": "C13",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 150,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.GOAL_EVENT_ID, \"invalid route event identity\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.invalid_route_event_identity",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_EVENT_ID"
+    },
+    {
+      "site_id": "C14",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 154,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.GOAL_EVENT_ORDER, \"unordered workflow events\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_EVENT_ORDER"
+    },
+    {
+      "site_id": "C15",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 163,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.GOAL_EVENT_BINDING, \"invalid GOAL approval routing occurrence\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.invalid_goal_approval_routing_occurrence",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_EVENT_BINDING"
+    },
+    {
+      "site_id": "C16",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveGoal",
+      "line": 166,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.GOAL_EVENT_PRESENT, \"GOAL_APPROVAL_INVALID\", \"GOAL approval route is missing\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_approval_route_is_missing",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_EVENT_PRESENT"
+    },
+    {
+      "site_id": "C17",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 195,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_GATE_PRESENT, \"GATE_NODE_MISSING\", \"contract approval gate node is missing\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_approval_gate_node_is_missing",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_GATE_PRESENT"
+    },
+    {
+      "site_id": "C18",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 198,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_GATE_COMPLETED, \"GATE_NOT_COMPLETED\", \"latest contract approval gate is not completed\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.latest_contract_approval_gate_is_not_completed",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_GATE_COMPLETED"
+    },
+    {
+      "site_id": "C19",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 206,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_GATE_LINEAGE, \"GATE_LINEAGE_INVALID\", \"latest contract gate lineage or status is invalid\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.latest_contract_gate_lineage_or_status_is_invalid",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_GATE_LINEAGE"
+    },
+    {
+      "site_id": "C20",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 211,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_APPROVED,\n                    \"CONTRACT_NOT_APPROVED\", \"latest contract gate action is not approved: \" + gateAction",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.latest_contract_gate_action_is_not_approved",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_APPROVED"
+    },
+    {
+      "site_id": "C21",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 215,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_NOTE, \"GATE_RESULT_MISMATCH\", \"contract gate note does not match node result\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_gate_note_does_not_match_node_result",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_NOTE"
+    },
+    {
+      "site_id": "C22",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 219,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_SUBJECT, \"GATE_SUBJECT_MISMATCH\", \"contract gate subject refs do not match node input refs\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_gate_subject_refs_do_not_match_node_input_refs",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_SUBJECT"
+    },
+    {
+      "site_id": "C23",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 225,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_SOURCE, \"GATE_SOURCE_MISMATCH\", \"contract gate source occurrence identity is missing or inconsistent\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_gate_source_occurrence_identity_is_missing_or_inconsistent",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_SOURCE"
+    },
+    {
+      "site_id": "C24",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 232,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_COMPILER, \"COMPILE_BINDING_MISSING\", \"approved source is not a completed contract.compile node\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_source_is_not_a_completed_contract_compile_node",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_COMPILER"
+    },
+    {
+      "site_id": "C25",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 235,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_EVENT_SOURCE, \"EVENT_SOURCE_MISMATCH\", \"routing event source does not match approved compile node\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.routing_event_source_does_not_match_approved_compile_node",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_EVENT_SOURCE"
+    },
+    {
+      "site_id": "C26",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 239,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_NEWER_COMPILER,\n                    \"UNAPPROVED_RECOMPILE\", \"completed contract.compile is newer than the approved source: \"\n                            + newerCompile.nodeInstanceId()",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.completed_contract_compile_is_newer_than_the_approved_source",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_NEWER_COMPILER"
+    },
+    {
+      "site_id": "C27",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 254,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_OUTPUTS, \"OUTPUT_REF_MISMATCH\", \"approved compile/gate refs do not bind both contract artifacts\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_compile_gate_refs_do_not_bind_both_contract_artifacts",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_OUTPUTS"
+    },
+    {
+      "site_id": "C28",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 269,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_PARSE, \"CONTRACT_INVALID\", \"approved contract artifacts cannot be parsed\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_artifacts_cannot_be_parsed",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_PARSE"
+    },
+    {
+      "site_id": "C29",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveExecution",
+      "line": 281,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.CANDIDATE_READINESS, VerificationReadiness.REQUIRED, invalid",
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.dynamic_diagnostic_or_i_o_failure",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "CANDIDATE_READINESS"
+    },
+    {
+      "site_id": "C30",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.availableArtifacts",
+      "line": 300,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_ARTIFACTS, \"ARTIFACT_MISSING\", \"approved contract or requirement resolution artifact is missing\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_or_requirement_resolution_artifact_is_missing",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_ARTIFACTS"
+    },
+    {
+      "site_id": "C31",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateArtifactIdentity",
+      "line": 308,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_SHAPE,\n                    \"CONTRACT_INVALID\", \"task-contract.json is invalid: \" + String.join(\"; \", errors)",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.task_contract_json_is_invalid",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_SHAPE"
+    },
+    {
+      "site_id": "C32",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateArtifactIdentity",
+      "line": 317,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_HASH_BINDING,\n                    \"COMPILE_BINDING_MISSING\", \"approved contract.compile has incomplete artifact SHA binding\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_compile_has_incomplete_artifact_sha_binding",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_HASH_BINDING"
+    },
+    {
+      "site_id": "C33",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateArtifactIdentity",
+      "line": 321,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_HASH, \"HASH_MISMATCH\", \"approved contract artifact SHA-256 does not match compile result\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_artifact_sha_256_does_not_match_compile_result",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_HASH"
+    },
+    {
+      "site_id": "C34",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateArtifactIdentity",
+      "line": 327,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_IDENTITY,\n                    \"IDENTITY_MISMATCH\", \"task-contract.json identity does not match compile result\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveExecution.task_contract_json_identity_does_not_match_compile_result",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_IDENTITY"
+    },
+    {
+      "site_id": "C35",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.currentVerificationBindings",
+      "line": 345,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.TECHNICAL_APPROVAL, \"invalid technical continuation approval binding\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.invalid_technical_continuation_approval_binding",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "TECHNICAL_APPROVAL"
+    },
+    {
+      "site_id": "C36",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.currentVerificationBindings",
+      "line": 352,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.TECHNICAL_REVIEW, \"technical continuation lost its independent reviews\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_lost_its_independent_reviews",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "TECHNICAL_REVIEW"
+    },
+    {
+      "site_id": "C37",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.currentVerificationBindings",
+      "line": 355,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.TECHNICAL_BOUNDARY, \"technical revision changed the execution authorization boundary\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_revision_changed_the_execution_authorization_boundary",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "TECHNICAL_BOUNDARY"
+    },
+    {
+      "site_id": "C38",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.currentVerificationBindings",
+      "line": 362,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.TECHNICAL_SOURCE, \"technical continuation route source changed\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_route_source_changed",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "TECHNICAL_SOURCE"
+    },
+    {
+      "site_id": "C39",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.currentVerificationBindings",
+      "line": 365,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.TECHNICAL_CYCLE, \"technical continuation lineage cycle\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_lineage_cycle",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "TECHNICAL_CYCLE"
+    },
+    {
+      "site_id": "C40",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateExecutionInputs",
+      "line": 382,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.GOAL_REQUIRED, \"GOAL_CONTRACT_NOT_QUALIFIED\", \"current GOAL is required\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.current_goal_is_required",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GOAL_REQUIRED"
+    },
+    {
+      "site_id": "C41",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateExecutionInputs",
+      "line": 393,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_GOAL, \"EXECUTION_GOAL_MISMATCH\", \"execution contract no longer binds the approved goal\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.execution_contract_no_longer_binds_the_approved_goal",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_GOAL"
+    },
+    {
+      "site_id": "C42",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateExecutionInputs",
+      "line": 397,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_DECLARATIONS, \"EXECUTION_DECLARATION_MISMATCH\", \"nonessential declarations must bind the frozen node contracts\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.nonessential_declarations_must_bind_the_frozen_node_contracts",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_DECLARATIONS"
+    },
+    {
+      "site_id": "C43",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateExecutionInputs",
+      "line": 405,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EXECUTION_REVIEWS, \"EXECUTION_REVIEW_MISMATCH\", \"execution contract must consume its routed independent reviews\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.execution_contract_must_consume_its_routed_independent_reviews",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EXECUTION_REVIEWS"
+    },
+    {
+      "site_id": "C44",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateExecutionInputs",
+      "line": 408,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.CANDIDATE_READINESS, VerificationReadiness.REQUIRED, failure.getMessage()",
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.dynamic_diagnostic_or_i_o_failure",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "CANDIDATE_READINESS"
+    },
+    {
+      "site_id": "C45",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validateReadiness",
+      "line": 421,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.CANDIDATE_READINESS, failure.getMessage())",
+      "proposed_rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.dynamic_diagnostic_or_i_o_failure",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "CANDIDATE_READINESS"
+    },
+    {
+      "site_id": "C46",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 434,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.CANDIDATE_CURRENT, \"contract candidate requires its current waiting gate\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_candidate_requires_its_current_waiting_gate",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "CANDIDATE_CURRENT"
+    },
+    {
+      "site_id": "C47",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 445,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.CANDIDATE_SUBJECT, \"contract gate subject or route is inconsistent\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_gate_subject_or_route_is_inconsistent",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "CANDIDATE_SUBJECT"
+    },
+    {
+      "site_id": "C48",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 453,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.CANDIDATE_COMPILER, \"contract gate does not bind its completed execution compiler\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_gate_does_not_bind_its_completed_execution_compiler",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "CANDIDATE_COMPILER"
+    },
+    {
+      "site_id": "C49",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 459,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.CANDIDATE_OUTPUTS, \"contract candidate references are not published by its compiler\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_candidate_references_are_not_published_by_its_compiler",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "CANDIDATE_OUTPUTS"
+    },
+    {
+      "site_id": "C50",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 461,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(availabilityFailure)",
+      "proposed_rule_id": "typed-passthrough-or-no-runtime-context.executionCandidate",
+      "coverage": "EXPLICIT_UNCOVERED_PASSTHROUGH",
+      "uncovered_reason": "Definition-only rejection has no runtime/decision context, or the branch forwards an already typed failure. No separate PASSED/NOT_CHECKED is inferred; missing actual check evidence remains UNKNOWN."
+    },
+    {
+      "site_id": "C51",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 472,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(Rule.CANDIDATE_IDENTITY, \"contract candidate bytes or identity changed\")",
+      "proposed_rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_candidate_bytes_or_identity_changed",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "CANDIDATE_IDENTITY"
+    },
+    {
+      "site_id": "C52",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 474,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(identityFailure)",
+      "proposed_rule_id": "typed-passthrough-or-no-runtime-context.executionCandidate",
+      "coverage": "EXPLICIT_UNCOVERED_PASSTHROUGH",
+      "uncovered_reason": "Definition-only rejection has no runtime/decision context, or the branch forwards an already typed failure. No separate PASSED/NOT_CHECKED is inferred; missing actual check evidence remains UNKNOWN."
+    },
+    {
+      "site_id": "C53",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.executionCandidate",
+      "line": 476,
+      "kind": "throw-expression",
+      "original_arguments": "trace.rejection(failure)",
+      "proposed_rule_id": "typed-passthrough-or-no-runtime-context.executionCandidate",
+      "coverage": "EXPLICIT_UNCOVERED_PASSTHROUGH",
+      "uncovered_reason": "Definition-only rejection has no runtime/decision context, or the branch forwards an already typed failure. No separate PASSED/NOT_CHECKED is inferred; missing actual check evidence remains UNKNOWN."
+    },
+    {
+      "site_id": "C54",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.trustedWrappedPayload",
+      "line": 522,
+      "kind": "throw",
+      "original_arguments": "resolution.failure() == null\n                    ? \"qualified task contract is required\"\n                    : resolution.failure().reason() + \": \" + resolution.failure().message()",
+      "proposed_rule_id": "typed-passthrough-or-no-runtime-context.trustedWrappedPayload",
+      "coverage": "EXPLICIT_UNCOVERED_PASSTHROUGH",
+      "uncovered_reason": "Definition-only rejection has no runtime/decision context, or the branch forwards an already typed failure. No separate PASSED/NOT_CHECKED is inferred; missing actual check evidence remains UNKNOWN."
+    },
+    {
+      "site_id": "C55",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.trustedWrappedPayload",
+      "line": 529,
+      "kind": "throw",
+      "original_arguments": "mismatch.get().reason() + \": \" + mismatch.get().message()",
+      "proposed_rule_id": "typed-passthrough-or-no-runtime-context.trustedWrappedPayload",
+      "coverage": "EXPLICIT_UNCOVERED_PASSTHROUGH",
+      "uncovered_reason": "Definition-only rejection has no runtime/decision context, or the branch forwards an already typed failure. No separate PASSED/NOT_CHECKED is inferred; missing actual check evidence remains UNKNOWN."
+    },
+    {
+      "site_id": "C56",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveRoutedAcceptance",
+      "line": 547,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.ACCEPTANCE_CONTEXT, \"CONTEXT_BINDING_INVALID\", failure",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveRoutedAcceptance.dynamic_diagnostic_or_i_o_failure",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "ACCEPTANCE_CONTEXT"
+    },
+    {
+      "site_id": "C57",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.resolveRoutedAcceptance",
+      "line": 555,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.ACCEPTANCE_CONTRACT, \"COMPILE_BINDING_MISSING\", \"qualified task contract is required\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.resolveRoutedAcceptance.qualified_task_contract_is_required",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "ACCEPTANCE_CONTRACT"
+    },
+    {
+      "site_id": "C58",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.lastContractGateOccurrence",
+      "line": 577,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EVENT_PARSE,\n                            \"EVENT_HISTORY_INVALID\", \"workflow event history contains invalid JSON\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_contains_invalid_json",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EVENT_PARSE"
+    },
+    {
+      "site_id": "C59",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.lastContractGateOccurrence",
+      "line": 584,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EVENT_ID,\n                                \"EVENT_HISTORY_INVALID\", \"routing event does not have a workflow event id\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.routing_event_does_not_have_a_workflow_event_id",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EVENT_ID"
+    },
+    {
+      "site_id": "C60",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.lastContractGateOccurrence",
+      "line": 591,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EVENT_ORDER,\n                            \"EVENT_HISTORY_INVALID\", \"workflow event history is not strictly ordered\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EVENT_ORDER"
+    },
+    {
+      "site_id": "C61",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.lastContractGateOccurrence",
+      "line": 608,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EVENT_SOURCE,\n                            \"GATE_SOURCE_MISSING\", \"contract gate routing event has incomplete source lineage\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.contract_gate_routing_event_has_incomplete_source_lineage",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EVENT_SOURCE"
+    },
+    {
+      "site_id": "C62",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.lastContractGateOccurrence",
+      "line": 615,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.EVENT_READ,\n                    \"EVENT_HISTORY_UNREADABLE\", \"cannot read workflow event history\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.cannot_read_workflow_event_history",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "EVENT_READ"
+    },
+    {
+      "site_id": "C63",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.readGate",
+      "line": 622,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.GATE_DOCUMENT_PRESENT, \"GATE_DOCUMENT_MISSING\", \"contract approval gate document is missing\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.readGate.contract_approval_gate_document_is_missing",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GATE_DOCUMENT_PRESENT"
+    },
+    {
+      "site_id": "C64",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.readGate",
+      "line": 627,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.GATE_DOCUMENT_PARSE, \"GATE_DOCUMENT_INVALID\", \"contract approval gate document cannot be parsed\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.readGate.contract_approval_gate_document_cannot_be_parsed",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "GATE_DOCUMENT_PARSE"
+    },
+    {
+      "site_id": "C65",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.readNodes",
+      "line": 664,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.NODE_DOCUMENT_READ,\n                            \"NODE_LEDGER_UNREADABLE\", \"cannot read node ledger document \" + path.getFileName()",
+      "proposed_rule_id": "TaskContractProjectionVerifier.readNodes.cannot_read_node_ledger_document",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "NODE_DOCUMENT_READ"
+    },
+    {
+      "site_id": "C66",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.readNodes",
+      "line": 670,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.NODE_DIRECTORY_READ, \"NODE_LEDGER_UNREADABLE\", \"cannot list node ledger\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.readNodes.cannot_list_node_ledger",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "NODE_DIRECTORY_READ"
+    },
+    {
+      "site_id": "C67",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.fromRefs",
+      "line": 792,
+      "kind": "throw-expression",
+      "original_arguments": "trace.contextRejection(Rule.ACCEPTANCE_CONTEXT_READ, \"cannot read routed acceptance context metadata\", failure)",
+      "proposed_rule_id": "TaskContractProjectionVerifier.fromRefs.cannot_read_routed_acceptance_context_metadata",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "ACCEPTANCE_CONTEXT_READ"
+    },
+    {
+      "site_id": "C68",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.fromRefs",
+      "line": 799,
+      "kind": "throw-expression",
+      "original_arguments": "trace.contextRejection(Rule.ACCEPTANCE_CONTEXT_UNIQUE, \"multiple routed acceptance context metadata documents\", null)",
+      "proposed_rule_id": "TaskContractProjectionVerifier.fromRefs.multiple_routed_acceptance_context_metadata_documents",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "ACCEPTANCE_CONTEXT_UNIQUE"
+    },
+    {
+      "site_id": "C69",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.fromRefs",
+      "line": 805,
+      "kind": "throw-expression",
+      "original_arguments": "trace.contextRejection(Rule.ACCEPTANCE_CONTEXT_BINDING, \"routed acceptance context metadata has no task contract binding\", null)",
+      "proposed_rule_id": "TaskContractProjectionVerifier.fromRefs.routed_acceptance_context_metadata_has_no_task_contract_binding",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "ACCEPTANCE_CONTEXT_BINDING"
+    },
+    {
+      "site_id": "C70",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validate",
+      "line": 812,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.ACCEPTANCE_HASH,\n                        \"CONTEXT_BINDING_HASH_MISMATCH\", \"routed context SHA does not match current task contract\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.AcceptanceContextBinding.validate.routed_context_sha_does_not_match_current_task_contract",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "ACCEPTANCE_HASH"
+    },
+    {
+      "site_id": "C71",
+      "consumer": "dev.dual.runtime.handler.TaskContractProjectionVerifier.validate",
+      "line": 816,
+      "kind": "trace.failure",
+      "original_arguments": "Rule.ACCEPTANCE_LINEAGE,\n                        \"CONTEXT_BINDING_LINEAGE_MISMATCH\", \"routed context compile ref does not match current binding\"",
+      "proposed_rule_id": "TaskContractProjectionVerifier.AcceptanceContextBinding.validate.routed_context_compile_ref_does_not_match_current_binding",
+      "coverage": "MAPPED_TYPED_PRODUCER",
+      "mapped_rule": "ACCEPTANCE_LINEAGE"
+    }
+  ]
+}

@@ -134,25 +134,22 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void acceptanceRequiresCompletedSelfTestEvidenceBeforeReviewerStarts() throws Exception {
+        approvedContextFixture();
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Fix a small bug.", StandardCharsets.UTF_8);
 
         var config = Map.<String, Object>of(
                 "target_node", "acceptance.codex_verifier_review",
+                "required_contract_phase", "EXECUTION",
                 "profile", "acceptance",
                 "required_agent_evidence", Map.of(
                         "node_id", "implement.claude_self_test_report",
                         "source_artifact_type", "self_test_report",
                         "decision", "SELF_TEST_COMPLETE")
         );
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws-ctx",
-                new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", config),
-                new NodeInstance("node-acceptance-context", "ctx.acceptance", NodeKind.TASK,
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", config), new NodeInstance("node-acceptance-context", "ctx.acceptance", NodeKind.TASK,
                         "context.build_package", NodeStatus.READY, "stage-test", "iter-001",
-                        List.of(), List.of(), Map.of(), null, null, null)
-        ));
+                        List.of(), List.of(), Map.of(), null, null, null), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", result.outcome());
@@ -164,51 +161,21 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void acceptanceRendersCompletedSelfTestEvidenceFromRoutedSidecar() throws Exception {
-        Files.createDirectories(wsDir);
-        Files.writeString(wsDir.resolve("requirement.md"), "Fix a small bug.", StandardCharsets.UTF_8);
-        var output = wsDir.resolve("runs/run-self-test/outputs/implement-claude-self-test.json");
-        Files.createDirectories(output.getParent());
-        Files.writeString(output, "{}", StandardCharsets.UTF_8);
-        var sidecar = AgentOutputContractSidecar.pathFor(output);
-        Files.writeString(sidecar, """
-                {
-                  "artifact_type": "agent_output_contract",
-                  "node_id": "implement.claude_self_test_report",
-                  "source_artifact_type": "self_test_report",
-                  "decision": "SELF_TEST_COMPLETE",
-                  "summary": "node --test passed",
-                  "checks_run": ["node --test"],
-                  "evidence": ["4 tests passed"],
-                  "verification_summary": "All targeted tests passed."
-                }
-                """, StandardCharsets.UTF_8);
-        publishSidecar(sidecar);
-
-        var config = Map.<String, Object>of(
-                "target_node", "acceptance.codex_verifier_review",
-                "profile", "acceptance",
-                "required_agent_evidence", Map.of(
-                        "node_id", "implement.claude_self_test_report",
-                        "source_artifact_type", "self_test_report",
-                        "decision", "SELF_TEST_COMPLETE")
-        );
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws-ctx",
-                new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", config),
-                new NodeInstance("node-acceptance-context", "ctx.acceptance", NodeKind.TASK,
-                        "context.build_package", NodeStatus.READY, "stage-test", "iter-001",
-                        List.of(relative(tempDir, sidecar)), List.of(), Map.of(), null, null, null)
-        ));
-
-        assertEquals(NodeStatus.COMPLETED, result.status());
-        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
+        var f = new AcceptanceRepairSequenceTest.Fixture(tempDir, "IMPLEMENTATION_BUG", "product.txt", "ws-ctx");
+        f.until("context.acceptance_codex_verifier_review");
+        var id = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst();
+        f.step();
+        var node = f.ledger.loadNode(f.paths, id);
+        assertEquals(NodeStatus.COMPLETED, node.status());
+        var markdown = Files.readString(f.root.resolve((String) node.result().get("context_package")));
         assertTrue(markdown.contains("SELF_TEST_COMPLETE"));
-        assertTrue(markdown.contains("All targeted tests passed."));
+        assertTrue(markdown.contains("Criterion evidence"));
+        assertTrue(markdown.contains("verification-observations.json"));
     }
 
     @Test
     void acceptanceDoesNotAcceptMatchingDecisionFromWrongProducer() throws Exception {
+        approvedContextFixture();
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Fix a small bug.", StandardCharsets.UTF_8);
         var output = wsDir.resolve("runs/run-other/outputs/other-agent.json");
@@ -228,20 +195,16 @@ class ContextBuildPackageHandlerTest {
 
         var config = Map.<String, Object>of(
                 "target_node", "acceptance.codex_verifier_review",
+                "required_contract_phase", "EXECUTION",
                 "profile", "acceptance",
                 "required_agent_evidence", Map.of(
                         "node_id", "implement.claude_self_test_report",
                         "source_artifact_type", "self_test_report",
                         "decision", "SELF_TEST_COMPLETE")
         );
-        var result = handler.execute(new TaskHandler.TaskContext(
-                tempDir,
-                "ws-ctx",
-                new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", config),
-                new NodeInstance("node-acceptance-context", "ctx.acceptance", NodeKind.TASK,
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", config), new NodeInstance("node-acceptance-context", "ctx.acceptance", NodeKind.TASK,
                         "context.build_package", NodeStatus.READY, "stage-test", "iter-001",
-                        List.of(relative(tempDir, sidecar)), List.of(), Map.of(), null, null, null)
-        ));
+                        List.of(relative(tempDir, sidecar)), List.of(), Map.of(), null, null, null), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals("REQUIRED_AGENT_EVIDENCE_MISSING", result.outcome());
@@ -249,35 +212,18 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void planReviewRendersTypedPlanFromValidatedAgentEvidence() throws Exception {
-        var author = AuthoredInputFixture.before(tempDir, "ws-ctx", "plan.claude_plan", "run-plan");
-        Files.createDirectories(wsDir);
-        Files.writeString(wsDir.resolve("requirement.md"), "Add a small application API.", StandardCharsets.UTF_8);
-        var output = wsDir.resolve("runs/run-plan/outputs/plan-claude.json");
-        Files.createDirectories(output.getParent());
-        Files.writeString(output, "{}", StandardCharsets.UTF_8);
-        var sidecar = AgentOutputContractSidecar.pathFor(output);
-        Files.writeString(sidecar, """
-                {
-                  "artifact_type": "agent_output_contract",
-                  "node_id": "plan.claude_plan",
-                  "source_artifact_type": "plan_result",
-                  "decision": "READY_FOR_PLAN_REVIEW",
-                  "summary": "Plan ready",
-                  "plan_artifact": {
-                    "artifact_type": "plan_artifact",
-                    "schema_version": 1,
-                    "implementation_steps": ["Create src/issueApi.js from the approved transition policy."],
-                    "edit_files": ["src/issueApi.js"],
-                    "reference_files": ["src/issueWorkflow.js"],
-                    "file_level_changes": ["src/issueApi.js: add getIssueState."],
-                    "validation_plan": ["Run npm test and verify no duplicate transition table."],
-                    "rollback_notes": "Delete src/issueApi.js.",
-                    "known_risks": ["Keep the transition policy single-sourced."],
-                    "human_review_checklist": ["Confirm getIssueState calls availableTransitions."]
-                  }
-                }
-                """, StandardCharsets.UTF_8);
-        AuthoredInputFixture.publish(author, output, "run-plan");
+        var f = new AuthoredStageSequenceTest.Fixture(tempDir, "src/issueApi.js", AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, "ws-ctx");
+        f.outputMutation = result -> {
+            if (result.has("plan")) {
+                var plan = (com.fasterxml.jackson.databind.node.ObjectNode) result.get("plan");
+                plan.putArray("implementation_steps").add("Create src/issueApi.js from the approved transition policy.");
+                plan.putArray("reference_files").add("src/issueWorkflow.js");
+                plan.putArray("validation_plan").add("Run npm test and verify no duplicate transition table.");
+            }
+        };
+        var context = f.before("ctx.plan");
+        var sidecar = tempDir.resolve(context.instance().inputRefs().stream().filter(ref -> ref.endsWith(".contract.json")).findFirst().orElseThrow());
+        var output = tempDir.resolve(objectMapper.readTree(sidecar.toFile()).path("source_output_ref").asText());
         var derivedPlan = PlanArtifactSidecar.pathFor(output);
         Files.writeString(derivedPlan, """
                 {
@@ -287,10 +233,7 @@ class ContextBuildPackageHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
 
-        var result = handler.execute(planReviewContext(List.of(
-                relative(tempDir, output),
-                relative(tempDir, sidecar),
-                relative(tempDir, derivedPlan))));
+        var result = handler.execute(context);
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
@@ -427,7 +370,7 @@ class ContextBuildPackageHandlerTest {
         var instance = new NodeInstance("node-001", "ctx.custom", NodeKind.TASK, "context.build_package",
                 NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null);
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", def, instance));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", def, instance, dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
@@ -462,7 +405,7 @@ class ContextBuildPackageHandlerTest {
         var instance = new NodeInstance("node-001", "ctx.custom-memory", NodeKind.TASK, "context.build_package",
                 NodeStatus.READY, "stage-test", "iter-001", List.of(), List.of(), Map.of(), null, null, null);
 
-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", def, instance));
+        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", def, instance, dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
@@ -682,39 +625,17 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void architectureReviewSubjectKeepsLargeValidatedChecksAndEvidenceOutsideSummaryBudget() throws Exception {
-        var author = AuthoredInputFixture.before(tempDir, "ws-ctx", "design.claude_design", "run-design");
-        Files.createDirectories(wsDir);
-        Files.writeString(wsDir.resolve("requirement.md"), "Review the complete design.", StandardCharsets.UTF_8);
-        Files.createDirectories(wsDir.resolve("iterations"));
-        Files.createDirectories(wsDir.resolve("nodes"));
-        var output = wsDir.resolve("runs/run-design/outputs/design-claude.md");
-        Files.createDirectories(output.getParent());
-        Files.writeString(output, "UNVALIDATED_RAW_TRANSCRIPT_MUST_STAY_OUT", StandardCharsets.UTF_8);
-        var sidecar = AgentOutputContractSidecar.pathFor(output);
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), Map.of(
-                "artifact_type", "agent_output_contract",
-                "node_id", "design.claude_design",
-                "decision", "READY_FOR_ARCH_REVIEW",
-                "summary", "Compact current design summary",
-                "checks", List.of(
-                        "CONCURRENCY_BOUNDARY " + "c".repeat(4_000),
-                        "CRASH_RESTART_BOUNDARY " + "r".repeat(4_000)),
-                "evidence", List.of(
-                        "ROLLBACK_CONFLICT_EVIDENCE " + "e".repeat(4_000),
-                        "uq_otp_current WHERE state IN ('PENDING','ACTIVE')"),
-                "must_fix", List.of(),
-                "open_risks", List.of("Stale PENDING must be recoverable"),
-                "verification_summary", "Lifecycle matrix reviewed"));
-        var typed = (com.fasterxml.jackson.databind.node.ObjectNode) objectMapper.readTree(sidecar.toFile());
-        typed.put("source_artifact_type", "design_result");
-        typed.putObject("design").putArray("planned_files").addObject()
-                .put("path", "src/design.ext").put("operation", "CREATE").put("responsibility", "Lifecycle ownership");
-        objectMapper.writeValue(sidecar.toFile(), typed);
-        AuthoredInputFixture.publish(author, output, "run-design");
-
-        var result = handler.execute(ctx("architecture_review", List.of(
-                ".agent/workstreams/ws-ctx/runs/run-design/outputs/design-claude.md", relative(tempDir, sidecar)),
-                "design.codex_arch_review"));
+        var f = new AuthoredStageSequenceTest.Fixture(tempDir, "src/design.ext", AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, "ws-ctx");
+        f.outputMutation = result -> {
+            if (result.has("design")) {
+                result.put("summary", "Compact current design summary");
+                result.putArray("checks").add("CONCURRENCY_BOUNDARY " + "c".repeat(4000)).add("CRASH_RESTART_BOUNDARY " + "r".repeat(4000));
+                result.putArray("evidence").add("ROLLBACK_CONFLICT_EVIDENCE " + "e".repeat(4000)).add("uq_otp_current WHERE state IN ('PENDING','ACTIVE')");
+                ((com.fasterxml.jackson.databind.node.ObjectNode) result.at("/design/planned_files/0")).put("responsibility", "Lifecycle ownership");
+            }
+        };
+        var context = f.before("ctx.design");
+        var result = handler.execute(context);
 
         assertEquals(NodeStatus.COMPLETED, result.status());
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
@@ -930,7 +851,6 @@ class ContextBuildPackageHandlerTest {
                   "verification_summary": "Backend test passed; frontend typecheck missing."
                 }
                 """, StandardCharsets.UTF_8);
-        publishSidecar(output.getParent().resolve("self-test.contract.json"));
         Files.createDirectories(wsDir.resolve("artifacts/git-evidence"));
         Files.writeString(wsDir.resolve("artifacts/git-evidence/git-evidence.json"), "{\"available\":true}", StandardCharsets.UTF_8);
         Files.writeString(wsDir.resolve("artifacts/task-contract.json"), """
@@ -956,6 +876,7 @@ class ContextBuildPackageHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
         TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
+        publishSidecar(output.getParent().resolve("self-test.contract.json"));
 
         var result = handler.execute(ctx("acceptance", List.of(
                 ".agent/workstreams/ws-ctx/runs/run-002/outputs/self-test.md")));
@@ -1314,6 +1235,7 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void acceptanceAlsoPreservesFeedbackAfterEnoughTrimming() throws Exception {
+        approvedContextFixture();
         assertMinimalBudgetTrimming("acceptance");
     }
 
@@ -1323,8 +1245,8 @@ class ContextBuildPackageHandlerTest {
                 new dev.dual.ledger.file.NodeInstanceDocument(1, "node-human", "gate.review", NodeKind.GATE,
                         "human.review", NodeStatus.COMPLETED, "review", "iter-001", List.of(), Map.of(),
                         List.of(), Map.of("human_action", "revise", "note", "Keep the approved API unchanged."),
-                        null, "", Instant.EPOCH, Instant.EPOCH));
-        Files.writeString(wsDir.resolve("events.jsonl"), "");
+                        null, "", Instant.now().plusSeconds(60), Instant.now().plusSeconds(60)));
+        if (!Files.exists(wsDir.resolve("events.jsonl"))) Files.writeString(wsDir.resolve("events.jsonl"), "");
         var diagnostic = wsDir.resolve("artifacts/contract-failures/diagnostic.json");
         Files.createDirectories(diagnostic.getParent());
         objectMapper.writeValue(diagnostic.toFile(), Map.of("recovery_hint", ""));
@@ -1362,7 +1284,7 @@ class ContextBuildPackageHandlerTest {
             }
         }
         assertEquals(1, dropped, metadata.toPrettyString());
-        assertTrue(markdown.contains("Keep the approved API unchanged."));
+        assertTrue(markdown.contains(profile.equals("acceptance") ? "Fixture approves this candidate" : "Keep the approved API unchanged."), markdown);
         assertFalse(markdown.contains("## Ledger Pointers"));
         assertEquals(markdown.indexOf("## Context Governance"), markdown.lastIndexOf("## Context Governance"));
     }
@@ -1448,7 +1370,7 @@ class ContextBuildPackageHandlerTest {
     }
 
     @Test
-    void taskContractSectionIncludesContractResolution() throws Exception {
+    void taskContractSectionUsesQualifiedResolutionNotMutableProjection() throws Exception {
         Files.createDirectories(wsDir.resolve("artifacts"));
         Files.writeString(wsDir.resolve("requirement.md"), "Resolution context test.", StandardCharsets.UTF_8);
         Files.writeString(wsDir.resolve("artifacts/task-contract.json"), """
@@ -1499,8 +1421,8 @@ class ContextBuildPackageHandlerTest {
         var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
         assertTrue(markdown.contains("TaskContract"));
         assertTrue(markdown.contains("Requirement Resolution"));
-        assertTrue(markdown.contains("Should review be mandatory?"));
-        assertTrue(markdown.contains("Yes, mandatory review was approved."));
+        assertFalse(markdown.contains("Should review be mandatory?"), "unbound legacy resolution cannot become approved evidence");
+        assertFalse(markdown.contains("Yes, mandatory review was approved."));
     }
 
     @Test
@@ -1872,10 +1794,10 @@ class ContextBuildPackageHandlerTest {
                     ],
                     "excluded": ["backend API changes"]
                   },
-                  "acceptance_criteria": ["Upload entry remains visible"],
-                  "test_requirements": [],
+                  "acceptance_criteria": ["Upload entry remains visible", "Existing records remain accessible"],
+                  "test_requirements": ["Run upload tests"],
                   "non_goals": [],
-                  "constraints": [],
+                  "constraints": ["Keep backend APIs unchanged"],
                   "risk_areas": [],
                   "ambiguity_notes": [],
                   "human_questions": [],
@@ -1911,6 +1833,7 @@ class ContextBuildPackageHandlerTest {
                 ))
         ));
 
+        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
         var result = handler.execute(ctx("implementation", List.of()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -2031,6 +1954,7 @@ class ContextBuildPackageHandlerTest {
 
     @Test
     void governedStageGuidanceContainsNoReadAuthority() throws Exception {
+        approvedContextFixture();
         Files.createDirectories(wsDir);
         Files.writeString(wsDir.resolve("requirement.md"), "Keep stage governance explicit.", StandardCharsets.UTF_8);
 
@@ -2146,6 +2070,7 @@ class ContextBuildPackageHandlerTest {
                 }
                 """, StandardCharsets.UTF_8);
 
+        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
         var result = handler.execute(ctx("implementation", List.of()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -2196,6 +2121,7 @@ class ContextBuildPackageHandlerTest {
         contract.put("source", Map.of("raw_request_ref", "requirement.md", "created_by", "test"));
         objectMapper.writeValue(wsDir.resolve("artifacts/task-contract.json").toFile(), contract);
 
+        TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
         var result = handler.execute(ctx("implementation", List.of()));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
@@ -2289,7 +2215,7 @@ class ContextBuildPackageHandlerTest {
         var result = handler.execute(ctx("implementation", List.of(), "implement.claude_implement"));
 
         assertEquals(NodeStatus.COMPLETED, result.status());
-        var readReuse = objectMapper.readValue(occurrenceArtifact(wsDir, "read-reuse-contract.json").toFile(), Map.class);
+        var readReuse = objectMapper.readValue(tempDir.resolve(objectMapper.readTree(tempDir.resolve(result.result().get("context_package_metadata").toString()).toFile()).path("readReuseContract").asText()).toFile(), Map.class);
         assertTrue(readReuse.get("allowedRereadFiles") instanceof List<?> allowed && allowed.isEmpty(),
                 "producer targets must use changed_files/plan/invalidation, not review reread allowance");
         assertEquals("agent_output_contract.reread_reasons", readReuse.get("reasonField"),
@@ -2323,18 +2249,31 @@ class ContextBuildPackageHandlerTest {
         Files.createDirectories(wsDir.resolve("artifacts"));
         Files.writeString(wsDir.resolve("requirement.md"), "Review the complete contract.");
         var objective = "complete-contract-fact-".repeat(700);
-        var contract = new TaskContract(
-                "tc-large", 1, Instant.parse("2026-08-26T00:00:00Z"), objective,
+        var contract = new TaskContract(2,
+                dev.dual.core.contract.TaskContract.Phase.EXECUTION,
+                1,
+                "tc-large",
+                1,
+                Instant.parse("2026-08-26T00:00:00Z"),
+                objective,
                 new TaskContract.Scope(
                         List.of(new TaskContract.ScopeEntry("src/Auth.java", TaskContract.ScopeOperation.MODIFY)),
                         List.of("unrelated files")),
-                List.of("registration works", "login works"),
-                List.of("Run authentication tests"),
+                dev.dual.runtime.RuntimeTestLedger.clauses("AC-", List.of("registration works", "login works")),
+                dev.dual.runtime.RuntimeTestLedger.clauses("TR-", List.of("Run authentication tests")),
                 List.of("Keep the existing API"),
                 List.of("Do not add SSO"),
-                List.of(), List.of(), List.of("src/Auth.java"),
-                ContractStatus.READY_FOR_REVIEW, 1,
-                new TaskContract.Source("requirement.md", "contract_compiler"));
+                List.of(),
+                java.util.List.of(),
+                List.of(),
+                List.of("src/Auth.java"),
+                ContractStatus.READY_FOR_REVIEW,
+                1,
+                new TaskContract.Source("requirement.md", "contract_compiler", null, null),
+                null,
+                java.util.List.of(),
+                java.util.List.of(),
+                java.util.List.of());
         TaskContractArtifactWriter.writeJson(contract, wsDir.resolve("artifacts"));
         TaskContractProjectionFixture.seedCompileBinding(tempDir, "ws-ctx");
 
@@ -2347,7 +2286,7 @@ class ContextBuildPackageHandlerTest {
                 "context package is a bounded projection; the agent run receives the separately verified typed payload");
         var metadata = objectMapper.readTree(
                 tempDir.resolve((String) result.result().get("context_package_metadata")).toFile());
-        assertEquals(TaskContractArtifactWriter.sha256(wsDir.resolve("artifacts/task-contract.json")),
+        assertEquals(TaskContractProjectionVerifier.resolve(dev.dual.runtime.RuntimeTestLedger.ledger(), tempDir, "ws-ctx").qualified().orElseThrow().sha256(),
                 metadata.path("taskContractSha256").asText());
         assertTrue(metadata.path("taskContractCompileNodeRef").asText().contains("node-contract-compile"));
         assertTrue(metadata.path("budgetWarnings").toString().contains("task_contract"));
@@ -2359,13 +2298,12 @@ class ContextBuildPackageHandlerTest {
         Files.createDirectories(wsDir);
         var definition = new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", Map.of(
                 "target_node", "acceptance.codex_verifier_review",
+                "required_contract_phase", "EXECUTION",
                 "profile", "acceptance",
                 "include_sections", List.of("task_contract")));
-        var context = new TaskHandler.TaskContext(
-                tempDir, "ws-ctx", definition,
-                new NodeInstance("node-acceptance", definition.id(), NodeKind.TASK, definition.handlerType(),
+        var context = new TaskHandler.TaskContext(tempDir, "ws-ctx", definition, new NodeInstance("node-acceptance", definition.id(), NodeKind.TASK, definition.handlerType(),
                         NodeStatus.READY, "acceptance", "iter-001", List.of(), List.of(), Map.of(),
-                        null, null, null));
+                        null, null, null), dev.dual.runtime.RuntimeTestLedger.ledger());
 
         var result = handler.execute(context);
 
@@ -2377,6 +2315,11 @@ class ContextBuildPackageHandlerTest {
 
     // --- Helper ---
 
+    private AuthoredStageSequenceTest.Fixture approvedContextFixture() throws Exception {
+        return ApprovedExecutionTestFixture.create(tempDir, "ws-ctx", List.of(
+                new TaskContract.ScopeEntry("src/fixture.java", TaskContract.ScopeOperation.CREATE)));
+    }
+
     private void writeFile(String relativePath, String content) throws Exception {
         var path = tempDir.resolve(relativePath);
         Files.createDirectories(path.getParent());
@@ -2385,6 +2328,11 @@ class ContextBuildPackageHandlerTest {
 
     private void publishSidecar(Path sidecar) throws Exception {
         AgentOutputLineageFixture.completeAndPublish(tempDir, "ws-ctx", sidecar, "iter-001", List.of());
+        var document = AgentOutputContractDocument.read(sidecar, objectMapper).orElseThrow();
+        if (document.taskContractProposal() != null) {
+            ApprovedTaskContractProposalFixture.writeInitialSource(tempDir, document);
+            AgentOutputLineageFixture.publish(tempDir, "ws-ctx", sidecar, "iter-001");
+        }
     }
 
     private void publishInitialProposalIteration() throws Exception {
@@ -2462,16 +2410,23 @@ class ContextBuildPackageHandlerTest {
     private TaskHandler.TaskContext ctx(String profile, List<String> inputRefs, String targetNode) {
         var config = new LinkedHashMap<String, Object>();
         config.put("target_node", targetNode);
+        if (Files.isDirectory(wsDir.resolve("artifacts/contracts"))) config.put("required_contract_phase",
+                targetNode.startsWith("design.") || targetNode.startsWith("plan.") ? "GOAL" : "EXECUTION");
         config.put("profile", profile);
+        if ("acceptance".equals(profile)) config.put("required_contract_phase", "EXECUTION");
         if ("intake.codex_product_review".equals(targetNode)) {
             config.put("required_input_artifact", "task_contract_proposal");
         }
-        return new TaskHandler.TaskContext(
-                tempDir, "ws-ctx",
-                new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.copyOf(config)),
-                new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",
-                        NodeStatus.READY, "stage-test", "iter-001", inputRefs, List.of(), Map.of(), null, null, null)
-        );
+        if (targetNode.equals("implement.claude_implement")) {
+            try {
+                var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+                var paths = new dev.dual.ledger.file.WorkstreamPaths(tempDir, new dev.dual.core.id.DualId("ws-ctx"));
+                var current = ledger.loadCoreNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst());
+                return new TaskHandler.TaskContext(tempDir, "ws-ctx", new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.copyOf(config)), current, ledger);
+            } catch (Exception error) { throw new IllegalStateException(error); }
+        }
+        return new TaskHandler.TaskContext(tempDir, "ws-ctx", new NodeDefinition("ctx.test", NodeKind.TASK, "context.build_package", Map.copyOf(config)), new NodeInstance("node-001", "ctx.test", NodeKind.TASK, "context.build_package",
+                        NodeStatus.READY, "stage-test", "iter-001", inputRefs, List.of(), Map.of(), null, null, null), dev.dual.runtime.RuntimeTestLedger.ledger());
     }
 
     private TaskHandler.TaskContext planReviewContext(List<String> inputRefs) {
@@ -2483,14 +2438,9 @@ class ContextBuildPackageHandlerTest {
                         "source_artifact_type", "plan_result",
                         "decision", "READY_FOR_PLAN_REVIEW")
         );
-        return new TaskHandler.TaskContext(
-                tempDir,
-                "ws-ctx",
-                new NodeDefinition("ctx.plan-review", NodeKind.TASK, "context.build_package", config),
-                new NodeInstance("node-plan-review-context", "ctx.plan-review", NodeKind.TASK,
+        return new TaskHandler.TaskContext(tempDir, "ws-ctx", new NodeDefinition("ctx.plan-review", NodeKind.TASK, "context.build_package", config), new NodeInstance("node-plan-review-context", "ctx.plan-review", NodeKind.TASK,
                         "context.build_package", NodeStatus.READY, "stage-plan", "iter-001",
-                        inputRefs, List.of(), Map.of(), null, null, null)
-        );
+                        inputRefs, List.of(), Map.of(), null, null, null), dev.dual.runtime.RuntimeTestLedger.ledger());
     }
 
     private void writeAgentOutputWithSidecar(Path output, String summary) throws Exception {

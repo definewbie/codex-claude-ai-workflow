@@ -1,0 +1,20 @@
+{
+  "status": "PASS_OFFLINE",
+  "javascriptSyntax": [
+    "route-options.mjs",
+    "metadata-preflight.mjs",
+    "model-probe.mjs",
+    "event-guard.mjs",
+    "test-event-guard.mjs"
+  ],
+  "pythonSyntax": "PASS",
+  "dryRun": {
+    "status": "PREPARED_NOT_RUN",
+    "model": "glm-5.3",
+    "userMessages": 0
+  },
+  "guardSequences": 18,
+  "modelTasks": 0,
+  "metadataOnly": "PASS",
+  "serverAuthentication": "UNVERIFIED"
+}

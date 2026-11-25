@@ -1,0 +1,16 @@
+test_tampered_or_unlinked_process_confirmation_refuses (test_continuation.AssemblyTest.test_tampered_or_unlinked_process_confirmation_refuses) ... 
+  test_tampered_or_unlinked_process_confirmation_refuses (test_continuation.AssemblyTest.test_tampered_or_unlinked_process_confirmation_refuses) (filename='absence.json') ... FAIL
+
+======================================================================
+FAIL: test_tampered_or_unlinked_process_confirmation_refuses (test_continuation.AssemblyTest.test_tampered_or_unlinked_process_confirmation_refuses) (filename='absence.json')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmpspijdkrr/test_continuation.py", line 163, in test_tampered_or_unlinked_process_confirmation_refuses
+    with self.subTest(filename=filename),self.assertRaises(AssertionError):c.inspect()
+                                         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: AssertionError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.009s
+
+FAILED (failures=1)

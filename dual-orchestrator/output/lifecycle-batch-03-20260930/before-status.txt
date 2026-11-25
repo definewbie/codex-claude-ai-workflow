@@ -1,0 +1,64 @@
+ M docs/design/dual-orchestrator-current-architecture.zh-CN.md
+ M docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+ M docs/testing/verification-gates/20260909-okx-profile-aligned-fresh-e2e.md
+ M dual-adapter-acpx/pom.xml
+ M dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredManifestDispatchTest.java
+ M dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java
+ M dual-cli/src/test/java/dev/dual/cli/RecoveryShowCommandTest.java
+ M dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java
+ M dual-core/src/main/java/dev/dual/core/workflow/HumanGateActionSemantics.java
+ M dual-core/src/test/java/dev/dual/core/execution/AgentExecutionOutcomeResolverTest.java
+ M dual-flow-liteflow/src/main/java/dev/dual/flow/liteflow/LiteFlowPrototypeKernel.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java
+ M dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamAttentionEvaluator.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/RecoveryAssessmentTest.java
+ M dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java
+ M dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java
+ M dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionResultFacts.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunMetadataFinalizer.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/FailureArbiter.java
+ M dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java
+ M dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json
+ M dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json
+ M dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/handler/ContractCompileHandlerTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRepairWorkflowDefinitionTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/FullWorkflowDefinitionTest.java
+ M dual-runtime/src/test/java/dev/dual/runtime/lifecycle/SmallWorkflowProfileDefinitionTest.java
+ M dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json
+ M dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java
+ M scripts/fixtures/emit-strict-agent-result.py
+ M scripts/semantic-boundary-smoke.sh
+ M scripts/smoke-test.sh
+?? ../.playwright-cli/
+?? .playwright-cli/
+?? docs/design/20260913-dual-evolution-retrospective-and-handoff.zh-CN.md
+?? docs/plans/20260910-harness-overall-convergence-review.zh-CN.md
+?? docs/plans/20260910-human-disposition-and-evidence-continuation-design-review.zh-CN.md
+?? docs/plans/20260910-workflow-continuation-and-liteflow-bounded-assessment.zh-CN.md
+?? docs/plans/20260912-dual-end-to-end-development-capability-review.zh-CN.md
+?? docs/plans/20260913-workflow-first-convergence-redesign.zh-CN.md
+?? docs/plans/20260913-workflow-first-implementation-checkpoint.zh-CN.md
+?? docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md
+?? docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+?? docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+?? docs/testing/20260929-d04-three-boundary-verification-checklist.zh-CN.md
+?? docs/testing/capability-proofs/20260907-phase-a-network-grant-effect-result/
+?? docs/testing/verification-gates/20260903-okx-s2-recovery-and-terminal-completion.md
+?? docs/testing/verification-gates/20260907-spm9-after-phase-a-readiness.md
+?? docs/testing/verification-gates/20260909-scope-deviation-disposition-policy.zh-CN.md
+?? dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java
+?? dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java
+?? dual-cli/src/test/java/dev/dual/cli/CliLedgerFactoryTest.java
+?? dual-flow-liteflow/src/test/java/dev/dual/flow/liteflow/LiteFlowLifecycleIsolationTest.java
+?? dual-server/src/test/java/dev/dual/server/ServerLedgerFactoryTest.java
+?? output/
+?? ../output/

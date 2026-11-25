@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-intake-decision-005",
+  "nodeDefinitionId": "intake.decision",
+  "kind": "DECISION",
+  "handlerType": "review.decision",
+  "status": "COMPLETED",
+  "stageId": "stage-intake",
+  "iterationId": "iter-001",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.stderr.log",
+    ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.transcript.log",
+    ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.json",
+    ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791728450947/binding.json",
+    ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.contract.json"
+  ],
+  "inputTransition": {
+    "source_node_instance_id": "node-intake-codex_product_review-004",
+    "source_node_sha256": "e6558650289127bbda8db2f165352b1725495311cabd8456f452099e923d2fb5",
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "condition": "unconditional",
+    "transition_type": "normal",
+    "required": true
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.stderr.log",
+    ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.transcript.log",
+    ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.json",
+    ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791728450947/binding.json",
+    ".agent/workstreams/ws-20261011T141651Z-MBC2/runs/run-1791728450947/outputs/intake-codex-product-review.contract.json"
+  ],
+  "result": {
+    "source": "contract-sidecar",
+    "summary": "功能语义与主要验收要求完整，但文件范围约束与提案性质冲突，且缺少退出码验证豁免。",
+    "decision": "NEEDS_REVISION"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1791728553799-52d7b95d",
+  "startedAt": "2026-10-11T14:22:33.809144Z",
+  "finishedAt": "2026-10-11T14:22:33.850658Z"
+}

@@ -1,0 +1,31 @@
+{
+  "status": "PASS_MATERIAL_CHECK_ONLY",
+  "checks": [
+    "synthetic example field identities and bounded delta are internally consistent; no production contract invoked",
+    "new document links exist",
+    "20 selected source identities preserved",
+    "656 frozen release inputs unchanged",
+    "fifth and A repair material bundles unchanged"
+  ],
+  "errors": [],
+  "source_input_count": 656,
+  "source_changes": [],
+  "historical_materials": [
+    {
+      "bundle": "w09-fresh-fifth-gate-20261011",
+      "checked": 326,
+      "changes": []
+    },
+    {
+      "bundle": "w09-current-transcript-forward-fix-20261011",
+      "checked": 398,
+      "changes": []
+    }
+  ],
+  "production_tests_run": 0,
+  "native_provider_calls": 0,
+  "new_agent_count": 0,
+  "sixth_case_started": false,
+  "maturity": "DESIGN_CANDIDATE; no new product ENFORCED/PROVEN claim",
+  "remaining": "CC independent design review, user implementation authorization, implementation proof, new release/Gate and separate real-run authorization"
+}

@@ -1,0 +1,5 @@
+{
+  "status": "INVALID_SETUP",
+  "reason": "sandbox denied loopback listener before native launch",
+  "nativeSessions": 0
+}

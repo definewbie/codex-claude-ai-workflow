@@ -1,0 +1,21 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "stage_scope_policy",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "design",
+  "nodeInstanceId" : "node-context-design_codex_arch_review-014",
+  "nodeDefinitionId" : "context.design_codex_arch_review",
+  "builderNodeDefinitionId" : "context.design_codex_arch_review",
+  "targetNodeDefinitionId" : "design.codex_arch_review",
+  "iterationId" : "iter-002",
+  "writeScope" : [ ],
+  "previouslyReadFiles" : [ ],
+  "readReusePolicy" : {
+    "preferExistingEvidence" : true,
+    "reasonField" : "",
+    "requireReasonWhenRereading" : false,
+    "avoidRepeatedReads" : [ ]
+  },
+  "forbiddenScope" : [ ".git/**", ".agent/workstreams/**/workflow/**", ".agent/workstreams/**/nodes/**", "business source writes" ],
+  "generatedAt" : "2026-10-23T01:29:09.694522Z"
+}

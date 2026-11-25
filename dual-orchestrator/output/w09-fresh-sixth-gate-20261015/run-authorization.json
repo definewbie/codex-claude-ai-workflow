@@ -1,0 +1,15 @@
+{
+  "case": "FRESH_SIXTH",
+  "user_message": "批准",
+  "approved_proposal": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-revision-review-acceptance-20261015/fresh-sixth-gate.md",
+  "fresh_run_authorized": true,
+  "budget": {
+    "tokens": 1700000,
+    "requests": 18,
+    "active_seconds": 3600
+  },
+  "recorded_at": "2026-10-15T07:40:02.221698+08:00",
+  "business_gates_preapproved": false,
+  "product_commit_owner": "USER",
+  "previous_case_recovery": false
+}

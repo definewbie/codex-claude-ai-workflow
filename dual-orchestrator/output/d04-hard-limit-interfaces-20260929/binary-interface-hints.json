@@ -1,0 +1,303 @@
+{
+  "warning": "string literals are discovery hints, not enforcement/source proof",
+  "terms": {
+    "excluded_tool_names": [
+      {
+        "offset": 166501956,
+        "excerpt": "</skills_instructions>all branches are disabled and there is no else branchmodel_drivenalways_onsystem  default_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespaces   free_guardianpersist_scoresclassifier_instructionsmax_tool_call_lagmax_action_tokensmax_classifier_instruction_tokensreuse_parent_compactionmax_parent_compaction_tokensreview_scopetranscriptlimiteduse_hist"
+      },
+      {
+        "offset": 166649075,
+        "excerpt": "ctionstruct NetworkMitmHookToml with 7 elementsaumidsstruct ComputerUseWindowsConfigToml with 2 elementsdefault_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespacesstruct CodeModeConfigToml with 4 elementsstrip_request_headersinject_request_headersextendsworkspace_rootsfilesystemnetworkstruct PermissionProfileToml with 5 elementsstruct SleepToolConfigToml with 2 element"
+      },
+      {
+        "offset": 166656449,
+        "excerpt": "Methodosc9bel  vscodevscode-insiderswindsurfcursormodel_drivenalways_on systemexternalCodeModeConfigTomldefault_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespacesSleepToolConfigTomlmodeGuardianV2ConfigTomlfree_guardianpersist_scoresclassifier_instructionsreview_thresholdmax_tool_call_lagreasoning_effortmax_action_tokensmax_classifier_instruction_tokensreuse_parent_com"
+      },
+      {
+        "offset": 166824588,
+        "excerpt": "SON number out of rangenot a JSON numberexpected field with custom nameregionmodel_drivenalways_onsystemdefault_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespacesfree_guardianpersist_scoresclassifier_instructionsmax_tool_call_lagmax_action_tokensmax_classifier_instruction_tokensreuse_parent_compactionmax_parent_compaction_tokensreview_scopetranscriptlimiteduse_history"
+      },
+      {
+        "offset": 167419854,
+        "excerpt": "ookToml with 7 elementsvariant index 0 <= i < 3aumidsstruct ComputerUseWindowsConfigToml with 2 elementsdefault_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespacesstruct CodeModeConfigToml with 4 elementsstruct PermissionProfileToml with 5 elementsstruct SleepToolConfigToml with 2 elementsaccessdownloadsuploadsfull_cdp_accessstruct BrowserUseOriginPolicyConfigToml with"
+      },
+      {
+        "offset": 167443773,
+        "excerpt": "resoss_provideru64 value was too large     model_drivenalways_on systemexternalCodeModeConfigTomlenableddefault_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespacesSleepToolConfigTomlmodeGuardianV2ConfigTomlfree_guardianpersist_scoresclassifier_instructionsreview_thresholdmax_tool_call_lagreasoning_effortmax_action_tokensmax_classifier_instruction_tokensreuse_parent_com"
+      },
+      {
+        "offset": 167529948,
+        "excerpt": "ers_helper must not be emptyinvalid transport     model_drivenalways_on systemexternalCodeModeConfigTomldefault_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespacesSleepToolConfigTomlmodeGuardianV2ConfigTomlfree_guardianpersist_scoresclassifier_instructionsreview_thresholdmax_tool_call_lagreasoning_effortmax_action_tokensmax_classifier_instruction_tokensreuse_parent_com"
+      },
+      {
+        "offset": 167552966,
+        "excerpt": " RawMcpServerCommandIdentity with 1 elementaumidsexesstruct ComputerUseWindowsConfigToml with 2 elementsdefault_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespacesstruct CodeModeConfigToml with 4 elementsfield index 0 <= i < 2identitystrip_request_headersinject_request_headersextendsworkspace_rootsfilesystemnetworkstruct PermissionProfileToml with 5 elementsstruct Slee"
+      },
+      {
+        "offset": 167661421,
+        "excerpt": "                             MCP-Protocol-Version2026-07-28     model_drivenalways_on CodeModeConfigTomldefault_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespacesSleepToolConfigTomlGuardianV2ConfigTomlfree_guardianpersist_scoresclassifier_instructionsreview_thresholdmax_tool_call_lagmax_action_tokensmax_classifier_instruction_tokensreuse_parent_compactionmax_parent_co"
+      },
+      {
+        "offset": 167927745,
+        "excerpt": "AudioSpeechStarted with 1 elementemaildate-timeaumidsstruct ComputerUseWindowsConfigToml with 2 elementsdefault_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespacesstruct CodeModeConfigToml with 4 elementsstruct ApplyPatchApprovalRequestEvent with 6 elementsstruct DynamicToolCallRequest with 6 elementsstruct ModelTokenBudgetConfig with 7 elementsstruct MultiAgentModeMes"
+      },
+      {
+        "offset": 170367749,
+        "excerpt": "odeCursor                                         model_drivenalways_on systemexternalCodeModeConfigTomldefault_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespacesSleepToolConfigTomlmodeGuardianV2ConfigTomlfree_guardianpersist_scoresclassifier_instructionsreview_thresholdmax_tool_call_lagreasoning_effortmax_action_tokensmax_classifier_instruction_tokensreuse_parent_com"
+      },
+      {
+        "offset": 170533067,
+        "excerpt": "ruct RealtimeConversationClosedEvent with 1 elementstruct RealtimeInputAudioSpeechStarted with 1 elementdefault_exec_yield_time_msexcluded_tool_namespacesdirect_only_tool_namespacesstruct CodeModeConfigToml with 4 elementssession_metaresponse_iteminter_agent_communicationinter_agent_communication_metadatacompactedturn_contexttoken_usage_recordworld_statesecurity_risk_scoreevent_msgrealt"
+      }
+    ],
+    "enabled_tools": [
+      {
+        "offset": 165023997,
+        "excerpt": "MCP server may or may not require login. Run `codex mcp login   ` to login.     (disabled:   )     (disabled)     enabled:        enabled_tools:        disabled_tools:        command:        args:        cwd:        env:        url:        bearer_token_env_var:        http_headers:        env_http_headers:        http_headers_helper:        startup_timeout_sec:        tool_timeout"
+      },
+      {
+        "offset": 166402794,
+        "excerpt": "e_numberspansthreadNameafterCursorstruct WaitTarget with 2 elementsstruct GoalsToml with 1 elementstruct ToolsToml with 3 elementsenabled_toolswritable_rootsnetwork_accessexclude_tmpdir_env_varexclude_slash_tmpsession_idforked_from_idforked_from_ordinal_exclusivecwdoriginatorcli_versionthread_sourceagent_nicknameagent_roleagent_pathbase_instructionsdynamic_toolsselected_capability"
+      },
+      {
+        "offset": 166498177,
+        "excerpt": "rruptAllowDenyRequirementTomlallowdenyMarketplaceSourceTypegitlocalunfocusedalwaysPluginMcpServerConfigdefault_tools_approval_modeenabled_toolsdisabled_toolstoolsSandboxWorkspaceWritewritable_rootsnetwork_accessexclude_tmpdir_env_varexclude_slash_tmpSessionPickerViewModecomfortabledenseWindowsSandboxModeTomlelevatedunelevatedToolSuggestDisabledToolToolSuggestDiscoverableTuiNotific"
+      },
+      {
+        "offset": 166606049,
+        "excerpt": "ken_budgetstruct GoalsToml with 1 elementweb_searchexperimental_request_user_inputupdate_planstruct ToolsToml with 3 elementsstateenabled_toolstoolsmax_concurrent_threads_per_sessionmax_depthdefault_subagent_modeldefault_subagent_reasoning_effortjob_max_runtime_secondsinterrupt_messagereview_modelmodel_context_windowmodel_auto_compact_token_limitmodel_auto_compact_token_limit_scop"
+      },
+      {
+        "offset": 166643892,
+        "excerpt": "ken_budgetstruct GoalsToml with 1 elementweb_searchexperimental_request_user_inputupdate_planstruct ToolsToml with 3 elementsstateenabled_toolswritable_rootsnetwork_accessexclude_tmpdir_env_varexclude_slash_tmpmax_concurrent_threads_per_sessionmax_depthdefault_subagent_modeldefault_subagent_reasoning_effortjob_max_runtime_secondsinterrupt_messagetoggle_voice_muteinterrupt_turndecr"
+      },
+      {
+        "offset": 166776756,
+        "excerpt": "x.plugins.loaded_cache.wait.duration_msplugin load semaphore closedstruct GoalsToml with 1 elementstruct ToolsToml with 3 elementsenabled_toolswritable_rootsnetwork_accessexclude_tmpdir_env_varexclude_slash_tmpstruct ConfigToml with 99 elementstoggle_voice_muteinterrupt_turndecrease_reasoning_effortincrease_reasoning_effortprevious_permission_modenext_permission_modeedit_queued_me"
+      },
+      {
+        "offset": 166792153,
+        "excerpt": "writesapproveauthrequiredsupports_parallel_tool_callsomit_tools_fromstartup_timeout_sectool_timeout_secdefault_tools_approval_modeenabled_toolsdisabled_toolsscopesoauth_resourcesourcedata did not match any variant of untagged enum McpServerEnvVarinternal error: entered unreachable codesharded_slab::cfg::DefaultConfig<unnamed> thread ' 3' attempted to panic at 'creating a new threa"
+      },
+      {
+        "offset": 166822383,
+        "excerpt": "rruptAllowDenyRequirementTomlallowdenyMarketplaceSourceTypegitlocalunfocusedalwaysPluginMcpServerConfigdefault_tools_approval_modeenabled_toolsdisabled_toolstoolsSandboxWorkspaceWritewritable_rootsnetwork_accessexclude_tmpdir_env_varexclude_slash_tmpSessionPickerViewModecomfortabledenseWindowsSandboxModeTomlelevatedunelevatedToolSuggestDisabledToolidToolSuggestDiscoverablenotifica"
+      },
+      {
+        "offset": 167414949,
+        "excerpt": "ken_budgetstruct GoalsToml with 1 elementweb_searchexperimental_request_user_inputupdate_planstruct ToolsToml with 3 elementsstateenabled_toolswritable_rootsnetwork_accessexclude_tmpdir_env_varexclude_slash_tmpmax_concurrent_threads_per_sessionmax_depthdefault_subagent_modeldefault_subagent_reasoning_effortjob_max_runtime_secondsinterrupt_messagemodelreview_modelmodel_providermode"
+      },
+      {
+        "offset": 167448057,
+        "excerpt": "ax_goal_token_budgetstruct GoalsToml with 1 elementexperimental_request_user_inputupdate_planstruct ToolsToml with 3 elementsstateenabled_toolswritable_rootsnetwork_accessexclude_tmpdir_env_varexclude_slash_tmpmax_depthdefault_subagent_modeldefault_subagent_reasoning_effortjob_max_runtime_secondsinterrupt_messagereview_modelmodel_context_windowmodel_auto_compact_token_limitmodel_a"
+      },
+      {
+        "offset": 167475154,
+        "excerpt": "cation/deliveredstatusinternally tagged enum WireResultWireToolNameyield_time_msinternally tagged enum WireContentItemtool_call_idenabled_toolssourcemax_output_tokensdescriptioninput_schemaoutput_schemaWireNestedToolCallmaxYieldTimeMsstruct variant WireRuntimeResponse::Yielded with 3 elementsstruct variant WireRuntimeResponse::Terminated with 3 elementsstruct variant WireRuntimeRe"
+      },
+      {
+        "offset": 167496740,
+        "excerpt": "ken_budgetstruct GoalsToml with 1 elementweb_searchexperimental_request_user_inputupdate_planstruct ToolsToml with 3 elementsstateenabled_toolstoolswritable_rootsnetwork_accessexclude_tmpdir_env_varexclude_slash_tmpmax_concurrent_threads_per_sessionmax_depthdefault_subagent_modeldefault_subagent_reasoning_effortjob_max_runtime_secondsinterrupt_messagemodelreview_modelmodel_provide"
+      },
+      {
+        "offset": 167516350,
+        "excerpt": "ktop..gitproject_root_markers must be an array of stringsMarketplaceSourceType     unfocusedalways     default_tools_approval_modeenabled_toolsdisabled_toolsSandboxWorkspaceWritewritable_rootsnetwork_accessexclude_tmpdir_env_varexclude_slash_tmpSessionPickerViewModecomfortabledenseWindowsSandboxModeTomlelevatedunelevated      TuiNotificationSettingsnotificationsnotification_method"
+      },
+      {
+        "offset": 167529601,
+        "excerpt": "tartup_timeout_secstartup_timeout_mstool_timeout_secrequiredsupports_parallel_tool_callsomit_tools_fromdefault_tools_approval_modeenabled_toolsdisabled_toolsscopesoauth_resourcetools  data did not match any variant of untagged enum McpServerEnvVarstdiobearer_tokenstreamable_httphttp_headers_helper is only supported for local MCP servershttp_headers_helper must not be emptyinvalid "
+      },
+      {
+        "offset": 167545987,
+        "excerpt": "ken_budgetstruct GoalsToml with 1 elementweb_searchexperimental_request_user_inputupdate_planstruct ToolsToml with 3 elementsstateenabled_toolswritable_rootsnetwork_accessexclude_tmpdir_env_varexclude_slash_tmpmax_concurrent_threads_per_sessionmax_depthdefault_subagent_modeldefault_subagent_reasoning_effortjob_max_runtime_secondsinterrupt_messagemodelreview_modelmodel_context_wind"
+      },
+      {
+        "offset": 167795553,
+        "excerpt": "varhttp_headershttp_headers_helper       supports_parallel_tool_callsomit_tools_fromstartup_timeout_secdefault_tools_approval_modeenabled_toolsscopesclient_idcallback_urlcallback_portoauthoauth_resourceplugin     resume_cwdcurrentrealtimefeaturesmulti_agent_v2transcript_v2shell_toolview_imagesleep_toolsecret_auth_storageunified_execshell_zsh_forkunified_exec_zsh_forkshell_snapshot"
+      }
+    ],
+    "non_code_mode_only": [
+      {
+        "offset": 166502706,
+        "excerpt": "_instructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingcredential_brokerToolRegistryConfigTomlerror_on_tool_collisionst"
+      },
+      {
+        "offset": 166650354,
+        "excerpt": "_instructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlystruct MultiAgentV2ConfigToml with 16 elementscredential_brokerstruct NetworkProxyConfigToml with 13 elementserror_on_tool_collisionsturn_metadata_includes_tool_infostruct ToolRegistryConfigToml with 2 elementsglob_scan_max_depthlimit_token"
+      },
+      {
+        "offset": 166657354,
+        "excerpt": "_instructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyNetworkProxyConfigTomlproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingcredential_broker      error_on_tool_colli"
+      },
+      {
+        "offset": 166825329,
+        "excerpt": "_instructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingcredential_brokerToolRegistryConfigTomlerror_on_tool_collisionst"
+      },
+      {
+        "offset": 167421051,
+        "excerpt": "_instructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlystruct MultiAgentV2ConfigToml with 16 elementscredential_brokerstruct NetworkProxyConfigToml with 13 elementserror_on_tool_collisionsturn_metadata_includes_tool_infostruct ToolRegistryConfigToml with 2 elementsglob_scan_max_depthlimit_token"
+      },
+      {
+        "offset": 167444678,
+        "excerpt": "_instructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyNetworkProxyConfigTomlproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingcredential_brokerToolRegistryConfigTomlerr"
+      },
+      {
+        "offset": 167530819,
+        "excerpt": "_instructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyNetworkProxyConfigTomlproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingToolRegistryConfigTomlerror_on_tool_collis"
+      },
+      {
+        "offset": 167554340,
+        "excerpt": "_instructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlystruct MultiAgentV2ConfigToml with 16 elementscredential_brokerstruct NetworkProxyConfigToml with 13 elementserror_on_tool_collisionsturn_metadata_includes_tool_infostruct ToolRegistryConfigToml with 2 elementsstruct CloudConfigFragmentglob"
+      },
+      {
+        "offset": 167662306,
+        "excerpt": "_instructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyNetworkProxyConfigTomlproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingcredential_brokererror_on_tool_collisionst"
+      },
+      {
+        "offset": 167929789,
+        "excerpt": "gent_developer_instructionsmulti_agent_mode_hint_texthide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlystruct MultiAgentV2ConfigToml with 16 elementscredential_brokerstruct NetworkProxyConfigToml with 13 elementserror_on_tool_collisionsturn_metadata_includes_tool_infostruct ToolRegistryConfigToml with 2 elementsstruct ModelInstructionsVariab"
+      },
+      {
+        "offset": 170368654,
+        "excerpt": "_instructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyNetworkProxyConfigTomlproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_binding      error_on_tool_collisionsturn_metadat"
+      },
+      {
+        "offset": 170534832,
+        "excerpt": "gent_developer_instructionsmulti_agent_mode_hint_texthide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlystruct MultiAgentV2ConfigToml with 16 elementscredential_brokerstruct NetworkProxyConfigToml with 13 elementsstruct AnnouncementTipRaw with 7 elementslimit_tokensreminder_at_remaining_tokenssampling_token_weightprefill_token_weightstruct Ro"
+      }
+    ],
+    "multi_agent_v2": [
+      {
+        "offset": 166363420,
+        "excerpt": "alling back to required defaultdefault approvals reviewer is disallowed by requirements; falling back to required defaultfeatures.multi_agent_v2.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_msdefaultmodel instructions fileagents.max_concurrent_t"
+      },
+      {
+        "offset": 166363497,
+        "excerpt": "quirements; falling back to required defaultfeatures.multi_agent_v2.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_msdefaultmodel instructions fileagents.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.default_wait_tim"
+      },
+      {
+        "offset": 166363540,
+        "excerpt": "tfeatures.multi_agent_v2.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_msdefaultmodel instructions fileagents.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.default_wait_timeout_ms must be at most features.multi_agen"
+      },
+      {
+        "offset": 166363583,
+        "excerpt": "eads_per_session must be at least 1features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_msdefaultmodel instructions fileagents.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.default_wait_timeout_ms must be at most features.multi_agent_v2.max_wait_timeout_msfeatures.multi_agen"
+      },
+      {
+        "offset": 166363720,
+        "excerpt": "gent_v2.default_wait_timeout_msdefaultmodel instructions fileagents.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.default_wait_timeout_ms must be at most features.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_ms must be at least features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.min_wait_timeout_ms must"
+      },
+      {
+        "offset": 166363784,
+        "excerpt": "nts.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.default_wait_timeout_ms must be at most features.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_ms must be at least features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.min_wait_timeout_ms must be at most features.multi_agent_v2.max_wait_timeout_msexperimen"
+      },
+      {
+        "offset": 166363827,
+        "excerpt": " be at least 1features.multi_agent_v2.default_wait_timeout_ms must be at most features.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_ms must be at least features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.min_wait_timeout_ms must be at most features.multi_agent_v2.max_wait_timeout_msexperimental compact prompt fileapproval_policyappro"
+      },
+      {
+        "offset": 166363892,
+        "excerpt": "t be at most features.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_ms must be at least features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.min_wait_timeout_ms must be at most features.multi_agent_v2.max_wait_timeout_msexperimental compact prompt fileapproval_policyapprovals_reviewerpermission_profile     web_search_mode0.153.4https:/"
+      },
+      {
+        "offset": 166363935,
+        "excerpt": "it_timeout_msfeatures.multi_agent_v2.default_wait_timeout_ms must be at least features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.min_wait_timeout_ms must be at most features.multi_agent_v2.max_wait_timeout_msexperimental compact prompt fileapproval_policyapprovals_reviewerpermission_profile     web_search_mode0.153.4https://chatgpt.com/backend-api/`approval_policy ="
+      },
+      {
+        "offset": 166363995,
+        "excerpt": " must be at least features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.min_wait_timeout_ms must be at most features.multi_agent_v2.max_wait_timeout_msexperimental compact prompt fileapproval_policyapprovals_reviewerpermission_profile     web_search_mode0.153.4https://chatgpt.com/backend-api/`approval_policy = \"never\"` cannot be used because requirements do not allow `"
+      },
+      {
+        "offset": 166590391,
+        "excerpt": "k access.NEW: Network proxy can now be enabled from /experimental. Restart Codex after enabling it.respect_system_proxymulti_agentmulti_agent_v2enable_fanoutappspspenable_mcp_appsmcp_oauth_refresh_coordinationapps_mcp_path_overridetool_searchtool_search_always_defer_mcp_toolsdeferred_tool_world_statenon_prefixed_mcp_tool_namesunavailable_dummy_toolsrecommended_pluginspluginsexecuto"
+      },
+      {
+        "offset": 166762606,
+        "excerpt": "alling back to required defaultdefault approvals reviewer is disallowed by requirements; falling back to required defaultfeatures.multi_agent_v2.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_msdefaultmodel instructions fileagents.max_concurrent_t"
+      },
+      {
+        "offset": 166762683,
+        "excerpt": "quirements; falling back to required defaultfeatures.multi_agent_v2.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_msdefaultmodel instructions fileagents.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.default_wait_tim"
+      },
+      {
+        "offset": 166762726,
+        "excerpt": "tfeatures.multi_agent_v2.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_msdefaultmodel instructions fileagents.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.default_wait_timeout_ms must be at most features.multi_agen"
+      },
+      {
+        "offset": 166762769,
+        "excerpt": "eads_per_session must be at least 1features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_msdefaultmodel instructions fileagents.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.default_wait_timeout_ms must be at most features.multi_agent_v2.max_wait_timeout_msfeatures.multi_agen"
+      },
+      {
+        "offset": 166762906,
+        "excerpt": "gent_v2.default_wait_timeout_msdefaultmodel instructions fileagents.max_concurrent_threads_per_session must be at least 1features.multi_agent_v2.default_wait_timeout_ms must be at most features.multi_agent_v2.max_wait_timeout_msfeatures.multi_agent_v2.default_wait_timeout_ms must be at least features.multi_agent_v2.min_wait_timeout_msfeatures.multi_agent_v2.min_wait_timeout_ms must"
+      }
+    ],
+    "code_mode_only": [
+      {
+        "offset": 166232780,
+        "excerpt": "_fallback_buffer_tokensexplicithint_textsubagentlimitpersonality_defaultpersonality_friendlypersonality_pragmaticbase_instructionscode_mode_onlydisplay_namedefault_reasoning_levelsupported_reasoning_levelsshell_typevisibilitypriorityadditional_speed_tiersservice_tiersdefault_service_tiermodel_messagesinclude_skills_usage_instructionsinclude_plugin_usage_instructionsinclude_apps_usa"
+      },
+      {
+        "offset": 166444310,
+        "excerpt": "relative_turn_diffsjs_replcontent_item_kindsexecuted_tool_call_metadatacode_mode_buffered_execcode_mode_prewarmcode_mode_interruptcode_mode_onlyjs_repl_tools_onlyterminal_resize_reflowweb_search_requestweb_search_cachedstandalone_web_searchsearch_toolruntime_metricssqliteexternal_agent_memory_importlocal_thread_store_compressionlocal_thread_store_shared_compressionbackground_pagina"
+      },
+      {
+        "offset": 166502710,
+        "excerpt": "tructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingcredential_brokerToolRegistryConfigTomlerror_on_tool_collisionst"
+      },
+      {
+        "offset": 166589600,
+        "excerpt": "eplcontent_item_kindsexecuted_tool_call_metadatacode_modecode_mode_buffered_execcode_mode_hostcode_mode_prewarmcode_mode_interruptcode_mode_onlyjs_repl_tools_onlyterminal_resize_reflowweb_search_requestweb_search_cachedstandalone_web_searchsearch_toolruntime_metricssqliteexternal_agent_memory_importlocal_thread_store_compressionlocal_thread_store_shared_compressionchronicleapply_pa"
+      },
+      {
+        "offset": 166650358,
+        "excerpt": "tructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlystruct MultiAgentV2ConfigToml with 16 elementscredential_brokerstruct NetworkProxyConfigToml with 13 elementserror_on_tool_collisionsturn_metadata_includes_tool_infostruct ToolRegistryConfigToml with 2 elementsglob_scan_max_depthlimit_token"
+      },
+      {
+        "offset": 166657358,
+        "excerpt": "tructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyNetworkProxyConfigTomlproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingcredential_broker      error_on_tool_colli"
+      },
+      {
+        "offset": 166825333,
+        "excerpt": "tructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingcredential_brokerToolRegistryConfigTomlerror_on_tool_collisionst"
+      },
+      {
+        "offset": 167421055,
+        "excerpt": "tructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlystruct MultiAgentV2ConfigToml with 16 elementscredential_brokerstruct NetworkProxyConfigToml with 13 elementserror_on_tool_collisionsturn_metadata_includes_tool_infostruct ToolRegistryConfigToml with 2 elementsglob_scan_max_depthlimit_token"
+      },
+      {
+        "offset": 167444682,
+        "excerpt": "tructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyNetworkProxyConfigTomlproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingcredential_brokerToolRegistryConfigTomlerr"
+      },
+      {
+        "offset": 167530823,
+        "excerpt": "tructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyNetworkProxyConfigTomlproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingToolRegistryConfigTomlerror_on_tool_collis"
+      },
+      {
+        "offset": 167554344,
+        "excerpt": "tructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlystruct MultiAgentV2ConfigToml with 16 elementscredential_brokerstruct NetworkProxyConfigToml with 13 elementserror_on_tool_collisionsturn_metadata_includes_tool_infostruct ToolRegistryConfigToml with 2 elementsstruct CloudConfigFragmentglob"
+      },
+      {
+        "offset": 167632620,
+        "excerpt": "eplcontent_item_kindsexecuted_tool_call_metadatacode_modecode_mode_buffered_execcode_mode_hostcode_mode_prewarmcode_mode_interruptcode_mode_onlyjs_repl_tools_onlyterminal_resize_reflowweb_search_requestweb_search_cachedstandalone_web_searchsearch_toolcodex_git_commitruntime_metricssqlitememoriesexternal_agent_memory_importlocal_thread_store_compressionlocal_thread_store_shared_comp"
+      },
+      {
+        "offset": 167662310,
+        "excerpt": "tructionsmulti_agent_mode_hint_texttool_namespacehide_spawn_agent_metadataexpose_spawn_agent_model_overrideswait_agent_enablednon_code_mode_onlyNetworkProxyConfigTomlproxy_urlenable_socks5socks_urlenable_socks5_udpallow_upstream_proxydangerously_allow_non_loopback_proxydangerously_allow_all_unix_socketsdomainsunix_socketsallow_local_bindingcredential_brokererror_on_tool_collisionst"
+      },
+      {
+        "offset": 167727603,
+        "excerpt": "model `    ` does not advertise Code Mode support. This may degrade model performance. Disable `features.code_mode` and `features.code_mode_only`, or select a model whose metadata enables Code Mode. event core/src/session/mod.rs:4635codex_core::sessioncore/src/session/mod.rsskipping subagent thread analytics: missing inherited client metadataapprovals_reviewercodex_request_typeeven"
+      },
+      {
+        "offset": 167796021,
+        "excerpt": "eplcontent_item_kindsexecuted_tool_call_metadatacode_modecode_mode_buffered_execcode_mode_hostcode_mode_prewarmcode_mode_interruptcode_mode_onlyjs_repl_tools_onlyterminal_resize_reflowweb_search_requestweb_search_cachedstandalone_web_searchsearch_toolruntime_metricssqliteexternal_agent_memory_importlocal_thread_store_compressionlocal_thread_store_shared_compressionbackground_pagina"
+      },
+      {
+        "offset": 167888213,
+        "excerpt": "mpact_fallback_promptauto_compact_fallback_buffer_tokenshint_textlimitpersonality_defaultpersonality_friendlypersonality_pragmaticcode_mode_onlydefault_reasoning_levelsupported_reasoning_levelsshell_typevisibilitypriorityadditional_speed_tiersservice_tiersdefault_service_tierupgrademodel_messagesinclude_skills_usage_instructionsinclude_plugin_usage_instructionsinclude_apps_usage_in"
+      }
+    ]
+  }
+}

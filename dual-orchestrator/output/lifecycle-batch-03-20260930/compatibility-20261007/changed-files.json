@@ -1,0 +1,110 @@
+[
+  {
+    "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "before_sha256": "df2564d0ffb5ebbd95c3cf13a1e7dae4a71489e325c3ecf5d038950682aff35a",
+    "after_sha256": "3e90def5f02ed2aff552ad664e0f07a6782a680396fe705a25520d6255a4e4d6",
+    "status": "modified"
+  },
+  {
+    "path": "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "before_sha256": "ba9e13e20a06c08ea1145d6db15ea9a45c15e7ecf5293ade413add8c424ac75a",
+    "after_sha256": "5b0bab469dc2f330443986064530a333baa9658b7a2b190b0906df66f024921d",
+    "status": "modified"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+    "before_sha256": "14058a0f5963fdb18284e57afe95b0aae238948664e6326b69272ff3d634639f",
+    "after_sha256": "8565e7d8e346e7d4ada5f8346b6856b5a3cd947273e02a5e1d0db527c7f9dd9e",
+    "status": "modified"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java",
+    "before_sha256": "f91df23fcfef1218e793942fd710286d10488379cb0f374fef4ac25686cc41cc",
+    "after_sha256": "94e4368278082c07fb60e6b8fd10455644e0f5f9d5fc2c77fb922ed8ad4fe703",
+    "status": "modified"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java",
+    "before_sha256": null,
+    "after_sha256": "56a03d86225676adebd4c16d88be34231e55234cefe11398b7828bf2f1369f55",
+    "status": "added"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ReviewedAcpxBuildIdentity.java",
+    "before_sha256": "74cf3bbf7bcc6f2c8e557c83fc692b52d9488b4b7fad7df0db5ec0b23fcdf96b",
+    "after_sha256": "643b54a1c94a0f2fdf6583507674971af29a820bdc068839ac37765ac84b1f61",
+    "status": "modified"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java",
+    "before_sha256": "7839090a131cdf7939d08cc38a22f3eb15fde2beaa6c47cc02b1b4600b9a6320",
+    "after_sha256": "23ef2006206dd151f9329bd933a50f2b89d82056568410c67769cc2132e452d4",
+    "status": "modified"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTransportTest.java",
+    "before_sha256": "f5335dd39f99701086ce7f0de911c80c150c2488d8864e35a90f59a63252daf6",
+    "after_sha256": "2f87f25d9ec54564f3f20b4115272b91eb8bef5de3bec42d425051a81acf84e6",
+    "status": "modified"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java",
+    "before_sha256": null,
+    "after_sha256": "a1cf88cc028b29e1baeff576028100a0590079610d02e3a23ecc574adb266f65",
+    "status": "added"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxNativeCommandSequenceTest.java",
+    "before_sha256": "01e0b85226df5faacd18f1b6ae86137756ebbfe16a069fcb2326c4207079d95c",
+    "after_sha256": "66c7d42c9099fd5abe0e09e6ebabbbdfcc93b62db44f370eda3081133911d842",
+    "status": "modified"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/SessionMetadataFixture.java",
+    "before_sha256": null,
+    "after_sha256": "4bb70939a0f942259d024513f7e0bf3a924e8b935881104065348c8b4d8935f8",
+    "status": "added"
+  },
+  {
+    "path": "dual-core/src/main/java/dev/dual/core/execution/AdapterSignalType.java",
+    "before_sha256": "763a2cc86fecc437294d10af9c5518684e5f77f46997ebf9e9cc6fcb1e92b107",
+    "after_sha256": "cbfb3d70b384d06bf9b42eb25e5e22779735d6b4e2618e4d93bd581ea2503000",
+    "status": "modified"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java",
+    "before_sha256": "ea645dde6eb71ca2d048b10d37a152e8863592fbccc23cf38ccf0d036f99f05c",
+    "after_sha256": "0dc3eaa0da3999da253137387081d11c3336e0554da06a4fe7f8364257d383ee",
+    "status": "modified"
+  },
+  {
+    "path": "dual-ledger-file/src/test/java/dev/dual/ledger/file/RecoveryAssessmentTest.java",
+    "before_sha256": "2523c20a6f51949a6bba1b238e26b50af51b2e7ce5cb7047810dac558c2ebb8d",
+    "after_sha256": "6e3b69c76956b73d5a036ff9e2443fed58f69f44664793f7a35a299c5ce50bce",
+    "status": "modified"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java",
+    "before_sha256": "90299628c5ccbc4e5c4a7fad5dca9fa43940f1a62ce8b2e46be733034b34ec28",
+    "after_sha256": "512690b6e9b9336bbd11961aed95db9bf3c1441559b3f7005774182332e8a436",
+    "status": "modified"
+  },
+  {
+    "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/AgentRunCommitProtocolTest.java",
+    "before_sha256": "ffbbe8c82f5c9b87919b0a3ea859229dcbc1aa67333c8e248e60159c5c2df7db",
+    "after_sha256": "5c0aa93171e0b79d4a0e7ddd947fc1a29e68f4d444e16b27b4c68b02a941404a",
+    "status": "modified"
+  },
+  {
+    "path": "dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java",
+    "before_sha256": "9fe18b77cb3a6699eb5e3a11ce12431050545917873480383800f34515740ba3",
+    "after_sha256": "3a57693348888055c27360b957574ef08bef7e5ad6e64342cf86c601043af91b",
+    "status": "modified"
+  },
+  {
+    "path": "output/lifecycle-batch-03-20260930/progress-and-decision.md",
+    "before_sha256": "c846de683e1e92b630b3e90d7b9d9789763d5637318514872406a4ce6a456c0f",
+    "after_sha256": "e896be3f6248f77b3738989762c371082e16ce9023cfd4ca3b42846b03533f2d",
+    "status": "modified"
+  }
+]

@@ -1,0 +1,21 @@
+                  Figure 2-5. Final application with a hierarchical architecture.
+
+But before you get there, you’ll start smaller by building your first
+supervisor setup: the research team. You see the overview of the team you
+create in Figure 2-6. Once that’s in place, the second step is to add a writing
+team. This group will take the output from the research team and save it to
+your file system as a simple text file.
+
+
+
+
+
+                        Figure 2-6. Flow diagram for the research team.
+
+I’ll leave out the details of how to create tools, since you already learned
+this in Chapter 1 (Example 1-2).
+
+The first thing you need is a helper (Example 2-22) to create your
+supervisor. This function acts as a router (see “Mapping FSM/HSM to
+Agent Frameworks”) that decides which worker should take the next step,
+or whether the process should finish.

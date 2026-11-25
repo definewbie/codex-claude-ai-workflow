@@ -17,7 +17,8 @@ public record TimelineEventDocument(
         String fromStatus,
         String toStatus,
         String reason,
-        List<String> artifactRefs
+        List<String> artifactRefs,
+        @com.fasterxml.jackson.annotation.JsonProperty("event_id") String eventId
 ) {
     static TimelineEventDocument from(TimelineEvent event) {
         return new TimelineEventDocument(
@@ -32,7 +33,8 @@ public record TimelineEventDocument(
                 event.fromStatus(),
                 event.toStatus(),
                 event.reason(),
-                event.artifactRefs()
+                event.artifactRefs(),
+                "timeline-" + java.util.UUID.randomUUID()
         );
     }
 }

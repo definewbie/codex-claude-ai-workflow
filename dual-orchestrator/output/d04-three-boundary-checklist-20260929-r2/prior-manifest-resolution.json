@@ -1,0 +1,114 @@
+[
+  {
+    "original_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/assessment.md",
+    "expected_sha256": "b3a5e5dd6d899f3a1a0580204df4effe730e52c3d31d864f4a74f703f67fc3ef",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/assessment.md",
+    "status": "CURRENT_MATCH",
+    "current_sha256": "b3a5e5dd6d899f3a1a0580204df4effe730e52c3d31d864f4a74f703f67fc3ef"
+  },
+  {
+    "original_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/baseline.json",
+    "expected_sha256": "9c5835eb2f6993b80519eb35cd4eb2f1d9dd68197a36d42b4ae28391fc94f36d",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/baseline.json",
+    "status": "CURRENT_MATCH",
+    "current_sha256": "9c5835eb2f6993b80519eb35cd4eb2f1d9dd68197a36d42b4ae28391fc94f36d"
+  },
+  {
+    "original_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/before/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "expected_sha256": "25dc1d04db72b18f4de4e46ddba82ab5e66ac587ed2b721b50e526378fa03390",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/before/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "status": "CURRENT_MATCH",
+    "current_sha256": "25dc1d04db72b18f4de4e46ddba82ab5e66ac587ed2b721b50e526378fa03390"
+  },
+  {
+    "original_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "expected_sha256": "56a219cb848665ae06cc4792bea5d43be53cd20ab8105dd75e9a3bc95c330ecb",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "status": "CURRENT_MATCH",
+    "current_sha256": "56a219cb848665ae06cc4792bea5d43be53cd20ab8105dd75e9a3bc95c330ecb"
+  },
+  {
+    "original_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "expected_sha256": "1ba8858eac0ab9337a8de19eccfc30f05e371091719c4791b45cac10fa2f3f07",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "status": "CURRENT_MATCH",
+    "current_sha256": "1ba8858eac0ab9337a8de19eccfc30f05e371091719c4791b45cac10fa2f3f07"
+  },
+  {
+    "original_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+    "expected_sha256": "e3e4ea1ee27020efac06a4e0a277cbb80146a2564aa6d4fe43103c3994823dee",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+    "status": "CURRENT_MATCH",
+    "current_sha256": "e3e4ea1ee27020efac06a4e0a277cbb80146a2564aa6d4fe43103c3994823dee"
+  },
+  {
+    "original_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/cc-review.txt",
+    "expected_sha256": "af25b55d7b71da5f4f15b17728b3875024131536fdf7c534cdee1e6199dcc625",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/original-cc-prompt.snapshot.txt",
+    "status": "VERIFIED_ORIGINAL_SNAPSHOT_CURRENT_APPEND_PRESERVED",
+    "current_sha256": "a558bb9950103d81268e20e4c67a4ea211e25098d7f3ab204289954390389f92"
+  },
+  {
+    "original_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/documentation.diff",
+    "expected_sha256": "0d5e178359994b4db89e11312b953e9f107d0d9f09c58df48d2f11bdc2b16226",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/documentation.diff",
+    "status": "CURRENT_MATCH",
+    "current_sha256": "0d5e178359994b4db89e11312b953e9f107d0d9f09c58df48d2f11bdc2b16226"
+  },
+  {
+    "original_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/material-verification.json",
+    "expected_sha256": "2abe069b0419c14cecde7c7d13c088f215ed56d4642d0e760b7c5afb56f156bf",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/material-verification.json",
+    "status": "CURRENT_MATCH",
+    "current_sha256": "2abe069b0419c14cecde7c7d13c088f215ed56d4642d0e760b7c5afb56f156bf"
+  },
+  {
+    "original_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/prior-manifest-resolution.json",
+    "expected_sha256": "6255583f154d94c3fd5aa7c5fa11615fe56cb20de26aacb698d884312f0d539e",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/prior-manifest-resolution.json",
+    "status": "CURRENT_MATCH",
+    "current_sha256": "6255583f154d94c3fd5aa7c5fa11615fe56cb20de26aacb698d884312f0d539e"
+  },
+  {
+    "original_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/source-checks.json",
+    "expected_sha256": "19bccdbca5a684415113ac57415961b06f10430d3a19e1af43e5a299606ef744",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929/source-checks.json",
+    "status": "CURRENT_MATCH",
+    "current_sha256": "19bccdbca5a684415113ac57415961b06f10430d3a19e1af43e5a299606ef744"
+  },
+  {
+    "original_path": "dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "expected_sha256": "8c8f2a95524651b3a6cca6771e2f2801c38267c414714f9a4e657170a54cf263",
+    "resolved_path": "dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "status": "CURRENT_MATCH",
+    "current_sha256": "8c8f2a95524651b3a6cca6771e2f2801c38267c414714f9a4e657170a54cf263"
+  },
+  {
+    "original_path": "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "expected_sha256": "a95fe5e9f5068e5439be84375d01c47d814f77cddb7b0833b9fdd1bc9d14f7ae",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "status": "PRE_EDIT_SNAPSHOT_MATCH",
+    "current_sha256": "f8e23688bf9ab661ef48b9212147a1b1dc3441a0f06d5df51e4b523169ae0953"
+  },
+  {
+    "original_path": "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "expected_sha256": "4e6853ebab408ba7d84a8c0162685b16a989f4879a28fae59f987fcf5051ffa4",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "status": "PRE_EDIT_SNAPSHOT_MATCH",
+    "current_sha256": "38926c63c50988275fede837f103ebac339458e717eae96f6af3870ae2532e6b"
+  },
+  {
+    "original_path": "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+    "expected_sha256": "da4193fb9d37f07fd6ecc48ccbffb84dc5e1fd6d7e9dd849c95ddfc1792b4720",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+    "status": "PRE_EDIT_SNAPSHOT_MATCH",
+    "current_sha256": "07dc18733ccc677343becf02c4720698da2d1c51449e01b1f51cb7d58903a761"
+  },
+  {
+    "original_path": "dual-orchestrator/docs/testing/20260929-d04-three-boundary-verification-checklist.zh-CN.md",
+    "expected_sha256": "234068bc46a71e0b4f640393fd36dedb934dec45bfc28f0150e1be1de649fd5c",
+    "resolved_path": "dual-orchestrator/output/d04-three-boundary-checklist-20260929-r2/before/20260929-d04-three-boundary-verification-checklist.zh-CN.md",
+    "status": "PRE_EDIT_SNAPSHOT_MATCH",
+    "current_sha256": "657b9bc4009107232ff8a3514bc967d6887854d9904f7dedf5249a45fb29637a"
+  }
+]

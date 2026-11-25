@@ -1,0 +1,28 @@
+{
+  "pid": 65912,
+  "pgid": 65912,
+  "argv": [
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+    "--verbose",
+    "--prompt-retries",
+    "1",
+    "--approve-reads",
+    "--non-interactive-permissions",
+    "fail",
+    "--permission-policy",
+    "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}",
+    "--allowed-tools",
+    "Read,Grep,Glob",
+    "--no-terminal",
+    "--claude-execution-policy-ref",
+    ".agent/workstreams/ws-20261022T150557Z-Y2KB/runs/run-1792682394836/execution-authority/claude-execution-policy.json",
+    "--claude-execution-policy-sha256",
+    "ca7ed0e1f716667cdbc3f0890171c49b4f349dca38dffd458e29dc0eba31d2c2",
+    "claude",
+    "sessions",
+    "close",
+    "claude-bootstrap-observe-20261023-pending-approval"
+  ],
+  "started_at": "2026-10-22T23:20:55.788886+00:00",
+  "stdin": "DEVNULL"
+}

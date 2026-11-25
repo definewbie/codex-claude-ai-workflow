@@ -1,0 +1,539 @@
+{
+  "candidate" : {
+    "outcome" : "completed",
+    "status" : "COMPLETED",
+    "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-codex_arch_review-010-run-1792718638529/binding.json" ],
+    "result" : {
+      "adapter_signals" : [ ],
+      "agent" : "codex",
+      "agent_execution_artifact_contract_results" : [ {
+        "contractType" : "agent_output_contract",
+        "errorCode" : "",
+        "errorMessage" : "",
+        "path" : "",
+        "present" : true,
+        "required" : true,
+        "valid" : true
+      } ],
+      "agent_execution_result_contract" : {
+        "decision" : "NEEDS_REVISION",
+        "present" : true,
+        "summary" : "",
+        "valid" : true,
+        "validationError" : ""
+      },
+      "exit_code" : 0,
+      "output_complete" : true,
+      "permission_assessments" : [ ],
+      "process_usability" : "EXITED_ZERO",
+      "repository_fact_binding_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-codex_arch_review-010-run-1792718638529/binding.json",
+      "repository_fact_binding_sha256" : "882754342de9d2cbe52896a512bcebd7c4b904039f6781beddfa9277caf13711",
+      "reread_reasons" : [ ],
+      "run_id" : "run-1792718638529",
+      "run_metadata" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/run.json",
+      "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+      "transcript_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log"
+    },
+    "errorMessage" : null
+  },
+  "outcome" : {
+    "status" : "SUCCESS",
+    "primaryReason" : "completed",
+    "secondarySignals" : [ ],
+    "nodeMaySucceed" : true,
+    "retryPolicy" : "NONE",
+    "recoveryCategory" : "NONE",
+    "operatorMessage" : "The agent produced valid result and artifact evidence."
+  },
+  "output_hashes" : {
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-codex_arch_review-010-run-1792718638529/binding.json" : "882754342de9d2cbe52896a512bcebd7c4b904039f6781beddfa9277caf13711",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.json" : "354b1aa039ed337fd37149cc359ddb3adf820e426bf2e388b1ff2bd3ee3adc12",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.stderr.log" : "6f3a89e9ccb74217b5b3458e0f6b0aaaea5acaeab4023b392f6529246be3e187",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log" : "401abd73504d8f21c83f7c164dc360c5a1b70b5a6f6708e5df2c88a09f7f9a42"
+  },
+  "publication" : {
+    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/publication-plan.json",
+    "sha256" : "cd1166c9c5d16e937f3b98b616d26e187f42caa6bb02ef8f58c57df7ae72f148"
+  },
+  "run_observations" : {
+    "schemaVersion" : 3,
+    "runId" : "run-1792718638529",
+    "workstreamId" : "ws-20261023T005431Z-9YYF",
+    "nodeId" : "design.codex_arch_review",
+    "agent" : "codex",
+    "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+    "sessionScope" : "workstream",
+    "sessionSegmentKey" : "ws:ws-20261023T005431Z-9YYF",
+    "sessionScopeReason" : "default:workstream",
+    "stage" : "stage-design",
+    "semanticIteration" : "iter-001",
+    "sessionCompactionMode" : "off",
+    "sessionCompactionEnabled" : false,
+    "sessionCompactionReason" : "default:off",
+    "sessionCompactionSeedKind" : "",
+    "sessionCompactionSeedPath" : "",
+    "promptTemplate" : "design-codex-review",
+    "workdir" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+    "promptPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md",
+    "promptManifestPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md.manifest.json",
+    "outputPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.json",
+    "transcriptPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log",
+    "stderrPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.stderr.log",
+    "promptMetadataPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md.meta.json",
+    "outputMetadataPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.json.meta.json",
+    "transcriptMetadataPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log.meta.json",
+    "stderrMetadataPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.stderr.log.meta.json",
+    "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--timeout", "600", "--ttl", "1800", "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "codex", "-s", "codex-reviewer-ws-20261023T005431Z-9YYF", "-f", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md" ],
+    "startedAt" : "2026-10-23T01:23:58.986240Z",
+    "finishedAt" : "2026-10-23T01:24:43.220094Z",
+    "durationMs" : 44233,
+    "exitCode" : 0,
+    "status" : "completed",
+    "failureReason" : null,
+    "recoverable" : false,
+    "usage" : {
+      "inputTokens" : 18837,
+      "outputTokens" : 1253,
+      "cachedReadTokens" : 26496,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 46586,
+      "costAmount" : null,
+      "costCurrency" : "",
+      "source" : "acpx_current_transcript",
+      "measurementType" : "PROVIDER_RUN_USAGE",
+      "attribution" : "EXACT_REQUEST_MATCH",
+      "cumulative" : false,
+      "contextUsedTokens" : 0,
+      "sessionCostAmount" : null,
+      "sessionCostCurrency" : "",
+      "providerId" : "openai",
+      "model" : "GPT-6-Astra",
+      "billingMode" : "metered",
+      "providerMetadataSource" : "acpx_session_json",
+      "unavailableReason" : ""
+    },
+    "agentResultAcquisition" : {
+      "schemaVersion" : 2,
+      "correctionAttempted" : false,
+      "maxCorrectionAttempts" : 1,
+      "selectedCandidateOccurrence" : 1,
+      "correctionReason" : "NONE",
+      "correctionDisposition" : "NOT_NEEDED",
+      "occurrences" : [ {
+        "occurrence" : 1,
+        "sessionName" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+        "requestId" : "4",
+        "promptPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md",
+        "outputPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.json",
+        "transcriptPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log",
+        "stderrPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.stderr.log",
+        "startedAt" : "2026-10-23T01:23:58.986240Z",
+        "finishedAt" : "2026-10-23T01:24:43.220094Z",
+        "durationMs" : 44233,
+        "exitCode" : 0,
+        "stopReason" : "end_turn",
+        "presentationDisposition" : "NOT_NEEDED",
+        "rawAssistantSha256" : "354b1aa039ed337fd37149cc359ddb3adf820e426bf2e388b1ff2bd3ee3adc12",
+        "candidateSha256" : "354b1aa039ed337fd37149cc359ddb3adf820e426bf2e388b1ff2bd3ee3adc12",
+        "contractDecodable" : true,
+        "parseErrorCode" : "",
+        "contractSchemaValid" : true,
+        "contractCorrectionDisposition" : "NONE",
+        "contractValidationErrors" : [ ],
+        "usage" : {
+          "inputTokens" : 18837,
+          "outputTokens" : 1253,
+          "cachedReadTokens" : 26496,
+          "cachedWriteTokens" : 0,
+          "totalTokens" : 46586,
+          "costAmount" : null,
+          "costCurrency" : "",
+          "source" : "acpx_current_transcript",
+          "measurementType" : "PROVIDER_RUN_USAGE",
+          "attribution" : "EXACT_REQUEST_MATCH",
+          "cumulative" : false,
+          "contextUsedTokens" : 0,
+          "sessionCostAmount" : null,
+          "sessionCostCurrency" : "",
+          "providerId" : "openai",
+          "model" : "GPT-6-Astra",
+          "billingMode" : "metered",
+          "providerMetadataSource" : "acpx_session_json",
+          "unavailableReason" : ""
+        },
+        "processResult" : {
+          "command" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx --timeout 600 --ttl 1800 --format json --permission-replies --approve-reads --non-interactive-permissions fail --permission-policy {\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"} --allowed-tools Read,Grep,Glob codex -s codex-reviewer-ws-20261023T005431Z-9YYF -f /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md",
+          "pid" : 76137,
+          "exitCode" : 0,
+          "usability" : "EXITED_ZERO",
+          "durationMs" : 44233,
+          "stdoutPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log",
+          "stderrPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.stderr.log",
+          "interrupted" : false,
+          "timedOut" : false
+        },
+        "adapterSignals" : [ ]
+      } ]
+    },
+    "providerModelIdentity" : {
+      "source" : "acpx_session_json",
+      "confidence" : "high",
+      "model" : "GPT-6-Astra",
+      "billingMode" : "metered",
+      "provider" : "openai"
+    },
+    "toolUsage" : {
+      "schemaVersion" : 1,
+      "toolCallCount" : 0,
+      "readCount" : 0,
+      "writeCount" : 0,
+      "bashCount" : 0,
+      "otherCount" : 0,
+      "byTool" : { },
+      "toolIds" : [ ],
+      "readFiles" : [ ],
+      "directReadFiles" : [ ],
+      "writeFiles" : [ ],
+      "bashCommands" : [ ],
+      "commandExecutables" : [ ]
+    },
+    "contextGovernanceActualReportPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/design.codex_arch_review-actual-run-1792718638529.json",
+    "executionAuthority" : {
+      "transportDisposition" : "NETWORK_AUTHORITY_NOT_CONFIGURED"
+    },
+    "processResult" : {
+      "command" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx --timeout 600 --ttl 1800 --format json --permission-replies --approve-reads --non-interactive-permissions fail --permission-policy {\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"} --allowed-tools Read,Grep,Glob codex -s codex-reviewer-ws-20261023T005431Z-9YYF -f /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md",
+      "pid" : 76137,
+      "exitCode" : 0,
+      "usability" : "EXITED_ZERO",
+      "durationMs" : 44233,
+      "stdoutPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log",
+      "stderrPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.stderr.log",
+      "interrupted" : false,
+      "timedOut" : false
+    },
+    "adapterSignals" : [ ],
+    "agentResultContract" : {
+      "present" : true,
+      "valid" : true,
+      "decision" : "NEEDS_REVISION",
+      "summary" : "",
+      "validationError" : ""
+    },
+    "artifactContractResults" : [ {
+      "contractType" : "agent_output_contract",
+      "required" : true,
+      "present" : true,
+      "valid" : true,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "executionAttempt" : {
+      "attemptId" : "att-run-1792718638529",
+      "runId" : "run-1792718638529",
+      "workstreamId" : "ws-20261023T005431Z-9YYF",
+      "nodeId" : "design.codex_arch_review",
+      "agent" : "codex",
+      "status" : "COMPLETED",
+      "processStatus" : "EXITED",
+      "failureSignal" : null,
+      "recoverable" : false,
+      "retrySafe" : false,
+      "message" : "The agent produced valid result and artifact evidence.",
+      "stderrPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.stderr.log",
+      "transcriptPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log",
+      "sessionName" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+      "sessionId" : "",
+      "sessionScope" : "workstream",
+      "sessionSegmentKey" : "ws:ws-20261023T005431Z-9YYF",
+      "startedAt" : "2026-10-23T01:23:58.986240Z",
+      "finishedAt" : "2026-10-23T01:24:43.220094Z"
+    },
+    "executionOutcome" : {
+      "status" : "SUCCESS",
+      "primaryReason" : "completed",
+      "nodeMaySucceed" : true,
+      "retryPolicy" : "NONE",
+      "recoveryCategory" : "NONE",
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "secondarySignals" : [ ]
+    },
+    "executionTimeline" : [ {
+      "elapsedMs" : 0,
+      "source" : "adapter",
+      "details" : {
+        "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+        "cleanup" : false,
+        "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "codex", "sessions", "ensure", "--name", "codex-reviewer-ws-20261023T005431Z-9YYF" ],
+        "purpose" : "session_ensure",
+        "command_id" : "1171095f-6795-44ed-adf2-47dbf03dadd9",
+        "invocation" : {
+          "cwd" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+          "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+          "executable" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+          "schema" : "dual.acpx.invocation.v1",
+          "launch_environment" : {
+            "CODEX_PATH" : "",
+            "PATH" : "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.codex/tmp/arg0-macos/codex-arg0o69tg0:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS"
+          },
+          "agent" : "codex"
+        },
+        "request_options" : [ "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob" ]
+      },
+      "sequence" : 0,
+      "kind" : "command_intent",
+      "observedAt" : "2026-10-23T01:23:58.691535Z"
+    }, {
+      "elapsedMs" : 0,
+      "source" : "adapter",
+      "details" : {
+        "request_options" : [ "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob" ],
+        "invocation" : {
+          "cwd" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+          "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+          "executable" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+          "schema" : "dual.acpx.invocation.v1",
+          "launch_environment" : {
+            "CODEX_PATH" : "",
+            "PATH" : "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.codex/tmp/arg0-macos/codex-arg0o69tg0:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS"
+          },
+          "agent" : "codex"
+        },
+        "command_id" : "1171095f-6795-44ed-adf2-47dbf03dadd9",
+        "purpose" : "session_ensure",
+        "observation" : {
+          "output" : "{\"action\":\"session_ensured\",\"created\":false,\"acpxRecordId\":\"01a1664b-1ea2-7e72-824f-a15b70c68b84\",\"acpxSessionId\":\"01a1664b-2902-7702-a04f-63ca9ddc4c2b\",\"name\":\"codex-reviewer-ws-20261023T005431Z-9YYF\"}\n",
+          "exit_code" : 0,
+          "timed_out" : false,
+          "success" : true
+        },
+        "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "codex", "sessions", "ensure", "--name", "codex-reviewer-ws-20261023T005431Z-9YYF" ],
+        "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+        "cleanup" : false
+      },
+      "sequence" : 0,
+      "kind" : "command_result",
+      "observedAt" : "2026-10-23T01:23:58.820309Z"
+    }, {
+      "elapsedMs" : 0,
+      "source" : "adapter",
+      "details" : {
+        "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+        "cleanup" : false,
+        "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--format", "json", "codex", "sessions", "show", "codex-reviewer-ws-20261023T005431Z-9YYF" ],
+        "purpose" : "session_compatibility",
+        "command_id" : "e6203435-7757-457b-a011-03a46cf7f850",
+        "invocation" : {
+          "cwd" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+          "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+          "executable" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+          "schema" : "dual.acpx.invocation.v1",
+          "launch_environment" : {
+            "CODEX_PATH" : "",
+            "PATH" : "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.codex/tmp/arg0-macos/codex-arg0o69tg0:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS"
+          },
+          "agent" : "codex"
+        },
+        "request_options" : [ "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob" ]
+      },
+      "sequence" : 0,
+      "kind" : "command_intent",
+      "observedAt" : "2026-10-23T01:23:58.822049Z"
+    }, {
+      "elapsedMs" : 0,
+      "source" : "adapter",
+      "details" : {
+        "request_options" : [ "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob" ],
+        "invocation" : {
+          "cwd" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+          "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+          "executable" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+          "schema" : "dual.acpx.invocation.v1",
+          "launch_environment" : {
+            "CODEX_PATH" : "",
+            "PATH" : "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.codex/tmp/arg0-macos/codex-arg0o69tg0:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS"
+          },
+          "agent" : "codex"
+        },
+        "command_id" : "e6203435-7757-457b-a011-03a46cf7f850",
+        "purpose" : "session_compatibility",
+        "observation" : {
+          "session_metadata" : {
+            "source" : "acpx.sessions.show",
+            "native_version" : "UNKNOWN",
+            "schema" : "acpx.session.v1",
+            "acpxRecordId" : "01a1664b-1ea2-7e72-824f-a15b70c68b84",
+            "acpSessionId" : "01a1664b-2902-7702-a04f-63ca9ddc4c2b",
+            "cwd" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+            "name" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+            "agent_session_id_status" : "NOT_PROVIDED",
+            "protocolVersion" : 1,
+            "closed" : false,
+            "agentCapabilities" : {
+              "loadSession" : true,
+              "promptCapabilities" : {
+                "image" : true,
+                "embeddedContext" : true
+              }
+            },
+            "compatible" : true
+          },
+          "exit_code" : 0,
+          "timed_out" : false,
+          "success" : true
+        },
+        "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--format", "json", "codex", "sessions", "show", "codex-reviewer-ws-20261023T005431Z-9YYF" ],
+        "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+        "cleanup" : false
+      },
+      "sequence" : 0,
+      "kind" : "command_result",
+      "observedAt" : "2026-10-23T01:23:58.937342Z"
+    }, {
+      "elapsedMs" : 0,
+      "source" : "adapter",
+      "details" : {
+        "invocation" : {
+          "cwd" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+          "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+          "executable" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+          "schema" : "dual.acpx.invocation.v1",
+          "launch_environment" : {
+            "CODEX_PATH" : "",
+            "PATH" : "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.codex/tmp/arg0-macos/codex-arg0o69tg0:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS"
+          },
+          "agent" : "codex"
+        },
+        "command_id" : "85aceb47-9036-4b50-9b26-006fa9fb3edc",
+        "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+        "purpose" : "prompt",
+        "cleanup" : false,
+        "prompt_sha256" : "4dec051659fdc3f76802922572be03d317d88fd2c496bba354b5027f092a571a",
+        "prompt" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md",
+        "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--timeout", "600", "--ttl", "1800", "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "codex", "-s", "codex-reviewer-ws-20261023T005431Z-9YYF", "-f", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md" ],
+        "request_options" : [ "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob" ]
+      },
+      "sequence" : 0,
+      "kind" : "command_intent",
+      "observedAt" : "2026-10-23T01:23:58.939248Z"
+    }, {
+      "elapsedMs" : 2,
+      "source" : "adapter",
+      "details" : {
+        "pid" : 76137
+      },
+      "sequence" : 0,
+      "kind" : "process_started",
+      "observedAt" : "2026-10-23T01:23:58.988290Z"
+    }, {
+      "elapsedMs" : 0,
+      "source" : "adapter",
+      "details" : {
+        "pid" : 76137
+      },
+      "sequence" : 0,
+      "kind" : "process_wait_started",
+      "observedAt" : "2026-10-23T01:23:58.989172Z"
+    }, {
+      "elapsedMs" : 2031,
+      "source" : "acpx_stream",
+      "details" : {
+        "lifecycleSequence" : 3
+      },
+      "sequence" : 3,
+      "kind" : "prompt_accepted",
+      "observedAt" : "2026-10-23T01:24:01.020661Z"
+    }, {
+      "elapsedMs" : 44225,
+      "source" : "acpx_stream",
+      "details" : {
+        "lifecycleSequence" : 2126
+      },
+      "sequence" : 2126,
+      "kind" : "prompt_completed",
+      "observedAt" : "2026-10-23T01:24:43.214988Z"
+    }, {
+      "elapsedMs" : 44228,
+      "source" : "adapter",
+      "details" : {
+        "waitMode" : "process_exit",
+        "exitCode" : 0
+      },
+      "sequence" : 2127,
+      "kind" : "process_wait_completed",
+      "observedAt" : "2026-10-23T01:24:43.217229Z"
+    }, {
+      "elapsedMs" : 44232,
+      "source" : "adapter",
+      "details" : {
+        "exitCode" : 0
+      },
+      "sequence" : 5,
+      "kind" : "process_exited",
+      "observedAt" : "2026-10-23T01:24:43.219214Z"
+    }, {
+      "elapsedMs" : 0,
+      "source" : "adapter",
+      "details" : {
+        "invocation" : {
+          "cwd" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+          "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+          "executable" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+          "schema" : "dual.acpx.invocation.v1",
+          "launch_environment" : {
+            "CODEX_PATH" : "",
+            "PATH" : "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/usr/local/go/bin:/Applications/ChatGPT.app/Contents/Resources/codex-cli/codex-path:/Users/kriswang/.codex/tmp/arg0-macos/codex-arg0o69tg0:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/override:/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin:/Users/kriswang/.nvm/versions/node/v22.21.0/bin:/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-agent-runner/bin:/Users/kriswang/.local/bin:/Users/kriswang/.pyenv/shims:/Users/kriswang/.pyenv/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/kriswang/.cargo/bin:/Users/kriswang/.foundry/bin:/opt/homebrew/opt:/Users/kriswang/work/opensource/maven/bin:/Users/kriswang/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback:/Applications/ChatGPT.app/Contents/Resources:/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS"
+          },
+          "agent" : "codex"
+        },
+        "session" : "codex-reviewer-ws-20261023T005431Z-9YYF",
+        "command" : [ "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx", "--timeout", "600", "--ttl", "1800", "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob", "codex", "-s", "codex-reviewer-ws-20261023T005431Z-9YYF", "-f", "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md" ],
+        "purpose" : "prompt",
+        "observation" : {
+          "process" : {
+            "command" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx --timeout 600 --ttl 1800 --format json --permission-replies --approve-reads --non-interactive-permissions fail --permission-policy {\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"} --allowed-tools Read,Grep,Glob codex -s codex-reviewer-ws-20261023T005431Z-9YYF -f /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md",
+            "pid" : 76137,
+            "exitCode" : 0,
+            "usability" : "EXITED_ZERO",
+            "durationMs" : 44233,
+            "stdoutPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.transcript.log",
+            "stderrPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/outputs/design-codex-review.stderr.log",
+            "interrupted" : false,
+            "timedOut" : false
+          },
+          "exit_code" : 0,
+          "prompt_completion" : {
+            "requestId" : "4",
+            "stopReason" : "end_turn",
+            "finalAssistantMessage" : "{\n  \"schema_version\": 1,\n  \"workstream_id\": \"ws-20261023T005431Z-9YYF\",\n  \"run_id\": \"run-1792718638529\",\n  \"node_id\": \"design.codex_arch_review\",\n  \"result\": {\n    \"artifact_type\": \"agent_output_contract\",\n    \"decision\": \"NEEDS_REVISION\",\n    \"summary\": \"整体方案与范围适配，但混合换行案例的期望值错误，且测试输出采集方案遗漏 stderr，需修正后继续。\",\n    \"lifecycle_status\": \"READY\",\n    \"blocking\": true,\n    \"checks\": [\n      \"已先审阅 Review Evidence Brief，再检查完整当前设计、全部计划文件职责及验收映射；当前无历史待关闭义务。\",\n      \"两步替换顺序正确，能够保留非 CR 字符、已有 LF、空串和末尾换行存在性，并满足幂等性。\",\n      \"三个 CREATE 候选文件覆盖实现、测试和文档职责；测试内设置导入路径的方案不需要额外包文件或依赖清单。\",\n      \"发现共享 CASES 表的混合换行期望值与函数语义、替换算法及 README 示例冲突。\",\n      \"发现设计将 unittest 默认输出归为 stdout，未明确采集实际承载测试报告的 stderr。\",\n      \"已检查正常完成、并发、超时、中断、恢复、回滚及绕过边界：产品函数无持久状态或外部副作用，无需增加锁、事务、恢复或补偿机制；测试进程内的导入路径设置也不产生跨运行恢复要求。\",\n      \"当前仅有 GOAL 批准；候选文件列表不构成实施授权，后续仍须批准精确 EXECUTION 路径与操作。\"\n    ],\n    \"evidence\": [\n      \"当前设计 evidence 中的 AC-1 覆盖依据将 \\\"a\\\\r\\\\nb\\\\rc\\\\nd\\\" 的期望写成 \\\"a\\\\n\\\\nb\\\\nc\\\\nd\\\"，在首个 CRLF 处额外增加一个 LF。\",\n      \"相同输入在 README 计划职责中的期望为 \\\"a\\\\nb\\\\nc\\\\nd\\\"，与先替换 CRLF、再替换单独 CR 的算法一致，证明设计内部存在明确冲突。\",\n      \"当前设计 checks 中的 AC-2 方案要求原样保留 stdout，并称其中包含逐用例名称、Ran 11 tests 与 OK；所列 python -m unittest discover -s tests -v 命令默认将这些报告写入 stderr。\",\n      \"所提供设计明确尚未编写代码或执行测试，因此本次结论针对设计正确性及未来取证方案，不将预期测试报告视为实际结果。\"\n    ],\n    \"missing_evidence\": [],\n    \"must_fix\": [\n      \"AR-1：依据 AC-1 与 C-1，将共享 CASES 中 \\\"a\\\\r\\\\nb\\\\rc\\\\nd\\\" 的期望修正为 \\\"a\\\\nb\\\\nc\\\\nd\\\"；同步核对设计说明、test_mixed_newlines_normalized 与 README 的同一案例，避免错误期望推动实现增加空行。\",\n      \"AR-2：依据 AC-2 与 TR-2，将测试取证方案明确为保留 stdout 和 stderr，或通过 2>&1 合并采集；保留实际逐用例结果、Ran N tests 和最终成功或失败报告，并与源码案例核对，不能只保存 stdout 或写入预期成功文本。\"\n    ],\n    \"contract_obligations\": [],\n    \"acceptance_notes\": [\n      \"保留现有两步 replace 和三个候选文件即可解决问题，无需增加架构机制或扩大文件范围。\",\n      \"11 表示计划中的测试方法数，subTest 遍历的输入数量需另据 CASES 核对；当前阶段无需提前提供实施测试结果。\",\n      \"README 的导入说明及读取源码或执行示例的验证路径可行，应与最终计划保持一致。\"\n    ],\n    \"open_risks\": [],\n    \"changed_files\": [],\n    \"verification_summary\": \"完成所提供完整设计的静态审查，确认两项影响 AC-1、AC-2 的阻断问题；未修改文件、未执行测试或访问外部来源。\",\n    \"failure\": {\n      \"category_hint\": \"设计一致性与验证证据采集缺陷\",\n      \"verification_remediation\": \"NONE\",\n      \"contract_gaps\": [],\n      \"out_of_scope_files\": [],\n      \"missing_tests\": [],\n      \"context_gaps\": [],\n      \"reason\": \"共享案例的错误期望违反换行转换语义；仅采集 stdout 的方案无法保证保留 unittest 默认写入 stderr 的实际测试报告。\"\n    },\n    \"reread_reasons\": []\n  }\n}",
+            "sessionId" : "01a1664b-2902-7702-a04f-63ca9ddc4c2b"
+          }
+        },
+        "prompt_sha256" : "4dec051659fdc3f76802922572be03d317d88fd2c496bba354b5027f092a571a",
+        "prompt" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718638529/prompts/design-codex-review.md",
+        "cleanup" : false,
+        "command_id" : "85aceb47-9036-4b50-9b26-006fa9fb3edc",
+        "request_options" : [ "--format", "json", "--permission-replies", "--approve-reads", "--non-interactive-permissions", "fail", "--permission-policy", "{\"autoApprove\":[\"read\",\"search\"],\"escalate\":[\"fetch\"],\"defaultAction\":\"deny\"}", "--allowed-tools", "Read,Grep,Glob" ]
+      },
+      "sequence" : 0,
+      "kind" : "command_result",
+      "observedAt" : "2026-10-23T01:24:43.269846Z"
+    }, {
+      "source" : "adapter",
+      "observedAt" : "2026-10-23T01:24:43.302001Z",
+      "sequence" : 13,
+      "elapsedMs" : 44315,
+      "kind" : "artifact_extracted"
+    }, {
+      "source" : "runtime",
+      "observedAt" : "2026-10-23T01:24:43.349289Z",
+      "sequence" : 14,
+      "elapsedMs" : 0,
+      "kind" : "contract_validated"
+    } ],
+    "permissionAssessments" : [ ],
+    "reread_reasons" : [ ]
+  },
+  "schema" : "dual.run.outcome.v1"
+}

@@ -36,8 +36,8 @@ class ReviewShowCommandTest {
                         Map.of("allowed_actions", List.of("approved", "revise")))),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-review-show", definition);
+        var ledger = CliLedgerFactory.create();
+        CliTestLedger.initialize(ledger, paths, "wf-review-show", definition);
         var node = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         var packetRef = ".agent/workstreams/" + workstreamId + "/reviews/" + node.nodeInstanceId() + ".md";
         var packetPath = tempDir.resolve(packetRef);

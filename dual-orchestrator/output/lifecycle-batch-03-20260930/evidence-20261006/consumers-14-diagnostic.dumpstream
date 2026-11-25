@@ -1,0 +1,1053 @@
+# Created at 2026-10-06T23:32:39.360
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '2026-10-06 23:32:39'.
+
+# Created at 2026-10-06T23:32:39.361
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream 'Full thread dump Java HotSpot(TM) 64-Bit Server VM (25.0.3+9-LTS-195 mixed mode, sharing):'.
+
+# Created at 2026-10-06T23:32:39.361
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream 'Threads class SMR info:'.
+
+# Created at 2026-10-06T23:32:39.361
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '_java_thread_list=0x0000000137951550, length=19, elements={'.
+
+# Created at 2026-10-06T23:32:39.361
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '0x0000000138808800, 0x000000012200be00, 0x000000012200c600, 0x000000012200ce00,'.
+
+# Created at 2026-10-06T23:32:39.362
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '0x000000012200e400, 0x000000012200ec00, 0x000000012200f400, 0x000000012200fe00,'.
+
+# Created at 2026-10-06T23:32:39.362
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '0x0000000122011200, 0x0000000122011a00, 0x0000000127823000, 0x0000000127821e00,'.
+
+# Created at 2026-10-06T23:32:39.362
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '0x00000001098ef800, 0x000000016881cc00, 0x0000000122892a00, 0x000000016881f600,'.
+
+# Created at 2026-10-06T23:32:39.362
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '0x000000012288f800, 0x0000000122173400, 0x0000000133936a00'.
+
+# Created at 2026-10-06T23:32:39.362
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '}'.
+
+# Created at 2026-10-06T23:32:39.362
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"main" #3 [3587] prio=5 os_prio=31 cpu=149993.03ms elapsed=227.47s tid=0x0000000138808800 nid=3587 runnable  [0x000000016fa45000]'.
+
+# Created at 2026-10-06T23:32:39.362
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: RUNNABLE'.
+
+# Created at 2026-10-06T23:32:39.362
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ProcessImpl.forkAndExec(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.363
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ProcessImpl.<init>(java.base@25.0.3/ProcessImpl.java:300)'.
+
+# Created at 2026-10-06T23:32:39.363
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ProcessImpl.start(java.base@25.0.3/ProcessImpl.java:231)'.
+
+# Created at 2026-10-06T23:32:39.365
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ProcessBuilder.start(java.base@25.0.3/ProcessBuilder.java:1078)'.
+
+# Created at 2026-10-06T23:32:39.365
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ProcessBuilder.start(java.base@25.0.3/ProcessBuilder.java:1046)'.
+
+# Created at 2026-10-06T23:32:39.365
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.handler.GitTrackedPathInventory.commandBytes(GitTrackedPathInventory.java:53)'.
+
+# Created at 2026-10-06T23:32:39.365
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.handler.GitTrackedPathInventory.command(GitTrackedPathInventory.java:44)'.
+
+# Created at 2026-10-06T23:32:39.365
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.handler.EvidenceCollectionSource.capture(EvidenceCollectionSource.java:15)'.
+
+# Created at 2026-10-06T23:32:39.365
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.handler.VerificationEvidence.verify(VerificationEvidence.java:139)'.
+
+# Created at 2026-10-06T23:32:39.366
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.handler.VerificationEvidence.verifyPublished(VerificationEvidence.java:98)'.
+
+# Created at 2026-10-06T23:32:39.366
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.handler.VerificationEvidence.verifyRequired(VerificationEvidence.java:61)'.
+
+# Created at 2026-10-06T23:32:39.366
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.handler.VerificationEvidence.verifyAcceptanceInputs(VerificationEvidence.java:82)'.
+
+# Created at 2026-10-06T23:32:39.366
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.handler.AgentRunGovernanceContext.ensureQualified(AgentRunGovernanceContext.java:65)'.
+
+# Created at 2026-10-06T23:32:39.366
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.adapter.acpx.AcpxAgentTaskHandler.execute(AcpxAgentTaskHandler.java:188)'.
+
+# Created at 2026-10-06T23:32:39.366
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.AgentWorker.executeNode(AgentWorker.java:172)'.
+
+# Created at 2026-10-06T23:32:39.366
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.AgentWorker.lambda$executeAndRecord$0(AgentWorker.java:132)'.
+
+# Created at 2026-10-06T23:32:39.367
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.AgentWorker$$Lambda/0x000003f0012b3e30.run(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.367
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.handler.EvidenceCollection.execute(EvidenceCollection.java:94)'.
+
+# Created at 2026-10-06T23:32:39.367
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.AgentWorker.executeAndRecord(AgentWorker.java:131)'.
+
+# Created at 2026-10-06T23:32:39.367
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.runtime.AgentWorker.runOne(AgentWorker.java:83)'.
+
+# Created at 2026-10-06T23:32:39.367
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.adapter.acpx.HumanRequirementContinuationSequenceTest$Fixture.untilGate(HumanRequirementContinuationSequenceTest.java:245)'.
+
+# Created at 2026-10-06T23:32:39.367
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.unavailablePrerequisitesRequireHumanDispositionThenEvidenceReverification(WorkflowFirstLifecycleSequenceTest.java:160)'.
+
+# Created at 2026-10-06T23:32:39.368
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.invoke.LambdaForm$DMH/0x000003f001168800.invokeVirtual(java.base@25.0.3/LambdaForm$DMH)'.
+
+# Created at 2026-10-06T23:32:39.368
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.invoke.LambdaForm$MH/0x000003f00116a400.invoke(java.base@25.0.3/LambdaForm$MH)'.
+
+# Created at 2026-10-06T23:32:39.368
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.invoke.Invokers$Holder.invokeExact_MT(java.base@25.0.3/Invokers$Holder)'.
+
+# Created at 2026-10-06T23:32:39.368
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.reflect.DirectMethodHandleAccessor.invokeImpl(java.base@25.0.3/DirectMethodHandleAccessor.java:155)'.
+
+# Created at 2026-10-06T23:32:39.368
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.reflect.DirectMethodHandleAccessor.invoke(java.base@25.0.3/DirectMethodHandleAccessor.java:104)'.
+
+# Created at 2026-10-06T23:32:39.368
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.reflect.Method.invoke(java.base@25.0.3/Method.java:565)'.
+
+# Created at 2026-10-06T23:32:39.368
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:767)'.
+
+# Created at 2026-10-06T23:32:39.369
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)'.
+
+# Created at 2026-10-06T23:32:39.369
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)'.
+
+# Created at 2026-10-06T23:32:39.369
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)'.
+
+# Created at 2026-10-06T23:32:39.369
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)'.
+
+# Created at 2026-10-06T23:32:39.369
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestTemplateMethod(TimeoutExtension.java:94)'.
+
+# Created at 2026-10-06T23:32:39.369
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.descriptor.TestTemplateInvocationTestDescriptor$$Lambda/0x000003f0010d7d90.apply(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.369
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)'.
+
+# Created at 2026-10-06T23:32:39.370
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall$$Lambda/0x000003f0010a2eb0.apply(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.370
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)'.
+
+# Created at 2026-10-06T23:32:39.370
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$$Lambda/0x000003f0010dab58.apply(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.370
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)'.
+
+# Created at 2026-10-06T23:32:39.370
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)'.
+
+# Created at 2026-10-06T23:32:39.370
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)'.
+
+# Created at 2026-10-06T23:32:39.371
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)'.
+
+# Created at 2026-10-06T23:32:39.371
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)'.
+
+# Created at 2026-10-06T23:32:39.371
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)'.
+
+# Created at 2026-10-06T23:32:39.371
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$8(TestMethodTestDescriptor.java:217)'.
+
+# Created at 2026-10-06T23:32:39.371
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor$$Lambda/0x000003f001165d58.execute(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.371
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)'.
+
+# Created at 2026-10-06T23:32:39.371
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:213)'.
+
+# Created at 2026-10-06T23:32:39.372
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:138)'.
+
+# Created at 2026-10-06T23:32:39.372
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:68)'.
+
+# Created at 2026-10-06T23:32:39.372
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156)'.
+
+# Created at 2026-10-06T23:32:39.372
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b9628.execute(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.372
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)'.
+
+# Created at 2026-10-06T23:32:39.372
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)'.
+
+# Created at 2026-10-06T23:32:39.372
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b93f8.invoke(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.372
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)'.
+
+# Created at 2026-10-06T23:32:39.373
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)'.
+
+# Created at 2026-10-06T23:32:39.373
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b8fc0.execute(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.373
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)'.
+
+# Created at 2026-10-06T23:32:39.373
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)'.
+
+# Created at 2026-10-06T23:32:39.373
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)'.
+
+# Created at 2026-10-06T23:32:39.373
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)'.
+
+# Created at 2026-10-06T23:32:39.373
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$DefaultDynamicTestExecutor.execute(NodeTestTask.java:231)'.
+
+# Created at 2026-10-06T23:32:39.374
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$DefaultDynamicTestExecutor.execute(NodeTestTask.java:209)'.
+
+# Created at 2026-10-06T23:32:39.374
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.descriptor.TestTemplateTestDescriptor.execute(TestTemplateTestDescriptor.java:141)'.
+
+# Created at 2026-10-06T23:32:39.374
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.descriptor.TestTemplateTestDescriptor.lambda$execute$3(TestTemplateTestDescriptor.java:109)'.
+
+# Created at 2026-10-06T23:32:39.374
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.descriptor.TestTemplateTestDescriptor$$Lambda/0x000003f0010cb6a8.accept(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.374
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(java.base@25.0.3/ForEachOps.java:186)'.
+
+# Created at 2026-10-06T23:32:39.374
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline$3$1.accept(java.base@25.0.3/ReferencePipeline.java:214)'.
+
+# Created at 2026-10-06T23:32:39.374
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline$2$1.accept(java.base@25.0.3/ReferencePipeline.java:197)'.
+
+# Created at 2026-10-06T23:32:39.374
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline$3$1.accept(java.base@25.0.3/ReferencePipeline.java:214)'.
+
+# Created at 2026-10-06T23:32:39.375
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(java.base@25.0.3/ForEachOps.java:186)'.
+
+# Created at 2026-10-06T23:32:39.375
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline$3$1.accept(java.base@25.0.3/ReferencePipeline.java:214)'.
+
+# Created at 2026-10-06T23:32:39.375
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(java.base@25.0.3/ForEachOps.java:186)'.
+
+# Created at 2026-10-06T23:32:39.375
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(java.base@25.0.3/ForEachOps.java:186)'.
+
+# Created at 2026-10-06T23:32:39.375
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline$3$1.accept(java.base@25.0.3/ReferencePipeline.java:214)'.
+
+# Created at 2026-10-06T23:32:39.375
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.Spliterators$ArraySpliterator.forEachRemaining(java.base@25.0.3/Spliterators.java:1024)'.
+
+# Created at 2026-10-06T23:32:39.375
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.copyInto(java.base@25.0.3/AbstractPipeline.java:570)'.
+
+# Created at 2026-10-06T23:32:39.376
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.wrapAndCopyInto(java.base@25.0.3/AbstractPipeline.java:560)'.
+
+# Created at 2026-10-06T23:32:39.376
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(java.base@25.0.3/ForEachOps.java:153)'.
+
+# Created at 2026-10-06T23:32:39.376
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(java.base@25.0.3/ForEachOps.java:176)'.
+
+# Created at 2026-10-06T23:32:39.376
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.evaluate(java.base@25.0.3/AbstractPipeline.java:265)'.
+
+# Created at 2026-10-06T23:32:39.376
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline.forEach(java.base@25.0.3/ReferencePipeline.java:632)'.
+
+# Created at 2026-10-06T23:32:39.376
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline$7$1FlatMap.accept(java.base@25.0.3/ReferencePipeline.java:293)'.
+
+# Created at 2026-10-06T23:32:39.376
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.ArrayList$ArrayListSpliterator.forEachRemaining(java.base@25.0.3/ArrayList.java:1716)'.
+
+# Created at 2026-10-06T23:32:39.376
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.copyInto(java.base@25.0.3/AbstractPipeline.java:570)'.
+
+# Created at 2026-10-06T23:32:39.377
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.wrapAndCopyInto(java.base@25.0.3/AbstractPipeline.java:560)'.
+
+# Created at 2026-10-06T23:32:39.377
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(java.base@25.0.3/ForEachOps.java:153)'.
+
+# Created at 2026-10-06T23:32:39.377
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(java.base@25.0.3/ForEachOps.java:176)'.
+
+# Created at 2026-10-06T23:32:39.377
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.evaluate(java.base@25.0.3/AbstractPipeline.java:265)'.
+
+# Created at 2026-10-06T23:32:39.377
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline.forEach(java.base@25.0.3/ReferencePipeline.java:632)'.
+
+# Created at 2026-10-06T23:32:39.377
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline$7$1FlatMap.accept(java.base@25.0.3/ReferencePipeline.java:293)'.
+
+# Created at 2026-10-06T23:32:39.377
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline$3$1.accept(java.base@25.0.3/ReferencePipeline.java:214)'.
+
+# Created at 2026-10-06T23:32:39.377
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline$3$1.accept(java.base@25.0.3/ReferencePipeline.java:214)'.
+
+# Created at 2026-10-06T23:32:39.378
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline$3$1.accept(java.base@25.0.3/ReferencePipeline.java:214)'.
+
+# Created at 2026-10-06T23:32:39.378
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.ArrayList$ArrayListSpliterator.forEachRemaining(java.base@25.0.3/ArrayList.java:1716)'.
+
+# Created at 2026-10-06T23:32:39.378
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.copyInto(java.base@25.0.3/AbstractPipeline.java:570)'.
+
+# Created at 2026-10-06T23:32:39.378
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.wrapAndCopyInto(java.base@25.0.3/AbstractPipeline.java:560)'.
+
+# Created at 2026-10-06T23:32:39.378
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(java.base@25.0.3/ForEachOps.java:153)'.
+
+# Created at 2026-10-06T23:32:39.378
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(java.base@25.0.3/ForEachOps.java:176)'.
+
+# Created at 2026-10-06T23:32:39.378
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.evaluate(java.base@25.0.3/AbstractPipeline.java:265)'.
+
+# Created at 2026-10-06T23:32:39.378
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline.forEach(java.base@25.0.3/ReferencePipeline.java:632)'.
+
+# Created at 2026-10-06T23:32:39.379
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline$7$1FlatMap.accept(java.base@25.0.3/ReferencePipeline.java:293)'.
+
+# Created at 2026-10-06T23:32:39.379
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.ArrayList$ArrayListSpliterator.forEachRemaining(java.base@25.0.3/ArrayList.java:1716)'.
+
+# Created at 2026-10-06T23:32:39.379
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.copyInto(java.base@25.0.3/AbstractPipeline.java:570)'.
+
+# Created at 2026-10-06T23:32:39.379
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.wrapAndCopyInto(java.base@25.0.3/AbstractPipeline.java:560)'.
+
+# Created at 2026-10-06T23:32:39.379
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(java.base@25.0.3/ForEachOps.java:153)'.
+
+# Created at 2026-10-06T23:32:39.379
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(java.base@25.0.3/ForEachOps.java:176)'.
+
+# Created at 2026-10-06T23:32:39.379
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.AbstractPipeline.evaluate(java.base@25.0.3/AbstractPipeline.java:265)'.
+
+# Created at 2026-10-06T23:32:39.379
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.stream.ReferencePipeline.forEach(java.base@25.0.3/ReferencePipeline.java:632)'.
+
+# Created at 2026-10-06T23:32:39.380
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.descriptor.TestTemplateTestDescriptor.execute(TestTemplateTestDescriptor.java:109)'.
+
+# Created at 2026-10-06T23:32:39.380
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.jupiter.engine.descriptor.TestTemplateTestDescriptor.execute(TestTemplateTestDescriptor.java:43)'.
+
+# Created at 2026-10-06T23:32:39.380
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:156)'.
+
+# Created at 2026-10-06T23:32:39.380
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b9628.execute(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.380
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)'.
+
+# Created at 2026-10-06T23:32:39.380
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)'.
+
+# Created at 2026-10-06T23:32:39.380
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b93f8.invoke(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.380
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)'.
+
+# Created at 2026-10-06T23:32:39.381
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)'.
+
+# Created at 2026-10-06T23:32:39.381
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b8fc0.execute(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.381
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)'.
+
+# Created at 2026-10-06T23:32:39.381
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)'.
+
+# Created at 2026-10-06T23:32:39.381
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)'.
+
+# Created at 2026-10-06T23:32:39.381
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService$$Lambda/0x000003f0010ba168.accept(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.381
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.ArrayList.forEach(java.base@25.0.3/ArrayList.java:1604)'.
+
+# Created at 2026-10-06T23:32:39.381
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)'.
+
+# Created at 2026-10-06T23:32:39.382
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)'.
+
+# Created at 2026-10-06T23:32:39.382
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b9628.execute(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.382
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)'.
+
+# Created at 2026-10-06T23:32:39.382
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)'.
+
+# Created at 2026-10-06T23:32:39.382
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b93f8.invoke(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.382
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)'.
+
+# Created at 2026-10-06T23:32:39.382
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)'.
+
+# Created at 2026-10-06T23:32:39.382
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b8fc0.execute(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.382
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)'.
+
+# Created at 2026-10-06T23:32:39.382
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)'.
+
+# Created at 2026-10-06T23:32:39.383
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)'.
+
+# Created at 2026-10-06T23:32:39.383
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService$$Lambda/0x000003f0010ba168.accept(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.383
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.ArrayList.forEach(java.base@25.0.3/ArrayList.java:1604)'.
+
+# Created at 2026-10-06T23:32:39.383
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)'.
+
+# Created at 2026-10-06T23:32:39.383
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:160)'.
+
+# Created at 2026-10-06T23:32:39.383
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b9628.execute(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.383
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)'.
+
+# Created at 2026-10-06T23:32:39.383
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:146)'.
+
+# Created at 2026-10-06T23:32:39.383
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b93f8.invoke(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.384
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)'.
+
+# Created at 2026-10-06T23:32:39.384
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:144)'.
+
+# Created at 2026-10-06T23:32:39.384
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask$$Lambda/0x000003f0010b8fc0.execute(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.384
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)'.
+
+# Created at 2026-10-06T23:32:39.384
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:143)'.
+
+# Created at 2026-10-06T23:32:39.384
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:100)'.
+
+# Created at 2026-10-06T23:32:39.384
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)'.
+
+# Created at 2026-10-06T23:32:39.384
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)'.
+
+# Created at 2026-10-06T23:32:39.384
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)'.
+
+# Created at 2026-10-06T23:32:39.385
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)'.
+
+# Created at 2026-10-06T23:32:39.385
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)'.
+
+# Created at 2026-10-06T23:32:39.385
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)'.
+
+# Created at 2026-10-06T23:32:39.385
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)'.
+
+# Created at 2026-10-06T23:32:39.385
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.launcher.core.EngineExecutionOrchestrator$$Lambda/0x000003f0010a7098.accept(Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.385
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)'.
+
+# Created at 2026-10-06T23:32:39.385
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)'.
+
+# Created at 2026-10-06T23:32:39.385
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)'.
+
+# Created at 2026-10-06T23:32:39.386
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)'.
+
+# Created at 2026-10-06T23:32:39.386
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)'.
+
+# Created at 2026-10-06T23:32:39.386
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56)'.
+
+# Created at 2026-10-06T23:32:39.386
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)'.
+
+# Created at 2026-10-06T23:32:39.386
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)'.
+
+# Created at 2026-10-06T23:32:39.386
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)'.
+
+# Created at 2026-10-06T23:32:39.386
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)'.
+
+# Created at 2026-10-06T23:32:39.386
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)'.
+
+# Created at 2026-10-06T23:32:39.386
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)'.
+
+# Created at 2026-10-06T23:32:39.386
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)'.
+
+# Created at 2026-10-06T23:32:39.386
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"Reference Handler" #15 [31235] daemon prio=10 os_prio=31 cpu=6.69ms elapsed=227.46s tid=0x000000012200be00 nid=31235 waiting on condition  [0x0000000170bc2000]'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: RUNNABLE'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ref.Reference.waitForReferencePendingList(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ref.Reference.processPendingReferences(java.base@25.0.3/Reference.java:246)'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ref.Reference$ReferenceHandler.run(java.base@25.0.3/Reference.java:208)'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"Finalizer" #16 [23555] daemon prio=8 os_prio=31 cpu=0.03ms elapsed=227.46s tid=0x000000012200c600 nid=23555 in Object.wait()  [0x0000000170dce000]'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: WAITING (on object monitor)'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Object.wait0(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- waiting on <0x0000000400000888> (a java.lang.ref.ReferenceQueue$Lock)'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Object.wait(java.base@25.0.3/Object.java:389)'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Object.wait(java.base@25.0.3/Object.java:351)'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ref.ReferenceQueue.remove0(java.base@25.0.3/ReferenceQueue.java:137)'.
+
+# Created at 2026-10-06T23:32:39.387
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ref.ReferenceQueue.remove(java.base@25.0.3/ReferenceQueue.java:215)'.
+
+# Created at 2026-10-06T23:32:39.388
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- locked <0x0000000400000888> (a java.lang.ref.ReferenceQueue$Lock)'.
+
+# Created at 2026-10-06T23:32:39.388
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ref.Finalizer$FinalizerThread.run(java.base@25.0.3/Finalizer.java:165)'.
+
+# Created at 2026-10-06T23:32:39.388
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"Signal Dispatcher" #17 [30467] daemon prio=9 os_prio=31 cpu=0.44ms elapsed=227.46s tid=0x000000012200ce00 nid=30467 waiting on condition  [0x0000000000000000]'.
+
+# Created at 2026-10-06T23:32:39.388
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: RUNNABLE'.
+
+# Created at 2026-10-06T23:32:39.388
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"Service Thread" #18 [23811] daemon prio=9 os_prio=31 cpu=4.30ms elapsed=227.46s tid=0x000000012200e400 nid=23811 runnable  [0x0000000000000000]'.
+
+# Created at 2026-10-06T23:32:39.388
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: RUNNABLE'.
+
+# Created at 2026-10-06T23:32:39.388
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"Monitor Deflation Thread" #19 [24323] daemon prio=9 os_prio=31 cpu=6.29ms elapsed=227.46s tid=0x000000012200ec00 nid=24323 runnable  [0x0000000000000000]'.
+
+# Created at 2026-10-06T23:32:39.388
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: RUNNABLE'.
+
+# Created at 2026-10-06T23:32:39.388
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"C2 CompilerThread0" #20 [29955] daemon prio=9 os_prio=31 cpu=16347.68ms elapsed=227.46s tid=0x000000012200f400 nid=29955 waiting on condition  [0x0000000000000000]'.
+
+# Created at 2026-10-06T23:32:39.388
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: RUNNABLE'.
+
+# Created at 2026-10-06T23:32:39.388
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   No compile task'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"C1 CompilerThread0" #28 [25091] daemon prio=9 os_prio=31 cpu=1053.70ms elapsed=227.46s tid=0x000000012200fe00 nid=25091 waiting on condition  [0x0000000000000000]'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: RUNNABLE'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   No compile task'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"Notification Thread" #32 [29699] daemon prio=9 os_prio=31 cpu=0.01ms elapsed=227.46s tid=0x0000000122011200 nid=29699 runnable  [0x0000000000000000]'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: RUNNABLE'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"Common-Cleaner" #33 [25603] daemon prio=8 os_prio=31 cpu=0.10ms elapsed=227.46s tid=0x0000000122011a00 nid=25603 in Object.wait()  [0x0000000171c22000]'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: TIMED_WAITING (on object monitor)'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Object.wait0(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- waiting on <0x0000000400000b50> (a java.lang.ref.ReferenceQueue$Lock)'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Object.wait(java.base@25.0.3/Object.java:389)'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ref.ReferenceQueue.remove0(java.base@25.0.3/ReferenceQueue.java:123)'.
+
+# Created at 2026-10-06T23:32:39.389
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.ref.ReferenceQueue.remove(java.base@25.0.3/ReferenceQueue.java:201)'.
+
+# Created at 2026-10-06T23:32:39.390
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- locked <0x0000000400000b50> (a java.lang.ref.ReferenceQueue$Lock)'.
+
+# Created at 2026-10-06T23:32:39.390
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.ref.CleanerImpl.run(java.base@25.0.3/CleanerImpl.java:146)'.
+
+# Created at 2026-10-06T23:32:39.390
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Thread.runWith(java.base@25.0.3/Thread.java:1487)'.
+
+# Created at 2026-10-06T23:32:39.390
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Thread.run(java.base@25.0.3/Thread.java:1474)'.
+
+# Created at 2026-10-06T23:32:39.390
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.misc.InnocuousThread.run(java.base@25.0.3/InnocuousThread.java:148)'.
+
+# Created at 2026-10-06T23:32:39.390
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"surefire-forkedjvm-stream-flusher" #34 [27139] daemon prio=5 os_prio=31 cpu=72.00ms elapsed=227.41s tid=0x0000000127823000 nid=27139 waiting on condition  [0x000000017265e000]'.
+
+# Created at 2026-10-06T23:32:39.390
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: TIMED_WAITING (parking)'.
+
+# Created at 2026-10-06T23:32:39.390
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.misc.Unsafe.park(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.390
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- parking to wait for  <0x00000004000029e0> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)'.
+
+# Created at 2026-10-06T23:32:39.390
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.locks.LockSupport.parkNanos(java.base@25.0.3/LockSupport.java:271)'.
+
+# Created at 2026-10-06T23:32:39.390
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(java.base@25.0.3/AbstractQueuedSynchronizer.java:1803)'.
+
+# Created at 2026-10-06T23:32:39.391
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(java.base@25.0.3/ScheduledThreadPoolExecutor.java:1166)'.
+
+# Created at 2026-10-06T23:32:39.391
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(java.base@25.0.3/ScheduledThreadPoolExecutor.java:883)'.
+
+# Created at 2026-10-06T23:32:39.391
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ThreadPoolExecutor.getTask(java.base@25.0.3/ThreadPoolExecutor.java:1016)'.
+
+# Created at 2026-10-06T23:32:39.391
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ThreadPoolExecutor.runWorker(java.base@25.0.3/ThreadPoolExecutor.java:1076)'.
+
+# Created at 2026-10-06T23:32:39.391
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ThreadPoolExecutor$Worker.run(java.base@25.0.3/ThreadPoolExecutor.java:614)'.
+
+# Created at 2026-10-06T23:32:39.391
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Thread.runWith(java.base@25.0.3/Thread.java:1487)'.
+
+# Created at 2026-10-06T23:32:39.391
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Thread.run(java.base@25.0.3/Thread.java:1474)'.
+
+# Created at 2026-10-06T23:32:39.391
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"surefire-forkedjvm-command-thread" #36 [28163] daemon prio=5 os_prio=31 cpu=3.00ms elapsed=227.41s tid=0x0000000127821e00 nid=28163 runnable  [0x000000017286a000]'.
+
+# Created at 2026-10-06T23:32:39.392
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: RUNNABLE'.
+
+# Created at 2026-10-06T23:32:39.392
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.io.FileInputStream.readBytes(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.392
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.io.FileInputStream.read(java.base@25.0.3/FileInputStream.java:281)'.
+
+# Created at 2026-10-06T23:32:39.392
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.System$In.read(java.base@25.0.3/System.java:1872)'.
+
+# Created at 2026-10-06T23:32:39.392
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.io.BufferedInputStream.read1(java.base@25.0.3/BufferedInputStream.java:328)'.
+
+# Created at 2026-10-06T23:32:39.392
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.io.BufferedInputStream.read(java.base@25.0.3/BufferedInputStream.java:388)'.
+
+# Created at 2026-10-06T23:32:39.392
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- locked <0x0000000400000e18> (a java.io.BufferedInputStream)'.
+
+# Created at 2026-10-06T23:32:39.392
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.io.BufferedInputStream.fill(java.base@25.0.3/BufferedInputStream.java:289)'.
+
+# Created at 2026-10-06T23:32:39.392
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.io.BufferedInputStream.read1(java.base@25.0.3/BufferedInputStream.java:330)'.
+
+# Created at 2026-10-06T23:32:39.392
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.io.BufferedInputStream.read(java.base@25.0.3/BufferedInputStream.java:388)'.
+
+# Created at 2026-10-06T23:32:39.393
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- locked <0x0000000400000df0> (a java.io.BufferedInputStream)'.
+
+# Created at 2026-10-06T23:32:39.393
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.api.util.internal.Channels$3.readImpl(Channels.java:169)'.
+
+# Created at 2026-10-06T23:32:39.393
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.api.util.internal.AbstractNoninterruptibleReadableChannel.read(AbstractNoninterruptibleReadableChannel.java:50)'.
+
+# Created at 2026-10-06T23:32:39.393
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.api.stream.AbstractStreamDecoder.read(AbstractStreamDecoder.java:430)'.
+
+# Created at 2026-10-06T23:32:39.393
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.api.stream.AbstractStreamDecoder.read(AbstractStreamDecoder.java:419)'.
+
+# Created at 2026-10-06T23:32:39.393
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.api.stream.AbstractStreamDecoder.readMessageType(AbstractStreamDecoder.java:116)'.
+
+# Created at 2026-10-06T23:32:39.393
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.booter.stream.CommandDecoder.decode(CommandDecoder.java:77)'.
+
+# Created at 2026-10-06T23:32:39.393
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.booter.spi.CommandChannelDecoder.decode(CommandChannelDecoder.java:60)'.
+
+# Created at 2026-10-06T23:32:39.393
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at org.apache.maven.surefire.booter.CommandReader$CommandRunnable.run(CommandReader.java:290)'.
+
+# Created at 2026-10-06T23:32:39.394
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Thread.runWith(java.base@25.0.3/Thread.java:1487)'.
+
+# Created at 2026-10-06T23:32:39.394
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Thread.run(java.base@25.0.3/Thread.java:1474)'.
+
+# Created at 2026-10-06T23:32:39.394
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"process reaper" #50 [36355] daemon prio=10 os_prio=31 cpu=299.91ms elapsed=227.14s tid=0x00000001098ef800 nid=36355 waiting on condition  [0x0000000174346000]'.
+
+# Created at 2026-10-06T23:32:39.394
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: TIMED_WAITING (parking)'.
+
+# Created at 2026-10-06T23:32:39.394
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.misc.Unsafe.park(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.394
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- parking to wait for  <0x0000000400002338> (a java.util.concurrent.SynchronousQueue$Transferer)'.
+
+# Created at 2026-10-06T23:32:39.394
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.locks.LockSupport.parkNanos(java.base@25.0.3/LockSupport.java:408)'.
+
+# Created at 2026-10-06T23:32:39.394
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.LinkedTransferQueue$DualNode.await(java.base@25.0.3/LinkedTransferQueue.java:452)'.
+
+# Created at 2026-10-06T23:32:39.394
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.SynchronousQueue$Transferer.xferLifo(java.base@25.0.3/SynchronousQueue.java:194)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.SynchronousQueue.xfer(java.base@25.0.3/SynchronousQueue.java:235)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.SynchronousQueue.poll(java.base@25.0.3/SynchronousQueue.java:338)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ThreadPoolExecutor.getTask(java.base@25.0.3/ThreadPoolExecutor.java:1015)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ThreadPoolExecutor.runWorker(java.base@25.0.3/ThreadPoolExecutor.java:1076)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ThreadPoolExecutor$Worker.run(java.base@25.0.3/ThreadPoolExecutor.java:614)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Thread.runWith(java.base@25.0.3/Thread.java:1487)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Thread.run(java.base@25.0.3/Thread.java:1474)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.misc.InnocuousThread.run(java.base@25.0.3/InnocuousThread.java:148)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"VirtualThread-unblocker" #53 [26643] daemon prio=5 os_prio=31 cpu=0.03ms elapsed=177.95s tid=0x000000016881cc00 nid=26643 runnable  [0x000000017203a000]'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: RUNNABLE'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.VirtualThread.takeVirtualThreadListToUnblock(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.VirtualThread.unblockVirtualThreads(java.base@25.0.3/VirtualThread.java:1516)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.VirtualThread$$Lambda/0x000003f0013cf1a8.run(java.base@25.0.3/Unknown Source)'.
+
+# Created at 2026-10-06T23:32:39.395
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Thread.runWith(java.base@25.0.3/Thread.java:1487)'.
+
+# Created at 2026-10-06T23:32:39.396
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.lang.Thread.run(java.base@25.0.3/Thread.java:1474)'.
+
+# Created at 2026-10-06T23:32:39.396
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.misc.InnocuousThread.run(java.base@25.0.3/InnocuousThread.java:148)'.
+
+# Created at 2026-10-06T23:32:39.396
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"ForkJoinPool-1-worker-1" #55 [29199] daemon prio=5 os_prio=31 cpu=6.27ms elapsed=177.95s tid=0x0000000122892a00 nid=29199 waiting on condition  [0x0000000172a76000]'.
+
+# Created at 2026-10-06T23:32:39.396
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: TIMED_WAITING (parking)'.
+
+# Created at 2026-10-06T23:32:39.396
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.misc.Unsafe.park(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.396
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- parking to wait for  <0x0000000401462ba8> (a java.util.concurrent.ForkJoinPool)'.
+
+# Created at 2026-10-06T23:32:39.396
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.awaitWork(java.base@25.0.3/ForkJoinPool.java:2109)'.
+
+# Created at 2026-10-06T23:32:39.396
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.deactivate(java.base@25.0.3/ForkJoinPool.java:2063)'.
+
+# Created at 2026-10-06T23:32:39.396
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.runWorker(java.base@25.0.3/ForkJoinPool.java:2027)'.
+
+# Created at 2026-10-06T23:32:39.397
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinWorkerThread.run(java.base@25.0.3/ForkJoinWorkerThread.java:187)'.
+
+# Created at 2026-10-06T23:32:39.397
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"ForkJoinPool-1-worker-2" #57 [27659] daemon prio=5 os_prio=31 cpu=5.03ms elapsed=177.95s tid=0x000000016881f600 nid=27659 waiting on condition  [0x0000000174552000]'.
+
+# Created at 2026-10-06T23:32:39.397
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: TIMED_WAITING (parking)'.
+
+# Created at 2026-10-06T23:32:39.397
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.misc.Unsafe.park(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.397
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- parking to wait for  <0x0000000401462ba8> (a java.util.concurrent.ForkJoinPool)'.
+
+# Created at 2026-10-06T23:32:39.397
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.awaitWork(java.base@25.0.3/ForkJoinPool.java:2109)'.
+
+# Created at 2026-10-06T23:32:39.397
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.deactivate(java.base@25.0.3/ForkJoinPool.java:2063)'.
+
+# Created at 2026-10-06T23:32:39.397
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.runWorker(java.base@25.0.3/ForkJoinPool.java:2027)'.
+
+# Created at 2026-10-06T23:32:39.397
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinWorkerThread.run(java.base@25.0.3/ForkJoinWorkerThread.java:187)'.
+
+# Created at 2026-10-06T23:32:39.397
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"ForkJoinPool-1-worker-4" #60 [37127] daemon prio=5 os_prio=31 cpu=6.54ms elapsed=177.95s tid=0x000000012288f800 nid=37127 waiting on condition  [0x0000000174b76000]'.
+
+# Created at 2026-10-06T23:32:39.397
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: WAITING (parking)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.misc.Unsafe.park(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- parking to wait for  <0x0000000401462ba8> (a java.util.concurrent.ForkJoinPool)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.awaitWork(java.base@25.0.3/ForkJoinPool.java:2109)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.deactivate(java.base@25.0.3/ForkJoinPool.java:2063)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.runWorker(java.base@25.0.3/ForkJoinPool.java:2027)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinWorkerThread.run(java.base@25.0.3/ForkJoinWorkerThread.java:187)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"ForkJoinPool-1-worker-3" #61 [39683] daemon prio=5 os_prio=31 cpu=6.96ms elapsed=177.95s tid=0x0000000122173400 nid=39683 waiting on condition  [0x0000000174d82000]'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: TIMED_WAITING (parking)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.misc.Unsafe.park(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- parking to wait for  <0x0000000401462ba8> (a java.util.concurrent.ForkJoinPool)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.awaitWork(java.base@25.0.3/ForkJoinPool.java:2109)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.deactivate(java.base@25.0.3/ForkJoinPool.java:2063)'.
+
+# Created at 2026-10-06T23:32:39.398
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.runWorker(java.base@25.0.3/ForkJoinPool.java:2027)'.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinWorkerThread.run(java.base@25.0.3/ForkJoinWorkerThread.java:187)'.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"ForkJoinPool-1-worker-5" #376 [37891] daemon prio=5 os_prio=31 cpu=1.66ms elapsed=86.00s tid=0x0000000133936a00 nid=37891 waiting on condition  [0x0000000174f8e000]'.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '   java.lang.Thread.State: WAITING (parking)'.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at jdk.internal.misc.Unsafe.park(java.base@25.0.3/Native Method)'.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	- parking to wait for  <0x0000000401462ba8> (a java.util.concurrent.ForkJoinPool)'.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.awaitWork(java.base@25.0.3/ForkJoinPool.java:2109)'.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.deactivate(java.base@25.0.3/ForkJoinPool.java:2063)'.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinPool.runWorker(java.base@25.0.3/ForkJoinPool.java:2027)'.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '	at java.util.concurrent.ForkJoinWorkerThread.run(java.base@25.0.3/ForkJoinWorkerThread.java:187)'.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"G1 Conc#2" os_prio=31 cpu=7.82ms elapsed=226.32s tid=0x00000001381a9200 nid=40195 runnable  '.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"G1 Conc#1" os_prio=31 cpu=7.89ms elapsed=226.32s tid=0x0000000109a39800 nid=40451 runnable  '.
+
+# Created at 2026-10-06T23:32:39.399
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#12" os_prio=31 cpu=160.55ms elapsed=227.20s tid=0x0000000109116800 nid=36099 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#11" os_prio=31 cpu=165.86ms elapsed=227.20s tid=0x0000000109116200 nid=35843 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#10" os_prio=31 cpu=170.03ms elapsed=227.20s tid=0x0000000109115c00 nid=41219 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#9" os_prio=31 cpu=160.81ms elapsed=227.20s tid=0x0000000109115000 nid=41475 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#8" os_prio=31 cpu=169.00ms elapsed=227.20s tid=0x0000000109114a00 nid=41731 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#7" os_prio=31 cpu=165.43ms elapsed=227.20s tid=0x0000000109114400 nid=34819 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#6" os_prio=31 cpu=159.34ms elapsed=227.20s tid=0x0000000109113e00 nid=34563 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#5" os_prio=31 cpu=154.98ms elapsed=227.20s tid=0x0000000109113800 nid=34051 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#4" os_prio=31 cpu=170.13ms elapsed=227.20s tid=0x0000000109113200 nid=33539 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#3" os_prio=31 cpu=169.24ms elapsed=227.20s tid=0x0000000109112c00 nid=42755 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#2" os_prio=31 cpu=155.98ms elapsed=227.20s tid=0x0000000132bb3c00 nid=43011 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#1" os_prio=31 cpu=160.46ms elapsed=227.20s tid=0x0000000132bb2e00 nid=43267 runnable  '.
+
+# Created at 2026-10-06T23:32:39.400
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"VM Thread" os_prio=31 cpu=217.90ms elapsed=227.47s tid=0x00000001388b0a00 nid=17155 runnable  '.
+
+# Created at 2026-10-06T23:32:39.401
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"VM Periodic Task Thread" os_prio=31 cpu=7.52ms elapsed=227.47s tid=0x0000000137f3cb10 nid=13063 waiting on condition  '.
+
+# Created at 2026-10-06T23:32:39.401
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"G1 Service" os_prio=31 cpu=21.35ms elapsed=227.47s tid=0x00000001388a0200 nid=13571 runnable  '.
+
+# Created at 2026-10-06T23:32:39.401
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"G1 Refine#0" os_prio=31 cpu=0.01ms elapsed=227.47s tid=0x000000013889fc00 nid=14083 runnable  '.
+
+# Created at 2026-10-06T23:32:39.401
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"G1 Conc#0" os_prio=31 cpu=9.37ms elapsed=227.47s tid=0x0000000138851600 nid=12035 runnable  '.
+
+# Created at 2026-10-06T23:32:39.401
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"G1 Main Marker" os_prio=31 cpu=0.28ms elapsed=227.47s tid=0x0000000138851000 nid=14595 runnable  '.
+
+# Created at 2026-10-06T23:32:39.401
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '"GC Thread#0" os_prio=31 cpu=156.29ms elapsed=227.47s tid=0x0000000138838200 nid=15107 runnable  '.
+
+# Created at 2026-10-06T23:32:39.401
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream 'JNI global refs: 24, weak refs: 0'.
+
+# Created at 2026-10-06T23:32:39.401
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream 'Heap'.
+
+# Created at 2026-10-06T23:32:39.401
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream ' garbage-first heap   total reserved 16777216K, committed 131072K, used 81611K [0x0000000400000000, 0x0000000800000000)'.
+
+# Created at 2026-10-06T23:32:39.401
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '  region size 8192K, 6 young (49152K), 1 survivors (8192K)'.
+
+# Created at 2026-10-06T23:32:39.401
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream ' Metaspace       used 36476K, committed 37760K, reserved 1114112K'.
+
+# Created at 2026-10-06T23:33:15.673
+Corrupted channel by directly writing to native stream in forked JVM 1. Stream '  class space    used 4084K, committed 4736K, reserved 1048576K'.
+

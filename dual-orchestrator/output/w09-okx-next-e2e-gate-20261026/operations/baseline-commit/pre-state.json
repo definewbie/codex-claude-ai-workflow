@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+    "-c",
+    "user.name=Dual Gate",
+    "-c",
+    "user.email=dual-gate@localhost",
+    "-c",
+    "core.hooksPath=/dev/null",
+    "-c",
+    "commit.gpgSign=false",
+    "commit",
+    "-m",
+    "Fixed committed baseline for isolated Java MODIFY Gate"
+  ],
+  "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/target",
+  "native_prompt_permitted": false
+}

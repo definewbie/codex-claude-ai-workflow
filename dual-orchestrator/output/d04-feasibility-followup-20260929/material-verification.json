@@ -1,0 +1,20 @@
+{
+  "status": "PASS_MATERIALS_ONLY",
+  "changedExistingFiles": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "unchangedBaselineFiles": 1316,
+  "priorEvidenceFilesUnchanged": 58,
+  "eventSequenceChecks": 18,
+  "preflightChecks": 6,
+  "providerTasks": 0,
+  "agents": 0,
+  "productionChanges": 0,
+  "D04": "DESIGN_GAP",
+  "authenticationRecovery": "AWAITING_USER_CONFIRMATION",
+  "serverAuthentication": "UNVERIFIED",
+  "liveProbeStopTiming": "UNPROVEN",
+  "independentReview": false
+}

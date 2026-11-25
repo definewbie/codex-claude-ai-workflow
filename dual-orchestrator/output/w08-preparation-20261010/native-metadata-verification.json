@@ -1,0 +1,174 @@
+{
+  "kind": "actual read-only acpx metadata calls; no provider/client/session launch",
+  "selected_executable": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+  "wrapper_sha256": "0aa69b6f1ff164f7282d6a58c83ffb902db5d417609ebb1d5827857f5db1abd9",
+  "dist_sha256": "e6c7915a4b46eec6fe338c7f71efdb28658d64d3f43d38907e4919e84bc17854",
+  "expected_patch_sha256": "1517f828d303ea720a7a153e6dc8c33265ba1ea100d2b9260c98327b5604468c",
+  "actual_patch_matches": true,
+  "process_env_selection": {
+    "DUAL_ACPX_EXECUTABLE": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+    "DUAL_ACPX_COMMAND_TIMEOUT_SECONDS": "600",
+    "DUAL_FLOW_KERNEL": "liteflow"
+  },
+  "shell_persistent_env_changed": false,
+  "metadata_commands": [
+    {
+      "args": [
+        "build-info",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "89dc174c368c949ed6a83c6f6e51bf74d781cdc91291cd0649248d46ab90f800",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "build_info": {
+        "upstream_commit": "fd173f04aa1b56f9e3f5ca5190c034ddcae28792",
+        "patch_sha256": "1517f828d303ea720a7a153e6dc8c33265ba1ea100d2b9260c98327b5604468c",
+        "policy_schema": "claude_execution_policy.v2"
+      }
+    },
+    {
+      "args": [
+        "config",
+        "show",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f7bfd482d53f67f8e2c74ced71efff18bd2f1bfdea02a1c1db4d347ecc7a81cc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "resolved_config_keys": [
+        "agents",
+        "authMethods",
+        "authPolicy",
+        "defaultAgent",
+        "defaultPermissions",
+        "disableExec",
+        "format",
+        "loaded",
+        "nonInteractivePermissions",
+        "paths",
+        "queueMaxDepth",
+        "timeout",
+        "ttl"
+      ],
+      "agents": {
+        "codex": {
+          "command_sha256": "2ee0bb6fdd8e9ecec35759030974fd5554023fd2ec147db76c093a5ea4e3b069",
+          "configured": true,
+          "value_shape": "dict"
+        },
+        "claude": {
+          "command_sha256": "edb672255ee32a0fd84a5c7aa1927306a53176d2b4afcc43e3be6ebab38d6cbe",
+          "configured": true,
+          "value_shape": "dict"
+        }
+      },
+      "selection": {
+        "defaultAgent": "codex",
+        "defaultPermissions": "approve-all",
+        "nonInteractivePermissions": "deny",
+        "authPolicy": "skip",
+        "ttl": 300,
+        "timeout": null,
+        "format": "text"
+      },
+      "config_source_paths": {}
+    },
+    {
+      "args": [
+        "--help"
+      ],
+      "exit": 0,
+      "stdout_sha256": "692447e3049fea6fd6e448246414b0e7b451d20280e15d326fc53d52cac230b6",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "permission_replies_flag": true,
+      "permission_reply_command": true,
+      "reply_option": false
+    },
+    {
+      "args": [
+        "claude",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout_sha256": "901a43a8036ef6968df95aa90b2e64b7c521ad63f5ed02a6afe03d85073eae31",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "permission_replies_flag": false,
+      "permission_reply_command": true,
+      "reply_option": false
+    },
+    {
+      "args": [
+        "codex",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e36b2f47998861057c81cf99be4f3c5a2ed834f39f37d2d45fc0e93f94698476",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "permission_replies_flag": false,
+      "permission_reply_command": true,
+      "reply_option": false
+    },
+    {
+      "args": [
+        "claude",
+        "permission-reply",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout_sha256": "4671757039cdaa6a408c15a69786e91daafc2d8093812e94cb8eec12cadec317",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "permission_replies_flag": false,
+      "permission_reply_command": true,
+      "reply_option": true
+    },
+    {
+      "args": [
+        "codex",
+        "permission-reply",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout_sha256": "78d195c3a2e9cb24b3ead33136a99dd6cc3ecc07ddf0876582114d883c59cfed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "permission_replies_flag": false,
+      "permission_reply_command": true,
+      "reply_option": true
+    }
+  ],
+  "provider_calls": 0,
+  "native_sessions_created": 0,
+  "installer_runs": 0,
+  "resolved_agents_sanitized": {
+    "codex": {
+      "keys": [
+        "command"
+      ],
+      "launch_spec_sha256": "248c1255e181be2fa7faccf0928cb163fcf3b0cbecc2b450f1d66b483aacc480",
+      "launch_text_sha256": "89300aed45f7272a568bc6e306ff92713a0dc7ca6db21705b4a6a9693faa7eb8",
+      "declared_acp_packages": [],
+      "claude_env_wrapper": false,
+      "source_form": "command"
+    },
+    "claude": {
+      "keys": [
+        "command"
+      ],
+      "launch_spec_sha256": "552577de7de6ad4bfb4ad0495c01cfda12f6c3c16d79b08fc07b735249e3c3f4",
+      "launch_text_sha256": "32db51df37608a32549ef22d29a458a835ab3614c5e82ab6157bc5975349460e",
+      "declared_acp_packages": [],
+      "claude_env_wrapper": false,
+      "source_form": "command"
+    }
+  },
+  "config_paths": {
+    "global": "/Users/kriswang/.acpx/config.json",
+    "project": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.acpxrc.json"
+  },
+  "config_loaded": {
+    "global": true,
+    "project": false
+  },
+  "default_approve_all_is_not_gate_authority": "Dual supplies --approve-reads or --deny-all and explicit fail policy; selected flags precede config default in resolvePermissionMode. Never launch raw prompt using default config.",
+  "metadata_config_inspections": 5
+}

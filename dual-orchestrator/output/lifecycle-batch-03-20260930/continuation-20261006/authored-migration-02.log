@@ -1,0 +1,672 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/6]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/6]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/6]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/6]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/6]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/6]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 86 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.runtime.handler.AuthoredBoundarySequenceTest
+[ERROR] Tests run: 14, Failures: 6, Errors: 1, Skipped: 0, Time elapsed: 13.55 s <<< FAILURE! -- in dev.dual.runtime.handler.AuthoredBoundarySequenceTest
+[ERROR] dev.dual.runtime.handler.AuthoredBoundarySequenceTest.everyDeclaredImplementationAndDirectSelfTestEntryConsumesTheApprovedPlan -- Time elapsed: 0.071 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: five implementation entries and one direct self-test entry; prerequisites wait for a human decision ==> expected: <6> but was: <7>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest.everyDeclaredImplementationAndDirectSelfTestEntryConsumesTheApprovedPlan(AuthoredBoundarySequenceTest.java:262)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredBoundarySequenceTest.approvedInputDamageAndPartialPublicationBlockTheActualConsumer(String)[1] -- Time elapsed: 2.609 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Exception in thread "main" java.io.IOException: AUTHORED_CONTRACT_NOT_QUALIFIED
+	at dev.dual.runtime.handler.AuthoredStageLineageResolver.require(AuthoredStageLineageResolver.java:481)
+	at dev.dual.runtime.handler.AuthoredStageLineageResolver.prepare(AuthoredStageLineageResolver.java:140)
+	at dev.dual.runtime.handler.AuthoredExecutionContext.prepare(AuthoredExecutionContext.java:31)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest$ColdRead.main(AuthoredBoundarySequenceTest.java:187)
+ ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest.approvedInputDamageAndPartialPublicationBlockTheActualConsumer(AuthoredBoundarySequenceTest.java:117)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredBoundarySequenceTest.approvedInputDamageAndPartialPublicationBlockTheActualConsumer(String)[2] -- Time elapsed: 2.307 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Exception in thread "main" java.io.IOException: AUTHORED_CONTRACT_NOT_QUALIFIED
+	at dev.dual.runtime.handler.AuthoredStageLineageResolver.require(AuthoredStageLineageResolver.java:481)
+	at dev.dual.runtime.handler.AuthoredStageLineageResolver.prepare(AuthoredStageLineageResolver.java:140)
+	at dev.dual.runtime.handler.AuthoredExecutionContext.prepare(AuthoredExecutionContext.java:31)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest$ColdRead.main(AuthoredBoundarySequenceTest.java:187)
+ ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest.approvedInputDamageAndPartialPublicationBlockTheActualConsumer(AuthoredBoundarySequenceTest.java:117)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredBoundarySequenceTest.sameBytesReapprovalRejectsOldAuthoredChainAndFreshChainCompletes -- Time elapsed: 0.585 s <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest.sameBytesReapprovalRejectsOldAuthoredChainAndFreshChainCompletes(AuthoredBoundarySequenceTest.java:234)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredBoundarySequenceTest.aLaterOpenApprovalBlocksOldRetryAndAResolvedReplacementDoesNotRebindIt -- Time elapsed: 0.479 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Expected java.io.IOException to be thrown, but nothing was thrown.
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest.aLaterOpenApprovalBlocksOldRetryAndAResolvedReplacementDoesNotRebindIt(AuthoredBoundarySequenceTest.java:201)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredBoundarySequenceTest.twoValidPlanCandidatesInOneApprovalCannotBeChosenByOrder(String)[1] -- Time elapsed: 0.746 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Expected java.io.IOException to be thrown, but nothing was thrown.
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest.twoValidPlanCandidatesInOneApprovalCannotBeChosenByOrder(AuthoredBoundarySequenceTest.java:143)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredBoundarySequenceTest.twoValidPlanCandidatesInOneApprovalCannotBeChosenByOrder(String)[2] -- Time elapsed: 0.740 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Expected java.io.IOException to be thrown, but nothing was thrown.
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest.twoValidPlanCandidatesInOneApprovalCannotBeChosenByOrder(AuthoredBoundarySequenceTest.java:143)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.AuthoredStageSequenceTest
+[ERROR] Tests run: 12, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 12.30 s <<< FAILURE! -- in dev.dual.runtime.handler.AuthoredStageSequenceTest
+[ERROR] dev.dual.runtime.handler.AuthoredStageSequenceTest.unknownRoutedNodeRejectsImplementationContextBeforePublication -- Time elapsed: 0.531 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <FAILED> but was: <COMPLETED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest.unknownRoutedNodeRejectsImplementationContextBeforePublication(AuthoredStageSequenceTest.java:240)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.ArtifactContractValidatorTest
+[ERROR] Tests run: 23, Failures: 7, Errors: 8, Skipped: 0, Time elapsed: 1.910 s <<< FAILURE! -- in dev.dual.runtime.handler.ArtifactContractValidatorTest
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.nonIntakeReviewMayOmitContractObligationsWithoutProjectionFailure -- Time elapsed: 0.146 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: {run_id=run-1, agent=test, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, contract_node_id=design.codex_arch_review, contract_required_keys=[summary, decision], contract_allowed_decisions=[NEEDS_REVISION, BLOCKED, READY_FOR_ARCH_REVIEW], parse_error={message=AUTHORED_PROMPT_PATH_INVALID, code=AUTHORED_CONTEXT_INVALID, details={}}, contract_failure_diagnostic_ref=.agent/workstreams/ws-1/artifacts/contract-failures/node-design-codex_arch_review-007.json, contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-1/artifacts/contract-failures/node-design-codex_arch_review-007.md, message=AUTHORED_PROMPT_PATH_INVALID, agent_execution_result_contract={present=true, valid=true, decision=READY_FOR_ARCH_REVIEW, summary=, validationError=}, agent_execution_artifact_contract_results=[{contractType=agent_output_contract, required=true, present=true, valid=false, path=, errorCode=AUTHORED_CONTEXT_INVALID, errorMessage=AUTHORED_PROMPT_PATH_INVALID}]} ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.nonIntakeReviewMayOmitContractObligationsWithoutProjectionFailure(ArtifactContractValidatorTest.java:188)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.publicationIoFailureRetainsSuccessfulExecutionRatherThanInventingContractFailure -- Time elapsed: 0.151 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Expected java.io.IOException to be thrown, but nothing was thrown.
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.publicationIoFailureRetainsSuccessfulExecutionRatherThanInventingContractFailure(ArtifactContractValidatorTest.java:99)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.taskProposalIsMechanicallyValidatedBeforeSidecarPublication -- Time elapsed: 0.008 s <<< ERROR!
+java.lang.IllegalStateException: typed execution requires program-owned run metadata
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.finalizeRunMetadata(AgentRunMetadataFinalizer.java:105)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.resolveNodeResult(AgentRunMetadataFinalizer.java:71)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.assessPublication(AgentRunMetadataFinalizer.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator$Validation.complete(ArtifactContractValidator.java:436)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:51)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.validate(ArtifactContractValidatorTest.java:689)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.taskProposalIsMechanicallyValidatedBeforeSidecarPublication(ArtifactContractValidatorTest.java:270)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.existingPathResolvesToModifyBeforeSidecarPublication -- Time elapsed: 0.005 s <<< ERROR!
+java.lang.IllegalStateException: typed execution requires program-owned run metadata
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.finalizeRunMetadata(AgentRunMetadataFinalizer.java:105)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.resolveNodeResult(AgentRunMetadataFinalizer.java:71)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.assessPublication(AgentRunMetadataFinalizer.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator$Validation.complete(ArtifactContractValidator.java:436)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:51)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.validate(ArtifactContractValidatorTest.java:689)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.existingPathResolvesToModifyBeforeSidecarPublication(ArtifactContractValidatorTest.java:366)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.repeatedReusableReadsDoNotInvalidateAnOtherwiseValidArtifact -- Time elapsed: 0.156 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: {run_id=run-1, run_metadata=.agent/workstreams/ws-1/runs/run-1/run.json, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, contract_node_id=design.codex_arch_review, contract_required_keys=[summary, decision], contract_allowed_decisions=[NEEDS_REVISION, BLOCKED, READY_FOR_ARCH_REVIEW], parse_error={message=AUTHORED_PROMPT_PATH_INVALID, code=AUTHORED_CONTEXT_INVALID, details={}}, contract_failure_diagnostic_ref=.agent/workstreams/ws-1/artifacts/contract-failures/node-design-codex_arch_review-007.json, contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-1/artifacts/contract-failures/node-design-codex_arch_review-007.md, message=AUTHORED_PROMPT_PATH_INVALID, agent_execution_result_contract={present=true, valid=true, decision=READY_FOR_ARCH_REVIEW, summary=, validationError=}, agent_execution_artifact_contract_results=[{contractType=agent_output_contract, required=true, present=true, valid=false, path=, errorCode=AUTHORED_CONTEXT_INVALID, errorMessage=AUTHORED_PROMPT_PATH_INVALID}]} ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.repeatedReusableReadsDoNotInvalidateAnOtherwiseValidArtifact(ArtifactContractValidatorTest.java:172)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.planResultProducesOccurrenceProjectionWithoutCanonicalPlan -- Time elapsed: 0.246 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.planResultProducesOccurrenceProjectionWithoutCanonicalPlan(ArtifactContractValidatorTest.java:248)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.intakeContractRevisionRequiresTypedObligationsAndPublishesThem -- Time elapsed: 0.004 s <<< ERROR!
+java.lang.IllegalStateException: typed execution requires program-owned run metadata
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.finalizeRunMetadata(AgentRunMetadataFinalizer.java:105)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.resolveNodeResult(AgentRunMetadataFinalizer.java:71)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.assessPublication(AgentRunMetadataFinalizer.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator$Validation.complete(ArtifactContractValidator.java:436)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:51)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.validate(ArtifactContractValidatorTest.java:689)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.intakeContractRevisionRequiresTypedObligationsAndPublishesThem(ArtifactContractValidatorTest.java:616)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.taskProposalCarriesTypedCreateAndModifyScopeThroughValidation -- Time elapsed: 0.004 s <<< ERROR!
+java.lang.IllegalStateException: typed execution requires program-owned run metadata
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.finalizeRunMetadata(AgentRunMetadataFinalizer.java:105)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.resolveNodeResult(AgentRunMetadataFinalizer.java:71)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.assessPublication(AgentRunMetadataFinalizer.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator$Validation.complete(ArtifactContractValidator.java:436)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:51)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.validate(ArtifactContractValidatorTest.java:689)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.taskProposalCarriesTypedCreateAndModifyScopeThroughValidation(ArtifactContractValidatorTest.java:317)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.integratedFinalizationRecordsOneDecisionBeforeSuccessfulPublication -- Time elapsed: 0.156 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.integratedFinalizationRecordsOneDecisionBeforeSuccessfulPublication(ArtifactContractValidatorTest.java:70)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.revisionFullProposalCannotBypassPatchContractOrPublishReference -- Time elapsed: 0.004 s <<< ERROR!
+java.lang.IllegalStateException: typed execution requires program-owned run metadata
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.finalizeRunMetadata(AgentRunMetadataFinalizer.java:105)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.resolveNodeResult(AgentRunMetadataFinalizer.java:71)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.assessPublication(AgentRunMetadataFinalizer.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator$Validation.complete(ArtifactContractValidator.java:436)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:51)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.validate(ArtifactContractValidatorTest.java:689)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.revisionFullProposalCannotBypassPatchContractOrPublishReference(ArtifactContractValidatorTest.java:422)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.proposalRetriesPublishDistinctImmutableReferences -- Time elapsed: 0.004 s <<< ERROR!
+java.lang.IllegalStateException: typed execution requires program-owned run metadata
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.finalizeRunMetadata(AgentRunMetadataFinalizer.java:105)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.resolveNodeResult(AgentRunMetadataFinalizer.java:71)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.assessPublication(AgentRunMetadataFinalizer.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator$Validation.complete(ArtifactContractValidator.java:436)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:51)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.validate(ArtifactContractValidatorTest.java:689)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.proposalRetriesPublishDistinctImmutableReferences(ArtifactContractValidatorTest.java:394)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.validEnvelopeWritesSidecarAndRoutesTypedDecision -- Time elapsed: 0.141 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.validEnvelopeWritesSidecarAndRoutesTypedDecision(ArtifactContractValidatorTest.java:133)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.codexReviewSidecarBindsTrustedProposalSubjectFromNodeInputs -- Time elapsed: 0.004 s <<< ERROR!
+java.lang.IllegalStateException: typed execution requires program-owned run metadata
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.finalizeRunMetadata(AgentRunMetadataFinalizer.java:105)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.resolveNodeResult(AgentRunMetadataFinalizer.java:71)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.assessPublication(AgentRunMetadataFinalizer.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator$Validation.complete(ArtifactContractValidator.java:436)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:51)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.validate(ArtifactContractValidatorTest.java:689)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.codexReviewSidecarBindsTrustedProposalSubjectFromNodeInputs(ArtifactContractValidatorTest.java:560)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.capturedV9NewPathsResolveToCreateBeforeSidecarPublication -- Time elapsed: 0.004 s <<< ERROR!
+java.lang.IllegalStateException: typed execution requires program-owned run metadata
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.finalizeRunMetadata(AgentRunMetadataFinalizer.java:105)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.resolveNodeResult(AgentRunMetadataFinalizer.java:71)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.assessPublication(AgentRunMetadataFinalizer.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator$Validation.complete(ArtifactContractValidator.java:436)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:51)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.validate(ArtifactContractValidatorTest.java:689)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.capturedV9NewPathsResolveToCreateBeforeSidecarPublication(ArtifactContractValidatorTest.java:343)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.ArtifactContractValidatorTest.runWriteFailureCannotPublishCandidate -- Time elapsed: 0.156 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Expected java.lang.IllegalStateException to be thrown, but nothing was thrown.
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:73)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3128)
+	at dev.dual.runtime.handler.ArtifactContractValidatorTest.runWriteFailureCannotPublishCandidate(ArtifactContractValidatorTest.java:86)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   ArtifactContractValidatorTest.integratedFinalizationRecordsOneDecisionBeforeSuccessfulPublication:70 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   ArtifactContractValidatorTest.nonIntakeReviewMayOmitContractObligationsWithoutProjectionFailure:188 {run_id=run-1, agent=test, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, contract_node_id=design.codex_arch_review, contract_required_keys=[summary, decision], contract_allowed_decisions=[NEEDS_REVISION, BLOCKED, READY_FOR_ARCH_REVIEW], parse_error={message=AUTHORED_PROMPT_PATH_INVALID, code=AUTHORED_CONTEXT_INVALID, details={}}, contract_failure_diagnostic_ref=.agent/workstreams/ws-1/artifacts/contract-failures/node-design-codex_arch_review-007.json, contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-1/artifacts/contract-failures/node-design-codex_arch_review-007.md, message=AUTHORED_PROMPT_PATH_INVALID, agent_execution_result_contract={present=true, valid=true, decision=READY_FOR_ARCH_REVIEW, summary=, validationError=}, agent_execution_artifact_contract_results=[{contractType=agent_output_contract, required=true, present=true, valid=false, path=, errorCode=AUTHORED_CONTEXT_INVALID, errorMessage=AUTHORED_PROMPT_PATH_INVALID}]} ==> expected: <COMPLETED> but was: <FAILED>
+[ERROR]   ArtifactContractValidatorTest.planResultProducesOccurrenceProjectionWithoutCanonicalPlan:248 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   ArtifactContractValidatorTest.publicationIoFailureRetainsSuccessfulExecutionRatherThanInventingContractFailure:99 Expected java.io.IOException to be thrown, but nothing was thrown.
+[ERROR]   ArtifactContractValidatorTest.repeatedReusableReadsDoNotInvalidateAnOtherwiseValidArtifact:172 {run_id=run-1, run_metadata=.agent/workstreams/ws-1/runs/run-1/run.json, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, contract_node_id=design.codex_arch_review, contract_required_keys=[summary, decision], contract_allowed_decisions=[NEEDS_REVISION, BLOCKED, READY_FOR_ARCH_REVIEW], parse_error={message=AUTHORED_PROMPT_PATH_INVALID, code=AUTHORED_CONTEXT_INVALID, details={}}, contract_failure_diagnostic_ref=.agent/workstreams/ws-1/artifacts/contract-failures/node-design-codex_arch_review-007.json, contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-1/artifacts/contract-failures/node-design-codex_arch_review-007.md, message=AUTHORED_PROMPT_PATH_INVALID, agent_execution_result_contract={present=true, valid=true, decision=READY_FOR_ARCH_REVIEW, summary=, validationError=}, agent_execution_artifact_contract_results=[{contractType=agent_output_contract, required=true, present=true, valid=false, path=, errorCode=AUTHORED_CONTEXT_INVALID, errorMessage=AUTHORED_PROMPT_PATH_INVALID}]} ==> expected: <COMPLETED> but was: <FAILED>
+[ERROR]   ArtifactContractValidatorTest.runWriteFailureCannotPublishCandidate:86 Expected java.lang.IllegalStateException to be thrown, but nothing was thrown.
+[ERROR]   ArtifactContractValidatorTest.validEnvelopeWritesSidecarAndRoutesTypedDecision:133 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AuthoredBoundarySequenceTest.aLaterOpenApprovalBlocksOldRetryAndAResolvedReplacementDoesNotRebindIt:201 Expected java.io.IOException to be thrown, but nothing was thrown.
+[ERROR]   AuthoredBoundarySequenceTest.approvedInputDamageAndPartialPublicationBlockTheActualConsumer:117 Exception in thread "main" java.io.IOException: AUTHORED_CONTRACT_NOT_QUALIFIED
+	at dev.dual.runtime.handler.AuthoredStageLineageResolver.require(AuthoredStageLineageResolver.java:481)
+	at dev.dual.runtime.handler.AuthoredStageLineageResolver.prepare(AuthoredStageLineageResolver.java:140)
+	at dev.dual.runtime.handler.AuthoredExecutionContext.prepare(AuthoredExecutionContext.java:31)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest$ColdRead.main(AuthoredBoundarySequenceTest.java:187)
+ ==> expected: <true> but was: <false>
+[ERROR]   AuthoredBoundarySequenceTest.approvedInputDamageAndPartialPublicationBlockTheActualConsumer:117 Exception in thread "main" java.io.IOException: AUTHORED_CONTRACT_NOT_QUALIFIED
+	at dev.dual.runtime.handler.AuthoredStageLineageResolver.require(AuthoredStageLineageResolver.java:481)
+	at dev.dual.runtime.handler.AuthoredStageLineageResolver.prepare(AuthoredStageLineageResolver.java:140)
+	at dev.dual.runtime.handler.AuthoredExecutionContext.prepare(AuthoredExecutionContext.java:31)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest$ColdRead.main(AuthoredBoundarySequenceTest.java:187)
+ ==> expected: <true> but was: <false>
+[ERROR]   AuthoredBoundarySequenceTest.everyDeclaredImplementationAndDirectSelfTestEntryConsumesTheApprovedPlan:262 five implementation entries and one direct self-test entry; prerequisites wait for a human decision ==> expected: <6> but was: <7>
+[ERROR]   AuthoredBoundarySequenceTest.twoValidPlanCandidatesInOneApprovalCannotBeChosenByOrder:143 Expected java.io.IOException to be thrown, but nothing was thrown.
+[ERROR]   AuthoredBoundarySequenceTest.twoValidPlanCandidatesInOneApprovalCannotBeChosenByOrder:143 Expected java.io.IOException to be thrown, but nothing was thrown.
+[ERROR]   AuthoredStageSequenceTest.unknownRoutedNodeRejectsImplementationContextBeforePublication:240 expected: <FAILED> but was: <COMPLETED>
+[ERROR] Errors: 
+[ERROR]   ArtifactContractValidatorTest.capturedV9NewPathsResolveToCreateBeforeSidecarPublication:343->validate:689 » IllegalState typed execution requires program-owned run metadata
+[ERROR]   ArtifactContractValidatorTest.codexReviewSidecarBindsTrustedProposalSubjectFromNodeInputs:560->validate:689 » IllegalState typed execution requires program-owned run metadata
+[ERROR]   ArtifactContractValidatorTest.existingPathResolvesToModifyBeforeSidecarPublication:366->validate:689 » IllegalState typed execution requires program-owned run metadata
+[ERROR]   ArtifactContractValidatorTest.intakeContractRevisionRequiresTypedObligationsAndPublishesThem:616->validate:689 » IllegalState typed execution requires program-owned run metadata
+[ERROR]   ArtifactContractValidatorTest.proposalRetriesPublishDistinctImmutableReferences:394->validate:689 » IllegalState typed execution requires program-owned run metadata
+[ERROR]   ArtifactContractValidatorTest.revisionFullProposalCannotBypassPatchContractOrPublishReference:422->validate:689 » IllegalState typed execution requires program-owned run metadata
+[ERROR]   ArtifactContractValidatorTest.taskProposalCarriesTypedCreateAndModifyScopeThroughValidation:317->validate:689 » IllegalState typed execution requires program-owned run metadata
+[ERROR]   ArtifactContractValidatorTest.taskProposalIsMechanicallyValidatedBeforeSidecarPublication:270->validate:689 » IllegalState typed execution requires program-owned run metadata
+[ERROR]   AuthoredBoundarySequenceTest.sameBytesReapprovalRejectsOldAuthoredChainAndFreshChainCompletes:234 » NoSuchElement No value present
+[INFO] 
+[ERROR] Tests run: 49, Failures: 14, Errors: 9, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.000 s]
+[INFO] dual-core .......................................... SUCCESS [  0.229 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  0.030 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  0.054 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  0.016 s]
+[INFO] dual-runtime ....................................... FAILURE [ 29.782 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  30.253 s
+[INFO] Finished at: 2026-10-06T17:39:10+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project dual-runtime: There are test failures.
+[ERROR] 
+[ERROR] See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-runtime

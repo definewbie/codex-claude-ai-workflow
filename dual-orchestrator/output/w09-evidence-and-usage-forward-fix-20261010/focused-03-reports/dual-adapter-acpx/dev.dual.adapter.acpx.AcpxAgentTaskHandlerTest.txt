@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest
+-------------------------------------------------------------------------------
+Tests run: 53, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.17 s -- in dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest

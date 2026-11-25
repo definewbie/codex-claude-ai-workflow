@@ -1,0 +1,110 @@
+--- before/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -4,7 +4,7 @@
+ 
+ 本文是唯一跨批次工作索引，不重新定义验收。唯一设计依据为 [R3 设计](20260923-dual-lifecycle-reliability-design.zh-CN.md) §0/§3–§7.1；证据层次和状态沿用该文 §5 与 [engineering-checklist](../engineering-checklist.md)。后续更新本文，不再按日期复制一份新主清单。§3 的文件处置都是建议，不授权删除、还原或提交既有改动。
+ 
+-2026-10-09 当前补记：B01–B04 以各批末记录为准；用户选择 C 后，B05 合同资格族已实施并完成主 agent 自查与稳定源码的单轮离线回归（1,731 项、206 suites、零失败/错误/跳过），见 §21.2。待独立批末评审，不自动收口。未覆盖族 UNKNOWN，D01/I1.a/W01 与其他 W 项、真实 NO-GO 均不因此关闭。
++2026-10-09 当前补记：B01–B04 以各批末记录为准；B05 首版 C 已获用户带回的 CC 批末独立 PASS，按合同资格单族收口（CLOSED / PASS），见 §21.2–§21.3。时钟判别尚未常驻的 LOW 已登记。未覆盖族 UNKNOWN，D01/I1.a/W01 与其他 W 项、真实 NO-GO 均不因此关闭，不自动启动下一批。
+ 
+ ## 1. 当前结论、工作区身份和核验范围
+ 
+@@ -628,20 +628,28 @@
+ 
+ 设计复审接收时 B05 **IN_PROGRESS**，开工前置守卫已执行；当时本族的实际检查事实、L04 决定、R03/L03 拒绝配对及恢复四分类尚未落码/证明，不能收口；后续状态由 §21.2 更新。见[接收与处置](../../output/lifecycle-batch-05-20261008/scope-c/implementation/cc-review-received.md)。保留完整 C 结束条件；不额外开 LOW 材料轮次，实施及内容稳定的整链离线回归后交 B05 合并独立评审。真实 NO-GO、W 项未完成、其余族 UNKNOWN、ROI/新 authority 停止条件均不变。
+ 
+-### 21.2 C 实施与批末候审（2026-10-09）
++### 21.2 C 实施与独立批末判断（2026-10-09）
+ 
+ 本族实际 checker 输入/结果生产、真实批准 L04、target-bound 拒绝、native 固定准备失败/R03→L03、本地任务原 L03、唯一四分类已落码；自查补齐四个任务 consumer、covered null、失败码关联、readiness 时间比较、R01 scoped 会话与拒绝后零 R02 资格。原身份/scope/批准/证据、主原因、独立复评、终态和外部 UNKNOWN 均未放宽。真实接口/provider 不在本批。
+ 
+ | 工作列表义务 | 当前证据 / 状态 |
+ |---|---|
+-| C producer→决定→拒绝配对→解释 | 原 checker/ReviewGateActions/RoutingEngine/Facts/固定完成/RecoveryAssessment，离线序列已证；等待独立判断 |
++| C producer→决定→拒绝配对→解释 | 原 checker/ReviewGateActions/RoutingEngine/Facts/固定完成/RecoveryAssessment，离线序列已证；本族批末独立 PASS 已接收，见 §21.3 |
+ | 三类及 UNKNOWN、合法续作 | 真实材料漂移/未来条件拒绝、同输入恢复；测试自身错误 checker 的矛盾机制；缺/错/未采集 UNKNOWN；合成机制与真实业务序列分列 |
+ | L04/R03/L03、重放与冷 JVM | 两组八类前缀、R03 写失败/删 pair、固定补齐；R01 后重核、R02 已存在不得声称未调用 |
+ | 两入口/四变体/投影 | 真正 ReviewGateActions 批准的 inline/worker × 四变体→作者/自测/独立验收/人工交付；统一 read model 的原 CLI/server/console 消费与既有回归；未做浏览器视觉验证 |
+ | LOW-1 枚举机械守卫 | 当前 71 拒绝位点，真实 producer 映射或明确未覆盖；原 67 候选保留历史，测试索引不在 runtime 加载 |
+ | 最终内容稳定单轮回归 | 1,731 tests / 206 suites / 0 failure / 0 error / 0 skipped，653 source/resource/pom 前后指纹相同，XML 全部新鲜 |
+-| 独立批末评审 | 待 CC；主 agent 自查不能替代。未收口，不自动开启下一批 |
++| 独立批末评审 | 用户带回 CC PASS；本族 CLOSED / PASS，原自查和测试凭证不改写。LOW 登记见 §21.3，不自动开启下一批 |
+ 
+ 入口：[本批材料](../../output/lifecycle-batch-05-20261008/scope-c/implementation/batch.md)，含实际 dirty 生产基线、24 个 source/resource 增量、消费者边界、最终回归及额外时钟隔离反证。只在本族的已测切片称离线 PROVEN；其余族/委托/I/O 不明依然 UNKNOWN，五族全覆盖未完成。真实 NO-GO、未授权提交/installer/原生运行/第二族、成本偏差停止条款全部保留。
+ 
+ §21.2 收尾注：最终整轮回归后只清除本批 Java 行尾空格并同步测试索引；已有索引守卫复跑通过，1,109 个 class 字节与整轮回归完全相同。整轮源码稳定凭证与格式收尾凭证分列，不隐去这次变化、不把定点数字拼入 1,731。此前 acpx patch 的格式告警在本批之外，未覆盖。
++
++### 21.3 B05 单族独立 PASS 接收与收口（2026-10-09）
++
++当前 B05 首版 C：**CLOSED / PASS（单族、离线）**。用户带回 CC 批末独立评审，原文与作者处置见 [收口材料](../../output/lifecycle-batch-05-20261008/closure-20261009/disposition.md)。接收核验确认 653 项当前源码输入、24 个批内增量、206 份原始 XML 与 474 项交评材料均未漂移；不替代独立代码审查，不重跑测试。1,731 项单轮凭证及格式收尾分列的口径保持；旧交评材料保留其当时状态，文档增量另存。
++
++LOW-1：ClockComparisonProof 尚非常驻回归，登记 OPEN / 非阻塞。owner 为 runtime 合同资格/readiness 回归维护者；下一次涉及有效期、检查时刻、输入比较或四分类的受影响改动必须一并折叠进既有套件。结束条件：不同检查时刻、同实际输入不误判漂移，测试错误 checker 的矛盾机制可触发，真实有效期跨越/依赖变化仍判漂移，并有抓住错误比较的反证。当前仅有一次性补证，不借登记宣称完成，也不为此自动开启一批。
++
++D01 全体/I1.a/W01、其他 W 项、真实 NO-GO 保持；其余族 UNKNOWN，原五族义务保留未完成。第二族按既定真实反复阻塞及可观察损失触发评估；本 PASS 不授权提交、installer、真实 native/provider 或下一批。CC 未核验范围完整保留。
+--- before/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md
++++ after/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md
+@@ -81,7 +81,7 @@
+ 
+ #### I1.a：声明允许与实际续作前置冲突的运行时证据
+ 
+-**首版覆盖补记（2026-10-08）：**用户在 B05 成本取舍评估后明确选择 C：先对合同资格校验族完成实际决定检查、后继拒绝配对、四分类及合法续作的垂直切片，其余守卫族明确 UNKNOWN。具体候选见 [C 接线设计](../../output/lifecycle-batch-05-20261008/scope-c/design.md)，该接线已获用户带回的独立设计认可，LOW-1 枚举守卫已纳入；与详设 §4.3、主清单 §21.1 同步。认可不等于本族实施或整链证明。 2026-10-09：本族已实施并完成主 agent 自查及内容稳定的单轮离线回归，当前证据见主清单 §21.2；等待独立批末评审，不能把此单族状态外推为完整 I1.a/D01/W01 或真实运行已闭合。下文仍是完整 I1.a 目标；未覆盖族保留为未完成，不能用首族证明关闭 I1.a/D01/W01。不会削减合法流程、严格身份/scope/批准/证据、独立复评或安全恢复，不自动开展第二族、通用追踪平台或历史回填。
++**首版覆盖补记（2026-10-08）：**用户在 B05 成本取舍评估后明确选择 C：先对合同资格校验族完成实际决定检查、后继拒绝配对、四分类及合法续作的垂直切片，其余守卫族明确 UNKNOWN。具体候选见 [C 接线设计](../../output/lifecycle-batch-05-20261008/scope-c/design.md)，该接线已获用户带回的独立设计认可，LOW-1 枚举守卫已纳入；与详设 §4.3、主清单 §21.1 同步。认可不等于本族实施或整链证明。 2026-10-09：本族已实施并完成主 agent 自查及内容稳定的单轮离线回归，当前证据见主清单 §21.2–§21.3；用户带回 CC 批末独立 PASS，本族 CLOSED / PASS。时钟判别非驻留证明的 LOW 已登记，不能把此单族状态外推为完整 I1.a/D01/W01 或真实运行已闭合。下文仍是完整 I1.a 目标；未覆盖族保留为未完成，不能用首族证明关闭 I1.a/D01/W01。不会削减合法流程、严格身份/scope/批准/证据、独立复评或安全恢复，不自动开展第二族、通用追踪平台或历史回填。
+ 
+ 仅检查静态边和已知序列不足。目标要求：当前 occurrence 的 resolving action 被接受后，真实下一消费者若因前置不满足而拒绝，失败必须保留“本次已允许的动作—被拒绝的前置”配对。它是现有失败事实的结构化补充，不是新增 workflow 状态或通用死端求解器。
+ 
+--- before/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ after/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -201,7 +201,7 @@
+ - 首版验收包括本族实际生产/强制消费、三类可触发及 UNKNOWN 对照、合法補足/返修→复评→新批准、写入前缀/冷 JVM、两入口/四变体/统一投影与删除式反证。合成诊断机制证据与生产消费者/真实用户流程证明分开。
+ - 全五族的完整覆盖仍未完成，不以 C 关闭 I1.a/D01/W01。新增全族追踪/规则平台、依赖图/服务或分类只能靠伪造事实时停止提交取舍；不自动平移到第二族，不改变真实 NO-GO。
+ 
+-2026-10-09 实施检查点：上述单族链已落码并完成离线自查与最终单轮回归，见主清单 §21.2 和 [批末材料](../../output/lifecycle-batch-05-20261008/scope-c/implementation/batch.md)。native 准备拒绝在原 R writer 固定 input-rejection 完成后走 L03；本地任务携同一诊断随原 L03，不伪造 native 执行记录。R01 后重核复用原 scoped 会话；固定拒绝与创建 R02 在同一原 R 锁内互斥。C 的原义务与覆盖边界不降低；实施仍待独立批末判断，不关闭全 D01 或解除真实 NO-GO。
++2026-10-09 实施检查点：上述单族链已落码并完成离线自查与最终单轮回归，见主清单 §21.2 和 [批末材料](../../output/lifecycle-batch-05-20261008/scope-c/implementation/batch.md)。native 准备拒绝在原 R writer 固定 input-rejection 完成后走 L03；本地任务携同一诊断随原 L03，不伪造 native 执行记录。R01 后重核复用原 scoped 会话；固定拒绝与创建 R02 在同一原 R 锁内互斥。C 的原义务与覆盖边界不降低；用户带回的 CC 批末独立 PASS 已接收，单族收口见主清单 §21.3；时钟判别 LOW 维持非驻留证明登记，不关闭全 D01 或解除真实 NO-GO。
+ 
+ ## 5. D02：阶段事实、原因保真与发布
+ 
+--- before/output/lifecycle-batch-05-20261008/scope-c/design.md
++++ after/output/lifecycle-batch-05-20261008/scope-c/design.md
+@@ -98,12 +98,12 @@
+ 
+ ## 7. 六维与当前状态
+ 
+-2026-10-09：本族已实施／离线自查与最终回归完成／待独立批末评审。详见 [实际批次材料](implementation/batch.md)、[当前消费者边界](implementation/consumer-map.md)和 [最终凭证](implementation/test-results.json)。下述状态替代此前“仅设计、待落码”，不回写旧成本或候选证据。
++2026-10-09：本族已实施／离线自查与最终回归完成／用户带回 CC 批末独立 PASS，单族 CLOSED / PASS，见 [收口处置](../closure-20261009/disposition.md)。详见 [实际批次材料](implementation/batch.md)、[当前消费者边界](implementation/consumer-map.md)和 [最终凭证](implementation/test-results.json)。下述状态替代此前“仅设计、待落码”，不回写旧成本或候选证据。
+ 
+ Declared：用户 C 与本族受审设计；Proven：真实离线批准/后继/恢复序列、三类与 UNKNOWN 分层对照、写入前缀/冷 JVM、两入口四变体、单轮 1,731 项全绿及额外时钟隔离反证；Consumed：原 checker→L04→原 native/本地任务消费→固定完成/L03→RecoveryAssessment；Enforced before：批准写入、dispatch、失败完整性采纳与后续路由，不称 OS 写前；Failure route：D06 固定补齐、D07 外部 UNKNOWN；Cannot-bypass：缺/错 pair/身份/规则、枚举、失败前缀及合法正向对照。
+ 
+ native 准备拒绝未有 R01 时仍在现有 runs/outputs 固定本次 execution 的 input-rejection 完成，绝不产生准备/外部发送资格；本地任务不造 R03。固定失败后原发送者不能再建 R02；R02 已存在则不得记录零调用失败。此为现有 writer 接线，不是新 store/authority。
+ 
+-本族可比证据切片达到离线 PROVEN；未覆盖委托、无法观察的 I/O 与无可信关联仍 UNKNOWN。独立收口待 CC；不得关闭完整 D01/W01/I1.a、真实 NO-GO 或启动第二族。来源定义与停止条件维持。
++本族可比证据切片达到离线 PROVEN；未覆盖委托、无法观察的 I/O 与无可信关联仍 UNKNOWN。本族已完成独立判断并收口；时钟判别尚未常驻的 LOW 已登记，不因此关闭完整 D01/W01/I1.a、真实 NO-GO 或启动第二族。来源定义与停止条件维持。
+ 
+ 收尾格式变化与最终整轮源码凭证分列，1,109 class 字节未变且索引守卫通过，见 implementation/format-proof.json。
+--- before/output/lifecycle-batch-05-20261008/scope-c/implementation/batch.md
++++ after/output/lifecycle-batch-05-20261008/scope-c/implementation/batch.md
+@@ -1,6 +1,6 @@
+ # B05 · D01 首版 C 合同资格族垂直切片
+ 
+-状态（2026-10-09）：本族实施完成，离线自查 PASS，等待 CC 独立批末评审。未取得实施批末独立 PASS，不自动关闭 B05 或 W 项。
++状态（2026-10-09）：用户带回 CC 批末独立 PASS，B05 首版 C 按单族 CLOSED / PASS，见 [收口处置](../../closure-20261009/disposition.md)。LOW-1 时钟证明未常驻已登记；不关闭整体 D01/I1.a/W01 或其他 W 项。
+ 
+ ## 目标与范围
+ 
+@@ -61,6 +61,6 @@
+ 
+ Declared by：用户 C、受审设计及原 I1.a/D01；Proven by：上述分层离线序列和最终单轮回归；Consumed by：实际 checker→L04→原消费失败→固定完成/L03→唯一 RecoveryAssessment；Enforced before：批准写入、dispatch、失败完整性采纳与后续路由；Failure route：D06 固定补齐、D07 外部 UNKNOWN、无自动重发；Cannot-bypass test：正常与拒绝对照、配对/身份/枚举反证、写入前缀、冷 JVM、两入口四变体。
+ 
+-稳定源码离线回归与主 agent 自查已完成；本族批末独立判断待 CC。不能关闭全 D01/I1.a/W01，也不关闭其他 W 项或改变真实 NO-GO。没有提交、installer、真实客户端运行、额外 agent 或后续批次授权。
++稳定源码离线回归与主 agent 自查已完成；本族批末独立 PASS 已接收，按单族收口。不能关闭全 D01/I1.a/W01，也不关闭其他 W 项或改变真实 NO-GO。没有提交、installer、真实客户端运行、额外 agent 或后续批次授权。
+ 
+ 收尾格式核对：清除本批 Verifier 的 13 处行尾空格并同步仅测试的 source-bound 索引后，重新编译及索引守卫通过；1,109 个已编译 class 字节全部与最终整轮回归相同。整轮 653 源码前后 SHA 凭证对应其运行期间，当前源码的格式变化另由 post-format-source-sha256.json / format-proof.json 记录，不伪称回归之后未改源码、不拼接测试数字。git diff --check 剩余告警属于此前 acpx patch 的上下文空格，本批没有修改该补丁。
+--- before/output/lifecycle-batch-05-20261008/scope-c/implementation/cc-review-received.md
++++ after/output/lifecycle-batch-05-20261008/scope-c/implementation/cc-review-received.md
+@@ -9,4 +9,6 @@
+ 状态：开工前置已纳入且守卫已执行；B05 IN_PROGRESS。本族 producer→decision_checks→continuation_failure→RecoveryAssessment、三类与 UNKNOWN、合法续作及 L04/R03/L03 失败前缀/冷 JVM 仍未实现/证明。不关闭 I1.a/D01/W01，不挪用 B04 数字。真实 NO-GO 维持；无提交、native/provider、installer、额外 agent 或第二族。此次 LOW 吸收不单开评审轮次；B05 完整离线验证后交批末合并独立评审。
+ 
+ 
+-2026-10-09 实施更新（作者追加，不是 CC 新结论）：当前源码已生产实际逐规则事实并接入 L04、固定 native 拒绝/R03/L03、本地 sibling L03 与四分类；71 位点新索引替代仅测试使用的旧候选映射，67 候选保留历史。最终单轮 1,731/206/0 + 653 前后指纹相同，见 batch.md/test-results.json。本族待独立批末评审，原复审不自动等于实施认可或 W 项完成。
++2026-10-09 实施更新（作者追加，不是 CC 新结论）：当前源码已生产实际逐规则事实并接入 L04、固定 native 拒绝/R03/L03、本地 sibling L03 与四分类；71 位点新索引替代仅测试使用的旧候选映射，67 候选保留历史。最终单轮 1,731/206/0 + 653 前后指纹相同，见 batch.md/test-results.json。该实施更新当时仍待独立批末评审，原设计复审不自动等于实施认可或 W 项完成。
++
++2026-10-09 后续批末评审接收（作者登记）：用户已带回独立实施 PASS，本族 CLOSED / PASS；原文及 LOW-1 处置见 [单族收口材料](../../closure-20261009/disposition.md)。本文件前文仍是设计复审与当时实施检查点，不把设计 PASS 回写为实施证明，不关闭全 D01/I1.a/W01 或解除真实 NO-GO。

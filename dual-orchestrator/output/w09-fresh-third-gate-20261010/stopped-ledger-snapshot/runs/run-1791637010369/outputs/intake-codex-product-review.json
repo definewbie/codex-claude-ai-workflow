@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "workstream_id": "ws-20261010T124812Z-XCZL",
+  "run_id": "run-1791637010369",
+  "node_id": "intake.codex_product_review",
+  "result": {
+    "artifact_type": "agent_output_contract",
+    "decision": "READY_FOR_PRODUCT_REVIEW",
+    "summary": "修订已解决文件范围授权问题，功能、限制与验收要求完整，可以继续后续流程。",
+    "lifecycle_status": "READY",
+    "blocking": false,
+    "checks": [
+      "已先审阅 Review Evidence Brief，再核对完整提案及上一轮 CO-1。",
+      "产品完整性：函数行为、输入类别、幂等性、标准库限制和 README 用法均有绑定字段覆盖。",
+      "架构适配：纯字符串函数与任务规模匹配，排除了外部集成及无关工程设施。",
+      "用户验收：要求实际测试输出、案例对应关系及 README 示例核对，未新增独立测量退出码的要求。",
+      "授权边界：C-4 与 AC-5 已区分候选文件、GOAL 批准和最终 EXECUTION 授权。"
+    ],
+    "evidence": [
+      "C-4 明确三个文件仅为候选，须经设计与计划评审，并在实现前单独批准精确路径及 CREATE/MODIFY。",
+      "AC-5 明确仅获批 EXECUTION scope.included 构成变更范围，且无需改动每个获批路径；CO-1 已解决。",
+      "AC-1、AC-4 与 TR-3 保留换行转换、其他字符不变及各类输入幂等要求。",
+      "AC-2、TR-2 要求真实命令和测试输出；AC-3、TR-4 要求实际核对导入及混合换行示例。",
+      "上下文报告 tracked 文件数为 0；完整提案已提供，足以支持本次需求层面的审查。"
+    ],
+    "missing_evidence": [],
+    "must_fix": [],
+    "contract_obligations": [],
+    "acceptance_notes": [
+      "本次通过仅表示提案可继续推进，不构成实现授权或最终交付验收。",
+      "测试执行与示例一致性证据按契约在实现后提供，当前阶段不属于证据缺口。"
+    ],
+    "open_risks": [],
+    "changed_files": [],
+    "verification_summary": "基于提供的上下文完成需求覆盖与修订核对；未修改文件，未执行测试，无未解决的提案阻塞项。",
+    "failure": {
+      "category_hint": "",
+      "verification_remediation": "NONE",
+      "contract_gaps": [],
+      "out_of_scope_files": [],
+      "missing_tests": [],
+      "context_gaps": [],
+      "reason": ""
+    },
+    "reread_reasons": []
+  }
+}

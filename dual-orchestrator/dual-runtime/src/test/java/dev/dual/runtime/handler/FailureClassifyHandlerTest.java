@@ -20,6 +20,14 @@ class FailureClassifyHandlerTest {
     private static final String WS = "ws-classification";
     private static final String REVIEW = "acceptance.codex_verifier_review";
     @TempDir Path root;
+    private int run;
+    private String runId = "run-review";
+
+    @org.junit.jupiter.api.BeforeEach
+    void approveExecution() throws Exception {
+        ApprovedExecutionTestFixture.create(root, WS, List.of(new dev.dual.core.contract.TaskContract.ScopeEntry(
+                "product.txt", dev.dual.core.contract.TaskContract.ScopeOperation.CREATE)));
+    }
 
     private ObjectNode envelope(FailureCategory category) throws Exception {
         var prompt = AgentResultPromptContract.render(WS, "run-review", REVIEW, "ACCEPT",
@@ -45,15 +53,20 @@ class FailureClassifyHandlerTest {
     }
 
     private NodeResult publish(ObjectNode tree) throws Exception {
-        String ref = ".agent/workstreams/" + WS + "/runs/run-review/outputs/review.json";
+        runId = "run-review-" + (++run);
+        tree.put("run_id", runId);
+        String ref = ".agent/workstreams/" + WS + "/runs/" + runId + "/outputs/review.json";
         Files.createDirectories(root.resolve(ref).getParent());
         JSON.writeValue(root.resolve(ref).toFile(), tree);
-        return new ArtifactContractValidator().validate(root, WS, "node-review", new NodeDefinition(
+        var runPath = root.resolve(ref).getParent().getParent().resolve("run.json");
+        JSON.writeValue(runPath.toFile(), Map.of("schemaVersion", 3, "runId", runId, "workstreamId", WS,
+                "nodeId", REVIEW, "processResult", Map.of("exitCode", 0, "usability", "EXITED_ZERO", "durationMs", 1), "adapterSignals", List.of()));
+        return new ArtifactContractValidator(dev.dual.runtime.RuntimeTestLedger.ledger()).validate(root, WS, "node-review", new NodeDefinition(
                 REVIEW, NodeKind.TASK, "acpx.agent_run", Map.of()), NodeResult.completed(
-                "completed", List.of(ref), Map.of("run_id", "run-review")));
+                "completed", List.of(ref), Map.of("run_id", runId, "run_metadata", root.relativize(runPath).toString())));
     }
 
-    private Path sidecar() { return root.resolve(".agent/workstreams/" + WS + "/runs/run-review/outputs/review.contract.json"); }
+    private Path sidecar() { return root.resolve(".agent/workstreams/" + WS + "/runs/" + runId + "/outputs/review.contract.json"); }
     private String sidecarRef() { return root.relativize(sidecar()).toString(); }
     private Path classification() { return root.resolve(".agent/workstreams/" + WS + "/artifacts/failure-classification.json"); }
 
@@ -61,9 +74,7 @@ class FailureClassifyHandlerTest {
         var instance = new NodeInstance("node-classify", "acceptance.classify_failure", NodeKind.TASK,
                 "acceptance.failure_classify", NodeStatus.READY, "stage-acceptance", "iter-001",
                 List.of(sidecarRef()), List.of(), Map.of(), "", Instant.now(), null);
-        return new FailureClassifyHandler().execute(new TaskHandler.TaskContext(root, WS,
-                new NodeDefinition("acceptance.classify_failure", NodeKind.TASK, "acceptance.failure_classify", Map.of()),
-                instance));
+        return new FailureClassifyHandler().execute(new TaskHandler.TaskContext(root, WS, new NodeDefinition("acceptance.classify_failure", NodeKind.TASK, "acceptance.failure_classify", Map.of("required_contract_phase", "EXECUTION")), instance, dev.dual.runtime.RuntimeTestLedger.ledger()));
     }
 
     @Test
@@ -78,7 +89,7 @@ class FailureClassifyHandlerTest {
             var published = publish(tree);
             assertEquals(NodeStatus.COMPLETED, published.status(), published.toString());
             AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
-            var cold = AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), new ObjectMapper());
+            var cold = AgentEvidenceIndex.latestDecisionFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), root, WS, List.of(sidecarRef()), new ObjectMapper());
             assertNotNull(cold.entry(), cold.toString());
             assertEquals(category.name(), cold.entry().document().failure().categoryHint());
             var classified = classify();
@@ -170,7 +181,7 @@ class FailureClassifyHandlerTest {
             assertEquals(expected ? NodeStatus.COMPLETED : NodeStatus.FAILED, publish(tree).status(), row);
             if (expected) {
                 AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
-                assertNotNull(AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), JSON).entry(), row);
+                assertNotNull(AgentEvidenceIndex.latestDecisionFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), root, WS, List.of(sidecarRef()), JSON).entry(), row);
             } else assertFalse(Files.exists(sidecar()), row);
         }
     }
@@ -192,7 +203,7 @@ class FailureClassifyHandlerTest {
             JSON.writeValue(sidecar().toFile(), persisted);
             // Give invalid historical bytes a valid lineage: semantic checks must still reject.
             AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
-            assertNull(AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), JSON).entry(), category);
+            assertNull(AgentEvidenceIndex.latestDecisionFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), root, WS, List.of(sidecarRef()), JSON).entry(), category);
             assertEquals(NodeStatus.FAILED, classify().status(), category);
             assertFalse(Files.exists(classification()), category);
         }
@@ -205,7 +216,7 @@ class FailureClassifyHandlerTest {
         ((ObjectNode) persisted.get("failure")).put("verification_remediation", "GUESS");
         JSON.writeValue(sidecar().toFile(), persisted);
         AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
-        assertNull(AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), JSON).entry());
+        assertNull(AgentEvidenceIndex.latestDecisionFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), root, WS, List.of(sidecarRef()), JSON).entry());
         assertEquals(NodeStatus.FAILED, classify().status());
         assertFalse(Files.exists(classification()));
     }
@@ -225,7 +236,12 @@ class FailureClassifyHandlerTest {
         assertEquals(NodeStatus.FAILED, publish(tree).status());
         result.putArray("must_fix");
         result.putArray("missing_evidence").add("Optional follow-up");
-        assertEquals(NodeStatus.COMPLETED, publish(tree).status(), "notes may retain optional evidence");
+        // Optional notes are semantically legal, but this isolated candidate has no machine proof.
+        var parsed = new AgentResultEnvelopeParser().parse(tree.toString());
+        var projected = new AgentResultDocumentProjector().outputContract(parsed.envelope(), ContractRegistry.forNode(REVIEW),
+                "acpx.agent_run", "node-review", ".agent/workstreams/" + WS + "/runs/" + runId + "/outputs/review.json");
+        assertTrue(AgentContractSemantics.validateOutputContract(AgentOutputContractDocument.from(projected)).isEmpty());
+        JSON.writeValue(sidecar().toFile(), projected);
         AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
         assertEquals("ACCEPTANCE_CLASSIFICATION_NOT_REQUIRED", classify().outcome());
     }
@@ -239,18 +255,23 @@ class FailureClassifyHandlerTest {
         var failure = (ObjectNode) result.get("failure");
         failure.put("category_hint", "");
         failure.put("reason", "");
-        assertEquals(NodeStatus.COMPLETED, publish(tree).status());
+        // This test concerns the classification projection, not completed verification authority.
+        var parsed = new AgentResultEnvelopeParser().parse(tree.toString());
+        var projected = new AgentResultDocumentProjector().outputContract(parsed.envelope(), ContractRegistry.forNode(REVIEW),
+                "acpx.agent_run", "node-review", ".agent/workstreams/" + WS + "/runs/" + runId + "/outputs/review.json");
+        Files.createDirectories(sidecar().getParent());
+        JSON.writeValue(sidecar().toFile(), projected);
         var persisted = (ObjectNode) JSON.readTree(sidecar().toFile());
         ((ObjectNode) persisted.get("failure")).remove("verification_remediation");
         JSON.writeValue(sidecar().toFile(), persisted);
         AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
-        assertNotNull(AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), JSON).entry());
+        assertNotNull(AgentEvidenceIndex.latestDecisionFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), root, WS, List.of(sidecarRef()), JSON).entry());
         assertEquals("ACCEPTANCE_CLASSIFICATION_NOT_REQUIRED", classify().outcome());
 
         ((ObjectNode) persisted.get("failure")).put("verification_remediation", "UNKNOWN");
         JSON.writeValue(sidecar().toFile(), persisted);
         AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
-        assertNull(AgentEvidenceIndex.latestDecisionFromRefs(root, WS, List.of(sidecarRef()), JSON).entry());
+        assertNull(AgentEvidenceIndex.latestDecisionFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), root, WS, List.of(sidecarRef()), JSON).entry());
         assertEquals(NodeStatus.FAILED, classify().status());
         assertFalse(Files.exists(classification()));
     }

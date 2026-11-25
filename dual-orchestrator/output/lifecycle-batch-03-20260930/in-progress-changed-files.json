@@ -1,0 +1,352 @@
+[
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+    "before_sha256": "d86b86cbc66c03ffe3e4c21dcbd4f533865a6760c0c3ca5a34dded888a457ff2",
+    "after_sha256": "9ccb917c1bf73af6015058f49c31327824dbb1b0bae4270bcd662ff087d34b37"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentPromptRenderer.java",
+    "before_sha256": "427af6dc901c56116911d4841ddfbc26da302b678c0d16903167006ba1c5364a",
+    "after_sha256": "62c6b25d7ca4b95a173bb5d1afa867c830577533cb6f83e7fed300790a58251f"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/SessionCompactionSeedWriter.java",
+    "before_sha256": "18cdc92a8d8ff1de9c7095e48c393435f8e647e27c822df35dac0c91f9200443",
+    "after_sha256": "4dd86a197fa2cec1830b05f90c4c0baff59c8844d5be491e15f53ac4132aba7a"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/WorkstreamMemoryUpdater.java",
+    "before_sha256": "8774f32bb809ff73dbd5da40b12767c03767af8155db78cb6671fcf3b9c31a45",
+    "after_sha256": "fdd61489b83fd24f75aa5d1d5424175d2e345b4e6bb3807a9153777b229bcfe6"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/resources/acpx/t6-20260731-nested-request-id.ndjson",
+    "before_sha256": null,
+    "after_sha256": "b1f09dfdc19aa4978ad063add1a2adc7994696aa63f1c3b7863f6ade23ec2184"
+  },
+  {
+    "path": "dual-core/src/main/java/dev/dual/core/contract/TaskContract.java",
+    "before_sha256": "504a6d7eaefb2accf09c372674fd136863395aefd1b35a11e4adb3ff12a99c95",
+    "after_sha256": "fac3c3b6f14fbbbe70edf43bfe218e728c2eb7fb0185e8da0adbe6847b0a2de0"
+  },
+  {
+    "path": "dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java",
+    "before_sha256": "80dda4f96efe04e1ab634a0e5de06571959dc878c198fd1f881c88e34fff551c",
+    "after_sha256": "72d8ef674c7729cf451a33bd332de9d77d5984dd2d6f6a4998f38481e1d53ce7"
+  },
+  {
+    "path": "dual-core/src/test/java/dev/dual/core/contract/PhasedContractTest.java",
+    "before_sha256": null,
+    "after_sha256": "12534426a75519e2534a96baaadcebde3451d7f623a8aa7bdc4d15f83297de72"
+  },
+  {
+    "path": "dual-core/src/test/java/dev/dual/core/contract/TaskContractTest.java",
+    "before_sha256": "e2eaf5c2db46c3401178b22776b59048e468dd059b25a2fc27fa3cc9f8ba031b",
+    "after_sha256": "94a5571467f102373b5f571012f013b23c793df4924cfb205f36af2cc256b235"
+  },
+  {
+    "path": "dual-core/src/test/resources/dev/dual/core/contract/execution-contract.json",
+    "before_sha256": null,
+    "after_sha256": "f702e57848c9ac76366577adbaabda74d315e80a1f14437f53850cc97ac25756"
+  },
+  {
+    "path": "dual-core/src/test/resources/dev/dual/core/contract/goal-contract.json",
+    "before_sha256": null,
+    "after_sha256": "9228634ffafa7d603eaad06f16efa7a7f66feb07890548bfc49acfd0eec5c768"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/AgentTaskLedgerWriter.java",
+    "before_sha256": "3b8c0b977b6ef449abef48aef4a9de38f5aebbdda30f0f44b2e0e066ce810ede",
+    "after_sha256": "3e0ec5268d8f378c81218b4fa18ff49c8757bee61f5ee20a1a7ea0e4f23f699c"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/AtomicJsonWriter.java",
+    "before_sha256": "22af077c6c4d3590ddde323d241e3b5770a808c62b832c129fcdea428f474354",
+    "after_sha256": "f93663eade136248436718330d619fcbdb8617775d2afb51142e054e5787fa99"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/CompletionAuditWriter.java",
+    "before_sha256": "8ca18faf5d9fd8b1325e5b6fa335261f1f24193c5a7696ef9e64d8a9a12ca790",
+    "after_sha256": "da6f92f629b69535b6659ace17e599e7e3d9faeade7abb0f17a8602df279bda6"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/ExecutionLedgerWriter.java",
+    "before_sha256": "65df5e36060588b1b158811432487110b31d533e4d27177ec70a24bbec6c4d96",
+    "after_sha256": "364bbed7c5358f331219f7524a7ed5083a58f54eddc385db5caea7ad182603c5"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/FileLedgerStore.java",
+    "before_sha256": "b4e34f26c923ef3467ae500fb875e8076ef93c202a4179b6a6db4ffc1d77fe66",
+    "after_sha256": "ca47cb9188773e019b486d541ea3fb237c09ab013d8b1c1710935592ccd4c21d"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/LedgerEventLog.java",
+    "before_sha256": "ba61adc411c9cbc29d7838225f57549c764623b3863615f0c5baf37087d5d347",
+    "after_sha256": "02e5683a35d813a07db4b0f9a4577d49966998ffc18649a83539ed9ed7d84281"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/LedgerSession.java",
+    "before_sha256": null,
+    "after_sha256": "cf36748c7a11ebbf413f5241f2e7119a478520a84f401970f89d5449a3851def"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+    "before_sha256": "6311d14d6ed98543e8f137bb4f14adddf6c72b294d812a3b90ec7134756fe40a",
+    "after_sha256": "3d347ccd351b53f015324321b6e526e7135e86a6b2895e1cc1f91b1e992bd6f1"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/RevisionTracker.java",
+    "before_sha256": "309f01e8620613280fc70d2e493f0e9af95db2bd7ae3392ce9fb11f9ccffffcb",
+    "after_sha256": "2ab19b90ff461fc23df1935957554e900177defb8f6d40bb31bfbfa57c22378f"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java",
+    "before_sha256": "0ed177b5252a167b40b1e2b9cd30765d0c96868f07c599de3100f83ba5059572",
+    "after_sha256": "2e63f9b42b1d57c571699401423321ee4e010adab0bcc7cfbd05861c1b57bd7f"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/TimelineEventDocument.java",
+    "before_sha256": "0db185377459e8f19796e21e723cc6089359da8cd3846c886f8f72cf80cee9ca",
+    "after_sha256": "8894d2dca7825c37afb5a5e0583797463161acf0f42275d6b3bf00475007c5a2"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java",
+    "before_sha256": "49f40617e49964bb9df561f98cedd3a48d97ed8ebff5594c62c8faa7951aed0f",
+    "after_sha256": "952752796874d0838a80e625c0728cf3937d94b3bd2129d4b329a4efbfa13fb7"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamDocument.java",
+    "before_sha256": "e511823da0aa67cc8e73cfb837f8d50119a7681509657a10be87be68f53d719f",
+    "after_sha256": "f262b7b038ad53c857c2929e5ebe01d5743230819ad07a749b9fe4f86e6ee16a"
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkstreamLock.java",
+    "before_sha256": "3f54f1e447e57bab0aa66920f26e213288f5b30aaac2e421d83be346bd050a5c",
+    "after_sha256": "0713d6dfd78dc16ab4e384d354bcb76ecea9c68517c7b4fadf7988a480c1cba8"
+  },
+  {
+    "path": "dual-ledger-file/src/test/java/dev/dual/ledger/file/LedgerSessionTest.java",
+    "before_sha256": null,
+    "after_sha256": "5f9c6426666f21ec9905acab4ea1f31c4f3f737bf43ca49abba197113ec78d30"
+  },
+  {
+    "path": "dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowCommitSequenceTest.java",
+    "before_sha256": null,
+    "after_sha256": "cf45cb9ae56e5dbaf6dfebbe7d1bb702a8cb9ff64a081528bf4f7fc2691871d2"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java",
+    "before_sha256": "2780cd10afbc62eb818dca095087eb01dcf2891f1c6e71020fc03b136cd9911c",
+    "after_sha256": "b973110ebac6c620bef51a18dfd480e2ac8aa994669bc3c520b926e9b04be9f4"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+    "before_sha256": "293ed4b428532636e3c3b6ae505700ab2c2a5f1dc54205fc891355b0e85b3cdf",
+    "after_sha256": "6245cc6a8a900d5099f3859312782a0af76a1b4aa3bec9ac690b83e5b1cb68dd"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentEvidenceIndex.java",
+    "before_sha256": "4a28884462037f915cac5973c0dd3d8f933899748181e1bfcb37a80ddcf5bca0",
+    "after_sha256": "a0c47edee90d0676cbaa0cfac1b0414b2b04894039e33ad0873803e5d36b6c1c"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputContractDocument.java",
+    "before_sha256": "eac35787ec9e95f43cff8835f69dce3e1ce46d2725fc92401eedf91741b7ffc5",
+    "after_sha256": "a5b151eb12754564456c1754746e09c595f355ebb0166c2b83c825ecefeab542"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputLineageVerifier.java",
+    "before_sha256": "1558a98205c8635cb885d422c8fd3a73b514994bf6f78f6609ca59d90a7ffe5f",
+    "after_sha256": "6030dfa707b33ea5448016340ee59dc66c55eda0b1fe9d3bbda6113349fb47d8"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultDocumentProjector.java",
+    "before_sha256": "0fd190b8cbe81abd27f84efbcc3c3a00a508ba7391f6810fd09b22f51d6d0ab6",
+    "after_sha256": "28dfa1901bc1f31cb1c5546b2d9a791bd521131f1a1dabdfa267a0f91735fd9b"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelope.java",
+    "before_sha256": "e6b7477f7d873728b4dc4ec383a2d561f6c2da48fbd1ffc6420ad453c93d587e",
+    "after_sha256": "2934b8e5f4f24c7af9fbfab14bd671c053a05fe71e2b19ac67cd1ecb471f3843"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+    "before_sha256": "8629e4bef76e05572a5987c1246958c59222b0f10c50eee47941fea6ec4c2181",
+    "after_sha256": "6000f29bfe378ddffedddebb0395c28e5f26969e2ad4e14702be57456227d223"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunGovernanceContext.java",
+    "before_sha256": "9104ac3130c1c6e80697a50ce46cd40306e193de06703aa99574011c7c1687c2",
+    "after_sha256": "ab944281a2fb261716d2df9569bdeac2c33653aa7ce5ddc59924b2235e5238c9"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java",
+    "before_sha256": "352848814d5ad9fe2893721475fc64c16fd77e26acc219850a1e96055bce607a",
+    "after_sha256": "42cb4ebad27b04a7cfd5de43c469a481e8627b7dcca6d2ed4d9963b01c25e454"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactValidateHandler.java",
+    "before_sha256": "39718472d0b22854c3f8be610cd2ff1efc8b50a2bd3876bc5bd6b04fe2f9683c",
+    "after_sha256": "8b2261690dd7e52861a2d699a01b249469e3484edf9807eb948ddaeeff454e66"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredExecutionContext.java",
+    "before_sha256": "e1b78e7014a9c0fdcc06b7aded36a4d247c0867f8c89b395f8bdf3fd4d266eb4",
+    "after_sha256": "8ae6e248507caa8bef0062f360b0e2d6e210987ba824af9fa0e9edce7c3c527d"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/AuthoredStageLineageResolver.java",
+    "before_sha256": "b9e9e7999b9de918a14554848edf11bba883e4b37a129778e200ae55cce724ec",
+    "after_sha256": "53c14c5f05f7192b1c4962a24f89f791f817779c3ae8511d1498754ab9a8ff94"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java",
+    "before_sha256": "ca89b47141b785835be0cbdcdbdcbfdf08aee6b3e36396fe4b2a3f1b28975738",
+    "after_sha256": "2768b6507de8dfc008f8a685b8312cfac71fe2fd268f25b3ed1de5157305d783"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ContextBuildPackageHandler.java",
+    "before_sha256": "bddfb2d1b212ced843407d9cd34b19eca0ff894e979a548646d2ca45d4c5075f",
+    "after_sha256": "206101becf0a201ba5995a14207600f1b11f51876b0a1b0276075bd802216c4c"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java",
+    "before_sha256": "2880b4914e52ca5d53c90e901c74a9a05738833649a5176cc6094ef065d2534f",
+    "after_sha256": "3b7b79e22c0f9188a28cc88ec32e87df0baa11f7f567bf82a798287e6ba7b0a6"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ContextStateEvidenceBoundaryRenderer.java",
+    "before_sha256": "bf4b16389a40c9dcd0adae8906622f79edf6b0797888ec8cbf11fd6a911f8ccd",
+    "after_sha256": "0c77523088a58e90e827ea507aa64b79ec42f331e8408e2c67ee04d864c32e17"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java",
+    "before_sha256": "73b76a0e07a7b4b735a43df2caa580ee5a82efb6385fa8ba509841a6ed6f5dbd",
+    "after_sha256": "885f9dfbd65b2793a66023f094d2bc5bf433e057d42e7318f1e0aa03e9b64567"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/DecisionHandler.java",
+    "before_sha256": "6117653f2475119beafb7e86da9efe43996e28f3554b0d3b127a17b3f32408a7",
+    "after_sha256": "3838202a6b5ae9fc3bd080f7f4b36df1828ed7d6df81158a6c7267e2c8928a59"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/DesignScopeValidator.java",
+    "before_sha256": "c05edf1e16fd3f47b2de07a7596078f8c14ce43b509e30516910064906a6442e",
+    "after_sha256": "37fea8bdc907f735d68b779b58bcc3e8b076a39ae09d3fb0e7c3f839cc995a2b"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+    "before_sha256": "6adcf5239e41149ef37634826bbe3da22bab911e2ebfbb886b526238f95e296b",
+    "after_sha256": "212a243c97ed31ffdb3a543a08177bf64a8ca934b4f0fdbcbfb2d044c35171f4"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceManifest.java",
+    "before_sha256": "627088b38aa92573a302a7c432562c7a0a031652e3e81bd287f57a7e8f408ee8",
+    "after_sha256": "526cd569e2eac1397801d88acb85b32154e48ad40d8ce11928156ec0742031a4"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/FailureClassifyHandler.java",
+    "before_sha256": "b004a9019ccf1547827333a904de9d122762077bbe6d649c8826904956de7c24",
+    "after_sha256": "7c7a9cef111dce87c0a64c192c1d6238f4617dbccd4f32e5fe6b7d0c8f4b534b"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/GateHandler.java",
+    "before_sha256": "123a9dfc98278cb3d907fa7de251e3cc6be156e367372f79f7e3f73e6ef50ab9",
+    "after_sha256": "fbbee503fcb32c0ee92ac866a8b5851f75dd994a2575640a468a454c7412981f"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/HumanReviewGateHandler.java",
+    "before_sha256": "75c82feaf4451c4c3d8772c314f8dace5db93dde3fad80c6ba224e3b66e1588b",
+    "after_sha256": "55230c708cd1467df93425ba2344e0f1f6d7d83c74fffb11119a07c108d0eff7"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/PlanArtifactDocument.java",
+    "before_sha256": "7e4821c9eb589eec2a20bdbb272c527ab1cb5081604832d48b3769be67279ca2",
+    "after_sha256": "0dd5af3764e743fba78dee1b9483fb083a06eaacfd76f98ea13351873ce8075b"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/PlanScopeValidator.java",
+    "before_sha256": "64a50cf466323a5883615bc94a3bd573d81bb58f83d5b7d117984e45a422a0bc",
+    "after_sha256": "1a1c8d03bc297cf39cfaa819beb0a2660aa7509c2451ff2c1950064f45842a78"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/PromptGenerateNextStageHandler.java",
+    "before_sha256": "f11b7a47317289d5348f0c7e74d6187b059bd28a11e253759eb6262274677f30",
+    "after_sha256": "9cd5bb721bb7c9ea36bef5fc987d4b94c42fc8c3a55a69aaf33025b97a6a51c9"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ReportGenerateFinalHandler.java",
+    "before_sha256": "d2b3f1114d6dd4fab03ad8f6a6e44a6f7b1469b4aaaccfa8879e11425809bf6d",
+    "after_sha256": "c916635d72a2af040872a61d74e7c6c3259c73d86dd271677626d5fd4a841730"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java",
+    "before_sha256": "7328755ad01d440e47a2f8c57d49cb6df95dee41084a66fab5ff15452095dc6e",
+    "after_sha256": "7014f85a4ee7c2240ce1c68d8425e4129fd413cec3f5184d44fb0d18a915a0a0"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractArtifactWriter.java",
+    "before_sha256": "e6fdf7c286938b4709408f76219edf1f2fa577f49c52a08acb04d0fad7e37303",
+    "after_sha256": "f0a3bcf5696ac8b9d158230e843125c235f42c60b22da83c0d5d0a46310b2e6f"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+    "before_sha256": "46779aafa6cb6c16388fb9e245c03ad55508d2be4c6c914be5fe383cbb13c826",
+    "after_sha256": "39be27ae22e376d5c3bb984a201ffc4c7df07da499d65087691bdcbf3193954a"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalValidator.java",
+    "before_sha256": "a1a07659dcf4378f5cf6a29b4358e8b287fa68d34d909ba2f50f12ee8d5a9da6",
+    "after_sha256": "8fc052420901198dd12874755357d9f08aa007d4ac8b2d3606a9fdaa7cc65d71"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java",
+    "before_sha256": "ab449af92f86b27e8d6eafee8adf4f1ea4759c3e60bc6f3bcb618b048bafbe63",
+    "after_sha256": "1aaac401fa9817d499333e88c65308a72b0434b93d956514a394e333220d6446"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskHandler.java",
+    "before_sha256": "c23ce3c6775ed24d1fbc679fb41766df7d14f2a70e762e1cf484efae0752d145",
+    "after_sha256": "31a7d44901b8bcbdff213976f8715312b0de4778190cb392fd00bb21e3f10cb9"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/WorkstreamMemoryProjection.java",
+    "before_sha256": "601d914e2224a5e3f9048d02fccc6005d8e5f46af3bb170cfcc62a78b492abca",
+    "after_sha256": "a1d62d8a1610719a6b56a1f8fc8e8cf8689a4f9f60be20fe912ebaa0db453aa0"
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/lifecycle/WorkflowDefinitionLoader.java",
+    "before_sha256": "611e9722fd5316dfa05d4aae315fdc0308bd40dc6656c04e44a8c3c5667ea63e",
+    "after_sha256": "342fae8928ea5c669c6f2945a3859590d4b5ba3a218594679ab1cc6c4fb6e58b"
+  },
+  {
+    "path": "dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json",
+    "before_sha256": "8b2e5887f8bec6e18b546289822782e159c8ec0584d224ad715eb506cd695603",
+    "after_sha256": "b8bb6ea89d3308df60b68630fcca7ff518c8190c1c1149298495977df3f7189d"
+  },
+  {
+    "path": "dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json",
+    "before_sha256": "914ea4be11a3884e654b4a4627a0d11cdf0385f6d248f058f9927018766e1706",
+    "after_sha256": "869b95defbacc23ac10201ec1a1abb0b2eec1d9ba6043b7f36bf0a2376610585"
+  },
+  {
+    "path": "dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json",
+    "before_sha256": "86abead15904c5106c674f3825d0bf0dff55ca6423b3e1b36e18f3a4fefad24d",
+    "after_sha256": "eefddf4365b0588596d9901d9e935099cd27958723d79fefcfb0e09d1dfe4c6c"
+  },
+  {
+    "path": "dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json",
+    "before_sha256": "5de35224ed473a3220a44ffccca67df330fb80d23678325fd9a45d1badc77ce9",
+    "after_sha256": "a23b5b488cfeae961110eb86f078ecf22c3ded888aa2381caf37f28ce1b8a6c4"
+  },
+  {
+    "path": "dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+    "before_sha256": "8e9fbef4317a533399ee1f79fe81b131f84253f04e14cf5465c304c8c56663bb",
+    "after_sha256": "922e2bfdd12534882e17f35751cc59fc2a8cbd284c8855abf05e37bcd1ae63bb"
+  },
+  {
+    "path": "dual-server/src/test/js/authored-packet-ui.mjs",
+    "before_sha256": null,
+    "after_sha256": "b81ae3dad1b9002ab259b3bbd6bb150f4082cadcb755d2e0b6c3a8b6f1d96061"
+  }
+]

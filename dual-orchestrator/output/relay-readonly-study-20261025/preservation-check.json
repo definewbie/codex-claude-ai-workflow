@@ -1,0 +1,28 @@
+[
+  {
+    "manifest": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/original-package-sha256.json",
+    "entries": 402,
+    "mismatches": []
+  },
+  {
+    "manifest": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/checkpoint-ledger-sha256.json",
+    "entries": 541,
+    "mismatches": []
+  },
+  {
+    "manifest": "selected-release.json/source_inputs",
+    "entries": 659,
+    "mismatches": []
+  },
+  {
+    "manifest": "selected-release.json/application_jars",
+    "entries": 2,
+    "mismatches": []
+  },
+  {
+    "original_stop_present": true,
+    "continuation_stop_present": true,
+    "continuation_stop_sha256": "bcbd4ae0c3e6d47e618b8defe744b58af655f9c4aa98c8a7be8a562111fde80b",
+    "new_steps_present": false
+  }
+]

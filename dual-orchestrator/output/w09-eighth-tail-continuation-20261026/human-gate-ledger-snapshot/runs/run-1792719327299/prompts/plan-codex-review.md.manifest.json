@@ -1,0 +1,162 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "runId" : "run-1792719327299",
+  "nodeId" : "plan.codex_plan_review",
+  "agent" : "codex",
+  "promptTemplate" : "plan-codex-review",
+  "promptPath" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/prompts/plan-codex-review.md",
+  "totalBytes" : 79038,
+  "totalEstimatedTokens" : 19760,
+  "sections" : [ {
+    "name" : "workspace_guard",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "workspace-guard",
+    "bytes" : 465,
+    "estimatedTokens" : 117,
+    "sha256" : "1c38a82cdfe20fcb44d80188b584a111fe711b8858f569240c8fdd68c835b4e7",
+    "includedReason" : "execution safety boundary",
+    "required" : true
+  }, {
+    "name" : "language_policy",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "language-policy",
+    "bytes" : 244,
+    "estimatedTokens" : 61,
+    "sha256" : "d20252d3644a0521308cb5b24f421c899463b6078aece0141858ed2ed32f50d5",
+    "includedReason" : "output language policy",
+    "required" : true
+  }, {
+    "name" : "structured_artifact_field_semantics",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "structured-artifact-field-semantics",
+    "bytes" : 479,
+    "estimatedTokens" : 120,
+    "sha256" : "b10bbd95cfd4baa41640817adc3618561f7e9e879d9527fd355fac978992158d",
+    "includedReason" : "structured artifact field semantics",
+    "required" : true
+  }, {
+    "name" : "template_static_frame",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "dev/dual/adapter/acpx/prompts/plan-codex-review.md",
+    "bytes" : 1205,
+    "estimatedTokens" : 302,
+    "sha256" : "52948e28921b77c3686ac5c56cbec7d366ae02fe4a5758f434b982f6902133b7",
+    "includedReason" : "prompt skeleton instructions",
+    "required" : true
+  }, {
+    "name" : "requirement",
+    "sourceType" : "requirement",
+    "sourceRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/requirement.md",
+    "bytes" : 1190,
+    "estimatedTokens" : 298,
+    "sha256" : "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+    "includedReason" : "task requirement",
+    "required" : true
+  }, {
+    "name" : "context_package",
+    "sourceType" : "context_package",
+    "sourceRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-plan_codex_plan_review-018.md,.agent/workstreams/ws-20261023T005431Z-9YYF/context/agent-governance-node-plan-codex_plan_review-019-run-1792719327299.md",
+    "bytes" : 45380,
+    "estimatedTokens" : 11345,
+    "sha256" : "df98d4c846fcf2367cd4aa94735d729f02bcd183f9a8c1f7cc4d7db380eae7e6",
+    "includedReason" : "prior artifacts / assembled context",
+    "required" : true
+  }, {
+    "name" : "read_reuse_contract",
+    "sourceType" : "read_reuse_contract",
+    "sourceRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-plan_codex_plan_review-018.md,.agent/workstreams/ws-20261023T005431Z-9YYF/context/agent-governance-node-plan-codex_plan_review-019-run-1792719327299.md",
+    "bytes" : 1043,
+    "estimatedTokens" : 261,
+    "sha256" : "80fb399560886ddeca4fb0ecfe9662981ddcf4a9d4c526583f2531beb663c31c",
+    "includedReason" : "typed memory read-reuse projection",
+    "required" : true
+  }, {
+    "name" : "contract_review_principles",
+    "sourceType" : "static_instruction",
+    "sourceRef" : "contract-review-principles.md",
+    "bytes" : 1996,
+    "estimatedTokens" : 499,
+    "sha256" : "255a1af39f7d8cc79006c28508b0833b7f25c8a60ef50ec52fbd956a5947a5f8",
+    "includedReason" : "review principles",
+    "required" : true
+  }, {
+    "name" : "prompt_contract",
+    "sourceType" : "tool_policy",
+    "sourceRef" : "ContractRegistry:plan.codex_plan_review",
+    "bytes" : 1721,
+    "estimatedTokens" : 431,
+    "sha256" : "74a3ccf39ef409696a3626fa5248360dab4a19285ffe869eb8dca7d015e449da",
+    "includedReason" : "strict agent result envelope",
+    "required" : true
+  }, {
+    "name" : "external_research_discipline",
+    "sourceType" : "permission_policy_projection",
+    "sourceRef" : "review",
+    "bytes" : 521,
+    "estimatedTokens" : 131,
+    "sha256" : "518335f6aed4ae3d471ead53c2a92286330b234a02bc3fd4cbdd7a5b3cf27867",
+    "includedReason" : "guide provider behavior without replacing adapter enforcement",
+    "required" : true
+  }, {
+    "name" : "authored-context",
+    "sourceType" : "typed_authored_context",
+    "sourceRef" : "node-plan-codex_plan_review-019",
+    "bytes" : 27717,
+    "estimatedTokens" : 6930,
+    "sha256" : "77ad8bd3dd42e81338bc7d8968d89606eb9959d27816e21caa66e130fa337ef9",
+    "includedReason" : "required approved and revision inputs",
+    "required" : true
+  } ],
+  "authoredContext" : {
+    "workstreamId" : "ws-20261023T005431Z-9YYF",
+    "nodeInstanceId" : "node-plan-codex_plan_review-019",
+    "nodeId" : "plan.codex_plan_review",
+    "runId" : "run-1792719327299",
+    "historyThrough" : 19,
+    "contract" : {
+      "compileNodeInstanceId" : "node-contract-compile-007",
+      "approvalGateRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+      "approvalEventId" : "evt-000007",
+      "contract" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+        "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+      },
+      "resolution" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json",
+        "sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417"
+      }
+    },
+    "reviewedDesign" : {
+      "decision" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-design-decision-016.json",
+        "sha256" : "e14f6e8c78b136449f68f13bd52e194bc31cfa44e57fd44f5ff34ef32389b45d"
+      },
+      "eventId" : "evt-000017",
+      "candidate" : {
+        "sidecar" : {
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.contract.json",
+          "sha256" : "107919da51a181a4e8fa14254d2158d2f28f5b08aa36c449fc783d00d7631bc8"
+        },
+        "nodeInstanceId" : "node-design-claude_design-012",
+        "nodeId" : "design.claude_design",
+        "runId" : "run-1792718732583",
+        "artifactType" : "design_result"
+      }
+    },
+    "reviewedPlan" : null,
+    "parent" : null,
+    "subject" : {
+      "sidecar" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719040009/outputs/plan-claude.contract.json",
+        "sha256" : "b2e9d853cc6d80f39b737950b1ae085310b87d916fd37f918c73bd4a2ee931bd"
+      },
+      "nodeInstanceId" : "node-plan-claude_plan-017",
+      "nodeId" : "plan.claude_plan",
+      "runId" : "run-1792719040009",
+      "artifactType" : "plan_result"
+    },
+    "trigger" : null,
+    "obligations" : [ ]
+  }
+}

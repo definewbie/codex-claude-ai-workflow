@@ -1,0 +1,45 @@
+  [RULER] Pretty-printed LLM choice JSON:
+  {
+      'scores': [
+          {
+              'trajectory_id': '1',
+              'explanation': 'Poetic, cat-focused, night-sky theme
+  fulfilled with
+                              vivid imagery; brief and compliant.',
+              'score': 0.9
+          },
+          {
+              'trajectory_id': '2',
+              'explanation': 'Meets topic but very simplistic and
+  minimally
+                              evocative; partial fulfillment.',
+              'score': 0.6
+          },
+          {
+              'trajectory_id': '3',
+              'explanation': 'Ignores cat theme, focuses on dogs; fails
+  the
+                              main instruction.',
+              'score': 0.05
+          }
+      ]
+  }
+
+Here is why this works:
+
+       Comparing several candidates is easier for a language model than grading
+       one in isolation. Differences become clear when options are viewed side
+       by side.
+
+     GRPO only requires rewards that are consistent within a group. It doesn’t
+       need global calibration, which keeps learning stable and scalable.
+
+In practice, this setup removes the need for labeled data or hand-built rules. It also
+accelerates convergence because partial improvements receive proportional credit.
+The result is a reward signal that is self-correcting, interpretable, and efficient.
+
+From this example you can clearly see how RULER helps grade textual or other
+open-ended tasks such as explanations, reasoning chains, summaries, essays,
+customer interactions, and scientific analysis. Quality in these settings depends on
+clarity, completeness, depth of reasoning, tone, and creativity—none of which can
+be reduced to a single formula. RULER uses a relative, model-based comparison

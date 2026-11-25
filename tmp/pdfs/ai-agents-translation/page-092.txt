@@ -1,0 +1,34 @@
+  {'supervisor': {'next': 'search'}}
+  {'supervisor': {'next': 'patent_research'}}
+  {'supervisor': {'next': '__end__'}}
+
+You can set up your writing team in the same way. The notebook for this
+section includes the full working code, but Figure 2-7 gives you a quick
+overview of what the writing team looks like.
+
+
+
+
+
+                            Figure 2-7. Flowchart for writing team.
+
+This modular approach makes it easy to compose increasingly capable
+MASs step-by-step: first by wiring up specialized workers, then by
+combining entire teams into larger graphs. In practice, this means you can
+start small—say with search, scraping, and patent lookup in a research
+team, and then plug that into a writing team to form a full end-to-end
+pipeline, or extend it even further with internal data and chart writing and
+plotting agents.
+
+To move from individual teams to a proper hierarchy, you’ll need to build
+another graph that ties everything together. Think of this as your “super
+graph,” shown in Example 2-29.
+
+Example 2-29. Build hierarchical architecture
+super_builder = StateGraph(State)
+super_builder.add_node("supervisor", teams_supervisor_node)
+super_builder.add_node("research_team", call_research_team)
+super_builder.add_node("writing_team", call_paper_writing_team)
+
+super_builder.add_edge(START, "supervisor")
+super_graph = super_builder.compile()

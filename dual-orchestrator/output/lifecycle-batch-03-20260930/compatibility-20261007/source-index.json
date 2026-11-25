@@ -1,0 +1,18 @@
+{
+  ".tools/acpx-e1/source/src/cli/command-handlers.ts": "61a99412d54e8f28aae60a5b1c57b432c655681ae129bd8a03937e2f673150ba",
+  ".tools/acpx-e1/source/src/cli/session/session-management.ts": "43cdbe2ed9dab541289622a56ea6abcadbac13c7366e1dd69d34d521001b56df",
+  ".tools/acpx-e1/source/src/cli/session/runtime.ts": "261cf649683ddcfe0421e85aaefd6e623d884341ca2866b35e0f0199860fc109",
+  ".tools/acpx-e1/source/src/acp/client.ts": "d727f05adfa38beadbc4214fbbc5a14c864dfa1eead4dd5e2a0a734a63e65a88",
+  "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java": "94e4368278082c07fb60e6b8fd10455644e0f5f9d5fc2c77fb922ed8ad4fe703",
+  "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java": "56a03d86225676adebd4c16d88be34231e55234cefe11398b7828bf2f1369f55",
+  "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java": "8565e7d8e346e7d4ada5f8346b6856b5a3cd947273e02a5e1d0db527c7f9dd9e",
+  "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxExecutionRecovery.java": "18e4739a5362f21953267f1fe75c9303505e93c19c71417081b97afcae5ced19",
+  "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ReviewedAcpxBuildIdentity.java": "643b54a1c94a0f2fdf6583507674971af29a820bdc068839ac37765ac84b1f61",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java": "512690b6e9b9336bbd11961aed95db9bf3c1441559b3f7005774182332e8a436",
+  "dual-runtime/src/main/java/dev/dual/runtime/RecordedExecutionRecovery.java": "91373193f72ca2548892e4a8378001d5b2d54e91889ab57b4926de3ee6ba8bb5",
+  "dual-runtime/src/main/java/dev/dual/runtime/FrozenRuntimeIdentity.java": "b2f8769687420954eef19d62f97eb25f3b329615561655edb4fda5c2b3997450",
+  "dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java": "0dc3eaa0da3999da253137387081d11c3336e0554da06a4fe7f8364257d383ee",
+  "dual-core/src/main/java/dev/dual/core/execution/AdapterSignalType.java": "cbfb3d70b384d06bf9b42eb25e5e22779735d6b4e2618e4d93bd581ea2503000",
+  "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "5b0bab469dc2f330443986064530a333baa9658b7a2b190b0906df66f024921d",
+  "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "3e90def5f02ed2aff552ad664e0f07a6782a680396fe705a25520d6255a4e4d6"
+}

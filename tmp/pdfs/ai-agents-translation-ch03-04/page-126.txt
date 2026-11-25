@@ -1,0 +1,49 @@
+train_scenarios = [mk_scenario(train_ds[i], i) for i in
+range(len(train_ds))]
+test_scenarios  = [mk_scenario(test_ds[i], i)  for i in
+range(len(test_ds))]
+
+With data, tools, and judge in place, you can define your rollout. Example 3-9 runs
+one task end to end, allows tool use, records the final answer, and writes rewards
+and metrics on the trajectory for ART.
+
+Example 3-9. Create rollout to capture trajectories
+class ProjectTrajectory(art.Trajectory):
+    final_answer: Optional[FinalAnswer] = None
+
+class CountdownScenario(BaseModel):
+    step: int
+    scenario: Scenario
+
+@weave.op
+async def rollout(model: art.Model, cd: CountdownScenario) ->
+ProjectTrajectory:
+    scn = cd.scenario
+
+    _nonlocal_final["value"] = None
+    _current_scenario["target"] = scn.target
+    _current_scenario["nums"]   = scn.nums
+    _current_scenario["id"]     = scn.id
+
+    nums_str = ",".join(map(str, scn.nums))
+    traj = ProjectTrajectory(
+        reward=0.0,
+        messages_and_choices=[],
+        metadata={"scenario_id": scn.id,
+                 "target": float(scn.target), "nums": nums_str},
+    )
+    if traj.metrics is None:
+        traj.metrics = {}
+
+    system_prompt = dedent(f"""
+        You are a math agent for countdown tasks.
+
+        Goal: produce one expression that evaluates exactly to
+{scn.target}
+        using only the numbers {scn.nums} each at most once.
+        Operators: +, -, *, /. Parentheses are allowed.
+
+        Tools:
+        - read_countdown_context()
+        - countdown_search_tool(nums=[...], target=...,
+          require_integer_intermediates=True)

@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261010T124812Z-XCZL",
+  "node_instance_id" : "node-context-intake_claude_brainstorm-001",
+  "run_id" : "",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_claude_brainstorm-001/read-reuse-contract.json",
+      "sha256" : "5b44eefe7a12021c486852ef96bcb82e1c8c7e526cf0955a7e5efbc3cbd705d7"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_claude_brainstorm-001/working-set.json",
+      "sha256" : "6038647c5cddfd024329d25d1b4f465bcc683efbaaf208bde75fe28c8262226e"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_claude_brainstorm-001/file-relevance-plan.json",
+      "sha256" : "a280c2e46de903b3d8334cdae2e5d891da76673b3da4b165d65616411f68d267"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_claude_brainstorm-001/stage-scope-policy.json",
+      "sha256" : "012a5d69ba3d24024305a6585b27bf8de315fb3ee431f2c2fab23ed5e1d22d8e"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_claude_brainstorm-001/file-summaries.json",
+      "sha256" : "d10eba27a4fa4c1b59b939676f78f0bd336a8cc81e5a0240384a4654a835b501"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_claude_brainstorm-001/repo-map.json",
+      "sha256" : "9e31cfaae02557fdd0be2cd377bb441f6734e3a46037e114fdf61aa7718a4949"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_claude_brainstorm-001/planned-report.json",
+      "sha256" : "ec4512da04af079f759c54d368814fdab7ebd64d75072cea583329ce5d36d6e5"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-context-intake_claude_brainstorm-001/agent-capability-catalog.json",
+      "sha256" : "0997fb4b4b0eb7bdbed8c38db5145227fe90f07bf2323ebd76b9c57f7924e7cc"
+    }
+  }
+}

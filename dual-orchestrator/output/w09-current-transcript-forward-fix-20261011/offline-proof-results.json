@@ -1,0 +1,64 @@
+{
+  "rows": [
+    {
+      "name": "proof-compile",
+      "exit": 0,
+      "expected": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "actual-current-transcripts-offline-proof",
+      "exit": 0,
+      "expected": 0,
+      "stdout_sha256": "00837392fd0d60b0b0f381175aa427c7c8f2b45468eff738dc1b7f9389757ca0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "strict-control-proof",
+      "exit": 0,
+      "expected": 0,
+      "stdout_sha256": "d4cfffe613697b2dd2cecd20af6bf2671971c4b2c65777f0896b257868a6b56e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "current-source-removed-compile",
+      "exit": 0,
+      "expected": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "current-source-removed",
+      "exit": 1,
+      "expected": "nonzero",
+      "stdout_sha256": "7a325761a619f2503468eb49ddad6ef56500aa215b3f6656b2867805a472be44",
+      "stderr_sha256": "472028eec5955580274fdb0928c177f0bd2f845e4a266242ec7bd920709f8417"
+    },
+    {
+      "name": "current-request-guard-removed-compile",
+      "exit": 0,
+      "expected": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "current-request-guard-removed",
+      "exit": 1,
+      "expected": "nonzero",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "03a52529f2e47c322be06957e2e0cce72cfa64d5334ee0184acb5f4ec1b653c0"
+    }
+  ],
+  "native_provider_calls": 0,
+  "maven_tests_not_added_by_this_proof": true,
+  "historical_materials_read_only": true,
+  "no_ledger_repair": true,
+  "diagnostic_recomputed_total": 403420,
+  "frozen_production_classes_not_modified": true,
+  "actual_source_counts": {
+    "acpx_current_transcript": 6,
+    "acpx_stream_strict_fallback": 2
+  },
+  "historical_append_stability_scope": "current-transcript calls; stream-only cross-generation reuse remains unavailable"
+}

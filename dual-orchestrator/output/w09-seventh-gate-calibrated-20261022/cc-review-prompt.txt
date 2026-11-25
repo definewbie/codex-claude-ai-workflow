@@ -1,0 +1,17 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的“第七例 Gate 预算校准并入与启动前离线核验”做合并受影响复审，遵守 AGENTS.md。用户已确认170万token/18次请求/60分钟与储备式准入，仅授权离线准备，未授权真实运行。
+
+入口：output/w09-seventh-gate-calibrated-20261022/assessment.md、fresh-seventh-gate.md、preflight-summary.json。
+校准依据：output/w09-seventh-budget-calibration-20261022/assessment.md、occurrences.csv、source-receipt.json。按需要追到具名原事实，不必重审全部无关历史。
+
+请自行重建“固定用量→observer→尾链/重复工作/修正储备→operator准入→原runner与人工门→原执行/验收/交付或停止”的控制链和失败切面，不预设作者结论。
+
+重点：
+1. 校准的请求粒度、实测/只读重算/假设是否分开，未测后半链与小样本不确定性是否诚实；170万是否只是风险上限，有无把场景算术包装成必需成本。
+2. budget.json、check_budget.py、planning、runner与文档是否同源；尾链、重入、修正有无漏算或重算；21项算术和12项观察器正反能证明什么、不能证明什么。预算ALLOW能否被误当业务/运行许可。
+3. 等待期原临时实例文件缺失、新路径经原start无--run初始化的处置是否有界；是否保留旧材料、零旧批准复用/零真实派发、仍为第七个真实案例。
+4. waiting-period-drift.json中Codex程序/配置指纹变化及当前候选装配：旧完整配置等价性和活兼容性未证，现有静态核对是否足够支持未来受控Gate，还是缺少具体、必要且有界的前置。不要仅凭哈希变化推导不兼容，也不要仅凭重新登记SHA推导兼容。
+5. 当前AGENTS的失败分级、合法非阻塞验收备注、原业务批准/身份/scope/证据/交付边界是否保留；是否有不必要的复杂度或无证据的进一步投入。
+
+按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 说明结论，给出分级发现、证据、未核验范围和具体剩余动作。区分材料正确、静态前提、未来运行准入；不要代用户授予运行许可。
+
+只读评审，不修改代码/材料/配置/账本，不启动额外agent、不执行原生客户端/provider/安装/注入探针，不恢复旧例、不运行第七例。必要时可在临时副本运行确认无客户端/账本副作用的离线算术或观察器对照；不要执行prepare-offline.py或实际派发。保持ROI，发现问题先定位owner与真实影响，不扩展为新平台或重开无关历史评审。

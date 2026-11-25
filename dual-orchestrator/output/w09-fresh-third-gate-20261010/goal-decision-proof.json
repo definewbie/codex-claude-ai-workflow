@@ -1,0 +1,50 @@
+{
+  "gate": {
+    "schemaVersion": 1,
+    "gateId": "gate-node-gate-human_requirement_review-011",
+    "nodeInstanceId": "node-gate-human_requirement_review-011",
+    "gateType": "human.review",
+    "status": "resolved",
+    "allowedActions": [
+      "approve",
+      "revise"
+    ],
+    "openedAt": "2026-10-10T12:57:53.437058Z",
+    "resolvedAt": "2026-10-10T14:12:15.357665Z",
+    "result": {
+      "subject_input_refs": [
+        ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log",
+        ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log",
+        ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json",
+        ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json",
+        ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json"
+      ],
+      "source_outcome": "READY_FOR_PRODUCT_REVIEW",
+      "source_node_instance_id": "node-intake-decision-010",
+      "human_action": "approved",
+      "note": "用户在当前GOAL材料展示后明确批准目标、验收和排除范围；不批准精确实施范围或最终交付。",
+      "decision_checks": {
+        "schemaVersion": 1,
+        "family": "TaskContractProjectionVerifier",
+        "familyCoverage": "NOT_INVOKED",
+        "gateNodeInstanceId": "node-gate-human_requirement_review-011",
+        "sourceNodeInstanceId": "node-intake-decision-010",
+        "subjectRefs": [
+          ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.stderr.log",
+          ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log",
+          ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.json",
+          ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791637010369/binding.json",
+          ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791637010369/outputs/intake-codex-product-review.contract.json"
+        ],
+        "runtimeIdentitySha256": "390b16750ef5a6f952e23849d88ee3cf51d2ca22cd3349778d566e46a5cc16f5",
+        "checks": []
+      }
+    }
+  },
+  "goal_contract_ref": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/task-contract.json",
+  "goal_contract_sha256": "e667b5ad04308d610fb15e7c0faf23cc274c33d48784ff104ba41358eca05ed6",
+  "phase": "GOAL",
+  "included_scope": [],
+  "event_refs": [],
+  "scope": "Actual GOAL approval and compiled contract; does not authorize implementation or final delivery"
+}

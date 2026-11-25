@@ -1,0 +1,29 @@
+{
+  "cases": [
+    {
+      "case": "w09-real-gate-20261010",
+      "checked_files": 116,
+      "unchanged": true
+    },
+    {
+      "case": "w09-fresh-second-gate-20261010",
+      "checked_files": 153,
+      "unchanged": true
+    },
+    {
+      "case": "w09-fresh-third-gate-20261010",
+      "checked_files": 487,
+      "unchanged": true
+    },
+    {
+      "case": "w09-fresh-fourth-gate-20261011",
+      "checked_files": 738,
+      "unchanged": true
+    }
+  ],
+  "fourth_live_and_snapshot_files": 437,
+  "unchanged": true,
+  "native_provider_calls": 0,
+  "lock_excluded_reason": "lock inode is not authoritative content",
+  "no_old_ledger_or_result_changed": true
+}

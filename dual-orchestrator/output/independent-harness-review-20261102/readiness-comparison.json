@@ -1,0 +1,61 @@
+{
+  "classification": "STATIC_CURRENT_RULE_REJECTION_PREDICTION_NOT_RECORDED_LEDGER_FAILURE",
+  "recordedLastEvent": {
+    "line": 87,
+    "event_id": "evt-000025",
+    "ts": "2026-10-26T21:09:17.939278Z",
+    "event_type": "node_routed",
+    "payload": {
+      "source_node_instance_id": "node-context-plan_codex_plan_review-024",
+      "to": "plan.codex_plan_review",
+      "outcome": "completed",
+      "transition": {
+        "transition_type": "normal",
+        "required": true,
+        "source_node_instance_id": "node-context-plan_codex_plan_review-024",
+        "source_node_sha256": "4057d13ee99aeeda7d6aa3dbfc48477498fccb17c17e4b0c6dba0bdfdcd83d14",
+        "purpose": "Seed the first Claude intake run with repo-scope context.",
+        "condition": "unconditional"
+      },
+      "node_instance_id": "node-plan-codex_plan_review-025",
+      "gate_id": "",
+      "from": "context.plan_codex_plan_review"
+    }
+  },
+  "plan": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.plan.json",
+  "declarationMethod": "在本隔离工作树使用 JDK 25 与现有 Maven 执行 mvn -o clean test，依据本次源码对应的 Surefire XML/日志及程序工具观察核验服务、CLI 和全部 MySQL/Testcontainers 回归；按 AC-1..AC-5 分别关联独立样例、DECIMAL128 原值、显示舍入不改变建议、不可用情形、既有行为与中文说明的断言。通过程序工具读取实际变更和说明进行逐条语义检查。既有宿主166项基线仅作环境材料，不代替本次源码测试；原生状态、reported exit 和 actual exit 如实区分，任何未经原生程序观察提供的实际退出码不由模型或声明补造。",
+  "comparison": [
+    {
+      "criterion": "AC-1",
+      "exactEqual": false,
+      "declarationIsPrefix": true,
+      "suffixLength": 404
+    },
+    {
+      "criterion": "AC-2",
+      "exactEqual": false,
+      "declarationIsPrefix": true,
+      "suffixLength": 501
+    },
+    {
+      "criterion": "AC-3",
+      "exactEqual": false,
+      "declarationIsPrefix": true,
+      "suffixLength": 301
+    },
+    {
+      "criterion": "AC-4",
+      "exactEqual": false,
+      "declarationIsPrefix": true,
+      "suffixLength": 387
+    },
+    {
+      "criterion": "AC-5",
+      "exactEqual": false,
+      "declarationIsPrefix": true,
+      "suffixLength": 326
+    }
+  ],
+  "currentRule": "VerificationReadiness.java:162 exact equals",
+  "currentCounterexampleTest": "VerificationReadinessTest.usefulSuffixAndWhitespaceStillCannotChangeTheRegisteredMethod"
+}

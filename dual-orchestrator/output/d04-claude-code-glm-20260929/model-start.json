@@ -1,0 +1,131 @@
+{
+  "startedAt": "2026-09-29T10:41:59.646326+00:00",
+  "fixture": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-claude-q44z1_1d",
+  "oracle": {
+    "token": "bf3b278b2779c3abb2109a28",
+    "sum": 469
+  },
+  "before": {
+    ".agent": {
+      "directory": true
+    },
+    ".git": {
+      "directory": true
+    },
+    "src": {
+      "directory": true
+    },
+    ".agent/nodes.json": {
+      "sha256": "c037611c28f63b3156f65aa4003989e5d5df7421a9cea49ad1c727eaab4099a5"
+    },
+    ".git/config": {
+      "sha256": "cae33efdb02cf774435c1ff9cb16bcc1014606908530c6e1dc727615fe3e8cda"
+    },
+    ".git/objects": {
+      "directory": true
+    },
+    ".git/HEAD": {
+      "sha256": "28d25bf82af4c0e2b72f50959b2beb859e3e60b9630a5e8c603dad4ddb2b6e80"
+    },
+    ".git/info": {
+      "directory": true
+    },
+    ".git/description": {
+      "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee"
+    },
+    ".git/hooks": {
+      "directory": true
+    },
+    ".git/refs": {
+      "directory": true
+    },
+    "src/deep": {
+      "directory": true
+    },
+    "src/deep/input.txt": {
+      "sha256": "a8bd6da6239c601c7ffb5cec1ea370d34b0687e08630b1882f5cec042829b0e1"
+    },
+    ".git/objects/pack": {
+      "directory": true
+    },
+    ".git/objects/info": {
+      "directory": true
+    },
+    ".git/info/exclude": {
+      "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1"
+    },
+    ".git/hooks/commit-msg.sample": {
+      "sha256": "1f74d5e9292979b573ebd59741d46cb93ff391acdd083d340b94370753d92437"
+    },
+    ".git/hooks/pre-rebase.sample": {
+      "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3"
+    },
+    ".git/hooks/pre-commit.sample": {
+      "sha256": "f9af7d95eb1231ecf2eba9770fedfa8d4797a12b02d7240e98d568201251244a"
+    },
+    ".git/hooks/applypatch-msg.sample": {
+      "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7"
+    },
+    ".git/hooks/fsmonitor-watchman.sample": {
+      "sha256": "e0549964e93897b519bd8e333c037e51fff0f88ba13e086a331592bf801fa1d0"
+    },
+    ".git/hooks/pre-receive.sample": {
+      "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989"
+    },
+    ".git/hooks/prepare-commit-msg.sample": {
+      "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619"
+    },
+    ".git/hooks/post-update.sample": {
+      "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5"
+    },
+    ".git/hooks/pre-merge-commit.sample": {
+      "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53"
+    },
+    ".git/hooks/pre-applypatch.sample": {
+      "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475"
+    },
+    ".git/hooks/pre-push.sample": {
+      "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a"
+    },
+    ".git/hooks/update.sample": {
+      "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106"
+    },
+    ".git/hooks/push-to-checkout.sample": {
+      "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f"
+    },
+    ".git/refs/heads": {
+      "directory": true
+    },
+    ".git/refs/tags": {
+      "directory": true
+    }
+  },
+  "identities": {
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs": "cae60ea6827d5f9b113c88b911388983fe96e7d565a382bf25904df78ab9d0fc",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts": "65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7",
+    "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/manifest.json": "1dc57b96dca95ccee8e050734a61fad689ca7a29de718e49e1b227e755d2d645",
+    "/opt/homebrew/Caskroom/claude-code/2.1.277/claude": "73d6a2a55c46907e49bd8bb7608e134333bd71173351ee16ddce7d7db9914b9c"
+  },
+  "diagnosticIdentities": {
+    "model-probe.mjs": "015ab21cc603543256ee3efe0af67f078e560c1a9696e08db04036cf7a78b361",
+    "event-guard.mjs": "9e2f8aa0acfa1c88c1ff02197b67943ee1e40b9120adc7e188b220dc57af3a44",
+    "route-options.mjs": "3d2dc87d61bb94831646180b5d80888b1addf1571510d9f23cdc3b10c713cd31",
+    "routing.json": "2cce6671f87d4a67ec1a004f9fbb87446052523639fbc612e1fd7339ebe1cc99",
+    "run-probe.py": "1b5d07d65a2dd9a3108c50f61fe14c8e61f2441c5f8cfbda1ce9e8f088584468",
+    "verification-gate.md": "4cc9b9819f95339ee23deb0f74f88fb5b19a59ba751b2d08d519c9eca1e8c1ac",
+    "model-spec.json": "e1cf4ac0035d7c71dcb2559ad14ff0e3db7e734e2d8e67091c48f016804331d0",
+    "offline-validation.json": "b0c3cb36dca03848fe5b75b2a834854d354e118d5aa0a8f64c4b1fde2cee1e9f",
+    "run-authorization.json": "ff778b404be4300841dec4f59fe84b7c617fb8abf826c950267a8145d125fed3"
+  },
+  "model": "glm-5.3",
+  "limits": {
+    "modelTasks": 1,
+    "wallSeconds": 90,
+    "maxTurns": 5,
+    "observedToolStopThreshold": 6,
+    "sdkMaxBudgetUsd": null,
+    "automaticReruns": 0
+  },
+  "billingMode": "provider_configured_unpriced",
+  "userAuthorization": "2026-09-29 user: enter next step; Claude Code has always used GLM, use existing GLM route; one bounded native capability task, no implementation or reviewer delegation"
+}

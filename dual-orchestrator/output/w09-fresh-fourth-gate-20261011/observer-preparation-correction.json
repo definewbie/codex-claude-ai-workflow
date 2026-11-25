@@ -1,0 +1,7 @@
+{
+  "issue": "CLI max_steps yield exit 1 is not execution rejection",
+  "source": "dual-cli/src/main/java/dev/dual/cli/CliWorkflowLoop.java:40-43",
+  "typed_positive": "001 context node COMPLETED and next intake READY; zero model calls",
+  "fix": "accept documented exits0/1 but require current legal state, each completed typed node and measured successful prior outcomes",
+  "not": "no production change, no ledger rewrite, no old recovery"
+}

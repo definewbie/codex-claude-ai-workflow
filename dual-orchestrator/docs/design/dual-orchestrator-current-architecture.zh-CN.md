@@ -1,5 +1,10 @@
 # Dual Orchestrator 当前架构
 
+> 历史快照提示（2026-09-13）：本文“当前”指下面注明的8月基线，不能代表9月代码。
+> 最新接手入口为 [架构演进与交接](20260913-dual-evolution-retrospective-and-handoff.zh-CN.md)，
+> 前向改造见 [工作流优先重设计](../plans/20260913-workflow-first-convergence-redesign.zh-CN.md)。
+> 特别是模块依赖、合同批准链、执行策略与人工材料续作已演进；本文保留为历史证据。
+
 日期：2026-08-04
 基线：`72ae925a`
 状态：`CURRENT / PHASE A-D CLOSED / T6 FULL WORKFLOW PROVEN`

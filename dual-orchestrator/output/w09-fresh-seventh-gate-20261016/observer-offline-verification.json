@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "observer_tests": 12,
+  "budget_cases": 13,
+  "native_provider_calls": 0,
+  "runner_is_not_production_guard": true,
+  "authorization_negative": "PASS",
+  "observer_changes": "Byte-identical accepted mixed-transcript candidate; no parser changes"
+}

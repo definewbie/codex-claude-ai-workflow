@@ -13,6 +13,47 @@ class AgentResultPromptContractTest {
     private final AgentResultEnvelopeValidator validator = new AgentResultEnvelopeValidator();
 
     @Test
+    void planPromptSeparatesRegisteredMethodFromCriterionDetails() {
+        var prompt = AgentResultPromptContract.render("ws", "run", "plan.claude_plan",
+                "READY_FOR_PLAN_REVIEW", Set.of("READY_FOR_PLAN_REVIEW"));
+        assertTrue(prompt.contains("copy its `method` exactly as the decoded JSON string"));
+        assertTrue(prompt.contains("do not append, paraphrase or normalize whitespace"));
+        assertTrue(prompt.contains("in `plan.validation_plan`, labeled with approved criterion IDs"));
+        assertTrue(prompt.contains("not execution evidence or approval"));
+        assertTrue(prompt.contains("placeholders, not registered readiness"));
+        assertTrue(prompt.contains("never weaken a required exit check"));
+        var design = AgentResultPromptContract.render("ws", "run", "design.claude_design",
+                "READY_FOR_ARCH_REVIEW", Set.of("READY_FOR_ARCH_REVIEW"));
+        assertFalse(design.contains("copy its `method`"), "do not impose the plan schema on design");
+    }
+
+    @Test
+    void fullRevisionEnumeratesTheSameClosedResponseFieldsAsInitialIntake() {
+        var context = new AgentResultPromptContract.ProposalEmissionContext(
+                AgentResultPromptContract.EmissionMode.REVISION_PATCH, "base", "a".repeat(64),
+                java.util.List.of()).withGoalReproposal(true);
+        var prompt = AgentResultPromptContract.render("ws", "run", "intake.claude_brainstorm",
+                "READY_FOR_PRODUCT_REVIEW", java.util.Set.of("READY_FOR_PRODUCT_REVIEW"), context);
+        assertTrue(prompt.contains("result.revision_responses` item is a closed object with exactly these fields: "
+                + "[review_obligation_id, resolved_by_clause_ids]"));
+        assertTrue(prompt.contains("result.obligation_patches` item is a closed object"));
+    }
+
+    @Test
+    void initialAndRevisionContractsShareProductEvidenceRuleIncludingCorrectionInput() {
+        var revision = new AgentResultPromptContract.ProposalEmissionContext(
+                AgentResultPromptContract.EmissionMode.REVISION_PATCH, "proposal", "a".repeat(64),
+                java.util.List.of(new AgentResultEnvelope.ReviewObligation("CO-1", "Clarify acceptance")));
+        for (var context : java.util.List.of(AgentResultPromptContract.ProposalEmissionContext.initial(), revision)) {
+            var contract = AgentResultPromptContract.render("ws", "run", "intake.claude_brainstorm",
+                    "READY_FOR_PRODUCT_REVIEW", Set.of("READY_FOR_PRODUCT_REVIEW"), context);
+            assertTrue(contract.contains("empty tracked-path inventory permits evidence_refs=[]"));
+            assertTrue(contract.contains("Never copy .agent/ or .git/ references into evidence_refs or evidence_ref_additions"));
+            assertTrue(contract.contains("RepositoryFactBinding"));
+        }
+    }
+
+    @Test
     void selfTestRequiresExplicitProductIssuesWithoutAcceptanceFailureSchema() throws Exception {
         var prompt = AgentResultPromptContract.render("ws-1", "run-1",
                 "implement.claude_self_test_report", "SELF_TEST_COMPLETE", Set.of("SELF_TEST_COMPLETE"));
@@ -104,7 +145,9 @@ class AgentResultPromptContractTest {
                 "Formatting normalization is a modification and is prohibited unless that clause ID is declared"));
         assertTrue(intake.contains("do not delete existing clause IDs"));
         assertTrue(intake.contains(
-                "`result.scope.included` is the exhaustive authorization set for permitted repository changes"));
+                "Intake `result.scope.included` contains candidate paths, not write authorization"));
+        assertTrue(intake.contains("Only approved EXECUTION `scope.included` is the exhaustive authorization set"));
+        assertFalse(intake.contains("`result.scope.included` is the exhaustive authorization set"));
         assertTrue(intake.contains("Each scope path must name one exact file, not a directory"));
         assertTrue(intake.contains("must not end with `/`"));
         assertTrue(intake.contains("no `./`, `..`, repeated separators"));

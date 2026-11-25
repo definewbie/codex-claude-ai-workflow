@@ -1,0 +1,103 @@
+{
+  "schemaVersion" : 1,
+  "commitSequence" : 1,
+  "workstreamId" : "ws-20261010T055644Z-6QCS",
+  "workflowInstanceId" : "wf-ws-20261010T055644Z-6QCS",
+  "workflowId" : "agent-lifecycle-terminal-delivery",
+  "definitionVersion" : 5,
+  "workflowStatus" : "RUNNING",
+  "generatedAt" : "2026-10-10T05:56:44.745648Z",
+  "updatedAt" : "2026-10-10T05:56:44.696877Z",
+  "nodeCount" : 1,
+  "nodeStatusCounts" : {
+    "READY" : 1
+  },
+  "nodeKindCounts" : {
+    "TASK" : 1
+  },
+  "agentRunCount" : 0,
+  "gateCount" : 0,
+  "decisionCount" : 0,
+  "iterationCount" : 1,
+  "revisionCount" : 0,
+  "completedCount" : 0,
+  "failedCount" : 0,
+  "blockedCount" : 0,
+  "waitingCount" : 0,
+  "runningCount" : 0,
+  "totalNodeDurationMs" : 0,
+  "longestNodes" : [ ],
+  "providerMetrics" : {
+    "outcomeStatusCounts" : { },
+    "executionConsistencyCounts" : { }
+  },
+  "tokenMetrics" : {
+    "runCount" : 0,
+    "measuredRunCount" : 0,
+    "estimatedRunCount" : 0,
+    "sessionSnapshotRunCount" : 0,
+    "total" : {
+      "inputTokens" : 0,
+      "outputTokens" : 0,
+      "cachedReadTokens" : 0,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 0,
+      "contextUsedTokens" : 0,
+      "costByCurrency" : { }
+    },
+    "estimatedTotal" : {
+      "inputTokens" : 0,
+      "outputTokens" : 0,
+      "cachedReadTokens" : 0,
+      "cachedWriteTokens" : 0,
+      "totalTokens" : 0,
+      "contextUsedTokens" : 0,
+      "costByCurrency" : { }
+    },
+    "byAgent" : { },
+    "byNode" : { },
+    "runs" : [ ],
+    "contextPackages" : [ ],
+    "topContextSections" : [ ]
+  },
+  "toolMetrics" : {
+    "runCount" : 0,
+    "toolCallCount" : 0,
+    "readCount" : 0,
+    "writeCount" : 0,
+    "bashCount" : 0,
+    "otherCount" : 0,
+    "repeatedReadFiles" : [ ],
+    "repeatedReadReasonRequiredCount" : 0,
+    "missingRereadReasonCount" : 0,
+    "allowedRepeatedReadReasons" : [ ],
+    "topReadFiles" : [ ],
+    "evidenceFileCount" : 0,
+    "runs" : [ ]
+  },
+  "tokenAttribution" : {
+    "schemaVersion" : 1,
+    "perRun" : [ ],
+    "usageVisibility" : {
+      "byVisibility" : { },
+      "byAgent" : { },
+      "gaps" : [ ]
+    },
+    "costEconomics" : {
+      "byReliability" : { },
+      "byCostEstimateReliability" : { },
+      "byDecision" : { },
+      "clientReportedCostByCurrency" : { },
+      "officialCalculatedCostByCurrency" : { },
+      "providerReportedCostByCurrency" : { },
+      "dualCalculatedCostByCurrency" : { }
+    },
+    "nodeHotspots" : [ ],
+    "fileReadCost" : [ ],
+    "sessionSnowball" : [ ],
+    "executionLatency" : {
+      "topRuns" : [ ],
+      "schemaVersion" : 1
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "command": [
+    "rtk",
+    "proxy",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+    "build-info",
+    "--json"
+  ],
+  "exitCode": 0,
+  "stdout": "{\"upstream_commit\":\"fd173f04aa1b56f9e3f5ca5190c034ddcae28792\",\"patch_sha256\":\"4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e\",\"policy_schema\":\"claude_execution_policy.v2\"}\n",
+  "stderr": "",
+  "providerInvoked": false
+}

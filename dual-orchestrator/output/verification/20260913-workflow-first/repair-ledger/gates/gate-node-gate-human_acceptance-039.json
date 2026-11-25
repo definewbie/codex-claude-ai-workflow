@@ -1,0 +1,17 @@
+{
+  "schemaVersion" : 1,
+  "gateId" : "gate-node-gate-human_acceptance-039",
+  "nodeInstanceId" : "node-gate-human_acceptance-039",
+  "gateType" : "human.review",
+  "status" : "resolved",
+  "allowedActions" : [ "approve", "revise" ],
+  "openedAt" : "2026-09-13T16:06:57.056516Z",
+  "resolvedAt" : "2026-09-13T16:06:58.773252Z",
+  "result" : {
+    "subject_input_refs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/delivery/commit-message.txt", ".agent/workstreams/ws-20260913T160441Z-H55W/delivery/pr-body.md", ".agent/workstreams/ws-20260913T160441Z-H55W/delivery/candidates/node-delivery-prepare_pr-038/candidate-424ab53f897e1152753a30461c859ba0d8f55de308143b6940bf0a50b1ab1c9c.json" ],
+    "source_outcome" : "completed",
+    "source_node_instance_id" : "node-delivery-prepare_pr-038",
+    "human_action" : "approved",
+    "note" : ""
+  }
+}

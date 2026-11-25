@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "workflowInstanceId" : "wf-ws-20261023T005431Z-9YYF",
+  "nodeInstanceId" : "node-acceptance-decision-036",
+  "nodeDefinitionId" : "acceptance.decision",
+  "iterationId" : "iter-003",
+  "outcome" : "ACCEPT",
+  "domainOutcome" : "SATISFIED",
+  "reason" : "三个获批文件满足 AC-1～AC-3，独立执行测试与文档示例全部通过。",
+  "evidenceRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/verification-observations.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.contract.json" ],
+  "sourceResult" : {
+    "summary" : "三个获批文件满足 AC-1～AC-3，独立执行测试与文档示例全部通过。",
+    "source" : "contract-sidecar",
+    "decision" : "ACCEPT"
+  },
+  "generatedAt" : "2026-10-26T01:21:24.425166Z"
+}

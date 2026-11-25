@@ -1,0 +1,20 @@
+{
+  "created_at": "2026-10-09T07:06:12.704821+08:00",
+  "status": "PREFLIGHT / NOT IMPLEMENTED",
+  "head": "3362eb421514e75fdc4332f570df5bf274b3725e",
+  "head_is_not_worktree_identity": true,
+  "source_inputs": 653,
+  "source_manifest": "source-before-sha256.json",
+  "dirty_source_preimages": "source-before-text.json",
+  "design_references": {
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "f0fb3f823c74061f4f44778b206bc14efd9f0907191f020a43efca76347ede79",
+    "docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md": "8442eee290ac92ca3d81754454bedee06a2e93e6685c71e02d3ae0c6a1dff429",
+    "output/freeze-review-20260928/freeze-details.md": "6c7f3fc5baddab3dfa20d3a7fe77cd9c8b4d545e4e4e330c3bbd6418fdf287a2",
+    "docs/engineering-checklist.md": "654d6d11b38fa177fe5ece62e7ac949eb8c501547eaa671103169b7299d2e52e",
+    "docs/design/boundary-drift-review.zh-CN.md": "f3f5492e871cbcd1f66d3eb325e004e2c522bce31de78f70b74ca07c0ca14fdc"
+  },
+  "source_matches_b05_post_format": true,
+  "product_changes": 0,
+  "tests_run": 0,
+  "live_provider_native_runs": 0
+}

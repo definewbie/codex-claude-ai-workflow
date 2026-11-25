@@ -1,0 +1,36 @@
+{
+  "files": {
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java": "3dfd8d2531fab9c496145d8818be233c23e4687c961b444600021cb9b2eae8cf",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts": "3f4204143fd1de4d160d74f4b74a966ffa6e5a12b9b682bb5a594a9309c443b5",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/agent-command.ts": "ccaaf63f555803452ff27a3c8fabb1ea5ec9fefe72d59876b5b0111446a8d91d",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/runtime/engine/manager.ts": "53cd924f662a11553121c596fbc7587cdcbb197891ae0c6daca0059d45b8c354",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh": "cfd47f649d0f940f3d5c4fb4a8808b34264dbd017f58cd4a5ada4fec07eb6c9f",
+    "/usr/local/lib/node_modules/npm/node_modules/libnpmexec/lib/index.js": "cfb349118f1065101f399ee18cfe66d298ac88646a41aa1e19dc4f6ed202c8dc"
+  },
+  "selected_npx_path": "/usr/local/bin/npx",
+  "selected_npx_realpath": "/usr/local/lib/node_modules/npm/bin/npx-cli.js",
+  "current_selected_npm_version": "10.9.0",
+  "historical_npx_npm_full_bytes": "NOT_SNAPSHOTTED",
+  "source_windows": {
+    "AcpxAgentTransport.java": [
+      "33-37",
+      "669-695",
+      "752-785",
+      "1181-1185"
+    ],
+    "client.ts": [
+      "815-860",
+      "933-965",
+      "1026-1067",
+      "1180-1227"
+    ],
+    "manager.ts": [
+      "1003-1047"
+    ],
+    "npm libnpmexec index.js": [
+      "25-61",
+      "174-185",
+      "241-254"
+    ]
+  }
+}

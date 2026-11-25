@@ -1,0 +1,11 @@
+{
+  "work": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work",
+  "control": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/.agent",
+  "git": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/work/.git",
+  "tmp": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n/tmp",
+  "sdk": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs",
+  "binary": "/opt/homebrew/Caskroom/claude-code/2.1.277/claude",
+  "stderr": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-control-carveout-gate-20260930/run/claude/stderr.txt",
+  "settingsEvidence": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-control-carveout-gate-20260930/run/claude/settings.json",
+  "optionsEvidence": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-control-carveout-gate-20260930/run/claude/options.json"
+}

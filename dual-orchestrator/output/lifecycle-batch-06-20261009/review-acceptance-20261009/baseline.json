@@ -1,0 +1,8 @@
+{
+  "recorded_at": "2026-10-09T18:25:53.585918+08:00",
+  "source_manifest": "output/lifecycle-batch-06-20261009/source-before-sha256.json",
+  "source_inputs_checked": 653,
+  "reviewed_manifest_copy": "reviewed-material-sha256.json",
+  "scope": "Receive user-supplied independent CC design review; document LOW dispositions; no implementation authorization",
+  "status": "DESIGN_REVIEW_ACCEPTANCE_NOT_IMPLEMENTED"
+}

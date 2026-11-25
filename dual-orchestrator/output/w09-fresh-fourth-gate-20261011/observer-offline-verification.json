@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "budget_cases": 13,
+  "actual_third_read_only": {
+    "tokens": 235366,
+    "calls": 5,
+    "future_admission": {
+      "result": "ALLOW_BUDGET_ONLY",
+      "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+      "required_token_reserve": 850000,
+      "required_call_reserve": 7,
+      "remaining_tokens": 1464634,
+      "remaining_calls": 13,
+      "warning": false
+    }
+  },
+  "synthetic_extraction_positive": true,
+  "synthetic_rejections": [
+    "duplicate completion",
+    "partial aggregate",
+    "unattributed occurrence",
+    "unfinished run",
+    "wrong workspace session"
+  ],
+  "native_provider_calls": 0,
+  "proof_boundary": "observer arithmetic/extraction only, no fourth dispatch or old recovery"
+}

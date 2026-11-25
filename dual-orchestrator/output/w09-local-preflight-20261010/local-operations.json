@@ -1,0 +1,85 @@
+[
+  {
+    "step": "git-init",
+    "argv": [
+      "git",
+      "init",
+      "-b",
+      "main"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261010/target",
+    "exit": 0
+  },
+  {
+    "step": "empty-base-commit",
+    "argv": [
+      "git",
+      "-c",
+      "core.hooksPath=/dev/null",
+      "-c",
+      "commit.gpgSign=false",
+      "commit",
+      "--allow-empty",
+      "-m",
+      "Initialize fresh Dual verification target"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261010/target",
+    "exit": 0
+  },
+  {
+    "step": "status",
+    "argv": [
+      "java",
+      "-jar",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+      "status",
+      "--workdir=/private/tmp/dual-w09-newlines-20261010/worktree",
+      "ws-20261010T055644Z-6QCS"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261010/worktree",
+    "exit": 0,
+    "stdout_sha256": "4ec20fd0af538e43f451541f6807d45525e5ec6003e85489176f49717a50ef85",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "step": "trace",
+    "argv": [
+      "java",
+      "-jar",
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar",
+      "trace",
+      "--workdir=/private/tmp/dual-w09-newlines-20261010/worktree",
+      "ws-20261010T055644Z-6QCS"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261010/worktree",
+    "exit": 0,
+    "stdout_sha256": "461b354f2a655f954c5668b08927519832a68f09eab414334a98ea9146fd707a",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "step": "acpx-build-info",
+    "argv": [
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "build-info",
+      "--json"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261010/worktree",
+    "exit": 0,
+    "stdout_sha256": "89dc174c368c949ed6a83c6f6e51bf74d781cdc91291cd0649248d46ab90f800",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "step": "acpx-effective-config",
+    "argv": [
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "config",
+      "show",
+      "--format",
+      "json"
+    ],
+    "cwd": "/private/tmp/dual-w09-newlines-20261010/worktree",
+    "exit": 0,
+    "stdout_sha256": "a3340629cc018396b7649808075ef40b9fb6e3582f2ad2c299394dff23085a26",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

@@ -32,8 +32,7 @@ public final class RunCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "run"))) {
-            return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps, dispatchMode);
-        }
+        return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps, dispatchMode);
+
     }
 }

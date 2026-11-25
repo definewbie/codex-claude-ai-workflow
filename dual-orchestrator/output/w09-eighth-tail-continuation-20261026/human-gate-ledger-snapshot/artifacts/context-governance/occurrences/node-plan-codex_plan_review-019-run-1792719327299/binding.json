@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "node_instance_id" : "node-plan-codex_plan_review-019",
+  "run_id" : "run-1792719327299",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/working-set.json",
+      "sha256" : "3240df7273813b3127d3943dfa57a38a4118352ead247a19763e08ea61972a50"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/read-reuse-contract.json",
+      "sha256" : "2e55c2f42d5aa7be33fa38fd43a14445e97d091ed2fa94ad246405f72d123342"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/agent-capability-catalog.json",
+      "sha256" : "bd4dceb0fb739023ab7add2512bd09b874968961273becb954c9ce4f6bafd342"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/planned-report.json",
+      "sha256" : "8a8af047cbe2564a05e86484807755fee4a16a9ca83fcc537ccf2e215d9360aa"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/repo-map.json",
+      "sha256" : "4c5a81a854be898632cf2d09cc37fa9f7c0b7dc250dbadc64b951e0735a7336b"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/file-summaries.json",
+      "sha256" : "d14b2fee7bb9118f388036f0b2f6fe063f0666d5efe799304ef359e85c4bfd9c"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/stage-scope-policy.json",
+      "sha256" : "8e735df9881d784bcc9d86750c30dcca14776da3e6eeac8f442c42a8ceee0381"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/file-relevance-plan.json",
+      "sha256" : "1e2ffe9112a1db8d8d9a1cf3c392c43079e35cc360669f599293d428e7d483b1"
+    }
+  }
+}

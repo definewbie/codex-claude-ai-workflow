@@ -1,0 +1,18 @@
+test_confirmed_history_is_not_a_current_absence_claim (test_process_check.HistoricalAbsenceTest.test_confirmed_history_is_not_a_current_absence_claim) ... FAIL
+
+======================================================================
+FAIL: test_confirmed_history_is_not_a_current_absence_claim (test_process_check.HistoricalAbsenceTest.test_confirmed_history_is_not_a_current_absence_claim)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmp_ge26sam/test_process_check.py", line 120, in test_confirmed_history_is_not_a_current_absence_claim
+    command.assert_not_called()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/mock.py", line 938, in assert_not_called
+    raise AssertionError(msg)
+AssertionError: Expected 'run' to not have been called. Called 1 times.
+Calls: [call(['rtk', 'proxy', 'ps', '-axo', 'pid=,lstart=,command='], capture_output=True, text=True, timeout=5, check=False)].
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)

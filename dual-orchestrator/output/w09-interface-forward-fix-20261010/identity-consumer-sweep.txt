@@ -1,0 +1,19 @@
+.tools/acpx-e1/source/src/session/persistence/serialize.ts:15:    agent_session_id: normalizeRuntimeSessionId(canonical.agentSessionId),
+.tools/acpx-e1/source/src/session/persistence/parse.ts:804:    agentSessionId: normalizeRuntimeSessionId(record.agent_session_id),
+.tools/acpx-e1/source/src/acp/agent-session-id.ts:1:const AGENT_SESSION_ID_META_KEYS = ["agentSessionId", "sessionId"] as const;
+.tools/acpx-e1/source/src/acp/client.ts:327:  agentSessionId?: string;
+.tools/acpx-e1/source/src/acp/client.ts:335:  agentSessionId?: string;
+.tools/acpx-e1/source/src/acp/client.ts:364:    agentSessionId: extractRuntimeSessionId(response?._meta),
+.tools/acpx-e1/source/src/acp/client.ts:1222:      agentSessionId: extractRuntimeSessionId(result._meta),
+dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java:21:            for (var key : List.of("schema", "acpxRecordId", "acpSessionId", "agentSessionId", "cwd", "name")) {
+dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java:50:        for (var key : List.of("acpxRecordId", "acpSessionId", "agentSessionId"))
+dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionTransportSequenceTest.java:34:        json.writeValue(root.resolve("session.json").toFile(), Map.of("schema", "acpx.session.v1", "acpxRecordId", "record", "acpSessionId", "native-one", "agentSessionId", "native-one", "cwd", root.toString(), "name", "exact-session", "closed", false, "protocolVersion", 1, "agentCapabilities", Map.of()));
+dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java:73:            // The actual W09 sessions-show shape omits agentSessionId, while both routing IDs exist.
+dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java:75:            metadata.remove("agentSessionId");
+dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java:76:            if (shape.equals("null")) metadata.put("agentSessionId", null);
+dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java:77:            if (shape.equals("provided")) metadata.put("agentSessionId", "engine-internal-one");
+dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java:82:                    assessment.observation().get("agent_session_id_status"));
+dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java:84:                    assessment.observation().get("agentSessionId"));
+dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java:105:            case "engine_blank" -> metadata.put("agentSessionId", " ");
+dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java:106:            case "engine_type" -> metadata.put("agentSessionId", 7);
+dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java:133:                "acpSessionId", "native-one", "agentSessionId", "engine-internal-one", "cwd", root.toString(),

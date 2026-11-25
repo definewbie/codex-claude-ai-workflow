@@ -1,0 +1,20 @@
+{
+  "historical_materials": [
+    {
+      "bundle": "w09-fresh-fifth-gate-20261011",
+      "entries": 326,
+      "mismatches": []
+    },
+    {
+      "bundle": "w09-current-transcript-forward-fix-20261011",
+      "entries": 398,
+      "mismatches": []
+    }
+  ],
+  "frozen_source_count": 656,
+  "frozen_source_drift": [],
+  "docs": {
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "3c37e1c462f394e4a7f1ab7bcd2c2355f52d076e0b77c0073407a3d6c55d1996",
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "0419204b33cfaee339b61bf0f0f17af3b45c61aeeaa07c279692ea210c94d979"
+  }
+}

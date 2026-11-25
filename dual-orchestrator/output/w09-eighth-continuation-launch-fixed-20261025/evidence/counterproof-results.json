@@ -1,0 +1,38 @@
+{
+  "status": "PASS_EXPECTED_FAILURES",
+  "not_part_of_green_test_count": true,
+  "results": [
+    {
+      "name": "restore_parent_path_admission",
+      "test": "test_continuation.AssemblyTest.test_real_standins_consume_same_checked_environment_despite_parent_path",
+      "mutant_exit": 1,
+      "expected_assertion_failure": true,
+      "log": "evidence/counterproof-restore_parent_path_admission.log",
+      "scope": "Isolated copied operator; temporary stand-ins only; no real Java/native"
+    },
+    {
+      "name": "rebuild_launch_environment",
+      "test": "test_continuation.AssemblyTest.test_real_standins_consume_same_checked_environment_despite_parent_path",
+      "mutant_exit": 1,
+      "expected_assertion_failure": true,
+      "log": "evidence/counterproof-rebuild_launch_environment.log",
+      "scope": "Isolated copied operator; temporary stand-ins only; no real Java/native"
+    },
+    {
+      "name": "remove_program_bytes_guard",
+      "test": "test_continuation.AssemblyTest.test_direct_selection_checks_bytes_and_client_overrides",
+      "mutant_exit": 1,
+      "expected_assertion_failure": true,
+      "log": "evidence/counterproof-remove_program_bytes_guard.log",
+      "scope": "Isolated copied operator; temporary stand-ins only; no real Java/native"
+    },
+    {
+      "name": "remove_new_combination_approval",
+      "test": "test_continuation.AssemblyTest.test_old_true_does_not_approve_new_combination",
+      "mutant_exit": 1,
+      "expected_assertion_failure": true,
+      "log": "evidence/counterproof-remove_new_combination_approval.log",
+      "scope": "Isolated copied operator; temporary stand-ins only; no real Java/native"
+    }
+  ]
+}

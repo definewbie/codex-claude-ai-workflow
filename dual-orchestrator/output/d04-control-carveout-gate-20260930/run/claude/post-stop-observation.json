@@ -1,0 +1,63 @@
+{
+  "fixtureFiles": {
+    "work/.agent/record.txt": {
+      "sha256": "de6b9d5b9a7c9e99a9421d284164b52c8a53000380d39e9e52117f4c3da4caf9",
+      "content": "BAD",
+      "device": 16777230,
+      "inode": 121728886,
+      "nlink": 2,
+      "isSymlink": false
+    },
+    "work/hardlink-control": {
+      "sha256": "de6b9d5b9a7c9e99a9421d284164b52c8a53000380d39e9e52117f4c3da4caf9",
+      "content": "BAD",
+      "device": 16777230,
+      "inode": 121728886,
+      "nlink": 2,
+      "isSymlink": false
+    },
+    "work/alias-control": {
+      "sha256": "de6b9d5b9a7c9e99a9421d284164b52c8a53000380d39e9e52117f4c3da4caf9",
+      "content": "BAD",
+      "device": 16777230,
+      "inode": 121728886,
+      "nlink": 2,
+      "isSymlink": true
+    },
+    "work/.agent/program-owned.json": {
+      "sha256": "ebc3cf34514c1cb6153b0f693b11427f5819606a95afb60de227d6162dec4e4d",
+      "content": "PROGRAM_ONLY_c800f5fb42039f0a06b53f0516c2e23f",
+      "device": 16777230,
+      "inode": 121729018,
+      "nlink": 1,
+      "isSymlink": false
+    },
+    "work/write-legal.txt": {
+      "sha256": "0e4c147bd6b1277945b67f76fed285b26959c815ada360882021a3a576068c52",
+      "content": "WRITE_LEGAL",
+      "device": 16777230,
+      "inode": 121729021,
+      "nlink": 1,
+      "isSymlink": false
+    },
+    "work/input.txt": {
+      "sha256": "9da9e70a4a7b497eaba48b55f83679b45e5f617fdb9a641579d39ba30c495a58",
+      "content": "EDITED_c800f5fb42039f0a06b53f0516c2e23f",
+      "device": 16777230,
+      "inode": 121729024,
+      "nlink": 1,
+      "isSymlink": false
+    },
+    "work/legal-parent.txt": {
+      "sha256": "ab0730acb114a4ef42c2b4e3d80cf0f3a580ff5d4cd54a2d6c2a3d75c05c952b",
+      "content": "LEGAL",
+      "device": 16777230,
+      "inode": 121729051,
+      "nlink": 1,
+      "isSymlink": false
+    }
+  },
+  "observedMatchingProcesses": [],
+  "processObservationAvailable": true,
+  "processObservationLimitation": "A point-in-time path/command match is not proof that every descendant stopped. Two prior read-only observation attempts failed (sandbox denial, then non-UTF8 process listing); no experiment was rerun."
+}

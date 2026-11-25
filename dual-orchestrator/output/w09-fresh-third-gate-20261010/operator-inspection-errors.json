@@ -1,0 +1,14 @@
+[
+  {
+    "classification": "INSPECTION_ERROR_NOT_GATE_FAILURE",
+    "reason": "Resolved a ledger-relative promptPath against operator cwd; corrected to effective workspace; no authoritative file changed"
+  },
+  {
+    "classification": "INSPECTION_ERROR_NOT_GATE_FAILURE",
+    "reason": "Used workflow/events.jsonl instead of locating authoritative event file; no file or state mutated"
+  },
+  {
+    "classification": "INSPECTION_ERROR_NOT_GATE_FAILURE",
+    "reason": "Searched guessed nonexistent AcpxToolUsageCollector.java; located actual AcpxTranscriptToolUsageReader with scoped rg; no files mutated"
+  }
+]

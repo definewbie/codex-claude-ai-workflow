@@ -1,0 +1,7 @@
+{
+  "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/tools.js",
+  "package_version": "0.70.0",
+  "sha256": "b9f6e42e59047bfc0554f862c0d71354cb6af54299f8947963886171657ee230",
+  "excerpts": "claude-tool-result-source.txt",
+  "method": "read-only local source inspection; no native/provider invocation"
+}

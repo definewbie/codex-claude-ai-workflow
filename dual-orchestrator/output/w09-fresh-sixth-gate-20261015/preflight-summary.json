@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-10-15T07:41:05.451311+08:00",
+  "preflight": "PASS",
+  "run_authorized": true,
+  "model_calls_before_business_request": 0,
+  "source_count": 659,
+  "observer_cases": 9,
+  "budget_cases": 13,
+  "native_config_change": "Only redundant same-authority fourth/fifth fixture registration; exact residual baseline match",
+  "business_approval_count": 0,
+  "location": {
+    "parent": "/private/tmp/dual-w09-newlines-20261015-fresh-06",
+    "target": "/private/tmp/dual-w09-newlines-20261015-fresh-06/target",
+    "workspace": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+    "workstream": "ws-20261014T234009Z-RN9X",
+    "ledger": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree/.agent/workstreams/ws-20261014T234009Z-RN9X"
+  }
+}

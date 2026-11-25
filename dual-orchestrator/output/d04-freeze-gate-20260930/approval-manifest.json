@@ -1,0 +1,9 @@
+{
+  "gate.md": "94af9a6df6f8dcbd40b8ceea5314d55ef762f3720ebfd1be147e912e91960d1b",
+  "binding-and-cost.md": "c45904eba4321da03d82c19de323d5a810dec686647d0c62af1c77be154adcac",
+  "plan.json": "edc58cb40133a1d37a58ce93e3eb5abb7cf1d7032590ad4e61f6b41a2c6f9708",
+  "source-identity.json": "387566ebf205497e1a07bd24f3510485c28de8a3176c8900a6ac352a4d62311f",
+  "tool-contract.json": "1b23107c3a73894f97bc1d17400299d6fca10a86948797ba6876fb74f1ff2da2",
+  "probe.py": "f597aa01f86023d0ab5a63cecfee0589005af69f0b1d8943d6a22b19f5b55883",
+  "offline_test.py": "e205d50a166a0942296a6feaeb86974bb42b3b7adc5b4492112ba2a3bc96ba60"
+}

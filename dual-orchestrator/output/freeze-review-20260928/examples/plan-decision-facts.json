@@ -1,0 +1,41 @@
+{
+  "reviewed_candidate": {
+    "schema_version": 1,
+    "stage": "plan",
+    "author_occurrence": "plan-author-001",
+    "reviewer_occurrence": "plan-review-001",
+    "decision_occurrence": "plan-decision-001",
+    "author_artifact": {
+      "ref": "examples/plan-author.json",
+      "sha256": "fcdc397415c632defbee32e45116ab2d310c23183c04f8b868e4efb9502f9115"
+    },
+    "review_artifact": {
+      "ref": "examples/plan-review.json",
+      "sha256": "e147a523fc7ced60e6d4d774a3127987f19ab3e64561ad6743bd12f26a72c642"
+    },
+    "review_decision": "READY",
+    "contract": {
+      "phase": "GOAL",
+      "epoch": 1,
+      "ref": "examples/goal-contract.json",
+      "sha256": "9228634ffafa7d603eaad06f16efa7a7f66feb07890548bfc49acfd0eec5c768"
+    },
+    "checks": [
+      {
+        "rule_id": "review.subject.and.route",
+        "rule_version": "2",
+        "result": "PASSED",
+        "input_refs": [
+          {
+            "ref": "examples/plan-author.json",
+            "sha256": "fcdc397415c632defbee32e45116ab2d310c23183c04f8b868e4efb9502f9115"
+          },
+          {
+            "ref": "examples/plan-review.json",
+            "sha256": "e147a523fc7ced60e6d4d774a3127987f19ab3e64561ad6743bd12f26a72c642"
+          }
+        ]
+      }
+    ]
+  }
+}

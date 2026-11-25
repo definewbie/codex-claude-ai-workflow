@@ -1,0 +1,11 @@
+{
+  "approved_at": "2026-10-23T09:03:03.119390+08:00",
+  "authority": "Current human user message",
+  "user_message": "批准",
+  "scope": "Fresh eighth real run under immediately preceding Gate: 1700000 attributable tokens,18 requests,3600 active seconds,reservation admission; business approvals and product commit not delegated",
+  "approved_gate_sha256": "2385da314b72ec13c3836b39ac1d968acba177fa9707d7003f07e3254a4f32ae",
+  "approved_material_manifest_sha256": "13e81703884a29ed866319d042017f25513a738c582e4c39576cd7b5c6aea271",
+  "previous_authorization_sha256": "32747b760b74fd6447db7d303fdcd58771f0b6e0fb36526be5c997c006d3a936",
+  "business_gates_delegated": false,
+  "previous_case_or_balance_inherited": false
+}

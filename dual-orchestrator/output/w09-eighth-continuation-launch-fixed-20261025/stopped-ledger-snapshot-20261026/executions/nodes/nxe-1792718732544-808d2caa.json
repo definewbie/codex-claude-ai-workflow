@@ -1,0 +1,80 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792718732544-808d2caa",
+  "agentTaskId" : "agt-1792718732539-5cb807d6",
+  "workflowExecutionId" : "wfe-1792718732465-ad7ae680",
+  "nodeInstanceId" : "node-design-claude_design-012",
+  "nodeDefinitionId" : "design.claude_design",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "pid" : 76367,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1792718732583/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.contract.json" ],
+  "result" : {
+    "claim" : {
+      "input_identity" : "fac0b76b721da8f8cf585ce3d7dc4e97b90f6ff586640c90f9e642d1b69650e4",
+      "executor_pid" : 76367,
+      "executor_started_at" : "2026-10-23T01:25:31.364Z"
+    },
+    "prepared_run" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/nxe-1792718732544-808d2caa-prepared.json",
+      "sha256" : "cf9d09b92c4d629262d07e80963c591f6c4fb9b97812844d7a9c03842b7b144c"
+    },
+    "adapter_signals" : [ ],
+    "agent" : "claude",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "design_result",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "READY_FOR_ARCH_REVIEW",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.contract.json",
+    "contract_sidecar_sha256" : "107919da51a181a4e8fa14254d2158d2f28f5b08aa36c449fc783d00d7631bc8",
+    "decision" : "READY_FOR_ARCH_REVIEW",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1792718732583/binding.json",
+    "repository_fact_binding_sha256" : "c9895a2906fd9a0dcc4a0d914633338fe28d52cf422b0cb1e39acf9aca377986",
+    "run_id" : "run-1792718732583",
+    "run_metadata" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/run.json",
+    "session" : "claude-main-ws-20261023T005431Z-9YYF-run-1792718732583",
+    "summary" : "完整替换设计：保持两步 str.replace 纯函数、11 个 unittest 用例与三个 CREATE 候选文件，修正混合换行期望为 \"a\\nb\\nc\\nd\"，并将 AC-2 取证明确为合并采集 stdout 与 stderr。",
+    "transcript_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/nxe-1792718732544-808d2caa-completion.json",
+    "completion_sha256" : "69fd28f0b43b64594705f405361514e3fa6ea7ccfe893ba9c7081d0772598697",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "run-1792718732583",
+  "agentRunRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/run.json",
+  "agent" : "claude",
+  "session" : "claude-main-ws-20261023T005431Z-9YYF-run-1792718732583",
+  "exitCode" : 0,
+  "startedAt" : "2026-10-23T01:25:32.543764Z",
+  "finishedAt" : "2026-10-23T01:28:55.090479Z",
+  "durationMs" : 202546
+}

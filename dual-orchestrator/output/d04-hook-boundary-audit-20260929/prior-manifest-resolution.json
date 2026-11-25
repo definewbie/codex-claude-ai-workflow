@@ -1,0 +1,239 @@
+{
+  "files": [
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/adapter-observation-order.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/adapter-observation-order.json",
+      "sha256": "aa3c6f9d0a67d10914487077f45dc0d75c774ecb36f02f3394f38e9a0205ebf0"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/assessment.md",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/assessment.md",
+      "sha256": "9d6b3681c08e50f34c153a38e454a0f56fcf9c4ec1b9466f921cd68d001c6849"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/baseline.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/baseline.json",
+      "sha256": "03d6803ab811cc742b76d35640297a20a15152bc449b1ca61c56202037df5a3b"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "sha256": "1308aa35d8bb5293186a331c4f0ed488d1c5e91749adebb5161d88052dda687f"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "sha256": "ce1ee2dee5707ee96e0fe913c37b5cd3907258b48fe7273fa70a2bb994eff03d"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "sha256": "82397b4c1e926044ee9b033107a3ecb881c73f2d63b77b6574ac1507bd395b7e"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/cache-package-identity.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/cache-package-identity.json",
+      "sha256": "9fe1af468cf529c7172c563704686e93558401b2d90da751931ef74aa69342fa"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/cc-review.txt",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/cc-review.txt",
+      "sha256": "e4e4c3031a98a96e00e3343bc31198e0203f66912b7426705bb273399516de3a"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/documentation.diff",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/documentation.diff",
+      "sha256": "7e5718b9320fd5c46fa355ba1d222893db3d74d62ae8fe8eb33421eff114f25f"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/local-identity.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/local-identity.json",
+      "sha256": "de3a9acce77d6631075976bb66540445f4e0754ed2cb4b15b2a5a1744a2da99c"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/material-verification.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/material-verification.json",
+      "sha256": "b8ae237e2b8ec068f207dc94ef3cf24e45e9b93a1ebcaabf4a93bd5beb279a34"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/npm-platform-attestations.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/npm-platform-attestations.json",
+      "sha256": "09f3690a7ac9e1d4adad4ddf304370dcfb1313449e2348744c961bc4cdd75e22"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/npm-platform-provenance-decoded.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/npm-platform-provenance-decoded.json",
+      "sha256": "19cec04fff2dfbd562d0963bdde2ab7509332b3b855a0857055be7e8a602cd49"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/npm-platform.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/npm-platform.json",
+      "sha256": "bd11c775b288cb23f8478655eef2d6e8d6a5e9cccc5bffe42f22413fa9209483"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/npm-version-attestations-error.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/npm-version-attestations-error.json",
+      "sha256": "e0b605968ef81a8aa8828b4238dede2f262f1f500daf2885cfd2c95eafce0fcc"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/npm-version.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/npm-version.json",
+      "sha256": "2dc0a0047d60584994671dc61d23f1907b663b3a8eacd76610a7fc796832dc7b"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/prior-manifest-resolution.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/prior-manifest-resolution.json",
+      "sha256": "77c73ef3f7e268ee363ffba16e97ea0fd9eab9f3fd38c80366a0b06702b23ea9"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/remote-tag.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/remote-tag.json",
+      "sha256": "384fc455a3d388261a78d7c5e6800fe25b9afdbf3fabb7821537a70cd9bd0a17"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/codex-api/src/sse/responses.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/codex-api/src/sse/responses.rs",
+      "sha256": "ffe0a51e8b496d6c6e3b887859a3ee1afcc5b9a4c76d2f3bdffffa719de0aa9c"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/core/src/tools/handlers/multi_agents_v2/list_agents.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/core/src/tools/handlers/multi_agents_v2/list_agents.rs",
+      "sha256": "97f54d0ed0757576c1ab40eb07db2142455180f28543664401ed0df32760e977"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/core/src/tools/handlers/multi_agents_v2/spawn.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/core/src/tools/handlers/multi_agents_v2/spawn.rs",
+      "sha256": "5c58539e11880fb5cf516d65277c0b35ef4924d7b33d96e0c605a9bc444b600b"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/core/src/tools/registry.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/core/src/tools/registry.rs",
+      "sha256": "f90bfac6c021ffa0aadce1208bd7d13679915ac2b1bfcec227e9648e9992343a"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/core/src/tools/router.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/core/src/tools/router.rs",
+      "sha256": "5c1132d48b183bf8e0bb8b21a8cd7c4f720d3642468737cd040b5b04c29a4f5a"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/core/src/tools/spec_plan.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/core/src/tools/spec_plan.rs",
+      "sha256": "9d7df8fe504890f9947d972c251f61cb5b14fcd19eb43229b8e6925a711b285a"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/protocol/src/models.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/source/codex-rs/protocol/src/models.rs",
+      "sha256": "0fedfd9889dcfc090cd3ff15464aa9ac1f5c33bb01378c10c068c18263d1b65e"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/source-fetch.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/source-fetch.json",
+      "sha256": "806a5843b43265f24b957d4f97edf9b3b8a102067fae17fea880ed7ed042477c"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/source-index.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/source-index.json",
+      "sha256": "1006efea5741f86825562cced08ec36107c04ba2e520ec461d9c8464a7289daf"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/source-tree.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/source-tree.json",
+      "sha256": "fa2966cc7cd7226cbdbaf64076cbfab5eee29c6515084155fa99261d298ffc1e"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/codex-api/src/sse/responses.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/codex-api/src/sse/responses.rs",
+      "sha256": "ffe0a51e8b496d6c6e3b887859a3ee1afcc5b9a4c76d2f3bdffffa719de0aa9c"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/agent/control/spawn.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/agent/control/spawn.rs",
+      "sha256": "b41c919444d5fe752fa1b2ee8db45df229a42c61fc9aa5c07c3a197aa99f90a9"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/agent/control/user_authorization.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/agent/control/user_authorization.rs",
+      "sha256": "10ecc23c94be15d3fafb9271023ecb357a05e2acb41b8a125cce2e95f9cbad8f"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/agent/control.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/agent/control.rs",
+      "sha256": "06fa53e7b587945b23bb178252566101ca3a8b30ea5d4809d56decbed10f81bb"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/session/multi_agents.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/session/multi_agents.rs",
+      "sha256": "8e74c565c293fba9b51708c7c1ae1312b1003d53cc01b27eb80fe53bbc40c7bd"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/handlers/multi_agents_common.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/handlers/multi_agents_common.rs",
+      "sha256": "4c580a1a5e74951c9228f370bb7529eaa8bdd6b21a83f206ba0762504974fce6"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/handlers/multi_agents_v2/list_agents.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/handlers/multi_agents_v2/list_agents.rs",
+      "sha256": "97f54d0ed0757576c1ab40eb07db2142455180f28543664401ed0df32760e977"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/handlers/multi_agents_v2/spawn.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/handlers/multi_agents_v2/spawn.rs",
+      "sha256": "82f738243e40f075bdf2dc08613c5657e8ab5c6aa92aea0644c787a3ea65b317"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/handlers/multi_agents_v2.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/handlers/multi_agents_v2.rs",
+      "sha256": "a60e2b7ff40dc1d686db6b91dbcac9a0bec471503d25ff1c407ed5a619777c0c"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/hosted_spec.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/hosted_spec.rs",
+      "sha256": "add42354c1662ced395898ba4b8bac9b4546ee5b5963cd40bc3f542fc950765c"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/registry.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/registry.rs",
+      "sha256": "f90bfac6c021ffa0aadce1208bd7d13679915ac2b1bfcec227e9648e9992343a"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/router.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/router.rs",
+      "sha256": "466ee7a51fd9e6b741653b50313a2567bb08ce55a32af815a619a07cc38bafef"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/spec_plan.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/core/src/tools/spec_plan.rs",
+      "sha256": "fef34c2bdc27159e4137321526ce8df3e453d3b6538c9db09425561c2320b43e"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/protocol/src/models.rs",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source/codex-rs/protocol/src/models.rs",
+      "sha256": "22c4496e666cb3078abb8f82ce623c21695bd639cf38f7a33f93fb6d8d280190"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source-fetch-r2.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source-fetch-r2.json",
+      "sha256": "37be7696fcbec140f4a3dc18b90f70d54567dbc73d628d3842ed18f86904d03b"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source-fetch.json",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/verified-source-fetch.json",
+      "sha256": "099c7b8ae9b97e49e4d927a632bddb49b1513de6c68b41ae63d2a45fc7e170dc"
+    },
+    {
+      "path": "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "sha256": "3b4deac8f77b4d2d43c9cb3fea74db0009c8df7f91764e620b0df46694f795c5"
+    },
+    {
+      "path": "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "sha256": "18d72c6c205f7551224709e315bdf2a6754f43e9e6d71f148d07c42e2b3d374e"
+    },
+    {
+      "path": "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-hook-boundary-audit-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "sha256": "1196a1b814cc4449497ed5af2009b54f6242e929aa552c35f274ca1b079bee5c"
+    }
+  ]
+}

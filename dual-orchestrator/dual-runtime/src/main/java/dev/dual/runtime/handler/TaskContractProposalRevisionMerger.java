@@ -24,8 +24,17 @@ final class TaskContractProposalRevisionMerger {
         if (!context.previousReference().proposalId().equals(patch.baseProposalId())) {
             errors.add("REVISION_BASE_PROPOSAL_ID_MISMATCH");
         }
-        if (!context.previousReference().sha256().equals(patch.baseProposalSha256())) {
-            errors.add("REVISION_BASE_PROPOSAL_SHA256_MISMATCH");
+
+        // The model cites only ID; the verified program context must still match all base bytes.
+        try {
+            var root = workspaceRoot.toAbsolutePath().normalize();
+            var base = root.resolve(context.previousReference().artifactRef()).normalize();
+            if (!base.startsWith(root) || !java.nio.file.Files.isRegularFile(base)
+                    || !TaskContractArtifactWriter.sha256(base).equals(context.previousReference().sha256())) {
+                errors.add("REVISION_BASE_PROPOSAL_CONTENT_MISMATCH");
+            }
+        } catch (Exception invalidBase) {
+            errors.add("REVISION_BASE_PROPOSAL_CONTENT_MISMATCH");
         }
 
         var expectedObligations = new LinkedHashSet<String>();

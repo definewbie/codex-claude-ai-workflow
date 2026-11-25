@@ -1,0 +1,20 @@
+{
+  "source": true,
+  "jars": true,
+  "native_config": true,
+  "reviewed_bundle": true,
+  "old_cases": [
+    {
+      "case": "w09-real-gate-20261010",
+      "files": 117,
+      "equal": true
+    },
+    {
+      "case": "w09-fresh-second-gate-20261010",
+      "files": 154,
+      "equal": true
+    }
+  ],
+  "read_queries_did_not_mutate_authoritative_bytes": true,
+  "snapshot_count": 288
+}

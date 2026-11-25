@@ -1,0 +1,196 @@
+package dev.dual.core.execution;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.Instant;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class AgentExecutionFinalizerTest {
+    private final AgentExecutionFinalizer finalizer = new AgentExecutionFinalizer();
+
+    @Test
+    void validEvidenceProducesConsistentCompletedAttemptAndLegacyFields() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.exitedZero(),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of()
+        ));
+
+        assertEquals(AgentExecutionAttemptStatus.COMPLETED, finalized.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.EXITED, finalized.attempt().processStatus());
+        assertEquals(AgentExecutionOutcomeStatus.SUCCESS, finalized.outcome().status());
+        assertEquals("completed", finalized.legacyStatus());
+        assertNull(finalized.legacyFailureReason());
+        assertFalse(finalized.legacyRecoverable());
+    }
+
+    @Test
+    void contractFailureProducesContractFailedAttemptAndLegacyFailure() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.exitedZero(),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
+                List.of(ArtifactContractResult.requiredMissing("plan_artifact")),
+                List.of()
+        ));
+
+        assertEquals(AgentExecutionAttemptStatus.CONTRACT_FAILED, finalized.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.EXITED, finalized.attempt().processStatus());
+        assertEquals(AgentExecutionOutcomeStatus.CONTRACT_FAILED, finalized.outcome().status());
+        assertEquals("failed", finalized.legacyStatus());
+        assertEquals("required_artifact_contract_failed", finalized.legacyFailureReason());
+        assertTrue(finalized.legacyRecoverable());
+    }
+
+    @Test
+    void reconnectSignalWithCompleteEvidenceBecomesRecoverableFailure() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.exitedZero(),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of(AdapterSignal.of(AdapterSignalType.AGENT_RECONNECT_REQUIRED))
+        ));
+
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, finalized.outcome().status());
+        assertEquals(AgentExecutionAttemptStatus.RECOVERABLE_FAILED, finalized.attempt().status());
+        assertEquals(AdapterSignalType.AGENT_RECONNECT_REQUIRED, finalized.attempt().failureSignal());
+        assertTrue(finalized.attempt().retrySafe());
+        assertEquals(AgentExecutionRetryPolicy.MANUAL_ONLY, finalized.outcome().retryPolicy());
+        assertEquals("failed", finalized.legacyStatus());
+        assertTrue(finalized.legacyRecoverable());
+    }
+
+    @Test
+    void killedAfterNonReconnectRecoverableSignalDoesNotBecomeReconnectProcessStatus() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.killedAfterRecoverableSignal(),
+                AgentResultContractResult.missing(),
+                List.of(),
+                List.of(AdapterSignal.of(AdapterSignalType.MODEL_MISMATCH))
+        ));
+
+        assertEquals(AgentExecutionAttemptStatus.RECOVERABLE_FAILED, finalized.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.FAILED, finalized.attempt().processStatus());
+        assertEquals(AdapterSignalType.MODEL_MISMATCH, finalized.attempt().failureSignal());
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, finalized.outcome().status());
+    }
+
+    @Test
+    void timeoutProducesTimedOutAttemptAndNoSuccessContradiction() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.timedOutProcess(),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of()
+        ));
+
+        assertEquals(AgentExecutionOutcomeStatus.TIMEOUT, finalized.outcome().status());
+        assertEquals(AgentExecutionAttemptStatus.TIMED_OUT, finalized.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.TIMED_OUT, finalized.attempt().processStatus());
+        assertEquals("failed", finalized.legacyStatus());
+        assertEquals("process_timed_out", finalized.legacyFailureReason());
+        assertTrue(finalized.legacyRecoverable());
+    }
+
+    @Test
+    void timeoutRemainsPrimaryWhenAgentResultIsMissing() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.timedOutProcess(),
+                AgentResultContractResult.missing(),
+                List.of(),
+                List.of()
+        ));
+
+        assertEquals(AgentExecutionOutcomeStatus.TIMEOUT, finalized.outcome().status());
+        assertEquals("process_timed_out", finalized.outcome().primaryReason());
+        assertEquals(AgentExecutionAttemptStatus.TIMED_OUT, finalized.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.TIMED_OUT, finalized.attempt().processStatus());
+    }
+
+    @Test
+    void stalledProducesStalledAttemptAndNoSuccessContradiction() {
+        var stalled = finalizer.finalize(baseAttempt(), evidence(
+                new ProcessResult("", null, null, ProcessUsability.STALLED, 0, "", "", false, false),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of()
+        ));
+
+        assertEquals(AgentExecutionOutcomeStatus.TIMEOUT, stalled.outcome().status());
+        assertEquals("process_stalled", stalled.outcome().primaryReason());
+        assertEquals(AgentExecutionAttemptStatus.STALLED, stalled.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.STALLED, stalled.attempt().processStatus());
+        assertTrue(stalled.legacyRecoverable());
+    }
+
+    @Test
+    void interruptedProducesInterruptedAttemptAndNoSuccessContradiction() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.interruptedProcess(),
+                AgentResultContractResult.valid("READY_FOR_PLAN_REVIEW"),
+                List.of(ArtifactContractResult.requiredValid("agent_output_contract")),
+                List.of()
+        ));
+
+        assertEquals(AgentExecutionOutcomeStatus.INTERRUPTED, finalized.outcome().status());
+        assertEquals(AgentExecutionAttemptStatus.INTERRUPTED, finalized.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.INTERRUPTED, finalized.attempt().processStatus());
+        assertEquals("failed", finalized.legacyStatus());
+        assertEquals("process_interrupted", finalized.legacyFailureReason());
+        assertTrue(finalized.legacyRecoverable());
+    }
+
+    @Test
+    void blockingPermissionSignalCannotMakeInterruptedAttemptInternallyInvalid() {
+        var finalized = finalizer.finalize(baseAttempt(), evidence(
+                ProcessResult.interruptedProcess(),
+                AgentResultContractResult.missing(),
+                List.of(),
+                List.of(AdapterSignal.of(AdapterSignalType.PERMISSION_BLOCKED))
+        ));
+
+        assertEquals(AgentExecutionOutcomeStatus.RECOVERABLE_ADAPTER_FAILURE, finalized.outcome().status());
+        assertEquals("permission_blocked", finalized.outcome().primaryReason());
+        assertEquals(AgentExecutionAttemptStatus.INTERRUPTED, finalized.attempt().status());
+        assertEquals(AgentExecutionProcessStatus.INTERRUPTED, finalized.attempt().processStatus());
+        assertEquals(AdapterSignalType.PERMISSION_BLOCKED, finalized.attempt().failureSignal());
+    }
+
+    private static AgentExecutionAttempt baseAttempt() {
+        return new AgentExecutionAttempt(
+                "att-run-1",
+                "run-1",
+                "ws-1",
+                "plan.claude_plan",
+                "claude",
+                AgentExecutionAttemptStatus.PROCESS_EXITED,
+                AgentExecutionProcessStatus.EXITED,
+                null,
+                false,
+                false,
+                "process exited",
+                "runs/run-1/stderr.log",
+                "runs/run-1/transcript.ndjson",
+                "claude-main-ws-1",
+                "session-1",
+                "workstream",
+                "ws:ws-1",
+                Instant.parse("2026-06-30T00:00:00Z"),
+                Instant.parse("2026-06-30T00:00:10Z")
+        );
+    }
+
+    private static AgentExecutionEvidence evidence(
+            ProcessResult process,
+            AgentResultContractResult agentResult,
+            List<ArtifactContractResult> artifacts,
+            List<AdapterSignal> signals
+    ) {
+        return new AgentExecutionEvidence(process, agentResult, artifacts, signals);
+    }
+}

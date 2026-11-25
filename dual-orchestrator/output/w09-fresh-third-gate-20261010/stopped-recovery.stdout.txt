@@ -1,0 +1,7 @@
+Recovery snapshot: RUNNING / commit 51
+Recovery Assessment
+- Classification: manual_recovery_required
+- Retry Readiness: INSPECT_BEFORE_RETRY
+- Reason: The failure is not marked recoverable. Read the evidence before deciding whether retry is safe.
+- Suggested Command: dualctl retry --workdir /private/tmp/dual-w09-newlines-20261010-fresh-03/worktree ws-20261010T124812Z-XCZL  # only after fixing the cause
+

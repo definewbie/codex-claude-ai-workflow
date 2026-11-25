@@ -1,0 +1,21 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "stage_scope_policy",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "implement",
+  "nodeInstanceId" : "node-context-implement_claude-029",
+  "nodeDefinitionId" : "context.implement_claude",
+  "builderNodeDefinitionId" : "context.implement_claude",
+  "targetNodeDefinitionId" : "implement.claude_implement",
+  "iterationId" : "iter-003",
+  "writeScope" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "previouslyReadFiles" : [ ],
+  "readReusePolicy" : {
+    "preferExistingEvidence" : true,
+    "reasonField" : "agent_output_contract.reread_reasons",
+    "requireReasonWhenRereading" : true,
+    "avoidRepeatedReads" : [ ]
+  },
+  "forbiddenScope" : [ ".git/**", ".agent/workstreams/**/workflow/**", ".agent/workstreams/**/nodes/**" ],
+  "generatedAt" : "2026-10-25T22:36:14.513561Z"
+}

@@ -1,0 +1,411 @@
+
+[1m=== Phase 0: Setup [lifecycle] ===[0m
+[0;36m[SMOKE][0m Skipping build (--skip-build)
+  [0;32mPASS[0m JAR exists
+[0;36m[SMOKE][0m Verifying dualctl...
+  [0;32mPASS[0m dualctl is runnable
+  [0;32mPASS[0m controlled acpx installed for lifecycle smoke
+  [0;32mPASS[0m acpx found: controlled-smoke-acpx 1.0
+[0;36m[SMOKE][0m Creating fixture repo at /tmp/dual-smoke-lifecycle-74839...
+  [0;32mPASS[0m Fixture repo ready
+
+[1m=== Phase 1: Start workstream [lifecycle] ===[0m
+[0;36m[SMOKE][0m Starting [lifecycle]: 给 main.py 添加一个 goodbye 函数，返回 'goodbye'，并在 README 中添加函数说明。不要修改 __main__ 运行输出。
+  [0;32mPASS[0m Workstream: ws-20260913T160342Z-TVXE
+  [0;32mPASS[0m Workspace:  /private/tmp/dual-smoke-lifecycle-74839-agent-runs/ws-20260913T160342Z-TVXE
+  [0;32mPASS[0m Ledger:     /private/tmp/dual-smoke-lifecycle-74839-agent-runs/ws-20260913T160342Z-TVXE/.agent/workstreams/ws-20260913T160342Z-TVXE
+[0;36m[SMOKE][0m   Step 1: intake.claude_brainstorm -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 2: context.intake_codex_product_review -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 3: intake.codex_product_review -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 4: intake.decision -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 5: gate.human_requirement_review -> WAITING_FOR_HUMAN (resumed workflow)
+  [0;32mPASS[0m Reached first human gate
+
+[1m=== Phase 1.5: Verify ledger structure ===[0m
+  [0;32mPASS[0m Exists: workstream.json
+  [0;32mPASS[0m Exists: requirement.md
+  [0;32mPASS[0m Exists: workflow/definition.json
+  [0;32mPASS[0m Exists: workflow/current.json
+  [0;32mPASS[0m Exists: events.jsonl
+  [0;32mPASS[0m Exists: nodes/
+  [0;32mPASS[0m Exists: runs/
+  [0;32mPASS[0m requirement.md contains task description
+
+[1m=== Phase 2: Gate approval loop [lifecycle] ===[0m
+[0;36m[SMOKE][0m Gate round 1
+[0;36m[SMOKE][0m   Definition: agent-lifecycle-full@10
+[0;36m[SMOKE][0m   Status: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Active nodes: [node-gate-human_requirement_review-006]
+[0;36m[SMOKE][0m   Open gates: [gate-node-gate-human_requirement_review-006]
+[0;36m[SMOKE][0m   Active node definition: gate.human_requirement_review
+[0;36m[SMOKE][0m   Active node status: WAITING
+[0;36m[SMOKE][0m   Active iteration: iter-001
+[0;36m[SMOKE][0m   Status: BLOCKED
+[0;36m[SMOKE][0m   Eligibility: Current workflow is not yet deliverable.
+[0;36m[SMOKE][0m   Reason: WORKFLOW_NOT_DELIVERABLE - workstream is not completed: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Target repo: /private/tmp/dual-smoke-lifecycle-74839
+[0;36m[SMOKE][0m   Changed files: 0
+[0;36m[SMOKE][0m   Can merge: false
+[0;36m[SMOKE][0m   Can finalize: false
+[0;36m[SMOKE][0m Approving gate and continuing...
+[0;36m[SMOKE][0m   Step 1: gate.contract_review -> WAITING_FOR_HUMAN (resumed workflow)
+  [0;32mPASS[0m Reached next gate
+[0;36m[SMOKE][0m Gate round 2
+[0;36m[SMOKE][0m   Definition: agent-lifecycle-full@10
+[0;36m[SMOKE][0m   Status: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Active nodes: [node-gate-contract_review-008]
+[0;36m[SMOKE][0m   Open gates: [gate-node-gate-contract_review-008]
+[0;36m[SMOKE][0m   Active node definition: gate.contract_review
+[0;36m[SMOKE][0m   Active node status: WAITING
+[0;36m[SMOKE][0m   Active iteration: iter-001
+[0;36m[SMOKE][0m   Status: BLOCKED
+[0;36m[SMOKE][0m   Eligibility: Current workflow is not yet deliverable.
+[0;36m[SMOKE][0m   Reason: WORKFLOW_NOT_DELIVERABLE - workstream is not completed: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Target repo: /private/tmp/dual-smoke-lifecycle-74839
+[0;36m[SMOKE][0m   Changed files: 0
+[0;36m[SMOKE][0m   Can merge: false
+[0;36m[SMOKE][0m   Can finalize: false
+[0;36m[SMOKE][0m Approving gate and continuing...
+[0;36m[SMOKE][0m   Step 1: context.design_codex_arch_review -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 2: design.codex_arch_review -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 3: design.decision -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 4: gate.human_design_approval -> WAITING_FOR_HUMAN (resumed workflow)
+  [0;32mPASS[0m Reached next gate
+[0;36m[SMOKE][0m Gate round 3
+[0;36m[SMOKE][0m   Definition: agent-lifecycle-full@10
+[0;36m[SMOKE][0m   Status: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Active nodes: [node-gate-human_design_approval-013]
+[0;36m[SMOKE][0m   Open gates: [gate-node-gate-human_design_approval-013]
+[0;36m[SMOKE][0m   Active node definition: gate.human_design_approval
+[0;36m[SMOKE][0m   Active node status: WAITING
+[0;36m[SMOKE][0m   Active iteration: iter-001
+[0;36m[SMOKE][0m   Status: BLOCKED
+[0;36m[SMOKE][0m   Eligibility: Current workflow is not yet deliverable.
+[0;36m[SMOKE][0m   Reason: WORKFLOW_NOT_DELIVERABLE - workstream is not completed: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Target repo: /private/tmp/dual-smoke-lifecycle-74839
+[0;36m[SMOKE][0m   Changed files: 0
+[0;36m[SMOKE][0m   Can merge: false
+[0;36m[SMOKE][0m   Can finalize: false
+[0;36m[SMOKE][0m Approving gate and continuing...
+[0;36m[SMOKE][0m   Step 1: context.plan_codex_plan_review -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 2: plan.codex_plan_review -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 3: plan.decision -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 4: gate.human_plan_approval -> WAITING_FOR_HUMAN (resumed workflow)
+  [0;32mPASS[0m Reached next gate
+[0;36m[SMOKE][0m Gate round 4
+[0;36m[SMOKE][0m   Definition: agent-lifecycle-full@10
+[0;36m[SMOKE][0m   Status: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Active nodes: [node-gate-human_plan_approval-018]
+[0;36m[SMOKE][0m   Open gates: [gate-node-gate-human_plan_approval-018]
+[0;36m[SMOKE][0m   Active node definition: gate.human_plan_approval
+[0;36m[SMOKE][0m   Active node status: WAITING
+[0;36m[SMOKE][0m   Active iteration: iter-001
+[0;36m[SMOKE][0m   Status: BLOCKED
+[0;36m[SMOKE][0m   Eligibility: Current workflow is not yet deliverable.
+[0;36m[SMOKE][0m   Reason: WORKFLOW_NOT_DELIVERABLE - workstream is not completed: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Target repo: /private/tmp/dual-smoke-lifecycle-74839
+[0;36m[SMOKE][0m   Changed files: 0
+[0;36m[SMOKE][0m   Can merge: false
+[0;36m[SMOKE][0m   Can finalize: false
+[0;36m[SMOKE][0m Approving gate and continuing...
+[0;36m[SMOKE][0m   Step 1: implement.claude_implement -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 2: implement.claude_self_test_report -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 3: implement.self_test_decision -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 4: implement.artifact_validation -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 5: context.acceptance_codex_verifier_review -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 6: acceptance.codex_verifier_review -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 7: acceptance.decision -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 8: acceptance.generate_final_report -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 9: delivery.prepare_pr -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 10: gate.human_acceptance -> WAITING_FOR_HUMAN (resumed workflow)
+  [0;32mPASS[0m Reached next gate
+[0;36m[SMOKE][0m Gate round 5
+[0;36m[SMOKE][0m   Definition: agent-lifecycle-full@10
+[0;36m[SMOKE][0m   Status: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Active nodes: [node-gate-human_acceptance-029]
+[0;36m[SMOKE][0m   Open gates: [gate-node-gate-human_acceptance-029]
+[0;36m[SMOKE][0m   Active node definition: gate.human_acceptance
+[0;36m[SMOKE][0m   Active node status: WAITING
+[0;36m[SMOKE][0m   Active iteration: iter-001
+[0;36m[SMOKE][0m   Status: BLOCKED
+[0;36m[SMOKE][0m   Eligibility: Current workflow is not yet deliverable.
+[0;36m[SMOKE][0m   Reason: WORKFLOW_NOT_DELIVERABLE - workstream is not completed: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Target repo: /private/tmp/dual-smoke-lifecycle-74839
+[0;36m[SMOKE][0m   Changed files: 0
+[0;36m[SMOKE][0m   Can merge: false
+[0;36m[SMOKE][0m   Can finalize: false
+[0;36m[SMOKE][0m Approving gate and continuing...
+[0;36m[SMOKE][0m   Step 1: stage.generate_next_prompt -> RUNNING (resumed workflow)
+[0;36m[SMOKE][0m   Step 2: gate.human_next_stage_approval -> WAITING_FOR_HUMAN (resumed workflow)
+  [0;32mPASS[0m Reached next gate
+[0;36m[SMOKE][0m Gate round 6
+[0;36m[SMOKE][0m   Definition: agent-lifecycle-full@10
+[0;36m[SMOKE][0m   Status: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Active nodes: [node-gate-human_next_stage_approval-032]
+[0;36m[SMOKE][0m   Open gates: [gate-node-gate-human_next_stage_approval-032]
+[0;36m[SMOKE][0m   Active node definition: gate.human_next_stage_approval
+[0;36m[SMOKE][0m   Active node status: WAITING
+[0;36m[SMOKE][0m   Active iteration: iter-001
+[0;36m[SMOKE][0m   Status: BLOCKED
+[0;36m[SMOKE][0m   Eligibility: Current workflow is not yet deliverable.
+[0;36m[SMOKE][0m   Reason: WORKFLOW_NOT_DELIVERABLE - workstream is not completed: WAITING_FOR_HUMAN
+[0;36m[SMOKE][0m   Target repo: /private/tmp/dual-smoke-lifecycle-74839
+[0;36m[SMOKE][0m   Changed files: 0
+[0;36m[SMOKE][0m   Can merge: false
+[0;36m[SMOKE][0m   Can finalize: false
+[0;36m[SMOKE][0m Detected final stage gate: gate.human_next_stage_approval
+[0;36m[SMOKE][0m Completing final stage gate...
+[0;36m[SMOKE][0m   Picked up JAVA_TOOL_OPTIONS: -Duser.home=/tmp/dual-smoke-home-lifecycle-74839
+[0;36m[SMOKE][0m   Human gate completed
+[0;36m[SMOKE][0m   Workstream: ws-20260913T160342Z-TVXE
+[0;36m[SMOKE][0m   Status: workflow completed
+  [0;32mPASS[0m Workflow completed via review complete!
+
+[1m=== Phase 3: Post-run verification [lifecycle] ===[0m
+[0;36m[SMOKE][0m Final status:
+  Definition: agent-lifecycle-full@10
+  Status: COMPLETED
+  Active nodes: []
+  Open gates: []
+  Status: READY
+  Target repo: /private/tmp/dual-smoke-lifecycle-74839
+  Candidate: .agent/workstreams/ws-20260913T160342Z-TVXE/delivery/candidates/node-delivery-prepare_pr-028/candidate-4ae728ea818e155c8f3a0601c0375aa5d1c970f0266f54f262c7ef216b6c2e6f.json
+  Candidate SHA-256: 4ae728ea818e155c8f3a0601c0375aa5d1c970f0266f54f262c7ef216b6c2e6f
+  Changed files: 2
+  Can merge: true
+  Can finalize: false
+[0;36m[SMOKE][0m Checking events.jsonl...
+  [0;32mPASS[0m events.jsonl has 112 events
+  [0;32mPASS[0m   workflow_started: 1
+  [0;32mPASS[0m   node_routed: 31
+  [0;32mPASS[0m   workflow_completed: 1
+[0;36m[SMOKE][0m Checking node instances...
+  [0;32mPASS[0m Node instances: 32
+  [0;32mPASS[0m   node-acceptance-codex_verifier_review-025: COMPLETED
+  [0;32mPASS[0m   node-acceptance-decision-026: COMPLETED
+  [0;32mPASS[0m   node-acceptance-generate_final_report-027: COMPLETED
+  [0;32mPASS[0m   node-context-acceptance_codex_verifier_review-024: COMPLETED
+  [0;32mPASS[0m   node-context-design_codex_arch_review-010: COMPLETED
+  [0;32mPASS[0m   node-context-implement_claude-019: COMPLETED
+  [0;32mPASS[0m   node-context-intake_claude_brainstorm-001: COMPLETED
+  [0;32mPASS[0m   node-context-intake_codex_product_review-003: COMPLETED
+  [0;32mPASS[0m   node-context-plan_codex_plan_review-015: COMPLETED
+  [0;32mPASS[0m   node-contract-compile-007: COMPLETED
+  [0;32mPASS[0m   node-delivery-prepare_pr-028: COMPLETED
+  [0;32mPASS[0m   node-design-claude_design-009: COMPLETED
+  [0;32mPASS[0m   node-design-codex_arch_review-011: COMPLETED
+  [0;32mPASS[0m   node-design-decision-012: COMPLETED
+  [0;32mPASS[0m   node-gate-contract_review-008: COMPLETED
+  [0;32mPASS[0m   node-gate-human_acceptance-029: COMPLETED
+  [0;32mPASS[0m   node-gate-human_design_approval-013: COMPLETED
+  [0;32mPASS[0m   node-gate-human_next_stage_approval-032: COMPLETED
+  [0;32mPASS[0m   node-gate-human_plan_approval-018: COMPLETED
+  [0;32mPASS[0m   node-gate-human_requirement_review-006: COMPLETED
+  [0;32mPASS[0m   node-implement-artifact_validation-023: COMPLETED
+  [0;32mPASS[0m   node-implement-claude_implement-020: COMPLETED
+  [0;32mPASS[0m   node-implement-claude_self_test_report-021: COMPLETED
+  [0;32mPASS[0m   node-implement-self_test_decision-022: COMPLETED
+  [0;32mPASS[0m   node-intake-claude_brainstorm-002: COMPLETED
+  [0;32mPASS[0m   node-intake-codex_product_review-004: COMPLETED
+  [0;32mPASS[0m   node-intake-decision-005: COMPLETED
+  [0;32mPASS[0m   node-plan-claude_plan-014: COMPLETED
+  [0;32mPASS[0m   node-plan-codex_plan_review-016: COMPLETED
+  [0;32mPASS[0m   node-plan-decision-017: COMPLETED
+  [0;32mPASS[0m   node-stage-claude_handoff-030: COMPLETED
+  [0;32mPASS[0m   node-stage-generate_next_prompt-031: COMPLETED
+[0;36m[SMOKE][0m Checking agent runs...
+  [0;32mPASS[0m Agent runs: 11
+  [0;32mPASS[0m   run-1789315423259: run.json present
+  [0;32mPASS[0m   run-1789315423259: 4 prompt file(s)
+  [0;32mPASS[0m   run-1789315423259: 8 output file(s)
+  [0;32mPASS[0m   run-1789315433868: run.json present
+  [0;32mPASS[0m   run-1789315433868: 4 prompt file(s)
+  [0;32mPASS[0m   run-1789315433868: 8 output file(s)
+  [0;32mPASS[0m   run-1789315448415: run.json present
+  [0;32mPASS[0m   run-1789315448415: 4 prompt file(s)
+  [0;32mPASS[0m   run-1789315448415: 8 output file(s)
+  [0;32mPASS[0m   run-1789315459022: run.json present
+  [0;32mPASS[0m   run-1789315459022: 4 prompt file(s)
+  [0;32mPASS[0m   run-1789315459022: 8 output file(s)
+  [0;32mPASS[0m   run-1789315471551: run.json present
+  [0;32mPASS[0m   run-1789315471551: 4 prompt file(s)
+  [0;32mPASS[0m   run-1789315471551: 9 output file(s)
+  [0;32mPASS[0m   run-1789315482183: run.json present
+  [0;32mPASS[0m   run-1789315482183: 4 prompt file(s)
+  [0;32mPASS[0m   run-1789315482183: 8 output file(s)
+  [0;32mPASS[0m   run-1789315494720: run.json present
+  [0;32mPASS[0m   run-1789315494720: 4 prompt file(s)
+  [0;32mPASS[0m   run-1789315494720: 8 output file(s)
+  [0;32mPASS[0m   run-1789315505296: run.json present
+  [0;32mPASS[0m   run-1789315505296: 4 prompt file(s)
+  [0;32mPASS[0m   run-1789315505296: 8 output file(s)
+  [0;32mPASS[0m   run-1789315516067: run.json present
+  [0;32mPASS[0m   run-1789315516067: 4 prompt file(s)
+  [0;32mPASS[0m   run-1789315516067: 8 output file(s)
+  [0;32mPASS[0m   run-1789315528692: run.json present
+  [0;32mPASS[0m   run-1789315528692: 4 prompt file(s)
+  [0;32mPASS[0m   run-1789315528692: 8 output file(s)
+[0;36m[SMOKE][0m Checking workflow definition...
+  [0;32mPASS[0m Workflow: agent-lifecycle-full v10
+  [0;32mPASS[0m Defined nodes: 34
+[0;36m[SMOKE][0m Checking case-specific artifacts...
+  [0;32mPASS[0m Case artifact: reports/latest-final-report.md
+  [0;32mPASS[0m Case artifact: delivery/commit-message.txt
+  [0;32mPASS[0m Case artifact: delivery/pr-body.md
+  [0;32mPASS[0m Case artifact: artifacts/next-stage/next-stage-prompt.md
+[0;36m[SMOKE][0m Checking delivery artifacts...
+  [0;32mPASS[0m delivery/ directory exists
+  [0;32mPASS[0m Exists: delivery/commit-message.txt
+  [0;32mPASS[0m Exists: delivery/pr-body.md
+  [0;32mPASS[0m Delivery view: READY from accepted candidate
+[0;36m[SMOKE][0m Checking final report...
+  [0;32mPASS[0m Final report: 6907 bytes
+  [0;32mPASS[0m   Report contains 'User Request' section
+  [0;32mPASS[0m   Report contains 'Acceptance Summary' section
+  [0;32mPASS[0m   Report contains 'Developer Self-Test Summary' section
+  [0;32mPASS[0m   Report contains 'Git Evidence' section
+  [0;32mPASS[0m   Report contains 'Run Artifacts' section
+[0;36m[SMOKE][0m Checking worktree changes...
+  [0;32mPASS[0m Uncommitted changes in worktree:
+[0;36m[SMOKE][0m   M README.md
+[0;36m[SMOKE][0m   M main.py
+[0;36m[SMOKE][0m Checking next-stage prompt...
+  [0;32mPASS[0m Next-stage prompt: 1300 bytes
+
+[1m=== Controlled Lifecycle Assertions ===[0m
+  [0;32mPASS[0m main.py contains goodbye()
+  [0;32mPASS[0m README documents goodbye()
+  [0;32mPASS[0m Git evidence captures goodbye() diff
+  [0;32mPASS[0m handoff.json exists
+
+[1m=== Contract Lifecycle Assertions ===[0m
+  [0;32mPASS[0m task-contract.json exists
+  [0;32mPASS[0m TaskContract status: READY_FOR_REVIEW
+  [0;32mPASS[0m TaskContract scope entries use typed path/operation
+  [0;32mPASS[0m Intake sidecar carries task_contract_proposal schema v3
+  [0;32mPASS[0m task-contract.md exists
+  [0;32mPASS[0m Controlled TaskContract preserves exact typed scope
+
+[1m=== Phase 4: Events timeline ===[0m
+[0;36m[SMOKE][0m Full event log:
+Picked up JAVA_TOOL_OPTIONS: -Duser.home=/tmp/dual-smoke-home-lifecycle-74839
+evt-000004  2026-09-13T16:03:53.852536Z  node_routed  {"transition":{"transition_type":"normal","condition":"unconditional","required":true,"purpose":"Seed the first Claude intake run with repo-scope context."},"outcome":"completed","gate_id":"","node_instance_id":"node-intake-codex_product_review-004","to":"intake.codex_product_review","from":"context.intake_codex_product_review"}
+agent-task-agt-1789315433857-2c3613de  2026-09-13T16:03:53.857887Z  agent_task_queued  {"session":"codex-reviewer","agent":"codex","workflow_execution_id":"wfe-1789315433857-70004c75","agent_task_id":"agt-1789315433857-2c3613de","node_instance_id":"node-intake-codex_product_review-004","node":"intake.codex_product_review","handler_type":"acpx.agent_run"}
+agent-task-running-agt-1789315433857-2c3613de  2026-09-13T16:03:53.863103Z  agent_task_started  {"agent_task_id":"agt-1789315433857-2c3613de","node":"intake.codex_product_review","node_instance_id":"node-intake-codex_product_review-004","node_execution_id":"nxe-1789315433860-62a44fbe"}
+agent-task-succeeded-agt-1789315433857-2c3613de  2026-09-13T16:04:04.210511Z  agent_task_completed  {"error":"","agent_task_id":"agt-1789315433857-2c3613de","status":"SUCCEEDED","node":"intake.codex_product_review","node_instance_id":"node-intake-codex_product_review-004","node_execution_id":"nxe-1789315433860-62a44fbe"}
+evt-000005  2026-09-13T16:04:04.230721Z  node_routed  {"transition":{"transition_type":"normal","condition":"unconditional","required":true,"purpose":"Seed the first Claude intake run with repo-scope context."},"outcome":"completed","gate_id":"","node_instance_id":"node-intake-decision-005","to":"intake.decision","from":"intake.codex_product_review"}
+agent-task-agt-1789315444237-6b60e3e2  2026-09-13T16:04:04.237638Z  agent_task_queued  {"session":"","agent":"","workflow_execution_id":"wfe-1789315444236-14629daa","agent_task_id":"agt-1789315444237-6b60e3e2","node_instance_id":"node-intake-decision-005","node":"intake.decision","handler_type":"review.decision"}
+agent-task-running-agt-1789315444237-6b60e3e2  2026-09-13T16:04:04.245454Z  agent_task_started  {"agent_task_id":"agt-1789315444237-6b60e3e2","node":"intake.decision","node_instance_id":"node-intake-decision-005","node_execution_id":"nxe-1789315444241-cdebe7e3"}
+agent-task-succeeded-agt-1789315444237-6b60e3e2  2026-09-13T16:04:04.254531Z  agent_task_completed  {"error":"","agent_task_id":"agt-1789315444237-6b60e3e2","status":"SUCCEEDED","node":"intake.decision","node_instance_id":"node-intake-decision-005","node_execution_id":"nxe-1789315444241-cdebe7e3"}
+evt-000006  2026-09-13T16:04:04.273489Z  node_routed  {"source_node_instance_id":"node-intake-decision-005","from":"intake.decision","gate_id":"gate-node-gate-human_requirement_review-006","node_instance_id":"node-gate-human_requirement_review-006","transition":{"transition_type":"normal","condition":"unconditional","required":true,"purpose":"Seed the first Claude intake run with repo-scope context."},"outcome":"READY_FOR_PRODUCT_REVIEW","to":"gate.human_requirement_review"}
+evt-000007  2026-09-13T16:04:06.179981Z  node_routed  {"to":"contract.compile","node_instance_id":"node-contract-compile-007","gate_id":"","outcome":"approved","transition":{"required":true,"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context."},"from":"gate.human_requirement_review"}
+agent-task-agt-1789315446251-a977a8b8  2026-09-13T16:04:06.254261Z  agent_task_queued  {"handler_type":"contract.compile","node":"contract.compile","node_instance_id":"node-contract-compile-007","agent_task_id":"agt-1789315446251-a977a8b8","workflow_execution_id":"wfe-1789315446248-d68686f0","agent":"","session":""}
+agent-task-running-agt-1789315446251-a977a8b8  2026-09-13T16:04:06.274695Z  agent_task_started  {"node_execution_id":"nxe-1789315446264-3cbd0817","node_instance_id":"node-contract-compile-007","node":"contract.compile","agent_task_id":"agt-1789315446251-a977a8b8"}
+agent-task-succeeded-agt-1789315446251-a977a8b8  2026-09-13T16:04:06.319114Z  agent_task_completed  {"node_execution_id":"nxe-1789315446264-3cbd0817","node_instance_id":"node-contract-compile-007","node":"contract.compile","status":"SUCCEEDED","agent_task_id":"agt-1789315446251-a977a8b8","error":""}
+domain-node-contract-compile-007  2026-09-13T16:04:06.330049Z  contract_compilation_completed  {"handler_type":"contract.compile","node_id":"contract.compile","node_instance_id":"node-contract-compile-007","contract_id":"tc-ws-20260913T160342Z-TVXE-v1","contract_status":"READY_FOR_REVIEW"}
+evt-000008  2026-09-13T16:04:06.342030Z  node_routed  {"outcome":"completed","transition":{"required":true,"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context."},"node_instance_id":"node-gate-contract_review-008","gate_id":"gate-node-gate-contract_review-008","from":"contract.compile","source_node_instance_id":"node-contract-compile-007","to":"gate.contract_review"}
+evt-000009  2026-09-13T16:04:08.309346Z  node_routed  {"transition":{"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context.","required":true},"from":"gate.contract_review","to":"design.claude_design","node_instance_id":"node-design-claude_design-009","gate_id":"","outcome":"approved"}
+agent-task-agt-1789315448378-b2814593  2026-09-13T16:04:08.380653Z  agent_task_queued  {"agent_task_id":"agt-1789315448378-b2814593","workflow_execution_id":"wfe-1789315448375-105191bf","agent":"claude","session":"claude-main","handler_type":"acpx.agent_run","node":"design.claude_design","node_instance_id":"node-design-claude_design-009"}
+agent-task-running-agt-1789315448378-b2814593  2026-09-13T16:04:08.401601Z  agent_task_started  {"agent_task_id":"agt-1789315448378-b2814593","node_execution_id":"nxe-1789315448391-6a02781f","node_instance_id":"node-design-claude_design-009","node":"design.claude_design"}
+agent-task-succeeded-agt-1789315448378-b2814593  2026-09-13T16:04:18.895768Z  agent_task_completed  {"status":"SUCCEEDED","agent_task_id":"agt-1789315448378-b2814593","error":"","node_execution_id":"nxe-1789315448391-6a02781f","node_instance_id":"node-design-claude_design-009","node":"design.claude_design"}
+evt-000010  2026-09-13T16:04:18.920169Z  node_routed  {"transition":{"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context.","required":true},"from":"design.claude_design","to":"context.design_codex_arch_review","node_instance_id":"node-context-design_codex_arch_review-010","gate_id":"","outcome":"completed"}
+agent-task-agt-1789315458929-52c9b70b  2026-09-13T16:04:18.930171Z  agent_task_queued  {"agent_task_id":"agt-1789315458929-52c9b70b","workflow_execution_id":"wfe-1789315458929-92a8c1f3","agent":"","session":"","handler_type":"context.build_package","node":"context.design_codex_arch_review","node_instance_id":"node-context-design_codex_arch_review-010"}
+agent-task-running-agt-1789315458929-52c9b70b  2026-09-13T16:04:18.942208Z  agent_task_started  {"agent_task_id":"agt-1789315458929-52c9b70b","node_execution_id":"nxe-1789315458937-4b3c3667","node_instance_id":"node-context-design_codex_arch_review-010","node":"context.design_codex_arch_review"}
+agent-task-succeeded-agt-1789315458929-52c9b70b  2026-09-13T16:04:18.984630Z  agent_task_completed  {"status":"SUCCEEDED","agent_task_id":"agt-1789315458929-52c9b70b","error":"","node_execution_id":"nxe-1789315458937-4b3c3667","node_instance_id":"node-context-design_codex_arch_review-010","node":"context.design_codex_arch_review"}
+evt-000011  2026-09-13T16:04:19.002404Z  node_routed  {"transition":{"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context.","required":true},"from":"context.design_codex_arch_review","to":"design.codex_arch_review","node_instance_id":"node-design-codex_arch_review-011","gate_id":"","outcome":"completed"}
+agent-task-agt-1789315459007-befc9f56  2026-09-13T16:04:19.007830Z  agent_task_queued  {"agent_task_id":"agt-1789315459007-befc9f56","workflow_execution_id":"wfe-1789315459007-816bff4a","agent":"codex","session":"codex-reviewer","handler_type":"acpx.agent_run","node":"design.codex_arch_review","node_instance_id":"node-design-codex_arch_review-011"}
+agent-task-running-agt-1789315459007-befc9f56  2026-09-13T16:04:19.015240Z  agent_task_started  {"agent_task_id":"agt-1789315459007-befc9f56","node_execution_id":"nxe-1789315459010-2e19882a","node_instance_id":"node-design-codex_arch_review-011","node":"design.codex_arch_review"}
+agent-task-succeeded-agt-1789315459007-befc9f56  2026-09-13T16:04:29.404275Z  agent_task_completed  {"status":"SUCCEEDED","agent_task_id":"agt-1789315459007-befc9f56","error":"","node_execution_id":"nxe-1789315459010-2e19882a","node_instance_id":"node-design-codex_arch_review-011","node":"design.codex_arch_review"}
+evt-000012  2026-09-13T16:04:29.425063Z  node_routed  {"transition":{"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context.","required":true},"from":"design.codex_arch_review","to":"design.decision","node_instance_id":"node-design-decision-012","gate_id":"","outcome":"completed"}
+agent-task-agt-1789315469431-6aaa98b1  2026-09-13T16:04:29.432002Z  agent_task_queued  {"agent_task_id":"agt-1789315469431-6aaa98b1","workflow_execution_id":"wfe-1789315469431-c23b1139","agent":"","session":"","handler_type":"review.decision","node":"design.decision","node_instance_id":"node-design-decision-012"}
+agent-task-running-agt-1789315469431-6aaa98b1  2026-09-13T16:04:29.440043Z  agent_task_started  {"agent_task_id":"agt-1789315469431-6aaa98b1","node_execution_id":"nxe-1789315469435-d70b135b","node_instance_id":"node-design-decision-012","node":"design.decision"}
+agent-task-succeeded-agt-1789315469431-6aaa98b1  2026-09-13T16:04:29.460968Z  agent_task_completed  {"status":"SUCCEEDED","agent_task_id":"agt-1789315469431-6aaa98b1","error":"","node_execution_id":"nxe-1789315469435-d70b135b","node_instance_id":"node-design-decision-012","node":"design.decision"}
+evt-000013  2026-09-13T16:04:29.475264Z  node_routed  {"gate_id":"gate-node-gate-human_design_approval-013","from":"design.decision","source_node_instance_id":"node-design-decision-012","to":"gate.human_design_approval","outcome":"READY_FOR_ARCH_REVIEW","transition":{"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context.","required":true},"node_instance_id":"node-gate-human_design_approval-013"}
+evt-000014  2026-09-13T16:04:31.431378Z  node_routed  {"to":"plan.claude_plan","node_instance_id":"node-plan-claude_plan-014","gate_id":"","outcome":"approved","transition":{"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context.","required":true},"from":"gate.human_design_approval"}
+agent-task-agt-1789315471505-b521db48  2026-09-13T16:04:31.507598Z  agent_task_queued  {"handler_type":"acpx.agent_run","node":"plan.claude_plan","node_instance_id":"node-plan-claude_plan-014","agent_task_id":"agt-1789315471505-b521db48","workflow_execution_id":"wfe-1789315471502-860e7a07","agent":"claude","session":"claude-main"}
+agent-task-running-agt-1789315471505-b521db48  2026-09-13T16:04:31.533110Z  agent_task_started  {"node_instance_id":"node-plan-claude_plan-014","node":"plan.claude_plan","agent_task_id":"agt-1789315471505-b521db48","node_execution_id":"nxe-1789315471520-e6d0a05d"}
+agent-task-succeeded-agt-1789315471505-b521db48  2026-09-13T16:04:42.065807Z  agent_task_completed  {"node_execution_id":"nxe-1789315471520-e6d0a05d","node_instance_id":"node-plan-claude_plan-014","node":"plan.claude_plan","status":"SUCCEEDED","agent_task_id":"agt-1789315471505-b521db48","error":""}
+evt-000015  2026-09-13T16:04:42.088878Z  node_routed  {"to":"context.plan_codex_plan_review","node_instance_id":"node-context-plan_codex_plan_review-015","gate_id":"","outcome":"completed","transition":{"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context.","required":true},"from":"plan.claude_plan"}
+agent-task-agt-1789315482099-2d05c821  2026-09-13T16:04:42.099567Z  agent_task_queued  {"handler_type":"context.build_package","node":"context.plan_codex_plan_review","node_instance_id":"node-context-plan_codex_plan_review-015","agent_task_id":"agt-1789315482099-2d05c821","workflow_execution_id":"wfe-1789315482098-ff0d536c","agent":"","session":""}
+agent-task-running-agt-1789315482099-2d05c821  2026-09-13T16:04:42.111289Z  agent_task_started  {"node_instance_id":"node-context-plan_codex_plan_review-015","node":"context.plan_codex_plan_review","agent_task_id":"agt-1789315482099-2d05c821","node_execution_id":"nxe-1789315482105-668bbccc"}
+agent-task-succeeded-agt-1789315482099-2d05c821  2026-09-13T16:04:42.143703Z  agent_task_completed  {"node_execution_id":"nxe-1789315482105-668bbccc","node_instance_id":"node-context-plan_codex_plan_review-015","node":"context.plan_codex_plan_review","status":"SUCCEEDED","agent_task_id":"agt-1789315482099-2d05c821","error":""}
+evt-000016  2026-09-13T16:04:42.160687Z  node_routed  {"to":"plan.codex_plan_review","node_instance_id":"node-plan-codex_plan_review-016","gate_id":"","outcome":"completed","transition":{"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context.","required":true},"from":"context.plan_codex_plan_review"}
+agent-task-agt-1789315482166-c1bdafc3  2026-09-13T16:04:42.166648Z  agent_task_queued  {"handler_type":"acpx.agent_run","node":"plan.codex_plan_review","node_instance_id":"node-plan-codex_plan_review-016","agent_task_id":"agt-1789315482166-c1bdafc3","workflow_execution_id":"wfe-1789315482166-c123cba5","agent":"codex","session":"codex-reviewer"}
+agent-task-running-agt-1789315482166-c1bdafc3  2026-09-13T16:04:42.174810Z  agent_task_started  {"node_instance_id":"node-plan-codex_plan_review-016","node":"plan.codex_plan_review","agent_task_id":"agt-1789315482166-c1bdafc3","node_execution_id":"nxe-1789315482170-f46700a8"}
+agent-task-succeeded-agt-1789315482166-c1bdafc3  2026-09-13T16:04:52.554200Z  agent_task_completed  {"node_execution_id":"nxe-1789315482170-f46700a8","node_instance_id":"node-plan-codex_plan_review-016","node":"plan.codex_plan_review","status":"SUCCEEDED","agent_task_id":"agt-1789315482166-c1bdafc3","error":""}
+evt-000017  2026-09-13T16:04:52.572246Z  node_routed  {"to":"plan.decision","node_instance_id":"node-plan-decision-017","gate_id":"","outcome":"completed","transition":{"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context.","required":true},"from":"plan.codex_plan_review"}
+agent-task-agt-1789315492579-4f3d1eec  2026-09-13T16:04:52.579270Z  agent_task_queued  {"handler_type":"review.decision","node":"plan.decision","node_instance_id":"node-plan-decision-017","agent_task_id":"agt-1789315492579-4f3d1eec","workflow_execution_id":"wfe-1789315492578-7e26b7f5","agent":"","session":""}
+agent-task-running-agt-1789315492579-4f3d1eec  2026-09-13T16:04:52.589964Z  agent_task_started  {"node_instance_id":"node-plan-decision-017","node":"plan.decision","agent_task_id":"agt-1789315492579-4f3d1eec","node_execution_id":"nxe-1789315492584-f167a7c6"}
+agent-task-succeeded-agt-1789315492579-4f3d1eec  2026-09-13T16:04:52.604489Z  agent_task_completed  {"node_execution_id":"nxe-1789315492584-f167a7c6","node_instance_id":"node-plan-decision-017","node":"plan.decision","status":"SUCCEEDED","agent_task_id":"agt-1789315492579-4f3d1eec","error":""}
+evt-000018  2026-09-13T16:04:52.626071Z  node_routed  {"transition":{"condition":"unconditional","transition_type":"normal","purpose":"Seed the first Claude intake run with repo-scope context.","required":true},"node_instance_id":"node-gate-human_plan_approval-018","gate_id":"gate-node-gate-human_plan_approval-018","from":"plan.decision","source_node_instance_id":"node-plan-decision-017","to":"gate.human_plan_approval","outcome":"READY_TO_IMPLEMENT"}
+evt-000019  2026-09-13T16:04:54.467222Z  node_routed  {"outcome":"approved","gate_id":"","node_instance_id":"node-context-implement_claude-019","to":"context.implement_claude","from":"gate.human_plan_approval","transition":{"required":true,"purpose":"Seed the first Claude intake run with repo-scope context.","transition_type":"normal","condition":"unconditional"}}
+agent-task-agt-1789315494542-f23969fd  2026-09-13T16:04:54.543900Z  agent_task_queued  {"node":"context.implement_claude","handler_type":"context.build_package","session":"","agent":"","workflow_execution_id":"wfe-1789315494539-e8beb3c5","agent_task_id":"agt-1789315494542-f23969fd","node_instance_id":"node-context-implement_claude-019"}
+agent-task-running-agt-1789315494542-f23969fd  2026-09-13T16:04:54.571316Z  agent_task_started  {"node_instance_id":"node-context-implement_claude-019","node_execution_id":"nxe-1789315494558-ec7016d5","agent_task_id":"agt-1789315494542-f23969fd","node":"context.implement_claude"}
+agent-task-succeeded-agt-1789315494542-f23969fd  2026-09-13T16:04:54.660293Z  agent_task_completed  {"node":"context.implement_claude","node_instance_id":"node-context-implement_claude-019","node_execution_id":"nxe-1789315494558-ec7016d5","error":"","agent_task_id":"agt-1789315494542-f23969fd","status":"SUCCEEDED"}
+evt-000020  2026-09-13T16:04:54.684261Z  node_routed  {"outcome":"completed","gate_id":"","node_instance_id":"node-implement-claude_implement-020","to":"implement.claude_implement","from":"context.implement_claude","transition":{"required":true,"purpose":"Seed the first Claude intake run with repo-scope context.","transition_type":"normal","condition":"unconditional"}}
+agent-task-agt-1789315494694-39ef3828  2026-09-13T16:04:54.695102Z  agent_task_queued  {"node":"implement.claude_implement","handler_type":"acpx.agent_run","session":"claude-main","agent":"claude","workflow_execution_id":"wfe-1789315494694-9a205993","agent_task_id":"agt-1789315494694-39ef3828","node_instance_id":"node-implement-claude_implement-020"}
+agent-task-running-agt-1789315494694-39ef3828  2026-09-13T16:04:54.706220Z  agent_task_started  {"node_instance_id":"node-implement-claude_implement-020","node_execution_id":"nxe-1789315494700-9d60f258","agent_task_id":"agt-1789315494694-39ef3828","node":"implement.claude_implement"}
+agent-task-succeeded-agt-1789315494694-39ef3828  2026-09-13T16:05:05.235734Z  agent_task_completed  {"node":"implement.claude_implement","node_instance_id":"node-implement-claude_implement-020","node_execution_id":"nxe-1789315494700-9d60f258","error":"","agent_task_id":"agt-1789315494694-39ef3828","status":"SUCCEEDED"}
+evt-000021  2026-09-13T16:05:05.260914Z  node_routed  {"outcome":"completed","gate_id":"","node_instance_id":"node-implement-claude_self_test_report-021","to":"implement.claude_self_test_report","from":"implement.claude_implement","transition":{"required":true,"purpose":"Seed the first Claude intake run with repo-scope context.","transition_type":"normal","condition":"unconditional"}}
+agent-task-agt-1789315505270-357d7d82  2026-09-13T16:05:05.270369Z  agent_task_queued  {"node":"implement.claude_self_test_report","handler_type":"acpx.agent_run","session":"claude-main","agent":"claude","workflow_execution_id":"wfe-1789315505269-624a4ff9","agent_task_id":"agt-1789315505270-357d7d82","node_instance_id":"node-implement-claude_self_test_report-021"}
+agent-task-running-agt-1789315505270-357d7d82  2026-09-13T16:05:05.282276Z  agent_task_started  {"node_instance_id":"node-implement-claude_self_test_report-021","node_execution_id":"nxe-1789315505276-3d12a1d5","agent_task_id":"agt-1789315505270-357d7d82","node":"implement.claude_self_test_report"}
+agent-task-succeeded-agt-1789315505270-357d7d82  2026-09-13T16:05:15.786600Z  agent_task_completed  {"node":"implement.claude_self_test_report","node_instance_id":"node-implement-claude_self_test_report-021","node_execution_id":"nxe-1789315505276-3d12a1d5","error":"","agent_task_id":"agt-1789315505270-357d7d82","status":"SUCCEEDED"}
+evt-000022  2026-09-13T16:05:15.807068Z  node_routed  {"outcome":"completed","gate_id":"","node_instance_id":"node-implement-self_test_decision-022","to":"implement.self_test_decision","from":"implement.claude_self_test_report","transition":{"required":true,"purpose":"Seed the first Claude intake run with repo-scope context.","transition_type":"normal","condition":"unconditional"}}
+agent-task-agt-1789315515814-daf4da77  2026-09-13T16:05:15.814452Z  agent_task_queued  {"node":"implement.self_test_decision","handler_type":"review.decision","session":"","agent":"","workflow_execution_id":"wfe-1789315515813-1b6a7925","agent_task_id":"agt-1789315515814-daf4da77","node_instance_id":"node-implement-self_test_decision-022"}
+agent-task-running-agt-1789315515814-daf4da77  2026-09-13T16:05:15.824605Z  agent_task_started  {"node_instance_id":"node-implement-self_test_decision-022","node_execution_id":"nxe-1789315515819-8714cb0f","agent_task_id":"agt-1789315515814-daf4da77","node":"implement.self_test_decision"}
+agent-task-succeeded-agt-1789315515814-daf4da77  2026-09-13T16:05:15.836720Z  agent_task_completed  {"node":"implement.self_test_decision","node_instance_id":"node-implement-self_test_decision-022","node_execution_id":"nxe-1789315515819-8714cb0f","error":"","agent_task_id":"agt-1789315515814-daf4da77","status":"SUCCEEDED"}
+evt-000023  2026-09-13T16:05:15.853184Z  node_routed  {"outcome":"SELF_TEST_COMPLETE","gate_id":"","node_instance_id":"node-implement-artifact_validation-023","to":"implement.artifact_validation","from":"implement.self_test_decision","transition":{"required":true,"purpose":"Only verified complete self-test evidence may enter artifact validation.","transition_type":"normal","condition":"unconditional"}}
+agent-task-agt-1789315515859-c12af4f5  2026-09-13T16:05:15.860048Z  agent_task_queued  {"node":"implement.artifact_validation","handler_type":"artifact.validate","session":"","agent":"","workflow_execution_id":"wfe-1789315515859-24786d3a","agent_task_id":"agt-1789315515859-c12af4f5","node_instance_id":"node-implement-artifact_validation-023"}
+agent-task-running-agt-1789315515859-c12af4f5  2026-09-13T16:05:15.870002Z  agent_task_started  {"node_instance_id":"node-implement-artifact_validation-023","node_execution_id":"nxe-1789315515864-d88155c4","agent_task_id":"agt-1789315515859-c12af4f5","node":"implement.artifact_validation"}
+agent-task-succeeded-agt-1789315515859-c12af4f5  2026-09-13T16:05:15.959531Z  agent_task_completed  {"node":"implement.artifact_validation","node_instance_id":"node-implement-artifact_validation-023","node_execution_id":"nxe-1789315515864-d88155c4","error":"","agent_task_id":"agt-1789315515859-c12af4f5","status":"SUCCEEDED"}
+evt-000024  2026-09-13T16:05:15.979075Z  node_routed  {"outcome":"completed","gate_id":"","node_instance_id":"node-context-acceptance_codex_verifier_review-024","to":"context.acceptance_codex_verifier_review","from":"implement.artifact_validation","transition":{"required":true,"purpose":"Only verified complete self-test evidence may enter artifact validation.","transition_type":"normal","condition":"unconditional"}}
+agent-task-agt-1789315515986-9da0d49a  2026-09-13T16:05:15.986256Z  agent_task_queued  {"node":"context.acceptance_codex_verifier_review","handler_type":"context.build_package","session":"","agent":"","workflow_execution_id":"wfe-1789315515985-2cc2dfe2","agent_task_id":"agt-1789315515986-9da0d49a","node_instance_id":"node-context-acceptance_codex_verifier_review-024"}
+agent-task-running-agt-1789315515986-9da0d49a  2026-09-13T16:05:15.996588Z  agent_task_started  {"node_instance_id":"node-context-acceptance_codex_verifier_review-024","node_execution_id":"nxe-1789315515991-05653e8c","agent_task_id":"agt-1789315515986-9da0d49a","node":"context.acceptance_codex_verifier_review"}
+agent-task-succeeded-agt-1789315515986-9da0d49a  2026-09-13T16:05:16.021344Z  agent_task_completed  {"node":"context.acceptance_codex_verifier_review","node_instance_id":"node-context-acceptance_codex_verifier_review-024","node_execution_id":"nxe-1789315515991-05653e8c","error":"","agent_task_id":"agt-1789315515986-9da0d49a","status":"SUCCEEDED"}
+evt-000025  2026-09-13T16:05:16.037105Z  node_routed  {"outcome":"completed","gate_id":"","node_instance_id":"node-acceptance-codex_verifier_review-025","to":"acceptance.codex_verifier_review","from":"context.acceptance_codex_verifier_review","transition":{"required":true,"purpose":"Only verified complete self-test evidence may enter artifact validation.","transition_type":"normal","condition":"unconditional"}}
+agent-task-agt-1789315516043-b6ee53d3  2026-09-13T16:05:16.044097Z  agent_task_queued  {"node":"acceptance.codex_verifier_review","handler_type":"acpx.agent_run","session":"codex-reviewer","agent":"codex","workflow_execution_id":"wfe-1789315516043-183e43fa","agent_task_id":"agt-1789315516043-b6ee53d3","node_instance_id":"node-acceptance-codex_verifier_review-025"}
+agent-task-running-agt-1789315516043-b6ee53d3  2026-09-13T16:05:16.057005Z  agent_task_started  {"node_instance_id":"node-acceptance-codex_verifier_review-025","node_execution_id":"nxe-1789315516048-b71d9f56","agent_task_id":"agt-1789315516043-b6ee53d3","node":"acceptance.codex_verifier_review"}
+agent-task-succeeded-agt-1789315516043-b6ee53d3  2026-09-13T16:05:26.440750Z  agent_task_completed  {"node":"acceptance.codex_verifier_review","node_instance_id":"node-acceptance-codex_verifier_review-025","node_execution_id":"nxe-1789315516048-b71d9f56","error":"","agent_task_id":"agt-1789315516043-b6ee53d3","status":"SUCCEEDED"}
+evt-000026  2026-09-13T16:05:26.469588Z  node_routed  {"outcome":"completed","gate_id":"","node_instance_id":"node-acceptance-decision-026","to":"acceptance.decision","from":"acceptance.codex_verifier_review","transition":{"required":true,"purpose":"Only verified complete self-test evidence may enter artifact validation.","transition_type":"normal","condition":"unconditional"}}
+agent-task-agt-1789315526478-55cda9d9  2026-09-13T16:05:26.479069Z  agent_task_queued  {"node":"acceptance.decision","handler_type":"review.decision","session":"","agent":"","workflow_execution_id":"wfe-1789315526478-49699462","agent_task_id":"agt-1789315526478-55cda9d9","node_instance_id":"node-acceptance-decision-026"}
+agent-task-running-agt-1789315526478-55cda9d9  2026-09-13T16:05:26.491454Z  agent_task_started  {"node_instance_id":"node-acceptance-decision-026","node_execution_id":"nxe-1789315526485-5912fd5b","agent_task_id":"agt-1789315526478-55cda9d9","node":"acceptance.decision"}
+agent-task-succeeded-agt-1789315526478-55cda9d9  2026-09-13T16:05:26.505777Z  agent_task_completed  {"node":"acceptance.decision","node_instance_id":"node-acceptance-decision-026","node_execution_id":"nxe-1789315526485-5912fd5b","error":"","agent_task_id":"agt-1789315526478-55cda9d9","status":"SUCCEEDED"}
+evt-000027  2026-09-13T16:05:26.522881Z  node_routed  {"outcome":"ACCEPT","gate_id":"","node_instance_id":"node-acceptance-generate_final_report-027","to":"acceptance.generate_final_report","from":"acceptance.decision","transition":{"required":true,"purpose":"Only verified complete self-test evidence may enter artifact validation.","transition_type":"normal","condition":"unconditional"}}
+agent-task-agt-1789315526529-ccbdbd18  2026-09-13T16:05:26.529993Z  agent_task_queued  {"node":"acceptance.generate_final_report","handler_type":"report.generate_final","session":"","agent":"","workflow_execution_id":"wfe-1789315526529-3b56c6b9","agent_task_id":"agt-1789315526529-ccbdbd18","node_instance_id":"node-acceptance-generate_final_report-027"}
+agent-task-running-agt-1789315526529-ccbdbd18  2026-09-13T16:05:26.540630Z  agent_task_started  {"node_instance_id":"node-acceptance-generate_final_report-027","node_execution_id":"nxe-1789315526535-8342c6f4","agent_task_id":"agt-1789315526529-ccbdbd18","node":"acceptance.generate_final_report"}
+agent-task-succeeded-agt-1789315526529-ccbdbd18  2026-09-13T16:05:26.563194Z  agent_task_completed  {"node":"acceptance.generate_final_report","node_instance_id":"node-acceptance-generate_final_report-027","node_execution_id":"nxe-1789315526535-8342c6f4","error":"","agent_task_id":"agt-1789315526529-ccbdbd18","status":"SUCCEEDED"}
+evt-000028  2026-09-13T16:05:26.578890Z  node_routed  {"outcome":"completed","gate_id":"","node_instance_id":"node-delivery-prepare_pr-028","to":"delivery.prepare_pr","from":"acceptance.generate_final_report","transition":{"required":true,"purpose":"Only verified complete self-test evidence may enter artifact validation.","transition_type":"normal","condition":"unconditional"}}
+agent-task-agt-1789315526585-a6610601  2026-09-13T16:05:26.586113Z  agent_task_queued  {"node":"delivery.prepare_pr","handler_type":"delivery.prepare_pr","session":"","agent":"","workflow_execution_id":"wfe-1789315526585-828ad017","agent_task_id":"agt-1789315526585-a6610601","node_instance_id":"node-delivery-prepare_pr-028"}
+agent-task-running-agt-1789315526585-a6610601  2026-09-13T16:05:26.596524Z  agent_task_started  {"node_instance_id":"node-delivery-prepare_pr-028","node_execution_id":"nxe-1789315526591-01a9f534","agent_task_id":"agt-1789315526585-a6610601","node":"delivery.prepare_pr"}
+agent-task-succeeded-agt-1789315526585-a6610601  2026-09-13T16:05:26.655881Z  agent_task_completed  {"node":"delivery.prepare_pr","node_instance_id":"node-delivery-prepare_pr-028","node_execution_id":"nxe-1789315526591-01a9f534","error":"","agent_task_id":"agt-1789315526585-a6610601","status":"SUCCEEDED"}
+evt-000029  2026-09-13T16:05:26.673646Z  node_routed  {"node_instance_id":"node-gate-human_acceptance-029","transition":{"required":true,"purpose":"Only verified complete self-test evidence may enter artifact validation.","transition_type":"normal","condition":"unconditional"},"outcome":"completed","to":"gate.human_acceptance","source_node_instance_id":"node-delivery-prepare_pr-028","from":"delivery.prepare_pr","gate_id":"gate-node-gate-human_acceptance-029"}
+evt-000030  2026-09-13T16:05:28.540713Z  node_routed  {"transition":{"transition_type":"normal","purpose":"Only verified complete self-test evidence may enter artifact validation.","required":true,"condition":"unconditional"},"from":"gate.human_acceptance","to":"stage.claude_handoff","node_instance_id":"node-stage-claude_handoff-030","gate_id":"","outcome":"approved"}
+agent-task-agt-1789315528630-615be6d6  2026-09-13T16:05:28.632893Z  agent_task_queued  {"workflow_execution_id":"wfe-1789315528627-7b87a1d9","agent":"claude","session":"claude-main","handler_type":"acpx.agent_run","node":"stage.claude_handoff","node_instance_id":"node-stage-claude_handoff-030","agent_task_id":"agt-1789315528630-615be6d6"}
+agent-task-running-agt-1789315528630-615be6d6  2026-09-13T16:05:28.669942Z  agent_task_started  {"node_execution_id":"nxe-1789315528654-864946d4","node_instance_id":"node-stage-claude_handoff-030","node":"stage.claude_handoff","agent_task_id":"agt-1789315528630-615be6d6"}
+agent-task-succeeded-agt-1789315528630-615be6d6  2026-09-13T16:05:39.218152Z  agent_task_completed  {"status":"SUCCEEDED","agent_task_id":"agt-1789315528630-615be6d6","error":"","node_execution_id":"nxe-1789315528654-864946d4","node_instance_id":"node-stage-claude_handoff-030","node":"stage.claude_handoff"}
+evt-000031  2026-09-13T16:05:39.253453Z  node_routed  {"transition":{"transition_type":"normal","purpose":"Only verified complete self-test evidence may enter artifact validation.","required":true,"condition":"unconditional"},"from":"stage.claude_handoff","to":"stage.generate_next_prompt","node_instance_id":"node-stage-generate_next_prompt-031","gate_id":"","outcome":"completed"}
+agent-task-agt-1789315539265-f3ddaa56  2026-09-13T16:05:39.265911Z  agent_task_queued  {"workflow_execution_id":"wfe-1789315539265-808a60e9","agent":"","session":"","handler_type":"prompt.generate_next_stage","node":"stage.generate_next_prompt","node_instance_id":"node-stage-generate_next_prompt-031","agent_task_id":"agt-1789315539265-f3ddaa56"}
+agent-task-running-agt-1789315539265-f3ddaa56  2026-09-13T16:05:39.279874Z  agent_task_started  {"node_execution_id":"nxe-1789315539272-dc10146a","node_instance_id":"node-stage-generate_next_prompt-031","node":"stage.generate_next_prompt","agent_task_id":"agt-1789315539265-f3ddaa56"}
+agent-task-succeeded-agt-1789315539265-f3ddaa56  2026-09-13T16:05:39.300354Z  agent_task_completed  {"status":"SUCCEEDED","agent_task_id":"agt-1789315539265-f3ddaa56","error":"","node_execution_id":"nxe-1789315539272-dc10146a","node_instance_id":"node-stage-generate_next_prompt-031","node":"stage.generate_next_prompt"}
+evt-000032  2026-09-13T16:05:39.323456Z  node_routed  {"from":"stage.generate_next_prompt","source_node_instance_id":"node-stage-generate_next_prompt-031","to":"gate.human_next_stage_approval","outcome":"completed","transition":{"transition_type":"normal","purpose":"Only verified complete self-test evidence may enter artifact validation.","required":true,"condition":"unconditional"},"node_instance_id":"node-gate-human_next_stage_approval-032","gate_id":"gate-node-gate-human_next_stage_approval-032"}
+evt-000033  2026-09-13T16:05:41.031737Z  workflow_completed  {"last_node":"gate.human_next_stage_approval","outcome":"complete"}
+
+[1m=== Smoke Test Report [lifecycle] ===[0m
+
+  Case:         lifecycle
+  Variant:      full (default)
+  Fixture:      /tmp/dual-smoke-lifecycle-74839
+  Workspace:    /private/tmp/dual-smoke-lifecycle-74839-agent-runs/ws-20260913T160342Z-TVXE
+  Ledger:       /private/tmp/dual-smoke-lifecycle-74839-agent-runs/ws-20260913T160342Z-TVXE/.agent/workstreams/ws-20260913T160342Z-TVXE
+  Final status: COMPLETED
+  Gate rounds:  6
+  Events:       112
+  Node count:   32
+  Run count:    11
+  Warnings:     0
+
+  [0;32m[1mRESULT: PASS[0m
+
+  Inspect: dualctl status --workdir /private/tmp/dual-smoke-lifecycle-74839-agent-runs/ws-20260913T160342Z-TVXE ws-20260913T160342Z-TVXE
+  Events:  dualctl events --workdir /private/tmp/dual-smoke-lifecycle-74839-agent-runs/ws-20260913T160342Z-TVXE ws-20260913T160342Z-TVXE
+

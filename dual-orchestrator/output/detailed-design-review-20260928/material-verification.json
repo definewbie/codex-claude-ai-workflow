@@ -1,0 +1,26 @@
+{
+  "verifiedAt": "2026-09-28T02:00:09.034211+00:00",
+  "head": "3362eb421514e75fdc4332f570df5bf274b3725e",
+  "baselineFileCount": 1319,
+  "changedExistingFiles": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "unchangedExistingFiles": 1316,
+  "documentHashes": {
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "ac6649ba133efc83507ce1e5c05a19609af087d6a9b1c390dd60060d71b127f6",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "fbd4e22eacb6cdfa8cfbe783788c61ff7409e311087da1ec052f6c24fda48960",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "a7ee8ad7ebb5ec08a5b9690c6d6efca4a209f82e5820910edd1e5cd180b689bc",
+    "dual-orchestrator/output/detailed-design-review-20260928/d04-feasibility.md": "706168e99ad04d4ac7c9ff73a5ac4273bf1730f3014df62c9a339682690a0973"
+  },
+  "sourceAnchorsUnchanged": 15,
+  "tablesChecked": 31,
+  "tableErrors": [],
+  "missingLinks": [],
+  "diffCheckExitCode": 0,
+  "testsRun": false,
+  "providerInvoked": false,
+  "implementationAuthorized": false,
+  "review": "Author documentation/static self-check only; review increments not independently approved; D04 direction pending; D01-D10 not frozen."
+}

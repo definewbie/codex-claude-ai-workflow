@@ -36,7 +36,7 @@ class WorkstreamActionServiceTest {
     @Test
     void scopeRevisionApiCannotBypassTheLedgerGateGuard() throws Exception {
         var paths = createWorkstream("ws-scope-request", gateDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var definition = ledger.loadDefinition(paths);
         ledger.completeAndRoute(paths, definition, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst(),
                 NodeStatus.COMPLETED, "completed", List.of(), Map.of());
@@ -57,7 +57,7 @@ class WorkstreamActionServiceTest {
                 new NodeDefinition("collect", NodeKind.TASK, "acpx.agent_run", Map.of("expected_artifact", "self_test_report"))),
                 List.of(new EdgeDefinition("start", "completed", "repair"), new EdgeDefinition("repair", "collect_evidence", "collect")));
         var paths = createWorkstream("ws-api-collect", definition);
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         ledger.completeAndRoute(paths, definition, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst(),
                 NodeStatus.COMPLETED, "completed", List.of(), Map.of());
         var before = ledger.loadCurrent(paths);
@@ -75,7 +75,7 @@ class WorkstreamActionServiceTest {
                 : node).toList();
         var paths = createWorkstream("ws-action-request", new WorkflowDefinition(base.workflowId(), base.version(),
                 base.entryNodeId(), nodes, base.edges()));
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         ledger.completeAndRoute(paths, ledger.loadDefinition(paths), ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst(),
                 NodeStatus.COMPLETED, "completed", List.of(), Map.of());
         var before = ledger.loadCurrent(paths);
@@ -85,7 +85,12 @@ class WorkstreamActionServiceTest {
         var request = new dev.dual.ledger.file.HumanActionRequest("r1", before.activeNodeInstanceIds().getFirst(),
                 List.of(), "Device evidence", "No available device");
         assertEquals("review.request_action", service.requestAction(tempDir, "ws-action-request", request).get("action"));
-        assertEquals(before, ledger.loadCurrent(paths));
+        var after = ledger.loadCurrent(paths);
+        assertEquals(before.status(), after.status());
+        assertEquals(before.activeNodeInstanceIds(), after.activeNodeInstanceIds());
+        assertEquals(before.openGateIds(), after.openGateIds());
+        assertEquals(before.lastEventId(), after.lastEventId());
+        assertEquals(before.commitSequence() + 1, after.commitSequence());
         assertEquals(1, ((List<?>) ledger.loadNode(paths, request.gateNodeInstanceId()).result().get("action_requests")).size());
     }
 
@@ -97,7 +102,7 @@ class WorkstreamActionServiceTest {
                 new WorkflowRuntimeResult("ws-run", WorkflowStatus.RUNNING, "middle", "step one"),
                 new WorkflowRuntimeResult("ws-run", WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused")
         ));
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> results.removeFirst());
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command -> results.removeFirst());
 
         var response = service.resume(tempDir, "ws-run", 5);
 
@@ -112,12 +117,12 @@ class WorkstreamActionServiceTest {
     @Test
     void approveResolvesCurrentHumanGate() throws Exception {
         var paths = createWorkstream("ws-approve", gateDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var definition = ledger.loadDefinition(paths);
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
 
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"));
         var response = service.approve(tempDir, "ws-approve", "approved by test", false, 1);
 
@@ -129,7 +134,7 @@ class WorkstreamActionServiceTest {
     @Test
     void apiPublicWebSearchApprovalUsesTheLedgerHumanAuthorityBoundary() throws Exception {
         var paths = createWorkstream("ws-websearch", simpleDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var definition = ledger.loadDefinition(paths);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
@@ -154,7 +159,7 @@ class WorkstreamActionServiceTest {
                                 "retryPolicy", "MANUAL_ONLY",
                                 "operatorMessage", "WebSearch requires approval."
                         )));
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.RUNNING, "first", "unused"));
 
         assertThrows(Exception.class,
@@ -173,29 +178,35 @@ class WorkstreamActionServiceTest {
         var definition = new WorkflowDefinition("custom", 1, "verify.tests", List.of(
                 new NodeDefinition("verify.tests", NodeKind.TASK, "acpx.agent_run", Map.of("agent", "claude", "permission_profile", "implement"))), List.of());
         var paths = createWorkstream("ws-network", definition);
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var node = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
         ledger.completeAndRoute(paths, definition, node, NodeStatus.FAILED, "failed", List.of(), Map.of());
-        var before = Files.readString(paths.workflowCurrentJson());
+        var before = ledger.loadCurrent(paths);
         var service = new WorkstreamActionService(ledger, () -> command -> { throw new AssertionError("approval must not start execution"); });
         var result = service.networkAuthority(tempDir, "ws-network", "verify.tests", List.of("packages.example.org"), "approved test prerequisites", false);
         assertEquals(true, result.get("canCancel"));
-        assertEquals(before, Files.readString(paths.workflowCurrentJson()));
+        assertEquals(before.status(), ledger.loadCurrent(paths).status());
+        assertEquals(before.activeNodeInstanceIds(), ledger.loadCurrent(paths).activeNodeInstanceIds());
+        assertEquals(before.openGateIds(), ledger.loadCurrent(paths).openGateIds());
+        assertEquals(before.lastEventId(), ledger.loadCurrent(paths).lastEventId());
         assertThrows(Exception.class, () -> service.networkAuthority(tempDir, "ws-network", "verify.tests", List.of("*.example.org"), "invalid", false));
         var cancelled = service.networkAuthority(tempDir, "ws-network", null, null, null, true);
         assertEquals(false, cancelled.get("canCancel"));
-        assertEquals(before, Files.readString(paths.workflowCurrentJson()));
+        assertEquals(before.status(), ledger.loadCurrent(paths).status());
+        assertEquals(before.activeNodeInstanceIds(), ledger.loadCurrent(paths).activeNodeInstanceIds());
+        assertEquals(before.openGateIds(), ledger.loadCurrent(paths).openGateIds());
+        assertEquals(before.lastEventId(), ledger.loadCurrent(paths).lastEventId());
     }
 
     @Test
     void approveCompletesTerminalHumanGateWithoutApprovedEdge() throws Exception {
         var paths = createWorkstream("ws-terminal-approve", completeGateDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var definition = ledger.loadDefinition(paths);
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
 
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"));
         var response = service.approve(tempDir, "ws-terminal-approve", "approved by test", false, 1);
 
@@ -208,12 +219,12 @@ class WorkstreamActionServiceTest {
     @Test
     void approveAndRunReturnsCompletedWithoutResumingTerminalHumanGate() throws Exception {
         var paths = createWorkstream("ws-terminal-approve-run", completeGateDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var definition = ledger.loadDefinition(paths);
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
 
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command -> {
             throw new AssertionError("terminal approval must not resume a completed workflow");
         });
         var response = service.approve(tempDir, "ws-terminal-approve-run", "approved by test", true, 1);
@@ -229,12 +240,12 @@ class WorkstreamActionServiceTest {
     @Test
     void completeResolvesCurrentHumanGateAndCompletesWorkflow() throws Exception {
         var paths = createWorkstream("ws-complete", completeGateDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var definition = ledger.loadDefinition(paths);
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
 
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"));
         var response = service.complete(tempDir, "ws-complete", "done");
 
@@ -247,12 +258,12 @@ class WorkstreamActionServiceTest {
     @Test
     void resumeRejectsCompletedWorkflow() throws Exception {
         var paths = createWorkstream("ws-completed-boundary", simpleDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var definition = ledger.loadDefinition(paths);
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
 
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.RUNNING, "should-not-run", "unused"));
 
         var error = assertThrows(IllegalStateException.class,
@@ -264,12 +275,12 @@ class WorkstreamActionServiceTest {
     @Test
     void recoverStaleRunningMovesActiveNodeToRecovery() throws Exception {
         var paths = createWorkstream("ws-stale-api", simpleDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.markRunning(paths, entry, Long.MAX_VALUE);
         var runJson = writeDeadRun(paths);
 
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"));
         var response = service.recoverStaleRunning(tempDir, "ws-stale-api", "process disappeared");
 
@@ -280,20 +291,20 @@ class WorkstreamActionServiceTest {
         var node = ledger.loadNode(paths, entry);
         assertEquals(NodeStatus.FAILED, node.status());
         assertEquals("STALE_RUNNING_PROCESS", node.result().get("reason"));
-        assertEquals("INTERRUPTED", MAPPER.readTree(runJson.toFile())
-                .path("executionOutcome").path("status").asText());
+        assertFalse(MAPPER.readTree(runJson.toFile()).has("executionOutcome"),
+                "mutable PID metadata is not a program-observed external result");
     }
 
 
     @Test
     void retryMarksActiveFailedNodeReady() throws Exception {
         var paths = createWorkstream("ws-retry", simpleDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var definition = ledger.loadDefinition(paths);
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(paths, definition, entry, NodeStatus.FAILED, "failed", List.of(), Map.of("reason", "test"));
 
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"));
         var response = service.retry(tempDir, "ws-retry", "try again");
 
@@ -310,13 +321,13 @@ class WorkstreamActionServiceTest {
         var definition = new WorkflowDefinition("retry-diagnostic", 1, "author",
                 List.of(new NodeDefinition("author", NodeKind.TASK, "acpx.agent_run", Map.of())), List.of());
         var paths = createWorkstream("ws-api-retry-diagnostic", definition);
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var id = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
         ledger.completeAndRoute(paths, definition, id, NodeStatus.FAILED, "AGENT_OUTPUT_CONTRACT_VIOLATION", List.of(),
                 Map.of("reason", "AGENT_OUTPUT_CONTRACT_VIOLATION", "parse_error",
                         Map.of("code", "SCOPE_INVALID", "message", "Outside scope", "details", Map.of())));
         var before = ledger.loadNode(paths, id);
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command -> {
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command -> {
             throw new AssertionError("retry must not itself launch a provider");
         });
         service.retry(tempDir, paths.workstreamId().value(), "Retry the same task");
@@ -332,13 +343,13 @@ class WorkstreamActionServiceTest {
     @Test
     void closesAcpxSessionsWhenActionReachesCompleted() throws Exception {
         var paths = createWorkstream("ws-close-completed", completeGateDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var definition = ledger.loadDefinition(paths);
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
 
         var closed = new ArrayList<String>();
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"),
                 recordingCloser(closed));
 
@@ -351,7 +362,7 @@ class WorkstreamActionServiceTest {
     void doesNotCloseSessionsWhenWorkflowNotTerminal() throws Exception {
         createWorkstream("ws-not-terminal", simpleDefinition());
         var closed = new ArrayList<String>();
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.WAITING_FOR_HUMAN, "gate.review", "paused"),
                 recordingCloser(closed));
 
@@ -363,12 +374,12 @@ class WorkstreamActionServiceTest {
     @Test
     void sessionCloseFailureDoesNotChangeWorkflowTerminalStatus() throws Exception {
         var paths = createWorkstream("ws-close-failure", completeGateDefinition());
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var definition = ledger.loadDefinition(paths);
         var entry = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.completeAndRoute(paths, definition, entry, NodeStatus.COMPLETED, "completed", List.of(), Map.of());
 
-        var service = new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+        var service = new WorkstreamActionService(ServerLedgerFactory.create(), () -> command ->
                 new WorkflowRuntimeResult(command.workstreamId(), WorkflowStatus.COMPLETED, "", "unused"),
                 throwingCloser());
 
@@ -394,7 +405,7 @@ class WorkstreamActionServiceTest {
     private WorkstreamPaths createWorkstream(String workstreamId, WorkflowDefinition definition) throws Exception {
         var paths = new WorkstreamPaths(tempDir, new DualId(workstreamId));
         Files.createDirectories(paths.workstreamDir());
-        new WorkflowFileLedger().initialize(paths, "wf-" + workstreamId, definition);
+        ServerTestLedger.initialize(ServerLedgerFactory.create(), paths, "wf-" + workstreamId, definition);
         return paths;
     }
 

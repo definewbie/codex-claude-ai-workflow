@@ -1,0 +1,7 @@
+{
+  "exit": 0,
+  "command": "rtk proxy mvn -o -DskipTests package",
+  "log_sha256": "3b526dd48cf22396c609084aee5cc0e75a9cac34a340a3e4ad770982cfdfc1b9",
+  "test_execution": "SKIPPED; use prior single clean reactor only",
+  "source_inputs_unchanged": true
+}

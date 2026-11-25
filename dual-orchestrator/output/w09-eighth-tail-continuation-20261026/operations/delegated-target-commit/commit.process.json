@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/opt/homebrew/Cellar/rtk/0.42.3/bin/rtk",
+    "proxy",
+    "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+    "commit",
+    "--file",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/commit-message.txt"
+  ],
+  "cwd": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target",
+  "purpose": "Explicitly user-delegated commit of already approved exact staged candidate",
+  "started_at": "2026-10-26T11:03:58.494886+08:00"
+}

@@ -1,0 +1,435 @@
+{
+  "date": "2026-11-01",
+  "timezone": "Asia/Shanghai",
+  "scope": "Documentation finalization and static source inspection; no production/test changes or execution",
+  "documents": {
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md": "38ef6575613369d6ec59bbc93913a134a95e57793906144e4885d31e16fad856",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md": "5a48308e2f4e0bc171ba07ea521b9d53433cc99e3678a672c845512df4370de7",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/minimal-change-plan.zh-CN.md": "374da30ae32023c5181d19d68e1382f3989cdd2e7e00e0d1588d977117cae102"
+  },
+  "linkedInputSha256": {
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/supplement-recheck.json": "726482ce64fea8fd1ac210e6c284f51b8ecc6511e1ee9795e69c697cad7979a9",
+    "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1789003988271/outputs/acceptance-codex-review.json": "bcd5f368351b260e1458f0761f54f2f00353e27c4251f897baaf8e3df032c75e",
+    "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl": "5b889c7776a9622b9cc5ace82946fa4bfb950d0ba0e2aa57901625ce8ad35e92",
+    "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/run.json": "41acbf81b8fca25fc16c0a0353684e248ffe3802d41776602ecf3133b8a8f13c",
+    "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/prompts/intake-codex-product-review.contract-correction.md": "187e7c978f1516b44d1cff6414a4814940fbacc4977bb20f5d4de23e30667968",
+    "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/runs/run-1788344261888/run.json": "22597c95941f36d6b5f70cc4b91de72740086a9350d2cff8c6ae9ea1203e3c5a",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md": "5a48308e2f4e0bc171ba07ea521b9d53433cc99e3678a672c845512df4370de7",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java": "48824b0df2f7fe01c281ab659cb2a7bb8082bc9b9526bac95ede17dbb420e567",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java": "92fd8928b600b0a282473a5f133c641f3134ee6f1bf8bbac5ffa3673f149294b",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java": "bdd7cdb2525494246276f231f634d8434f46d4c3de7a3d100a375e1bf45050b9",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json": "4375c8074896871bb00970b0ba8946bb4344d098800dbe060038c112a6897c0e",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java": "7d21d43972267957faf0f3a2bc04b966c6e7239405716368748102a70c418aa0",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/test/java/dev/dual/core/execution/AgentExecutionOutcomeResolverTest.java": "3472375298610c65c6084cad5d6e5e01d4520908e5191c6e0944a3080e63497a",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java": "27ac6688a1816dc9c8b12f30fc6bc07853a1520e5a909b1dc3317e88704dcacc",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java": "e3352a0689d07fa9911b958186b61a02560f95ecd9f478b579f8d75c6db02ea7",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java": "ff6f992a29525994f7733656c111bd7cf3bb159b5a2835d62e070090cdf89db7",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/NativePermissionSequenceTest.java": "bc6d1be71e3cbe94b7b6b774c38b43f8764dbaa384a1f9a06043671c182b66bf",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageReaderTest.java": "82c928783d1241f4638e9ec8b422831df09d44637c750e6aa1d89446941d5a14",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageWireCompletenessTest.java": "cdb41c474874d386189e86cb6743aaa2f3182a9390f0eb9900dc0e61e3dac0da",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/NativePermissionRequests.java": "aa90ceac8955c914355478a2a4b53e9fd9e4e44ed6c7a3fe01e58669b5014fe5",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java": "acd5242f826c23e1037a6634dc3c819b9d2673d330bee0e064a16b0a1b96c1c1",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java": "500026b45a9e16706d0ad0fa0c5c831d9e38af8a4b2da1f34004941c737c4fc2",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java": "bc89b78be8466c6b58b16635e6099a081bb6e94338b0794085ee7cf6ebf6b6ff",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentRunCommitProtocolTest.java": "5c0aa93171e0b79d4a0e7ddd947fc1a29e68f4d444e16b27b4c68b02a941404a",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExecutionRecoveryAdjudication.java": "16bf25a45d3929b1e1b8b50a60e23c826841c899e15f487d19fa11fb469c0ee2",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/RecordedExecutionRecovery.java": "70bf8f42178cd48cc8819a645e4fa258100e1df18e51e041e9a640dc09f70635",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/test/java/dev/dual/core/provider/ProviderBillingCsvCalibrationTest.java": "590558151efbfe469993f25b3b51d0158b208c808a69e61782a3f3492371feb0",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/CalibrationCommandTest.java": "24185c2643b8331ec83f939a84ee0a4ff2c13414d5a84d99d23b1d8f337f64c8",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/main/java/dev/dual/core/provider/ProviderCostAttribution.java": "d5ebc256694719cd78c89fe7d1ef6f3bc9e4f70e9a202769a7592de6282f3747",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/docs/design/mainline-stability-and-token-governance-plan.zh-CN.md": "7b0259e9cb8dcaf2cd835790c82e82de6c3963afba588c9dbf346f893df283a7",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/FrozenRuntimeIdentity.java": "b2f8769687420954eef19d62f97eb25f3b329615561655edb4fda5c2b3997450",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/historical-replay.json": "66f788daf1b572b8ac447dbe4f9161eef8d0cb8c64790f6885a8b95b39d46be7",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md": "38ef6575613369d6ec59bbc93913a134a95e57793906144e4885d31e16fad856",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/census.json": "09ed02840968551eff529fd6a7212c97525080e05e60251ee6bc6af2dc503479",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/source-sha256.json": "085c7f69f53bb4d562216e38124f06c6e18741b8fcc4fcdfa6338c26b2639c52",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/recompute.py": "983542ad9e6df7e4c4dc655f30b2fd4e624b15e6d6bbca2228898d25589ee1ea",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java": "ffc5370455cd32b768833bf9606c44083f9fc0fce7a38bbf72ea6d4e5a6a8d85",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java": "9804c76d0364b388cc763e9579ae1448001b946457bc07980816dabf3a949dda",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java": "248cb1cb41bea137a1eb0c557df1904ddaa533e1702e5e2487cbdbf079b7702d",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728580831/prompts/intake-claude-brainstorm.md": "b2da7c760c33bdc0a34f47125721192da9f4ee7a675e8a7e273b336848b91cb4",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728580831/outputs/intake-claude-brainstorm.json": "119d0b4e3ffef6f19e4047afe8383c5783e741ef8314137f3ce61aaeaeeda5ab",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/nodes/node-intake-claude_brainstorm-006.json": "8ec8f5a5518ef0ba01b35f90e75b0d736f38bde8c2c9ffbe0fe02031459c1e24",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractRevisionBinding.java": "893ee67c22919794f8a57e3e0e5f7cb36ed9e07a29fa48f33c466489b39d4f9b",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.plan.json": "e7bffc3bedbea71f685cc606341dbb07b0422a46094280d5c3c9917157822ced",
+    "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K/.agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.transcript.log": "f79edb28cb2e03a09c839405dc96ed250930c9719729291e51a2965f24f29ca6",
+    "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1788997906573/outputs/implement-claude-self-test.transcript.log": "ee9948307e21a6931422bf91b9cdcbffa1db7c913554309edb8dcd4ceb492760",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl": "477d8c0305988e19664e94c1250bbd9a40639a3d4e058eba308ba135806497fc",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/economics.json": "1df3373ec9758c0aca06394f825807f34761e193f91cf4ccf808a85f0fd45092",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/discipline-history.json": "266fc3b4121e20b72a5ef1bc5eb14e728bd03b51d14874edd4f34a4bc7fb2285",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/discipline-worktree.diff": "89a2a1702d2dd0dfb554ae8054057c1a9e014d891e7eca41d8ea9127010def53",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/invariants-results.json": "cf40189f02dcee637908918c15eaf2b454bab0cbdc3c9db57f14bd89eb5a99c8",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/external-grader.json": "0e70477aca27be1d591e86b844683a3412a3955183157a32c42d16e96296499f",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/examined-io-and-current-source-sha256.json": "58d25f4169dd2e2360a8530c70b1dac991999ff073b6728498d3df8585502d2e",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/audit-integrity.json": "f9511a699e3cfd48c4fe9221b1ec1d24737c9e4ac01b35ba653e5e34c0b536b7",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/claim-check.json": "217e60d2d34932152ed0df79e13844af2f19886732b99c269d7a50bd3419631d"
+  },
+  "originalCensusInputs": 3674,
+  "supplementInputs": 188,
+  "uniqueOriginalInputsChecked": 3692,
+  "changedOrMissingOriginalInputs": [],
+  "localLinkCount": 58,
+  "brokenLinksOrInvalidLines": [],
+  "sourceInspectionChecks": {
+    "enum_diagnostic_still_generic": true,
+    "enum_specific_parse_kind_absent": true,
+    "typed_resolver_auto_allowed_absent": true,
+    "runtime_requires_auto_allowed": true,
+    "request_reader_no_latest_fallback": true
+  },
+  "links": [
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "supplement-recheck.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/supplement-recheck.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../../../okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1789003988271/outputs/acceptance-codex-review.json:27",
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1789003988271/outputs/acceptance-codex-review.json",
+      "line": 27
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../../../okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl:318",
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/events.jsonl",
+      "line": 318
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../../../okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/run.json:218",
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/run.json",
+      "line": 218
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../../../okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/prompts/intake-codex-product-review.contract-correction.md:3",
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260903T225544Z-HHZL/.agent/workstreams/ws-20260903T225544Z-HHZL/runs/run-1788476621271/prompts/intake-codex-product-review.contract-correction.md",
+      "line": 3
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../../../okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/runs/run-1788344261888/run.json:120",
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260829T122452Z-9BZG/.agent/workstreams/ws-20260829T122452Z-9BZG/runs/run-1788344261888/run.json",
+      "line": 120
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "report.zh-CN.md",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java:144",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java",
+      "line": 144
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java:64",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java",
+      "line": 64
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java:70",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java",
+      "line": 70
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json:924",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json",
+      "line": 924
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java:43",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java",
+      "line": 43
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-core/src/test/java/dev/dual/core/execution/AgentExecutionOutcomeResolverTest.java",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/test/java/dev/dual/core/execution/AgentExecutionOutcomeResolverTest.java",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java:46",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java",
+      "line": 46
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java:289",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java",
+      "line": 289
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/test/java/dev/dual/runtime/handler/NativePermissionSequenceTest.java",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/NativePermissionSequenceTest.java",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageReaderTest.java:273",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageReaderTest.java",
+      "line": 273
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageWireCompletenessTest.java",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageWireCompletenessTest.java",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/main/java/dev/dual/runtime/handler/NativePermissionRequests.java:59",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/NativePermissionRequests.java",
+      "line": 59
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java:9",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java",
+      "line": 9
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java:25",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionOutcomeResolver.java",
+      "line": 25
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java:456",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+      "line": 456
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/test/java/dev/dual/runtime/handler/AgentRunCommitProtocolTest.java:123",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentRunCommitProtocolTest.java",
+      "line": 123
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/main/java/dev/dual/runtime/handler/ExecutionRecoveryAdjudication.java:48",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ExecutionRecoveryAdjudication.java",
+      "line": 48
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/main/java/dev/dual/runtime/RecordedExecutionRecovery.java:51",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/RecordedExecutionRecovery.java",
+      "line": 51
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-core/src/test/java/dev/dual/core/provider/ProviderBillingCsvCalibrationTest.java",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/test/java/dev/dual/core/provider/ProviderBillingCsvCalibrationTest.java",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-cli/src/test/java/dev/dual/cli/CalibrationCommandTest.java",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/CalibrationCommandTest.java",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-core/src/main/java/dev/dual/core/provider/ProviderCostAttribution.java:13",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/main/java/dev/dual/core/provider/ProviderCostAttribution.java",
+      "line": 13
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../docs/design/mainline-stability-and-token-governance-plan.zh-CN.md:127",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/docs/design/mainline-stability-and-token-governance-plan.zh-CN.md",
+      "line": 127
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "../../dual-runtime/src/main/java/dev/dual/runtime/FrozenRuntimeIdentity.java:17",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/FrozenRuntimeIdentity.java",
+      "line": 17
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "historical-replay.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/historical-replay.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "target": "finalization-check.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/finalization-check.json",
+      "line": null,
+      "generatedEvidence": true
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "final-verdict-and-acceptance.zh-CN.md",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "census.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/census.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "source-sha256.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/source-sha256.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "recompute.py",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/recompute.py",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java:82",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java",
+      "line": 82
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java:406",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+      "line": 406
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java:133",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java",
+      "line": 133
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728580831/prompts/intake-claude-brainstorm.md:295",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728580831/prompts/intake-claude-brainstorm.md",
+      "line": 295
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728580831/outputs/intake-claude-brainstorm.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728580831/outputs/intake-claude-brainstorm.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/nodes/node-intake-claude_brainstorm-006.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/nodes/node-intake-claude_brainstorm-006.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractRevisionBinding.java:10",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractRevisionBinding.java",
+      "line": 10
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.plan.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree/.agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.plan.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "historical-replay.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/historical-replay.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K/.agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.transcript.log",
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T113923Z-FZ8K/.agent/workstreams/ws-20260909T113923Z-FZ8K/runs/run-1788956758608/outputs/implement-claude.transcript.log",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1788997906573/outputs/implement-claude-self-test.transcript.log",
+      "path": "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260909T151234Z-BXWV/.agent/workstreams/ws-20260909T151234Z-BXWV/runs/run-1788997906573/outputs/implement-claude-self-test.transcript.log",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "economics.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/economics.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "discipline-history.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/discipline-history.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "discipline-worktree.diff",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/discipline-worktree.diff",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "invariants-results.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/invariants-results.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "external-grader.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/external-grader.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "examined-io-and-current-source-sha256.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/examined-io-and-current-source-sha256.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/report.zh-CN.md",
+      "target": "audit-integrity.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/audit-integrity.json",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/minimal-change-plan.zh-CN.md",
+      "target": "final-verdict-and-acceptance.zh-CN.md",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/final-verdict-and-acceptance.zh-CN.md",
+      "line": null
+    },
+    {
+      "document": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/minimal-change-plan.zh-CN.md",
+      "target": "claim-check.json",
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/closure-root-cause-audit-20261029/claim-check.json",
+      "line": null
+    }
+  ],
+  "testsThisTurn": "NOT_RUN",
+  "providerCallsThisTurn": 0,
+  "externalBenchmarkThisTurn": "NOT_RUN",
+  "independentReviewThisTurn": "NOT_PERFORMED"
+}

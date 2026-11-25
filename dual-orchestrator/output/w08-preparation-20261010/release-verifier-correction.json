@@ -1,0 +1,7 @@
+{
+  "classification": "VERIFIER_AUTHOR_ERROR",
+  "reason": "rglob *.js encountered punycode.js directory; release manifest generation failed after artifact checks passed",
+  "correction": "Used actual dist absolute path explicitly declared by measured wrapper; no new package resolver, source change or test rerun",
+  "artifact_checks_preserved": true,
+  "release_manifest_completed": true
+}

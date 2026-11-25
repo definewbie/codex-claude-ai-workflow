@@ -1,0 +1,71 @@
+{
+  "exit_code": 0,
+  "source_unchanged": true,
+  "source_mismatches": [],
+  "modules": {
+    "dual-cli": {
+      "tests": 94,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 26
+    },
+    "dual-server": {
+      "tests": 78,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 13
+    },
+    "dual-flow-liteflow": {
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 4
+    },
+    "dual-ledger-file": {
+      "tests": 153,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 23
+    },
+    "dual-adapter-acpx": {
+      "tests": 432,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 34
+    },
+    "dual-runtime": {
+      "tests": 718,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 80
+    },
+    "dual-adapter-git": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 2
+    },
+    "dual-core": {
+      "tests": 126,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 16
+    }
+  },
+  "total": {
+    "tests": 1625,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": 198
+  },
+  "note": "Valid whole clean result for final2 snapshot; not final current-source proof after subsequent legal absolute-path and unresolved-permission fixes"
+}

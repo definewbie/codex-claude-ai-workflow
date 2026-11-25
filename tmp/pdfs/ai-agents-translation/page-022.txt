@@ -1,0 +1,30 @@
+Chapter 1. From LLMs to
+Agents: The Foundational
+Blueprint
+
+
+
+One of the defining traits of human intelligence is the way we combine
+inner reasoning with concrete actions, and this maps surprisingly well to
+how large language model (LLM) agents operate when paired with tools.
+Take the process of building a coding project. As a human developer you
+begin with a prompt, the client’s request. First comes reasoning, where you
+sketch out a plan of how to approach it. Then comes action, such as
+searching for documentation, writing functions, or debugging errors.
+Feedback enters the loop when tests fail, a peer review points out gaps, or
+the client tests the application. Each step is not static but iterative, with
+reasoning adapting to new insights and actions changing in response.
+
+The same applies to a single LLM agent. Given a task, the agent first
+reasons about what’s missing or what step comes next, then takes actions by
+calling tools to retrieve data, run code, or check results. Like a developer’s
+feedback loop, the environment provides signals such as errors, gaps, or
+confirmations that guide the next iteration. External support, such as code
+libraries or documentation, maps to tools like retrieval systems or web
+searches, which refine the output beyond the model’s own raw ability.
+
+An LLM agent is a large language model embedded in a loop of reasoning,
+acting, and feedback, where it can call external tools and adapt its behavior
+based on results. Unlike a standalone LLM, which is limited to static text
+generation, an agent operates as a decision-making entity within a
+workflow. Figure 1-1 illustrates this flow.

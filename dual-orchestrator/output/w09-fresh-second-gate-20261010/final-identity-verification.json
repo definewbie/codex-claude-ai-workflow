@@ -1,0 +1,23 @@
+{
+  "sources_unchanged": true,
+  "source_count": 654,
+  "jars_unchanged": true,
+  "native_wrapper_dist_unchanged": true,
+  "configs_unchanged": true,
+  "first_case_indexed_files_unchanged": true,
+  "first_case_indexed_count": 77,
+  "git_observations": {
+    "target": {
+      "head": "c71273fe0ca9960aa24de708c696979c9a7dea2a",
+      "tree": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+      "status": ""
+    },
+    "workspace": {
+      "head": "c71273fe0ca9960aa24de708c696979c9a7dea2a",
+      "tree": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+      "status": ""
+    }
+  },
+  "stopped_prefix_files": 92,
+  "checked_at": "2026-10-10T17:11:29.557746+08:00"
+}

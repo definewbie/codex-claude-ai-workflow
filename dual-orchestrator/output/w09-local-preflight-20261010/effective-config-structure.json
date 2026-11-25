@@ -1,0 +1,19 @@
+{
+  "top_level_keys": [
+    "defaultAgent",
+    "defaultPermissions",
+    "nonInteractivePermissions",
+    "authPolicy",
+    "ttl",
+    "timeout",
+    "queueMaxDepth",
+    "format",
+    "agents",
+    "authMethods",
+    "disableExec",
+    "paths",
+    "loaded"
+  ],
+  "raw_response_sha256": "04ccb71c9abc3149a1b8814c7583b92766f8e2c3077be17e54930c959cecb9ad",
+  "raw_config_not_persisted": true
+}

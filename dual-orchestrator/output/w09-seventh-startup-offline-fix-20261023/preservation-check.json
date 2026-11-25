@@ -1,0 +1,15 @@
+{
+  "checked_at": "2026-10-23T03:15:46.500128+08:00",
+  "before_inputs": "ALL_UNCHANGED",
+  "seventh_stopped_snapshot_files": 77,
+  "seventh_stopped_snapshot": "ALL_UNCHANGED",
+  "frozen_source_inputs": 659,
+  "frozen_jars": "MATCH",
+  "candidate_source_parse": "PASS",
+  "seventh_gate_result": "INVALID_UNCHANGED",
+  "stop_required": "UNCHANGED",
+  "native_provider_calls": 0,
+  "new_cases": 0,
+  "product_changes": false,
+  "whole_mainline_proven": false
+}

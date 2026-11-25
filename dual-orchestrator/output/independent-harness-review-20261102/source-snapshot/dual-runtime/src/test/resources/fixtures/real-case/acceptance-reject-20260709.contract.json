@@ -1,0 +1,87 @@
+{
+  "artifact_type": "agent_output_contract",
+  "node_id": "acceptance.codex_verifier_review",
+  "handler_type": "acpx.agent_run",
+  "decision": "REJECT",
+  "summary": "实现方向和范围基本符合计划，但缺少实际 pytest 与前端类型检查证据，不能最终接受。",
+  "required_keys": ["summary", "decision"],
+  "allowed_decisions": ["ACCEPT_WITH_NOTES", "ACCEPT", "REJECT"],
+  "source_output_ref": ".agent/workstreams/ws-20260709T100534Z-2TCS/runs/run-1783598386726/outputs/acceptance-codex-review.md",
+  "generated_at": "2026-07-09T12:01:15.701134Z",
+  "control": {
+    "decision": "REJECT",
+    "summary": "实现方向和范围基本符合计划，但缺少实际 pytest 与前端类型检查证据，不能最终接受。"
+  },
+  "control_source": {
+    "candidate_count": 1,
+    "block_selection": "LAST_TOP_LEVEL_DUAL_CONTROL"
+  },
+  "source_artifact_type": "acceptance_review",
+  "must_fix": [
+    "补齐后端新增测试与相关回归测试的实际执行证据",
+    "补齐前端类型检查或等价构建验证证据"
+  ],
+  "open_risks": [
+    "preparation_items 不持久化导致历史摘要不展示结构化准备清单",
+    "前端无自动化 UI 测试时渲染行为依赖类型检查和人工审查",
+    "question 类目复用既有问题文本，需要响应级安全测试持续覆盖"
+  ],
+  "changed_files": [
+    "backend/app/api/summaries.py",
+    "backend/app/schemas/summary.py",
+    "backend/tests/test_safety.py",
+    "backend/tests/test_summaries.py",
+    "miniprogram/src/api/summary.ts",
+    "miniprogram/src/pages/follow-up-summary/index.vue"
+  ],
+  "checks_run": [
+    "审查 git evidence changed files 与 diff.patch",
+    "对照 task_contract 的功能范围、安全边界和测试要求",
+    "评估 Claude self-test report 的验证充分性",
+    "按 boundary-first-engineering 检查后端 typed response 与前端 projection 边界"
+  ],
+  "checks_skipped": [],
+  "evidence": [
+    "git_evidence 显示 changed_file_count 为 6 且 hygiene_warning_count 为 0",
+    "diff.patch 显示新增 PreparationItem 与 FollowUpResponse.preparation_items",
+    "diff.patch 显示 fallback 派生 preparation_items 且 AI 路径置 None",
+    "diff.patch 显示前端 summary 类型和 follow-up-summary 页面新增准备清单展示",
+    "Claude self-test report 明确为 SELF_TEST_INCOMPLETE"
+  ],
+  "missing_evidence": [
+    "tests/test_summaries.py 与 tests/test_safety.py 的实际 pytest 运行结果",
+    "summary 或 safety 相关既有回归测试运行结果",
+    "vue-tsc --noEmit 或等价前端类型检查结果",
+    "前端展示契约的实际验证结果"
+  ],
+  "acceptance_notes": [
+    "变更文件范围符合计划，没有看到 DB migration、外部服务或无关模块扩散",
+    "实现形态符合 schema 先行、fallback 结构化派生、前端只展示后端文本的设计",
+    "不持久化 preparation_items 是已批准取舍，历史摘要返回 null 可接受"
+  ],
+  "verification_summary": "实现代码已按 diff 做接受审查，但 self-test 缺少关键运行证据，验收结论为证据不足。",
+  "blocking": true,
+  "failure": {
+    "category_hint": "insufficient_verification",
+    "contract_gaps": [],
+    "out_of_scope_files": [],
+    "missing_tests": [
+      "pytest tests/test_summaries.py tests/test_safety.py",
+      "summary or safety regression tests",
+      "vue-tsc --noEmit or equivalent frontend type check"
+    ],
+    "context_gaps": [],
+    "reason": "核心测试与前端类型检查未实际运行，无法证明测试要求和安全红线已被执行验证。"
+  },
+  "lifecycle_status": "INSUFFICIENT_EVIDENCE",
+  "stage_outcome": "INSUFFICIENT_EVIDENCE",
+  "stage_outcome_source": "declared_status",
+  "evidence_state": {
+    "blocking": true,
+    "evidence_count": 5,
+    "missing_evidence_count": 4,
+    "must_fix_count": 2,
+    "acceptance_note_count": 3,
+    "open_risk_count": 3
+  }
+}

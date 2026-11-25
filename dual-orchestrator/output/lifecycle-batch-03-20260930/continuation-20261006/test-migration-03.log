@@ -1,0 +1,891 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] dual-cli                                                           [jar]
+[INFO] dual-server                                                        [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/9]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/9]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/9]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 5 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/9]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/9]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 86 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 某些消息已经过简化; 请使用 -Xdiags:verbose 重新编译以获得完整输出
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeEventTest.java:[109,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+  需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+  找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java:[103,17] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+  需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+  找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java:[629,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+  需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+  找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java:[234,17] 无法将记录 dev.dual.runtime.handler.AgentResultEnvelope.Plan中的构造器 Plan应用到给定类型;
+  需要: java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.lang.String,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<dev.dual.core.contract.TaskContract.ScopeEntry>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+  找到:    java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.lang.String,java.util.List<java.lang.String>,java.util.List<java.lang.String>
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[67,29] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 input
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[210,33] 找不到符号
+  符号:   方法 approvedDesign()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 original
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[210,57] 找不到符号
+  符号:   方法 approvedDesign()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 fresh
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[217,27] 找不到符号
+  符号:   方法 approvedDesign()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 fresh
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[217,88] 找不到符号
+  符号:   方法 approvedDesign()
+  位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[246,28] 找不到符号
+  符号:   方法 approvedDesign()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 old
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[246,52] 找不到符号
+  符号:   方法 approvedDesign()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 fresh
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[247,28] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 old
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[247,50] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 fresh
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[248,27] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 fresh
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[248,93] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[290,35] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 expected
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[302,56] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 expected
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[312,38] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 expected
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[312,63] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 consumer
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[316,42] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 expected
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[316,101] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[390,75] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[69,31] 找不到符号
+  符号:   方法 approvedDesign()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 plan
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[71,36] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 implement
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[72,30] 找不到符号
+  符号:   方法 approvedDesign()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 plan
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[72,58] 找不到符号
+  符号:   方法 approvedDesign()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 implement
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[73,35] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 implement
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[73,107] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[108,66] 找不到符号
+  符号:   方法 approvedDesign()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 input
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[109,64] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 input
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[113,31] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 input
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[113,103] 找不到符号
+  符号:   方法 approvedPlan()
+  位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[139,78] 找不到符号
+  符号:   方法 approvedDesign()
+  位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[212,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[41,44] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[61,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[77,69] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[102,44] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[156,52] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[188,23] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[216,65] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[240,65] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[282,21] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[364,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[422,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[460,60] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[498,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[543,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[585,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[621,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[661,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[688,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[721,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1424,65] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1434,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1439,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1444,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1449,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1454,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1459,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1467,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1472,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1476,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1482,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[2279,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+  需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+  找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ChangeScopeEvaluationTest.java:[115,16] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+  需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+  找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[31,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[32,17] 不兼容的类型: java.nio.file.Path无法转换为dev.dual.ledger.file.WorkflowFileLedger
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[45,50] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+  找到:    java.nio.file.Path,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[47,50] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+  找到:    java.nio.file.Path,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[57,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+  找到:    java.nio.file.Path,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[69,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[70,17] 不兼容的类型: java.nio.file.Path无法转换为dev.dual.ledger.file.WorkflowFileLedger
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[86,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[87,17] 不兼容的类型: java.nio.file.Path无法转换为dev.dual.ledger.file.WorkflowFileLedger
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[102,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+  找到:    java.nio.file.Path,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[115,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+  找到:    java.nio.file.Path,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[130,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[131,17] 不兼容的类型: java.nio.file.Path无法转换为dev.dual.ledger.file.WorkflowFileLedger
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[142,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+  找到:    java.nio.file.Path,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[158,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+  找到:    java.nio.file.Path,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[206,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+  找到:    java.nio.file.Path,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[216,56] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[228,57] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+  需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[229,17] 不兼容的类型: java.nio.file.Path无法转换为dev.dual.ledger.file.WorkflowFileLedger
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContextBuildPackageHandlerTest.java:[2311,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+  需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+  找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContextTaskContractSectionTest.java:[85,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+  需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+  找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractReviewGateTest.java:[26,44] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRevisionDisplayTest.java:[89,25] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRevisionDisplayTest.java:[106,65] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRevisionDisplayTest.java:[161,98] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRevisionDisplayTest.java:[260,16] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java:[131,26] 对于WorkflowFileLedger(<匿名dev.dual.core.flow.FlowOrchestrationKernel>), 找不到合适的构造器
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+      (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ExternalVerificationEvidenceTest.java:[201,38] 对于WorkflowFileLedger(<匿名dev.dual.core.flow.FlowOrchestrationKernel>), 找不到合适的构造器
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+      (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/LateProposalScopeTest.java:[221,16] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+  需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+  找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ReportTaskContractTest.java:[38,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+  需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+  找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,<nulltype>
+  原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java:[32,26] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+      (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java:[74,34] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+      (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java:[110,32] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+      (实际参数列表和形式参数列表长度不同)
+    构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+      (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SmallWorkflowProfileGateIntegrationTest.java:[43,65] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+  需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+  找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+  原因: 实际参数列表和形式参数列表长度不同
+[INFO] 100 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.171 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  0.025 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  0.514 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  0.017 s]
+[INFO] dual-runtime ....................................... FAILURE [  1.200 s]
+[INFO] dual-adapter-acpx .................................. SKIPPED
+[INFO] dual-cli ........................................... SKIPPED
+[INFO] dual-server ........................................ SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.067 s
+[INFO] Finished at: 2026-10-06T17:11:33+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile (default-testCompile) on project dual-runtime: Compilation failure: Compilation failure: 
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeEventTest.java:[109,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+[ERROR]   需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+[ERROR]   找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java:[103,17] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+[ERROR]   需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+[ERROR]   找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java:[629,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+[ERROR]   需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+[ERROR]   找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java:[234,17] 无法将记录 dev.dual.runtime.handler.AgentResultEnvelope.Plan中的构造器 Plan应用到给定类型;
+[ERROR]   需要: java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.lang.String,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<dev.dual.core.contract.TaskContract.ScopeEntry>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+[ERROR]   找到:    java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.lang.String,java.util.List<java.lang.String>,java.util.List<java.lang.String>
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[67,29] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 input
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[210,33] 找不到符号
+[ERROR]   符号:   方法 approvedDesign()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 original
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[210,57] 找不到符号
+[ERROR]   符号:   方法 approvedDesign()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 fresh
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[217,27] 找不到符号
+[ERROR]   符号:   方法 approvedDesign()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 fresh
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[217,88] 找不到符号
+[ERROR]   符号:   方法 approvedDesign()
+[ERROR]   位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[246,28] 找不到符号
+[ERROR]   符号:   方法 approvedDesign()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 old
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[246,52] 找不到符号
+[ERROR]   符号:   方法 approvedDesign()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 fresh
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[247,28] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 old
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[247,50] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 fresh
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[248,27] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 fresh
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[248,93] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[290,35] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 expected
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[302,56] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 expected
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[312,38] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 expected
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[312,63] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 consumer
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[316,42] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 expected
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[316,101] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java:[390,75] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[69,31] 找不到符号
+[ERROR]   符号:   方法 approvedDesign()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 plan
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[71,36] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 implement
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[72,30] 找不到符号
+[ERROR]   符号:   方法 approvedDesign()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 plan
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[72,58] 找不到符号
+[ERROR]   符号:   方法 approvedDesign()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 implement
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[73,35] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 implement
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[73,107] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[108,66] 找不到符号
+[ERROR]   符号:   方法 approvedDesign()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 input
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[109,64] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 input
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[113,31] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类型为dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot的变量 input
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[113,103] 找不到符号
+[ERROR]   符号:   方法 approvedPlan()
+[ERROR]   位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[139,78] 找不到符号
+[ERROR]   符号:   方法 approvedDesign()
+[ERROR]   位置: 类 dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java:[212,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[41,44] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[61,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[77,69] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[102,44] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[156,52] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[188,23] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[216,65] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[240,65] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[282,21] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[364,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[422,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[460,60] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[498,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[543,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[585,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[621,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[661,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[688,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[721,31] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1424,65] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1434,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1439,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1444,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1449,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1454,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1459,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1467,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1472,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1476,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[1482,17] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java:[2279,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+[ERROR]   需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+[ERROR]   找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ChangeScopeEvaluationTest.java:[115,16] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+[ERROR]   需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+[ERROR]   找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[31,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[32,17] 不兼容的类型: java.nio.file.Path无法转换为dev.dual.ledger.file.WorkflowFileLedger
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[45,50] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+[ERROR]   找到:    java.nio.file.Path,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[47,50] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+[ERROR]   找到:    java.nio.file.Path,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[57,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+[ERROR]   找到:    java.nio.file.Path,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[69,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[70,17] 不兼容的类型: java.nio.file.Path无法转换为dev.dual.ledger.file.WorkflowFileLedger
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[86,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[87,17] 不兼容的类型: java.nio.file.Path无法转换为dev.dual.ledger.file.WorkflowFileLedger
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[102,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+[ERROR]   找到:    java.nio.file.Path,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[115,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+[ERROR]   找到:    java.nio.file.Path,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[130,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[131,17] 不兼容的类型: java.nio.file.Path无法转换为dev.dual.ledger.file.WorkflowFileLedger
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[142,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+[ERROR]   找到:    java.nio.file.Path,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[158,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+[ERROR]   找到:    java.nio.file.Path,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[206,59] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveCurrent应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String
+[ERROR]   找到:    java.nio.file.Path,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[216,56] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[228,57] 无法将类 dev.dual.runtime.handler.CompletionEvidenceLineageResolver中的方法 resolveForReport应用到给定类型;
+[ERROR]   需要: dev.dual.ledger.file.WorkflowFileLedger,java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeInstance
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java:[229,17] 不兼容的类型: java.nio.file.Path无法转换为dev.dual.ledger.file.WorkflowFileLedger
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContextBuildPackageHandlerTest.java:[2311,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+[ERROR]   需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+[ERROR]   找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContextTaskContractSectionTest.java:[85,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+[ERROR]   需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+[ERROR]   找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractReviewGateTest.java:[26,44] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRevisionDisplayTest.java:[89,25] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRevisionDisplayTest.java:[106,65] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRevisionDisplayTest.java:[161,98] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRevisionDisplayTest.java:[260,16] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java:[131,26] 对于WorkflowFileLedger(<匿名dev.dual.core.flow.FlowOrchestrationKernel>), 找不到合适的构造器
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ExternalVerificationEvidenceTest.java:[201,38] 对于WorkflowFileLedger(<匿名dev.dual.core.flow.FlowOrchestrationKernel>), 找不到合适的构造器
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/LateProposalScopeTest.java:[221,16] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+[ERROR]   需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+[ERROR]   找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ReportTaskContractTest.java:[38,24] 无法将记录 dev.dual.core.contract.TaskContract中的构造器 TaskContract应用到给定类型;
+[ERROR]   需要: int,dev.dual.core.contract.TaskContract.Phase,long,java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<dev.dual.core.contract.TaskContract.Clause>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,java.util.List<java.lang.String>,dev.dual.core.contract.ContractStatus,int,dev.dual.core.contract.TaskContract.Source,dev.dual.core.contract.TaskContract.Reference,java.util.List<dev.dual.core.contract.TaskContract.Reference>,java.util.List<dev.dual.core.contract.TaskContract.VerificationBinding>,java.util.List<dev.dual.core.contract.TaskContract.Reference>
+[ERROR]   找到:    java.lang.String,int,java.time.Instant,java.lang.String,dev.dual.core.contract.TaskContract.Scope,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.String>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,java.util.List<java.lang.Object>,dev.dual.core.contract.ContractStatus,int,<nulltype>
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java:[32,26] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java:[74,34] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java:[110,32] 对于WorkflowFileLedger(dev.dual.flow.liteflow.LiteFlowPrototypeKernel), 找不到合适的构造器
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession.FaultPoint)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR]     构造器 dev.dual.ledger.file.WorkflowFileLedger.WorkflowFileLedger(dev.dual.ledger.file.AtomicJsonWriter,dev.dual.core.flow.FlowOrchestrationKernel,java.util.Map<java.lang.String,java.lang.String>,dev.dual.ledger.file.LedgerSession)不适用
+[ERROR]       (实际参数列表和形式参数列表长度不同)
+[ERROR] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/SmallWorkflowProfileGateIntegrationTest.java:[43,65] 无法将记录 dev.dual.runtime.handler.GateHandler.GateContext中的构造器 GateContext应用到给定类型;
+[ERROR]   需要: java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String,dev.dual.ledger.file.WorkflowFileLedger
+[ERROR]   找到:    java.nio.file.Path,java.lang.String,dev.dual.core.workflow.NodeDefinition,dev.dual.core.workflow.NodeInstance,java.lang.String
+[ERROR]   原因: 实际参数列表和形式参数列表长度不同
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-runtime

@@ -1,0 +1,10 @@
+{
+  "status": "PASS_LOCAL_PRECONDITIONS_ZERO_MODEL_CALLS",
+  "gate_source": "../w09-current-transcript-forward-fix-20261011/fresh-fifth-gate.md",
+  "local_preflight_sha256": "5ffcad5b0b02760ff0b6abedf5a47984b039726eb157f6a7e0845dcc48ed9d51",
+  "runner_observer_verified": true,
+  "old_named_sessions_closed": true,
+  "business_approvals": 0,
+  "native_model_calls": 0,
+  "not_proven": "Live native handshake/tools/usage, actual GOAL/EXECUTION/final approvals, whole mainline/delivery"
+}

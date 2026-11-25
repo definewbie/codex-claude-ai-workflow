@@ -1,0 +1,51 @@
+{
+  "isolated_copy": "/private/tmp/dual-b06-counterproof-20261009",
+  "native_provider_runs": 0,
+  "mutants": [
+    {
+      "name": "stop-before-finalize",
+      "removed_guard": "if (\"ACTIVE\".equals(stop) || \"UNKNOWN\".equals(stop))",
+      "test": "DeliveryApplicationServiceTest#exactCommitCannotReplaceMissingEvidenceThatTheOldApplyStopped",
+      "exit": 1,
+      "assertion_failures": 1,
+      "errors": 0,
+      "expected_failure_proven": true
+    },
+    {
+      "name": "existing-intent-is-not-fresh",
+      "removed_guard": "if (previous != null) {",
+      "test": "DeliveryApplicationServiceTest#unknownAtBaseNeedsANewExplicitAuthorizationAndDuplicateDoesNotReapply",
+      "exit": 1,
+      "assertion_failures": 1,
+      "errors": 0,
+      "expected_failure_proven": true
+    },
+    {
+      "name": "duplicate-before-obsolete-binding",
+      "removed_guard": "if (oldReceipt != null) {",
+      "test": "DeliveryApplicationServiceTest#humanStopRemainsADeclarationAndCloseStillAllowsAnExactExistingCommit",
+      "exit": 1,
+      "assertion_failures": 1,
+      "errors": 0,
+      "expected_failure_proven": true
+    },
+    {
+      "name": "receipt-before-patch-input",
+      "removed_guard": "lifecycle.started(process);",
+      "test": "GitPatchMergeServiceTest#failedReceiptSuppliesNoPatchAndCleanHeadDriftStartsNoChild",
+      "exit": 1,
+      "assertion_failures": 1,
+      "errors": 0,
+      "expected_failure_proven": true
+    },
+    {
+      "name": "launch-identity",
+      "test": "GitPatchMergeServiceTest#failedReceiptSuppliesNoPatchAndCleanHeadDriftStartsNoChild",
+      "exit": 1,
+      "assertion_failures": 1,
+      "errors": 0,
+      "expected_failure_proven": true
+    }
+  ],
+  "status": "PASS"
+}

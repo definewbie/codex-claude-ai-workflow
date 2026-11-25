@@ -1,0 +1,39 @@
+{
+  "type": "ISOLATED_FORWARD_GUARD_MUTANTS_NOT_REGRESSION_TOTAL",
+  "cases": [
+    {
+      "name": "full-reference",
+      "source": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalReference.java",
+      "test": "ProposalReferenceIdentityTest",
+      "mutation": "!resolved.reference().equals(candidate.get()) => !resolved.reference().proposalId().equals(candidate.get().proposalId())",
+      "exit": 1,
+      "expected_failure_detected": true,
+      "log": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-revision-forward-fix-20261014/counterproof-full-reference.log",
+      "original_sha256": "89d55242ab6553e739075f12a130e919b81b654475982f5c13d152015668993a",
+      "source_restored": true,
+      "initial_classifier_error": "marker case mismatch; log already contained the intended assertion failure, no experiment re-run or result editing"
+    },
+    {
+      "name": "program-sha",
+      "source": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalRevisionMerger.java",
+      "test": "TaskContractProposalRevisionMergerTest#exactIdCannotHideChangedProgramBaseBytes",
+      "mutation": "errors.add(\"REVISION_BASE_PROPOSAL_CONTENT_MISMATCH\"); => // mutant: ignore program base content mismatch",
+      "exit": 1,
+      "expected_failure_detected": true,
+      "log": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-revision-forward-fix-20261014/counterproof-program-sha.log",
+      "original_sha256": "28093cee075d716893c40282b8227fd54104b85232eedf063278da0244a1fa44",
+      "source_restored": true
+    },
+    {
+      "name": "goal-shape",
+      "source": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalValidator.java",
+      "test": "HumanRequirementContinuationSequenceTest#humanGoalRevisionUsesFreshSubjectAndMissingOrForgedFormsNeverPublish",
+      "mutation": "errors.add(\"goal re-proposal requires actual objective or exclusion change\"); => errors.addAll(java.util.List.of());",
+      "exit": 1,
+      "expected_failure_detected": true,
+      "log": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-revision-forward-fix-20261014/counterproof-goal-shape.log",
+      "original_sha256": "4c3e18d081a8321b7b477e03c16ee1268ddcd0036afe0c08d2fe775e4dd66963",
+      "source_restored": true
+    }
+  ]
+}

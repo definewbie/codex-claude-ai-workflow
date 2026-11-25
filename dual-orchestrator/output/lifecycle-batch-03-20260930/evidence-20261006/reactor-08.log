@@ -1,0 +1,941 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] dual-cli                                                           [jar]
+[INFO] dual-server                                                        [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/9]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.core.contract.TaskContractTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.173 s -- in dev.dual.core.contract.TaskContractTest
+[INFO] Running dev.dual.core.contract.PhasedContractTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.033 s -- in dev.dual.core.contract.PhasedContractTest
+[INFO] Running dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in dev.dual.core.provider.ProviderPricingCatalogTest
+[INFO] Running dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.core.provider.ProviderCachePolicyTest
+[INFO] Running dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in dev.dual.core.provider.ProviderBillingCsvCalibrationTest
+[INFO] Running dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.dual.core.execution.AgentExecutionOutcomeResolverTest
+[INFO] Running dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.core.execution.AgentExecutionFinalizerTest
+[INFO] Running dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.core.execution.AgentExecutionAttemptTest
+[INFO] Running dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.core.arbitration.FailureClassificationTest
+[INFO] Running dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in dev.dual.core.workflow.WorkflowDefinitionTest
+[INFO] Running dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.core.workflow.EdgeDefinitionTest
+[INFO] Running dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.workflow.HumanGateActionSemanticsTest
+[INFO] Running dev.dual.core.workflow.EdgeConditionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.workflow.EdgeConditionTest
+[INFO] Running dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.core.workflow.ChangeScopeViolationRoutingSemanticsTest
+[INFO] Running dev.dual.core.id.DualIdGeneratorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.core.id.DualIdGeneratorTest
+[INFO] Running dev.dual.core.domain.PromptLanguageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.core.domain.PromptLanguageTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 125, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/9]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in dev.dual.ledger.file.CheckpointDocumentTest
+[INFO] Running dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.027 s -- in dev.dual.ledger.file.WorkstreamLockTest
+[INFO] Running dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.099 s -- in dev.dual.ledger.file.DeliveryMergePlanTest
+[INFO] Running dev.dual.ledger.file.FileLedgerStoreTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.160 s -- in dev.dual.ledger.file.FileLedgerStoreTest
+[INFO] Running dev.dual.ledger.file.IterationRefTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.ledger.file.IterationRefTest
+[INFO] Running dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.260 s -- in dev.dual.ledger.file.WorkstreamAttentionEvaluatorTest
+[INFO] Running dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.483 s -- in dev.dual.ledger.file.WorkflowCommitSequenceTest
+[INFO] Running dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.ledger.file.LedgerMigratorTest
+[INFO] Running dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.dual.ledger.file.RecoveryAssessmentTest
+[INFO] Running dev.dual.ledger.file.WorkflowGateResolutionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.178 s -- in dev.dual.ledger.file.WorkflowGateResolutionTest
+[INFO] Running dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.076 s -- in dev.dual.ledger.file.ConditionalEdgeRoutingTest
+[INFO] Running dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.305 s -- in dev.dual.ledger.file.MultiFileMutationRestartAssessmentTest
+[INFO] Running dev.dual.ledger.file.ParallelFanOutTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.169 s -- in dev.dual.ledger.file.ParallelFanOutTest
+[INFO] Running dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.ledger.file.OperatorWorkspaceRegistryTest
+[INFO] Running dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.ledger.file.DeliveryCandidateWriterTest
+[INFO] Running dev.dual.ledger.file.WorkflowFileLedgerTest
+[INFO] Tests run: 50, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.323 s -- in dev.dual.ledger.file.WorkflowFileLedgerTest
+[INFO] Running dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.ledger.file.ExecutionConsistencyClassifierTest
+[INFO] Running dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.413 s -- in dev.dual.ledger.file.ExecutionNetworkGrantStoreTest
+[INFO] Running dev.dual.ledger.file.ExecutionClaimSequenceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 s -- in dev.dual.ledger.file.ExecutionClaimSequenceTest
+[INFO] Running dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.176 s -- in dev.dual.ledger.file.MetricsProjectionWriterTest
+[INFO] Running dev.dual.ledger.file.HumanActionRequestTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.102 s -- in dev.dual.ledger.file.HumanActionRequestTest
+[INFO] Running dev.dual.ledger.file.LedgerSessionTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.538 s -- in dev.dual.ledger.file.LedgerSessionTest
+[INFO] Running dev.dual.ledger.file.RetryFailureContextTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.283 s -- in dev.dual.ledger.file.RetryFailureContextTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 153, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/9]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.748 s -- in dev.dual.flow.liteflow.LiteFlowLedgerBoundaryTest
+[INFO] Running dev.dual.flow.liteflow.FlowKernelProviderTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.flow.liteflow.FlowKernelProviderTest
+[INFO] Running dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.flow.liteflow.LiteFlowPrototypeKernelTest
+[INFO] Running dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest
+D08 topology: pid=26885, kernel=dev.dual.flow.liteflow.LiteFlowPrototypeKernel, kernelLoader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, holderLoader=jdk.internal.loader.ClassLoaders$AppClassLoader@7a8c5397, holderSource=file:/Users/kriswang/.m2/repository/com/yomahub/liteflow-core/2.16.0/liteflow-core-2.16.0.jar
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.437 s -- in dev.dual.flow.liteflow.LiteFlowLifecycleIsolationTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/9]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.adapter.git.GitPatchMergeServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.763 s -- in dev.dual.adapter.git.GitPatchMergeServiceTest
+[INFO] Running dev.dual.adapter.git.GitWorkspaceServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.093 s -- in dev.dual.adapter.git.GitWorkspaceServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/9]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 89 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- jar:3.4.2:test-jar (shared-lifecycle-test-fixtures) @ dual-runtime ---
+[INFO] Building jar: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/dual-runtime-0.1.0-SNAPSHOT-tests.jar
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.runtime.handler.LateContractRevisionContextTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 28.78 s -- in dev.dual.runtime.handler.LateContractRevisionContextTest
+[INFO] Running dev.dual.runtime.handler.PlanArtifactDocumentTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.runtime.handler.PlanArtifactDocumentTest
+[INFO] Running dev.dual.runtime.handler.TypedDesignScopeTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.907 s -- in dev.dual.runtime.handler.TypedDesignScopeTest
+[INFO] Running dev.dual.runtime.handler.EvidenceCollectionSourceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.483 s -- in dev.dual.runtime.handler.EvidenceCollectionSourceTest
+[INFO] Running dev.dual.runtime.handler.TokenEstimatorTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.handler.TokenEstimatorTest
+[INFO] Running dev.dual.runtime.handler.TypedPlanScopeTest
+[ERROR] Tests run: 7, Failures: 3, Errors: 0, Skipped: 0, Time elapsed: 13.16 s <<< FAILURE! -- in dev.dual.runtime.handler.TypedPlanScopeTest
+[ERROR] dev.dual.runtime.handler.TypedPlanScopeTest.approvedPlanDoesNotExcuseActualGitScopeViolation -- Time elapsed: 0.726 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.TypedPlanScopeTest.approvedPlanDoesNotExcuseActualGitScopeViolation(TypedPlanScopeTest.java:210)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.TypedPlanScopeTest.approvedPlanKeepsOccurrenceProjectionWithoutPublishingCanonicalPlan -- Time elapsed: 0.682 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.TypedPlanScopeTest.approvedPlanKeepsOccurrenceProjectionWithoutPublishingCanonicalPlan(TypedPlanScopeTest.java:90)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.TypedPlanScopeTest.everyPlanTopologySurvivesColdReadAndFeedsTheSameApprovedIdentityToImplementationAndSelfTest -- Time elapsed: 1.093 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.TypedPlanScopeTest.everyPlanTopologySurvivesColdReadAndFeedsTheSameApprovedIdentityToImplementationAndSelfTest(TypedPlanScopeTest.java:116)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.939 s -- in dev.dual.runtime.handler.SmallWorkflowProfileGateIntegrationTest
+[INFO] Running dev.dual.runtime.handler.TaskContractScopeResolverTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.runtime.handler.TaskContractScopeResolverTest
+[INFO] Running dev.dual.runtime.handler.SelfTestContinuationSequenceTest
+[ERROR] Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.227 s <<< FAILURE! -- in dev.dual.runtime.handler.SelfTestContinuationSequenceTest
+[ERROR] dev.dual.runtime.handler.SelfTestContinuationSequenceTest.realLiteFlowRoutesValidatedSelfTestAndColdLoadsTheCorrectSuccessorAcrossSiblings -- Time elapsed: 0.197 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeResult[outcome=VERIFICATION_EVIDENCE_INVALID, status=FAILED, outputRefs=[], result={allowed_decisions=[SELF_TEST_COMPLETE, BLOCKED, SELF_TEST_INCOMPLETE], input_refs=[.agent/workstreams/ws-test/runs/run-test/outputs/self-test.json, .agent/workstreams/ws-test/runs/run-test/outputs/self-test.contract.json], contract_values={decision=SELF_TEST_COMPLETE, summary=Verification result}, parse_error={}, reason=VERIFICATION_EVIDENCE_INVALID, message=missing prepared binding}, errorMessage=missing prepared binding] ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.SelfTestContinuationSequenceTest.realLiteFlowRoutesValidatedSelfTestAndColdLoadsTheCorrectSuccessorAcrossSiblings(SelfTestContinuationSequenceTest.java:107)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest
+[ERROR] Tests run: 11, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.268 s <<< FAILURE! -- in dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest
+[ERROR] dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest.resolvesAcceptanceAndSelfTestThroughPersistedContextLineage -- Time elapsed: 0.033 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <AVAILABLE> but was: <INVALID>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.CompletionEvidenceLineageResolverTest.resolvesAcceptanceAndSelfTestThroughPersistedContextLineage(CompletionEvidenceLineageResolverTest.java:36)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest
+[ERROR] Tests run: 5, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.723 s <<< FAILURE! -- in dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest
+[ERROR] dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest.acceptsSelfTestResult -- Time elapsed: 0.710 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: {run_metadata=.agent/workstreams/ws-fixture/runs/run-fixture/run.json, run_id=run-fixture, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, contract_node_id=implement.claude_self_test_report, contract_required_keys=[decision, summary], contract_allowed_decisions=[SELF_TEST_COMPLETE, BLOCKED, SELF_TEST_INCOMPLETE], parse_error={message=successful verification requires one evidence check for each approved criterion, details={}, code=VERIFICATION_EVIDENCE_INVALID}, contract_failure_diagnostic_ref=.agent/workstreams/ws-fixture/artifacts/contract-failures/node-implement-claude_self_test_report-018.json, contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-fixture/artifacts/contract-failures/node-implement-claude_self_test_report-018.md, message=successful verification requires one evidence check for each approved criterion, agent_execution_result_contract={present=true, valid=true, decision=SELF_TEST_COMPLETE, summary=, validationError=}, agent_execution_artifact_contract_results=[{contractType=self_test_report, required=true, present=true, valid=false, path=, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=successful verification requires one evidence check for each approved criterion}]} ==> expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest.validate(ArtifactContractFixtureRegressionTest.java:117)
+	at dev.dual.runtime.handler.ArtifactContractFixtureRegressionTest.acceptsSelfTestResult(ArtifactContractFixtureRegressionTest.java:77)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.EvidenceCollectionSequenceTest
+[ERROR] Tests run: 7, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 6.304 s <<< FAILURE! -- in dev.dual.runtime.handler.EvidenceCollectionSequenceTest
+[ERROR] dev.dual.runtime.handler.EvidenceCollectionSequenceTest.realInlineAndWorkerConsumersRejectBeforeAndAfterExecutionIncludingThrownFailure -- Time elapsed: 0.979 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <RUNNING> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.EvidenceCollectionSequenceTest.realInlineAndWorkerConsumersRejectBeforeAndAfterExecutionIncludingThrownFailure(EvidenceCollectionSequenceTest.java:74)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.HandlerRegistryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.HandlerRegistryTest
+[INFO] Running dev.dual.runtime.handler.AgentEvidenceIndexTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.123 s -- in dev.dual.runtime.handler.AgentEvidenceIndexTest
+[INFO] Running dev.dual.runtime.handler.FailureArbiterTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.FailureArbiterTest
+[INFO] Running dev.dual.runtime.handler.PhasedContractContinuationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.793 s -- in dev.dual.runtime.handler.PhasedContractContinuationTest
+[INFO] Running dev.dual.runtime.handler.ContractRegistryTest
+[INFO] Tests run: 50, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in dev.dual.runtime.handler.ContractRegistryTest
+[INFO] Running dev.dual.runtime.handler.TaskContractProjectionVerifierTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.84 s -- in dev.dual.runtime.handler.TaskContractProjectionVerifierTest
+[INFO] Running dev.dual.runtime.handler.LateProposalScopeTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.741 s -- in dev.dual.runtime.handler.LateProposalScopeTest
+[INFO] Running dev.dual.runtime.handler.ContractReviewGateTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.311 s -- in dev.dual.runtime.handler.ContractReviewGateTest
+[INFO] Running dev.dual.runtime.handler.AcceptanceRepairSequenceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 33.76 s -- in dev.dual.runtime.handler.AcceptanceRepairSequenceTest
+[INFO] Running dev.dual.runtime.handler.ContractRevisionDisplayTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 32.72 s -- in dev.dual.runtime.handler.ContractRevisionDisplayTest
+[INFO] Running dev.dual.runtime.handler.AuthoredRevisionCoverageTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.AuthoredRevisionCoverageTest
+[INFO] Running dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.148 s -- in dev.dual.runtime.handler.RepoScopeGovernanceContractDiscoveryTest
+[INFO] Running dev.dual.runtime.handler.TaskContractArtifactWriterTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.runtime.handler.TaskContractArtifactWriterTest
+[INFO] Running dev.dual.runtime.handler.ContextBudgetOverrideTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.runtime.handler.ContextBudgetOverrideTest
+[INFO] Running dev.dual.runtime.handler.StageOutcomeCompilerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.StageOutcomeCompilerTest
+[INFO] Running dev.dual.runtime.handler.ExternalVerificationEvidenceTest
+[ERROR] Tests run: 8, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 12.14 s <<< FAILURE! -- in dev.dual.runtime.handler.ExternalVerificationEvidenceTest
+[ERROR] dev.dual.runtime.handler.ExternalVerificationEvidenceTest.realRuntimePublishesSelfTestAndAcceptanceSidecarsWithExactMaterialRefs -- Time elapsed: 1.303 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+# Current Failure
+
+## Summary
+
+- Workflow Status: WAITING_FOR_RECOVERY
+- Node: implement.claude_self_test_report
+- Node Instance: node-implement-claude_self_test_report-020
+- Node Status: FAILED
+- Handler: acpx.agent_run
+- Reason: AGENT_OUTPUT_CONTRACT_VIOLATION
+- Recoverable: N/A
+- Exit Code: 0
+- Run ID: run-node-implement-claude_self_test_report-020
+- Agent: N/A
+- Session: N/A
+- Attention Category: ARTIFACT_CONTRACT_FAILURE
+- Retry Safe: false
+
+## Contract Failure Diagnostic
+
+- Diagnostic JSON: .agent/workstreams/ws-test/artifacts/contract-failures/node-implement-claude_self_test_report-020.json
+- Diagnostic Markdown: .agent/workstreams/ws-test/artifacts/contract-failures/node-implement-claude_self_test_report-020.md
+- Error Code: VERIFICATION_EVIDENCE_INVALID
+- Error Message: successful verification requires one evidence check for each approved criterion
+
+## Evidence
+
+- .agent/workstreams/ws-test/runs/run-node-implement-claude_self_test_report-020/outputs/result.json
+- .agent/workstreams/ws-test/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-020-run-node-implement-claude_self_test_report-020/binding.json
+- .agent/workstreams/ws-test/artifacts/contract-failures/node-implement-claude_self_test_report-020.json
+- .agent/workstreams/ws-test/artifacts/contract-failures/node-implement-claude_self_test_report-020.md
+
+## Suggested Action
+
+- Inspect the diagnostic details, prompt contract, and source output before retrying the node.
+- Inspect the contract diagnostic and fix the output contract before retrying.
+- Command: `dualctl retry --workdir /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-4531879658103301894/runtime-false-valid ws-test`.
+ ==> expected: not equal but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertNotEquals.failEqual(AssertNotEquals.java:277)
+	at org.junit.jupiter.api.AssertNotEquals.assertNotEquals(AssertNotEquals.java:269)
+	at org.junit.jupiter.api.Assertions.assertNotEquals(Assertions.java:2846)
+	at dev.dual.runtime.handler.ExternalVerificationEvidenceTest.realRuntimePublishesSelfTestAndAcceptanceSidecarsWithExactMaterialRefs(ExternalVerificationEvidenceTest.java:86)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.ReadinessRoutingDefinitionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.runtime.handler.ReadinessRoutingDefinitionTest
+[INFO] Running dev.dual.runtime.handler.AuthoredBoundarySequenceTest
+[ERROR] Tests run: 14, Failures: 4, Errors: 0, Skipped: 0, Time elapsed: 25.28 s <<< FAILURE! -- in dev.dual.runtime.handler.AuthoredBoundarySequenceTest
+[ERROR] dev.dual.runtime.handler.AuthoredBoundarySequenceTest.everyDeclaredImplementationAndDirectSelfTestEntryConsumesTheApprovedPlan -- Time elapsed: 0.780 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: gate.contract_review:approved damaged=falseNodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-implement-claude_self_test_report-019, nodeDefinitionId=implement.claude_self_test_report, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-implement, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-authored/runs/setup-run-5/outputs/result.json, .agent/workstreams/ws-authored/runs/setup-run-5/outputs/result.contract.json], inputTransition={transition_type=normal, condition=unconditional, source_node_sha256=4eb5fc9949abceb0b7564642c86cfa77ed06f206dd81b383042bfa6c249271c8, source_node_instance_id=node-implement-claude_implement-018, required=true}, outputRefs=[.agent/workstreams/ws-authored/runs/setup-run-6/outputs/result.json, .agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-019.json, .agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-019.md], result={agent_execution_artifact_contract_results=[{contractType=self_test_report, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=successful verification requires one evidence check for each approved criterion, path=, present=true, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., primaryReason=required_artifact_contract_failed, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=CONTRACT_FAILED}, agent_execution_result_contract={decision=SELF_TEST_COMPLETE, present=true, summary=, valid=true, validationError=}, contract_allowed_decisions=[SELF_TEST_COMPLETE, BLOCKED, SELF_TEST_INCOMPLETE], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-019.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-019.json, contract_node_id=implement.claude_self_test_report, contract_required_keys=[decision, summary], exit_code=0, message=successful verification requires one evidence check for each approved criterion, parse_error={code=VERIFICATION_EVIDENCE_INVALID, details={}, message=successful verification requires one evidence check for each approved criterion}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-6, run_metadata=.agent/workstreams/ws-authored/runs/setup-run-6/run.json, completion_ref=.agent/workstreams/ws-authored/runs/setup-run-6/outputs/nxe-1791298568815-c76f3b09-completion.json, completion_sha256=2a6c9e73108458be82c4b08dff0bc606b55b499007d4055798291cc088b7d243}, runRef=null, latestExecutionId=nxe-1791298568815-c76f3b09, startedAt=2026-10-06T14:56:08.816264Z, finishedAt=2026-10-06T14:56:08.880371Z] ==> expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest.everyDeclaredImplementationAndDirectSelfTestEntryConsumesTheApprovedPlan(AuthoredBoundarySequenceTest.java:305)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredBoundarySequenceTest.successiveHumanPacketsExposeTheSameCandidateAndObligationsAsTheirConsumer -- Time elapsed: 0.967 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest.successiveHumanPacketsExposeTheSameCandidateAndObligationsAsTheirConsumer(AuthoredBoundarySequenceTest.java:384)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredBoundarySequenceTest.unchangedRetryAndColdJvmResolveIdenticalObligations -- Time elapsed: 1.263 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest.unchangedRetryAndColdJvmResolveIdenticalObligations(AuthoredBoundarySequenceTest.java:174)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredBoundarySequenceTest.aLaterOpenApprovalBlocksOldRetryAndAResolvedReplacementDoesNotRebindIt -- Time elapsed: 0.893 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.AuthoredBoundarySequenceTest.aLaterOpenApprovalBlocksOldRetryAndAResolvedReplacementDoesNotRebindIt(AuthoredBoundarySequenceTest.java:216)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.ChangeScopeEvaluationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.handler.ChangeScopeEvaluationTest
+[INFO] Running dev.dual.runtime.handler.WorkflowIntegrationTest
+[ERROR] Tests run: 10, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 2.907 s <<< FAILURE! -- in dev.dual.runtime.handler.WorkflowIntegrationTest
+[ERROR] dev.dual.runtime.handler.WorkflowIntegrationTest.chain5_needsRevisionLoopWithContextCarryover -- Time elapsed: 1.098 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.WorkflowIntegrationTest.chain5_needsRevisionLoopWithContextCarryover(WorkflowIntegrationTest.java:328)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.AgentResultEnvelopeParserTest
+[ERROR] Tests run: 13, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.005 s <<< FAILURE! -- in dev.dual.runtime.handler.AgentResultEnvelopeParserTest
+[ERROR] dev.dual.runtime.handler.AgentResultEnvelopeParserTest.rejectWithMissingTestsRequiresTypedVerificationRemediation -- Time elapsed: 0.001 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at dev.dual.runtime.handler.AgentResultEnvelopeParserTest.rejectWithMissingTestsRequiresTypedVerificationRemediation(AgentResultEnvelopeParserTest.java:209)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.VerificationReadinessTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.325 s -- in dev.dual.runtime.handler.VerificationReadinessTest
+[INFO] Running dev.dual.runtime.handler.AgentRunCommitProtocolTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.483 s -- in dev.dual.runtime.handler.AgentRunCommitProtocolTest
+[INFO] Running dev.dual.runtime.handler.ContractLifecycleLedgerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.483 s -- in dev.dual.runtime.handler.ContractLifecycleLedgerTest
+[INFO] Running dev.dual.runtime.handler.VerificationEvidenceSequenceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.997 s -- in dev.dual.runtime.handler.VerificationEvidenceSequenceTest
+[INFO] Running dev.dual.runtime.handler.AcceptanceRepairInterruptionTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.484 s -- in dev.dual.runtime.handler.AcceptanceRepairInterruptionTest
+[INFO] Running dev.dual.runtime.handler.AgentRunMetadataFinalizerTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.074 s -- in dev.dual.runtime.handler.AgentRunMetadataFinalizerTest
+[INFO] Running dev.dual.runtime.handler.FailureClassifyHandlerTest
+[ERROR] Tests run: 8, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 4.437 s <<< FAILURE! -- in dev.dual.runtime.handler.FailureClassifyHandlerTest
+[ERROR] dev.dual.runtime.handler.FailureClassifyHandlerTest.acceptedSidecarAllowsAbsentRemediationButRejectsUnknownRemediation -- Time elapsed: 0.506 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <FAILED>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.FailureClassifyHandlerTest.acceptedSidecarAllowsAbsentRemediationButRejectsUnknownRemediation(FailureClassifyHandlerTest.java:253)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.runtime.handler.ChangeScopeEvaluationArtifactTest
+[INFO] Running dev.dual.runtime.handler.ContextBuildPackageHandlerTest
+[INFO] Tests run: 61, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.744 s -- in dev.dual.runtime.handler.ContextBuildPackageHandlerTest
+[INFO] Running dev.dual.runtime.handler.LegacyContractConsumerRejectionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.793 s -- in dev.dual.runtime.handler.LegacyContractConsumerRejectionTest
+[INFO] Running dev.dual.runtime.handler.ContractCompileHandlerTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.477 s -- in dev.dual.runtime.handler.ContractCompileHandlerTest
+[INFO] Running dev.dual.runtime.handler.AuthoredStageSequenceTest
+[ERROR] Tests run: 12, Failures: 7, Errors: 0, Skipped: 0, Time elapsed: 8.935 s <<< FAILURE! -- in dev.dual.runtime.handler.AuthoredStageSequenceTest
+[ERROR] dev.dual.runtime.handler.AuthoredStageSequenceTest.publishedInputBindingDoesNotDependOnHistoricalPromptOrManifestLocator -- Time elapsed: 0.650 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest.publishedInputBindingDoesNotDependOnHistoricalPromptOrManifestLocator(AuthoredStageSequenceTest.java:158)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredStageSequenceTest.twoBusinessDomainsConsumeApprovedDesignAndPlanThroughTheSameRuntime -- Time elapsed: 0.699 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-implement-claude_self_test_report-018, nodeDefinitionId=implement.claude_self_test_report, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-implement, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-authored/runs/setup-run-5/outputs/result.json, .agent/workstreams/ws-authored/runs/setup-run-5/outputs/result.contract.json], inputTransition={transition_type=normal, condition=unconditional, source_node_sha256=4f0f2c0d40a3ef9f29af1fef093b87eb754afd0020b4c94b7d3c979f3ff3a36b, source_node_instance_id=node-implement-claude_implement-017, required=true}, outputRefs=[.agent/workstreams/ws-authored/runs/setup-run-6/outputs/result.json, .agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-018.json, .agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-018.md], result={agent_execution_artifact_contract_results=[{contractType=self_test_report, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=successful verification requires one evidence check for each approved criterion, path=, present=true, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., primaryReason=required_artifact_contract_failed, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=CONTRACT_FAILED}, agent_execution_result_contract={decision=SELF_TEST_COMPLETE, present=true, summary=, valid=true, validationError=}, contract_allowed_decisions=[SELF_TEST_COMPLETE, BLOCKED, SELF_TEST_INCOMPLETE], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-018.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-018.json, contract_node_id=implement.claude_self_test_report, contract_required_keys=[decision, summary], exit_code=0, message=successful verification requires one evidence check for each approved criterion, parse_error={code=VERIFICATION_EVIDENCE_INVALID, details={}, message=successful verification requires one evidence check for each approved criterion}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-6, run_metadata=.agent/workstreams/ws-authored/runs/setup-run-6/run.json, completion_ref=.agent/workstreams/ws-authored/runs/setup-run-6/outputs/nxe-1791298625586-b691537d-completion.json, completion_sha256=a23e665b2c1d3b76b3ad26bee35afc52b95dfe141f8a1ac71c19e7d8cdf28405}, runRef=null, latestExecutionId=nxe-1791298625586-b691537d, startedAt=2026-10-06T14:57:05.587114Z, finishedAt=2026-10-06T14:57:05.645888Z] ==> expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest.twoBusinessDomainsConsumeApprovedDesignAndPlanThroughTheSameRuntime(AuthoredStageSequenceTest.java:64)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredStageSequenceTest.consistentPathRenamePreservesTheCompleteAuthoredSequence(String, String)[1] -- Time elapsed: 0.657 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest.consistentPathRenamePreservesTheCompleteAuthoredSequence(AuthoredStageSequenceTest.java:105)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:803)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredStageSequenceTest.consistentPathRenamePreservesTheCompleteAuthoredSequence(String, String)[2] -- Time elapsed: 0.659 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest.consistentPathRenamePreservesTheCompleteAuthoredSequence(AuthoredStageSequenceTest.java:105)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:186)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:803)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.stream.ReferencePipeline$7$1FlatMap.accept(ReferencePipeline.java:293)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1716)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:153)
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:176)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:632)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredStageSequenceTest.reviewedHumanPlanShowsNewIssuesThenCarriesThemWithTheHumanNote -- Time elapsed: 0.918 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest.reviewedHumanPlanShowsNewIssuesThenCarriesThemWithTheHumanNote(AuthoredStageSequenceTest.java:52)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredStageSequenceTest.approvedRevisionDoesNotReplaySupersededInputManifests -- Time elapsed: 0.880 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest.approvedRevisionDoesNotReplaySupersededInputManifests(AuthoredStageSequenceTest.java:141)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AuthoredStageSequenceTest.reviewerDrivenPlanRevisionsKeepEveryReviewObligationUntilApproval -- Time elapsed: 1.127 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest.reviewerDrivenPlanRevisionsKeepEveryReviewObligationUntilApproval(AuthoredStageSequenceTest.java:35)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.handler.ReportGenerateFinalHandlerTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 19.97 s -- in dev.dual.runtime.handler.ReportGenerateFinalHandlerTest
+[INFO] Running dev.dual.runtime.handler.ContextTaskContractSectionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.581 s -- in dev.dual.runtime.handler.ContextTaskContractSectionTest
+[INFO] Running dev.dual.runtime.handler.ReportTaskContractTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.896 s -- in dev.dual.runtime.handler.ReportTaskContractTest
+[INFO] Running dev.dual.runtime.handler.TypedContextPayloadBoundaryTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.TypedContextPayloadBoundaryTest
+[INFO] Running dev.dual.runtime.handler.AuthoredDefinitionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.runtime.handler.AuthoredDefinitionTest
+[INFO] Running dev.dual.runtime.handler.BuiltinHandlerTest
+[INFO] Tests run: 67, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.62 s -- in dev.dual.runtime.handler.BuiltinHandlerTest
+[INFO] Running dev.dual.runtime.handler.TaskContractProposalValidatorTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.082 s -- in dev.dual.runtime.handler.TaskContractProposalValidatorTest
+[INFO] Running dev.dual.runtime.handler.AgentContractSemanticsTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.dual.runtime.handler.AgentContractSemanticsTest
+[INFO] Running dev.dual.runtime.handler.AgentResultPromptContractTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.dual.runtime.handler.AgentResultPromptContractTest
+[INFO] Running dev.dual.runtime.handler.ReportFailureClassificationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.078 s -- in dev.dual.runtime.handler.ReportFailureClassificationTest
+[INFO] Running dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.074 s -- in dev.dual.runtime.handler.PromptGenerateNextStageHandlerTest
+[INFO] Running dev.dual.runtime.handler.ArtifactContractValidatorTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.952 s -- in dev.dual.runtime.handler.ArtifactContractValidatorTest
+[INFO] Running dev.dual.runtime.handler.AuthoredRevisionContractTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in dev.dual.runtime.handler.AuthoredRevisionContractTest
+[INFO] Running dev.dual.runtime.handler.WorkstreamMemoryProjectionTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.dual.runtime.handler.WorkstreamMemoryProjectionTest
+[INFO] Running dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.handler.TaskContractProposalRevisionMergerTest
+[INFO] Running dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.runtime.handler.TaskContractRevisionPatchTargetValidatorTest
+[INFO] Running dev.dual.runtime.handler.FailureClassifyRegistryTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.runtime.handler.FailureClassifyRegistryTest
+[INFO] Running dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest
+[INFO] Running dev.dual.runtime.WorkflowRuntimeTest
+[ERROR] Tests run: 10, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.580 s <<< FAILURE! -- in dev.dual.runtime.WorkflowRuntimeTest
+[ERROR] dev.dual.runtime.WorkflowRuntimeTest.contradictoryAcceptanceCannotPublishOrReachSuccessConsumersEvenAfterColdResume -- Time elapsed: 0.060 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: {agent_execution_artifact_contract_results=[{contractType=acceptance_review, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=verification requires the approved EXECUTION contract, path=, present=true, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., primaryReason=required_artifact_contract_failed, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=CONTRACT_FAILED}, agent_execution_result_contract={decision=ACCEPT, present=true, summary=, valid=true, validationError=}, contract_allowed_decisions=[ACCEPT, ACCEPT_WITH_NOTES, REJECT], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-contradiction-accept-true/artifacts/contract-failures/node-acceptance-codex_verifier_review-001.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-contradiction-accept-true/artifacts/contract-failures/node-acceptance-codex_verifier_review-001.json, contract_node_id=acceptance.codex_verifier_review, contract_required_keys=[decision, summary], exit_code=0, message=verification requires the approved EXECUTION contract, parse_error={code=VERIFICATION_EVIDENCE_INVALID, details={}, message=verification requires the approved EXECUTION contract}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-contradiction-accept-true/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-001-run-001/binding.json, repository_fact_binding_sha256=71aef53fd19feccf4fad2284161cbdabdd9d67b461ce6809c3a3e489013dc71d, run_id=run-001, run_metadata=.agent/workstreams/ws-contradiction-accept-true/runs/run-001/run.json, completion_ref=.agent/workstreams/ws-contradiction-accept-true/runs/run-001/outputs/nxe-1791298680503-610d7649-completion.json, completion_sha256=a9cef0a81c2d32efe970884cc3dd7a2cc9fbf6b82253d5ae9cd581c3d11a48ee} ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.runtime.WorkflowRuntimeTest.contradictoryAcceptanceCannotPublishOrReachSuccessConsumersEvenAfterColdResume(WorkflowRuntimeTest.java:468)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.runtime.FrozenRuntimeIdentityTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.runtime.FrozenRuntimeIdentityTest
+[INFO] Running dev.dual.runtime.WorkflowRuntimeEventTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.622 s -- in dev.dual.runtime.WorkflowRuntimeEventTest
+[INFO] Running dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.dual.runtime.lifecycle.TerminalDeliveryWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.dual.runtime.lifecycle.SmallWorkflowProfileDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.dual.runtime.lifecycle.FullWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.974 s -- in dev.dual.runtime.lifecycle.AcceptanceRevisionBudgetTest
+[INFO] Running dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in dev.dual.runtime.lifecycle.AcceptanceRepairWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.dual.runtime.lifecycle.WorkflowVariantSelectorTest
+[INFO] Running dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.dual.runtime.lifecycle.WorkflowDefinitionLoaderTest
+[INFO] Running dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.dual.runtime.lifecycle.ContractWorkflowDefinitionTest
+[INFO] Running dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.dual.runtime.lifecycle.LifecycleWorkflowDefinitionFactoryTest
+[INFO] Running dev.dual.runtime.RunningStateGuardTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 57.25 s -- in dev.dual.runtime.RunningStateGuardTest
+[INFO] Running dev.dual.runtime.StaleRunningRecoveryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.119 s -- in dev.dual.runtime.StaleRunningRecoveryTest
+[INFO] Running dev.dual.runtime.governance.AgentCapabilityCatalogTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.dual.runtime.governance.AgentCapabilityCatalogTest
+[INFO] Running dev.dual.runtime.delivery.DeliveryApplicationServiceTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.125 s -- in dev.dual.runtime.delivery.DeliveryApplicationServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   WorkflowRuntimeTest.contradictoryAcceptanceCannotPublishOrReachSuccessConsumersEvenAfterColdResume:468 {agent_execution_artifact_contract_results=[{contractType=acceptance_review, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=verification requires the approved EXECUTION contract, path=, present=true, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., primaryReason=required_artifact_contract_failed, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=CONTRACT_FAILED}, agent_execution_result_contract={decision=ACCEPT, present=true, summary=, valid=true, validationError=}, contract_allowed_decisions=[ACCEPT, ACCEPT_WITH_NOTES, REJECT], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-contradiction-accept-true/artifacts/contract-failures/node-acceptance-codex_verifier_review-001.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-contradiction-accept-true/artifacts/contract-failures/node-acceptance-codex_verifier_review-001.json, contract_node_id=acceptance.codex_verifier_review, contract_required_keys=[decision, summary], exit_code=0, message=verification requires the approved EXECUTION contract, parse_error={code=VERIFICATION_EVIDENCE_INVALID, details={}, message=verification requires the approved EXECUTION contract}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-contradiction-accept-true/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-001-run-001/binding.json, repository_fact_binding_sha256=71aef53fd19feccf4fad2284161cbdabdd9d67b461ce6809c3a3e489013dc71d, run_id=run-001, run_metadata=.agent/workstreams/ws-contradiction-accept-true/runs/run-001/run.json, completion_ref=.agent/workstreams/ws-contradiction-accept-true/runs/run-001/outputs/nxe-1791298680503-610d7649-completion.json, completion_sha256=a9cef0a81c2d32efe970884cc3dd7a2cc9fbf6b82253d5ae9cd581c3d11a48ee} ==> expected: <true> but was: <false>
+[ERROR]   AgentResultEnvelopeParserTest.rejectWithMissingTestsRequiresTypedVerificationRemediation:209 expected: <true> but was: <false>
+[ERROR]   ArtifactContractFixtureRegressionTest.acceptsSelfTestResult:77->validate:117 {run_metadata=.agent/workstreams/ws-fixture/runs/run-fixture/run.json, run_id=run-fixture, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, contract_node_id=implement.claude_self_test_report, contract_required_keys=[decision, summary], contract_allowed_decisions=[SELF_TEST_COMPLETE, BLOCKED, SELF_TEST_INCOMPLETE], parse_error={message=successful verification requires one evidence check for each approved criterion, details={}, code=VERIFICATION_EVIDENCE_INVALID}, contract_failure_diagnostic_ref=.agent/workstreams/ws-fixture/artifacts/contract-failures/node-implement-claude_self_test_report-018.json, contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-fixture/artifacts/contract-failures/node-implement-claude_self_test_report-018.md, message=successful verification requires one evidence check for each approved criterion, agent_execution_result_contract={present=true, valid=true, decision=SELF_TEST_COMPLETE, summary=, validationError=}, agent_execution_artifact_contract_results=[{contractType=self_test_report, required=true, present=true, valid=false, path=, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=successful verification requires one evidence check for each approved criterion}]} ==> expected: <COMPLETED> but was: <FAILED>
+[ERROR]   AuthoredBoundarySequenceTest.aLaterOpenApprovalBlocksOldRetryAndAResolvedReplacementDoesNotRebindIt:216 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AuthoredBoundarySequenceTest.everyDeclaredImplementationAndDirectSelfTestEntryConsumesTheApprovedPlan:305 gate.contract_review:approved damaged=falseNodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-implement-claude_self_test_report-019, nodeDefinitionId=implement.claude_self_test_report, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-implement, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-authored/runs/setup-run-5/outputs/result.json, .agent/workstreams/ws-authored/runs/setup-run-5/outputs/result.contract.json], inputTransition={transition_type=normal, condition=unconditional, source_node_sha256=4eb5fc9949abceb0b7564642c86cfa77ed06f206dd81b383042bfa6c249271c8, source_node_instance_id=node-implement-claude_implement-018, required=true}, outputRefs=[.agent/workstreams/ws-authored/runs/setup-run-6/outputs/result.json, .agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-019.json, .agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-019.md], result={agent_execution_artifact_contract_results=[{contractType=self_test_report, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=successful verification requires one evidence check for each approved criterion, path=, present=true, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., primaryReason=required_artifact_contract_failed, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=CONTRACT_FAILED}, agent_execution_result_contract={decision=SELF_TEST_COMPLETE, present=true, summary=, valid=true, validationError=}, contract_allowed_decisions=[SELF_TEST_COMPLETE, BLOCKED, SELF_TEST_INCOMPLETE], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-019.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-019.json, contract_node_id=implement.claude_self_test_report, contract_required_keys=[decision, summary], exit_code=0, message=successful verification requires one evidence check for each approved criterion, parse_error={code=VERIFICATION_EVIDENCE_INVALID, details={}, message=successful verification requires one evidence check for each approved criterion}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-6, run_metadata=.agent/workstreams/ws-authored/runs/setup-run-6/run.json, completion_ref=.agent/workstreams/ws-authored/runs/setup-run-6/outputs/nxe-1791298568815-c76f3b09-completion.json, completion_sha256=2a6c9e73108458be82c4b08dff0bc606b55b499007d4055798291cc088b7d243}, runRef=null, latestExecutionId=nxe-1791298568815-c76f3b09, startedAt=2026-10-06T14:56:08.816264Z, finishedAt=2026-10-06T14:56:08.880371Z] ==> expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AuthoredBoundarySequenceTest.successiveHumanPacketsExposeTheSameCandidateAndObligationsAsTheirConsumer:384 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AuthoredBoundarySequenceTest.unchangedRetryAndColdJvmResolveIdenticalObligations:174 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AuthoredStageSequenceTest.approvedRevisionDoesNotReplaySupersededInputManifests:141 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AuthoredStageSequenceTest.consistentPathRenamePreservesTheCompleteAuthoredSequence:105 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AuthoredStageSequenceTest.consistentPathRenamePreservesTheCompleteAuthoredSequence:105 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AuthoredStageSequenceTest.publishedInputBindingDoesNotDependOnHistoricalPromptOrManifestLocator:158 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AuthoredStageSequenceTest.reviewedHumanPlanShowsNewIssuesThenCarriesThemWithTheHumanNote:52 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AuthoredStageSequenceTest.reviewerDrivenPlanRevisionsKeepEveryReviewObligationUntilApproval:35 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AuthoredStageSequenceTest.twoBusinessDomainsConsumeApprovedDesignAndPlanThroughTheSameRuntime:64 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-implement-claude_self_test_report-018, nodeDefinitionId=implement.claude_self_test_report, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-implement, iterationId=iter-001, inputRefs=[.agent/workstreams/ws-authored/runs/setup-run-5/outputs/result.json, .agent/workstreams/ws-authored/runs/setup-run-5/outputs/result.contract.json], inputTransition={transition_type=normal, condition=unconditional, source_node_sha256=4f0f2c0d40a3ef9f29af1fef093b87eb754afd0020b4c94b7d3c979f3ff3a36b, source_node_instance_id=node-implement-claude_implement-017, required=true}, outputRefs=[.agent/workstreams/ws-authored/runs/setup-run-6/outputs/result.json, .agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-018.json, .agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-018.md], result={agent_execution_artifact_contract_results=[{contractType=self_test_report, errorCode=VERIFICATION_EVIDENCE_INVALID, errorMessage=successful verification requires one evidence check for each approved criterion, path=, present=true, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The agent result was valid, but one or more required artifact projections failed validation., primaryReason=required_artifact_contract_failed, recoveryCategory=ARTIFACT_CONTRACT_FAILURE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=CONTRACT_FAILED}, agent_execution_result_contract={decision=SELF_TEST_COMPLETE, present=true, summary=, valid=true, validationError=}, contract_allowed_decisions=[SELF_TEST_COMPLETE, BLOCKED, SELF_TEST_INCOMPLETE], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-018.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-authored/artifacts/contract-failures/node-implement-claude_self_test_report-018.json, contract_node_id=implement.claude_self_test_report, contract_required_keys=[decision, summary], exit_code=0, message=successful verification requires one evidence check for each approved criterion, parse_error={code=VERIFICATION_EVIDENCE_INVALID, details={}, message=successful verification requires one evidence check for each approved criterion}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, run_id=setup-run-6, run_metadata=.agent/workstreams/ws-authored/runs/setup-run-6/run.json, completion_ref=.agent/workstreams/ws-authored/runs/setup-run-6/outputs/nxe-1791298625586-b691537d-completion.json, completion_sha256=a23e665b2c1d3b76b3ad26bee35afc52b95dfe141f8a1ac71c19e7d8cdf28405}, runRef=null, latestExecutionId=nxe-1791298625586-b691537d, startedAt=2026-10-06T14:57:05.587114Z, finishedAt=2026-10-06T14:57:05.645888Z] ==> expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   CompletionEvidenceLineageResolverTest.resolvesAcceptanceAndSelfTestThroughPersistedContextLineage:36 expected: <AVAILABLE> but was: <INVALID>
+[ERROR]   EvidenceCollectionSequenceTest.realInlineAndWorkerConsumersRejectBeforeAndAfterExecutionIncludingThrownFailure:74 expected: <RUNNING> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   ExternalVerificationEvidenceTest.realRuntimePublishesSelfTestAndAcceptanceSidecarsWithExactMaterialRefs:86 # Current Failure
+
+## Summary
+
+- Workflow Status: WAITING_FOR_RECOVERY
+- Node: implement.claude_self_test_report
+- Node Instance: node-implement-claude_self_test_report-020
+- Node Status: FAILED
+- Handler: acpx.agent_run
+- Reason: AGENT_OUTPUT_CONTRACT_VIOLATION
+- Recoverable: N/A
+- Exit Code: 0
+- Run ID: run-node-implement-claude_self_test_report-020
+- Agent: N/A
+- Session: N/A
+- Attention Category: ARTIFACT_CONTRACT_FAILURE
+- Retry Safe: false
+
+## Contract Failure Diagnostic
+
+- Diagnostic JSON: .agent/workstreams/ws-test/artifacts/contract-failures/node-implement-claude_self_test_report-020.json
+- Diagnostic Markdown: .agent/workstreams/ws-test/artifacts/contract-failures/node-implement-claude_self_test_report-020.md
+- Error Code: VERIFICATION_EVIDENCE_INVALID
+- Error Message: successful verification requires one evidence check for each approved criterion
+
+## Evidence
+
+- .agent/workstreams/ws-test/runs/run-node-implement-claude_self_test_report-020/outputs/result.json
+- .agent/workstreams/ws-test/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-020-run-node-implement-claude_self_test_report-020/binding.json
+- .agent/workstreams/ws-test/artifacts/contract-failures/node-implement-claude_self_test_report-020.json
+- .agent/workstreams/ws-test/artifacts/contract-failures/node-implement-claude_self_test_report-020.md
+
+## Suggested Action
+
+- Inspect the diagnostic details, prompt contract, and source output before retrying the node.
+- Inspect the contract diagnostic and fix the output contract before retrying.
+- Command: `dualctl retry --workdir /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-4531879658103301894/runtime-false-valid ws-test`.
+ ==> expected: not equal but was: <WAITING_FOR_RECOVERY>
+[ERROR]   FailureClassifyHandlerTest.acceptedSidecarAllowsAbsentRemediationButRejectsUnknownRemediation:253 expected: <COMPLETED> but was: <FAILED>
+[ERROR]   SelfTestContinuationSequenceTest.realLiteFlowRoutesValidatedSelfTestAndColdLoadsTheCorrectSuccessorAcrossSiblings:107 NodeResult[outcome=VERIFICATION_EVIDENCE_INVALID, status=FAILED, outputRefs=[], result={allowed_decisions=[SELF_TEST_COMPLETE, BLOCKED, SELF_TEST_INCOMPLETE], input_refs=[.agent/workstreams/ws-test/runs/run-test/outputs/self-test.json, .agent/workstreams/ws-test/runs/run-test/outputs/self-test.contract.json], contract_values={decision=SELF_TEST_COMPLETE, summary=Verification result}, parse_error={}, reason=VERIFICATION_EVIDENCE_INVALID, message=missing prepared binding}, errorMessage=missing prepared binding] ==> expected: <COMPLETED> but was: <FAILED>
+[ERROR]   TypedPlanScopeTest.approvedPlanDoesNotExcuseActualGitScopeViolation:210 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   TypedPlanScopeTest.approvedPlanKeepsOccurrenceProjectionWithoutPublishingCanonicalPlan:90 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   TypedPlanScopeTest.everyPlanTopologySurvivesColdReadAndFeedsTheSameApprovedIdentityToImplementationAndSelfTest:116 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[ERROR]   WorkflowIntegrationTest.chain5_needsRevisionLoopWithContextCarryover:328 expected: <COMPLETED> but was: <WAITING_FOR_RECOVERY>
+[INFO] 
+[ERROR] Tests run: 710, Failures: 23, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Skipping dual-adapter-acpx
+[INFO] This project has been banned from the build due to previous failures.
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Skipping dual-cli
+[INFO] This project has been banned from the build due to previous failures.
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Skipping dual-server
+[INFO] This project has been banned from the build due to previous failures.
+[INFO] ------------------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.834 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  8.020 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  1.468 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  1.054 s]
+[INFO] dual-runtime ....................................... FAILURE [05:36 min]
+[INFO] dual-adapter-acpx .................................. SKIPPED
+[INFO] dual-cli ........................................... SKIPPED
+[INFO] dual-server ........................................ SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  05:47 min
+[INFO] Finished at: 2026-10-06T22:59:04+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project dual-runtime: There are test failures.
+[ERROR] 
+[ERROR] See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-runtime

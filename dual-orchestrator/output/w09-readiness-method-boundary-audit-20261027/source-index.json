@@ -1,0 +1,421 @@
+{
+  "scope": "Examined anchors only; no claim of whole-repository semantic audit",
+  "sources": [
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java",
+      "sha256": "240c007625d039a19d60fb62a810107769dc73742e2a7ec925b7495ce9ae11ab",
+      "anchors": [
+        {
+          "text": "public record Request",
+          "lines": [
+            39
+          ],
+          "found": true
+        },
+        {
+          "text": "public static TaskContract.Reference record",
+          "lines": [
+            55
+          ],
+          "found": true
+        },
+        {
+          "text": "static void validateBindings",
+          "lines": [
+            112,
+            119
+          ],
+          "found": true
+        },
+        {
+          "text": "request.method().equals(binding.method())",
+          "lines": [
+            152
+          ],
+          "found": true
+        },
+        {
+          "text": "static boolean sameVerificationBoundary",
+          "lines": [
+            161
+          ],
+          "found": true
+        },
+        {
+          "text": "static String context",
+          "lines": [
+            183
+          ],
+          "found": true
+        },
+        {
+          "text": "private static void validateRequest",
+          "lines": [
+            204,
+            209
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java",
+      "sha256": "0ae8fda308de8eff0690d1eaaf60d5c26f51902f2ebeb9c81aaefd14007590fe",
+      "anchors": [
+        {
+          "text": "private static String verificationInstruction",
+          "lines": [
+            93
+          ],
+          "found": true
+        },
+        {
+          "text": "observable assertion and execution method",
+          "lines": [
+            374
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/PlanArtifactDocument.java",
+      "sha256": "0dd5af3764e743fba78dee1b9483fb083a06eaacfd76f98ea13351873ce8075b",
+      "anchors": [
+        {
+          "text": "public record PlanArtifactDocument",
+          "lines": [
+            24
+          ],
+          "found": true
+        },
+        {
+          "text": "List<String> validationPlan",
+          "lines": [
+            31
+          ],
+          "found": true
+        },
+        {
+          "text": "typedList(document.get(\"verification_bindings\")",
+          "lines": [
+            59
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/PlanScopeValidator.java",
+      "sha256": "6766e6e8a86ded851990d01461d8a457ada94c80754cd8bcc5577b20abec4052",
+      "anchors": [
+        {
+          "text": "static List<String> shapeErrors",
+          "lines": [
+            15
+          ],
+          "found": true
+        },
+        {
+          "text": "static List<String> validate",
+          "lines": [
+            47
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java",
+      "sha256": "e3352a0689d07fa9911b958186b61a02560f95ecd9f478b579f8d75c6db02ea7",
+      "anchors": [
+        {
+          "text": "FAIL_ON_UNKNOWN_PROPERTIES",
+          "lines": [
+            24
+          ],
+          "found": true
+        },
+        {
+          "text": "STRICT_DUPLICATE_DETECTION",
+          "lines": [
+            20
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeValidator.java",
+      "sha256": "47e4eed927b88c14e03441167e8ffa2336d04d67aeb53b524872702369450ae0",
+      "anchors": [
+        {
+          "text": "case AgentResultEnvelope.PlanResult",
+          "lines": [
+            199,
+            266
+          ],
+          "found": true
+        },
+        {
+          "text": "result.plan.validation_plan",
+          "lines": [
+            213
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultDocumentProjector.java",
+      "sha256": "4f89974d0207de7f0e601c5303f584e415bdc7694816ae8d52b5481380746022",
+      "anchors": [
+        {
+          "text": "Map<String, Object> planArtifact",
+          "lines": [
+            216
+          ],
+          "found": true
+        },
+        {
+          "text": "document.put(\"validation_plan\"",
+          "lines": [
+            228
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java",
+      "sha256": "015f0449a9eebf144f06822eeaf3415a9d496252d535401c6e3141ac928e3648",
+      "anchors": [
+        {
+          "text": "appendTypedPlanArtifact(builder, contract.planArtifact())",
+          "lines": [
+            123,
+            539
+          ],
+          "found": true
+        },
+        {
+          "text": "private static void appendTypedPlanArtifact",
+          "lines": [
+            556
+          ],
+          "found": true
+        },
+        {
+          "text": "\"Validation Plan\"",
+          "lines": [
+            565
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java",
+      "sha256": "bdd7cdb2525494246276f231f634d8434f46d4c3de7a3d100a375e1bf45050b9",
+      "anchors": [
+        {
+          "text": "\"plan.decision\".equals",
+          "lines": [
+            86
+          ],
+          "found": true
+        },
+        {
+          "text": "VerificationReadiness.validateBindings",
+          "lines": [
+            101
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java",
+      "sha256": "b6318e71eb1ef4117fe6d4d0ffe66bb506ea53fd0120b9cc5afa6ee913863809",
+      "anchors": [
+        {
+          "text": "private NodeResult compileExecution",
+          "lines": [
+            144
+          ],
+          "found": true
+        },
+        {
+          "text": "VerificationReadiness.validateBindings",
+          "lines": [
+            165
+          ],
+          "found": true
+        },
+        {
+          "text": "plan.verificationBindings(), plan.authorityRefs()",
+          "lines": [
+            191
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+      "sha256": "4c963675c7a44027bcf1a06813f164d81741def2dd22ed4a3b2be6967aab57c7",
+      "anchors": [
+        {
+          "text": "static boolean sameExecutionBoundary",
+          "lines": [
+            368
+          ],
+          "found": true
+        },
+        {
+          "text": "private static Failure validateExecutionInputs",
+          "lines": [
+            376
+          ],
+          "found": true
+        },
+        {
+          "text": "VerificationReadiness.validateBindings",
+          "lines": [
+            417
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunGovernanceContext.java",
+      "sha256": "f7f2510db253afb6485a16a11faa9300b36c63b8fb43a6ea559be3b6f043b7d1",
+      "anchors": [
+        {
+          "text": "builder.append(VerificationReadiness.context",
+          "lines": [
+            101
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationEvidence.java",
+      "sha256": "b38a56085fb5bd2c74aaf735498c16331dbb0262ad2e5124bc7977b86db42137",
+      "anchors": [
+        {
+          "text": "static void verify(",
+          "lines": [
+            109
+          ],
+          "found": true
+        },
+        {
+          "text": "public static void verifyExit",
+          "lines": [
+            168
+          ],
+          "found": true
+        },
+        {
+          "text": "static void verifySelectedExits",
+          "lines": [
+            176
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/main/java/dev/dual/core/contract/TaskContract.java",
+      "sha256": "f55c6ebe367773b65f68fc1eaa3e04401c669316aaeeedbf88dc505c43f4185c",
+      "anchors": [
+        {
+          "text": "public record VerificationBinding",
+          "lines": [
+            139
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java",
+      "sha256": "61a4a30d463e4747c1a70c201ea85fd4ca76bb4a1104b880647c8936bd7c147d",
+      "anchors": [
+        {
+          "text": "verification method and detail_owner are required",
+          "lines": [
+            97
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java",
+      "sha256": "ff6f992a29525994f7733656c111bd7cf3bb159b5a2835d62e070090cdf89db7",
+      "anchors": [
+        {
+          "text": "renderCorrectionPrompt",
+          "lines": [
+            92,
+            234
+          ],
+          "found": true
+        },
+        {
+          "text": "This is the only contract-correction attempt",
+          "lines": [
+            245,
+            275
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/VerificationReadinessTest.java",
+      "sha256": "14a191181530e0ebbbaccdd9b9f07190d3950a4ef246be748943f6e02b2290eb",
+      "anchors": [
+        {
+          "text": "unregisteredBytesMissingCriteriaAndChangedMethodDoNotQualify",
+          "lines": [
+            84
+          ],
+          "found": true
+        }
+      ]
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java",
+      "sha256": "a2133721c117f7fd2fb7ffed954e98a96f5d844827757a67426bd5ef4b2bd882",
+      "anchors": [
+        {
+          "text": "missingReadinessCanBeRecordedRevisedReviewedApprovedAndConsumed",
+          "lines": [
+            22
+          ],
+          "found": true
+        },
+        {
+          "text": "dependencyDriftBeforeApprovalRejectsWithoutDecisionOrDispatch",
+          "lines": [
+            52
+          ],
+          "found": true
+        },
+        {
+          "text": "weakeningApprovedExitRequirementReturnsToAuthorReviewAndNewExecutionApproval",
+          "lines": [
+            88
+          ],
+          "found": true
+        }
+      ]
+    }
+  ],
+  "unlocated_anchors": []
+}

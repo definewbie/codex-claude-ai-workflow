@@ -1,0 +1,18 @@
+[
+  {
+    "name": "original-package-sha256.json",
+    "entries": 402,
+    "mismatches": []
+  },
+  {
+    "name": "checkpoint-ledger-sha256.json",
+    "entries": 541,
+    "mismatches": []
+  },
+  {
+    "both_stops_preserved": true,
+    "no_new_step": true,
+    "implementation_tests": "NOT_RUN: DESIGN_ONLY",
+    "tool_path_lookup_error": "Two non-existing script names queried during initial sibling inventory; read-only lookup error only, corrected by listing actual files; no failed production test claimed"
+  }
+]

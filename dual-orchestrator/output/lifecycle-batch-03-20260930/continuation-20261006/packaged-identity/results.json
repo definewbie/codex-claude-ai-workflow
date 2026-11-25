@@ -1,0 +1,24 @@
+[
+  {
+    "role": "cli",
+    "mode": "initialize",
+    "exit": 0
+  },
+  {
+    "role": "server",
+    "mode": "read",
+    "exit": 0
+  },
+  {
+    "role": "cli",
+    "mode": "read",
+    "exit": 0
+  },
+  {
+    "jars": {
+      "dual-cli/target/dual-cli-0.1.0-SNAPSHOT.jar": "bed1c0b68cbd3c51ae15774a26ac5425882b3b6866716e7df73ed9e48886e3d5",
+      "dual-server/target/dual-server-0.1.0-SNAPSHOT.jar": "aeca9f23312ba11786fcfe75df61db860153ca959fdd9f74550ee1cfe46b65f7"
+    },
+    "live_provider_runs": 0
+  }
+]

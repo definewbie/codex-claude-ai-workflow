@@ -1,0 +1,8 @@
+full-reference False
+program-sha True
+goal-shape True
+Traceback (most recent call last):
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-revision-forward-fix-20261014/run-counterproofs.py", line 28, in <module>
+    assert all(r["expected_failure_detected"] and r["source_restored"] for r in results)
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

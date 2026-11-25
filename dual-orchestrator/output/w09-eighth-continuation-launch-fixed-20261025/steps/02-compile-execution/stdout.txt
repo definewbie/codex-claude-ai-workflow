@@ -1,0 +1,10 @@
+Step 1: gate.contract_review -> WAITING_FOR_HUMAN (resumed workflow)
+
+Next actions:
+  1. Read the current review packet:
+     dualctl review show --workdir /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree ws-20261023T005431Z-9YYF
+     packet: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/reviews/node-gate-contract_review-028.md
+  2. Choose one action after review:
+Then: dualctl approve --run --workdir /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree ws-20261023T005431Z-9YYF
+Or:   dualctl review decide --action clarify --note 'DECISION_NOTE' --run --workdir /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree ws-20261023T005431Z-9YYF
+Or:   dualctl review decide --action reject --note 'DECISION_NOTE' --run --workdir /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree ws-20261023T005431Z-9YYF

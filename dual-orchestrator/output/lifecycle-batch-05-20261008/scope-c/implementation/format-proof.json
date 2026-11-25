@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "scope": "post-reactor formatting only; existing AST guard rerun",
+  "class_files_checked": 1109,
+  "all_class_bytes_identical": true,
+  "source_files_changed": [
+    "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProjectionVerifier.java",
+    "dual-runtime/src/test/resources/contract-qualification-rejection-sites.json"
+  ],
+  "production_token_and_line_count_changes": false,
+  "test_index_only_not_runtime": true,
+  "log": "format-index-check.log",
+  "not_added_to_whole_reactor_count": true
+}

@@ -33,7 +33,8 @@ public final class TaskContractValidator {
             if (contract.acceptanceCriteria().isEmpty()) {
                 errors.add("READY_FOR_REVIEW requires non-empty acceptanceCriteria");
             }
-            if (contract.scope() != null && contract.scope().included().isEmpty()) {
+            if (contract.phase() == TaskContract.Phase.EXECUTION
+                    && contract.scope() != null && contract.scope().included().isEmpty()) {
                 errors.add("READY_FOR_REVIEW requires non-empty scope.included");
             }
             if (contract.acceptanceCriteria().size() < 2) {
@@ -46,8 +47,10 @@ public final class TaskContractValidator {
                 errors.add("READY_FOR_REVIEW requires constraints or nonGoals to define boundaries");
             }
         }
-        validateList("acceptanceCriteria", contract.acceptanceCriteria(), errors);
-        validateList("testRequirements", contract.testRequirements(), errors);
+        var clauseIds = new HashSet<String>();
+        validateClauses("acceptanceCriteria", contract.acceptanceCriteria(), clauseIds, errors);
+        validateClauses("testRequirements", contract.testRequirements(), clauseIds, errors);
+        validatePhase(contract, errors);
         validateList("constraints", contract.constraints(), errors);
         validateList("nonGoals", contract.nonGoals(), errors);
         validateList("riskAreas", contract.riskAreas(), errors);
@@ -60,6 +63,91 @@ public final class TaskContractValidator {
         }
 
         return errors;
+    }
+
+    private static void validatePhase(TaskContract contract, List<String> errors) {
+        var source = contract.source();
+        if (source == null || source.proposal() == null || source.goalApproval() == null
+                || source.rawRequestRef() == null || source.rawRequestRef().isBlank()
+                || source.createdBy() == null || source.createdBy().isBlank()) {
+            errors.add("source must bind the proposal and actual goal approval");
+        }
+        if (contract.phase() == TaskContract.Phase.GOAL) {
+            if (contract.scope() != null && !contract.scope().included().isEmpty())
+                errors.add("GOAL cannot grant product writes through scope.included");
+            if (contract.goalContract() != null || !contract.reviewedCandidates().isEmpty()
+                    || !contract.verificationBindings().isEmpty() || !contract.nonessentialOperationDeclarations().isEmpty())
+                errors.add("GOAL cannot masquerade as an EXECUTION contract");
+            return;
+        }
+        if (contract.goalContract() == null) errors.add("EXECUTION requires the approved GOAL reference");
+        if (contract.reviewedCandidates().size() != 2
+                || new HashSet<>(contract.reviewedCandidates()).size() != 2)
+            errors.add("EXECUTION requires distinct reviewed design and plan references");
+        var required = new HashSet<String>();
+        for (var clause : contract.acceptanceCriteria()) if (clause != null) required.add(clause.id());
+        var covered = new HashSet<String>();
+        for (var binding : contract.verificationBindings()) {
+            errors.addAll(verificationEvidenceErrors(binding));
+            if (binding == null) continue;
+            if (!required.contains(binding.criterionId())) errors.add("verification refers to an unapproved criterion");
+            if (!covered.add(binding.criterionId())) errors.add("duplicate verification criterion: " + binding.criterionId());
+            if (binding.method() == null || binding.method().isBlank()
+                    || binding.detailOwner() == null || binding.detailOwner().isBlank())
+                errors.add("verification method and detail_owner are required");
+            if (binding.environmentRefs().isEmpty() || binding.feasibilityRefs().isEmpty())
+                errors.add("verification requires environment and feasibility evidence references");
+            if (binding.executor() == null || binding.evidenceKind() == null
+                    || (binding.executor() == TaskContract.Executor.AGENT
+                        && binding.evidenceKind() != TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS)
+                    || (binding.executor() == TaskContract.Executor.OPERATOR
+                        && binding.evidenceKind() != TaskContract.EvidenceKind.OPERATOR_DECLARATION_WITH_MATERIAL))
+                errors.add("verification executor and evidence kind must agree");
+        }
+        if (!covered.equals(required)) errors.add("every approved acceptance criterion requires a verification exit");
+        var declarationIds = new HashSet<String>();
+        for (var declaration : contract.nonessentialOperationDeclarations()) {
+            if (declaration.id() == null || declaration.id().isBlank() || !declarationIds.add(declaration.id())
+                    || declaration.nodeDefinitionId() == null || declaration.nodeDefinitionId().isBlank()
+                    || declaration.nodeContractRef() == null
+                    || !List.of("read", "search").contains(declaration.operationKind())
+                    || declaration.operationParametersSha256() == null
+                    || !declaration.operationParametersSha256().matches("[0-9a-f]{64}")
+                    || declaration.rationale() == null || declaration.rationale().isBlank()
+                    || !"permission_nonessential.v1".equals(declaration.ruleIdentity())
+                    || declaration.criterionIds().isEmpty()
+                    || !required.containsAll(declaration.criterionIds())
+                    || new HashSet<>(declaration.criterionIds()).size() != declaration.criterionIds().size())
+                errors.add("invalid nonessential operation declaration: " + declaration.id());
+        }
+
+    }
+
+    /** Evidence requirements are approved with the plan, never inferred from observed results. */
+    public static List<String> verificationEvidenceErrors(TaskContract.VerificationBinding binding) {
+        if (binding == null) return List.of("verification binding is required");
+        var errors = new ArrayList<String>();
+        if (binding.actualExitRequired() == null)
+            errors.add("actual_exit_required must be explicitly declared for " + binding.criterionId());
+        if (binding.expectedExitCode() != null && !Boolean.TRUE.equals(binding.actualExitRequired()))
+            errors.add("expected_exit_code requires actual_exit_required=true for " + binding.criterionId());
+        if (Boolean.TRUE.equals(binding.actualExitRequired())
+                && binding.evidenceKind() != TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS)
+            errors.add("actual process exit requires program execution evidence for " + binding.criterionId());
+        return List.copyOf(errors);
+    }
+
+    private static void validateClauses(String name, List<TaskContract.Clause> clauses,
+                                        java.util.Set<String> allIds, List<String> errors) {
+        var texts = new ArrayList<String>();
+        for (var clause : clauses) {
+            if (clause == null || clause.id() == null || clause.id().isBlank()
+                    || !clause.id().equals(clause.id().trim()) || !allIds.add(clause.id())) {
+                errors.add(name + " contains missing or duplicate clause id");
+            }
+            texts.add(clause == null ? null : clause.text());
+        }
+        validateList(name, texts, errors);
     }
 
     private static void validateIncludedRefs(List<TaskContract.ScopeEntry> refs, List<String> errors) {

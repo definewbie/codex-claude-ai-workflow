@@ -1,0 +1,16 @@
+请对 /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator 的 W09 第七例启动核验离线修正做独立受影响材料评审，遵守 AGENTS.md。默认主审独立完成，不启动额外 agent。
+
+入口：output/w09-seventh-startup-offline-fix-20261023/assessment.md。
+本轮用户只授权离线修正进程核验、查会话启动超时及成对验证；不新增模型调用、不启动新例。本轮不改产品Java/发行、历史第七例账本或其INVALID结论。阅读同目录 analysis-before-edit.md、process_check.py、两个 *.candidate/*.diff、test_process_check.py、实际正反观察和 source-index.json；原失败材料位于相邻 w09-seventh-gate-calibrated-20261022/。
+
+请自行重建：旧进程观察→启动前置判定→原session_ensure→原固定命令/完成/唯一outcome→停止/后续资格。不要预设候选说明或根因结论。
+
+重点：
+1. 旧PID误判的根因与新守卫是否成立；准备/派发前两兄弟入口是否共用强制消费，成功读取、PID存在、无权限/超时/坏输出是否正确区分；冷启动、拒绝后零后续动作与合法正向的证明范围是否诚实，是否引入不必要复杂度。
+2. 核验“45秒直接超时机制”与“内部阻塞根因”的区分。源码链、历史空输出/无会话记录、当前npx/npm离线对照分别能证明什么？是否把模拟/当前配置/无日志误说成历史因果？是否还有更简单的现有只读证据入口。
+3. 第七例INVALID、领域session_bootstrap_failed与UNAVAILABLE是否保持分立；是否存在自动重试、单例救援、放宽权限/超时或改现场。
+4. 就ROI判断：纯operator候选修正与产品发行字节未变情况下，本轮验证是否覆盖实际改动；未来完整Gate接线/原生初始化验证哪些尚未成立。若建议下一观察，限定必要范围，不预设新增平台或立即真实运行。
+
+按 Declared by / Proven by / Consumed by / Enforced before / Failure route / Cannot-bypass test 给分级发现、证据及未核验范围。区分离线候选正确、内部根因已证、未来可启动，不能相互替代；不要预填PASS。
+
+只读评审；不要执行真实 native/provider/session/prompt，不运行两个候选的初始化逻辑，不改代码/文档/账本，不启动新例或替用户授权运行。

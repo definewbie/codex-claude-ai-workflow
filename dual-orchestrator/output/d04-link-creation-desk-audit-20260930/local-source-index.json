@@ -1,0 +1,41 @@
+{
+  "claude": {
+    "path": "/opt/homebrew/Caskroom/claude-code/2.1.277/claude",
+    "sha256": "73d6a2a55c46907e49bd8bb7608e134333bd71173351ee16ddce7d7db9914b9c",
+    "extraction": "literal embedded JavaScript bytes, never evaluated",
+    "fileLinkStringCount": 0,
+    "excerpts": [
+      {
+        "symbol": "la",
+        "offset": 176878365,
+        "endOffsetExclusive": 176878496,
+        "sha256": "6b750ad224510d4ebb00dec44f3f3c2cc0c81e962bfe1a51ded316e99b76650e",
+        "path": "claude-la.txt"
+      },
+      {
+        "symbol": "V4",
+        "offset": 176880843,
+        "endOffsetExclusive": 176881452,
+        "sha256": "ea46f0a3a931ee5ce2ccc13be941b0d92f4c4de99ad06a05a516f73d7d3b8902",
+        "path": "claude-V4.txt"
+      },
+      {
+        "symbol": "M4",
+        "offset": 176881452,
+        "endOffsetExclusive": 176889118,
+        "sha256": "2aaab5557e894c7038078c03a9cddc910c70092db3d8fefdda77801debe97650",
+        "path": "claude-M4.txt"
+      }
+    ],
+    "limitation": "Static embedded text, not captured effective SBPL; operation hierarchy/default semantics not established",
+    "selection": "Anchored to M4 readConfig generator and adjacent V4 write policy/la formatter; repeated minified symbol names elsewhere excluded."
+  },
+  "appsandbox-common.sb": {
+    "path": "/System/Library/Sandbox/Profiles/appsandbox-common.sb",
+    "sha256": "65e27292ec422e437dbc6a961dc99b6f552be8d701eb641cd17cbc2df24c05fa"
+  },
+  "application.sb": {
+    "path": "/System/Library/Sandbox/Profiles/application.sb",
+    "sha256": "7eae899904c89bd181f096d542a6207729152fd78a77e799e7dbd8b236160c67"
+  }
+}

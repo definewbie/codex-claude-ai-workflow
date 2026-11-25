@@ -1,0 +1,26 @@
+{
+  "status": "PASS_READ_ONLY_IDENTITY_CHECK",
+  "not_an_independent_code_review": true,
+  "real_native_calls": 0,
+  "sixth_started": false,
+  "source": {
+    "count": 659,
+    "mismatches": []
+  },
+  "submitted_material": {
+    "count": 1929,
+    "mismatches": []
+  },
+  "jars": {
+    "dual-cli": {
+      "expected": "53c6da9fe711dca9161eddfeee9d3ef74ec48f1b525c41493a253ef638de98da",
+      "frozen_matches": true,
+      "target_matches": true
+    },
+    "dual-server": {
+      "expected": "bca51b56a6f3af8a4cf063e9e85ad58431fe36d3342d04dc89f9679a588ddd7c",
+      "frozen_matches": true,
+      "target_matches": true
+    }
+  }
+}

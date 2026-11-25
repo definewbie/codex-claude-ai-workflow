@@ -1,0 +1,14 @@
+{
+  "schemaVersion" : 1,
+  "workspaceId" : "wsp-20261010T124812Z-S77X",
+  "workstreamId" : "ws-20261010T124812Z-XCZL",
+  "purpose" : "primary",
+  "kind" : "git_worktree",
+  "status" : "active",
+  "originalWorkdir" : "/private/tmp/dual-w09-newlines-20261010-fresh-03/target",
+  "effectiveWorkdir" : "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree",
+  "branch" : "codex/w09-newlines-20261010-fresh-03",
+  "baseBranch" : "main",
+  "baseCommit" : "5f83f0734868724181489ab560caee34cc645dbb",
+  "cleanupCommands" : [ "git -C /private/tmp/dual-w09-newlines-20261010-fresh-03/target worktree remove /private/tmp/dual-w09-newlines-20261010-fresh-03/worktree", "git -C /private/tmp/dual-w09-newlines-20261010-fresh-03/target branch -D codex/w09-newlines-20261010-fresh-03" ]
+}

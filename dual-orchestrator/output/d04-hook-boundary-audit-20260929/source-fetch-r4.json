@@ -1,0 +1,42 @@
+{
+  "commit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "files": [
+    {
+      "path": "codex-rs/hooks/src/events/pre_tool_use.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/events/pre_tool_use.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [
+        "IncompleteRead(39064 bytes read, 1437 more expected)"
+      ],
+      "bytes": 28591,
+      "gitBlobSha": "c1baebd4f01fd1906f461fe84cb2bf0d73058bfc",
+      "sha256": "11a421933eac6f78749470b221c4b30eeb71e5cd75e8f091f06067da7c1652e6",
+      "blobVerified": true
+    },
+    {
+      "path": "codex-rs/hooks/src/engine/dispatcher.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/engine/dispatcher.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [],
+      "bytes": 21384,
+      "gitBlobSha": "c5ee0d2ce1da03ec07b08f9ba692088142673e99",
+      "sha256": "47db17f4eaab89841947d9e7887fbefa6bc40fb41d08e70caab10fd4c1fd0e42",
+      "blobVerified": true
+    },
+    {
+      "path": "codex-rs/hooks/src/engine/command_runner.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/engine/command_runner.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [],
+      "bytes": 14546,
+      "gitBlobSha": "b68474f0cfa9c4e5a208bfd0de4ae9fddd5821b6",
+      "sha256": "c3913ff8ee6f449f07ce3c69bb2f194ad8aef2ce13b83e693165d74329ca3e14",
+      "blobVerified": true
+    },
+    {
+      "path": "codex-rs/hooks/src/engine/output_parser.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/engine/output_parser.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "errors": [
+        "IncompleteRead(28830 bytes read, 364 more expected)",
+        "IncompleteRead(23602 bytes read, 5592 more expected)"
+      ]
+    }
+  ]
+}

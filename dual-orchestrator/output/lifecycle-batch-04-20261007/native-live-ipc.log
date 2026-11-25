@@ -1,0 +1,37 @@
+✖ CLI live ask -> exact IPC reply -> original ACP continuation; saved old reply cannot replay (3607.91125ms)
+✔ concurrent asks retain exact per-request allow/deny decisions; repeats never send twice (1.5945ms)
+✔ wrong owner/prompt/session/RPC/hash/deadline/choice does not poison a legal ask (0.153625ms)
+✔ cancel/turn replacement/owner restart never restore an old callback from a commit (0.118916ms)
+✔ deadline and request publication failure cancel instead of falling through (42.581584ms)
+✔ wire rejects absent/changed generations, unbounded asks and prompt retry (0.465917ms)
+✔ live IPC replies bypass queued prompts and never recreate consumed callbacks (20.446042ms)
+✔ lost or silent IPC receipt makes one attempt and no owner recovery or resend (203.729291ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3643.343958
+
+✖ failing tests:
+
+test at dist-test/test/permission-cli.test.js:32:1
+✖ CLI live ask -> exact IPC reply -> original ACP continuation; saved old reply cannot replay (3607.91125ms)
+  AssertionError [ERR_ASSERTION]: [acpx] session exact (471d92bb-98da-4d24-8cba-b5ca7869e70f) · /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/acpx-permission-cli-55jm3P · agent starting
+  
+  
+  5 !== 0
+  
+      at TestContext.<anonymous> (file:///Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist-test/test/permission-cli.test.js:101:20)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 5,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

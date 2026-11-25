@@ -1,0 +1,43 @@
+{
+  "status": "PROVEN_ORIGINAL_OWNER_REGISTRATION_ONLY",
+  "records": [
+    {
+      "criterion": "AC-1",
+      "reference": {
+        "ref": ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json",
+        "sha256": "afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd"
+      },
+      "event_id": "readiness-eighth-readiness-ac-1-20261023.json",
+      "event_type": "verification_readiness_recorded",
+      "source": "OPERATOR_ATTESTED",
+      "not_execution_evidence": true
+    },
+    {
+      "criterion": "AC-2",
+      "reference": {
+        "ref": ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json",
+        "sha256": "81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99"
+      },
+      "event_id": "readiness-eighth-readiness-ac-2-20261023.json",
+      "event_type": "verification_readiness_recorded",
+      "source": "OPERATOR_ATTESTED",
+      "not_execution_evidence": true
+    },
+    {
+      "criterion": "AC-3",
+      "reference": {
+        "ref": ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json",
+        "sha256": "ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf"
+      },
+      "event_id": "readiness-eighth-readiness-ac-3-20261023.json",
+      "event_type": "verification_readiness_recorded",
+      "source": "OPERATOR_ATTESTED",
+      "not_execution_evidence": true
+    }
+  ],
+  "not_proven": [
+    "native Python execution",
+    "test success",
+    "final execution approval"
+  ]
+}

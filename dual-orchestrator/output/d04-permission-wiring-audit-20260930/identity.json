@@ -1,0 +1,80 @@
+{
+  "capturedAt": "2026-09-30T08:29:11.505917+00:00",
+  "nativeRuns": 0,
+  "providerCalls": 0,
+  "offlineBehaviorTestsRun": 0,
+  "extraAgents": 0,
+  "packages": [
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/package.json",
+      "name": "acpx",
+      "version": "0.13.2",
+      "sha256": "365d2b9f3e260f03517e45cc7e207931644e91bfe7f66143d9aea47c95b64587"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/node_modules/@agentclientprotocol/sdk/package.json",
+      "name": "@agentclientprotocol/sdk",
+      "version": "1.4.0",
+      "sha256": "89bbcd7a71a3cd6e94b7096ef1f239dda62b5fb8aef840d3475af3fbfff3a955"
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/package.json",
+      "name": "@agentclientprotocol/claude-agent-acp",
+      "version": "0.70.0",
+      "sha256": "dc85a06d256602b6ad40429b69bc7920ee4297839136b0e722199e4c7daf8567"
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/package.json",
+      "name": "@agentclientprotocol/codex-acp",
+      "version": "1.10.0",
+      "sha256": "7addfe1ad54d5a39a6961dd9918b9256fcc22c5a1dbdd4c83f91a41dda182965"
+    }
+  ],
+  "sourceMapMatches": [
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/types.ts",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/permission-prompt.ts",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/permissions.ts",
+      "matches": true
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts",
+      "matches": true
+    }
+  ],
+  "buildIdentityFiles": [
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/e1-build-info.generated.ts",
+      "sha256": "4c2255586f4fd741a21b2993f7f50c7dffb7d4437d282aca6e0cf5d82b68df54"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/tools/acpx-e1/patches/acpx-v0.13.2-e1-policy-transport.patch",
+      "sha256": "4f7b7b8e81adf63b7145907cde01ac26f690113862fd9b933226a7eed4d47c8e"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist/cli.js",
+      "sha256": "78e3e4ef1ce0abcc8b35ec38e1519fb5a54b1021c2903ca6163af93e37c5ea76"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/dist/live-checkpoint-OIY8CyQl.js",
+      "sha256": "1f73a7fa9bdde3a350d7abcd24cac87ee0d26c1b49ebe8aac50dacd139ef8223"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/audit/identity.json",
+      "sha256": "110ff4e7e7513c6003ba4a132b46ce5f328a419de309c20b8e6186969f0fb755"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/audit/build-info.json",
+      "sha256": "460c77522ccdd4c487ff884daa2d4724c7c0148943efee66b45039da46f91680"
+    }
+  ],
+  "limits": "Source maps link local source with build inputs; no reproducible build or native execution proof. Older audit files retain previous patch hash.",
+  "productHead": "3362eb421514e75fdc4332f570df5bf274b3725e",
+  "productWorkspace": "existing tracked and untracked changes preserved; source hashes identify actual inspected content"
+}

@@ -1,0 +1,1812 @@
+diff --git a/dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java b/dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java
+index 2e262404..fbfe3b67 100644
+--- a/dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java
++++ b/dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/AutoRunCommand.java
+@@ -143,8 +143,8 @@ public final class AutoRunCommand implements Callable<Integer> {
+     }
+ 
+     private Snapshot loadSnapshot(WorkstreamPaths paths) throws Exception {
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "autorun inspect"))) {
+-            var ledger = CliLedgerFactory.create();
++        try (var snapshot = CliLedgerFactory.create().readSession(paths)) {
++            var ledger = snapshot.ledger();
+             var current = ledger.loadCurrent(paths);
+             NodeInstanceDocument node = null;
+             if (!current.activeNodeInstanceIds().isEmpty()) {
+@@ -170,10 +170,9 @@ public final class AutoRunCommand implements Callable<Integer> {
+         }
+         var action = gateActionFor(node.nodeDefinitionId());
+         System.out.println("Gate " + gateCount + ": " + node.nodeDefinitionId() + " -> " + action);
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "autorun gate"))) {
+-            var ledger = CliLedgerFactory.create();
+-            ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), action, "auto-resolved from autorun");
+-        }
++        // Bind to the occurrence autorun inspected; if a person or another session moved the gate meanwhile, refuse.
++        dev.dual.runtime.handler.ReviewGateActions.resolve(CliLedgerFactory.create(), paths, action,
++                "auto-resolved from autorun", node.nodeInstanceId());
+     }
+ 
+     private int runUntilPause(Path workspaceRoot, WorkstreamPaths paths) throws Exception {
+@@ -181,7 +180,7 @@ public final class AutoRunCommand implements Callable<Integer> {
+         var heartbeat = new AtomicBoolean(true);
+         var heartbeatThread = progressHeartbeat(workspaceRoot, heartbeat);
+         heartbeatThread.start();
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "autorun run"))) {
++        try {
+             return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
+         } finally {
+             heartbeat.set(false);
+@@ -233,7 +232,7 @@ public final class AutoRunCommand implements Callable<Integer> {
+ 
+     private void registerOperatorWorkspace(Path workspaceRoot) {
+         try {
+-            new OperatorWorkspaceRegistry().registerFromLedger(workspaceRoot, workstreamId);
++            new OperatorWorkspaceRegistry().registerFromLedger(CliLedgerFactory.create(), workspaceRoot, workstreamId);
+         } catch (Exception e) {
+             System.err.println("Warning: failed to update operator workspace registry: " + e.getMessage());
+         }
+diff --git a/dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewDecideCommand.java b/dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewDecideCommand.java
+index 6e365cbd..2f33db9a 100644
+--- a/dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewDecideCommand.java
++++ b/dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/ReviewDecideCommand.java
+@@ -1,9 +1,7 @@
+ package dev.dual.cli;
+ 
+ import dev.dual.core.id.DualId;
+-import dev.dual.ledger.file.LockOwner;
+ import dev.dual.ledger.file.WorkflowFileLedger;
+-import dev.dual.ledger.file.WorkstreamLock;
+ import dev.dual.ledger.file.WorkstreamPaths;
+ import org.springframework.stereotype.Component;
+ import picocli.CommandLine.Command;
+@@ -25,6 +23,9 @@ public final class ReviewDecideCommand implements Callable<Integer> {
+     @Option(names = "--note", description = "Optional decision note.")
+     String note = "";
+ 
++    @Option(names = "--subject", description = "Gate node instance id the decision was composed against (the gate shown by review show). The decision is refused if that gate is no longer the open gate.")
++    String subject;
++
+     @Option(names = "--run", description = "After deciding, immediately run until the next gate, recovery, failure, or completion.")
+     boolean runImmediately;
+ 
+@@ -38,13 +39,8 @@ public final class ReviewDecideCommand implements Callable<Integer> {
+     public Integer call() throws Exception {
+         var workspaceRoot = workdir.toAbsolutePath().normalize();
+         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
+-        var resolvedAction = "";
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "review decide"))) {
+-            var ledger = CliLedgerFactory.create();
+-            var definition = ledger.loadDefinition(paths);
+-            resolvedAction = requireAction(action);
+-            dev.dual.runtime.handler.EvidenceCollection.resolveGate(ledger, paths, definition, resolvedAction, note);
+-        }
++        var resolvedAction = requireAction(action);
++        dev.dual.runtime.handler.ReviewGateActions.resolve(CliLedgerFactory.create(), paths, resolvedAction, note, subject);
+         System.out.println("Human gate decided");
+         System.out.println("Workstream: " + workstreamId);
+         System.out.println("Action: " + resolvedAction);
+@@ -53,9 +49,7 @@ public final class ReviewDecideCommand implements Callable<Integer> {
+             return 0;
+         }
+         System.out.println("Running workflow until next gate...");
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "run"))) {
+-            return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
+-        }
++        return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
+     }
+ 
+     private static String requireAction(String requestedAction) {
+diff --git a/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java b/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java
+index bfb9ef82..06c7c28e 100644
+--- a/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java
++++ b/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java
+@@ -28,29 +28,32 @@ final class RoutingEngine {
+     private final FlowOrchestrationKernel flowKernel;
+     private final GoalSatisfactionWriter goalSatisfactionWriter;
+     private final CompletionAuditWriter completionAuditWriter;
++    private final Map<String, String> runtimeIdentity;
+ 
+     RoutingEngine(
+             AtomicJsonWriter jsonWriter,
+             ObjectMapper objectMapper,
+             LedgerEventLog eventLog,
+             RevisionTracker revisionTracker,
+-            FlowOrchestrationKernel flowKernel
++            FlowOrchestrationKernel flowKernel,
++            Map<String, String> runtimeIdentity
+     ) {
+         this.jsonWriter = jsonWriter;
+         this.objectMapper = objectMapper;
+         this.eventLog = eventLog;
+         this.revisionTracker = revisionTracker;
+         this.flowKernel = flowKernel;
++        this.runtimeIdentity = Map.copyOf(runtimeIdentity);
+         this.goalSatisfactionWriter = new GoalSatisfactionWriter(jsonWriter);
+         this.completionAuditWriter = new CompletionAuditWriter(jsonWriter);
+     }
+ 
+     WorkflowCurrentDocument loadCurrent(WorkstreamPaths paths) throws IOException {
+-        return objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);
++        return jsonWriter.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
+     }
+ 
+     NodeInstanceDocument loadNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
+-        return objectMapper.readValue(paths.nodeJson(nodeInstanceId).toFile(), NodeInstanceDocument.class);
++        return jsonWriter.read(paths.nodeJson(nodeInstanceId), NodeInstanceDocument.class);
+     }
+ 
+     void completeAndRoute(
+@@ -129,7 +132,7 @@ final class RoutingEngine {
+         var lastEventId = current.lastEventId();
+         for (var transition : matchingTransitions) {
+             var nextDefinition = definition.node(transition.toNodeDefinitionId());
+-            var transitionAttributes = ExecutionNetworkGrantStore.forward(paths, node, nextDefinition,
++            var transitionAttributes = ExecutionNetworkGrantStore.forward(jsonWriter, paths, node, nextDefinition,
+                     collectionTransition(paths, finished, nextDefinition, effectiveTransitionAttributes(node, transition.attributes())));
+             if (nextDefinition.kind() == NodeKind.GATE
+                     || !startsNewIteration(transitionAttributes, node.nodeDefinitionId(), outcome, nextDefinition.id())) {
+@@ -228,8 +231,12 @@ final class RoutingEngine {
+ 
+         for (var transition : matchingTransitions) {
+             var nextDefinition = definition.node(transition.toNodeDefinitionId());
+-            var transitionAttributes = ExecutionNetworkGrantStore.forward(paths, node, nextDefinition,
++            var transitionAttributes = ExecutionNetworkGrantStore.forward(jsonWriter, paths, node, nextDefinition,
+                     collectionTransition(paths, finished, nextDefinition, effectiveTransitionAttributes(node, transition.attributes())));
++            var occurrenceTransition = new LinkedHashMap<String, Object>(transitionAttributes);
++            occurrenceTransition.put("source_node_instance_id", node.nodeInstanceId());
++            occurrenceTransition.put("source_node_sha256", LedgerSession.sha(jsonWriter.readBytes(paths.nodeJson(node.nodeInstanceId()))));
++            transitionAttributes = Map.copyOf(occurrenceTransition);
+             if (!joinReady(paths, current, nodeInstanceId, transitionAttributes)) {
+                 lastEventId = LedgerUtils.nextEventId(lastEventId);
+                 eventLog.appendEvent(paths, lastEventId, "join_deferred", Map.of(
+@@ -333,9 +340,7 @@ final class RoutingEngine {
+             routedPayload.put("node_instance_id", nextNodeInstanceId);
+             routedPayload.put("gate_id", gateId);
+             routedPayload.put("transition", transitionAttributes);
+-            if (nextDefinition.kind() == NodeKind.GATE) {
+-                routedPayload.put("source_node_instance_id", node.nodeInstanceId());
+-            }
++            routedPayload.put("source_node_instance_id", node.nodeInstanceId());
+             eventLog.appendEvent(paths, lastEventId, "node_routed", Map.copyOf(routedPayload));
+             if (!iterationStartedPayload.isEmpty()) {
+                 lastEventId = LedgerUtils.nextEventId(lastEventId);
+@@ -416,7 +421,7 @@ final class RoutingEngine {
+                 try {
+                     result.put("evidence_collection_gate_sha256", java.util.HexFormat.of().formatHex(
+                             java.security.MessageDigest.getInstance("SHA-256")
+-                                    .digest(Files.readAllBytes(paths.nodeJson(source.nodeInstanceId())))));
++                                    .digest(jsonWriter.readBytes(paths.nodeJson(source.nodeInstanceId())))));
+                 } catch (java.security.NoSuchAlgorithmException impossible) { throw new IOException(impossible); }
+             }
+         } else if (!"loop".equals(attributes.get("transition_type"))
+@@ -485,6 +490,24 @@ final class RoutingEngine {
+ 
+     void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
+                          EvidenceCollectionBaseline collection, EvidenceSubmission submission) throws IOException {
++        resolveOpenGate(paths, definition, action, note, collection, submission, null);
++    }
++
++    void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
++                         EvidenceCollectionBaseline collection, EvidenceSubmission submission,
++                         ContractQualificationChecks.Decision actualChecks) throws IOException {
++        resolveOpenGate(paths, definition, action, note, collection, submission, actualChecks, null);
++    }
++
++    /**
++     * Resolves the open gate only when it is still the occurrence the decider looked at. The subject is the gate
++     * occurrence identity supplied by the decision entry (never re-derived from "latest"), so a request composed
++     * against an earlier gate is refused before any write instead of resolving whichever gate is open now.
++     * A blank subject keeps the unbound behaviour for callers that predate subject binding.
++     */
++    void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
++                         EvidenceCollectionBaseline collection, EvidenceSubmission submission,
++                         ContractQualificationChecks.Decision actualChecks, String expectedGate) throws IOException {
+         if ("submit_evidence".equals(action) != (submission != null))
+             throw new IOException("submit_evidence requires the typed material submission API");
+         if ("request_action".equals(action == null ? "" : action.trim())) {
+@@ -501,6 +524,13 @@ final class RoutingEngine {
+         if (node.kind() != NodeKind.GATE) {
+             throw new IOException("active node is not a gate: " + node.nodeDefinitionId());
+         }
++        if (expectedGate != null && !expectedGate.isBlank()) {
++            // Refuse before any gate/subject/qualification work: the decider's view is stale, not the ledger.
++            if (!expectedGate.equals(node.nodeInstanceId())) {
++                throw new IOException("gate decision subject is no longer the open gate: requested " + expectedGate
++                        + " but the open gate is " + node.nodeInstanceId());
++            }
++        }
+         var outgoingEdges = definition.edgesFrom(node.nodeDefinitionId());
+         var canonicalAction = HumanGateActionSemantics.canonicalAction(outgoingEdges, action.trim());
+         if (FINAL_NEXT_STAGE_GATE.equals(node.nodeDefinitionId())
+@@ -545,25 +575,26 @@ final class RoutingEngine {
+                 throw new IOException("scope revision request budget exhausted; gate remains open");
+             }
+         }
+-        if ("BLOCKED".equals(sourceOutcome) && (note == null || note.isBlank())) {
+-            throw new IOException("a decision note is required for a BLOCKED human gate");
+-        }
+-        var gatePurpose = text(definition.node(node.nodeDefinitionId()).config().get("gate_purpose"));
+-        if ("implementation_repair".equals(gatePurpose)
+-                && "revise".equals(canonicalAction)
+-                && (note == null || note.isBlank())) {
+-            throw new IOException("a decision note is required for implementation repair");
+-        }
+-        if ("design".equals(gatePurpose)
+-                && "revise".equals(canonicalAction)
+-                && (note == null || note.isBlank())) {
+-            throw new IOException("a decision note is required to revise a design");
+-        }
+-        if ("plan".equals(gatePurpose) && "revise".equals(canonicalAction)
++        if (HumanGateActionSemantics.requiresDecisionNote(canonicalAction, sourceOutcome)
+                 && (note == null || note.isBlank())) {
+-            throw new IOException("a decision note is required to revise a plan");
+-        }
+-        resolveGateDocument(paths, gate, canonicalAction, note);
++            throw new IOException("a decision note is required for " + canonicalAction + " at "
++                    + node.nodeDefinitionId() + " (" + sourceOutcome + ")");
++        }
++        var runtimeSha = ContractQualificationChecks.identity(runtimeIdentity);
++        var checks = actualChecks == null
++                ? new ContractQualificationChecks.Decision(1, ContractQualificationChecks.FAMILY,
++                    ContractQualificationChecks.Coverage.NOT_INVOKED, node.nodeInstanceId(),
++                    text(gate.result().get("source_node_instance_id")), node.inputRefs(), runtimeSha, List.of())
++                : actualChecks;
++        if (!checks.gateNodeInstanceId().equals(node.nodeInstanceId())
++                || !checks.sourceNodeInstanceId().equals(text(gate.result().get("source_node_instance_id")))
++                || !checks.subjectRefs().equals(node.inputRefs()) || !checks.runtimeIdentitySha256().equals(runtimeSha)
++                || actualChecks != null && (!"contract".equals(definition.node(node.nodeDefinitionId()).config().get("gate_purpose"))
++                    || !"approved".equals(canonicalAction)
++                    || checks.familyCoverage() != ContractQualificationChecks.Coverage.COVERED
++                    || checks.checks().stream().anyMatch(c -> c.result() == ContractQualificationChecks.Result.FAILED)))
++            throw new IOException("qualification observations do not bind the current decision");
++        jsonWriter.write(paths.gateJson(gate.gateId()), gate.resolved(canonicalAction, note, checks));
+         var humanAuthorizedRevision = "revise".equals(canonicalAction)
+                 && note != null
+                 && !note.isBlank();
+@@ -571,6 +602,7 @@ final class RoutingEngine {
+         resolvedNodeResult.put("human_action", canonicalAction);
+         resolvedNodeResult.put("requested_action", action);
+         resolvedNodeResult.put("note", note == null ? "" : note);
++        resolvedNodeResult.put("decision_checks", checks.toMap());
+         if (collection != null) resolvedNodeResult.put("evidence_collection_baseline", collection);
+         if (submission != null) resolvedNodeResult.put("external_evidence", submission);
+         completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED, canonicalAction,
+@@ -630,10 +662,10 @@ final class RoutingEngine {
+     ) throws IOException {
+         for (var gateId : current.openGateIds()) {
+             var gatePath = paths.gateJson(gateId);
+-            if (!Files.isRegularFile(gatePath)) {
++            if (!jsonWriter.exists(gatePath)) {
+                 continue;
+             }
+-            var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);
++            var gate = jsonWriter.read(gatePath, GateDocument.class);
+             if (gate.nodeInstanceId().equals(node.nodeInstanceId()) && "open".equals(gate.status())) {
+                 return gate;
+             }
+diff --git a/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java b/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java
+index c1fae26d..dfaaad07 100644
+--- a/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java
++++ b/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/WorkflowFileLedger.java
+@@ -22,36 +22,45 @@ public final class WorkflowFileLedger {
+     private final ObjectMapper objectMapper;
+     private final LedgerEventLog eventLog;
+     private final RoutingEngine routingEngine;
++    private final RevisionTracker revisionTracker;
+     private final NodeStateWriter nodeStateWriter;
+     private final TimelineProjectionWriter timelineProjectionWriter;
+     private final MetricsProjectionWriter metricsProjectionWriter;
+     private final FailureSummaryWriter failureSummaryWriter;
+     private final ExecutionLedgerWriter executionLedgerWriter;
+     private final AgentTaskLedgerWriter agentTaskLedgerWriter;
++    private final FlowOrchestrationKernel flowKernel;
++    private final Map<String, String> runtimeIdentity;
++    private boolean projectionRefreshRequested;
++    private final LedgerSession session;
++    private LedgerSession.FaultPoint faultPoint = (point, target) -> {};
+ 
+-    public WorkflowFileLedger() {
+-        this(new BuiltInFlowOrchestrationKernel());
++    public WorkflowFileLedger(FlowOrchestrationKernel flowKernel, Map<String, String> runtimeIdentity) {
++        this(new AtomicJsonWriter(), flowKernel, Map.copyOf(runtimeIdentity), null);
++        if (runtimeIdentity.isEmpty()) throw new IllegalArgumentException("runtime identity is required");
+     }
+ 
+-    public WorkflowFileLedger(FlowOrchestrationKernel flowKernel) {
+-        this(new AtomicJsonWriter(), flowKernel);
++    WorkflowFileLedger(FlowOrchestrationKernel flowKernel, Map<String, String> runtimeIdentity,
++                       LedgerSession.FaultPoint faultPoint) {
++        this(flowKernel, runtimeIdentity);
++        this.faultPoint = java.util.Objects.requireNonNull(faultPoint);
+     }
+ 
+-    WorkflowFileLedger(AtomicJsonWriter jsonWriter) {
+-        this(jsonWriter, new BuiltInFlowOrchestrationKernel());
+-    }
+-
+-    WorkflowFileLedger(AtomicJsonWriter jsonWriter, FlowOrchestrationKernel flowKernel) {
++    private WorkflowFileLedger(AtomicJsonWriter jsonWriter, FlowOrchestrationKernel flowKernel,
++                               Map<String, String> runtimeIdentity, LedgerSession session) {
+         if (flowKernel == null) {
+             throw new IllegalArgumentException("flow orchestration kernel is required");
+         }
+         this.jsonWriter = jsonWriter;
++        this.flowKernel = flowKernel;
++        this.runtimeIdentity = runtimeIdentity;
++        this.session = session;
+         this.objectMapper = jsonWriter.objectMapper();
+         var jsonlMapper = jsonWriter.objectMapper().copy()
+                 .disable(SerializationFeature.INDENT_OUTPUT);
+         this.eventLog = new LedgerEventLog(jsonWriter, jsonlMapper);
+-        var revisionTracker = new RevisionTracker(jsonWriter, this.objectMapper, eventLog);
+-        this.routingEngine = new RoutingEngine(jsonWriter, this.objectMapper, eventLog, revisionTracker, flowKernel);
++        this.revisionTracker = new RevisionTracker(jsonWriter, this.objectMapper, eventLog);
++        this.routingEngine = new RoutingEngine(jsonWriter, this.objectMapper, eventLog, revisionTracker, flowKernel, runtimeIdentity);
+         this.nodeStateWriter = new NodeStateWriter(jsonWriter, this.objectMapper, eventLog);
+         this.timelineProjectionWriter = new TimelineProjectionWriter(jsonWriter, this.objectMapper);
+         this.metricsProjectionWriter = new MetricsProjectionWriter(jsonWriter, this.objectMapper);
+@@ -60,9 +69,267 @@ public final class WorkflowFileLedger {
+         this.agentTaskLedgerWriter = new AgentTaskLedgerWriter(jsonWriter);
+     }
+ 
++    @FunctionalInterface
++    public interface ReadOperation<T> { T read(WorkflowFileLedger ledger, LedgerSession files) throws IOException; }
++
++    /** Reuses an explicitly passed session; never installs an ambient/default ledger. */
++    public <T> T inspect(WorkstreamPaths paths, ReadOperation<T> operation) throws IOException {
++        if (session != null) {
++            if (!session.paths().workstreamDir().toAbsolutePath().normalize()
++                    .equals(paths.workstreamDir().toAbsolutePath().normalize()))
++                throw new IOException("session belongs to another workstream");
++            return operation.read(this, session);
++        }
++        try (var snapshot = readSession(paths)) { return operation.read(snapshot.ledger(), snapshot.files()); }
++    }
++
++    boolean hasSession() { return session != null; }
++
++    public LedgerSession files() {
++        if (session == null) throw new IllegalStateException("an explicit ledger session is required");
++        return session;
++    }
++
++    public FileLedgerStore store() {
++        if (session == null) throw new IllegalStateException("store access requires an explicit ledger session");
++        return new FileLedgerStore(jsonWriter, runtimeIdentity);
++    }
++
++    public Map<String, Object> timelineSnapshot(WorkstreamPaths paths) throws IOException {
++        return inspect(paths, (scoped, files) -> new TimelineProjectionWriter(new AtomicJsonWriter(files), objectMapper).snapshot(paths));
++    }
++
++    public String failureSummarySnapshot(WorkstreamPaths paths) throws IOException {
++        return inspect(paths, (scoped, files) -> {
++            var current = scoped.loadCurrent(paths);
++            if (!java.util.Set.of(WorkflowStatus.WAITING_FOR_RECOVERY, WorkflowStatus.FAILED, WorkflowStatus.BLOCKED)
++                    .contains(current.status()) || current.activeNodeInstanceIds().size() != 1) return "";
++            var node = scoped.loadNode(paths, current.activeNodeInstanceIds().getFirst());
++            return new FailureSummaryWriter(objectMapper).render(paths, current, node);
++        });
++    }
++
++    /** Cached metrics are observations only; a cache from another commit cannot describe this snapshot. */
++    public Map<String, Object> metricsSnapshot(WorkstreamPaths paths) throws IOException {
++        return inspect(paths, (scoped, files) -> {
++            if (!files.exists(paths.workstreamMetricsJson()))
++                return Map.of("status", "STALE", "reason", "metrics projection is unavailable");
++            var metrics = files.read(paths.workstreamMetricsJson(),
++                    new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
++            var sequence = metrics.get("commitSequence");
++            if (!(sequence instanceof Number number) || number.longValue() != scoped.loadCurrent(paths).commitSequence())
++                return Map.of("status", "STALE", "reason", "metrics projection belongs to another ledger commit");
++            return metrics;
++        });
++    }
++
++    /** L04: registration cannot resolve the subject or authorize an execution. */
++    public void recordReadiness(WorkstreamPaths paths, String subject,
++                                dev.dual.core.contract.TaskContract.Reference reference, byte[] bytes) throws IOException {
++        if (session == null) throw new IOException("readiness requires the caller's validated write session");
++        var current = loadCurrent(paths);
++        if (!java.util.Set.of(WorkflowStatus.WAITING_FOR_HUMAN, WorkflowStatus.WAITING_FOR_RECOVERY).contains(current.status())
++                || !current.activeNodeInstanceIds().equals(List.of(subject)))
++            throw new IOException("readiness subject is no longer current");
++        var node = loadNode(paths, subject);
++        if (!java.util.Set.of(NodeStatus.WAITING, NodeStatus.FAILED).contains(node.status()))
++            throw new IOException("readiness cannot replace running inputs");
++        var prefix = ".agent/workstreams/" + paths.workstreamId().value() + "/artifacts/verification-readiness/";
++        if (!reference.ref().startsWith(prefix)
++                || !reference.ref().substring(prefix.length()).matches("[A-Za-z0-9._-]{1,80}\\.json")
++                || !reference.sha256().equals(sha256(bytes))) throw new IOException("invalid readiness bytes or path");
++        if (!node.latestExecutionId().isBlank()) executionLedgerWriter.closePermissionReply(paths, node.latestExecutionId());
++        var target = paths.workspaceRoot().resolve(reference.ref());
++        if (session.exists(target)) throw new IOException("readiness record already exists");
++        session.writeBytes(target, bytes);
++        var result = new java.util.LinkedHashMap<String, Object>(node.result());
++        var refs = new java.util.ArrayList<Object>();
++        if (result.get("readiness_refs") instanceof List<?> existing) refs.addAll(existing);
++        refs.add(Map.of("ref", reference.ref(), "sha256", reference.sha256()));
++        result.put("readiness_refs", List.copyOf(refs));
++        jsonWriter.write(paths.nodeJson(subject), new NodeInstanceDocument(node.schemaVersion(), node.nodeInstanceId(),
++                node.nodeDefinitionId(), node.kind(), node.handlerType(), node.status(), node.stageId(), node.iterationId(),
++                node.inputRefs(), node.inputTransition(), node.outputRefs(), result, node.runRef(), node.latestExecutionId(),
++                node.startedAt(), node.finishedAt()));
++        appendEvent(paths, "readiness-" + target.getFileName(), "verification_readiness_recorded",
++                Map.of("subject", subject, "reference", Map.of("ref", reference.ref(), "sha256", reference.sha256())));
++    }
++
++    /** Commit a runtime-validated recovery decision with its single local transition. */
++    public void adjudicateUnknownExecution(WorkstreamPaths paths, String subject, String executionId,
++                                           Map<String, Object> decision) throws IOException {
++        adjudicateUnknownExecution(paths, subject, executionId, decision, null);
++    }
++
++    public void adjudicateUnknownExecution(WorkstreamPaths paths, String subject, String executionId,
++                                           Map<String, Object> decision, dev.dual.core.workflow.NodeResult adopted) throws IOException {
++        if (session == null) throw new IOException("recovery adjudication requires an explicit write session");
++        var current = loadCurrent(paths);
++        var node = loadNode(paths, subject);
++        var execution = jsonWriter.read(paths.nodeExecutionJson(executionId), NodeExecutionDocument.class);
++        if (current.status() != WorkflowStatus.WAITING_FOR_RECOVERY || !current.activeNodeInstanceIds().equals(List.of(subject))
++                || node.status() != NodeStatus.FAILED || !node.latestExecutionId().equals(executionId)
++                || !execution.nodeInstanceId().equals(subject) || execution.status() == NodeExecutionStatus.RUNNING
++                || !"UNKNOWN".equals(node.result().get("external_effect")))
++            throw new IOException("recovery decision does not match the current failed execution");
++        var disposition = String.valueOf(decision.get("disposition"));
++        if (!java.util.Set.of("AUTHORIZE_NEW_ATTEMPT", "ABORT", "ADOPT_VERIFIED_RESULT").contains(disposition))
++            throw new IOException("unsupported unknown-execution disposition");
++        if (disposition.equals("ADOPT_VERIFIED_RESULT") != (adopted != null)) throw new IOException("adoption requires a verified fixed result");
++        if (adopted != null && (!java.util.Objects.equals(decision.get("completion_ref"), adopted.result().get("completion_ref"))
++                || !java.util.Objects.equals(decision.get("completion_sha256"), adopted.result().get("completion_sha256"))))
++            throw new IOException("adoption and fixed completion differ");
++        if (!Boolean.TRUE.equals(decision.get("executor_stopped"))) throw new IOException("executor stop verification missing");
++        executionLedgerWriter.closePermissionReply(paths, executionId);
++        var document = (com.fasterxml.jackson.databind.node.ObjectNode) jsonWriter.readTree(paths.nodeExecutionJson(executionId));
++        var result = (com.fasterxml.jackson.databind.node.ObjectNode) document.get("result");
++        var decisions = result.withObject("recovery_decisions");
++        var requestId = String.valueOf(decision.get("request_id"));
++        if (!requestId.matches("[A-Za-z0-9._-]{1,80}") || decisions.has(requestId)) throw new IOException("invalid or duplicate recovery request");
++        decisions.set(requestId, jsonWriter.objectMapper().valueToTree(decision));
++        jsonWriter.write(paths.nodeExecutionJson(executionId), document);
++        appendEvent(paths, "recovery-" + executionId + "-" + requestId, "execution_recovery_adjudicated", decision);
++        var note = String.valueOf(decision.get("operator_note"));
++        if (adopted != null) {
++            var facts = new java.util.LinkedHashMap<String, Object>(adopted.result());
++            facts.put("recovery_decision", decision);
++            facts.put("prior_unknown_observation", node.result());
++            var resultValue = new dev.dual.core.workflow.NodeResult(adopted.outcome(), adopted.status(), adopted.outputRefs(), facts, adopted.errorMessage());
++            agentTaskLedgerWriter.adoptVerifiedResult(paths, readAgentTask(paths, execution.agentTaskId()).orElseThrow(), resultValue);
++            executionLedgerWriter.adoptVerifiedResult(paths, jsonWriter.read(paths.nodeExecutionJson(executionId), NodeExecutionDocument.class), resultValue);
++            routingEngine.completeAndRoute(paths, loadDefinition(paths), subject, resultValue.status(), resultValue.outcome(), resultValue.outputRefs(), resultValue.result());
++        } else if (disposition.equals("AUTHORIZE_NEW_ATTEMPT")) nodeStateWriter.retryAdjudicatedNode(paths, note, decision);
++        else nodeStateWriter.abortRecovery(paths, note, true);
++    }
++
++    /** L06: preserve a readiness failure and create a fresh, bounded plan-author occurrence. */
++    public String reviseReadinessFailure(WorkstreamPaths paths, String subject, String note,
++                                         Map<String, Object> parentCandidate, List<String> evidenceRefs) throws IOException {
++        if (session == null) throw new IOException("readiness revision requires an explicit validated write session");
++        var current = loadCurrent(paths);
++        var source = loadNode(paths, subject);
++        var preparation = source.result().get("input_preparation_failure");
++        boolean failedPreparation = preparation instanceof Map<?, ?> fact
++                && "VERIFICATION_READINESS_REQUIRED".equals(fact.get("code")) && Boolean.FALSE.equals(fact.get("providerInvoked"));
++        if (current.status() != WorkflowStatus.WAITING_FOR_RECOVERY
++                || !current.activeNodeInstanceIds().equals(List.of(subject)) || source.status() != NodeStatus.FAILED
++                || !("VERIFICATION_READINESS_REQUIRED".equals(source.result().get("readiness_reason")) || failedPreparation)
++                || note == null || note.isBlank() || "UNKNOWN".equals(source.result().get("external_effect")))
++            throw new IOException("subject is not a current, quiescent readiness failure");
++        var execution = latestNodeExecution(paths, source);
++        if (execution.isPresent() && execution.get().status() == NodeExecutionStatus.RUNNING)
++            throw new IOException("running execution must be resolved before plan revision");
++        var definition = loadDefinition(paths);
++        var target = definition.node("plan.claude_plan");
++        var budget = RevisionTracker.maxRevisions(definition.node("plan.decision"));
++        var used = revisionTracker.revisionCount(paths, "plan.decision", target.id());
++        if (budget >= 0 && used >= budget) throw new IOException("revision_limit_reached; explicit existing budget disposition is required");
++        if (execution.isPresent()) executionLedgerWriter.closePermissionReply(paths, execution.get().nodeExecutionId());
++        var repair = Map.<String, Object>of("action", "revise_readiness", "note", note,
++                "parent_candidate", parentCandidate, "evidence_refs", List.copyOf(evidenceRefs));
++        var facts = new java.util.LinkedHashMap<String, Object>(source.result());
++        facts.put("readiness_repair", repair);
++        jsonWriter.write(paths.nodeJson(subject), new NodeInstanceDocument(source.schemaVersion(), source.nodeInstanceId(),
++                source.nodeDefinitionId(), source.kind(), source.handlerType(), source.status(), source.stageId(), source.iterationId(),
++                source.inputRefs(), source.inputTransition(), source.outputRefs(), facts, source.runRef(), source.latestExecutionId(),
++                source.startedAt(), source.finishedAt()));
++        var iteration = revisionTracker.nextRevisionIteration(paths, source, "revise_readiness", target.id(), Map.of("note", note));
++        jsonWriter.write(paths.iterationJson(iteration.iterationId()), iteration);
++        var eventId = LedgerUtils.nextEventId(current.lastEventId());
++        var nextId = LedgerUtils.nodeInstanceId(target.id(), LedgerUtils.currentEventNumber(eventId));
++        var transition = Map.<String, Object>of("source_node_instance_id", subject,
++                "source_node_sha256", sha256(jsonWriter.readBytes(paths.nodeJson(subject))), "readiness_repair", true);
++        var refs = new java.util.LinkedHashSet<>(source.inputRefs());
++        refs.addAll(evidenceRefs);
++        jsonWriter.write(paths.nodeJson(nextId), new NodeInstanceDocument(1, nextId, target.id(), target.kind(), target.handlerType(),
++                NodeStatus.READY, LedgerUtils.stageId(target.id()), iteration.iterationId(), List.copyOf(refs), transition,
++                List.of(), Map.of(), null, "", null, null));
++        for (var id : current.openGateIds()) {
++            var gate = jsonWriter.read(paths.gateJson(id), GateDocument.class);
++            jsonWriter.write(paths.gateJson(id), gate.resolved("revise_readiness", note));
++        }
++        eventLog.appendEvent(paths, eventId, "node_routed", Map.of("from", source.nodeDefinitionId(), "to", target.id(),
++                "outcome", "revise_readiness", "source_node_instance_id", subject, "node_instance_id", nextId,
++                "transition", transition, "repair", repair));
++        var now = java.time.Instant.now();
++        var next = new WorkflowCurrentDocument(current.schemaVersion(), current.workstreamId(), current.workflowInstanceId(),
++                current.workflowId(), current.definitionVersion(), WorkflowStatus.RUNNING, List.of(nextId), List.of(), eventId, now);
++        jsonWriter.write(paths.workflowCurrentJson(), next);
++        eventLog.writeInstanceFromCurrent(paths, next, now);
++        return nextId;
++    }
++
++    private static String sha256(byte[] bytes) {
++        try { return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes)); }
++        catch (java.security.NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
++    }
++
++    public Session readSession(WorkstreamPaths paths) throws IOException {
++        return openSession(paths, false, false, "read snapshot", java.util.UUID.randomUUID().toString());
++    }
++
++    public Session writeSession(WorkstreamPaths paths, String operation, String requestId) throws IOException {
++        return openSession(paths, true, false, operation, requestId);
++    }
++
++    private Session openSession(WorkstreamPaths paths, boolean write, boolean initialize,
++                                String operation, String requestId) throws IOException {
++        if (session != null) throw new IllegalStateException("pass the existing session; nested sessions are forbidden");
++        var files = new LedgerSession(paths, jsonWriter, runtimeIdentity, write, initialize,
++                operation, requestId, faultPoint);
++        return new Session(files, new WorkflowFileLedger(new AtomicJsonWriter(files), flowKernel, runtimeIdentity, files));
++    }
++
++    public void initialize(WorkstreamPaths paths, dev.dual.core.domain.Workstream workstream,
++                           dev.dual.core.domain.Workspace workspace, String requirement,
++                           WorkstreamSettingsDocument settings, String workflowInstanceId,
++                           WorkflowDefinition definition) throws IOException {
++        try (var transaction = openSession(paths, true, true, "initialize", workflowInstanceId)) {
++            new FileLedgerStore(transaction.ledger.jsonWriter, runtimeIdentity)
++                    .initializeWorkstream(paths, workstream, workspace, requirement, settings);
++            transaction.ledger.initialize(paths, workflowInstanceId, definition);
++            transaction.commit();
++        }
++    }
++
++    public final class Session implements AutoCloseable {
++        private final LedgerSession files;
++        private final WorkflowFileLedger ledger;
++        private Session(LedgerSession files, WorkflowFileLedger ledger) { this.files = files; this.ledger = ledger; }
++        public WorkflowFileLedger ledger() { return ledger; }
++        public LedgerSession files() { return files; }
++        public FileLedgerStore store() { return new FileLedgerStore(ledger.jsonWriter, runtimeIdentity); }
++        public void commit() throws IOException {
++            files.commit();
++            if (files.appliedMutation() || ledger.projectionRefreshRequested) refreshCommittedProjections(files.paths());
++        }
++        @Override public void close() throws IOException { files.close(); }
++    }
++
++    private void refreshCommittedProjections(WorkstreamPaths paths) {
++        // Derived output failure must not convert a completed authoritative commit into a failed transition.
++        var raw = new AtomicJsonWriter();
++        var marker = paths.workstreamDir().resolve("projection-status.json");
++        try {
++            new TimelineProjectionWriter(raw, raw.objectMapper()).write(paths);
++            new MetricsProjectionWriter(raw, raw.objectMapper()).write(paths);
++            var current = raw.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
++            for (var id : current.activeNodeInstanceIds()) {
++                var node = raw.read(paths.nodeJson(id), NodeInstanceDocument.class);
++                if (node.status() == NodeStatus.FAILED || node.status() == NodeStatus.BLOCKED)
++                    new FailureSummaryWriter(raw.objectMapper()).write(paths, id);
++            }
++            raw.write(marker, Map.of("status", "CURRENT", "sourceEventId", current.lastEventId()));
++        } catch (IOException | RuntimeException failure) {
++            try { raw.write(marker, Map.of("status", "STALE", "reason", failure.getClass().getSimpleName())); }
++            catch (IOException ignored) { /* readers also compare projection source identity to the committed snapshot */ }
++        }
++    }
++
+     public void initialize(WorkstreamPaths paths, String workflowInstanceId, WorkflowDefinition definition)
+             throws IOException {
+-        if (Files.exists(paths.workflowCurrentJson()) || Files.exists(paths.eventsJsonl())) {
++        if (session == null) throw new IllegalStateException("initialize requires the complete application initialization session");
++        if (jsonWriter.exists(paths.workflowCurrentJson()) || jsonWriter.exists(paths.eventsJsonl())) {
+             throw new IOException("workflow ledger already initialized: " + paths.workstreamDir());
+         }
+         Files.createDirectories(paths.workflowDir());
+@@ -83,7 +350,7 @@ public final class WorkflowFileLedger {
+                 "entry_node", entry.id()
+         ));
+         jsonWriter.write(paths.workflowDefinitionJson(), new WorkflowDefinitionDocument(
+-                1,
++                2,
+                 definition.workflowId(),
+                 definition.version(),
+                 definition.entryNodeId(),
+@@ -136,20 +403,28 @@ public final class WorkflowFileLedger {
+     }
+ 
+     public WorkflowCurrentDocument loadCurrent(WorkstreamPaths paths) throws IOException {
+-        return objectMapper.readValue(paths.workflowCurrentJson().toFile(), WorkflowCurrentDocument.class);
++        if (session == null) {
++            try (var transaction = readSession(paths)) {
++                var value = transaction.ledger().loadCurrent(paths);
++                return value;
++            }
++        }
++        return jsonWriter.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
+     }
+ 
+     public WorkflowDefinition loadDefinition(WorkstreamPaths paths) throws IOException {
++        if (session == null) {
++            try (var transaction = readSession(paths)) {
++                var value = transaction.ledger().loadDefinition(paths);
++                return value;
++            }
++        }
+         var jsonPath = paths.workflowDefinitionJson();
+-        var json = Files.readString(jsonPath, StandardCharsets.UTF_8);
++        var json = jsonWriter.readString(jsonPath);
+         var doc = objectMapper.readValue(json, WorkflowDefinitionDocument.class);
+ 
+-        // Migrate if schema version is older than current
+-        if (doc.schemaVersion() < LedgerMigrator.currentVersion()) {
+-            json = LedgerMigrator.migrate(json, doc.schemaVersion());
+-            // Write migrated version back
+-            Files.writeString(jsonPath, json, StandardCharsets.UTF_8);
+-            doc = objectMapper.readValue(json, WorkflowDefinitionDocument.class);
++        if (doc.schemaVersion() != 2) {
++            throw new IOException("INVALID_LEDGER_SCHEMA: automatic migration is not supported");
+         }
+ 
+         return new WorkflowDefinition(
+@@ -162,17 +437,29 @@ public final class WorkflowFileLedger {
+     }
+ 
+     public NodeInstanceDocument loadNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
+-        return objectMapper.readValue(paths.nodeJson(nodeInstanceId).toFile(), NodeInstanceDocument.class);
++        if (session == null) {
++            try (var transaction = readSession(paths)) {
++                var value = transaction.ledger().loadNode(paths, nodeInstanceId);
++                return value;
++            }
++        }
++        return jsonWriter.read(paths.nodeJson(nodeInstanceId), NodeInstanceDocument.class);
+     }
+ 
+     public GateDocument loadOpenGateForNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
++        if (session == null) {
++            try (var transaction = readSession(paths)) {
++                var value = transaction.ledger().loadOpenGateForNode(paths, nodeInstanceId);
++                return value;
++            }
++        }
+         var current = loadCurrent(paths);
+         for (var gateId : current.openGateIds()) {
+             var gatePath = paths.gateJson(gateId);
+-            if (!Files.isRegularFile(gatePath)) {
++            if (!jsonWriter.exists(gatePath)) {
+                 continue;
+             }
+-            var gate = objectMapper.readValue(gatePath.toFile(), GateDocument.class);
++            var gate = jsonWriter.read(gatePath, GateDocument.class);
+             if (nodeInstanceId.equals(gate.nodeInstanceId()) && "open".equals(gate.status())) {
+                 return gate;
+             }
+@@ -181,6 +468,12 @@ public final class WorkflowFileLedger {
+     }
+ 
+     public NodeInstance loadCoreNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
++        if (session == null) {
++            try (var transaction = readSession(paths)) {
++                var value = transaction.ledger().loadCoreNode(paths, nodeInstanceId);
++                return value;
++            }
++        }
+         var node = loadNode(paths, nodeInstanceId);
+         return new NodeInstance(
+                 node.nodeInstanceId(),
+@@ -208,15 +501,26 @@ public final class WorkflowFileLedger {
+             List<String> outputRefs,
+             Map<String, Object> result
+     ) throws IOException {
+-        routingEngine.completeAndRoute(paths, definition, nodeInstanceId, completedStatus, outcome, outputRefs, result);
+-        if (completedStatus == NodeStatus.FAILED || completedStatus == NodeStatus.BLOCKED) {
+-            failureSummaryWriter.write(paths, nodeInstanceId);
++        if (session == null) {
++            try (var transaction = writeSession(paths, "completeAndRoute", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().completeAndRoute(paths, definition, nodeInstanceId, completedStatus, outcome, outputRefs, result);
++                transaction.commit();
++                return;
++            }
+         }
++        routingEngine.completeAndRoute(paths, definition, nodeInstanceId, completedStatus, outcome, outputRefs, result);
+         refreshProjections(paths);
+     }
+ 
+     public void appendEvent(WorkstreamPaths paths, String eventId, String eventType, Map<String, Object> payload)
+             throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "appendEvent", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().appendEvent(paths, eventId, eventType, payload);
++                transaction.commit();
++                return;
++            }
++        }
+         eventLog.appendEvent(paths, eventId, eventType, payload);
+     }
+ 
+@@ -225,6 +529,13 @@ public final class WorkflowFileLedger {
+             WorkflowCurrentDocument current,
+             String trigger
+     ) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "startWorkflowExecution", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().startWorkflowExecution(paths, current, trigger);
++                transaction.commit();
++                return value;
++            }
++        }
+         return executionLedgerWriter.startWorkflowExecution(paths, current, trigger);
+     }
+ 
+@@ -235,6 +546,13 @@ public final class WorkflowFileLedger {
+             WorkflowExecutionStatus status,
+             String stopReason
+     ) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "finishWorkflowExecution", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().finishWorkflowExecution(paths, workflowExecution, nodeExecutionIds, status, stopReason);
++                transaction.commit();
++                return value;
++            }
++        }
+         return executionLedgerWriter.finishWorkflowExecution(paths, workflowExecution, nodeExecutionIds, status, stopReason);
+     }
+ 
+@@ -244,6 +562,13 @@ public final class WorkflowFileLedger {
+             dev.dual.core.workflow.NodeDefinition definition,
+             NodeInstanceDocument node
+     ) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "createAgentTask", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().createAgentTask(paths, workflowExecutionId, definition, node);
++                transaction.commit();
++                return value;
++            }
++        }
+         var task = agentTaskLedgerWriter.create(paths, workflowExecutionId, definition, node);
+         appendEvent(paths, "agent-task-" + task.agentTaskId(), "agent_task_queued", Map.of(
+                 "agent_task_id", task.agentTaskId(),
+@@ -263,6 +588,13 @@ public final class WorkflowFileLedger {
+             AgentTaskDocument task,
+             String nodeExecutionId
+     ) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "markAgentTaskRunning", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().markAgentTaskRunning(paths, task, nodeExecutionId);
++                transaction.commit();
++                return value;
++            }
++        }
+         var updated = agentTaskLedgerWriter.markRunning(paths, task, nodeExecutionId);
+         appendEvent(paths, "agent-task-running-" + updated.agentTaskId(), "agent_task_started", Map.of(
+                 "agent_task_id", updated.agentTaskId(),
+@@ -279,6 +611,13 @@ public final class WorkflowFileLedger {
+             AgentTaskDocument task,
+             dev.dual.core.workflow.NodeResult result
+     ) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "markAgentTaskFinished", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().markAgentTaskFinished(paths, task, result);
++                transaction.commit();
++                return value;
++            }
++        }
+         var updated = agentTaskLedgerWriter.markFinished(paths, task, result);
+         var failed = updated.status() == AgentTaskStatus.FAILED;
+         appendEvent(paths, (failed ? "agent-task-failed-" : "agent-task-succeeded-") + updated.agentTaskId(),
+@@ -299,6 +638,13 @@ public final class WorkflowFileLedger {
+             AgentTaskDocument task,
+             Exception failure
+     ) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "markAgentTaskFailed", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().markAgentTaskFailed(paths, task, failure);
++                transaction.commit();
++                return value;
++            }
++        }
+         var updated = agentTaskLedgerWriter.markFailed(paths, task, failure);
+         appendEvent(paths, "agent-task-failed-" + updated.agentTaskId(), "agent_task_failed", Map.of(
+                 "agent_task_id", updated.agentTaskId(),
+@@ -312,14 +658,32 @@ public final class WorkflowFileLedger {
+     }
+ 
+     public List<AgentTaskDocument> readAgentTasks(WorkstreamPaths paths) throws IOException {
++        if (session == null) {
++            try (var transaction = readSession(paths)) {
++                var value = transaction.ledger().readAgentTasks(paths);
++                return value;
++            }
++        }
+         return agentTaskLedgerWriter.readAgentTasks(paths);
+     }
+ 
+     public Optional<AgentTaskDocument> readAgentTask(WorkstreamPaths paths, String agentTaskId) throws IOException {
++        if (session == null) {
++            try (var transaction = readSession(paths)) {
++                var value = transaction.ledger().readAgentTask(paths, agentTaskId);
++                return value;
++            }
++        }
+         return agentTaskLedgerWriter.readAgentTask(paths, agentTaskId);
+     }
+ 
+     public Optional<AgentTaskDocument> firstQueuedAgentTask(WorkstreamPaths paths) throws IOException {
++        if (session == null) {
++            try (var transaction = readSession(paths)) {
++                var value = transaction.ledger().firstQueuedAgentTask(paths);
++                return value;
++            }
++        }
+         return agentTaskLedgerWriter.firstQueued(paths);
+     }
+ 
+@@ -330,6 +694,13 @@ public final class WorkflowFileLedger {
+             AgentTaskDocument agentTask,
+             long pid
+     ) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "startNodeExecution", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().startNodeExecution(paths, workflowExecutionId, node, agentTask, pid);
++                transaction.commit();
++                return value;
++            }
++        }
+         var execution = executionLedgerWriter.startNodeExecution(paths, workflowExecutionId, node, agentTask, pid);
+         nodeStateWriter.setLatestExecution(paths, node.nodeInstanceId(), execution.nodeExecutionId());
+         refreshProjections(paths);
+@@ -341,26 +712,87 @@ public final class WorkflowFileLedger {
+             NodeExecutionDocument nodeExecution,
+             dev.dual.core.workflow.NodeResult result
+     ) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "finishNodeExecution", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().finishNodeExecution(paths, nodeExecution, result);
++                transaction.commit();
++                return value;
++            }
++        }
+         var execution = executionLedgerWriter.finishNodeExecution(paths, nodeExecution, result);
+         refreshProjections(paths);
+         return execution;
+     }
+ 
++    /** Explicit L02 binding. The caller publishes immutable R01 bytes before entering this session. */
++    public void bindPreparedRun(WorkstreamPaths paths, NodeExecutionDocument execution, Map<String, String> reference)
++            throws IOException {
++        if (session == null) throw new IOException("prepared run binding requires an explicit write session");
++        executionLedgerWriter.bindPreparedRun(paths, execution, reference);
++    }
++
++    public NodeExecutionDocument verifyExecutionClaim(WorkstreamPaths paths, NodeExecutionDocument execution)
++            throws IOException {
++        if (session == null) throw new IOException("execution qualification requires an explicit session");
++        return executionLedgerWriter.verifyClaim(paths, execution);
++    }
++
++    /** C and X share the same existing L write session, never a separate permission lock. */
++    public boolean commitPermissionReply(WorkstreamPaths paths, NodeExecutionDocument execution, String key,
++                                         Map<String, Object> commit) throws IOException {
++        if (session == null) throw new IOException("permission reply commit requires an explicit write session");
++        var fresh = executionLedgerWriter.commitPermissionReply(paths, execution, key, commit);
++        if (fresh) appendEvent(paths, "permission-reply-C-" + execution.nodeExecutionId() + "-" + key,
++                "native_permission_reply_committed", Map.of("execution", execution.nodeExecutionId(), "request_key", key, "commit", commit));
++        return fresh;
++    }
++
++    public void closeLivePermissionReplies(WorkstreamPaths paths, String executionId, String reason) throws IOException {
++        if (session == null) throw new IOException("permission closure requires an explicit write session");
++        var prior = executionLedgerWriter.readNodeExecutions(paths).stream()
++                .filter(e -> e.nodeExecutionId().equals(executionId)).findFirst().orElseThrow(() -> new IOException("execution absent"));
++        if (prior.result().get("permission_reply") instanceof Map<?, ?> reply && Boolean.TRUE.equals(reply.get("closed"))) return;
++        executionLedgerWriter.closeLivePermissionReplies(paths, executionId);
++        appendEvent(paths, "permission-reply-X-" + executionId, "native_permission_reply_closed",
++                Map.of("execution", executionId, "reason", reason));
++    }
++
++    public Map<String, String> frozenRuntimeIdentity() { return runtimeIdentity; }
++
+     public NodeExecutionDocument failNodeExecution(
+             WorkstreamPaths paths,
+             NodeExecutionDocument nodeExecution,
+             Exception failure
+     ) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "failNodeExecution", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().failNodeExecution(paths, nodeExecution, failure);
++                transaction.commit();
++                return value;
++            }
++        }
+         var execution = executionLedgerWriter.failNodeExecution(paths, nodeExecution, failure);
+         refreshProjections(paths);
+         return execution;
+     }
+ 
+     public List<NodeExecutionDocument> readNodeExecutions(WorkstreamPaths paths) throws IOException {
++        if (session == null) {
++            try (var transaction = readSession(paths)) {
++                var value = transaction.ledger().readNodeExecutions(paths);
++                return value;
++            }
++        }
+         return executionLedgerWriter.readNodeExecutions(paths);
+     }
+ 
+     public Optional<NodeExecutionDocument> latestNodeExecution(WorkstreamPaths paths, NodeInstanceDocument node) throws IOException {
++        if (session == null) {
++            try (var transaction = readSession(paths)) {
++                var value = transaction.ledger().latestNodeExecution(paths, node);
++                return value;
++            }
++        }
+         return executionLedgerWriter.latestNodeExecution(paths, node);
+     }
+ 
+@@ -369,27 +801,102 @@ public final class WorkflowFileLedger {
+             NodeExecutionDocument nodeExecution,
+             String note
+     ) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "markNodeExecutionStale", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().markNodeExecutionStale(paths, nodeExecution, note);
++                transaction.commit();
++                return value;
++            }
++        }
+         var execution = executionLedgerWriter.markNodeExecutionStale(paths, nodeExecution, note);
+         refreshProjections(paths);
+         return execution;
+     }
+ 
+     public Map<String, Object> requestAction(WorkstreamPaths paths, HumanActionRequest request) throws IOException {
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(),
+-                LockOwner.currentProcess(paths.workstreamId().value(), "request action"))) {
+-            return routingEngine.requestAction(paths, loadDefinition(paths), request);
++        if (session == null) {
++            try (var transaction = writeSession(paths, "requestAction", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().requestAction(paths, request);
++                transaction.commit();
++                return value;
++            }
+         }
++        return routingEngine.requestAction(paths, loadDefinition(paths), request);
+     }
+ 
+     public void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note)
+             throws IOException {
+-        routingEngine.resolveOpenGate(paths, definition, action, note);
++        if (session == null) {
++            try (var transaction = writeSession(paths, "resolveOpenGate", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().resolveOpenGate(paths, definition, action, note);
++                transaction.commit();
++                return;
++            }
++        }
++        routingEngine.resolveOpenGate(paths, definition, action, note, null, null, null);
++        refreshProjections(paths);
++    }
++
++    /**
++     * Resolves the open gate only if it is still {@code expectedGate}. Use this from decision entries that know
++     * which occurrence the decider saw (UI packet, CLI {@code --subject}, autorun snapshot). The unbound overload
++     * remains for callers that hold the session and have already established the subject themselves.
++     */
++    public void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
++                                String expectedGate) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "resolveOpenGate", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().resolveOpenGate(paths, definition, action, note, expectedGate);
++                transaction.commit();
++                return;
++            }
++        }
++        routingEngine.resolveOpenGate(paths, definition, action, note, null, null, null, expectedGate);
++        refreshProjections(paths);
++    }
++
++    /** Runtime supplies actual observations; no UI/model decision request can carry this parameter. */
++    public void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
++                                ContractQualificationChecks.Decision checks) throws IOException {
++        if (checks == null || checks.familyCoverage() != ContractQualificationChecks.Coverage.COVERED)
++            throw new IOException("covered contract decision requires actual check observations");
++        if (session == null) {
++            try (var transaction = writeSession(paths, "resolveOpenGate", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().resolveOpenGate(paths, definition, action, note, checks);
++                transaction.commit();
++                return;
++            }
++        }
++        routingEngine.resolveOpenGate(paths, definition, action, note, null, null, checks);
++        refreshProjections(paths);
++    }
++
++    /** Contract approval bound to the gate occurrence the decider saw; see the subject-bound overload above. */
++    public void resolveOpenGate(WorkstreamPaths paths, WorkflowDefinition definition, String action, String note,
++                                ContractQualificationChecks.Decision checks, String expectedGate) throws IOException {
++        if (checks == null || checks.familyCoverage() != ContractQualificationChecks.Coverage.COVERED)
++            throw new IOException("covered contract decision requires actual check observations");
++        if (session == null) {
++            try (var transaction = writeSession(paths, "resolveOpenGate", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().resolveOpenGate(paths, definition, action, note, checks, expectedGate);
++                transaction.commit();
++                return;
++            }
++        }
++        routingEngine.resolveOpenGate(paths, definition, action, note, null, null, checks, expectedGate);
+         refreshProjections(paths);
+     }
+ 
+     /** Caller holds the workstream lock and supplies a freshly captured machine baseline. */
+     public void collectEvidence(WorkstreamPaths paths, WorkflowDefinition definition, String note,
+                                 EvidenceCollectionBaseline baseline) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "collectEvidence", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().collectEvidence(paths, definition, note, baseline);
++                transaction.commit();
++                return;
++            }
++        }
+         routingEngine.resolveOpenGate(paths, definition, "collect_evidence", note, baseline);
+         refreshProjections(paths);
+     }
+@@ -397,11 +904,25 @@ public final class WorkflowFileLedger {
+     /** Caller holds the lock and has verified the prepared source and copied material identities. */
+     public void submitEvidence(WorkstreamPaths paths, WorkflowDefinition definition, String note,
+                                EvidenceSubmission submission) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "submitEvidence", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().submitEvidence(paths, definition, note, submission);
++                transaction.commit();
++                return;
++            }
++        }
+         routingEngine.resolveOpenGate(paths, definition, "submit_evidence", note, submission.baseline(), submission);
+         refreshProjections(paths);
+     }
+ 
+     public NodeInstanceDocument markRunning(WorkstreamPaths paths, String nodeInstanceId, long pid) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "markRunning", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().markRunning(paths, nodeInstanceId, pid);
++                transaction.commit();
++                return value;
++            }
++        }
+         var node = nodeStateWriter.markRunning(paths, nodeInstanceId, pid);
+         refreshProjections(paths);
+         return node;
+@@ -409,6 +930,13 @@ public final class WorkflowFileLedger {
+ 
+     public NodeInstanceDocument markQueuedForAgentTask(WorkstreamPaths paths, String nodeInstanceId, String agentTaskId)
+             throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "markQueuedForAgentTask", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().markQueuedForAgentTask(paths, nodeInstanceId, agentTaskId);
++                transaction.commit();
++                return value;
++            }
++        }
+         var node = nodeStateWriter.markQueuedForAgentTask(paths, nodeInstanceId, agentTaskId);
+         appendEvent(paths, "agent-task-queued-node-" + agentTaskId, "node_agent_task_queued", Map.of(
+                 "agent_task_id", agentTaskId,
+@@ -420,18 +948,39 @@ public final class WorkflowFileLedger {
+     }
+ 
+     public NodeInstanceDocument autoRetryNode(WorkstreamPaths paths, String nodeInstanceId) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "autoRetryNode", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().autoRetryNode(paths, nodeInstanceId);
++                transaction.commit();
++                return value;
++            }
++        }
+         var node = nodeStateWriter.autoRetryNode(paths, nodeInstanceId);
+         refreshProjections(paths);
+         return node;
+     }
+ 
+     public NodeInstanceDocument autoRetryNode(WorkstreamPaths paths, String nodeInstanceId, long retryDelayMs) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "autoRetryNode", java.util.UUID.randomUUID().toString())) {
++                var value = transaction.ledger().autoRetryNode(paths, nodeInstanceId, retryDelayMs);
++                transaction.commit();
++                return value;
++            }
++        }
+         var node = nodeStateWriter.autoRetryNode(paths, nodeInstanceId, retryDelayMs);
+         refreshProjections(paths);
+         return node;
+     }
+ 
+     public void retryActiveNode(WorkstreamPaths paths, String note) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "retryActiveNode", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().retryActiveNode(paths, note);
++                transaction.commit();
++                return;
++            }
++        }
+         nodeStateWriter.retryActiveNode(paths, note);
+         refreshProjections(paths);
+     }
+@@ -441,36 +990,75 @@ public final class WorkflowFileLedger {
+             String note,
+             boolean publicRepositoryAttested
+     ) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "approvePublicWebSearch", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().approvePublicWebSearch(paths, note, publicRepositoryAttested);
++                transaction.commit();
++                return;
++            }
++        }
+         nodeStateWriter.approvePublicWebSearch(paths, note, publicRepositoryAttested);
+         refreshProjections(paths);
+     }
+ 
+     public void replayDeterministicClassification(WorkstreamPaths paths, String note) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "replayDeterministicClassification", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().replayDeterministicClassification(paths, note);
++                transaction.commit();
++                return;
++            }
++        }
+         nodeStateWriter.replayDeterministicClassification(paths, note);
+         refreshProjections(paths);
+     }
+ 
+     public void recoverStaleRunningNode(WorkstreamPaths paths, String note) throws IOException {
+-        nodeStateWriter.recoverStaleRunningNode(paths, note);
+-        var current = loadCurrent(paths);
+-        if (!current.activeNodeInstanceIds().isEmpty()) {
+-            failureSummaryWriter.write(paths, current.activeNodeInstanceIds().get(0));
++        if (session == null) {
++            try (var transaction = writeSession(paths, "recoverStaleRunningNode", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().recoverStaleRunningNode(paths, note);
++                transaction.commit();
++                return;
++            }
+         }
++        nodeStateWriter.recoverStaleRunningNode(paths, note);
+         refreshProjections(paths);
+     }
+ 
+     public void abortRecovery(WorkstreamPaths paths, String note) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "abortRecovery", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().abortRecovery(paths, note);
++                transaction.commit();
++                return;
++            }
++        }
+         nodeStateWriter.abortRecovery(paths, note);
+         refreshProjections(paths);
+     }
+ 
+     public void closeMistakenIteration(WorkstreamPaths paths, String note) throws IOException {
++        if (session == null) {
++            try (var transaction = writeSession(paths, "closeMistakenIteration", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().closeMistakenIteration(paths, note);
++                transaction.commit();
++                return;
++            }
++        }
+         nodeStateWriter.closeMistakenIteration(paths, note);
+         refreshProjections(paths);
+     }
+ 
+     public void refreshProjections(WorkstreamPaths paths) throws IOException {
+-        timelineProjectionWriter.write(paths);
+-        metricsProjectionWriter.write(paths);
++        if (session == null) {
++            try (var transaction = writeSession(paths, "refreshProjections", java.util.UUID.randomUUID().toString())) {
++                transaction.ledger().refreshProjections(paths);
++                transaction.commit();
++                return;
++            }
++        }
++        if (session == null) throw new IllegalStateException("projection refresh requires a session");
++        // Rebuilt after commit, while the same session still excludes readers/writers.
++        projectionRefreshRequested = true;
+     }
+ }
+diff --git a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java
+index 1fb26e80..57849b56 100644
+--- a/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java
++++ b/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollection.java
+@@ -17,8 +17,14 @@ public final class EvidenceCollection {
+     /** CLI/API already hold the workstream lock; ordinary decisions retain their existing semantics. */
+     public static void resolveGate(WorkflowFileLedger ledger, WorkstreamPaths paths, WorkflowDefinition definition,
+                                    String action, String note) throws IOException {
++        resolveGate(ledger, paths, definition, action, note, null);
++    }
++
++    static void resolveGate(WorkflowFileLedger ledger, WorkstreamPaths paths, WorkflowDefinition definition,
++                            String action, String note, String expectedGate) throws IOException {
+         if (!HumanGateActionSemantics.COLLECT_EVIDENCE.equals(action)) {
+-            ledger.resolveOpenGate(paths, definition, action, note);
++            if (expectedGate == null) ledger.resolveOpenGate(paths, definition, action, note);
++            else ledger.resolveOpenGate(paths, definition, action, note, expectedGate);
+             return;
+         }
+         if (note == null || note.isBlank()) throw new IOException("collection requires an explicit note");
+@@ -36,7 +42,7 @@ public final class EvidenceCollection {
+         if (gate == null || !HumanGateActionSemantics.allowedActions(definition.node(node.nodeDefinitionId()),
+                 String.valueOf(gate.result().get("source_outcome"))).contains(action))
+             throw new IOException("collection is not available at this gate");
+-        var resolution = TaskContractProjectionVerifier.resolve(paths.workspaceRoot(), paths.workstreamId().value());
++        var resolution = TaskContractProjectionVerifier.resolve(ledger, paths.workspaceRoot(), paths.workstreamId().value());
+         var qualified = resolution.qualified().orElseThrow(() -> new IOException(
+                 "collection requires a qualified approved task contract: " + resolution.failure()));
+         var included = qualified.contract().scope().included().stream().map(entry -> entry.path()).toList();
+@@ -50,11 +56,12 @@ public final class EvidenceCollection {
+     @FunctionalInterface public interface Execution { NodeResult run() throws Exception; }
+ 
+     /** Advisory projection only; execute() and publication validation own enforcement. */
+-    public static Optional<String> promptInstruction(Path root, String workstreamId, String nodeId) throws IOException {
+-        var file = new WorkstreamPaths(root, new DualId(workstreamId)).nodeJson(nodeId);
+-        if (!Files.isRegularFile(file)
+-                || !MAPPER.readTree(file.toFile()).path("inputTransition").has("evidence_collection_gate")) return Optional.empty();
+-        var refs = requiredReferences(root, workstreamId, nodeId);
++    public static Optional<String> promptInstruction(WorkflowFileLedger ledger, Path root, String workstreamId, String nodeId) throws IOException {
++        var paths = new WorkstreamPaths(root, new DualId(workstreamId));
++        var refs = requiredReferences(ledger, root, workstreamId, nodeId);
++        var collecting = ledger.inspect(paths, (scoped, files) ->
++                scoped.loadNode(paths, nodeId).inputTransition().containsKey("evidence_collection_gate"));
++        if (!collecting) return Optional.empty();
+         return Optional.of("This occurrence collects evidence against a human-approved source baseline. "
+                 + "Do not modify product source, tests, dependencies, or Git state. "
+                 + "Write evidence only to the designated run artifacts. If verification needs a code change, "
+@@ -65,15 +72,18 @@ public final class EvidenceCollection {
+                 + "Do not replace refs with summaries or treat a submission as approval."));
+     }
+ 
+-    static List<String> requiredReferences(Path root, String workstreamId, String nodeId) throws IOException {
++    static List<String> requiredReferences(WorkflowFileLedger ledger, Path root, String workstreamId, String nodeId) throws IOException {
+         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
+-        if (!Files.isRegularFile(paths.nodeJson(nodeId))) return List.of();
+-        var guard = open(root, workstreamId, MAPPER.readValue(paths.nodeJson(nodeId).toFile(), NodeInstanceDocument.class));
+-        return guard == null || guard.submission() == null ? List.of() : ExternalVerificationEvidence.refs(paths, guard.submission());
++        if (!Files.exists(paths.workstreamJson()) && !Files.exists(paths.nodeJson(nodeId))) return List.of();
++        return ledger.inspect(paths, (scoped, files) -> {
++            if (!files.exists(paths.nodeJson(nodeId))) return List.of();
++            var guard = openSnapshot(ledger, scoped, root, workstreamId, scoped.loadNode(paths, nodeId));
++            return guard == null || guard.submission() == null ? List.of() : ExternalVerificationEvidence.refs(paths, guard.submission());
++        });
+     }
+ 
+-    static void verifyResult(Path root, String workstreamId, String nodeId, AgentResultEnvelope.AgentResult result) throws IOException {
+-        var refs = requiredReferences(root, workstreamId, nodeId);
++    static void verifyResult(WorkflowFileLedger ledger, Path root, String workstreamId, String nodeId, AgentResultEnvelope.AgentResult result) throws IOException {
++        var refs = requiredReferences(ledger, root, workstreamId, nodeId);
+         if (refs.isEmpty()) return;
+         List<String> evidence = result instanceof AgentResultEnvelope.SelfTestResult self ? self.evidence()
+                 : result instanceof AgentResultEnvelope.AcceptanceReviewResult acceptance ? acceptance.evidence() : null;
+@@ -82,33 +92,47 @@ public final class EvidenceCollection {
+             throw new IOException("result.evidence must contain every exact bound material ref");
+     }
+ 
+-    public static NodeResult execute(Path root, String workstreamId, NodeInstanceDocument node, Execution execution)
++    public static NodeResult execute(WorkflowFileLedger ledger, Path root, String workstreamId, NodeInstanceDocument node, Execution execution)
+             throws Exception {
+         Guard guard;
+-        try { guard = open(root, workstreamId, node); }
+-        catch (IOException | IllegalArgumentException invalid) { return rejected(invalid); }
++        try { guard = open(ledger, root, workstreamId, node); }
++        catch (IOException | IllegalArgumentException invalid) { return AgentExecutionResultFacts.inputPreparationFailed(FAILURE, FAILURE, List.of(String.valueOf(invalid.getMessage()))); }
+         if (guard == null) return execution.run();
+         NodeResult result;
+         try { result = execution.run(); }
+         catch (Exception failure) {
+             try { guard.verify(); }
+-            catch (IOException | IllegalArgumentException invalid) { return rejected(invalid); }
++            catch (IOException | IllegalArgumentException invalid) { failure.addSuppressed(invalid); }
+             throw failure;
+         }
+         try { guard.verify(); }
+-        catch (IOException | IllegalArgumentException invalid) { return rejected(invalid); }
++        catch (IOException | IllegalArgumentException invalid) { return ArtifactContractValidator.evidenceFailureResult(result, invalid); }
+         return result;
+     }
+ 
+     /** Recheck at sidecar publication too, including cold or direct validator calls. */
+-    static void verify(Path root, String workstreamId, String nodeId) throws IOException {
++    static void verify(WorkflowFileLedger ledger, Path root, String workstreamId, String nodeId) throws IOException {
+         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
+-        var file = paths.nodeJson(nodeId);
+-        if (!Files.isRegularFile(file)) return; // Ordinary standalone validators have no ledger occurrence.
+-        open(root, workstreamId, MAPPER.readValue(file.toFile(), NodeInstanceDocument.class));
++        if (!Files.exists(paths.workstreamJson()) && !Files.exists(paths.nodeJson(nodeId))) return;
++        ledger.inspect(paths, (scoped, files) -> {
++            if (files.exists(paths.nodeJson(nodeId))) openSnapshot(ledger, scoped, root, workstreamId, scoped.loadNode(paths, nodeId));
++            return null;
++        });
+     }
+ 
+-    static Guard open(Path root, String workstreamId, NodeInstanceDocument node) throws IOException {
++    static Guard open(WorkflowFileLedger ledger, Path root, String workstreamId, NodeInstanceDocument node) throws IOException {
++        var paths = new WorkstreamPaths(root, new DualId(workstreamId));
++        return ledger.inspect(paths, (scoped, files) -> {
++            var actual = scoped.loadNode(paths, node.nodeInstanceId());
++            if (!actual.nodeDefinitionId().equals(node.nodeDefinitionId()) || !actual.iterationId().equals(node.iterationId())
++                    || !actual.inputTransition().equals(node.inputTransition()) || !actual.inputRefs().equals(node.inputRefs()))
++                throw new IOException("collection input identity changed before execution");
++            return openSnapshot(ledger, scoped, root, workstreamId, actual);
++        });
++    }
++
++    private static Guard openSnapshot(WorkflowFileLedger owner, WorkflowFileLedger scoped, Path root,
++                                      String workstreamId, NodeInstanceDocument node) throws IOException {
+         var transition = node.inputTransition();
+         var id = transition.get("evidence_collection_gate");
+         var sha = transition.get("evidence_collection_gate_sha256");
+@@ -161,26 +185,29 @@ public final class EvidenceCollection {
+         if ("submit_evidence".equals(approval.result().get("human_action")) != (submission != null)
+                 || (submission != null && !baseline.equals(submission.baseline())))
+             throw new IOException("missing or inconsistent external material binding");
+-        var guard = new Guard(root, paths, file, hash, gateFile, TaskContractArtifactWriter.sha256(gateFile),
++        var guard = new Guard(owner, root, paths, file, hash, gateFile, TaskContractArtifactWriter.sha256(gateFile),
+                 node.nodeInstanceId(), baseline, submission);
+-        guard.verify();
++        guard.verifySnapshot(scoped);
+         return guard;
+     }
+ 
+-    record Guard(Path root, WorkstreamPaths paths, Path approvalFile, String approvalSha, Path gateFile,
++    record Guard(WorkflowFileLedger ledger, Path root, WorkstreamPaths paths, Path approvalFile, String approvalSha, Path gateFile,
+                  String gateSha, String nodeId, EvidenceCollectionBaseline baseline, EvidenceSubmission submission) {
+         void verify() throws IOException {
++            ledger.inspect(paths, (scoped, files) -> { verifySnapshot(scoped); return null; });
++        }
++        private void verifySnapshot(WorkflowFileLedger scoped) throws IOException {
+             requireCanonical(root, approvalFile);
+             if (!approvalSha.equals(TaskContractArtifactWriter.sha256(approvalFile)))
+                 throw new IOException("collection approval changed during execution");
+             requireCanonical(root, gateFile);
+             if (!gateSha.equals(TaskContractArtifactWriter.sha256(gateFile)))
+                 throw new IOException("collection gate changed during execution");
+-            var node = MAPPER.readValue(paths.nodeJson(nodeId).toFile(), NodeInstanceDocument.class);
++            var node = scoped.loadNode(paths, nodeId);
+             if (!baseline.gateNodeInstanceId().equals(node.inputTransition().get("evidence_collection_gate"))
+                     || !approvalSha.equals(node.inputTransition().get("evidence_collection_gate_sha256")))
+                 throw new IOException("collection execution lost its approval binding");
+-            if (!baseline.contractRef().equals(".agent/workstreams/" + paths.workstreamId().value() + "/artifacts/task-contract.json"))
++            if (!baseline.contractRef().startsWith(".agent/workstreams/" + paths.workstreamId().value() + "/artifacts/contracts/"))
+                 throw new IOException("collection contract belongs to another workstream");
+             verifySource(root, baseline);
+             if (submission != null) {
+diff --git a/dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java b/dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java
+index 5d86fdc7..20f66e5d 100644
+--- a/dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java
++++ b/dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java
+@@ -69,25 +69,50 @@ public class WorkstreamActionService {
+         }
+     }
+ 
++    public Map<String, Object> decideNativePermission(Path root, String workstreamId, String execution, String requestKey, String option, String note) throws Exception {
++        return dev.dual.runtime.handler.NativePermissionRequests.decide(ledger, paths(normalize(root), workstreamId), execution, requestKey, option, note);
++    }
++    public Map<String, Object> cancelNativePermissionWait(Path root, String workstreamId, String execution, String note) throws Exception {
++        return dev.dual.runtime.handler.NativePermissionRequests.cancel(ledger, paths(normalize(root), workstreamId), execution, note == null ? "operator cancelled native permission wait" : note);
++    }
++
++    public dev.dual.core.contract.TaskContract.Reference recordReadiness(Path root, String workstreamId,
++            dev.dual.runtime.handler.VerificationReadiness.Request request) throws Exception {
++        return dev.dual.runtime.handler.VerificationReadiness.record(ledger, normalize(root), workstreamId, request);
++    }
++
+     public Map<String, Object> resume(Path workspaceRoot, String workstreamId, int maxSteps) throws Exception {
+         var root = normalize(workspaceRoot);
+         validateMaxSteps(maxSteps);
+         var paths = paths(root, workstreamId);
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api resume"))) {
+-            assertResumable(paths, "resume");
+-            var response = runLoop(root, workstreamId, maxSteps);
+-            maybeCloseTerminalSessions(root, workstreamId);
+-            return response;
+-        }
++        assertResumable(paths, "resume");
++        var response = runLoop(root, workstreamId, maxSteps);
++        maybeCloseTerminalSessions(root, workstreamId);
++        return response;
++
++    }
++
++    public Map<String, Object> adjudicate(Path workspaceRoot, String workstreamId,
++            dev.dual.runtime.handler.ExecutionRecoveryAdjudication.Request request, String expectedDisposition) throws Exception {
++        if (request == null || !expectedDisposition.equals(request.disposition())) throw new IllegalArgumentException("wrong recovery disposition");
++        dev.dual.runtime.handler.ExecutionRecoveryAdjudication.apply(ledger, paths(normalize(workspaceRoot), workstreamId), request);
++        return actionResponse("recovery.adjudicate", workstreamId, "explicit recovery decision recorded; prior observations retained; no new execution dispatched");
++    }
++
++    public Map<String, Object> stopRecordedSession(Path root, String workstreamId) throws Exception {
++        var paths = paths(normalize(root), workstreamId);
++        var refs = new dev.dual.adapter.acpx.AcpxExecutionRecovery().stop(ledger, paths);
++        var execution = dev.dual.runtime.RecordedExecutionRecovery.active(ledger, paths).orElseThrow();
++        if (execution.status() == dev.dual.ledger.file.NodeExecutionStatus.RUNNING) staleRunningRecovery.recover(paths, "native stop acknowledged");
++        return Map.of("workstream", workstreamId, "native_stop_observations", refs, "external_effect", "UNKNOWN");
+     }
+ 
+     public Map<String, Object> retry(Path workspaceRoot, String workstreamId, String note) throws Exception {
+         var root = normalize(workspaceRoot);
+         var paths = paths(root, workstreamId);
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api retry"))) {
+-            assertNotCompleted(paths, "retry");
+-            ledger.retryActiveNode(paths, note);
+-        }
++        assertNotCompleted(paths, "retry");
++        ledger.retryActiveNode(paths, note);
++
+         maybeCloseTerminalSessions(root, workstreamId);
+         return actionResponse("retry", workstreamId, "active node marked ready for retry");
+     }
+@@ -100,12 +125,9 @@ public class WorkstreamActionService {
+     ) throws Exception {
+         var root = normalize(workspaceRoot);
+         var paths = paths(root, workstreamId);
+-        try (var ignored = WorkstreamLock.acquire(
+-                paths.workstreamDir(),
+-                LockOwner.currentProcess(workstreamId, "api approve public WebSearch"))) {
+-            assertNotCompleted(paths, "approve public WebSearch");
+-            ledger.approvePublicWebSearch(paths, note, publicRepositoryAttested);
+-        }
++        assertNotCompleted(paths, "approve public WebSearch");
++        ledger.approvePublicWebSearch(paths, note, publicRepositoryAttested);
++
+         return actionResponse(
+                 "recovery.approve_public_websearch",
+                 workstreamId,
+@@ -116,43 +138,48 @@ public class WorkstreamActionService {
+                                                 String target, java.util.List<String> domains, String note, boolean cancel) throws Exception {
+         var root = normalize(workspaceRoot).toRealPath();
+         var paths = paths(root, workstreamId);
+-        var store = new dev.dual.ledger.file.ExecutionNetworkGrantStore();
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api network authority"))) {
+-            if (cancel) {
+-                if (target != null || domains != null || note != null) throw new IllegalArgumentException("cancel cannot include approval fields");
+-                store.cancel(paths);
+-            } else {
+-                store.approve(paths, target, domains, note);
+-            }
+-            return store.view(paths);
++        var store = new dev.dual.ledger.file.ExecutionNetworkGrantStore(ledger);
++        if (cancel) {
++            if (target != null || domains != null || note != null) throw new IllegalArgumentException("cancel cannot include approval fields");
++            store.cancel(paths);
++        } else {
++            store.approve(paths, target, domains, note);
+         }
++        return store.view(paths);
++
+     }
+ 
+     public Map<String, Object> recoverStaleRunning(Path workspaceRoot, String workstreamId, String note) throws Exception {
+         var root = normalize(workspaceRoot);
+         var paths = paths(root, workstreamId);
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api recovery stale"))) {
+-            staleRunningRecovery.recover(paths, note);
+-        }
++        staleRunningRecovery.recover(paths, note);
++
+         maybeCloseTerminalSessions(root, workstreamId);
+-        return actionResponse("recovery.stale", workstreamId, "stale running node moved to recovery");
++        return actionResponse("recovery.stale", workstreamId, "recovery state checked: " + ledger.loadCurrent(paths).status());
+     }
+ 
+     public Map<String, Object> closeMistakenIteration(Path workspaceRoot, String workstreamId, String note) throws Exception {
+         var root = normalize(workspaceRoot);
+         var paths = paths(root, workstreamId);
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api recovery close mistaken iteration"))) {
+-            ledger.closeMistakenIteration(paths, note);
+-        }
++        ledger.closeMistakenIteration(paths, note);
++
+         maybeCloseTerminalSessions(root, workstreamId);
+         return actionResponse("recovery.close_mistaken_iteration", workstreamId, "mistaken iteration closed");
+     }
+ 
+     public Map<String, Object> approve(
+             Path workspaceRoot, String workstreamId, String note, boolean runImmediately, int maxSteps
++    ) throws Exception {
++        return approve(workspaceRoot, workstreamId, note, runImmediately, maxSteps, null);
++    }
++
++    /** @param expectedGate the gate occurrence the decider saw (from the review packet); refuses a stale view. */
++    public Map<String, Object> approve(
++            Path workspaceRoot, String workstreamId, String note, boolean runImmediately, int maxSteps,
++            String expectedGate
+     ) throws Exception {
+         var root = normalize(workspaceRoot);
+-        resolveGate(root, workstreamId, "approve", note);
++        dev.dual.runtime.handler.ReviewGateActions.resolve(ledger, paths(root, workstreamId), "approve", note, expectedGate);
+         if (runImmediately) {
+             var current = ledger.loadCurrent(paths(root, workstreamId));
+             if (current.status() == WorkflowStatus.COMPLETED) {
+@@ -180,13 +207,13 @@ public class WorkstreamActionService {
+         return actionResponse("review.complete", workstreamId, "human gate completed");
+     }
+ 
+-    public Map<String, Object> revise(Path workspaceRoot, String workstreamId, String feedback,
++    public Map<String, Object> revise(Path workspaceRoot, String workstreamId, String feedback, String subject,
+                                       boolean runImmediately, int maxSteps) throws Exception {
+         if (feedback == null || feedback.isBlank()) {
+             throw new IllegalArgumentException("feedback is required");
+         }
+         var root = normalize(workspaceRoot);
+-        resolveGate(root, workstreamId, "revise", feedback);
++        dev.dual.runtime.handler.ReviewGateActions.revise(ledger, new WorkstreamPaths(root, new DualId(workstreamId)), subject, feedback);
+         if (runImmediately) {
+             var response = resume(root, workstreamId, maxSteps);
+             response.put("action", "review.revise.run");
+@@ -226,10 +253,7 @@ public class WorkstreamActionService {
+ 
+     private void resolveGate(Path root, String workstreamId, String action, String note) throws Exception {
+         var paths = paths(root, workstreamId);
+-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "api review " + action))) {
+-            assertNotCompleted(paths, "review " + action);
+-            dev.dual.runtime.handler.EvidenceCollection.resolveGate(ledger, paths, ledger.loadDefinition(paths), action, note);
+-        }
++        dev.dual.runtime.handler.ReviewGateActions.resolve(ledger, paths, action, note);
+     }
+ 
+     private Map<String, Object> runLoop(Path root, String workstreamId, int maxSteps) throws Exception {
+diff --git a/dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java b/dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java
+index f06d84d1..c8493a55 100644
+--- a/dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java
++++ b/dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java
+@@ -85,6 +85,23 @@ public class WorkstreamApiController {
+         return streamService.overviewStream(workdirPath(workdir), workstreamId, intervalMs);
+     }
+ 
++    @GetMapping("/{workstreamId}/permissions")
++    public Map<String, Object> nativePermissions(@PathVariable String workstreamId, @RequestParam(defaultValue = "") String workdir) throws Exception {
++        return queryService.nativePermissions(workdirPath(workdir), workstreamId);
++    }
++    public record NativePermissionDecision(String execution, String requestKey, String optionId, String note) {}
++    @PostMapping("/{workstreamId}/permissions/decide")
++    public Map<String, Object> nativePermissionDecision(@PathVariable String workstreamId, @RequestParam(defaultValue = "") String workdir,
++                                                       @RequestBody NativePermissionDecision decision) throws Exception {
++        return actionService.decideNativePermission(workdirPath(workdir), workstreamId, decision.execution(), decision.requestKey(), decision.optionId(), decision.note());
++    }
++    public record NativePermissionCancel(String execution, String note) {}
++    @PostMapping("/{workstreamId}/permissions/cancel")
++    public Map<String, Object> nativePermissionCancel(@PathVariable String workstreamId, @RequestParam(defaultValue = "") String workdir,
++                                                     @RequestBody NativePermissionCancel cancel) throws Exception {
++        return actionService.cancelNativePermissionWait(workdirPath(workdir), workstreamId, cancel.execution(), cancel.note());
++    }
++
+     @GetMapping("/{workstreamId}/review/current")
+     public Map<String, Object> currentReview(
+             @PathVariable String workstreamId,
+@@ -138,6 +155,15 @@ public class WorkstreamApiController {
+         return deliveryViewService.finalizeCommit(workdirPath(workdir), workstreamId, request.commit());
+     }
+ 
++    @PostMapping("/{workstreamId}/delivery/resolve")
++    public Map<String, Object> deliveryResolve(
++            @PathVariable String workstreamId,
++            @RequestParam(defaultValue = "") String workdir,
++            @RequestBody byte[] request
++    ) throws Exception {
++        return deliveryViewService.resolve(workdirPath(workdir), workstreamId, request);
++    }
++
+     @PostMapping("/{workstreamId}/resume")
+     public Map<String, Object> resume(
+             @PathVariable String workstreamId,
+@@ -153,6 +179,8 @@ public class WorkstreamApiController {
+             @RequestParam(defaultValue = "") String workdir,
+             @RequestBody(required = false) RetryRequest request
+     ) throws Exception {
++        if (request != null && request.decision() != null)
++            return actionService.adjudicate(workdirPath(workdir), workstreamId, request.decision(), "AUTHORIZE_NEW_ATTEMPT");
+         return actionService.retry(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
+     }
+ 
+@@ -188,15 +216,34 @@ public class WorkstreamApiController {
+         return actionService.closeMistakenIteration(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
+     }
+ 
++    @PostMapping("/{workstreamId}/recovery/abort")
++    public Map<String, Object> abortRecovery(@PathVariable String workstreamId,
++            @RequestParam(defaultValue = "") String workdir,
++            @RequestBody dev.dual.runtime.handler.ExecutionRecoveryAdjudication.Request decision) throws Exception {
++        return actionService.adjudicate(workdirPath(workdir), workstreamId, decision, "ABORT");
++    }
++
+     @PostMapping("/{workstreamId}/recovery/stale")
+     public Map<String, Object> recoverStaleRunning(
+             @PathVariable String workstreamId,
+             @RequestParam(defaultValue = "") String workdir,
+             @RequestBody(required = false) RecoveryStaleRequest request
+     ) throws Exception {
++        if (request != null && request.decision() != null) {
++            if (request.stopRecordedSession()) throw new IllegalArgumentException("adoption and stop are separate operations");
++            return actionService.adjudicate(workdirPath(workdir), workstreamId, request.decision(), "ADOPT_VERIFIED_RESULT");
++        }
++        if (request != null && request.stopRecordedSession()) return actionService.stopRecordedSession(workdirPath(workdir), workstreamId);
+         return actionService.recoverStaleRunning(workdirPath(workdir), workstreamId, request == null ? "" : request.note());
+     }
+ 
++    @PostMapping("/{workstreamId}/review/readiness")
++    public dev.dual.core.contract.TaskContract.Reference recordReadiness(
++            @PathVariable String workstreamId, @RequestParam(defaultValue = "") String workdir,
++            @RequestBody dev.dual.runtime.handler.VerificationReadiness.Request request) throws Exception {
++        return actionService.recordReadiness(workdirPath(workdir), workstreamId, request);
++    }
++
+     @PostMapping("/{workstreamId}/review/approve")
+     public Map<String, Object> approve(
+             @PathVariable String workstreamId,
+@@ -206,7 +253,8 @@ public class WorkstreamApiController {
+             @RequestBody(required = false) ReviewApproveRequest request
+     ) throws Exception {
+         return actionService.approve(
+-                workdirPath(workdir), workstreamId, request == null ? "" : request.note(), run, maxSteps);
++                workdirPath(workdir), workstreamId, request == null ? "" : request.note(), run, maxSteps,
++                request == null ? null : request.gateNodeInstanceId());
+     }
+ 
+     @PostMapping("/{workstreamId}/review/complete")
+@@ -226,7 +274,7 @@ public class WorkstreamApiController {
+             @RequestParam(defaultValue = "20") int maxSteps,
+             @RequestBody(required = false) ReviewReviseRequest request
+     ) throws Exception {
+-        return actionService.revise(workdirPath(workdir), workstreamId, request == null ? "" : request.feedback(), run, maxSteps);
++        return actionService.revise(workdirPath(workdir), workstreamId, request == null ? "" : request.feedback(), request == null ? "" : request.subject(), run, maxSteps);
+     }
+ 
+     @PostMapping("/{workstreamId}/review/request-action")
+@@ -304,13 +352,17 @@ public class WorkstreamApiController {
+         return requestUri != null && requestUri.endsWith("/stream");
+     }
+ 
+-    public record RetryRequest(String note) {
++    public record RetryRequest(String note, dev.dual.runtime.handler.ExecutionRecoveryAdjudication.Request decision) {
++        public RetryRequest(String note) { this(note, null); }
+     }
+ 
+     public record RecoveryCloseRequest(String note) {
+     }
+ 
+-    public record RecoveryStaleRequest(String note) {
++    public record RecoveryStaleRequest(String note, boolean stopRecordedSession,
++            dev.dual.runtime.handler.ExecutionRecoveryAdjudication.Request decision) {
++        public RecoveryStaleRequest(String note) { this(note, false, null); }
++        public RecoveryStaleRequest(String note, boolean stopRecordedSession) { this(note, stopRecordedSession, null); }
+     }
+ 
+     public record PublicWebSearchApprovalRequest(String note, boolean publicRepositoryAttested) {
+@@ -318,10 +370,10 @@ public class WorkstreamApiController {
+ 
+     public record NetworkApprovalRequest(String target, java.util.List<String> domains, String note, boolean cancel) { }
+ 
+-    public record ReviewReviseRequest(String feedback) {
++    public record ReviewReviseRequest(String feedback, String subject) {
+     }
+ 
+-    public record ReviewApproveRequest(String note) {
++    public record ReviewApproveRequest(String note, String gateNodeInstanceId) {
+     }
+ 
+     public record ReviewCompleteRequest(String note) {
+diff --git a/dual-orchestrator/dual-server/src/main/resources/static/console.js b/dual-orchestrator/dual-server/src/main/resources/static/console.js
+index 2942c799..d2d96770 100644
+--- a/dual-orchestrator/dual-server/src/main/resources/static/console.js
++++ b/dual-orchestrator/dual-server/src/main/resources/static/console.js
+@@ -346,6 +346,11 @@ function renderAll() {
+   renderEvidence(status);
+   renderLoopHistory();
+   renderRca(status);
++  window.DualNativePermissions.render(document.getElementById("nativePermissions"), overview.nativePermissions,
++    async (action, body) => {
++      await request(`/api/workstreams/${encodeURIComponent(state.selectedId)}/permissions/${action}?workdir=${selectedWorkdirParam()}`, { method: "POST", body: JSON.stringify(body) });
++      await loadSelected();
++    });
+ }
+ 
+ function renderLifecycle() {
+@@ -470,6 +475,7 @@ function renderEvidence(status) {
+       ["原因", guidance.reason || decision.summary || "-"],
+     ], [
+       ...authoredStageEvidence(packet.authoredStage),
++      ...asList(contract.nonessentialOperationDeclarations).map(item => `非必需操作声明：${item}`),
+       ...(packet.externalEvidenceInstructions ? [packet.externalEvidenceInstructions] : []),
+       ...(asList(decision.mustFix).map((item) => `Must Fix：${item}`)),
+       ...(asList(state.review?.actionRequests).map((item) => `待处理动作需求：${item.content?.expected_result || ""}`)),
+@@ -1190,6 +1196,10 @@ function allowedActions(status) {
+     } else {
+       actions.push({ label: "查看交付差异", kind: "primary", onClick: () => switchView("management") });
+     }
++    if (asList(delivery.currentActions).includes("RESOLVE_AUTHORIZE_NEW_APPLY"))
++      actions.push({ label: "核实停止并授权一次重试", kind: "subtle", onClick: () => resolveDelivery("AUTHORIZE_NEW_APPLY") });
++    if (asList(delivery.currentActions).includes("RESOLVE_CLOSE_OR_CONFIRM_STOP"))
++      actions.push({ label: "关闭再次应用／记录停止核实", kind: "subtle", onClick: () => resolveDelivery("CLOSE_APPLICATION") });
+     actions.push({ label: "打开旧管理面板", kind: "ghost", onClick: openOldPanel });
+     return actions;
+   }
+@@ -1217,7 +1227,8 @@ function approveAndRun() {
+   }
+   postAction(
+     `/api/workstreams/${encodeURIComponent(state.selectedId)}/review/approve?workdir=${selectedWorkdirParam()}&run=true&maxSteps=80`,
+-    { note }
++    // Bind the decision to the gate occurrence this page rendered; the server refuses it if the open gate moved on.
++    { note, gateNodeInstanceId: state.review?.gateNodeInstanceId || state.review?.packet?.gateNodeInstanceId || null }
+   );
+ }
+ 
+@@ -1324,6 +1335,28 @@ function finalizeDelivery() {
+   );
+ }
+ 
++function resolveDelivery(disposition) {
++  const delivery = deliveryView();
++  const required = disposition === "AUTHORIZE_NEW_APPLY" ? "RESOLVE_AUTHORIZE_NEW_APPLY" : "RESOLVE_CLOSE_OR_CONFIRM_STOP";
++  if (!asList(delivery.currentActions).includes(required) || !delivery.resolutionTemplate?.operation_id) return;
++  const note = window.prompt("请说明你核对的目标仓库、旧应用操作及本次决定：", "");
++  if (!note?.trim()) return;
++  const request = JSON.parse(JSON.stringify(delivery.resolutionTemplate));
++  request.request_id = crypto.randomUUID(); request.disposition = disposition; request.operator_note = note.trim();
++  request.stop_basis = null;
++  const confirmStop = disposition === "AUTHORIZE_NEW_APPLY" || window.confirm("是否同时记录：你已经核实旧应用进程停止？未核实请选择取消；仍可只关闭再次应用。");
++  if (confirmStop) {
++    const checks = window.prompt("请填写实际采取的停止核查方法（旧进程、相关终端或执行记录）：", "");
++    if (!checks?.trim()) return;
++    if (!window.confirm("确认旧操作已经停止，理解其结果可能仍未知；本声明不等于程序测量证据。新应用还可能重复已有副作用。")) return;
++    request.stop_basis = { type: "OPERATOR_CONFIRMED_STOPPED", checked_at: new Date().toISOString(),
++      checks_performed: [checks.trim()], old_operation_stopped: true,
++      accept_unknown_result_and_repeat_risk: true, material_refs: [] };
++  }
++  if (!window.confirm(disposition === "AUTHORIZE_NEW_APPLY" ? "授权对这个批准候选尝试一次新应用？服务器会重核身份与目标状态。" : "关闭这个候选的再次应用？已存在的精确提交仍可按条件确认。")) return;
++  postAction(`/api/workstreams/${encodeURIComponent(state.selectedId)}/delivery/resolve?workdir=${selectedWorkdirParam()}`, request);
++}
++
+ function commandForStatus(status, assessment) {
+   const task = selectedTask();
+   const effectiveWorkdir = task?.effectiveWorkdir || state.workdir || ".";
+@@ -1343,12 +1376,7 @@ function commandForStatus(status, assessment) {
+   }
+   if (status === "COMPLETED") {
+     const delivery = deliveryView();
+-    if (delivery.canFinalize) {
+-      return `${jar} delivery finalize --workdir "${effectiveWorkdir}" --commit <target_commit_sha> ${state.selectedId}`;
+-    }
+-    if (delivery.canMerge) {
+-      return `${jar} delivery merge --workdir "${effectiveWorkdir}" --target "<original_repo>" ${state.selectedId}`;
+-    }
++    if (asList(delivery.nextCommands).length) return delivery.nextCommands.join("\n");
+     return `${jar} summary ${base}`;
+   }
+   return `${jar} status ${base}`;
+@@ -1830,7 +1858,7 @@ function deliveryEvidenceCard() {
+     bullets.push(`命令：${command}`);
+   });
+   if (delivery.canFinalize) {
+-    bullets.push("说明：当前只完成暂存，没有自动提交、推送或创建 PR。");
++    bullets.push("说明：目标仓库已有匹配提交；登记只确认现有提交，不会再应用或推送。");
+   }
+   if (!bullets.length) {
+     bullets.push("暂无可展示的交付证据。");
+@@ -1840,6 +1868,8 @@ function deliveryEvidenceCard() {
+     ["最终验收", delivery.acceptanceDecision || state.overview?.acceptance?.finalDecision || "-"],
+     ["目标结果", delivery.goalOutcome || state.overview?.goalSatisfaction?.domainOutcome || "-"],
+     ["目标仓库", delivery.targetRepo || "-"],
++    ["停止依据", delivery.stopBasis || "UNKNOWN"],
++    ["历史交付", delivery.historicalStatus || "-"],
+     ["业务改动", changedFiles.length ? `${changedFiles.length} 个文件` : "-"],
+     ["终态保护", "已完成任务只能查看、导出或显式合并"],
+   ], bullets);

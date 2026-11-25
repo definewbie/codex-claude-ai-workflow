@@ -1,0 +1,10 @@
+{
+  "schema_version" : 1,
+  "decision" : "APPROVE",
+  "resolved_questions" : [ ],
+  "assumptions" : [ "Human approved the requirement review gate before canonical contract generation." ],
+  "accepted_risks" : [ ],
+  "gate_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+  "approved_by" : "human_gate",
+  "created_at" : 1792718379.401426000
+}

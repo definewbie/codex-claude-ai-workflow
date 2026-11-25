@@ -1,0 +1,21 @@
+{
+  "native_session_record": "e67d5ff9-924f-403b-8fc4-98ccd7d42f62",
+  "stream_files": [
+    {
+      "name": "e67d5ff9-924f-403b-8fc4-98ccd7d42f62.stream.ndjson",
+      "bytes": 2690872
+    }
+  ],
+  "event_log": {
+    "active_path": "/Users/kriswang/.acpx/sessions/e67d5ff9-924f-403b-8fc4-98ccd7d42f62.stream.ndjson",
+    "segment_count": 5,
+    "max_segment_bytes": 67108864,
+    "max_segments": 5,
+    "last_write_at": "2026-10-10T09:02:23.944Z",
+    "last_write_error": null
+  },
+  "last_seq": 10842,
+  "last_request_id": "3",
+  "request_token_usage": {},
+  "no_business_response_in_transport_log": true
+}

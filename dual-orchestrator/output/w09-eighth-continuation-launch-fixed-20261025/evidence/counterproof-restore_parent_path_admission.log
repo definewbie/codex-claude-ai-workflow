@@ -1,0 +1,39 @@
+test_real_standins_consume_same_checked_environment_despite_parent_path (test_continuation.AssemblyTest.test_real_standins_consume_same_checked_environment_despite_parent_path) ... FAIL
+
+======================================================================
+FAIL: test_real_standins_consume_same_checked_environment_despite_parent_path (test_continuation.AssemblyTest.test_real_standins_consume_same_checked_environment_despite_parent_path)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/w09-launch-mutant-_9uzrgmj/test_continuation.py", line 303, in test_real_standins_consume_same_checked_environment_despite_parent_path
+    self.run_entry('run-one-step.py',['actual-standins','plan.decision'])
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/w09-launch-mutant-_9uzrgmj/test_continuation.py", line 135, in run_entry
+    return runpy.run_path(str(PACKAGE/filename),run_name='__main__')
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/w09-launch-mutant-_9uzrgmj/run-one-step.py", line 20, in <module>
+    release, inherited_measurement, active, process_observation, launch = inspect()
+                                                                          ~~~~~~~^^
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/w09-launch-mutant-_9uzrgmj/continuation.py", line 107, in inspect
+    launch = selected_environment()
+  File "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/unittest/mock.py", line 1167, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/unittest/mock.py", line 1171, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/unittest/mock.py", line 1232, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/w09-launch-mutant-_9uzrgmj/test_continuation.py", line 295, in capture
+    value=original();captured['value']=value
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/w09-launch-mutant-_9uzrgmj/continuation.py", line 40, in selected_environment
+    assert os.environ.get('PATH') == explicit['PATH'], 'Mutant parent PATH admission'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Mutant parent PATH admission
+
+----------------------------------------------------------------------
+Ran 1 test in 0.011s
+
+FAILED (failures=1)

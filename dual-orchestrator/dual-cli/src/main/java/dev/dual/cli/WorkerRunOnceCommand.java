@@ -27,13 +27,12 @@ public final class WorkerRunOnceCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "worker run-once"))) {
-            var worker = new AgentWorker(CliLedgerFactory.create(), dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactory.create());
-            var result = worker.runOne(new WorkflowCommand(workspaceRoot, workstreamId));
-            System.out.println("Worker: " + result.agentTaskId() + " " + result.nodeDefinitionId()
-                    + " -> " + result.status() + " (" + result.message() + ")");
-            SummaryCommand.writeDefaultSummary(paths);
-            return result.taskExecuted() ? 0 : 1;
-        }
+        var worker = new AgentWorker(CliLedgerFactory.create(), dev.dual.adapter.acpx.AcpxWorkflowHandlerRegistryFactory.create());
+        var result = worker.runOne(new WorkflowCommand(workspaceRoot, workstreamId));
+        System.out.println("Worker: " + result.agentTaskId() + " " + result.nodeDefinitionId()
+                + " -> " + result.status() + " (" + result.message() + ")");
+        SummaryCommand.writeDefaultSummary(paths);
+        return result.taskExecuted() ? 0 : 1;
+
     }
 }

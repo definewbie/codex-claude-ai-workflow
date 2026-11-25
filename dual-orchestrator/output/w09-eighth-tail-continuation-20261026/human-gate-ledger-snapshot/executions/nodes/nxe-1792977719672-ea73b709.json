@@ -1,0 +1,39 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792977719672-ea73b709",
+  "agentTaskId" : "agt-1792977719665-1958b1e9",
+  "workflowExecutionId" : "wfe-1792977719558-ba24aab6",
+  "nodeInstanceId" : "node-delivery-prepare_pr-038",
+  "nodeDefinitionId" : "delivery.prepare_pr",
+  "handlerType" : "delivery.prepare_pr",
+  "status" : "SUCCEEDED",
+  "pid" : 45122,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/commit-message.txt", ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/pr-body.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/candidate-5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-26T01:21:58.442Z",
+      "executor_pid" : 45122,
+      "input_identity" : "595fe54f1bd48175e381bf7a72dd8fe7b9e2e076d56bf0a5ab122511f383f958"
+    },
+    "commit_message_path" : ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/commit-message.txt",
+    "pr_body_path" : ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/pr-body.md",
+    "delivery_candidate_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/candidate-5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb.json",
+    "delivery_candidate_sha256" : "5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb",
+    "expected_result_tree" : "0233afaf8755e44b6c8ab156e311ffbef6e50983",
+    "prepared_at" : "2026-10-26T01:21:59.683720Z",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-26T01:21:59.672036Z",
+  "finishedAt" : "2026-10-26T01:21:59.808092Z",
+  "durationMs" : 136
+}

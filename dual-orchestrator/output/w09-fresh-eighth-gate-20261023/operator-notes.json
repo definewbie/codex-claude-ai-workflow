@@ -1,0 +1,19 @@
+[
+  {
+    "kind": "OPERATOR_READ_ERROR",
+    "operation": "Read completed architecture review for inspection",
+    "error": "Assumed design-codex.json filename; actual authoritative node outputRef is design-codex-review.json",
+    "resolution": "Read actual outputRef from completed node; no product/runtime changes, no repeated provider call, no Gate failure classification"
+  },
+  {
+    "kind": "OPERATOR_READ_ERROR",
+    "operation": "Inspect readiness gate paths/source",
+    "error": "Tried non-authoritative ledger/current.json and current/current.json paths and guessed PlanDecisionHandler.java; files absent. One broad material read was truncated.",
+    "resolution": "Used original runner authoritative workflow/current.json and actual ReviewDecisionHandler.java; inspected exact readiness owner and gate. No domain write, provider retry or product change."
+  },
+  {
+    "kind": "OPERATOR_DOCUMENT_ARITHMETIC_CORRECTION",
+    "error": "First readiness approval draft overstated remaining reserve as 950000; authoritative unchanged checker returned 775000.",
+    "resolution": "Corrected draft before presenting to user to actual 563916 + reserve 775000 = 1338916. No budget/checker/ledger/provider changes."
+  }
+]

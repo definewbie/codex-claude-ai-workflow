@@ -22,10 +22,16 @@ final class FailureSummaryWriter {
         Files.writeString(paths.currentFailureMarkdown(), render(paths, current, node), StandardCharsets.UTF_8);
     }
 
-    private String render(WorkstreamPaths paths, WorkflowCurrentDocument current, NodeInstanceDocument node) {
+    String render(WorkstreamPaths paths, WorkflowCurrentDocument current, NodeInstanceDocument node) {
         var result = node.result() == null ? Map.<String, Object>of() : node.result();
+        var hasExecutionOutcome = result.containsKey("agent_execution_outcome");
+        var executionOutcome = result.get("agent_execution_outcome") instanceof Map<?, ?> map ? map : Map.of();
         var outputRefs = node.outputRefs() == null ? List.<String>of() : node.outputRefs();
-        var reason = text(firstNonBlank(
+        // The finalized outcome owns agent failures; acquisition diagnostics cannot override it.
+        var reason = hasExecutionOutcome
+                ? executionOutcome.get("primaryReason") instanceof String primary && !primary.isBlank()
+                        ? primary : "INVALID_AGENT_EXECUTION_OUTCOME"
+                : text(firstNonBlank(
                 result.get("acpx_failure.reason"),
                 result.get("reason"),
                 result.get("error"),
@@ -48,14 +54,20 @@ final class FailureSummaryWriter {
         line(content, "Node Status", node.status().name());
         line(content, "Handler", node.handlerType());
         line(content, "Reason", reason);
-        line(content, "Recoverable", recoverable);
+        if (hasExecutionOutcome) {
+            line(content, "Recovery Category", text(executionOutcome.get("recoveryCategory")));
+            line(content, "Retry Policy", text(executionOutcome.get("retryPolicy")));
+        } else {
+            line(content, "Recoverable", recoverable);
+        }
         line(content, "Exit Code", exitCode);
         line(content, "Run ID", runId);
         line(content, "Agent", agent);
         line(content, "Session", session);
         line(content, "Attention Category", attention.category().name());
         line(content, "Retry Safe", String.valueOf(attention.retrySafe()));
-        appendContractFailureDiagnostic(content, result);
+        appendContractFailureDiagnostic(content, result, hasExecutionOutcome
+                && !"ARTIFACT_CONTRACT_FAILURE".equals(executionOutcome.get("recoveryCategory")));
         content.append("\n## Evidence\n\n");
         if (outputRefs.isEmpty()) {
             content.append("- Output refs: N/A\n");
@@ -74,13 +86,14 @@ final class FailureSummaryWriter {
     }
 
     @SuppressWarnings("unchecked")
-    private static void appendContractFailureDiagnostic(StringBuilder content, Map<String, Object> result) {
+    private static void appendContractFailureDiagnostic(StringBuilder content, Map<String, Object> result, boolean secondary) {
         var diagnosticJson = text(result.get("contract_failure_diagnostic_ref"));
         var diagnosticMarkdown = text(result.get("contract_failure_diagnostic_markdown_ref"));
         if (diagnosticJson.isBlank() && diagnosticMarkdown.isBlank() && !result.containsKey("parse_error")) {
             return;
         }
-        content.append("\n## Contract Failure Diagnostic\n\n");
+        content.append(secondary ? "\n## Secondary Contract Diagnostic\n\n" : "\n## Contract Failure Diagnostic\n\n");
+        if (secondary) content.append("These acquisition diagnostics do not replace the execution outcome's primary reason.\n\n");
         line(content, "Diagnostic JSON", diagnosticJson);
         line(content, "Diagnostic Markdown", diagnosticMarkdown);
         if (result.get("parse_error") instanceof Map<?, ?> parseError) {

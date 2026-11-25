@@ -1,0 +1,15 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "working_set",
+  "workstreamId" : "ws-20261011T044656Z-BMDJ",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-context-intake_codex_product_review-008",
+  "nodeDefinitionId" : "context.intake_codex_product_review",
+  "targetNodeDefinitionId" : "intake.codex_product_review",
+  "iterationId" : "iter-002",
+  "coreFiles" : [ ],
+  "supportingFiles" : [ ],
+  "allowedWriteFiles" : [ ],
+  "forbiddenScope" : [ ".git/**", ".agent/workstreams/**/workflow/**", ".agent/workstreams/**/nodes/**", "business source writes" ],
+  "generatedAt" : "2026-10-11T04:57:12.762403Z"
+}

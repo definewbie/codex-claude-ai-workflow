@@ -1,0 +1,85 @@
+{
+  "definition": "dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json",
+  "sha256": "d9cdcf71b8974d1ed023150dc1c2146d79769d6ac6aea994b0305d2d6b895fa2",
+  "roles": [
+    {
+      "node": "intake.claude_brainstorm",
+      "agent": "claude",
+      "template": "intake-claude-brainstorm",
+      "phase": null,
+      "permission_profile": "contract_discovery",
+      "approve_all_field": null
+    },
+    {
+      "node": "intake.codex_product_review",
+      "agent": "codex",
+      "template": "intake-codex-product-review",
+      "phase": null,
+      "permission_profile": "review",
+      "approve_all_field": null
+    },
+    {
+      "node": "design.claude_design",
+      "agent": "claude",
+      "template": "design-claude",
+      "phase": "GOAL",
+      "permission_profile": "observe",
+      "approve_all_field": null
+    },
+    {
+      "node": "design.codex_arch_review",
+      "agent": "codex",
+      "template": "design-codex-review",
+      "phase": "GOAL",
+      "permission_profile": "review",
+      "approve_all_field": null
+    },
+    {
+      "node": "plan.claude_plan",
+      "agent": "claude",
+      "template": "plan-claude",
+      "phase": "GOAL",
+      "permission_profile": "observe",
+      "approve_all_field": null
+    },
+    {
+      "node": "plan.codex_plan_review",
+      "agent": "codex",
+      "template": "plan-codex-review",
+      "phase": "GOAL",
+      "permission_profile": "review",
+      "approve_all_field": null
+    },
+    {
+      "node": "implement.claude_implement",
+      "agent": "claude",
+      "template": "implement-claude",
+      "phase": "EXECUTION",
+      "permission_profile": "implement",
+      "approve_all_field": true
+    },
+    {
+      "node": "implement.claude_self_test_report",
+      "agent": "claude",
+      "template": "implement-claude-self-test",
+      "phase": "EXECUTION",
+      "permission_profile": "implement",
+      "approve_all_field": true
+    },
+    {
+      "node": "acceptance.codex_verifier_review",
+      "agent": "codex",
+      "template": "acceptance-codex-review",
+      "phase": "EXECUTION",
+      "permission_profile": "review",
+      "approve_all_field": null
+    }
+  ],
+  "config_default_permissions": "approve-all",
+  "dual_named_profile_overrides_legacy_approve_all": true,
+  "bridge_exceptions": [
+    "contract_discovery simpleClaudeCode",
+    "contract_correction deny-all"
+  ],
+  "client_launch_and_handshake": "NOT_RUN"
+}

@@ -1,0 +1,26 @@
+{
+  "status": "OFFLINE_VERIFIED_PENDING_CC",
+  "batch_closed": false,
+  "final_java": {
+    "artifact": "test-results.json",
+    "tests": 1701,
+    "suites": 204,
+    "single_clean_reactor": true,
+    "inputs": 945,
+    "stable": true
+  },
+  "maintained_acpx": {
+    "artifact": "native-verification.json",
+    "tests": 1005,
+    "patch_sha256": "1517f828d303ea720a7a153e6dc8c33265ba1ea100d2b9260c98327b5604468c",
+    "installer_run": false
+  },
+  "incremental_files": 69,
+  "comparison": "dirty implementation baseline, not HEAD; reference document reconstruction explicitly labeled",
+  "live_native_provider_runs": 0,
+  "agents_spawned": 0,
+  "committed": false,
+  "real_gate": "NO_GO_UNCHANGED",
+  "independent_review": "AWAITING_USER_CC_REVIEW",
+  "remaining": "Real native/provider/tool/stop/browser/Git delivery/final Gate and overall W items not proven."
+}

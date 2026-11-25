@@ -1,0 +1,50 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261026T142203Z-7SNA",
+    "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-context-plan_codex_plan_review-024"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000024",
+    "updatedAt": "2026-10-26T21:08:58.274010Z",
+    "commitSequence": 89
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-context-plan_codex_plan_review-024",
+    "nodeDefinitionId": "context.plan_codex_plan_review",
+    "kind": "TASK",
+    "handlerType": "context.build_package",
+    "status": "READY",
+    "stageId": "stage-context",
+    "iterationId": "iter-003",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.stderr.log",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.transcript.log",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.json",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1793048679201/binding.json",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.contract.json",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793048679201/outputs/plan-claude.plan.json"
+    ],
+    "inputTransition": {
+      "condition": "unconditional",
+      "purpose": "Seed the first Claude intake run with repo-scope context.",
+      "source_node_sha256": "4fe57ef71b126680565df9c75d3eb0333d77f80b328c197323049414a717ea08",
+      "source_node_instance_id": "node-plan-claude_plan-022",
+      "required": true,
+      "transition_type": "normal"
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 1976.98663307967
+}

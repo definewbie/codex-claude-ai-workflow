@@ -1,0 +1,152 @@
+--- original/process_check.py
++++ continuation/process_check.py
+@@ -8,6 +8,33 @@
+     def __init__(self, status, message):
+         super().__init__(message)
+         self.status = status
++
++
++def require_unresolved_pids_absent(records):
++    """Consume caller-verified records; a PID number is not a durable identity.
++
++    absent=True must come from an earlier successful check in the caller's
++    frozen inputs, never from a model assertion. That old process cannot return
++    after confirmed absence. Unconfirmed records still use the strict reader.
++    """
++    if not isinstance(records, list):
++        raise ProcessInspectionError("UNKNOWN", "Invalid process records")
++    seen, confirmed, unresolved = set(), [], []
++    for row in records:
++        if not isinstance(row, dict):
++            raise ProcessInspectionError("UNKNOWN", "Invalid process record")
++        pid = row.get("pid")
++        if type(pid) is not int or pid <= 0 or pid in seen:
++            raise ProcessInspectionError("UNKNOWN", "Invalid or duplicate recorded PID")
++        if "absent" in row and type(row["absent"]) is not bool:
++            raise ProcessInspectionError("UNKNOWN", "Invalid prior absence fact")
++        seen.add(pid)
++        (confirmed if row.get("absent") is True else unresolved).append(pid)
++    observation = (require_known_pids_absent(unresolved) if unresolved else {
++        "status": "NO_UNRESOLVED_PIDS", "checked_pids": [],
++        "scope": "Prior confirmed absence only; no current process-table or child-tree claim",
++    })
++    return {**observation, "previously_confirmed_absent": sorted(confirmed)}
+ 
+ 
+ def require_known_pids_absent(pids):
+--- original/run-one-step.py
++++ continuation/run-one-step.py
+@@ -7,24 +7,22 @@
+ from pathlib import Path
+ from gate_support import OUT, read, write, frozen_check, measure, planning
+ from check_budget import check
+-from process_check import require_known_pids_absent
++from continuation import authorize, inspect
+ 
+ # This is a candidate runner, not permission to reuse a prior case or budget.
+-authorization = read(OUT / 'run-authorization.json')
+-assert authorization.get('fresh_run_authorized') is True and authorization.get('case') == 'FRESH_EIGHTH', 'Fresh eighth requires new human authorization'
+-assert read(OUT / 'gate-local-preflight.json').get('status') == 'PASS_OFFLINE_PRECONDITIONS_AWAITING_RUN_APPROVAL', 'Fresh local preflight required'
++authorize()
+ step, expected = sys.argv[1:]
+ assert not (OUT / 'stop-required.json').exists(), 'Gate already stopped; no automatic continuation'
+ folder = OUT / 'steps' / step
+ assert not folder.exists(), 'Never repeat an old step automatically'
+ loc = read(OUT / 'instance-location.json')
+ workspace, ledger = Path(loc['workspace']), Path(loc['ledger'])
+-release = frozen_check()
++release, inherited_measurement, active, process_observation = inspect()
+ assert not (workspace / '.acpxrc.json').exists(), 'Unexpected workspace config'
+ assert not list(ledger.rglob('pending/*.json')), 'Pending local write requires original recovery assessment'
+ previous = [read(p) for p in (OUT / 'steps').glob('*/result.json')]
+ assert all(p.get('exit') in (0, 1) for p in previous), 'Prior runner exception requires assessment'
+-active = sum(p['elapsed_seconds'] for p in previous)
++# Active time already includes old operations and every new receipt via inspect().
+ current = read(ledger / 'workflow/current.json')
+ assert current['status'] == 'RUNNING' and not current['openGateIds'], 'Paused/terminal workflow'
+ assert len(current['activeNodeInstanceIds']) == 1
+@@ -35,7 +33,7 @@
+ assert identity['executable.server'] == release['application_jars']['dual-server']['sha256']
+ assert identity['kernel.effective'] == 'liteflow' and identity['behavior.env.DUAL_ACPX_COMMAND_TIMEOUT_SECONDS'] == '600'
+ # Same reviewed prerequisite before any step directory or Java side effect.
+-process_observation = require_known_pids_absent([r['pid'] for r in read(OUT/'old-execution-recheck.json')['known_pids']])
++# Process guard and observation-link validation already ran in inspect().
+ folder.mkdir(parents=True)
+ write(folder/'old-process-observation.json', process_observation)
+ is_model = expected in [s['node'] for s in read(OUT / 'budget.json')['stages']]
+--- original/pre-dispatch-recheck.py
++++ continuation/pre-dispatch-recheck.py
+@@ -1,52 +1,25 @@
+-from process_check import require_known_pids_absent
+-"""Read-only pre-dispatch checks. Does not grant authorization or dispatch."""
+-import datetime
+-import hashlib
+-import os
+-import shutil
+-import subprocess
++"""Read-only continuation preflight: no Java/native/provider command."""
++import time
+ from pathlib import Path
+-from gate_support import OUT, ROOT, read, write, sha, frozen_check, measure, planning
++import gate_support as gate
+ from check_budget import check
++from continuation import inspect
+ 
+-release = frozen_check()
+-loc = read(OUT/'instance-location.json')
+-workspace, ledger = Path(loc['workspace']), Path(loc['ledger'])
+-assert read(OUT/'gate-local-preflight.json')['status']=='PASS_OFFLINE_PRECONDITIONS_AWAITING_RUN_APPROVAL'
+-assert read(ledger/'workflow/current.json')==read(OUT/'initial-workflow-current.json'), 'Initial state drift'
+-assert not list((ledger/'runs').glob('*/run.json')), 'Fresh case already executed'
+-assert not list(ledger.rglob('pending/*.json')), 'Pending mutation'
+-assert all(sha(ledger/p)==h for p,h in read(OUT/'initial-ledger-sha256.json')['files'].items())
+-assert {str(p.relative_to(ledger)) for p in ledger.rglob('*') if p.is_file() and p.name!='.mutation.lock'}==set(read(OUT/'initial-ledger-sha256.json')['files']), 'Unexpected initial ledger files'
+-assert not (workspace/'.acpxrc.json').exists()
+-launch = read(OUT/'local-launch-selection.json')
+-assert hashlib.sha256(os.environ.get('PATH','').encode()).hexdigest()==launch['process_path_sha256'], 'PATH drift'
+-assert all(shutil.which(n)==p for n,p in launch['executables'].items()), 'Executable resolution drift'
+-for dep in read(OUT/'host-environment-identity.json')['dependencies']:
+-    assert sha(dep['path'])==dep['sha256'], 'Host environment drift'
+-assert not any(read(p).get('cwd')==str(workspace) for p in (Path.home()/'.acpx/sessions').glob('*.json')), 'Native session already created'
+-old = read(OUT/'old-execution-recheck.json')
+-for row in old['sessions']:
+-    meta = read(Path.home()/'.acpx/sessions'/(row['record_id']+'.json'))
+-    assert meta['closed'] is True and meta['name']==row['name'], 'Prior named session is active'
+-process_observation = require_known_pids_absent([row['pid'] for row in old['known_pids']])
+-for role, location in [('target',Path(loc['target'])),('workspace',workspace)]:
+-    for label,args in [('head',['rev-parse','HEAD']),('tree',['rev-parse','HEAD^{tree}']),
+-                       ('common-dir',['rev-parse','--path-format=absolute','--git-common-dir']),
+-                       ('status',['status','--porcelain']),('tracked',['ls-files'])]:
+-        cp = subprocess.run(['rtk','proxy','git']+args,cwd=location,capture_output=True,text=True)
+-        assert cp.returncode==0 and cp.stdout==(OUT/(role+'-'+label+'.stdout.txt')).read_text(), 'Initial target/workspace drift'
+-observed = measure(workspace,ledger)
+-assert observed['completed_calls']==0 and observed['actual_tokens']==0
+-first = read(OUT/'budget.json')['stages'][0]['node']
+-state = planning(first,observed,0)
++start = time.monotonic()
++release, measured, active, process = inspect()
++location = gate.read(gate.OUT / 'instance-location.json')
++workspace, ledger = Path(location['workspace']), Path(location['ledger'])
++current = gate.read(ledger / 'workflow/current.json')
++if not list((gate.OUT / 'steps').glob('*')):
++    assert len(current['activeNodeInstanceIds']) == 1 and not current['openGateIds']
++    node = gate.read(ledger / 'nodes' / (current['activeNodeInstanceIds'][0] + '.json'))
++    assert node['nodeDefinitionId'] == 'plan.decision' and node['status'] == 'READY'
++state = gate.planning('implement.claude_implement', measured, active + time.monotonic() - start)
+ admission = check(state)
+-assert admission['result']=='ALLOW_BUDGET_ONLY'
+-authorization = read(OUT/'run-authorization.json')
+-write(OUT/'pre-dispatch-recheck.json',dict(checked_at=datetime.datetime.now().astimezone().isoformat(),
+-    status='PASS_READONLY_RECHECK',fresh_run_authorized=authorization['fresh_run_authorized'],
+-    dispatch_performed=False,native_provider_calls=0,initial_current_unchanged=True,
+-    process_observation=process_observation,
+-    budget_input=state,budget_result=admission,
+-    next_action='USER_CURRENT_RUN_APPROVAL_REQUIRED' if not authorization['fresh_run_authorized'] else 'CURRENT_APPROVAL_MUST_BE_VERIFIED_BY_OPERATOR_BEFORE_ORIGINAL_RUNNER'))
+-print('Read-only recheck PASS; run authorized='+str(authorization['fresh_run_authorized'])+'; no dispatch')
++assert admission['result'] == 'ALLOW_BUDGET_ONLY', admission
++receipt = gate.OUT / 'preflight-receipts' / str(time.time_ns())
++receipt.mkdir(parents=True)
++gate.write(receipt / 'result.json', {'elapsed_seconds': time.monotonic() - start, 'exit': 0,
++    'budget_input': state, 'budget_result': admission, 'process_observation': process,
++    'current': current, 'native_model_calls': 0, 'dispatch_performed': False})
++print('Offline continuation preflight PASS; no run approval or dispatch implied')

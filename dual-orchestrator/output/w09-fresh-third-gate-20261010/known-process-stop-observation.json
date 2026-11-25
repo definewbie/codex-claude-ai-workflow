@@ -1,0 +1,101 @@
+{
+  "checks": [
+    {
+      "pid": 45722,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": null
+    },
+    {
+      "pid": 45900,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": null
+    },
+    {
+      "pid": 45942,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": 0
+    },
+    {
+      "pid": 46715,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": null
+    },
+    {
+      "pid": 46753,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": null
+    },
+    {
+      "pid": 47523,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": 0
+    },
+    {
+      "pid": 49255,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": null
+    },
+    {
+      "pid": 49403,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": null
+    },
+    {
+      "pid": 49443,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": 0
+    },
+    {
+      "pid": 50095,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": null
+    },
+    {
+      "pid": 50119,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": null
+    },
+    {
+      "pid": 50127,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": 0
+    },
+    {
+      "pid": 50391,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": null
+    },
+    {
+      "pid": 53236,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": null
+    },
+    {
+      "pid": 53420,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": null
+    },
+    {
+      "pid": 53509,
+      "exit": 1,
+      "observation": "",
+      "known_process_result_exit": 0
+    }
+  ],
+  "scope": "known invocation PIDs, not arbitrary child tree"
+}

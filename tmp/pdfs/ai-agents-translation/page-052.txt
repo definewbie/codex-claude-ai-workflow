@@ -1,0 +1,7 @@
+    Figure 1-6. In orchestrated autonomy, decision points are predefined in the workflow. In full
+     autonomy, the LLM could generate new tools, actions, or decision paths to reach its goal.
+
+Agents can simulate flexibility within frameworks such as LangGraph using
+reflection, planning, and structured outputs. However, we do not yet have
+systems that can freely redefine their own architecture or reason about their
+goals in a robust and general way.

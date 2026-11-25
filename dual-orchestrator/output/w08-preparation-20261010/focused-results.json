@@ -1,0 +1,68 @@
+{
+  "suites": [
+    {
+      "suite": "dev.dual.adapter.acpx.AgentPromptRendererTest",
+      "tests": 38,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "output/w08-preparation-20261010/focused-reports/dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AgentPromptRendererTest.xml"
+    },
+    {
+      "suite": "dev.dual.runtime.handler.AgentResultPromptContractTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "output/w08-preparation-20261010/focused-reports/dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.AgentResultPromptContractTest.xml"
+    },
+    {
+      "suite": "dev.dual.runtime.handler.TypedDesignScopeTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "output/w08-preparation-20261010/focused-reports/dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TypedDesignScopeTest.xml"
+    },
+    {
+      "suite": "dev.dual.runtime.handler.TypedPlanScopeTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "output/w08-preparation-20261010/focused-reports/dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.TypedPlanScopeTest.xml"
+    },
+    {
+      "suite": "dev.dual.runtime.handler.PhasedContractContinuationTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "output/w08-preparation-20261010/focused-reports/dual-runtime/target/surefire-reports/TEST-dev.dual.runtime.handler.PhasedContractContinuationTest.xml"
+    },
+    {
+      "suite": "dev.dual.adapter.acpx.AuthoredManifestDispatchTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "output/w08-preparation-20261010/focused-reports/dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AuthoredManifestDispatchTest.xml"
+    },
+    {
+      "suite": "dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "output/w08-preparation-20261010/focused-reports/dual-adapter-acpx/target/surefire-reports/TEST-dev.dual.adapter.acpx.AuthoredReferenceCorrectionSequenceTest.xml"
+    }
+  ],
+  "totals": {
+    "tests": 98,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "exit": 0,
+  "provider_runs": 0
+}

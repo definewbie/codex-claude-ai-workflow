@@ -1,0 +1,7 @@
+{
+  "frozen_at": "2026-10-26T06:21:25.086566+08:00",
+  "launch_identity_sha256": "7ad21b78058d5ce5fb3cb180ff835fb9740a57a851ca37d10162244a3d463ed1",
+  "review_manifest_sha256": "9ab42fbe221e6627ece737ee5d7aa93904af374987f47a0304e99bf9267e9274",
+  "authorization_before_sha256": "8aa0c6f1c25f751638c485dbdbaacae52b6f9564f050412a2c77c1ad9357af7f",
+  "scope": "Current reviewed operator launch combination only; historical identities/stops unchanged"
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "request_id": "3",
+    "session_id": "60521b08-07f4-4cc7-b656-71a2af3d7c26",
+    "prompt_file_ref": ".agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/prompts/intake-claude-brainstorm.md",
+    "prompt_file_sha256": "e9dd88ee1e78029b677187876dff6cb062cc154718d4e2cbda26efd064ca06d5",
+    "wire_text_sha256": "19a25c123e87f86842b05e3a660088e8adb30f270365cf2759083f2cf6ccd854",
+    "wire_text_length": 16115,
+    "prompt_file_length": 16116,
+    "exact_match": false,
+    "starts_with_original": false,
+    "ends_with_original": false,
+    "text_chunks": 1
+  },
+  {
+    "request_id": "4",
+    "session_id": "60521b08-07f4-4cc7-b656-71a2af3d7c26",
+    "prompt_file_ref": ".agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/prompts/intake-claude-brainstorm.contract-correction.md",
+    "prompt_file_sha256": "0c62ed717d5aebda344172c62145a0a73a5023ee501ac64ee0b61f055049ae50",
+    "wire_text_sha256": "0c62ed717d5aebda344172c62145a0a73a5023ee501ac64ee0b61f055049ae50",
+    "wire_text_length": 4255,
+    "prompt_file_length": 4255,
+    "exact_match": true,
+    "starts_with_original": true,
+    "ends_with_original": true,
+    "text_chunks": 1
+  }
+]

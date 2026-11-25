@@ -1,0 +1,13 @@
+{
+  "schemaVersion" : 1,
+  "iterationId" : "iter-001",
+  "parentIterationId" : "",
+  "number" : 1,
+  "stageId" : "stage-context",
+  "status" : "active",
+  "triggerNodeInstanceId" : "",
+  "triggerAction" : "workflow_started",
+  "targetNodeDefinitionId" : "context.intake_claude_brainstorm",
+  "reason" : "Initial workflow iteration.",
+  "createdAt" : "2026-10-14T23:40:09.439357Z"
+}

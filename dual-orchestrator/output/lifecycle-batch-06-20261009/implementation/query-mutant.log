@@ -1,0 +1,14 @@
+Exception in thread "main" java.lang.AssertionError: observe called while L held
+	at dev.dual.server.QueryLockOrderProof$1.observe(QueryLockOrderProof.java:18)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:74)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:83)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:73)
+	at dev.dual.server.WorkstreamQueryService.status(WorkstreamQueryService.java:99)
+	at dev.dual.server.QueryLockOrderProof.main(QueryLockOrderProof.java:28)
+Caused by: dev.dual.ledger.file.WorkstreamLockedException: workstream is already being mutated: /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/b06-query-proof-17413803450657085891/.agent/workstreams/ws-query-proof
+	at dev.dual.ledger.file.WorkstreamLock.acquire(WorkstreamLock.java:36)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:60)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:278)
+	at dev.dual.ledger.file.WorkflowFileLedger.readSession(WorkflowFileLedger.java:268)
+	at dev.dual.server.QueryLockOrderProof$1.observe(QueryLockOrderProof.java:17)
+	... 5 more

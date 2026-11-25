@@ -1,0 +1,75 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "context_governance_report",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "nodeDefinitionId" : "implement.claude_self_test_report",
+  "policyNodeDefinitionId" : "implement.claude_self_test_report",
+  "targetNodeDefinitionId" : "implement.claude_self_test_report",
+  "nodeInstanceId" : "node-implement-claude_self_test_report-031",
+  "iterationId" : "iter-003",
+  "stageId" : "implement",
+  "runId" : "run-1792977352552",
+  "repositoryFactBinding" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/binding.json",
+  "repositoryFactBindingSha256" : "0ed346af2379f7061e4c6a2c8e08a7c3f51c6153b197635b138b94a640293ace",
+  "inventoryHead" : "",
+  "inventorySha256" : "",
+  "inventoryPathCount" : 0,
+  "reportPhase" : "actual",
+  "planningAvailable" : true,
+  "recommendedReadFiles" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "expectedWriteFiles" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "actualReadFiles" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "actualDirectReadFiles" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "actualReadEvidence" : [ {
+    "path" : "src/normalize_text.py",
+    "sha256" : "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c",
+    "sizeBytes" : 885
+  }, {
+    "path" : "tests/test_normalize_text.py",
+    "sha256" : "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be",
+    "sizeBytes" : 3847
+  }, {
+    "path" : "README.md",
+    "sha256" : "0af74daeacfdd946a47e88d3b3f28d41ef125285084fd5f1c8735859e5caaae5",
+    "sizeBytes" : 2904
+  } ],
+  "actualReadFileKinds" : {
+    "tests/test_normalize_text.py" : "source",
+    "src/normalize_text.py" : "source",
+    "README.md" : "doc"
+  },
+  "actualDirectReadFileKinds" : {
+    "tests/test_normalize_text.py" : "source",
+    "src/normalize_text.py" : "source",
+    "README.md" : "doc"
+  },
+  "actualCapabilityUsages" : [ {
+    "source" : "tool_id",
+    "provider" : "Read",
+    "kind" : "direct_file_read"
+  } ],
+  "actualWriteFiles" : [ ],
+  "repeatedReadFiles" : [ ],
+  "toolUsage" : {
+    "schemaVersion" : 1,
+    "toolCallCount" : 45,
+    "readCount" : 20,
+    "writeCount" : 0,
+    "bashCount" : 25,
+    "otherCount" : 0,
+    "byTool" : {
+      "Bash" : 25,
+      "Glob" : 8,
+      "Read" : 12
+    },
+    "toolIds" : [ "Read", "Bash", "Glob" ],
+    "readFiles" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+    "directReadFiles" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+    "writeFiles" : [ ],
+    "bashCommands" : [ "pwd && python --version 2>&1 && python3 --version 2>&1", "python -m unittest discover -s tests -v 2>&1", "PYTHONPATH=src python -B -m doctest README.md && echo DOCTEST_OK", "shasum -a 256 src/normalize_text.py tests/test_normalize_text.py README.md", "rm -rf src/__pycache__ tests/__pycache__ && git status --porcelain -uall" ],
+    "commandExecutables" : [ "pwd", "python", "shasum", "rm" ]
+  },
+  "transcriptPath" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.transcript.log",
+  "telemetryPending" : false,
+  "generatedAt" : "2026-10-26T01:18:45.096434Z"
+}

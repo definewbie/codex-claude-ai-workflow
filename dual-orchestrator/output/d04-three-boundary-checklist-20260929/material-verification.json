@@ -1,0 +1,17 @@
+{
+  "baselineFiles": 1319,
+  "unchangedBaselineFiles": 1315,
+  "changedBaselineFiles": [
+    "dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "newChecklist": "dual-orchestrator/docs/testing/20260929-d04-three-boundary-verification-checklist.zh-CN.md",
+  "priorManifestEntriesResolved": 15,
+  "linksAndMarkdownTablesValid": true,
+  "runtimeTests": "NOT RUN",
+  "nativeProviderAgentCalls": 0,
+  "productChanges": false,
+  "review": "author material checks only; new independent review pending"
+}

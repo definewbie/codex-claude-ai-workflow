@@ -1,0 +1,55 @@
+{
+  "commit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "files": [
+    {
+      "path": "codex-rs/protocol/src/models.rs",
+      "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/protocol/src/models.rs",
+      "status": 200,
+      "bytes": 146020,
+      "sha256": "0fedfd9889dcfc090cd3ff15464aa9ac1f5c33bb01378c10c068c18263d1b65e"
+    },
+    {
+      "path": "codex-rs/core/src/tools/router.rs",
+      "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/core/src/tools/router.rs",
+      "status": 200,
+      "bytes": 11024,
+      "sha256": "5c1132d48b183bf8e0bb8b21a8cd7c4f720d3642468737cd040b5b04c29a4f5a"
+    },
+    {
+      "path": "codex-rs/core/src/tools/registry.rs",
+      "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/core/src/tools/registry.rs",
+      "status": 200,
+      "bytes": 30218,
+      "sha256": "f90bfac6c021ffa0aadce1208bd7d13679915ac2b1bfcec227e9648e9992343a"
+    },
+    {
+      "path": "codex-rs/core/src/tools/handlers/multi_agents_v2/spawn.rs",
+      "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/core/src/tools/handlers/multi_agents_v2/spawn.rs",
+      "status": 200,
+      "bytes": 9646,
+      "sha256": "5c58539e11880fb5cf516d65277c0b35ef4924d7b33d96e0c605a9bc444b600b"
+    },
+    {
+      "path": "codex-rs/core/src/tools/handlers/multi_agents_v2/list_agents.rs",
+      "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/core/src/tools/handlers/multi_agents_v2/list_agents.rs",
+      "status": 200,
+      "bytes": 2575,
+      "sha256": "97f54d0ed0757576c1ab40eb07db2142455180f28543664401ed0df32760e977"
+    },
+    {
+      "path": "codex-rs/core/src/tools/spec_plan.rs",
+      "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/core/src/tools/spec_plan.rs",
+      "status": 200,
+      "bytes": 57876,
+      "sha256": "9d7df8fe504890f9947d972c251f61cb5b14fcd19eb43229b8e6925a711b285a"
+    },
+    {
+      "path": "codex-rs/codex-api/src/sse/responses.rs",
+      "url": "https://raw.githubusercontent.com/openai/codex/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/codex-rs/codex-api/src/sse/responses.rs",
+      "status": 200,
+      "bytes": 72196,
+      "sha256": "ffe0a51e8b496d6c6e3b887859a3ee1afcc5b9a4c76d2f3bdffffa719de0aa9c"
+    }
+  ],
+  "scope": "source read only; no imported code executed"
+}

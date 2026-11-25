@@ -1,0 +1,356 @@
+{
+  "recorded_at": "2026-10-26T09:25:09.725968+08:00",
+  "phase": "P0 mainline E2E proof",
+  "workstream": "ws-20261023T005431Z-9YYF",
+  "slice_result": "PASS_TO_FINAL_HUMAN_GATE",
+  "full_e2e_result": "PENDING_FINAL_HUMAN_APPROVAL_TARGET_APPLY_USER_COMMIT_AND_FINALIZE",
+  "domain_current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "workflowInstanceId": "wf-ws-20261023T005431Z-9YYF",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "WAITING_FOR_HUMAN",
+    "activeNodeInstanceIds": [
+      "node-gate-human_acceptance-039"
+    ],
+    "openGateIds": [
+      "gate-node-gate-human_acceptance-039"
+    ],
+    "lastEventId": "evt-000039",
+    "updatedAt": "2026-10-26T01:22:00.010367Z",
+    "commitSequence": 152
+  },
+  "domain_current_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/workflow/current.json",
+  "domain_current_sha256": "5aa626caab56d104bcd5f41646ed2fdf8692459f9a70506b8173a05de4a9ff71",
+  "final_gate_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_acceptance-039.json",
+  "final_gate_sha256": "affafde431cbaf50bb65ce23af5016932f24ed41d3be953031681e327ead6d01",
+  "candidate_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/candidate-5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb.json",
+  "candidate_sha256": "5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb",
+  "candidate": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261023T005431Z-9YYF",
+    "producerNodeInstanceId": "node-delivery-prepare_pr-038",
+    "iterationId": "iter-003",
+    "sourceWorkspaceId": "wsp-20261023T005431Z-29TT",
+    "sourceEffectiveWorkdir": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+    "baseCommit": "c442fd02fb39d87481bbd940aa5f270947a72a60",
+    "baseTree": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+    "acceptedFiles": [
+      "README.md",
+      "src/normalize_text.py",
+      "tests/test_normalize_text.py"
+    ],
+    "excludedFiles": [],
+    "patch": {
+      "ref": ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/merge.patch",
+      "sha256": "382a66c6778bdc10472efe46bb02359fd1cf1204c6426a3943f80dd0e7aaf857"
+    },
+    "expectedResultTree": "0233afaf8755e44b6c8ab156e311ffbef6e50983",
+    "commitMessage": {
+      "ref": ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/commit-message.txt",
+      "sha256": "117887f9387c497de62c1fa13aa52c3b4cb5c40a879c42759547bcc305497020"
+    },
+    "prBody": {
+      "ref": ".agent/workstreams/ws-20261023T005431Z-9YYF/delivery/candidates/node-delivery-prepare_pr-038/pr-body.md",
+      "sha256": "c8210d698a439166cd6e696eae57a98e982dd452c7a297fdee9610c4ed1b6ffd"
+    },
+    "createdAt": "2026-10-26T01:21:59.683720Z"
+  },
+  "products": {
+    "README.md": {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/README.md",
+      "sha256": "0af74daeacfdd946a47e88d3b3f28d41ef125285084fd5f1c8735859e5caaae5",
+      "snapshot_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/human-gate-ledger-snapshot/product-files/README.md"
+    },
+    "src/normalize_text.py": {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/src/normalize_text.py",
+      "sha256": "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c",
+      "snapshot_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/human-gate-ledger-snapshot/product-files/src/normalize_text.py"
+    },
+    "tests/test_normalize_text.py": {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/tests/test_normalize_text.py",
+      "sha256": "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be",
+      "snapshot_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/human-gate-ledger-snapshot/product-files/tests/test_normalize_text.py"
+    }
+  },
+  "verification": {
+    "run-1792977352552": {
+      "run_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/run.json",
+      "run_sha256": "1e3ed5246929b0aa741e2cc2fd56f35d85852c1fa6e582108110ac4c5a59f0af",
+      "output_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/implement-claude-self-test.json",
+      "output_sha256": "50757e0554b646c95966d136d192fe3f6d8f9e0b3e1c1c737234b90bbab5f84f",
+      "outcome": {
+        "status": "SUCCESS",
+        "primaryReason": "completed",
+        "nodeMaySucceed": true,
+        "retryPolicy": "NONE",
+        "recoveryCategory": "NONE",
+        "operatorMessage": "The agent produced valid result and artifact evidence.",
+        "secondarySignals": []
+      },
+      "decision": "SELF_TEST_COMPLETE",
+      "summary": "在仓库根实际执行 python -m unittest discover -s tests -v 2>&1 得 Ran 11 tests 与 OK（零 failure/error），11 个用例名与 tests/test_normalize_text.py 九项 CASES 逐条核对一致，README 示例经逐字符比对与 doctest 实际执行确认与实现一致，AC-1/AC-2/AC-3 全部通过。",
+      "verification_checks": [
+        {
+          "criterion_id": "AC-1",
+          "assertion": "实际执行的 python -m unittest discover -s tests -v 2>&1 输出 11 个用例全部 ok：九项 CASES 覆盖空串、纯 LF、CRLF、孤立 CR、混合换行 \"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、Unicode 含 U+2028 保留、末尾有换行 \"end\\r\\n\"→\"end\\n\"、末尾无换行、连续空行 \"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\" 共九类（≥八种）且每项有明确期望，test_crlf_becomes_single_lf 断言 CRLF 不拆为双 LF，test_idempotent_across_all_cases 以 subTest 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x) 实际通过，案例与 tests/test_normalize_text.py 源码逐条相符。",
+          "execution_ref": "CURRENT",
+          "tool_call_ids": [],
+          "material_refs": [
+            {
+              "ref": "tests/test_normalize_text.py",
+              "sha256": "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be"
+            }
+          ]
+        },
+        {
+          "criterion_id": "AC-2",
+          "assertion": "实际执行测试并合并采集：unittest 实际输出含 11 条逐用例行（方法名与测试源码一一对应、均 ok）并以 Ran 11 tests in 0.000s 与 OK 结尾，明确显示覆盖数 11 与零 failure/零 error；输出为本次运行的程序观测原样结果，非完成状态或文字结论的替代。",
+          "execution_ref": "CURRENT",
+          "tool_call_ids": [],
+          "material_refs": [
+            {
+              "ref": "tests/test_normalize_text.py",
+              "sha256": "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be"
+            }
+          ]
+        },
+        {
+          "criterion_id": "AC-3",
+          "assertion": "实际读取 src/normalize_text.py 与 README.md 逐字符比对：README 的导入语句 from normalize_text import normalize_newlines 与典型混合换行示例 normalize_newlines(\"a\\r\\nb\\rc\\nd\") → 'a\\nb\\nc\\nd'（另含空串 ''、末尾有换行 'end\\n'、末尾无换行 'no newline' 示例）与两步 str.replace 实现语义一致；并实际执行 PYTHONPATH=src python -B -m doctest README.md 通过（实际输出 DOCTEST_OK）。",
+          "execution_ref": "CURRENT",
+          "tool_call_ids": [],
+          "material_refs": [
+            {
+              "ref": "src/normalize_text.py",
+              "sha256": "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c"
+            },
+            {
+              "ref": "README.md",
+              "sha256": "0af74daeacfdd946a47e88d3b3f28d41ef125285084fd5f1c8735859e5caaae5"
+            }
+          ]
+        }
+      ],
+      "acceptance_notes": [
+        "本任务约定 actual_exit_required=false，不要求工具独立测量的真实退出码；本次以 2>&1 合并采集的逐用例实际输入/输出与 Ran 11 tests/OK 摘要作为 AC-2 证据，未以完成状态或文字结论替代实测结果。",
+        "实现、测试与 README 三方数量同步：测试方法 11 个、CASES 九项，README 第 48 行记载的用例数与类别描述与实际执行结果一致。",
+        "doctest 以 -B 运行以避免字节码副产物；unittest 按计划原命令运行后其 __pycache__ 副产物已清理并复核，最终工作区仅含三个批准的 CREATE 文件，均未提交 git（不在本次授权内）。",
+        "计划 open risk 中 python 命令缺失需替换 python3 的情形在本机不成立（python 与 python3 均为 Python 3.13.0），实际使用计划原命令 python -m unittest discover -s tests -v 2>&1。"
+      ],
+      "must_fix": [],
+      "usage": {
+        "inputTokens": 51885,
+        "outputTokens": 10419,
+        "cachedReadTokens": 199168,
+        "cachedWriteTokens": 0,
+        "totalTokens": 261472,
+        "costAmount": 0.6194839999999999,
+        "costCurrency": "USD",
+        "source": "acpx_current_transcript",
+        "measurementType": "PROVIDER_RUN_USAGE",
+        "attribution": "EXACT_REQUEST_MATCH",
+        "cumulative": false,
+        "contextUsedTokens": 0,
+        "sessionCostAmount": 0.6194839999999999,
+        "sessionCostCurrency": "USD",
+        "providerId": "zhipu",
+        "model": "glm-5.3",
+        "billingMode": "subscription_token_only",
+        "providerMetadataSource": "acpx_session_json",
+        "unavailableReason": ""
+      },
+      "providerModelIdentity": {
+        "billingMode": "subscription_token_only",
+        "model": "glm-5.3",
+        "confidence": "high",
+        "source": "acpx_session_json",
+        "provider": "zhipu"
+      },
+      "observations_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977352552/outputs/verification-observations.json",
+      "observations_sha256": "7b037b915de2188c604a87c5346bbebeaf8747a1b874828fbd08fbc9e2598af8",
+      "duration_ms": 168207
+    },
+    "run-1792977598143": {
+      "run_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/run.json",
+      "run_sha256": "26484fd87deaacd4626f88607c62c2699125cc23f9c353b93d926897752622e8",
+      "output_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.json",
+      "output_sha256": "3db04f19b0a45b6445d8a420c3d4f6d8e6780d6a4627c2233d4571f38e5a2007",
+      "outcome": {
+        "status": "SUCCESS",
+        "primaryReason": "completed",
+        "nodeMaySucceed": true,
+        "retryPolicy": "NONE",
+        "recoveryCategory": "NONE",
+        "operatorMessage": "The agent produced valid result and artifact evidence.",
+        "secondarySignals": []
+      },
+      "decision": "ACCEPT",
+      "summary": "三个获批文件满足 AC-1～AC-3，独立执行测试与文档示例全部通过。",
+      "verification_checks": [
+        {
+          "criterion_id": "AC-1",
+          "assertion": "九类输入覆盖空串、纯 LF、CRLF、单 CR、混合换行、Unicode、末尾有换行、末尾无换行及连续空行；逐项实际结果等于明确期望，重复规范化均保持相同结果。",
+          "execution_ref": "CURRENT",
+          "tool_call_ids": [],
+          "material_refs": [
+            {
+              "ref": "tests/test_normalize_text.py",
+              "sha256": "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be"
+            },
+            {
+              "ref": "src/normalize_text.py",
+              "sha256": "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c"
+            }
+          ]
+        },
+        {
+          "criterion_id": "AC-2",
+          "assertion": "实际发现并运行 11 个 unittest 测试，逐项名称与测试源码一致；输出 Ran 11 tests、OK，并明确统计 failures 0、errors 0，同时保留九组实际输入与输出。",
+          "execution_ref": "CURRENT",
+          "tool_call_ids": [],
+          "material_refs": [
+            {
+              "ref": "tests/test_normalize_text.py",
+              "sha256": "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be"
+            }
+          ]
+        },
+        {
+          "criterion_id": "AC-3",
+          "assertion": "README 的导入语句及混合换行、空串、末尾有换行、末尾无换行示例共五项 doctest 全部通过；混合输入实际得到 'a\\nb\\nc\\nd'，与文档和实现一致。",
+          "execution_ref": "CURRENT",
+          "tool_call_ids": [],
+          "material_refs": [
+            {
+              "ref": "README.md",
+              "sha256": "0af74daeacfdd946a47e88d3b3f28d41ef125285084fd5f1c8735859e5caaae5"
+            },
+            {
+              "ref": "src/normalize_text.py",
+              "sha256": "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c"
+            }
+          ]
+        }
+      ],
+      "acceptance_notes": [
+        "三个交付文件当前仍为未跟踪文件；本次验收不包含提交或最终交付批准。",
+        "开发者所称工作区干净应理解为无测试副产物，不能理解为 Git 无未提交文件。"
+      ],
+      "must_fix": [],
+      "usage": {
+        "inputTokens": 2765,
+        "outputTokens": 1258,
+        "cachedReadTokens": 45184,
+        "cachedWriteTokens": 0,
+        "totalTokens": 49207,
+        "costAmount": null,
+        "costCurrency": "",
+        "source": "acpx_current_transcript",
+        "measurementType": "PROVIDER_RUN_USAGE",
+        "attribution": "EXACT_REQUEST_MATCH",
+        "cumulative": false,
+        "contextUsedTokens": 0,
+        "sessionCostAmount": null,
+        "sessionCostCurrency": "",
+        "providerId": "openai",
+        "model": "GPT-6-Astra",
+        "billingMode": "metered",
+        "providerMetadataSource": "acpx_session_json",
+        "unavailableReason": ""
+      },
+      "providerModelIdentity": {
+        "model": "GPT-6-Astra",
+        "confidence": "high",
+        "source": "acpx_session_json",
+        "provider": "openai",
+        "billingMode": "metered"
+      },
+      "observations_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/verification-observations.json",
+      "observations_sha256": "9659150664963d0ddcc78aa5033e25a88a0f031dbe374ae107fbbd340c3aa74e",
+      "duration_ms": 53156
+    }
+  },
+  "cumulative_budget": {
+    "actual_tokens": 2077707,
+    "token_limit": 3000000,
+    "remaining_tokens": 922293,
+    "actual_requests": 13,
+    "request_limit": 18,
+    "remaining_requests": 5,
+    "active_seconds": 2050.634597333293,
+    "active_seconds_limit": 3600,
+    "remaining_active_seconds": 1549.3654026667068,
+    "prior_tokens_inherited": 1767028,
+    "prior_calls_inherited": 11,
+    "new_model_tokens": 310679,
+    "new_model_requests": 2,
+    "attribution": "All fixed occurrences EXACT_REQUEST_MATCH; no budget reset",
+    "time_scope": "Recorded active operation receipts including prior case and cleanup; not authorization wait wall time"
+  },
+  "cleanup": {
+    "completed_named_sessions_closed": 2,
+    "evidence_ref": "operations/close-completed-tail-sessions",
+    "successful_current_process_observation_ref": "operations/completed-current-readcheck/current-process-observation.json",
+    "scope": "Recorded main PIDs/current case identity observation, not arbitrary subtree-stop guarantee"
+  },
+  "preservation": {
+    "prior_stops": [
+      {
+        "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-eighth-gate-20261023/stop-required.json",
+        "sha256": "b0d1e123671e6f220469254109de3065a823eecf93dbc060be623b26d594fbcc"
+      },
+      {
+        "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-gate-20261024/stop-required.json",
+        "sha256": "bcbd4ae0c3e6d47e618b8defe744b58af655f9c4aa98c8a7be8a562111fde80b"
+      },
+      {
+        "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/stop-required.json",
+        "sha256": "1a5f70d2096a87f86548686adc5f167d402d73e079a0cd44bc39aea4768c3e5f"
+      }
+    ],
+    "all_prior_packages_hashes_unchanged": true,
+    "prior_fixed_run_files_unchanged": true,
+    "source_inputs_unchanged": 659,
+    "jars_unchanged": 2,
+    "snapshot_manifest": "human-gate-snapshot-manifest.json",
+    "snapshot_files": 749,
+    "target_unchanged_clean_head": "c442fd02fb39d87481bbd940aa5f270947a72a60",
+    "target_ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target",
+    "no_target_apply_or_commit": true
+  },
+  "not_proven": [
+    "Final human approval",
+    "Real target patch apply",
+    "User commit and exact commit finalize",
+    "Full terminal-delivery PASS",
+    "Implementation request provider/model metadata resolution",
+    "Token reduction or price savings",
+    "Unexercised C/X/UNKNOWN/failpoint branches"
+  ],
+  "review_invariant": {
+    "Declared_by": "User current EXECUTION approval, subsequent explicit budget amendment and original business gates",
+    "Proven_by": "Real Claude self-test and separate real Codex acceptance, fixed R03/observations and original decision nodes",
+    "Consumed_by": "Original artifact validator → self_test_decision → artifact_validation → acceptance.decision → final report → immutable delivery candidate → human gate",
+    "Enforced_before": "Contract, scope, identity and budget checks before dispatch/acceptance; final human authority still required before target apply",
+    "Failure_route": "New stop, boundary/unknown or insufficient cumulative budget prohibits further dispatch; prior FAIL records not rewritten",
+    "Cannot_bypass": "38 operator/observer tests, 21 budget cases, 6 checkpoint threshold negatives and actual false authorization refusal; real notes did not block legal delivery gate"
+  },
+  "known_followup": {
+    "implementation_metadata": "Prior run preserved provider unknown/model raw in/pricing_unknown; measured tokens retained. User prioritizes E2E, investigation deferred; do not claim this P0.5 gap closed.",
+    "tool_count": "Known duplicate aggregate toolCallCount not used as unique native tool count."
+  },
+  "next_required_human_decision": {
+    "action": "Approve or revise current gate-node-gate-human_acceptance-039",
+    "subject_candidate_sha256": "5b4ba7c4993dcda7ccd7190c47edb54f74fb0b8046deb3cf1e04bc78b9ed59bb",
+    "approved_scope": [
+      "README.md",
+      "src/normalize_text.py",
+      "tests/test_normalize_text.py"
+    ],
+    "consequence_of_approve": "Original Dual delivery path may apply this fixed candidate to the existing isolated target; user commit/finalize still needed",
+    "target": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target",
+    "commit_authority_delegated": false
+  }
+}

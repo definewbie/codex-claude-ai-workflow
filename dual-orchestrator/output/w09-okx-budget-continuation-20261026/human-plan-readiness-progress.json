@@ -1,0 +1,93 @@
+{
+  "status": "WAITING_FOR_HUMAN_READINESS_PLAN_CORRECTION",
+  "experiment_status": "IN_PROGRESS_NOT_E2E_PASS",
+  "workstream": "ws-20261026T142203Z-7SNA",
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261026T142203Z-7SNA",
+    "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "WAITING_FOR_HUMAN",
+    "activeNodeInstanceIds": [
+      "node-gate-human_plan_approval-021"
+    ],
+    "openGateIds": [
+      "gate-node-gate-human_plan_approval-021"
+    ],
+    "lastEventId": "evt-000021",
+    "updatedAt": "2026-10-26T16:10:43.563741Z",
+    "commitSequence": 83
+  },
+  "actual_tokens": 1728741,
+  "completed_requests": 8,
+  "active_seconds": 1714.831716287756,
+  "limits": {
+    "tokens": 4000000,
+    "requests": 18,
+    "active_seconds": 3600
+  },
+  "remaining_tokens": 2271259,
+  "original_stop_preserved": true,
+  "reset_usage_or_time": false,
+  "product_trees_clean": true,
+  "all_runs_finished": true,
+  "pending_mutations": 0,
+  "readiness_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/verification-readiness/okx-ac-availability-20261027-01.json",
+  "readiness_sha256": "1212daf7ab19146a19336a41ac32668c60a31d76f48a6bf0292d361006129d08",
+  "plan_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030521008/outputs/plan-claude.plan.json",
+  "plan_sha256": "3aa7f3135317a9d7bb22c50e578e583d9376dcde06134d7121923d54ff0d5c3d",
+  "current_binding_criteria": [
+    "TR-1",
+    "TR-2",
+    "TR-3",
+    "TR-4"
+  ],
+  "required_criteria": [
+    "AC-1",
+    "AC-2",
+    "AC-3",
+    "AC-4",
+    "AC-5"
+  ],
+  "next_request": "human revise current plan gate with concrete feedback; not approve execution",
+  "proposed_feedback": [
+    "Use one binding per approved AC-1..AC-5; TR-1..TR-4 remain test requirements, not substitutes for ACs.",
+    "Consume the actual registered readiness ref/SHA in both environment_refs and feasibility_refs exactly matching declared method/executor/evidence/detailOwner. Prompt manifests do not prove readiness.",
+    "Preserve current GOAL program-tool observations plus current Surefire reports; do not impose unproven actual_exit_required on all bindings. Do not fabricate exit facts. If truly required, explicitly identify an already-proven source instead."
+  ],
+  "human_action_performed": false,
+  "business_gates_delegated": false,
+  "commit_delegated": false,
+  "proposed_replan_budget_check": {
+    "input": {
+      "actual_tokens": 1728741,
+      "completed_calls": 8,
+      "active_seconds": 1714.831716287756,
+      "remaining_mainline": [
+        "implement.claude_implement",
+        "implement.claude_self_test_report",
+        "acceptance.codex_verifier_review"
+      ],
+      "new_extra_calls": [
+        "plan.claude_plan",
+        "plan.codex_plan_review"
+      ],
+      "measurement_complete": true,
+      "external_pending": false
+    },
+    "result": {
+      "result": "ALLOW_BUDGET_ONLY",
+      "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+      "required_token_reserve": 2025000,
+      "required_call_reserve": 6,
+      "remaining_tokens": 2271259,
+      "remaining_calls": 10,
+      "warning": false
+    }
+  },
+  "old_errors_not_production_failures": [
+    "One inspection used absent run.nodeInstanceId; corrected inspection uses persisted nodeId/run paths.",
+    "Initial search assumed standalone verification-observation file; authoritative completion run_observations and source mapping used instead."
+  ]
+}

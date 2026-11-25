@@ -9,8 +9,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /** Raw worktree bytes, not Git's filtered blobs or the path-only inventory digest. */
-record EvidenceCollectionSource(String head, String indexSha256, String sha256, List<String> paths) {
-    static EvidenceCollectionSource capture(Path workspace, List<String> retainedPaths) throws IOException {
+public record EvidenceCollectionSource(String head, String indexSha256, String sha256, List<String> paths) {
+    public static EvidenceCollectionSource capture(Path workspace, List<String> retainedPaths) throws IOException {
         var root = workspace.toRealPath();
         if (!root.equals(Path.of(GitTrackedPathInventory.command(root, "rev-parse", "--show-toplevel").trim()).toRealPath()))
             throw new IOException("collection workspace must be the Git root");

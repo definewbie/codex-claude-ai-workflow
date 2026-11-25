@@ -1,0 +1,38 @@
+Usage: dualctl [-hV] [COMMAND]
+Lifecycle orchestrator for dual-agent design loops.
+  -h, --help      Show this help message and exit.
+  -V, --version   Print version information and exit.
+Commands:
+  start          Start an agent lifecycle workstream.
+  delivery       Apply and finalize an accepted delivery candidate.
+  doctor         Check local prerequisites and optional workstream ledger.
+  status         Show workstream status.
+  summary        Print or write a compact workstream run summary.
+  trace          Show a one-screen trace for a workstream.
+  timeline       Show the workflow timeline projection.
+  watch          Watch workflow progress using timeline.json.
+  events         Show recent workflow events.
+  runs           List agent runs for a workstream.
+  inspect        Inspect active node, a node, or an agent run.
+  runner-kind    Resolve the first agent node's actual runner kind
+                   (acpx_claude_session / acpx_codex_session) for a bundled
+                   workflow variant.
+  resume         Resume a paused workstream.
+  run            Run a workstream until a gate, recovery, failure, or
+                   completion.
+  autorun        Auto-drive a workstream across approval gates until completion
+                   or recovery.
+  worker         Run local queued agent tasks.
+  approve        Shortcut for review approve.
+  revise         Shortcut for review revise.
+  complete       Shortcut for review complete.
+  retry          Mark the current failed or blocked node as ready to run again.
+  recovery       Resolve workflow recovery states.
+  sessions-reap  Close leftover acpx sessions for terminal (COMPLETED/FAILED)
+                   workstreams.
+  calibration    Inspect and decide calibration candidates.
+  projections    Refresh or inspect read-model projections.
+  review         Apply human review decisions.
+  permissions    Show native asks or save an exact once choice; this is not
+                   business approval.
+  workflow       Inspect and validate workflow definition files.

@@ -1,0 +1,20 @@
+{
+  "schema_version" : 1,
+  "artifact_type" : "contract_failure_diagnostic",
+  "generated_at" : "2026-10-10T09:05:23.117822Z",
+  "workstream_id" : "ws-20261010T085617Z-8SVF",
+  "node_instance_id" : "node-intake-claude_brainstorm-002",
+  "node_id" : "intake.claude_brainstorm",
+  "handler_type" : "acpx.agent_run",
+  "category" : "contract_violation",
+  "reason" : "TASK_CONTRACT_EVIDENCE_TRACEABILITY_INVALID",
+  "message" : "task_contract_proposal is not grounded in the tracked inventory",
+  "source_output_ref" : ".agent/workstreams/ws-20261010T085617Z-8SVF/runs/run-1791622684632/outputs/intake-claude-brainstorm.json",
+  "required_keys" : [ "summary", "decision" ],
+  "allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW" ],
+  "details" : {
+    "errors" : [ "evidence_refs contains a non-canonical path: .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791622684632/repo-map.json", "evidence_refs contains a non-canonical path: .agent/workstreams/ws-20261010T085617Z-8SVF/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1791622684632/binding.json" ]
+  },
+  "recovery_hint" : "Inspect the diagnostic details, prompt contract, and source output before retrying the node.",
+  "recommended_owner" : "harness_or_prompt"
+}

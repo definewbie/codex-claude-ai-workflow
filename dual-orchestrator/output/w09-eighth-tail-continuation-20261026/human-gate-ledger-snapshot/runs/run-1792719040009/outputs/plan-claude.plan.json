@@ -1,0 +1,57 @@
+{
+  "artifact_type" : "plan_artifact",
+  "schema_version" : 2,
+  "implementation_steps" : [ "创建 src/normalize_text.py：定义带类型注解的纯函数 normalize_newlines(text: str) -> str，函数体按固定顺序执行 text = text.replace(\"\\r\\n\", \"\\n\") 再 text = text.replace(\"\\r\", \"\\n\") 并返回结果；附简短 docstring 说明语义（CRLF 与孤立 CR 转为 LF，其余字符含 U+2028/U+2029 不变，末尾换行有无状态原样保留）；仅标准库、无 I/O、无共享可变状态、重复调用幂等。", "创建 tests/test_normalize_text.py：文件顶部用 pathlib.Path 定位仓库 src/ 目录并加入 sys.path（不存在时才插入），支持从仓库根执行 python -m unittest discover -s tests -v；定义模块级共享 CASES 表，九项输入/期望为 \"\"→\"\"、\"a\\nb\\n\"→\"a\\nb\\n\"、\"a\\r\\nb\"→\"a\\nb\"、\"a\\rb\"→\"a\\nb\"、\"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、\"中文\\u2028😀\\r\\nx\"→\"中文\\u2028😀\\nx\"、\"end\\r\\n\"→\"end\\n\"、\"no newline\"→\"no newline\"、\"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"。", "在同一测试文件实现 11 个测试方法：test_empty_string_returns_empty、test_pure_lf_unchanged、test_crlf_becomes_single_lf、test_lone_cr_becomes_lf、test_mixed_newlines_normalized、test_unicode_and_line_separators_preserved、test_trailing_newline_present_kept、test_trailing_newline_absent_kept、test_consecutive_blank_lines_normalized、test_no_cr_left_in_output、test_idempotent_across_all_cases；其中 test_crlf_becomes_single_lf 显式断言 \"a\\r\\nb\"→\"a\\nb\"（而非 \"a\\n\\nb\"）以锁定替换顺序，test_no_cr_left_in_output 遍历全表断言输出不含 \"\\r\"，test_idempotent_across_all_cases 以 subTest 遍历 CASES 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。", "创建 README.md 中文用法文档：函数语义规则（CRLF/单 CR 转 LF，不转换 U+2028/U+2029，不新增或删除末尾换行）、导入方式（PYTHONPATH=src python 或与测试一致的 sys.path 做法）、doctest 风格示例（from normalize_text import normalize_newlines；normalize_newlines(\"a\\r\\nb\\rc\\nd\") 得 'a\\nb\\nc\\nd'；另含空串与末尾换行示例）、以及 python -m unittest discover -s tests -v 运行测试说明（注明 unittest 默认将报告写入 stderr，保存完整输出可用 2>&1 合并采集）；全部示例与 src/normalize_text.py 实现逐字符一致。", "实现完成后由 implement.claude_self_test_report 节点按 validation_plan 执行验证并采集证据；本计划阶段不执行任何命令、不产生执行证据。" ],
+  "edit_files" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "files" : [ {
+    "path" : "src/normalize_text.py",
+    "operation" : "CREATE"
+  }, {
+    "path" : "tests/test_normalize_text.py",
+    "operation" : "CREATE"
+  }, {
+    "path" : "README.md",
+    "operation" : "CREATE"
+  } ],
+  "verification_bindings" : [ {
+    "criterion_id" : "AC-1",
+    "method" : "在仓库根执行 python -m unittest discover -s tests -v 2>&1 并采集实际输出；断言逐用例全部通过、结尾为 Ran 11 tests 与 OK（零 failure/零 error）；逐条核对 tests/test_normalize_text.py 中共享 CASES 表覆盖九类输入（空串、纯 LF、CRLF、单 CR、混合换行 \"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、Unicode 含 U+2028 保留、末尾有换行、末尾无换行、连续空行 \"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"），且 test_idempotent_across_all_cases 以 subTest 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。",
+    "executor" : "AGENT",
+    "environment_refs" : [ ],
+    "authority_refs" : [ ],
+    "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+    "feasibility_refs" : [ ],
+    "detail_owner" : "implement.claude_self_test_report",
+    "actual_exit_required" : false,
+    "expected_exit_code" : null
+  }, {
+    "criterion_id" : "AC-2",
+    "method" : "实际执行 python -m unittest discover -s tests -v 2>&1 并合并采集 stdout 与 stderr（unittest 默认将逐用例行、Ran 11 tests 与 OK/FAILED 写入 stderr）；实际输出须明确显示覆盖数（Ran 11 tests）与零 failure/error，并与测试源码中的 11 个方法名及 CASES 一一核对；不以完成状态或文字结论替代实际输入/输出与测试结果。",
+    "executor" : "AGENT",
+    "environment_refs" : [ ],
+    "authority_refs" : [ ],
+    "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+    "feasibility_refs" : [ ],
+    "detail_owner" : "implement.claude_self_test_report",
+    "actual_exit_required" : false,
+    "expected_exit_code" : null
+  }, {
+    "criterion_id" : "AC-3",
+    "method" : "实际读取 src/normalize_text.py 与 README.md，逐字符比对 README 中的导入语句（from normalize_text import normalize_newlines）与典型混合换行示例输入/输出（\"a\\r\\nb\\rc\\nd\" → 'a\\nb\\nc\\nd'，另含空串与末尾换行示例）与实现一致；或额外执行 PYTHONPATH=src python -m doctest README.md 作为支持证据（TR-3 允许任一途径）。",
+    "executor" : "AGENT",
+    "environment_refs" : [ ],
+    "authority_refs" : [ ],
+    "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+    "feasibility_refs" : [ ],
+    "detail_owner" : "implement.claude_self_test_report",
+    "actual_exit_required" : false,
+    "expected_exit_code" : null
+  } ],
+  "authority_refs" : [ ],
+  "reference_files" : [ ],
+  "file_level_changes" : [ "src/normalize_text.py: CREATE — 实现 normalize_newlines(text: str) -> str，两步 str.replace（先 \"\\r\\n\"→\"\\n\" 再 \"\\r\"→\"\\n\"）；空串返回空串、已有 LF 与其他字符原样保留、末尾换行有无状态不增不减；纯函数、仅标准库、无 I/O、无外部副作用、幂等。", "tests/test_normalize_text.py: CREATE — 顶部 pathlib/sys.path 注入 src；九项共享 CASES 表（含 \"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\" 与 \"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"）；11 个测试方法覆盖九类输入、CRLF 不拆双 LF 的顺序断言、全表无残留 CR 断言与 subTest 幂等性断言。", "README.md: CREATE — 中文文档：语义规则、导入方式（PYTHONPATH=src 或 sys.path）、doctest 风格示例（导入语句、混合换行 \"a\\r\\nb\\rc\\nd\"→'a\\nb\\nc\\nd'、空串、末尾换行）、unittest 运行命令与 stderr/2>&1 采集说明；示例与实现逐字符一致。" ],
+  "validation_plan" : [ "在仓库根执行 python -m unittest discover -s tests -v 2>&1，合并采集实际输出；不得只保存 stdout，也不得以预期成功文本或完成状态替代实际输入/输出与测试结果（若环境仅有 python3，等价替换并如实记录所用命令）。", "核对实际输出：包含全部 11 个测试方法逐用例行、结尾 Ran 11 tests 与 OK（零 failure、零 error），并与 tests/test_normalize_text.py 源码中的 CASES 与方法名一一核对（覆盖 AC-1 九类输入与幂等性、AC-2 覆盖数与实际输出相符）。", "实际读取 src/normalize_text.py 与 README.md，逐字符比对 README 的导入语句与示例（\"a\\r\\nb\\rc\\nd\"→'a\\nb\\nc\\nd'、空串、末尾换行）与实现语义一致（AC-3）；可选支持证据：PYTHONPATH=src python -m doctest README.md。", "若任一步失败：修复对应文件后重新执行上述检查并保留最终实际输出与核对记录，不以文字结论替代实测结果。" ],
+  "rollback_notes" : "三个文件均为 CREATE 且不覆盖任何现有文件（仓库现状无同名路径）；回滚仅需删除新建的 src/normalize_text.py、tests/test_normalize_text.py、README.md 或还原对应提交，不触碰 .git/ 与 .agent/ 下任何内容，无状态、无外部副作用需要补偿。",
+  "known_risks" : [ "src 布局导入依赖测试文件内 sys.path 注入或运行时 PYTHONPATH=src：本计划沿用设计的 sys.path 注入方案并在 README 说明 PYTHONPATH 方式，若计划评审改用其他布局须同步调整 README 导入说明（仍在同一批准文件集内）。", "测试方法数为 11：若实现阶段增删用例，须同步更新 README 与执行记录中的 Ran N tests 数量，避免 AC-2 覆盖数与测试源码不符。", "执行环境若无 python 命令仅有 python3，需等价使用 python3 -m unittest discover -s tests -v 2>&1 并如实记录，不视为验证强度变化。" ],
+  "human_review_checklist" : [ "确认三个 CREATE 路径与 GOAL 排除项一致：不涉及 .git/、.agent/、第三方依赖、网络、数据库、浏览器、后台服务或机器配置修改。", "确认实现保持两步替换顺序（先 \"\\r\\n\" 后 \"\\r\"），混合换行期望为 \"a\\nb\\nc\\nd\"，CRLF 不产生双 LF。", "确认 11 个测试方法与九类输入 CASES 覆盖 AC-1 全部类别及全表幂等性与无残留 CR 断言。", "确认 AC-2 取证方案：2>&1 合并采集实际输出并与测试源码核对，不以结论或完成状态替代，且 actual_exit_required=false 与任务不要求独立退出码的约定一致。", "确认 README 示例与实现逐字符一致（AC-3），导入说明与测试的 sys.path/PYTHONPATH 方案一致。" ]
+}

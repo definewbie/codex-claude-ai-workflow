@@ -1,0 +1,32 @@
+Table 4-1. Transformer architecture types
+
+ Type          Primary capability       Typical use cases
+
+ Encoder-only     Representation learning;     Text classification,
+                  produces contextual         semantic search, named
+                 embeddings for input         entity recognition
+                   tokens                 (NER)
+
+ Decoder-only     Autoregressive generation;  Text generation, code
+                     learns to predict the next     synthesis,
+                  token given previous        conversational agents
+                   context                   and chat systems
+
+ Encoder–         Sequence-to-sequence       Translation,
+ decoder         mapping between input      summarization, question
+                 and output representations   answering over provided
+                                                context
+
+ Embedding       Produce dense or sparse     Retrieval-augmented
+ models           vector representations for    generation (RAG),
+                      efficient retrieval and       semantic similarity
+                     similarity comparison        search, clustering
+
+ Mixture of        Sparse expert routing for     Efficient large-scale
+ experts (MoE)     scalable compute and        generation, multitask
+                     specialization across tasks    learning, adaptive model
+                                                  scaling
+
+
+Let’s take a deeper look into decoder-only, encoder-only, and MoE models,
+since these are the backbones of modern AI systems.

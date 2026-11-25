@@ -1,0 +1,11 @@
+{
+  "status": "PASS_LOCAL_HELP_AND_EXISTING_PROOF",
+  "commands": [
+    "review record-readiness --help",
+    "delivery finalize --help"
+  ],
+  "actual_criteria_execution": false,
+  "readiness_registered": false,
+  "compiled_goal": false,
+  "typed_evidence_not_replaced_by_host_observation": true
+}

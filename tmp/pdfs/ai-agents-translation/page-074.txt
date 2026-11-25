@@ -1,0 +1,32 @@
+Table 2-3. Pattern summary: structured reasoning methods (CoT, ToT,
+ReAct)
+
+                                                Trade-offs /
+ Method      Use case       Benefits         failure modes
+
+ Chain of         Step-by-step      Improves         Slower, verbose
+ thought (CoT)   reasoning for       reliability and     outputs; can
+                 math, planning,    transparency;     produce
+                   analysis           enables smaller    plausible but
+                                models on         incorrect
+                                    harder tasks       reasoning
+
+ Tree of          Exploratory       Explores         Higher compute
+ thoughts (ToT)   tasks with          alternatives;        cost; branching
+                  multiple          reduces “first-    can grow
+                   solution paths     answer bias”      quickly without
+                    (creative                           pruning
+                   writing, strategy
+                  search)
+
+ ReAct          Tasks needing     Integrates       More complex
+                 both reasoning    reasoning +        state
+                and tool use        action; creates    management;
+                   (research,          audit trail;        can over-call
+                  coding, APIs)     adapts to           tools or loop
+                                  feedback          without stopping
+                                                                 criteria
+
+
+This highlights how these methods can become powerful building blocks
+once you integrate them into your overall agentic workflow.

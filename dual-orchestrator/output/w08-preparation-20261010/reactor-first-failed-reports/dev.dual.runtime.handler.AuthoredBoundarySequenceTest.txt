@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.runtime.handler.AuthoredBoundarySequenceTest
+-------------------------------------------------------------------------------
+Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 38.00 s -- in dev.dual.runtime.handler.AuthoredBoundarySequenceTest

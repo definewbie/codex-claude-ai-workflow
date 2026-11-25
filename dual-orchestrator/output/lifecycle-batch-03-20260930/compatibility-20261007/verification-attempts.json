@@ -1,0 +1,67 @@
+[
+  {
+    "log": "red.log",
+    "exit_code": 1,
+    "classification": "VALID_COUNTERPROOF_OLD_BEHAVIOR"
+  },
+  {
+    "log": "focused-1.log",
+    "exit_code": 1,
+    "classification": "AUTHOR_COMPILE_ERROR"
+  },
+  {
+    "log": "focused-2.log",
+    "exit_code": 1,
+    "classification": "AUTHOR_TEST_SERIALIZATION_ERROR"
+  },
+  {
+    "log": "focused-3.log",
+    "exit_code": 1,
+    "classification": "OLD_STOP_FIXTURE_MISSING_NEW_IDENTITY"
+  },
+  {
+    "log": "focused-4.log",
+    "exit_code": 0,
+    "classification": "PASS_SELECTED"
+  },
+  {
+    "log": "focused-5.log",
+    "exit_code": 0,
+    "classification": "PASS_SELECTED"
+  },
+  {
+    "log": "sequence-1.log",
+    "exit_code": 1,
+    "classification": "PRODUCTION_MISSING_DIAGNOSTIC_REF"
+  },
+  {
+    "log": "sequence-2.log",
+    "exit_code": 1,
+    "classification": "PRODUCTION_MISSING_TRANSCRIPT_REF"
+  },
+  {
+    "log": "sequence-3.log",
+    "exit_code": 0,
+    "classification": "PASS_SELECTED"
+  },
+  {
+    "log": "focused-final.log",
+    "exit_code": 0,
+    "classification": "PASS_SELECTED"
+  },
+  {
+    "log": "aborted-reactor-clean.log",
+    "exit_code": 143,
+    "classification": "INVALID_ABORTED_REACTOR_WITH_TWO_FIXTURE_ERRORS"
+  },
+  {
+    "log": "focused-after-sweep.log",
+    "exit_code": 0,
+    "classification": "PASS_SELECTED_AFTER_MIGRATION"
+  },
+  {
+    "log": "focused-final-2.log",
+    "exit_code": 0,
+    "classification": "PASS_FINAL_SELECTED_WITH_COLD_JVM"
+  }
+]

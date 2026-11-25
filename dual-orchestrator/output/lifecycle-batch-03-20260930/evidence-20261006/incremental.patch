@@ -1,0 +1,2177 @@
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+@@ -329,12 +329,19 @@
+                     compactionMeta,
+                     executionPolicy
+             );
++            var verificationSource = governanceContext.qualifiedTaskContract().isPresent()
++                    && governanceContext.qualifiedTaskContract().orElseThrow().phase() == dev.dual.core.contract.TaskContract.Phase.EXECUTION
++                    ? dev.dual.runtime.handler.VerificationEvidence.prepare(context)
++                    : null;
++            var preparedBinding = new java.util.LinkedHashMap<String, Object>();
++            preparedBinding.put("run", new com.fasterxml.jackson.databind.ObjectMapper().readTree(runDir.resolve("run.json").toFile()));
++            preparedBinding.put("contract_ref", governanceContext.taskContractRef());
++            preparedBinding.put("contract_sha256", governanceContext.taskContractSha256());
++            if (verificationSource != null) preparedBinding.put("verification_source", verificationSource);
+             var preparedRun = dev.dual.runtime.handler.AgentRunCommitProtocol.prepare(context, runDir,
+                     List.of(promptPath, PromptManifestWriter.manifestPathFor(promptPath),
+                             context.workspaceRoot().resolve(governanceContext.repositoryFactBinding().ref())),
+-                    Map.of("run", new com.fasterxml.jackson.databind.ObjectMapper().readTree(runDir.resolve("run.json").toFile()),
+-                            "contract_ref", governanceContext.taskContractRef(),
+-                            "contract_sha256", governanceContext.taskContractSha256()));
++                    preparedBinding);
+             var request = new AcpxRunRequest(
+                     context.workspaceRoot(),
+                     session,
+@@ -467,6 +474,9 @@
+                                 governanceContext.repositoryFactBinding()
+                         )
+                 );
++                // Correction cannot supply new semantic execution evidence for the original result.
++                candidate = dev.dual.runtime.handler.VerificationEvidence.record(context, preparedRun, verificationSource,
++                        agent, acquisition.initialResult().toolObservations(), candidate);
+                 if (acquisition.correctionValidation() != null && !acquisition.correctionValidation().valid()) {
+                     candidate = dev.dual.runtime.handler.AgentExecutionResultFacts.rejectAgentResult(candidate,
+                             String.join("; ", acquisition.correctionValidation().errors()));
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java
+@@ -359,7 +359,8 @@
+                     null,
+                     waitResult.promptCompletion(),
+                     processResult,
+-                    waitResult.signals()
++                    waitResult.signals(),
++                    waitResult.toolObservations()
+             );
+         } catch (InterruptedException failure) {
+             Thread.interrupted();
+@@ -806,7 +807,8 @@
+                         eventReader.promptCompletion(),
+                         signals,
+                         terminalSignal,
+-                        false
++                        false,
++                        eventReader.toolObservations()
+                 );
+             }
+             var elapsed = Duration.between(startedAt, Instant.now());
+@@ -836,7 +838,8 @@
+                         eventReader.promptCompletion(),
+                         assessment.signals(),
+                         assessment.signal(),
+-                        true
++                        true,
++                        eventReader.toolObservations()
+                 );
+             }
+         }
+@@ -940,7 +943,8 @@
+                 result.promptCompletion(),
+                 signals,
+                 terminalSignal,
+-                result.terminatedByHealth()
++                result.terminatedByHealth(),
++                result.toolObservations()
+         );
+     }
+ 
+@@ -1227,7 +1231,8 @@
+             AcpxPromptCompletion promptCompletion,
+             List<AdapterSignal> signals,
+             AdapterSignal signal,
+-            boolean terminatedByHealth
++            boolean terminatedByHealth,
++            List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> toolObservations
+     ) {
+         ProcessWaitResult {
+             signals = signals == null ? List.of() : List.copyOf(signals);
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxRunResult.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxRunResult.java
+@@ -15,7 +15,8 @@
+         AcpxUsage usage,
+         AcpxPromptCompletion promptCompletion,
+         ProcessResult processResult,
+-        List<AdapterSignal> adapterSignals
++        List<AdapterSignal> adapterSignals,
++        List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> toolObservations
+ ) {
+     public AcpxRunResult {
+         command = command == null ? List.of() : List.copyOf(command);
+@@ -25,6 +26,14 @@
+             throw new IllegalArgumentException("processResult is required");
+         }
+         adapterSignals = adapterSignals == null ? List.of() : List.copyOf(adapterSignals);
++        toolObservations = toolObservations == null ? List.of() : List.copyOf(toolObservations);
++    }
++
++    /** Bootstrap/failed calls have no internal tool evidence; an empty list grants no verification success. */
++    public AcpxRunResult(Instant startedAt, Instant finishedAt, List<String> command,
++                         List<AcpxExecutionEvent> executionTimeline, AcpxUsage usage,
++                         AcpxPromptCompletion promptCompletion, ProcessResult processResult, List<AdapterSignal> adapterSignals) {
++        this(startedAt, finishedAt, command, executionTimeline, usage, promptCompletion, processResult, adapterSignals, List.of());
+     }
+ 
+     public int exitCode() {
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionStreamProjector.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionStreamProjector.java
+@@ -25,6 +25,11 @@
+     private AcpxPromptCompletion promptCompletion = AcpxPromptCompletion.EMPTY;
+     private final Map<String, AgentLifecycleEvent.PermissionEvidence> permissionDetails = new HashMap<>();
+     private final Map<String, String> toolNamesByCallId = new HashMap<>();
++    private final AcpxToolObservations toolObservations = new AcpxToolObservations();
++
++    List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> toolObservations() {
++        return toolObservations.values();
++    }
+ 
+     Optional<AgentLifecycleEvent> accept(long sequence, AcpxStreamWireLine wire) {
+         return accept(sequence, wire, true);
+@@ -79,6 +84,7 @@
+         }
+         if ("session/prompt".equals(wire.method())) {
+             startPrompt(wire.requestId());
++            toolObservations.start(wire.request().sessionId());
+         }
+         if ("session/new".equals(wire.method()) || "session/resume".equals(wire.method())) {
+             sessionReady = false;
+@@ -119,6 +125,7 @@
+                     promptStopReason,
+                     finalAssistantMessage()
+             );
++            toolObservations.finish();
+             return Optional.of(AgentLifecycleEvent.promptCompleted(sequence));
+         }
+         if (currentObservation && "session/request_permission".equals(method)) {
+@@ -167,6 +174,7 @@
+             return Optional.empty();
+         }
+         var notification = wire.notification();
++        if (currentObservation && notification != null) toolObservations.accept(notification);
+         var updateKind = notification == null ? "" : notification.updateKind();
+         if (notification != null
+                 && !notification.toolCallId().isBlank()
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java
+@@ -35,6 +35,7 @@
+     }
+ 
+     record Request(
++            String sessionId,
+             String promptText,
+             String permissionToolCallId,
+             String permissionToolKind,
+@@ -69,7 +70,8 @@
+             String text,
+             String toolCallId,
+             String toolName,
+-            UsageUpdate usageUpdate
++            UsageUpdate usageUpdate,
++            JsonNode toolUpdate
+     ) {
+         Notification {
+             sessionId = sessionId == null ? "" : sessionId;
+@@ -177,6 +179,7 @@
+                     requestId,
+                     method,
+                     new Request(
++                            text(node.at("/params/sessionId")),
+                             text(node.at("/params/prompt/0/text")),
+                             text(node.at("/params/toolCall/toolCallId")),
+                             text(node.at("/params/toolCall/kind")),
+@@ -207,7 +210,9 @@
+                             text(update.at("/content/text")),
+                             text(update.get("toolCallId")),
+                             text(update.at("/_meta/claudeCode/toolName")),
+-                            usageUpdate(updateKind, update)
++                            usageUpdate(updateKind, update),
++                            ("tool_call".equals(updateKind) || "tool_call_update".equals(updateKind))
++                                    ? update.deepCopy() : null
+                     ),
+                     null
+             );
+--- /dev/null
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxToolObservations.java
+@@ -0,0 +1,75 @@
++package dev.dual.adapter.acpx;
++
++import com.fasterxml.jackson.databind.JsonNode;
++import com.fasterxml.jackson.databind.node.JsonNodeFactory;
++import dev.dual.core.execution.AgentExecutionEvidence.ToolObservation;
++import java.util.*;
++
++/** Correlates only typed updates inside the current prompt. No prose or transcript heuristics. */
++final class AcpxToolObservations {
++    private String session = "";
++    private boolean active;
++    private final Map<String, Call> calls = new LinkedHashMap<>();
++
++    void start(String session) { this.session = session == null ? "" : session; active = !this.session.isBlank(); calls.clear(); }
++    void finish() { active = false; }
++    List<ToolObservation> values() { return calls.values().stream().map(Call::freeze).toList(); }
++
++    void accept(AcpxStreamWireLine.Notification notification) {
++        if (!active || !session.equals(notification.sessionId()) || notification.toolUpdate() == null
++                || notification.toolCallId().isBlank()) return;
++        var update = notification.toolUpdate();
++        var id = notification.toolCallId();
++        var call = calls.get(id);
++        if ("tool_call".equals(notification.updateKind())) {
++            if (call != null) { call.invalid = true; return; }
++            call = new Call(session, id); calls.put(id, call);
++        } else if (call == null) {
++            // A result without the call's creation/input is not evidence of this prompt's execution.
++            call = new Call(session, id); call.invalid = true; calls.put(id, call);
++        }
++        if (call.terminal && !call.raw.contains(update)) call.invalid = true;
++        if (call.raw.contains(update)) return;
++        call.raw.add(update.deepCopy());
++        if (!notification.toolName().isBlank()) call.name = notification.toolName();
++        if (update.hasNonNull("kind")) call.kind = update.path("kind").asText();
++        if (update.hasNonNull("rawInput")) {
++            if (call.input != null && call.terminal && !call.input.equals(update.get("rawInput"))) call.invalid = true;
++            call.input = update.get("rawInput").deepCopy();
++        }
++        if (update.hasNonNull("rawOutput")) { call.output = update.get("rawOutput").deepCopy(); call.hasRawOutput = true; }
++        else if (update.has("content") || update.path("_meta").has("terminal_output")) {
++            var result = JsonNodeFactory.instance.objectNode();
++            if (update.has("content")) result.set("content", update.get("content").deepCopy());
++            if (update.path("_meta").has("terminal_output"))
++                result.set("terminal_output", update.path("_meta").get("terminal_output").deepCopy());
++            call.outputChunks.add(result);
++            if (!call.hasRawOutput) call.output = call.outputChunks.deepCopy();
++        }
++        if (update.hasNonNull("status")) call.status = update.path("status").asText();
++        var reported = update.at("/_meta/terminal_exit/exit_code");
++        if (reported.isIntegralNumber() && reported.canConvertToInt()) call.reported = reported.intValue();
++        // Pinned Claude ACP forwards this exact result branch in rawOutput. Its _meta exit alone is synthetic/ambiguous.
++        if ("Bash".equals(call.name) && call.output != null
++                && "bash_code_execution_result".equals(call.output.path("type").asText())) {
++            var actual = call.output.path("return_code");
++            if (actual.isIntegralNumber() && actual.canConvertToInt()) {
++                call.actual = actual.intValue(); call.actualSource = "claude.rawOutput.bash_code_execution_result.return_code";
++            }
++        }
++        call.terminal = "completed".equals(call.status) || "failed".equals(call.status);
++    }
++
++    private static final class Call {
++        final String session, id;
++        String name = "", kind = "", status = "", actualSource = "";
++        JsonNode input, output;
++        Integer reported, actual;
++        boolean invalid, terminal, hasRawOutput;
++        final com.fasterxml.jackson.databind.node.ArrayNode outputChunks = JsonNodeFactory.instance.arrayNode();
++        final List<JsonNode> raw = new ArrayList<>();
++        Call(String session, String id) { this.session = session; this.id = id; }
++        ToolObservation freeze() { return new ToolObservation(session, id, name, kind, input, output,
++                status, reported, actual, actualSource, invalid, raw); }
++    }
++}
+--- before/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentLifecycleEventReader.java
++++ after/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentLifecycleEventReader.java
+@@ -104,6 +104,10 @@
+         return streamProjector.promptCompletion();
+     }
+ 
++    List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> toolObservations() {
++        return streamProjector.toolObservations();
++    }
++
+     private void updateSessionId(String text) {
+         var matcher = SESSION_ID_PATTERN.matcher(text == null ? "" : text);
+         while (matcher.find()) {
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
+@@ -323,6 +323,7 @@
+         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-schema-correction");
+         Files.createDirectories(workstreamDir);
+         Files.writeString(workstreamDir.resolve("requirement.md"), "Verify the completed README change.\n");
++        Files.writeString(tempDir.resolve("README.md"), "Completed fixture README change\n");
+ 
+         var transport = new SchemaContractCorrectionTransport();
+         var handler = new AcpxAgentTaskHandler(transport, false);
+@@ -397,6 +398,7 @@
+         var workstreamDir = tempDir.resolve(".agent/workstreams/ws-schema-correction-fails");
+         Files.createDirectories(workstreamDir);
+         Files.writeString(workstreamDir.resolve("requirement.md"), "Verify the completed README change.\n");
++        Files.writeString(tempDir.resolve("README.md"), "Completed fixture README change\n");
+ 
+         var transport = new SchemaContractCorrectionTransport(false);
+         var definition = new NodeDefinition(
+@@ -2349,11 +2351,25 @@
+             calls++;
+             sessions.add(request.sessionName());
+             prepareLogs(request);
+-            initialArtifact = completionJson(request, "SELF_TEST_COMPLETE")
++            var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.readTree(completionJson(request, "SELF_TEST_COMPLETE"));
++            var manifest = OBJECT_MAPPER.readTree(PromptManifestWriter.manifestPathFor(request.promptPath()).toFile());
++            var snapshot = OBJECT_MAPPER.treeToValue(manifest.get("authoredContext"), dev.dual.runtime.handler.AuthoredExecutionContext.Snapshot.class);
++            var contract = OBJECT_MAPPER.readTree(request.workdir().resolve(snapshot.contract().contract().ref()).toFile());
++            var checks = ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.get("result")).putArray("verification_checks");
++            for (var binding : contract.findValue("verification_bindings")) {
++                var check = checks.addObject().put("criterion_id", binding.path("criterion_id").asText())
++                        .put("assertion", "Observed the fixture README").put("execution_ref", "CURRENT");
++                check.putArray("tool_call_ids").add("read-readme"); check.putArray("material_refs");
++            }
++            var content = Files.readString(request.workdir().resolve("README.md"));
++            var observations = List.of(new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("fixture-session", "read-readme", "fixture.read", "read",
++                    OBJECT_MAPPER.valueToTree(Map.of("path", "README.md")), OBJECT_MAPPER.valueToTree(Map.of("content", content)),
++                    "completed", null, null, "", false, List.of()));
++            initialArtifact = OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
+                     .replace("    \"missing_evidence\" : [ ],\n", "");
+             initialPrompt = Files.readString(request.promptPath());
+             var now = Instant.parse("2026-07-26T00:00:00Z");
+-            return fixtureResult(
++            var initialResult = fixtureResult(
+                     0,
+                     now,
+                     now.plusSeconds(1),
+@@ -2362,6 +2378,8 @@
+                     null,
+                     new AcpxPromptCompletion("fixture-schema-initial", "end_turn", initialArtifact)
+             );
++            return new AcpxRunResult(initialResult.startedAt(), initialResult.finishedAt(), initialResult.command(), initialResult.executionTimeline(),
++                    initialResult.usage(), initialResult.promptCompletion(), initialResult.processResult(), initialResult.adapterSignals(), observations);
+         }
+ 
+         @Override
+--- /dev/null
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxToolObservationsTest.java
+@@ -0,0 +1,75 @@
++package dev.dual.adapter.acpx;
++
++import org.junit.jupiter.api.Test;
++import static org.junit.jupiter.api.Assertions.*;
++
++class AcpxToolObservationsTest {
++    @Test void ordinaryClaudeSuccessIsAnObservationNotAnActualExit() {
++        var p = start();
++        call(p, "one");
++        update(p, "s1", "one", "\"rawOutput\":\"10 tests passed\",\"_meta\":{\"terminal_exit\":{\"exit_code\":0}}");
++        var fact = p.toolObservations().getFirst();
++        assertTrue(fact.hasExecutionResult());
++        assertEquals("completed", fact.nativeStatus());
++        assertEquals(0, fact.reportedExitCode());
++        assertNull(fact.actualExitCode());
++        assertEquals("", fact.actualExitSource());
++        assertEquals("run-tests", fact.input().path("command").asText());
++        assertEquals(2, fact.rawUpdates().size());
++    }
++
++    @Test void auditedRawReturnCodeIsPreservedIncludingFailure() {
++        var p = start(); call(p, "one");
++        update(p, "s1", "one", "\"rawOutput\":{\"type\":\"bash_code_execution_result\",\"return_code\":7,\"stdout\":\"\",\"stderr\":\"failed\"}");
++        assertEquals(7, p.toolObservations().getFirst().actualExitCode());
++        assertFalse(p.toolObservations().getFirst().actualExitSource().isBlank());
++    }
++
++    @Test void historyForeignSessionProseMissingInputAndLateResultCannotBecomeEvidence() {
++        var p = new AcpxSessionStreamProjector();
++        update(p, "s1", "history", "\"rawOutput\":\"passed\"");
++        assertTrue(p.toolObservations().isEmpty());
++        p = start(); call(p, "one");
++        update(p, "other", "one", "\"rawOutput\":\"passed\"");
++        assertFalse(p.toolObservations().getFirst().hasExecutionResult());
++        update(p, "s1", "missing", "\"rawOutput\":\"passed\"");
++        assertTrue(p.toolObservations().get(1).invalid());
++        p.accept(5, AcpxStreamWireLine.parse("{\"id\":1,\"result\":{\"stopReason\":\"end_turn\"}}"));
++        update(p, "s1", "one", "\"rawOutput\":\"late\"");
++        assertFalse(p.toolObservations().getFirst().hasExecutionResult());
++    }
++
++    @Test void duplicateIdentityCannotReplaceACompletedCall() {
++        var p = start(); call(p, "one");
++        update(p, "s1", "one", "\"rawOutput\":\"first\"");
++        call(p, "one");
++        assertFalse(p.toolObservations().getFirst().hasExecutionResult());
++    }
++
++    @Test void statusWithoutAResultCannotBecomeEvidenceAndStreamingOutputIsRetained() {
++        var p = start(); call(p, "one");
++        update(p, "s1", "one", "\"title\":\"success\"");
++        assertFalse(p.toolObservations().getFirst().hasExecutionResult());
++        p = start(); call(p, "two");
++        p.accept(2, AcpxStreamWireLine.parse("""
++                {"method":"session/update","params":{"sessionId":"s1","update":{
++                  "sessionUpdate":"tool_call_update","toolCallId":"two","status":"in_progress",
++                  "_meta":{"terminal_output":{"terminal_id":"two","data":"actual test results"}}}}}
++                """));
++        update(p, "s1", "two", "\"content\":[{\"type\":\"terminal\",\"terminalId\":\"two\"}]");
++        assertTrue(p.toolObservations().getFirst().hasExecutionResult());
++        assertTrue(p.toolObservations().getFirst().output().toString().contains("actual test results"));
++    }
++
++    private static AcpxSessionStreamProjector start() {
++        var p = new AcpxSessionStreamProjector();
++        p.accept(0, AcpxStreamWireLine.parse("{\"id\":1,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s1\",\"prompt\":[]}}"));
++        return p;
++    }
++    private static void call(AcpxSessionStreamProjector p, String id) {
++        p.accept(1, AcpxStreamWireLine.parse("{\"method\":\"session/update\",\"params\":{\"sessionId\":\"s1\",\"update\":{\"sessionUpdate\":\"tool_call\",\"toolCallId\":\""+id+"\",\"kind\":\"execute\",\"rawInput\":{\"command\":\"run-tests\"},\"_meta\":{\"claudeCode\":{\"toolName\":\"Bash\"}}}}}"));
++    }
++    private static void update(AcpxSessionStreamProjector p, String session, String id, String result) {
++        p.accept(2, AcpxStreamWireLine.parse("{\"method\":\"session/update\",\"params\":{\"sessionId\":\""+session+"\",\"update\":{\"sessionUpdate\":\"tool_call_update\",\"toolCallId\":\""+id+"\",\"status\":\"completed\","+result+"}}}"));
++    }
++}
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredReferenceCorrectionSequenceTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredReferenceCorrectionSequenceTest.java
+@@ -231,6 +231,7 @@
+         ObjectNode valid;
+         com.fasterxml.jackson.databind.JsonNode bindings;
+         AcpxRunRequest initial;
++        List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> observations = List.of();
+         AuthoredExecutionContext.Snapshot snapshot;
+ 
+         @Override public AcpxRunResult runClaudeDesign(AcpxRunRequest request) throws java.io.IOException { return initial(request); }
+@@ -240,6 +241,7 @@
+             var manifest = JSON.readTree(PromptManifestWriter.manifestPathFor(request.promptPath()).toFile());
+             snapshot = JSON.treeToValue(manifest.get("authoredContext"), AuthoredExecutionContext.Snapshot.class);
+             calls.add(snapshot.nodeId());
++            observations = List.of();
+             var decision = snapshot.nodeId().equals("plan.claude_plan") ? "READY_FOR_PLAN_REVIEW"
+                     : snapshot.nodeId().equals("plan.codex_plan_review") ? "READY_TO_IMPLEMENT"
+                     : snapshot.nodeId().equals("implement.claude_implement") ? "IMPLEMENTED"
+@@ -255,6 +257,20 @@
+                 plan.set("verification_bindings", bindings.deepCopy());
+                 plan.putArray("authority_refs");
+             }
++            if (result.has("verification_checks")) {
++                // Real local fixture observation, not a claim that a native test command ran.
++                var content = Files.readString(request.workdir().resolve("README.md"));
++                observations = List.of(new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation(
++                        "fixture-session", "read-readme", "fixture.read", "read",
++                        JSON.valueToTree(Map.of("path", "README.md")), JSON.valueToTree(Map.of("content", content)),
++                        "completed", null, null, "", false, List.of()));
++                var checks = result.putArray("verification_checks");
++                for (var binding : bindings) {
++                    var check = checks.addObject().put("criterion_id", binding.path("criterion_id").asText())
++                            .put("assertion", "Read the fixture README").put("execution_ref", "CURRENT");
++                    check.putArray("tool_call_ids").add("read-readme"); check.putArray("material_refs");
++                }
++            }
+             if (mutation.equals("schema") && result.has("revision_responses")) {
+                 revisedNode = snapshot.nodeInstanceId();
+                 revisedRun = request.promptPath().getParent().getParent().resolve("run.json");
+@@ -300,7 +316,7 @@
+             var now = Instant.now();
+             return new AcpxRunResult(now, now.plusMillis(1), List.of("fixture"), List.of(), null,
+                     new AcpxPromptCompletion("fixture-request", "end_turn", value),
+-                    new ProcessResult("fixture", null, 0, ProcessUsability.EXITED_ZERO, 1, "", "", false, false), List.of());
++                    new ProcessResult("fixture", null, 0, ProcessUsability.EXITED_ZERO, 1, "", "", false, false), List.of(), observations);
+         }
+     }
+ }
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java
+@@ -273,7 +273,7 @@
+                     VerificationReadiness.Action.RECORD, null));
+             bindings = goal.acceptanceCriteria().stream().map(c -> new dev.dual.core.contract.TaskContract.VerificationBinding(c.id(), "Run offline verification",
+                     dev.dual.core.contract.TaskContract.Executor.AGENT, List.of(readiness), List.of(),
+-                    dev.dual.core.contract.TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(readiness), "fixture-operator")).toList();
++                    dev.dual.core.contract.TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(readiness), "fixture-operator", false, null)).toList();
+         }
+ 
+         Map<String, String> snapshot() throws Exception {
+@@ -375,7 +375,7 @@
+                         var goal = JSON.readValue(f.root.resolve(goalRef).toFile(), dev.dual.core.contract.TaskContract.class);
+                         f.bindings = goal.acceptanceCriteria().stream().map(c -> new dev.dual.core.contract.TaskContract.VerificationBinding(c.id(), "Run offline verification",
+                                 dev.dual.core.contract.TaskContract.Executor.AGENT, List.of(), List.of(),
+-                                dev.dual.core.contract.TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(), "fixture-operator")).toList();
++                                dev.dual.core.contract.TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(), "fixture-operator", false, null)).toList();
+                     }
+                     plan.set("verification_bindings", JSON.valueToTree(f.bindings)); plan.putArray("authority_refs");
+                 }
+@@ -397,6 +397,15 @@
+                         }
+                     }
+                 }
++                var observations = new ArrayList<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation>();
++                if (result.has("verification_checks")) {
++                    var content = Files.readString(f.root.resolve("README.md"));
++                    observations.add(new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("fixture-session", "read-readme", "fixture.read", "read",
++                            JSON.valueToTree(Map.of("path", "README.md")), JSON.valueToTree(Map.of("content", content)),
++                            "completed", null, null, "", false, List.of()));
++                    result.set("verification_checks", JSON.valueToTree(f.bindings.stream().map(binding ->
++                            new AgentResultEnvelope.VerificationCheck(binding.criterionId(), "Inspected fixture README", "CURRENT", List.of("read-readme"), List.of())).toList()));
++                }
+                 Files.writeString(request.stdoutPath(), "fixture transcript"); Files.writeString(request.stderrPath(), "");
+                 completedCandidateNode = node.nodeInstanceId();
+                 var now = Instant.now();
+@@ -404,7 +413,7 @@
+                         new AcpxPromptCompletion("fixture", "end_turn", envelope.toString()),
+                         process,
+                         providerDenied ? List.of(new dev.dual.core.execution.AdapterSignal(
+-                                dev.dual.core.execution.AdapterSignalType.RATE_LIMITED, "quota exhausted", 1)) : List.of());
++                                dev.dual.core.execution.AdapterSignalType.RATE_LIMITED, "quota exhausted", 1)) : List.of(), observations);
+             } catch (java.io.IOException e) { throw e; }
+             catch (Exception e) { throw new java.io.IOException(e); }
+         }
+--- before/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java
++++ after/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java
+@@ -281,11 +281,24 @@
+                     ((ObjectNode) result.get("plan")).putArray("files").addObject().put("path", badPath).put("operation", "CREATE");
+                 }
+             }
++            var observations = new ArrayList<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation>();
++            if (result.has("verification_checks")) {
++                var content = Files.readString(request.workdir().resolve("README.md"));
++                observations.add(new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("fixture-session", "read-readme", "fixture.read", "read",
++                        JSON.valueToTree(Map.of("path", "README.md")), JSON.valueToTree(Map.of("content", content)),
++                        "completed", null, null, "", false, List.of()));
++                var checks = result.putArray("verification_checks");
++                for (var binding : bindings) {
++                    var check = checks.addObject().put("criterion_id", binding.path("criterion_id").asText())
++                            .put("assertion", "Inspected fixture README").put("execution_ref", "CURRENT");
++                    check.putArray("tool_call_ids").add("read-readme"); check.putArray("material_refs");
++                }
++            }
+             Files.writeString(request.stdoutPath(), "fixture transcript"); Files.writeString(request.stderrPath(), "");
+             var now = Instant.now();
+             return new AcpxRunResult(now, now.plusMillis(1), List.of("fixture"), List.of(), null,
+                     new AcpxPromptCompletion("fixture-request", "end_turn", envelope.toString()),
+-                    new ProcessResult("fixture", null, 0, ProcessUsability.EXITED_ZERO, 1, "", "", false, false), List.of());
++                    new ProcessResult("fixture", null, 0, ProcessUsability.EXITED_ZERO, 1, "", "", false, false), List.of(), observations);
+         }
+     }
+ }
+--- before/dual-core/src/main/java/dev/dual/core/contract/TaskContract.java
++++ after/dual-core/src/main/java/dev/dual/core/contract/TaskContract.java
+@@ -113,7 +113,9 @@
+             @JsonProperty("authority_refs") List<Reference> authorityRefs,
+             @JsonProperty("evidence_kind") EvidenceKind evidenceKind,
+             @JsonProperty("feasibility_refs") List<Reference> feasibilityRefs,
+-            @JsonProperty("detail_owner") String detailOwner
++            @JsonProperty("detail_owner") String detailOwner,
++            @JsonProperty("actual_exit_required") Boolean actualExitRequired,
++            @JsonProperty("expected_exit_code") Integer expectedExitCode
+     ) {
+         public VerificationBinding {
+             environmentRefs = List.copyOf(environmentRefs == null ? List.of() : environmentRefs);
+--- before/dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java
++++ after/dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java
+@@ -88,6 +88,8 @@
+         for (var clause : contract.acceptanceCriteria()) if (clause != null) required.add(clause.id());
+         var covered = new HashSet<String>();
+         for (var binding : contract.verificationBindings()) {
++            errors.addAll(verificationEvidenceErrors(binding));
++            if (binding == null) continue;
+             if (!required.contains(binding.criterionId())) errors.add("verification refers to an unapproved criterion");
+             if (!covered.add(binding.criterionId())) errors.add("duplicate verification criterion: " + binding.criterionId());
+             if (binding.method() == null || binding.method().isBlank()
+@@ -103,6 +105,20 @@
+                 errors.add("verification executor and evidence kind must agree");
+         }
+         if (!covered.equals(required)) errors.add("every approved acceptance criterion requires a verification exit");
++    }
++
++    /** Evidence requirements are approved with the plan, never inferred from observed results. */
++    public static List<String> verificationEvidenceErrors(TaskContract.VerificationBinding binding) {
++        if (binding == null) return List.of("verification binding is required");
++        var errors = new ArrayList<String>();
++        if (binding.actualExitRequired() == null)
++            errors.add("actual_exit_required must be explicitly declared for " + binding.criterionId());
++        if (binding.expectedExitCode() != null && !Boolean.TRUE.equals(binding.actualExitRequired()))
++            errors.add("expected_exit_code requires actual_exit_required=true for " + binding.criterionId());
++        if (Boolean.TRUE.equals(binding.actualExitRequired())
++                && binding.evidenceKind() != TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS)
++            errors.add("actual process exit requires program execution evidence for " + binding.criterionId());
++        return List.copyOf(errors);
+     }
+ 
+     private static void validateClauses(String name, List<TaskContract.Clause> clauses,
+--- before/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionEvidence.java
++++ after/dual-core/src/main/java/dev/dual/core/execution/AgentExecutionEvidence.java
+@@ -11,6 +11,25 @@
+         List<ArtifactContractResult> artifactContracts,
+         List<AdapterSignal> adapterSignals
+ ) {
++    /** One adapter-observed call. Reported status/exit are not a measured process exit. */
++    public record ToolObservation(String sessionId, String toolCallId, String toolName, String kind,
++                                  com.fasterxml.jackson.databind.JsonNode input,
++                                  com.fasterxml.jackson.databind.JsonNode output,
++                                  String nativeStatus, Integer reportedExitCode, Integer actualExitCode,
++                                  String actualExitSource, boolean invalid,
++                                  List<com.fasterxml.jackson.databind.JsonNode> rawUpdates) {
++        public ToolObservation {
++            input = input == null ? null : input.deepCopy();
++            output = output == null ? null : output.deepCopy();
++            rawUpdates = rawUpdates == null ? List.of() : rawUpdates.stream()
++                    .<com.fasterxml.jackson.databind.JsonNode>map(node -> node.deepCopy()).toList();
++        }
++        public boolean hasExecutionResult() {
++            return !invalid && sessionId != null && !sessionId.isBlank() && toolCallId != null && !toolCallId.isBlank()
++                    && input != null && !input.isNull() && output != null && !output.isNull()
++                    && ("completed".equals(nativeStatus) || "failed".equals(nativeStatus));
++        }
++    }
+     public AgentExecutionEvidence {
+         if (processResult == null) {
+             throw new IllegalArgumentException("processResult is required");
+--- before/dual-core/src/test/java/dev/dual/core/contract/PhasedContractTest.java
++++ after/dual-core/src/test/java/dev/dual/core/contract/PhasedContractTest.java
+@@ -64,6 +64,31 @@
+         return MAPPER.treeToValue(document, TaskContract.class);
+     }
+ 
++    @Test
++    void executionCannotTreatUnspecifiedExitEvidenceAsOptional() throws Exception {
++        var document = example("execution-contract.json");
++        for (var binding : document.withArray("verification_bindings"))
++            ((ObjectNode) binding).remove("actual_exit_required");
++        assertTrue(TaskContractValidator.validate(parse(document)).stream()
++                .anyMatch(error -> error.contains("actual_exit_required")),
++                "an execution approval must explicitly decide each criterion's exit evidence requirement");
++    }
++
++    @Test
++    void approvedEvidenceCanRequireExitForOneCriterionWithoutImposingItOnAnother() throws Exception {
++        var document = example("execution-contract.json");
++        ((ObjectNode) document.withArray("verification_bindings").get(0))
++                .put("actual_exit_required", true).put("expected_exit_code", 0);
++        var contract = parse(document);
++        assertTrue(TaskContractValidator.validate(contract).isEmpty());
++        assertTrue(contract.verificationBindings().getFirst().actualExitRequired());
++        assertEquals(0, contract.verificationBindings().getFirst().expectedExitCode());
++        assertFalse(contract.verificationBindings().get(1).actualExitRequired());
++        assertEquals(document.path("verification_bindings"), MAPPER.valueToTree(contract).path("verification_bindings"));
++        ((ObjectNode) document.withArray("verification_bindings").get(0)).put("actual_exit_required", false);
++        assertTrue(TaskContractValidator.validate(parse(document)).stream().anyMatch(s -> s.contains("expected_exit_code")));
++    }
++
+     private static ObjectNode example(String name) throws Exception {
+         try (var input = PhasedContractTest.class.getResourceAsStream(name)) {
+             assertNotNull(input);
+--- before/dual-core/src/test/java/dev/dual/core/contract/TaskContractTest.java
++++ after/dual-core/src/test/java/dev/dual/core/contract/TaskContractTest.java
+@@ -316,7 +316,7 @@
+         var exits = criteria.stream().map(c -> new TaskContract.VerificationBinding(c.id(), "compare actual output",
+                 TaskContract.Executor.AGENT, List.of(reference("environment")), List.of(),
+                 TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS,
+-                List.of(reference("feasibility")), "self-test")).toList();
++                List.of(reference("feasibility")), "self-test", false, null)).toList();
+         return new TaskContract(2, TaskContract.Phase.EXECUTION, 1,
+                 id, version, created, objective, scope, criteria, requirements, constraints, nonGoals, risks,
+                 List.of(), ambiguities, questions, status, pass, source, reference("goal"),
+--- before/dual-core/src/test/resources/dev/dual/core/contract/execution-contract.json
++++ after/dual-core/src/test/resources/dev/dual/core/contract/execution-contract.json
+@@ -97,7 +97,9 @@
+           "sha256": "db38e2f4338f3bcce8d73bc0d531b75589223d93004eabd4ce42702a11262c03"
+         }
+       ],
+-      "detail_owner": "implement.claude_self_test_report"
++      "detail_owner": "implement.claude_self_test_report",
++      "actual_exit_required": false,
++      "expected_exit_code": null
+     },
+     {
+       "criterion_id": "A2",
+@@ -117,7 +119,9 @@
+           "sha256": "db38e2f4338f3bcce8d73bc0d531b75589223d93004eabd4ce42702a11262c03"
+         }
+       ],
+-      "detail_owner": "implement.claude_self_test_report"
++      "detail_owner": "implement.claude_self_test_report",
++      "actual_exit_required": false,
++      "expected_exit_code": null
+     }
+   ],
+   "authority_refs": []
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputContractDocument.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputContractDocument.java
+@@ -54,7 +54,8 @@
+         PlanArtifactDocument planArtifact,
+         AgentResultEnvelope.Design design,
+         List<AgentResultEnvelope.AuthoredRevisionResponse> authoredRevisionResponses,
+-        AuthoredExecutionContext.Reference authoredContext
++        AuthoredExecutionContext.Reference authoredContext,
++        List<AgentResultEnvelope.VerificationCheck> verificationChecks
+ ) {
+     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
+     };
+@@ -103,7 +104,8 @@
+                 planArtifact(objectMap(document.get("plan_artifact"))),
+                 design(objectMap(document.get("design"))),
+                 authoredResponses(document.get("revision_responses")),
+-                authoredReference(document.get("authored_context"))
++                authoredReference(document.get("authored_context")),
++                verificationChecks(document.get("verification_checks"))
+         );
+     }
+ 
+@@ -208,6 +210,11 @@
+     private static AuthoredExecutionContext.Reference authoredReference(Object value) {
+         if (value == null) return null;
+         return AuthoredExecutionContext.JSON.convertValue(value, AuthoredExecutionContext.Reference.class);
++    }
++
++    private static List<AgentResultEnvelope.VerificationCheck> verificationChecks(Object value) {
++        if (value == null) return List.of();
++        return AuthoredExecutionContext.JSON.convertValue(value, new TypeReference<List<AgentResultEnvelope.VerificationCheck>>() {});
+     }
+ 
+     private static List<AgentResultEnvelope.AuthoredRevisionResponse> authoredResponses(Object value) {
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultDocumentProjector.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultDocumentProjector.java
+@@ -92,6 +92,7 @@
+                 document.put("plan_artifact", planArtifact(plan));
+             }
+             case AgentResultEnvelope.SelfTestResult selfTest -> {
++                document.put("verification_checks", selfTest.verificationChecks());
+                 document.put("lifecycle_status", selfTest.lifecycleStatus());
+                 document.put("blocking", false);
+                 document.put("checks_run", selfTest.checksRun());
+@@ -103,10 +104,13 @@
+                 document.put("verification_summary", selfTest.verificationSummary());
+                 evidenceDefaultsIfAbsent(document);
+             }
+-            case AgentResultEnvelope.AcceptanceReviewResult review -> evidenceFields(
++            case AgentResultEnvelope.AcceptanceReviewResult review -> {
++                document.put("verification_checks", review.verificationChecks());
++                evidenceFields(
+                     document, review.lifecycleStatus(), review.blocking(), review.checks(), review.evidence(),
+                     review.missingEvidence(), review.mustFix(), review.acceptanceNotes(), review.openRisks(),
+                     review.changedFiles(), review.verificationSummary(), review.failure());
++            }
+             case AgentResultEnvelope.StageHandoffResult handoff -> {
+                 document.put("lifecycle_status", handoff.lifecycleStatus());
+                 document.put("blocking", false);
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelope.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelope.java
+@@ -234,7 +234,8 @@
+             List<String> missingEvidence,
+             List<String> mustFix,
+             List<String> acceptanceNotes,
+-            String verificationSummary
++            String verificationSummary,
++            List<VerificationCheck> verificationChecks
+     ) implements AgentResult {
+     }
+ 
+@@ -252,9 +253,15 @@
+             List<String> openRisks,
+             List<String> changedFiles,
+             String verificationSummary,
+-            Failure failure
+-    ) implements AgentResult {
+-    }
++            Failure failure,
++            List<VerificationCheck> verificationChecks
++    ) implements AgentResult {
++    }
++
++    /** Model-authored assertion and selectors; neither the selectors nor assertion create execution facts. */
++    @com.fasterxml.jackson.databind.annotation.JsonNaming(com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy.class)
++    public record VerificationCheck(String criterionId, String assertion, String executionRef,
++                                    List<String> toolCallIds, List<TaskContract.Reference> materialRefs) {}
+ 
+     public record StageHandoffResult(
+             String artifactType,
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeValidator.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeValidator.java
+@@ -218,6 +218,7 @@
+                 validateNoVerificationRemediation(plan.failure(), errors);
+             }
+             case AgentResultEnvelope.SelfTestResult selfTest -> {
++                validateVerificationChecks(selfTest.verificationChecks(), errors);
+                 requiredText(selfTest.lifecycleStatus(), "result.lifecycle_status", errors);
+                 requiredList(selfTest.checksRun(), "result.checks_run", false, errors);
+                 requiredList(selfTest.checksSkipped(), "result.checks_skipped", false, errors);
+@@ -233,6 +234,7 @@
+                 requiredText(selfTest.verificationSummary(), "result.verification_summary", errors);
+             }
+             case AgentResultEnvelope.AcceptanceReviewResult review -> {
++                validateVerificationChecks(review.verificationChecks(), errors);
+                 validateEvidencePayload(
+                         review.lifecycleStatus(), review.checks(), review.evidence(), review.missingEvidence(),
+                         review.mustFix(), review.acceptanceNotes(), review.openRisks(), review.changedFiles(),
+@@ -481,6 +483,21 @@
+     }
+ 
+ 
++    private static void validateVerificationChecks(List<AgentResultEnvelope.VerificationCheck> checks, ValidationErrors errors) {
++        if (checks == null) { errors.reject("result.verification_checks is required (empty for missing evidence)"); return; }
++        var ids = new HashSet<String>();
++        for (var check : checks) {
++            if (check == null) { errors.reject("null verification check"); continue; }
++            requiredText(check.criterionId(), "verification_checks.criterion_id", errors);
++            requiredText(check.assertion(), "verification_checks.assertion", errors);
++            requiredText(check.executionRef(), "verification_checks.execution_ref", errors);
++            if (!ids.add(check.criterionId())) errors.reject("duplicate verification criterion");
++            if (check.toolCallIds() == null || check.materialRefs() == null) errors.reject("verification selectors must be explicit lists");
++            if (check.toolCallIds() != null) for (var id : check.toolCallIds())
++                requiredText(id, "verification_checks.tool_call_ids[]", errors);
++        }
++    }
++
+     private static void validateNoVerificationRemediation(
+             AgentResultEnvelope.Failure failure,
+             ValidationErrors errors
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
+@@ -64,7 +64,7 @@
+                             rereadReasonInstruction(nodeId),
+                             verificationRemediationInstruction(nodeId, exampleResult) + acceptanceClassificationInstruction(exampleResult),
+                             contractRevisionInstruction(nodeId, proposalContext) + authoredRevisionInstruction(exampleResult)
+-                                    + selfTestInstruction(exampleResult),
++                                    + selfTestInstruction(exampleResult) + verificationInstruction(exampleResult),
+                             OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope)
+                     ).stripTrailing();
+         } catch (Exception failure) {
+@@ -79,6 +79,22 @@
+                 + "Both lists may be non-empty when code defects and missing proof coexist. "
+                 + "SELF_TEST_COMPLETE requires both lists empty; otherwise use SELF_TEST_INCOMPLETE or BLOCKED. "
+                 + "Do not invent code changes to resolve an environment or evidence-only blocker.";
++    }
++
++    private static String verificationInstruction(AgentResultEnvelope.AgentResult result) {
++        if (result instanceof AgentResultEnvelope.PlanResult)
++            return "\nEach verification_binding must explicitly set actual_exit_required (boolean) and expected_exit_code (integer or null). "
++                    + "Derive these from the approved acceptance requirements before execution; never weaken a required exit check. "
++                    + "expected_exit_code requires actual_exit_required=true. Operator declarations cannot supply measured process exits.";
++        if (!(result instanceof AgentResultEnvelope.SelfTestResult) && !(result instanceof AgentResultEnvelope.AcceptanceReviewResult)) return "";
++        return "\nSuccessful self-test/acceptance must have one verification_checks entry for each approved criterion. "
++                + "Each entry contains exactly criterion_id, assertion, execution_ref, tool_call_ids, material_refs. "
++                + "assertion describes what the actual result demonstrates. execution_ref is CURRENT for this execution's program observations, "
++                + "or an exact prior verification-observations.json reference supplied in context; operator evidence uses the bound submission manifest. "
++                + "tool_call_ids may select known call IDs; [] selects the complete observed result set, not zero required evidence. "
++                + "material_refs contains actual material references with ref and sha256 fields when used, or []. Never invent IDs, paths, hashes, outputs or exits. "
++                + "Native completion is not measured exit 0. Missing required evidence must remain incomplete/rejected; verification_checks may be [] for an incomplete result. "
++                + "A declaration or a tool status alone does not establish the criterion; inspect its actual input/output and any required report.";
+     }
+ 
+     private static String authoredRevisionInstruction(AgentResultEnvelope.AgentResult result) {
+@@ -344,7 +360,7 @@
+                                     List.of(new dev.dual.core.contract.TaskContract.Reference("replace/with/actual-environment-ref", "0".repeat(64))),
+                                     List.of(), dev.dual.core.contract.TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS,
+                                     List.of(new dev.dual.core.contract.TaskContract.Reference("replace/with/actual-feasibility-ref", "0".repeat(64))),
+-                                    "implement.claude_self_test_report")), List.of()
++                                    "implement.claude_self_test_report", false, null)), List.of()
+                     ), List.of()
+             );
+             case "implement.claude_self_test_report" -> new AgentResultEnvelope.SelfTestResult(
+@@ -359,7 +375,7 @@
+                     List.of(),
+                     List.of(),
+                     "short verification adequacy summary"
+-            );
++            , List.of());
+             case "acceptance.codex_verifier_review" -> new AgentResultEnvelope.AcceptanceReviewResult(
+                     "acceptance_review",
+                     decision,
+@@ -375,7 +391,7 @@
+                     List.of(),
+                     "short verification adequacy summary",
+                     emptyFailure()
+-            );
++            , List.of());
+             case "stage.claude_handoff" -> new AgentResultEnvelope.StageHandoffResult(
+                     "stage_handoff",
+                     decision,
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java
+@@ -17,6 +17,22 @@
+     private AgentRunCommitProtocol() {}
+ 
+     public record Prepared(NodeExecutionDocument execution, Map<String, String> reference, Path path) {}
++
++    /** Program facts share the run writer and cannot replace a prior observation or a completed outcome. */
++    static dev.dual.core.contract.TaskContract.Reference recordObservation(Path root, String workstream,
++                                                                          Prepared prepared, Object observation) throws IOException {
++        var run = prepared.path().getParent().getParent();
++        var path = run.resolve("outputs/verification-observations.json");
++        try (var ignored = lock(run, workstream)) {
++            if (!hash(Files.readAllBytes(prepared.path())).equals(prepared.reference().get("sha256"))
++                    || !Files.isRegularFile(intentPath(prepared.path())))
++                throw new IOException("observation lacks its fixed preparation and execution intent");
++            if (Files.exists(completionPath(prepared.path())) || Files.exists(run.resolve("outputs/execution-outcome.json")))
++                throw new IOException("completed execution cannot acquire new observations");
++            immutable(path, observation);
++            return new dev.dual.core.contract.TaskContract.Reference(reference(root, path), hash(Files.readAllBytes(path)));
++        }
++    }
+ 
+     public static Prepared prepare(TaskHandler.TaskContext context, Path runDirectory, List<Path> inputs,
+                                    Map<String, Object> binding) throws IOException {
+@@ -62,6 +78,11 @@
+ 
+     /** Repeat qualification against the current claim and fixed contract, without producing new inputs. */
+     public static void qualifyDispatch(TaskHandler.TaskContext context, Prepared prepared) throws IOException {
++        try {
++            VerificationEvidence.verifyAcceptanceInputs(context);
++        } catch (IOException invalid) {
++            throw new AgentRunGovernanceContext.QualificationException("VERIFICATION_EVIDENCE_INVALID", invalid.getMessage());
++        }
+         var paths = paths(context);
+         context.ledger().inspect(paths, (scoped, files) -> {
+             scoped.verifyExecutionClaim(paths, prepared.execution());
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunGovernanceContext.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunGovernanceContext.java
+@@ -60,6 +60,11 @@
+         }
+         if ("acceptance_review".equals(expectedArtifact) && contractResolution.qualified().isEmpty()) {
+             throw new QualificationException("CONTEXT_BINDING_MISSING", "acceptance agent has no routed task contract binding");
++        }
++        try {
++            VerificationEvidence.verifyAcceptanceInputs(context);
++        } catch (IOException invalid) {
++            throw new QualificationException("VERIFICATION_EVIDENCE_INVALID", invalid.getMessage());
+         }
+         Optional<TaskContractProjectionVerifier.QualifiedTaskContract> qualifiedContract =
+                 contractResolution.qualified();
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
+@@ -129,11 +129,14 @@
+         ContractViolation lastInvalid = null;
+         String lastSourceRef = "";
+         var repositoryFactBindingRef = text(result.result().get("repository_fact_binding_ref"));
++        var observations = result.result().get(VerificationEvidence.FACT);
++        var observationRef = observations == null ? "" : new com.fasterxml.jackson.databind.ObjectMapper()
++                .convertValue(observations, dev.dual.core.contract.TaskContract.Reference.class).ref();
+         for (int i = result.outputRefs().size() - 1; i >= 0; i--) {
+             var ref = result.outputRefs().get(i);
+             if (ref.startsWith("artifact://")
+                     || !ref.endsWith(".json")
+-                    || ref.equals(repositoryFactBindingRef)) {
++                    || ref.equals(repositoryFactBindingRef) || ref.equals(observationRef)) {
+                 continue;
+             }
+             var path = root.resolve(ref).normalize();
+@@ -381,6 +384,12 @@
+         } catch (java.io.IOException | IllegalArgumentException invalid) {
+             return evidenceFailure(result, invalid);
+         }
++        try {
++            VerificationEvidence.verify(ledger, root, workstreamId, nodeInstanceId, result, envelope.result());
++        } catch (java.io.IOException | IllegalArgumentException invalid) {
++            return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
++                    envelope, ContractViolation.of("VERIFICATION_EVIDENCE_INVALID", invalid.getMessage(), Map.of()));
++        }
+         var validated = AgentExecutionResultFacts.attach(result,
+                 AgentResultContractResult.valid(envelope.result().decision()),
+                 List.of(ArtifactContractResult.requiredValid(envelope.result().artifactType())),
+@@ -406,14 +415,17 @@
+                     .writeValueAsString(resultProjector.planArtifact(plan)) + "\n").getBytes(StandardCharsets.UTF_8)));
+             refs.add(ref); fields.put("plan_artifact_ref", ref);
+         }
+-        return new Validation(validated, new Publication(workstreamId, nodeInstanceId, refs, fields, writes));
++        return new Validation(validated, new Publication(workstreamId, nodeInstanceId, refs, fields, writes,
++                new dev.dual.core.contract.TaskContract.Reference(outputRef, TaskContractArtifactWriter.sha256(outputPath))));
+     }
+ 
+     /** Fixed byte publication, subordinate to the unique execution outcome. No reevaluation on restart. */
+     record Publication(String workstream, String node, List<String> outputRefs,
+-                       Map<String, Object> fields, Map<String, String> bytes) {
++                       Map<String, Object> fields, Map<String, String> bytes,
++                       dev.dual.core.contract.TaskContract.Reference candidate) {
+         NodeResult publish(dev.dual.ledger.file.WorkflowFileLedger ledger, Path root, NodeResult execution) throws Exception {
+             EvidenceCollection.verify(ledger, root, workstream, node);
++            VerificationEvidence.verifyPublication(ledger, root, workstream, node, execution, candidate);
+             for (var entry : bytes.entrySet()) {
+                 var path = root.toAbsolutePath().normalize().resolve(entry.getKey()).normalize();
+                 if (!path.startsWith(root.toAbsolutePath().normalize()) || Path.of(entry.getKey()).isAbsolute())
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolver.java
+@@ -89,6 +89,8 @@
+             if (selfTest.failure() != null) {
+                 return Resolution.invalid(SELF_TEST_INVALID, selfTest.failure(), goal);
+             }
++            VerificationEvidence.verifyPublished(ledger, root, workstreamId, acceptance.evidence().document());
++            VerificationEvidence.verifyPublished(ledger, root, workstreamId, selfTest.evidence().document());
+             return Resolution.available(goal, decisionNode, context.node(), acceptance.evidence(), selfTest.evidence());
+         } catch (Exception e) {
+             return Resolution.invalid(GOAL_INVALID, "completion evidence cannot be resolved: " + e.getMessage(), null);
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextBuildPackageHandler.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextBuildPackageHandler.java
+@@ -1023,11 +1023,13 @@
+             return Optional.empty();
+         }
+         var required = RequiredAgentEvidence.from(configured);
+-        var evidence = AgentEvidenceIndex.fromRefs(
+-                context.ledger(), context.workspaceRoot(), context.workstreamId(), context.instance().inputRefs(), OBJECT_MAPPER);
+-        return evidence.contains(required.nodeId(), required.sourceArtifactType(), required.decision())
+-                ? Optional.empty()
+-                : Optional.of(required);
++        try {
++            VerificationEvidence.verifyRequired(context.ledger(), context.workspaceRoot(), context.workstreamId(),
++                    context.instance().inputRefs(), configured);
++            return Optional.empty();
++        } catch (IOException invalid) {
++            return Optional.of(required);
++        }
+     }
+ 
+     private record RequiredAgentEvidence(String nodeId, String sourceArtifactType, String decision) {
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/ContextPackageSectionRenderer.java
+@@ -522,6 +522,18 @@
+         if (!verification.isBlank()) {
+             builder.append("- Verification: ").append(verification.replace("\n", " / ")).append("\n");
+         }
++        if (!contract.verificationChecks().isEmpty()) {
++            builder.append("- Criterion evidence (assertions still require independent review):\n");
++            for (var check : contract.verificationChecks()) {
++                var ref = "CURRENT".equals(check.executionRef())
++                        ? ".agent/workstreams/" + contract.workstreamId() + "/runs/" + contract.runId() + "/outputs/verification-observations.json"
++                        : check.executionRef();
++                builder.append("  - ").append(check.criterionId()).append(": ").append(check.assertion())
++                        .append("; execution evidence: ").append(ref)
++                        .append("; selected tool calls: ").append(check.toolCallIds())
++                        .append("; materials: ").append(check.materialRefs()).append("\n");
++            }
++        }
+         builder.append("- Contract Sidecar: ").append(toDisplayRef(sidecar)).append("\n");
+         builder.append("- Raw Output: ").append(contract.sourceOutputRef()).append("\n\n");
+         appendTypedPlanArtifact(builder, contract.planArtifact());
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollectionSource.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/EvidenceCollectionSource.java
+@@ -9,8 +9,8 @@
+ import java.util.*;
+ 
+ /** Raw worktree bytes, not Git's filtered blobs or the path-only inventory digest. */
+-record EvidenceCollectionSource(String head, String indexSha256, String sha256, List<String> paths) {
+-    static EvidenceCollectionSource capture(Path workspace, List<String> retainedPaths) throws IOException {
++public record EvidenceCollectionSource(String head, String indexSha256, String sha256, List<String> paths) {
++    public static EvidenceCollectionSource capture(Path workspace, List<String> retainedPaths) throws IOException {
+         var root = workspace.toRealPath();
+         if (!root.equals(Path.of(GitTrackedPathInventory.command(root, "rev-parse", "--show-toplevel").trim()).toRealPath()))
+             throw new IOException("collection workspace must be the Git root");
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/PlanScopeValidator.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/PlanScopeValidator.java
+@@ -38,6 +38,8 @@
+         }
+         if (plan.verificationBindings() == null || plan.verificationBindings().isEmpty())
+             errors.add("PLAN_VERIFICATION_BINDINGS_MISSING");
++        else for (var binding : plan.verificationBindings())
++            errors.addAll(TaskContractValidator.verificationEvidenceErrors(binding));
+         if (plan.authorityRefs() == null) errors.add("PLAN_AUTHORITY_REFS_MISSING");
+         return List.copyOf(errors);
+     }
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/ReviewDecisionHandler.java
+@@ -35,6 +35,11 @@
+                     allowedDecisions(context.definition().id()), read);
+         }
+         var document = read.entry().document();
++        try { VerificationEvidence.verifyPublished(context.ledger(), context.workspaceRoot(), context.workstreamId(), document); }
++        catch (java.io.IOException invalid) {
++            return failed("VERIFICATION_EVIDENCE_INVALID", invalid.getMessage(), context,
++                    allowedDecisions(context.definition().id()), read);
++        }
+         if ("implement.self_test_decision".equals(context.definition().id())
+                 && !"self_test_report".equals(document.sourceArtifactType())) {
+             return failed("INVALID_CONTRACT_SIDECAR", "self-test decision requires a self_test_report",
+--- /dev/null
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationEvidence.java
+@@ -0,0 +1,238 @@
++package dev.dual.runtime.handler;
++
++import com.fasterxml.jackson.databind.ObjectMapper;
++import dev.dual.core.contract.TaskContract;
++import dev.dual.core.execution.AgentExecutionEvidence.ToolObservation;
++import dev.dual.core.id.DualId;
++import dev.dual.core.workflow.NodeResult;
++import dev.dual.ledger.file.*;
++import java.io.IOException;
++import java.nio.file.*;
++import java.util.*;
++
++/** Program-owned execution observations and criterion evidence checks. Never executes a test or judges assertion prose. */
++public final class VerificationEvidence {
++    private static final ObjectMapper JSON = new ObjectMapper().findAndRegisterModules();
++    public static final String FACT = "verification_observations";
++    private static final String FILE = "verification-observations.json";
++    public record Baseline(TaskContract.Reference contract, EvidenceCollectionSource source) {}
++    public record Observation(String schema, String workstream, String node, String execution, String run,
++                              String agent, Map<String, String> prepared, Baseline baseline,
++                              EvidenceCollectionSource afterSource, List<ToolObservation> tools) {}
++    private VerificationEvidence() {}
++
++    public static Baseline prepare(TaskHandler.TaskContext context) throws IOException {
++        var qualified = TaskContractProjectionVerifier.resolve(context.ledger(), context.workspaceRoot(), context.workstreamId(),
++                TaskContract.Phase.EXECUTION).qualified().orElseThrow(() -> new IOException("approved EXECUTION required for source capture"));
++        return new Baseline(new TaskContract.Reference(qualified.contractRef(), qualified.sha256()),
++                EvidenceCollectionSource.capture(context.workspaceRoot(), qualified.contract().scope().included().stream()
++                        .map(TaskContract.ScopeEntry::path).toList()));
++    }
++
++    public static NodeResult record(TaskHandler.TaskContext context, AgentRunCommitProtocol.Prepared prepared,
++                                    Baseline baseline, String agent, List<ToolObservation> observations, NodeResult result) throws IOException {
++        if (baseline == null) return result;
++        var runDir = prepared.path().getParent().getParent();
++        var record = new Observation("dual.verification.observations.v1", context.workstreamId(),
++                context.instance().nodeInstanceId(), prepared.execution().nodeExecutionId(), runDir.getFileName().toString(),
++                agent, prepared.reference(), baseline,
++                EvidenceCollectionSource.capture(context.workspaceRoot(), baseline.source().paths()), List.copyOf(observations));
++        var ref = AgentRunCommitProtocol.recordObservation(context.workspaceRoot(), context.workstreamId(), prepared, record);
++        var facts = new LinkedHashMap<String, Object>(result.result()); facts.put(FACT, ref);
++        var outputs = new ArrayList<>(result.outputRefs()); outputs.add(ref.ref());
++        return new NodeResult(result.outcome(), result.status(), List.copyOf(outputs), facts, result.errorMessage());
++    }
++
++    static List<AgentResultEnvelope.VerificationCheck> checks(AgentResultEnvelope.AgentResult result) {
++        return result instanceof AgentResultEnvelope.SelfTestResult self ? self.verificationChecks()
++                : result instanceof AgentResultEnvelope.AcceptanceReviewResult acceptance ? acceptance.verificationChecks() : null;
++    }
++
++    /** Required routed evidence is current execution input, not a historical display. */
++    static void verifyRequired(WorkflowFileLedger ledger, Path root, String ws, List<String> refs, Object configured) throws IOException {
++        require(configured instanceof Map<?, ?>, "required evidence definition is missing");
++        var required = (Map<?, ?>) configured;
++        var matches = AgentEvidenceIndex.fromRefs(ledger, root, ws, refs, JSON).recent(refs.size()).stream()
++                .map(AgentEvidenceIndex.Entry::document)
++                .filter(d -> Objects.equals(required.get("node_id"), d.nodeId())
++                        && Objects.equals(required.get("source_artifact_type"), d.sourceArtifactType())
++                        && Objects.equals(required.get("decision"), d.decision()) && d.hasRequiredTypedPayload()).toList();
++        require(matches.size() == 1, "exactly one routed required evidence occurrence is needed");
++        verifyPublished(ledger, root, ws, matches.getFirst());
++    }
++
++    /** Recheck the completed context's actual inputs immediately before a verifier command. */
++    static void verifyAcceptanceInputs(TaskHandler.TaskContext context) throws IOException {
++        if (!"acceptance_review".equals(context.definition().config().get("expected_artifact"))) return;
++        var root = context.workspaceRoot();
++        var paths = new WorkstreamPaths(root, new DualId(context.workstreamId()));
++        var prefix = ".agent/workstreams/" + context.workstreamId() + "/context/";
++        var packages = context.instance().inputRefs().stream()
++                .filter(r -> r.startsWith(prefix) && r.endsWith(".md") && !r.substring(prefix.length()).contains("/")).toList();
++        require(packages.size() == 1, "acceptance requires one routed context occurrence");
++        var ref = packages.getFirst();
++        var id = ref.substring(prefix.length(), ref.length() - 3);
++        var producer = context.ledger().loadNode(paths, id);
++        require(producer.status() == dev.dual.core.workflow.NodeStatus.COMPLETED
++                && "context.build_package".equals(producer.handlerType()) && producer.outputRefs().contains(ref)
++                && producer.iterationId().equals(context.instance().iterationId()), "invalid acceptance context producer");
++        var definition = context.ledger().loadDefinition(paths).node(producer.nodeDefinitionId());
++        require("acceptance".equals(definition.config().get("profile"))
++                && context.definition().id().equals(definition.config().get("target_node")), "wrong acceptance context target");
++        verifyRequired(context.ledger(), root, context.workstreamId(), producer.inputRefs(), definition.config().get("required_agent_evidence"));
++    }
++
++    static void verifyPublished(WorkflowFileLedger ledger, Path root, String ws, AgentOutputContractDocument document) throws IOException {
++        if (!("self_test_report".equals(document.sourceArtifactType()) && "SELF_TEST_COMPLETE".equals(document.decision())
++                || "acceptance_review".equals(document.sourceArtifactType()) && accepted(document.decision()))) return;
++        var paths = new WorkstreamPaths(root, new DualId(ws));
++        var fixed = ledger.inspect(paths, (snapshot, files) -> {
++            var node = snapshot.loadNode(paths, document.nodeInstanceId());
++            var execution = snapshot.latestNodeExecution(paths, node).orElseThrow(() -> new IOException("verification lacks its execution"));
++            var result = AgentRunCommitProtocol.readCompletion(paths, execution);
++            require(result.outputRefs().contains(document.sourceOutputRef()), "verification source is not in the fixed completion");
++            return result;
++        });
++        var parsed = new AgentResultEnvelopeParser().parse(Files.readString(root.resolve(document.sourceOutputRef())));
++        require(parsed.valid() && document.decision().equals(parsed.envelope().result().decision()), "invalid published verification result");
++        verify(ledger, root, ws, document.nodeInstanceId(), fixed, parsed.envelope().result());
++    }
++
++    static void verifyPublication(WorkflowFileLedger ledger, Path root, String ws, String node,
++                                  NodeResult execution, TaskContract.Reference candidate) throws IOException {
++        var parsed = new AgentResultEnvelopeParser().parse(new String(read(root, candidate), java.nio.charset.StandardCharsets.UTF_8));
++        require(parsed.valid(), "fixed publication candidate is invalid");
++        verify(ledger, root, ws, node, execution, parsed.envelope().result());
++    }
++
++    /** Called before publication, again by completion/lineage consumers for the same approved requirements. */
++    static void verify(WorkflowFileLedger ledger, Path root, String ws, String node, NodeResult executionResult,
++                       AgentResultEnvelope.AgentResult result) throws IOException {
++        boolean success = result instanceof AgentResultEnvelope.SelfTestResult && "SELF_TEST_COMPLETE".equals(result.decision())
++                || result instanceof AgentResultEnvelope.AcceptanceReviewResult && accepted(result.decision());
++        if (!success) return;
++        var resolution = TaskContractProjectionVerifier.resolve(ledger, root, ws, TaskContract.Phase.EXECUTION);
++        var qualified = resolution.qualified().orElseThrow(() -> new IOException("verification requires the approved EXECUTION contract"));
++        var checks = checks(result);
++        require(checks != null && checks.size() == qualified.contract().verificationBindings().size(),
++                "successful verification requires one evidence check for each approved criterion");
++        var seen = new HashSet<String>();
++        var observations = new LinkedHashMap<String, Observation>();
++        for (var check : checks) {
++            require(check != null && seen.add(check.criterionId()) && check.assertion() != null && !check.assertion().isBlank(),
++                    "missing/duplicate criterion assertion");
++            var binding = qualified.contract().verificationBindings().stream().filter(b -> b.criterionId().equals(check.criterionId()))
++                    .findFirst().orElseThrow(() -> new IOException("unapproved verification criterion"));
++            require(dev.dual.core.contract.TaskContractValidator.verificationEvidenceErrors(binding).isEmpty(), "invalid evidence requirements");
++            require(check.materialRefs() != null && check.toolCallIds() != null, "evidence selectors must be explicit");
++            if (binding.evidenceKind() == TaskContract.EvidenceKind.OPERATOR_DECLARATION_WITH_MATERIAL) {
++                var refs = EvidenceCollection.requiredReferences(ledger, root, ws, node);
++                require(!refs.isEmpty() && refs.getFirst().equals(check.executionRef()),
++                        "operator assertion requires the bound, verified external submission");
++                require(!check.materialRefs().isEmpty() && check.materialRefs().stream().allMatch(r -> r != null && refs.subList(1, refs.size()).contains(r.ref())),
++                        "operator assertion must reference the submitted materials");
++                require(check.toolCallIds().isEmpty(), "operator declaration cannot claim program tool calls");
++            } else {
++                var evidence = observations.get(check.executionRef());
++                if (evidence == null) {
++                    evidence = load(ledger, root, ws, node, executionResult, check.executionRef());
++                    observations.put(check.executionRef(), evidence);
++                }
++                require(evidence.baseline().contract().equals(new TaskContract.Reference(qualified.contractRef(), qualified.sha256())),
++                        "tool evidence belongs to a different approved contract");
++                require(evidence.baseline().source().equals(evidence.afterSource()), "source changed during observed execution");
++                // An empty selection means the fixed execution's complete tool-result set, so clients
++                // need not copy opaque ACP IDs. It never means that no observed execution is required.
++                var selected = check.toolCallIds().isEmpty() ? evidence.tools().stream()
++                        .filter(ToolObservation::hasExecutionResult).map(ToolObservation::toolCallId).toList() : check.toolCallIds();
++                require(!selected.isEmpty() && new HashSet<>(selected).size() == selected.size(),
++                        "criterion must have actual tool results without duplicate identities");
++                var selectedObservations = new ArrayList<ToolObservation>();
++                for (var callId : selected) {
++                    require(callId != null && !callId.isBlank(), "tool call identity is missing");
++                    var matches = evidence.tools().stream().filter(t -> callId.equals(t.toolCallId())).toList();
++                    require(matches.size() == 1 && matches.getFirst().hasExecutionResult(), "missing, ambiguous or incomplete tool call: " + callId);
++                    selectedObservations.add(matches.getFirst());
++                }
++                verifySelectedExits(binding, selectedObservations);
++            }
++            for (var material : check.materialRefs()) read(root, material);
++        }
++        // One fresh source read per distinct baseline at this consumption point. Multiple
++        // criteria sharing the same execution do not each launch another Git inventory.
++        // Nothing is cached across preparation, dispatch, publication or recovery calls.
++        for (var source : observations.values().stream().map(Observation::afterSource).distinct().toList())
++            require(source.equals(EvidenceCollectionSource.capture(root, source.paths())), "source changed after observed execution");
++    }
++
++    public static void verifyExit(TaskContract.VerificationBinding binding, ToolObservation observation) throws IOException {
++        if (!Boolean.TRUE.equals(binding.actualExitRequired())) return;
++        require(observation.actualExitCode() != null && observation.actualExitSource() != null
++                && !observation.actualExitSource().isBlank(), "required actual process exit is unavailable; native status is insufficient");
++        require(binding.expectedExitCode() == null || binding.expectedExitCode().equals(observation.actualExitCode()),
++                "actual process exit does not match approved requirement");
++    }
++
++    static void verifySelectedExits(TaskContract.VerificationBinding binding, List<ToolObservation> observations) throws IOException {
++        if (!Boolean.TRUE.equals(binding.actualExitRequired())) return;
++        // Reading a test report has no process exit. It may accompany a process result, but
++        // cannot replace one or exempt an execution tool whose actual exit is unavailable.
++        var executions = observations.stream().filter(t -> "execute".equals(t.kind()) || t.actualExitCode() != null).toList();
++        require(!executions.isEmpty(), "required actual process exit is unavailable; native status is insufficient");
++        for (var execution : executions) verifyExit(binding, execution);
++    }
++
++    private static Observation load(WorkflowFileLedger ledger, Path root, String ws, String node, NodeResult result, String selector) throws IOException {
++        require(selector != null && !selector.isBlank(), "execution_ref must be CURRENT or a fixed observation reference");
++        TaskContract.Reference ref;
++        boolean own = "CURRENT".equals(selector);
++        if (own) {
++            require(result.result().get(FACT) != null, "current execution has no program tool observation");
++            ref = JSON.convertValue(result.result().get(FACT), TaskContract.Reference.class);
++        } else {
++            var path = root.resolve(selector).normalize();
++            require(path.startsWith(root.toAbsolutePath().normalize()) && path.getFileName().toString().equals(FILE), "invalid tool observation selector");
++            ref = new TaskContract.Reference(selector, TaskContractArtifactWriter.sha256(path));
++        }
++        require(ref.ref().startsWith(".agent/workstreams/" + ws + "/runs/") && ref.ref().endsWith("/outputs/" + FILE), "foreign observation reference");
++        var observed = JSON.readValue(read(root, ref), Observation.class);
++        require(observed != null && observed.prepared() != null && observed.prepared().get("ref") != null
++                && observed.baseline() != null && observed.baseline().source() != null && observed.baseline().contract() != null
++                && observed.afterSource() != null && observed.tools() != null && observed.tools().stream().noneMatch(Objects::isNull),
++                "incomplete observation record");
++        require("dual.verification.observations.v1".equals(observed.schema()) && ws.equals(observed.workstream()), "invalid observation schema/workstream");
++        require(ref.ref().equals(".agent/workstreams/" + ws + "/runs/" + observed.run() + "/outputs/" + FILE)
++                && observed.prepared().get("ref").equals(".agent/workstreams/" + ws + "/runs/" + observed.run()
++                    + "/outputs/" + observed.execution() + "-prepared.json"), "observation run differs from its preparation");
++        if (own) require(node.equals(observed.node()) && observed.run().equals(String.valueOf(result.result().get("run_id"))), "foreign current observation");
++        var paths = new WorkstreamPaths(root, new DualId(ws));
++        ledger.inspect(paths, (snapshot, files) -> {
++            var execution = files.read(paths.nodeExecutionJson(observed.execution()), NodeExecutionDocument.class);
++            require(execution.nodeInstanceId().equals(observed.node()) && observed.prepared().equals(execution.result().get("prepared_run")),
++                    "tool observation lacks its actual prepared execution binding");
++            var prepared = JSON.readTree(read(root, new TaskContract.Reference(observed.prepared().get("ref"), observed.prepared().get("sha256"))));
++            require(prepared.path("binding").path("verification_source").equals(JSON.valueToTree(observed.baseline())), "source identity is not the prepared baseline");
++            if (!own) {
++                var completed = AgentRunCommitProtocol.readCompletion(paths, execution);
++                require(completed.outputRefs().contains(ref.ref())
++                        && JSON.valueToTree(ref).equals(JSON.valueToTree(completed.result().get(FACT))),
++                        "observation was not fixed by its original execution completion");
++            }
++            return null;
++        });
++        return observed;
++    }
++
++    private static byte[] read(Path root, TaskContract.Reference ref) throws IOException {
++        require(ref != null && ref.ref() != null && ref.sha256() != null && ref.sha256().matches("[0-9a-f]{64}")
++                && !Path.of(ref.ref()).isAbsolute() && !ref.ref().isBlank(), "invalid evidence reference");
++        var file = root.toAbsolutePath().normalize().resolve(ref.ref());
++        require(file.normalize().equals(file) && file.startsWith(root.toAbsolutePath().normalize()), "evidence path escapes workspace");
++        require(file.toRealPath().equals(root.toRealPath().resolve(ref.ref())), "noncanonical evidence path");
++        var bytes = Files.readAllBytes(file);
++        require(ref.sha256().equals(TaskContractArtifactWriter.sha256(bytes)), "evidence bytes changed");
++        return bytes;
++    }
++    private static boolean accepted(String decision) { return "ACCEPT".equals(decision) || "ACCEPT_WITH_NOTES".equals(decision); }
++    private static void require(boolean condition, String message) throws IOException { if (!condition) throw new IOException(message); }
++}
+--- before/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java
++++ after/dual-runtime/src/main/java/dev/dual/runtime/handler/VerificationReadiness.java
+@@ -117,6 +117,8 @@
+         var expected = goal.contract().acceptanceCriteria().stream().map(TaskContract.Clause::id).collect(java.util.stream.Collectors.toSet());
+         var seen = new HashSet<String>();
+         for (var binding : bindings) {
++            require(dev.dual.core.contract.TaskContractValidator.verificationEvidenceErrors(binding).isEmpty(),
++                    "verification exit evidence requirements must be explicit and consistent");
+             require(expected.contains(binding.criterionId()) && seen.add(binding.criterionId()), "unexpected or duplicate criterion");
+             require(!binding.environmentRefs().isEmpty() && !binding.feasibilityRefs().isEmpty(), "missing environment or feasibility reference");
+             var refs = new HashSet<>(binding.environmentRefs()); refs.addAll(binding.feasibilityRefs());
+@@ -141,6 +143,8 @@
+             if (matches.size() != 1) return false;
+             var next = matches.getFirst();
+             if (!old.method().equals(next.method()) || old.executor() != next.executor()
++                    || !Objects.equals(old.actualExitRequired(), next.actualExitRequired())
++                    || !Objects.equals(old.expectedExitCode(), next.expectedExitCode())
+                     || old.evidenceKind() != next.evidenceKind() || !old.detailOwner().equals(next.detailOwner())
+                     || !old.authorityRefs().equals(next.authorityRefs())) return false;
+             var oldEnvironments = new HashSet<Environment>();
+--- before/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/WorkflowRuntimeTest.java
+@@ -443,7 +443,7 @@
+                         List.of("reviewed diff"), List.of("tests passed"), List.of(),
+                         blocking ? List.of() : List.of("repair the implementation"), List.of(), List.of(),
+                         List.of(), "verified", new AgentResultEnvelope.Failure("",
+-                        AgentResultEnvelope.VerificationRemediation.NONE, List.of(), List.of(), List.of(), List.of(), ""));
++                        AgentResultEnvelope.VerificationRemediation.NONE, List.of(), List.of(), List.of(), List.of(), ""), List.of());
+                 var mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+                 var output = writeOutput(workstreamId, "acceptance.json", mapper.writeValueAsString(
+                         new AgentResultEnvelope(1, workstreamId, "run-001", "acceptance.codex_verifier_review", review)));
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java
+@@ -185,7 +185,7 @@
+         final String category;
+         final String business;
+         final WorkstreamPaths paths;
+-        final WorkflowFileLedger ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
++        final WorkflowFileLedger ledger;
+         final WorkflowRuntime runtime;
+         final List<String> calls = new ArrayList<>();
+         final List<String> patchObligations = new ArrayList<>();
+@@ -204,6 +204,11 @@
+         }
+ 
+         Fixture(Path root, String category, String business, String ws) throws Exception {
++            this(root, category, business, ws, "contract", dev.dual.runtime.RuntimeTestLedger.ledger());
++        }
++
++        Fixture(Path root, String category, String business, String ws, String variant, WorkflowFileLedger ledger) throws Exception {
++            this.ledger = ledger;
+             this.ws = ws;
+             Files.createDirectories(root);
+             this.root = root.toRealPath(); this.category = category; this.business = business;
+@@ -212,7 +217,7 @@
+             Files.writeString(this.root.resolve(".gitignore"), ".agent/\n");
+             git("add", "."); git("commit", "-m", "baseline");
+             paths = new WorkstreamPaths(this.root, new DualId(ws));
+-            var definition = new WorkflowDefinitionLoader().loadOrDefault(null, "contract");
++            var definition = new WorkflowDefinitionLoader().loadOrDefault(null, variant);
+             if (category.equals("SCOPE_ADDITION") && definition.edgesFrom("gate.human_implementation_repair").stream()
+                     .noneMatch(edge -> edge.on().equals("request_scope_revision"))) {
+                 var nodes = definition.nodes().stream().map(node -> {
+@@ -243,6 +248,8 @@
+                             new ReportGenerateFinalHandler(), new DeliveryPrepareHandler(), new PromptGenerateNextStageHandler()),
+                     List.of(new ReviewDecisionHandler()), List.of(new HumanReviewGateHandler())));
+         }
++
++        java.util.function.Consumer<TaskHandler.TaskContext> beforeDispatch = context -> {};
+ 
+         NodeResult output(TaskHandler.TaskContext context) throws Exception {
+             var id = context.definition().id();
+@@ -277,7 +284,11 @@
+                 bindingFacts.put("contract_ref", prepared.taskContractRef());
+                 bindingFacts.put("contract_sha256", prepared.taskContractSha256());
+             }
++            var verificationBaseline = prepared.qualifiedTaskContract().filter(q -> q.phase() == TaskContract.Phase.EXECUTION)
++                    .isPresent() ? VerificationEvidence.prepare(context) : null;
++            if (verificationBaseline != null) bindingFacts.put("verification_source", verificationBaseline);
+             var runPrepared = AgentRunCommitProtocol.prepare(context, dir, preparationFiles, bindingFacts);
++            beforeDispatch.accept(context);
+             AgentRunCommitProtocol.qualifyDispatch(context, runPrepared);
+             AgentRunCommitProtocol.beginExternalCall(context, runPrepared);
+             calls.add(id);
+@@ -294,7 +305,7 @@
+             var emission = AgentResultPromptContract.ProposalEmissionContext.initial();
+             TaskContractRevisionContextResolver.Context revision = null;
+             if (id.equals("intake.claude_brainstorm")) {
+-                var resolved = new TaskContractRevisionContextResolver(dev.dual.runtime.RuntimeTestLedger.ledger()).resolveForNode(root, ws, context.instance().nodeInstanceId());
++                var resolved = new TaskContractRevisionContextResolver(ledger).resolveForNode(root, ws, context.instance().nodeInstanceId());
+                 assertTrue(resolved.valid(), resolved.errors().toString());
+                 revision = resolved.context();
+                 if (revision.revision()) emission = AgentResultPromptContract.proposalEmissionContext(revision);
+@@ -345,8 +356,8 @@
+                 var goal = TaskContractProjectionVerifier.resolve(ledger, root, ws, TaskContract.Phase.GOAL).qualified().orElseThrow();
+                 var refs = goal.contractRef().equals(readinessGoal) ? List.of(readiness) : List.<TaskContract.Reference>of();
+                 plan.set("verification_bindings", JSON.valueToTree(goal.contract().acceptanceCriteria().stream().map(c ->
+-                        new TaskContract.VerificationBinding(c.id(), "Verify output against the approved criteria", TaskContract.Executor.OPERATOR,
+-                                refs, List.of(), TaskContract.EvidenceKind.OPERATOR_DECLARATION_WITH_MATERIAL, refs, "operator")).toList()));
++                        new TaskContract.VerificationBinding(c.id(), "Verify output against the approved criteria", TaskContract.Executor.AGENT,
++                                refs, List.of(), TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, refs, "operator", false, null)).toList()));
+                 plan.putArray("authority_refs");
+             }
+             if (id.equals("implement.claude_implement")) {
+@@ -366,15 +377,26 @@
+                 if (category.startsWith("CONTRACT_")) failure.putArray("contract_gaps").add("define output behavior");
+                 if (category.equals("IMPLEMENTATION_BUG")) result.putArray("must_fix").add("repair output under existing contract");
+             }
++            var observations = new ArrayList<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation>();
++            if (result.has("verification_checks") && verificationBaseline != null) {
++                // This test program actually reads the fixture product. It is not a native/provider proof.
++                var content = Files.readString(root.resolve(business));
++                observations.add(new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("fixture-session", "read-product",
++                        "fixture.read", "read", JSON.valueToTree(Map.of("path", business)), JSON.valueToTree(Map.of("content", content)),
++                        "completed", null, null, "", false, List.of()));
++                result.set("verification_checks", JSON.valueToTree(prepared.qualifiedTaskContract().orElseThrow().verificationBindings().stream()
++                        .map(b -> new AgentResultEnvelope.VerificationCheck(b.criterionId(), "The fixture contains the expected output", "CURRENT", List.of("read-product"), List.of())).toList()));
++            }
+             outputMutation.accept(result);
+             metadata.put("status", "process_exited");
+             metadata.set("processResult", JSON.valueToTree(Map.of("exitCode", 0, "usability", "EXITED_ZERO", "durationMs", 1)));
+             metadata.putArray("adapterSignals"); JSON.writeValue(dir.resolve("run.json").toFile(), metadata);
+             var output = dir.resolve("outputs/result.json"); JSON.writeValue(output.toFile(), envelope);
+             var binding = prepared.repositoryFactBinding();
+-            return NodeResult.completed("completed", List.of(root.relativize(output).toString(), binding.ref()), Map.of(
++            var candidate = NodeResult.completed("completed", List.of(root.relativize(output).toString(), binding.ref()), Map.of(
+                     "run_id", runId, "exit_code", 0, "run_metadata", root.relativize(dir.resolve("run.json")).toString(), "repository_fact_binding_ref", binding.ref(),
+                     "repository_fact_binding_sha256", binding.sha256()));
++            return VerificationEvidence.record(context, runPrepared, verificationBaseline, "fixture", observations, candidate);
+         }
+ 
+         String currentNode() throws Exception {
+@@ -400,8 +422,8 @@
+                 readiness = VerificationReadiness.record(ledger, root, ws, new VerificationReadiness.Request(1, "ready-" + run,
+                         current.nodeInstanceId(), new TaskContract.Reference(goal.contractRef(), goal.sha256()), goal.contract().epoch(),
+                         goal.contract().acceptanceCriteria().stream().map(TaskContract.Clause::id).toList(),
+-                        "Verify output against the approved criteria", TaskContract.Executor.OPERATOR,
+-                        TaskContract.EvidenceKind.OPERATOR_DECLARATION_WITH_MATERIAL,
++                        "Verify output against the approved criteria", TaskContract.Executor.AGENT,
++                        TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS,
+                         new VerificationReadiness.Environment(root.toString(), "fixture-environment", "operator", List.of()),
+                         "Operator can inspect the generated output", "operator", VerificationReadiness.Lifetime.AUTHORIZATION_EPOCH,
+                         null, VerificationReadiness.Action.RECORD, null));
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeParserTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeParserTest.java
+@@ -233,6 +233,7 @@
+                     "open_risks": [],
+                     "changed_files": ["backend/tests/test_chemo.py"],
+                     "verification_summary": "A test source change is required.",
++                    "verification_checks": [],
+                     "failure": {
+                       "category_hint": "IMPLEMENTATION_BUG",
+                       "verification_remediation": "%s",
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractFixtureRegressionTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractFixtureRegressionTest.java
+@@ -31,7 +31,7 @@
+         var result = new AgentResultEnvelope.AcceptanceReviewResult(
+                 "acceptance_review", "ACCEPT_WITH_NOTES", "accepted with notes", "ACCEPTED_WITH_NOTES",
+                 false, List.of("reviewed diff"), List.of("tests passed"), List.of(), List.of(),
+-                List.of("minor note"), List.of(), List.of("src/A.java"), "verified", emptyFailure());
++                List.of("minor note"), List.of(), List.of("src/A.java"), "verified", emptyFailure(), List.of());
+ 
+         var sidecar = validate("acceptance.codex_verifier_review", result);
+ 
+@@ -44,7 +44,7 @@
+         var result = new AgentResultEnvelope.AcceptanceReviewResult(
+                 "acceptance_review", "ACCEPT_WITH_NOTES", "accepted with optional follow-up", "ACCEPTED_WITH_NOTES",
+                 false, List.of("reviewed diff"), List.of("tests passed"), List.of("optional visual inspection"),
+-                List.of(), List.of("non-blocking follow-up"), List.of(), List.of(), "verified", emptyFailure());
++                List.of(), List.of("non-blocking follow-up"), List.of(), List.of(), "verified", emptyFailure(), List.of());
+         var sidecar = validate("acceptance.codex_verifier_review", result);
+         assertTrue(sidecar.contains("\"missing_evidence_count\" : 1"));
+         assertTrue(sidecar.contains("\"stage_outcome\" : \"ACCEPTED_WITH_NOTES\""));
+@@ -58,7 +58,7 @@
+                 List.of(), List.of("unverified behavior"), List.of(), "not verified",
+                 new AgentResultEnvelope.Failure("VERIFICATION_INSUFFICIENT",
+                         AgentResultEnvelope.VerificationRemediation.NONE, List.of(), List.of(),
+-                        List.of(), List.of(), "Collect the missing test output"));
++                        List.of(), List.of(), "Collect the missing test output"), List.of());
+ 
+         var sidecar = validate("acceptance.codex_verifier_review", result);
+ 
+@@ -68,11 +68,11 @@
+     }
+ 
+     @Test
+-    void acceptsSelfTestResult() throws Exception {
++    void acceptsIncompleteSelfTestWithoutInventingExecutionProof() throws Exception {
+         var result = new AgentResultEnvelope.SelfTestResult(
+-                "self_test_report", "SELF_TEST_COMPLETE", "tests complete", "READY",
+-                List.of("mvn test"), List.of(), List.of("all tests passed"), List.of(),
+-                List.of(), List.of("focused suite"), "adequate");
++                "self_test_report", "SELF_TEST_INCOMPLETE", "test evidence missing", "INSUFFICIENT_EVIDENCE",
++                List.of("mvn test"), List.of(), List.of(), List.of("actual execution evidence is still required"),
++                List.of(), List.of("focused suite"), "adequate", List.of());
+ 
+         var sidecar = validate("implement.claude_self_test_report", result);
+ 
+@@ -94,6 +94,21 @@
+     }
+ 
+     private String validate(String nodeId, AgentResultEnvelope.AgentResult result) throws Exception {
++        if (result instanceof AgentResultEnvelope.AcceptanceReviewResult && result.decision().startsWith("ACCEPT")) {
++            var fixture = new AcceptanceRepairSequenceTest.Fixture(root, "IMPLEMENTATION_BUG", "product.txt", "ws-fixture");
++            fixture.acceptanceCount = 1;
++            fixture.until("acceptance.codex_verifier_review");
++            var id = fixture.ledger.loadCurrent(fixture.paths).activeNodeInstanceIds().getFirst();
++            fixture.outputMutation = output -> {
++                var checks = output.get("verification_checks");
++                output.removeAll(); output.setAll((com.fasterxml.jackson.databind.node.ObjectNode) OBJECT_MAPPER.valueToTree(result));
++                output.set("verification_checks", checks);
++            };
++            fixture.step();
++            var producer = fixture.ledger.loadNode(fixture.paths, id);
++            var sidecar = producer.outputRefs().stream().filter(ref -> ref.endsWith(".contract.json")).findFirst().orElseThrow();
++            return Files.readString(fixture.root.resolve(sidecar));
++        }
+         var instanceId = "node-fixture";
+         if (AuthoredStageLineageResolver.participates(nodeId)) {
+             instanceId = AuthoredInputFixture.before(root, "ws-fixture", nodeId, "run-fixture").instance().nodeInstanceId();
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
+@@ -248,7 +248,7 @@
+         var readinessPath = tempDir.resolve(".agent/workstreams/ws-1/artifacts/verification-readiness/authored-ready.json");
+         var readiness = new TaskContract.Reference(tempDir.relativize(readinessPath).toString(), TaskContractArtifactWriter.sha256(readinessPath));
+         var bindings = List.of("AC-1", "AC-2").stream().map(id -> new TaskContract.VerificationBinding(id, "run project tests", TaskContract.Executor.AGENT,
+-                List.of(readiness), List.of(), TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(readiness), "verification-owner")).toList();
++                List.of(readiness), List.of(), TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(readiness), "verification-owner", false, null)).toList();
+         var plan = new AgentResultEnvelope.PlanResult(
+                 "plan_result", "READY_FOR_PLAN_REVIEW", "Plan is ready.", "READY", false,
+                 List.of("reviewed design"), List.of("scoped plan"), List.of(), List.of(), List.of(),
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredStageSequenceTest.java
+@@ -262,6 +262,7 @@
+         int planReviews;
+         java.util.function.Consumer<ObjectNode> outputMutation = ignored -> { };
+         final PlanTopology topology;
++        final boolean operatorVerification;
+ 
+         Fixture(Path root, String business) throws Exception {
+             this(root, business, PlanTopology.DIRECT_HUMAN);
+@@ -286,10 +287,22 @@
+ 
+         Fixture(Path root, String business, PlanTopology topology, String ws, WorkflowDefinition declared,
+                        WorkflowFileLedger ledger, dev.dual.core.contract.TaskContract goalTemplate) throws Exception {
++            this(root, business, topology, ws, declared, ledger, goalTemplate, false);
++        }
++
++        Fixture(Path root, String business, PlanTopology topology, String ws, WorkflowDefinition declared,
++                       WorkflowFileLedger ledger, dev.dual.core.contract.TaskContract goalTemplate, boolean operatorVerification) throws Exception {
++            this.operatorVerification = operatorVerification;
+             this.ledger = ledger;
+             this.ws = ws;
+             this.topology = topology;
+             Files.createDirectories(root); root = root.toRealPath(); this.root = root; this.business = business;
++            if (!Files.exists(root.resolve(".git"))) {
++                GitTrackedPathInventory.command(root, "init");
++                Files.writeString(root.resolve(".gitignore"), ".agent/\n");
++                GitTrackedPathInventory.command(root, "add", ".gitignore");
++                GitTrackedPathInventory.command(root, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-m", "fixture baseline");
++            }
+             paths = new WorkstreamPaths(root, new DualId(ws));
+             var nodes = new ArrayList<>(List.of(
+                     agent("design.claude_design", "design_result"),
+@@ -335,7 +348,12 @@
+             // The operator has a known test environment before the authored slice starts.
+             // This is a real readiness registration after GOAL approval, not a program-evidence claim.
+             goalFixture = new VerificationReadinessTest.Fixture(root, nodes, edges, "gate.plan", ws, ledger, goalTemplate);
+-            readiness = VerificationReadiness.record(ledger, root, ws, goalFixture.request("authored-ready", VerificationReadiness.Action.RECORD, null));
++            var request = goalFixture.request("authored-ready", VerificationReadiness.Action.RECORD, null);
++            if (operatorVerification) request = new VerificationReadiness.Request(request.schema(), request.requestId(), request.subject(),
++                    request.goal(), request.epoch(), request.criterionIds(), request.method(), dev.dual.core.contract.TaskContract.Executor.OPERATOR,
++                    dev.dual.core.contract.TaskContract.EvidenceKind.OPERATOR_DECLARATION_WITH_MATERIAL, request.environment(), request.statement(),
++                    request.detailOwner(), request.lifetime(), request.expiresAt(), request.action(), request.supersedes());
++            readiness = VerificationReadiness.record(ledger, root, ws, request);
+             ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), "approve", "Begin the authored slice with registered test conditions");
+             var provider = new TaskHandler() {
+                 public String type() { return "acpx.agent_run"; }
+@@ -347,7 +365,11 @@
+         }
+ 
+         public com.fasterxml.jackson.databind.JsonNode verificationBindings() {
+-            return JSON.valueToTree(goalFixture.bindings(readiness));
++            var bindings = goalFixture.bindings(readiness);
++            if (operatorVerification) bindings = bindings.stream().map(b -> new dev.dual.core.contract.TaskContract.VerificationBinding(
++                    b.criterionId(), b.method(), dev.dual.core.contract.TaskContract.Executor.OPERATOR, b.environmentRefs(), b.authorityRefs(),
++                    dev.dual.core.contract.TaskContract.EvidenceKind.OPERATOR_DECLARATION_WITH_MATERIAL, b.feasibilityRefs(), b.detailOwner(), false, null)).toList();
++            return JSON.valueToTree(bindings);
+         }
+ 
+         NodeResult executeProvider(TaskHandler.TaskContext context) throws Exception {
+@@ -371,9 +393,12 @@
+                             "sha256", TaskContractArtifactWriter.sha256(body.getBytes(java.nio.charset.StandardCharsets.UTF_8))))));
+             JSON.writeValue(dir.resolve("run.json").toFile(), Map.of("schemaVersion", 3, "runId", runId, "workstreamId", ws,
+                     "nodeId", context.definition().id(), "agent", "fixture", "session", "fixture-session", "status", "prepared", "promptManifestPath", manifestPath.toString()));
+-            var prepared = AgentRunCommitProtocol.prepare(context, dir, List.of(promptPath, manifestPath), Map.of(
+-                    "contract_ref", snapshot.contract().contract().ref(), "contract_sha256", snapshot.contract().contract().sha256(),
+-                    "run", JSON.readTree(dir.resolve("run.json").toFile())));
++            var facts = new LinkedHashMap<String, Object>();
++            facts.put("contract_ref", snapshot.contract().contract().ref()); facts.put("contract_sha256", snapshot.contract().contract().sha256());
++            facts.put("run", JSON.readTree(dir.resolve("run.json").toFile()));
++            var baseline = context.definition().id().startsWith("implement.") ? VerificationEvidence.prepare(context) : null;
++            if (baseline != null) facts.put("verification_source", baseline);
++            var prepared = AgentRunCommitProtocol.prepare(context, dir, List.of(promptPath, manifestPath), facts);
+             AgentRunCommitProtocol.qualifyDispatch(context, prepared);
+             AgentRunCommitProtocol.beginExternalCall(context, prepared);
+             AuthoredExecutionContext.verifyManifest(root, manifestPath, snapshot);
+@@ -403,8 +428,16 @@
+                 var plan = (ObjectNode) result.get("plan");
+                 plan.putArray("edit_files").add(business);
+                 plan.set("files", JSON.valueToTree(List.of(new dev.dual.core.contract.TaskContract.ScopeEntry(business, dev.dual.core.contract.TaskContract.ScopeOperation.CREATE))));
+-                plan.set("verification_bindings", JSON.valueToTree(goalFixture.bindings(readiness)));
++                plan.set("verification_bindings", verificationBindings());
+                 plan.putArray("authority_refs");
++            }
++            var observations = new ArrayList<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation>();
++            if (result.has("verification_checks")) {
++                var exists = Files.exists(root.resolve(business));
++                observations.add(new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("fixture-session", "inspect-file", "fixture.inspect", "read",
++                        JSON.valueToTree(Map.of("path", business)), JSON.valueToTree(Map.of("exists", exists)), "completed", null, null, "", false, List.of()));
++                result.set("verification_checks", JSON.valueToTree(goalFixture.bindings(readiness).stream()
++                        .map(b -> new AgentResultEnvelope.VerificationCheck(b.criterionId(), "Fixture path inspected", "CURRENT", List.of("inspect-file"), List.of())).toList()));
+             }
+             outputMutation.accept(result);
+             var output = dir.resolve("outputs/result.json"); JSON.writeValue(output.toFile(), envelope);
+@@ -412,8 +445,9 @@
+             metadata.put("status", "process_exited");
+             metadata.set("processResult", JSON.valueToTree(Map.of("exitCode", 0, "usability", "EXITED_ZERO", "durationMs", 1)));
+             metadata.putArray("adapterSignals"); JSON.writeValue(dir.resolve("run.json").toFile(), metadata);
+-            return NodeResult.completed("completed", List.of(root.relativize(output).toString()), Map.of("run_id", runId, "exit_code", 0,
++            var candidate = NodeResult.completed("completed", List.of(root.relativize(output).toString()), Map.of("run_id", runId, "exit_code", 0,
+                     "run_metadata", root.relativize(dir.resolve("run.json")).toString()));
++            return VerificationEvidence.record(context, prepared, baseline, "offline-fixture", observations, candidate);
+         }
+ 
+         void advanceToGate() throws Exception {
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/BuiltinHandlerTest.java
+@@ -1279,6 +1279,8 @@
+     @Test
+     void artifactValidationFailsClosedWhenGitEvidenceIsUnavailable() throws Exception {
+         writeTaskContract(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.CREATE));
++        // Approval fixture now has a real repository; remove Git availability only after preparing it.
++        Files.move(tempDir.resolve(".git"), tempDir.resolve(".agent/git-unavailable-fixture"));
+         var handler = new ArtifactValidateHandler();
+         var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws", new NodeDefinition("implement.artifact_validation", NodeKind.TASK, "artifact.validate",
+                         Map.of("route_scope_violation", true, "required_contract_phase", "EXECUTION")), node("implement.artifact_validation", NodeKind.TASK, "artifact.validate"), dev.dual.runtime.RuntimeTestLedger.ledger()));
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageFixture.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageFixture.java
+@@ -21,7 +21,7 @@
+ import java.util.List;
+ import java.util.Map;
+ 
+-final class CompletionEvidenceLineageFixture {
++public final class CompletionEvidenceLineageFixture {
+     private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
+     private static final Instant NOW = Instant.parse("2026-08-29T00:00:00Z");
+ 
+@@ -148,8 +148,14 @@
+         return prepareApproved(root, ws, "ACCEPT", "Codex accepts the implementation.");
+     }
+ 
+-    static Prepared prepareApproved(Path root, String ws, String decision, String summary) throws Exception {
+-        var f = new AcceptanceRepairSequenceTest.Fixture(root, "IMPLEMENTATION_BUG", "product.txt", ws);
++    public static Prepared prepareApproved(Path root, String ws, String decision, String summary) throws Exception {
++        return prepareApproved(root, ws, decision, summary, dev.dual.runtime.RuntimeTestLedger.ledger());
++    }
++
++    public static Prepared prepareApproved(Path root, String ws, String decision, String summary,
++                                           WorkflowFileLedger ledger) throws Exception {
++        var f = new AcceptanceRepairSequenceTest.Fixture(root, "IMPLEMENTATION_BUG", "product.txt", ws,
++                "contract", ledger);
+         f.acceptanceCount = 1; // First review succeeds; no repair scenario in these report tests.
+         f.outputMutation = result -> {
+             if (result.path("decision").asText().equals("ACCEPT")) {
+@@ -197,7 +203,7 @@
+         return root.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
+     }
+ 
+-    record Prepared(
++    public record Prepared(
+             NodeInstance reportNode,
+             String selfTestRef,
+             String acceptanceRef,
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/CompletionEvidenceLineageResolverTest.java
+@@ -26,7 +26,7 @@
+ 
+     @Test
+     void resolvesAcceptanceAndSelfTestThroughPersistedContextLineage() throws Exception {
+-        var fixture = CompletionEvidenceLineageFixture.prepare(tempDir, "ws-lineage");
++        var fixture = CompletionEvidenceLineageFixture.prepareApproved(tempDir, "ws-lineage");
+ 
+         var resolution = CompletionEvidenceLineageResolver.resolveForReport(dev.dual.runtime.RuntimeTestLedger.ledger(),
+                 tempDir,
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/ContextBuildPackageHandlerTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/ContextBuildPackageHandlerTest.java
+@@ -161,44 +161,16 @@
+ 
+     @Test
+     void acceptanceRendersCompletedSelfTestEvidenceFromRoutedSidecar() throws Exception {
+-        approvedContextFixture();
+-        Files.createDirectories(wsDir);
+-        Files.writeString(wsDir.resolve("requirement.md"), "Fix a small bug.", StandardCharsets.UTF_8);
+-        var output = wsDir.resolve("runs/run-self-test/outputs/implement-claude-self-test.json");
+-        Files.createDirectories(output.getParent());
+-        Files.writeString(output, "{}", StandardCharsets.UTF_8);
+-        var sidecar = AgentOutputContractSidecar.pathFor(output);
+-        Files.writeString(sidecar, """
+-                {
+-                  "artifact_type": "agent_output_contract",
+-                  "node_id": "implement.claude_self_test_report",
+-                  "source_artifact_type": "self_test_report",
+-                  "decision": "SELF_TEST_COMPLETE",
+-                  "summary": "node --test passed",
+-                  "checks_run": ["node --test"],
+-                  "evidence": ["4 tests passed"],
+-                  "verification_summary": "All targeted tests passed."
+-                }
+-                """, StandardCharsets.UTF_8);
+-        publishSidecar(sidecar);
+-
+-        var config = Map.<String, Object>of(
+-                "target_node", "acceptance.codex_verifier_review",
+-                "required_contract_phase", "EXECUTION",
+-                "profile", "acceptance",
+-                "required_agent_evidence", Map.of(
+-                        "node_id", "implement.claude_self_test_report",
+-                        "source_artifact_type", "self_test_report",
+-                        "decision", "SELF_TEST_COMPLETE")
+-        );
+-        var result = handler.execute(new TaskHandler.TaskContext(tempDir, "ws-ctx", new NodeDefinition("ctx.acceptance", NodeKind.TASK, "context.build_package", config), new NodeInstance("node-acceptance-context", "ctx.acceptance", NodeKind.TASK,
+-                        "context.build_package", NodeStatus.READY, "stage-test", "iter-001",
+-                        List.of(relative(tempDir, sidecar)), List.of(), Map.of(), null, null, null), dev.dual.runtime.RuntimeTestLedger.ledger()));
+-
+-        assertEquals(NodeStatus.COMPLETED, result.status());
+-        var markdown = Files.readString(tempDir.resolve((String) result.result().get("context_package")));
++        var f = new AcceptanceRepairSequenceTest.Fixture(tempDir, "IMPLEMENTATION_BUG", "product.txt", "ws-ctx");
++        f.until("context.acceptance_codex_verifier_review");
++        var id = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst();
++        f.step();
++        var node = f.ledger.loadNode(f.paths, id);
++        assertEquals(NodeStatus.COMPLETED, node.status());
++        var markdown = Files.readString(f.root.resolve((String) node.result().get("context_package")));
+         assertTrue(markdown.contains("SELF_TEST_COMPLETE"));
+-        assertTrue(markdown.contains("All targeted tests passed."));
++        assertTrue(markdown.contains("Criterion evidence"));
++        assertTrue(markdown.contains("verification-observations.json"));
+     }
+ 
+     @Test
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/EvidenceCollectionSequenceTest.java
+@@ -48,7 +48,9 @@
+                     var rendered = AgentResultPromptContract.render(context.workstreamId(), run.runId,
+                             context.definition().id(), "SELF_TEST_COMPLETE", Set.of("SELF_TEST_COMPLETE"));
+                     var output = run.dir.resolve("outputs/result.json");
+-                    mapper.writeValue(output.toFile(), mapper.readTree(rendered.substring(rendered.indexOf('{'))));
++                    var envelope = (com.fasterxml.jackson.databind.node.ObjectNode) mapper.readTree(rendered.substring(rendered.indexOf('{')));
++                    run.observeRead((com.fasterxml.jackson.databind.node.ObjectNode) envelope.get("result"), "source.txt");
++                    mapper.writeValue(output.toFile(), envelope);
+                     return run.exited(List.of(paths.workspaceRoot().relativize(output).toString()));
+                 }
+             }), List.of(), List.of());
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/ExternalVerificationEvidenceTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/ExternalVerificationEvidenceTest.java
+@@ -26,7 +26,7 @@
+             GitTrackedPathInventory.command(root, "add", ".");
+             GitTrackedPathInventory.command(root, "-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-m", "baseline");
+             var fixture = new AuthoredStageSequenceTest.Fixture(root, "src/Main.java",
+-                    AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, "ws-test");
++                    AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN, "ws-test", null, ledger, null, true);
+             var prior = fixture.before("implement.claude_self_test_report");
+             var paths = new WorkstreamPaths(root, new dev.dual.core.id.DualId("ws-test"));
+             var oldDefinition = ledger.loadDefinition(paths);
+@@ -65,6 +65,14 @@
+                     if (mode.equals("summary")) evidence.add("all external checks passed");
+                     else if (mode.equals("suffix")) refs.forEach(ref -> evidence.add(ref + ".old"));
+                     else refs.forEach(evidence::add);
++                    // Approved operator evidence: references the submitted manifest and copied material;
++                    // no synthetic tool observation or measured process exit is produced.
++                    var material = new dev.dual.core.contract.TaskContract.Reference(refs.getLast(),
++                            TaskContractArtifactWriter.sha256(context.workspaceRoot().resolve(refs.getLast())));
++                    ((com.fasterxml.jackson.databind.node.ObjectNode) envelope.get("result")).set("verification_checks", json.valueToTree(
++                            run.governance.qualifiedTaskContract().orElseThrow().verificationBindings().stream().map(binding ->
++                                    new AgentResultEnvelope.VerificationCheck(binding.criterionId(), "Review the submitted operator report", refs.getFirst(),
++                                            List.<String>of(), List.of(material))).toList()));
+                     var output = paths.workstreamDir().resolve("runs/" + runId + "/outputs/result.json");
+                     Files.createDirectories(output.getParent()); json.writeValue(output.toFile(), envelope);
+                     sidecars.add(paths.workspaceRoot().relativize(AgentOutputContractSidecar.pathFor(output)).toString());
+@@ -92,6 +100,14 @@
+             for (var ref : sidecars) {
+                 var document = json.readTree(paths.workspaceRoot().resolve(ref).toFile());
+                 assertEquals(allRefs.getFirst(), json.convertValue(document.path("evidence"), List.class));
++                var typed = AgentOutputContractDocument.read(paths.workspaceRoot().resolve(ref), json).orElseThrow();
++                VerificationEvidence.verifyPublished(ledger, root, "ws-test", typed);
++                var material = root.resolve(allRefs.getFirst().getLast());
++                var original = Files.readAllBytes(material);
++                Files.writeString(material, "modified operator report");
++                assertThrows(java.io.IOException.class, () -> VerificationEvidence.verifyPublished(ledger, root, "ws-test", typed));
++                Files.write(material, original);
++                VerificationEvidence.verifyPublished(ledger, root, "ws-test", typed);
+             }
+         }
+     }
+@@ -268,10 +284,10 @@
+     }
+     private AgentResultEnvelope.SelfTestResult self(List<String> refs) {
+         return new AgentResultEnvelope.SelfTestResult("self_test_report", "SELF_TEST_COMPLETE", "verified", "IMPLEMENTED",
+-                List.of("device verification"), List.of(), refs, List.of(), List.of(), List.of(), "verified material");
++                List.of("device verification"), List.of(), refs, List.of(), List.of(), List.of(), "verified material", List.of());
+     }
+     private AgentResultEnvelope.AcceptanceReviewResult acceptance(List<String> refs) {
+         return new AgentResultEnvelope.AcceptanceReviewResult("acceptance_review", "ACCEPT", "verified", "ACCEPTED", false,
+-                List.of("device evidence"), refs, List.of(), List.of(), List.of(), List.of(), List.of(), "verified", null);
++                List.of("device evidence"), refs, List.of(), List.of(), List.of(), List.of(), List.of(), "verified", null, List.of());
+     }
+ }
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/FailureClassifyHandlerTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/FailureClassifyHandlerTest.java
+@@ -236,7 +236,12 @@
+         assertEquals(NodeStatus.FAILED, publish(tree).status());
+         result.putArray("must_fix");
+         result.putArray("missing_evidence").add("Optional follow-up");
+-        assertEquals(NodeStatus.COMPLETED, publish(tree).status(), "notes may retain optional evidence");
++        // Optional notes are semantically legal, but this isolated candidate has no machine proof.
++        var parsed = new AgentResultEnvelopeParser().parse(tree.toString());
++        var projected = new AgentResultDocumentProjector().outputContract(parsed.envelope(), ContractRegistry.forNode(REVIEW),
++                "acpx.agent_run", "node-review", ".agent/workstreams/" + WS + "/runs/" + runId + "/outputs/review.json");
++        assertTrue(AgentContractSemantics.validateOutputContract(AgentOutputContractDocument.from(projected)).isEmpty());
++        JSON.writeValue(sidecar().toFile(), projected);
+         AgentOutputLineageFixture.completeAndPublish(root, WS, sidecar());
+         assertEquals("ACCEPTANCE_CLASSIFICATION_NOT_REQUIRED", classify().outcome());
+     }
+@@ -250,7 +255,12 @@
+         var failure = (ObjectNode) result.get("failure");
+         failure.put("category_hint", "");
+         failure.put("reason", "");
+-        assertEquals(NodeStatus.COMPLETED, publish(tree).status());
++        // This test concerns the classification projection, not completed verification authority.
++        var parsed = new AgentResultEnvelopeParser().parse(tree.toString());
++        var projected = new AgentResultDocumentProjector().outputContract(parsed.envelope(), ContractRegistry.forNode(REVIEW),
++                "acpx.agent_run", "node-review", ".agent/workstreams/" + WS + "/runs/" + runId + "/outputs/review.json");
++        Files.createDirectories(sidecar().getParent());
++        JSON.writeValue(sidecar().toFile(), projected);
+         var persisted = (ObjectNode) JSON.readTree(sidecar().toFile());
+         ((ObjectNode) persisted.get("failure")).remove("verification_remediation");
+         JSON.writeValue(sidecar().toFile(), persisted);
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/OfflineAgentRun.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/OfflineAgentRun.java
+@@ -13,6 +13,9 @@
+     final Path dir;
+     final ObjectNode metadata;
+     final AgentRunGovernanceContext.PreparedContext governance;
++    final AgentRunCommitProtocol.Prepared prepared;
++    final VerificationEvidence.Baseline baseline;
++    final List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> observations = new ArrayList<>();
+ 
+     private OfflineAgentRun(TaskHandler.TaskContext context, String runId) throws Exception {
+         this.context = context; this.runId = runId;
+@@ -41,11 +44,22 @@
+         if (governance.qualifiedTaskContract().isPresent()) {
+             facts.put("contract_ref", governance.taskContractRef()); facts.put("contract_sha256", governance.taskContractSha256());
+         }
+-        var prepared = AgentRunCommitProtocol.prepare(context, dir, inputs, facts);
++        baseline = governance.qualifiedTaskContract().filter(c -> c.phase() == dev.dual.core.contract.TaskContract.Phase.EXECUTION)
++                .isPresent() ? VerificationEvidence.prepare(context) : null;
++        if (baseline != null) facts.put("verification_source", baseline);
++        prepared = AgentRunCommitProtocol.prepare(context, dir, inputs, facts);
+         AgentRunCommitProtocol.qualifyDispatch(context, prepared);
+         AgentRunCommitProtocol.beginExternalCall(context, prepared);
+     }
+     public static OfflineAgentRun start(TaskHandler.TaskContext context, String runId) throws Exception { return new OfflineAgentRun(context, runId); }
++    /** Explicit fixture action: read a real local file; does not prove a native client ran tests. */
++    public void observeRead(ObjectNode result, String ref) throws Exception {
++        var content = Files.readString(context.workspaceRoot().resolve(ref));
++        observations.add(new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("offline-" + runId, "read-file", "fixture.read", "read",
++                JSON.valueToTree(Map.of("path", ref)), JSON.valueToTree(Map.of("content", content)), "completed", null, null, "", false, List.of()));
++        result.set("verification_checks", JSON.valueToTree(governance.qualifiedTaskContract().orElseThrow().verificationBindings().stream()
++                .map(b -> new AgentResultEnvelope.VerificationCheck(b.criterionId(), "Inspected the fixture material", "CURRENT", List.of("read-file"), List.of())).toList()));
++    }
+     public dev.dual.core.workflow.NodeResult candidate(List<String> outputRefs) throws Exception {
+         metadata.put("status", "process_exited");
+         metadata.set("processResult", JSON.valueToTree(Map.of("exitCode", 0, "usability", "EXITED_ZERO", "durationMs", 1)));
+@@ -55,7 +69,7 @@
+         var result = dev.dual.core.workflow.NodeResult.completed("completed", refs, Map.of("run_id", runId, "exit_code", 0,
+                 "run_metadata", context.workspaceRoot().relativize(dir.resolve("run.json")).toString(),
+                 "repository_fact_binding_ref", binding.ref(), "repository_fact_binding_sha256", binding.sha256()));
+-        return result;
++        return VerificationEvidence.record(context, prepared, baseline, "offline-fixture", observations, result);
+     }
+     public dev.dual.core.workflow.NodeResult exited(List<String> outputRefs) throws Exception {
+         var result = candidate(outputRefs);
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/PhasedContractContinuationTest.java
+@@ -333,7 +333,7 @@
+                 plan.set("files", JSON.valueToTree(List.of(new TaskContract.ScopeEntry("product.txt", TaskContract.ScopeOperation.CREATE))));
+                 var bindings = readiness == null ? List.of("AC-1", "AC-2").stream().map(id -> new TaskContract.VerificationBinding(
+                         id, "run project tests", TaskContract.Executor.AGENT, List.of(), List.of(),
+-                        TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(), "verification-owner")).toList() : base.bindings(readiness);
++                        TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(), "verification-owner", false, null)).toList() : base.bindings(readiness);
+                 plan.set("verification_bindings", JSON.valueToTree(bindings)); plan.putArray("authority_refs");
+             }
+             var output = dir.resolve("outputs/result.json"); JSON.writeValue(output.toFile(), envelope);
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/SelfTestContinuationSequenceTest.java
+@@ -67,6 +67,20 @@
+             for (var mode : List.of("complete", "evidence", "mixed", "blocked")) {
+                 var workspace = temp.resolve(variant + "-" + mode);
+                 var paths = new WorkstreamPaths(workspace, new DualId("ws-test"));
++                if (mode.equals("complete")) {
++                    try (var kernel = new LiteFlowPrototypeKernel()) {
++                        var ledger = new WorkflowFileLedger(kernel, java.util.Map.of("test_binary", "runtime-tests-v3"));
++                        var fixture = new AcceptanceRepairSequenceTest.Fixture(workspace, "IMPLEMENTATION_BUG", "product.txt", "ws-test", variant, ledger);
++                        fixture.until("implement.claude_self_test_report");
++                        fixture.step(); fixture.step();
++                    }
++                    try (var kernel = new LiteFlowPrototypeKernel()) {
++                        var cold = new WorkflowFileLedger(kernel, java.util.Map.of("test_binary", "runtime-tests-v3"));
++                        var current = cold.loadCurrent(paths);
++                        assertEquals("implement.artifact_validation", cold.loadNode(paths, current.activeNodeInstanceIds().getFirst()).nodeDefinitionId());
++                    }
++                    continue;
++                }
+                 var loaded = new WorkflowDefinitionLoader().loadOrDefault(null, variant);
+                 // Enter at the affected stage; upstream qualification is not bypassed by a provider run.
+                 var definition = new WorkflowDefinition(loaded.workflowId(), loaded.version(),
+@@ -84,7 +98,7 @@
+                             "Verification result", mode.equals("complete") ? "READY"
+                                     : mode.equals("blocked") ? "BLOCKED" : "INSUFFICIENT_EVIDENCE",
+                             List.of("local test"), List.of(), List.of("local result"), missing, mustFix,
+-                            List.of(), "Recorded actual evidence");
++                            List.of(), "Recorded actual evidence", List.of());
+                     var envelope = new AgentResultEnvelope(1, "ws-test", "run-test",
+                             "implement.claude_self_test_report", payload);
+                     var contract = ContractRegistry.forNode(envelope.nodeId());
+--- /dev/null
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/VerificationEvidenceSequenceTest.java
+@@ -0,0 +1,121 @@
++package dev.dual.runtime.handler;
++
++import com.fasterxml.jackson.databind.ObjectMapper;
++import dev.dual.core.workflow.WorkflowStatus;
++import dev.dual.runtime.WorkflowCommand;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.io.TempDir;
++import java.nio.file.*;
++import java.util.*;
++import static org.junit.jupiter.api.Assertions.*;
++
++/** Offline program observations through the real lifecycle; not native/provider capability proof. */
++class VerificationEvidenceSequenceTest {
++    private static final ObjectMapper JSON = new ObjectMapper().findAndRegisterModules();
++    @TempDir Path root;
++
++    @Test void legitimateNoExitEvidenceCanBeConsumedAgainButSourceOrBytesDriftCannot() throws Exception {
++        var f = new AcceptanceRepairSequenceTest.Fixture(root, "IMPLEMENTATION_BUG", "product.txt");
++        f.until("implement.claude_self_test_report");
++        var node = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst();
++        f.step();
++        var completed = f.ledger.loadNode(f.paths, node);
++        var sidecar = completed.outputRefs().stream().filter(r -> r.endsWith(".contract.json")).findFirst().orElseThrow();
++        var document = AgentOutputContractDocument.read(root.resolve(sidecar), JSON).orElseThrow();
++        VerificationEvidence.verifyPublished(f.ledger, root, f.ws, document);
++        // A fresh reader may reuse the exact fixed result; no exit requirement was approved.
++        VerificationEvidence.verifyPublished(dev.dual.runtime.RuntimeTestLedger.ledger(), root, f.ws, document);
++        var fixedExecution = f.ledger.latestNodeExecution(f.paths, completed).orElseThrow();
++        var publication = AgentRunCommitProtocol.recordedPublication(f.root, f.paths, fixedExecution);
++        var fixedResult = AgentRunCommitProtocol.readCompletion(f.paths, fixedExecution);
++        assertNotNull(publication);
++        publication.publish(f.ledger, f.root, fixedResult);
++        var observation = completed.outputRefs().stream().filter(r -> r.endsWith("verification-observations.json")).findFirst().orElseThrow();
++        assertTrue(JSON.readTree(root.resolve(observation).toFile()).path("tools").get(0).path("actualExitCode").isNull());
++        Files.writeString(root.resolve("product.txt"), "late child write\n");
++        assertThrows(java.io.IOException.class, () -> VerificationEvidence.verifyPublished(f.ledger, root, f.ws, document));
++        assertThrows(java.io.IOException.class, () -> publication.publish(f.ledger, f.root, fixedResult));
++        Files.writeString(root.resolve("product.txt"), "output\n");
++        VerificationEvidence.verifyPublished(f.ledger, root, f.ws, document);
++        publication.publish(f.ledger, f.root, fixedResult);
++        Files.writeString(root.resolve(observation), "{}\n");
++        assertThrows(java.io.IOException.class, () -> VerificationEvidence.verifyPublished(f.ledger, root, f.ws, document));
++    }
++
++    @Test void driftBeforeContextBeforePreparationAndBeforeDispatchNeverCallsTheReviewer() throws Exception {
++        for (var point : List.of("context", "prepare", "dispatch")) {
++            var f = new AcceptanceRepairSequenceTest.Fixture(root.resolve(point), "IMPLEMENTATION_BUG", "product.txt");
++            f.until(point.equals("context") ? "context.acceptance_codex_verifier_review" : "acceptance.codex_verifier_review");
++            if (point.equals("dispatch")) f.beforeDispatch = context -> {
++                if (context.definition().id().equals("acceptance.codex_verifier_review")) {
++                    try { Files.writeString(f.root.resolve("product.txt"), "late write"); }
++                    catch (java.io.IOException e) { throw new java.io.UncheckedIOException(e); }
++                }
++            };
++            else Files.writeString(f.root.resolve("product.txt"), "late write");
++            if (point.equals("context")) {
++                f.runtime.resume(new WorkflowCommand(f.root, f.ws));
++                assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.ledger.loadCurrent(f.paths).status(), point);
++            } else {
++                // This offline provider deliberately exposes the qualification exception. The
++                // acpx handler maps the same typed failure to its normal preparation failure.
++                var failure = assertThrows(AgentRunGovernanceContext.QualificationException.class,
++                        () -> f.runtime.resume(new WorkflowCommand(f.root, f.ws)), point);
++                assertTrue(failure.getMessage().contains("source changed"), failure.getMessage());
++            }
++            assertFalse(f.calls.contains("acceptance.codex_verifier_review"), point);
++        }
++    }
++
++    @Test void approvedActualExitCannotBeSatisfiedByACompletedNativeStatus() throws Exception {
++        var f = new AcceptanceRepairSequenceTest.Fixture(root, "IMPLEMENTATION_BUG", "product.txt");
++        f.outputMutation = result -> {
++            if (result.has("plan")) for (var binding : result.path("plan").path("verification_bindings"))
++                ((com.fasterxml.jackson.databind.node.ObjectNode) binding).put("actual_exit_required", true).put("expected_exit_code", 0);
++        };
++        f.until("implement.claude_self_test_report");
++        var node = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst();
++        f.runtime.resume(new WorkflowCommand(f.root, f.ws));
++        var failed = f.ledger.loadNode(f.paths, node);
++        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.ledger.loadCurrent(f.paths).status());
++        assertTrue(JSON.valueToTree(failed).toString().contains("required actual process exit is unavailable"));
++        assertTrue(failed.outputRefs().stream().noneMatch(r -> r.endsWith(".contract.json")));
++    }
++
++    @Test void inventedToolIdentityCannotPublishSuccessfulSelfTest() throws Exception {
++        var f = new AcceptanceRepairSequenceTest.Fixture(root, "IMPLEMENTATION_BUG", "product.txt");
++        f.outputMutation = result -> {
++            if (result.has("verification_checks")) for (var check : result.path("verification_checks"))
++                ((com.fasterxml.jackson.databind.node.ObjectNode) check).putArray("tool_call_ids").add("invented-call");
++        };
++        f.until("implement.claude_self_test_report");
++        var node = f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst();
++        f.runtime.resume(new WorkflowCommand(f.root, f.ws));
++        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.ledger.loadCurrent(f.paths).status());
++        assertTrue(JSON.valueToTree(f.ledger.loadNode(f.paths, node)).toString().contains("invented-call"));
++    }
++    @Test void measuredExitMustMatchTheSpecificApprovedRequirement() throws Exception {
++        var binding = new dev.dual.core.contract.TaskContract.VerificationBinding("AC-1", "process exits 7",
++                dev.dual.core.contract.TaskContract.Executor.AGENT, List.of(), List.of(),
++                dev.dual.core.contract.TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(), "test", true, 7);
++        var process = new ProcessBuilder("/bin/sh", "-c", "printf verified; exit 7").start();
++        var output = new String(process.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
++        var exit = process.waitFor();
++        var observed = new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("offline-session", "local-process", "fixture.exec", "execute",
++                JSON.valueToTree(Map.of("command", "printf verified; exit 7")), JSON.valueToTree(Map.of("stdout", output)),
++                "completed", 0, exit, "java.process.waitFor", false, List.of());
++        VerificationEvidence.verifyExit(binding, observed);
++        var reportRead = new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("offline-session", "read-report", "Read", "read",
++                JSON.valueToTree(Map.of("path", "report.txt")), JSON.valueToTree(Map.of("content", output)),
++                "completed", null, null, "", false, List.of());
++        VerificationEvidence.verifySelectedExits(binding, List.of(observed, reportRead));
++        assertThrows(java.io.IOException.class, () -> VerificationEvidence.verifySelectedExits(binding, List.of(reportRead)));
++        var unmeasured = new dev.dual.core.execution.AgentExecutionEvidence.ToolObservation("offline-session", "another-command", "Bash", "execute",
++                observed.input(), observed.output(), "completed", 0, null, "", false, List.of());
++        assertThrows(java.io.IOException.class, () -> VerificationEvidence.verifySelectedExits(binding, List.of(observed, unmeasured)));
++        var zeroRequired = new dev.dual.core.contract.TaskContract.VerificationBinding("AC-1", "process exits 0",
++                binding.executor(), List.of(), List.of(), binding.evidenceKind(), List.of(), "test", true, 0);
++        assertThrows(java.io.IOException.class, () -> VerificationEvidence.verifyExit(zeroRequired, observed));
++    }
++
++}
+--- before/dual-runtime/src/test/java/dev/dual/runtime/handler/VerificationReadinessTest.java
++++ after/dual-runtime/src/test/java/dev/dual/runtime/handler/VerificationReadinessTest.java
+@@ -97,7 +97,7 @@
+             assertThrows(IOException.class, () -> VerificationReadiness.validateBindings(read.ledger(), f.root, f.ws, goal, bindings.subList(0, 1)));
+             var original = bindings.getFirst();
+             var changed = new TaskContract.VerificationBinding(original.criterionId(), "different verification method", original.executor(),
+-                    original.environmentRefs(), original.authorityRefs(), original.evidenceKind(), original.feasibilityRefs(), original.detailOwner());
++                    original.environmentRefs(), original.authorityRefs(), original.evidenceKind(), original.feasibilityRefs(), original.detailOwner(), original.actualExitRequired(), original.expectedExitCode());
+             assertThrows(IOException.class, () -> VerificationReadiness.validateBindings(read.ledger(), f.root, f.ws, goal, List.of(changed, bindings.getLast())));
+         }
+         var content = JSON.readTree(f.root.resolve(ref.ref()).toFile());
+@@ -236,7 +236,7 @@
+         }
+         List<TaskContract.VerificationBinding> bindings(TaskContract.Reference ref) {
+             return goal().contract().acceptanceCriteria().stream().map(TaskContract.Clause::id).map(id -> new TaskContract.VerificationBinding(id, "run project tests", TaskContract.Executor.AGENT,
+-                    List.of(ref), List.of(), TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(ref), "verification-owner")).toList();
++                    List.of(ref), List.of(), TaskContract.EvidenceKind.PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS, List.of(ref), "verification-owner", false, null)).toList();
+         }
+         void validate(TaskContract.Reference ref) throws Exception {
+             var goal = goal();
+--- before/dual-server/pom.xml
++++ after/dual-server/pom.xml
+@@ -13,6 +13,13 @@
+     <artifactId>dual-server</artifactId>
+ 
+     <dependencies>
++        <dependency>
++            <groupId>dev.dual</groupId>
++            <artifactId>dual-runtime</artifactId>
++            <version>${project.version}</version>
++            <type>test-jar</type>
++            <scope>test</scope>
++        </dependency>
+         <dependency>
+             <groupId>dev.dual</groupId>
+             <artifactId>dual-core</artifactId>
+--- before/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java
++++ after/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java
+@@ -194,7 +194,7 @@
+ 
+     @Test
+     @SuppressWarnings("unchecked")
+-    void overviewReturnsTraceSummary() throws Exception {
++    void overviewReturnsTraceSummaryWithoutTrustingUnprovenAcceptance() throws Exception {
+         var fixture = createWorkstream("ws-api-overview");
+         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+         Files.createDirectories(paths.workstreamDir().resolve("reports"));
+@@ -235,17 +235,12 @@
+         assertEquals("workflow_current", workflow.get("statusSource"));
+         assertEquals("review.gate", workflow.get("currentNode"));
+         var acceptance = (Map<String, Object>) response.get("acceptance");
+-        assertEquals("ACCEPT_WITH_NOTES", acceptance.get("finalDecision"));
+-        assertEquals("MEDIUM", acceptance.get("verificationConfidence"));
+-        assertEquals("real_case_summary_projection", acceptance.get("verificationConfidenceSource"));
++        assertEquals("none", acceptance.get("finalDecision"));
++        assertEquals("UNKNOWN", acceptance.get("verificationConfidence"));
++        assertEquals("completion_evidence_status", acceptance.get("verificationConfidenceSource"));
+         assertEquals(1, acceptance.get("repairLoopCount"));
+         var completionEvidence = (Map<String, Object>) response.get("completionEvidence");
+-        assertEquals("available", completionEvidence.get("status"));
+-        assertEquals("ACCEPT_WITH_NOTES", completionEvidence.get("goalOutcome"));
+-        assertEquals("acceptance.codex_verifier_review",
+-                ((Map<String, Object>) completionEvidence.get("acceptance")).get("nodeId"));
+-        assertEquals("implement.claude_self_test_report",
+-                ((Map<String, Object>) completionEvidence.get("selfTest")).get("nodeId"));
++        assertEquals("unavailable", completionEvidence.get("status"));
+         assertEquals(true, response.get("whyStopped").toString().contains("Waiting for human review"));
+         assertEquals(true, response.get("nextAction").toString().contains("dualctl review show"));
+         var attention = (List<Map<String, Object>>) response.get("attention");
+@@ -253,7 +248,7 @@
+         assertEquals(sharedAttention.detail(), response.get("whyStopped"));
+         assertEquals(sharedNextAction(sharedAttention), response.get("nextAction"));
+         assertEquals(sharedAttention.toMap(), attention.getFirst());
+-        assertEquals(true, attention.stream().anyMatch(item -> "Accepted with notes".equals(item.get("title"))));
++        assertEquals(false, attention.stream().anyMatch(item -> "Accepted with notes".equals(item.get("title"))));
+         assertEquals(true, attention.stream().anyMatch(item -> "Repair loop occurred".equals(item.get("title"))));
+         assertEquals(true, attention.stream().anyMatch(item -> "Human gate is open".equals(item.get("title"))));
+         assertEquals(false, ((List<Map<String, Object>>) response.get("recentTimeline")).isEmpty());
+@@ -276,6 +271,35 @@
+         assertFalse(response.containsKey("deliveryMerge"));
+         var delivery = (Map<String, Object>) response.get("deliveryView");
+         assertEquals("WORKFLOW_NOT_DELIVERABLE", delivery.get("reasonCode"));
++    }
++
++    @Test
++    @SuppressWarnings("unchecked")
++    void serverProjectsAcceptedEvidenceFromApprovedExecutionAndIndependentReview() throws Exception {
++        var ws = "ws-api-proven-acceptance";
++        dev.dual.runtime.handler.CompletionEvidenceLineageFixture.prepareApproved(
++                tempDir, ws, "ACCEPT_WITH_NOTES", "Accepted with notes.", ServerLedgerFactory.create());
++        var reports = new WorkstreamPaths(tempDir, new DualId(ws)).workstreamDir().resolve("reports");
++        Files.createDirectories(reports);
++        Files.writeString(reports.resolve("real-case-summary.json"),
++                "{\"verification_confidence\":\"MEDIUM\"}");
++        var controller = controller();
++        var overview = controller.overview(ws, tempDir.toString());
++        var acceptance = (Map<String, Object>) overview.get("acceptance");
++        var completion = (Map<String, Object>) overview.get("completionEvidence");
++        assertEquals("ACCEPT_WITH_NOTES", acceptance.get("finalDecision"));
++        assertEquals("MEDIUM", acceptance.get("verificationConfidence"));
++        assertEquals("real_case_summary_projection", acceptance.get("verificationConfidenceSource"));
++        assertEquals("available", completion.get("status"));
++        assertEquals("ACCEPT_WITH_NOTES", completion.get("goalOutcome"));
++        assertEquals("acceptance.codex_verifier_review",
++                ((Map<String, Object>) completion.get("acceptance")).get("nodeId"));
++        assertEquals("implement.claude_self_test_report",
++                ((Map<String, Object>) completion.get("selfTest")).get("nodeId"));
++        var attention = (List<Map<String, Object>>) overview.get("attention");
++        assertTrue(attention.stream().anyMatch(item -> "Accepted with notes".equals(item.get("title"))));
++        var status = controller.status(ws, tempDir);
++        assertEquals("available", ((Map<String, Object>) status.get("completionEvidence")).get("status"));
+     }
+ 
+     @Test

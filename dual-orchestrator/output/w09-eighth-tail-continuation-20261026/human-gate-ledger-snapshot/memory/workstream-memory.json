@@ -1,0 +1,74 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "workstream_memory",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "acceptance",
+  "nodeInstanceId" : "node-acceptance-codex_verifier_review-035",
+  "iterationId" : "iter-003",
+  "decidedScope" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+  "nonGoals" : [ "不引入第三方依赖，也不生成 requirements.txt、pyproject.toml 等依赖清单。", "不进行网络访问、数据库、浏览器、后台服务或机器配置修改。", "不扩展换行处理范围：不转换 LF 以外的 Unicode 行/段分隔符，不添加、删除或补齐末尾换行，不提供 CLI 或打包发布。" ],
+  "decisions" : [ ],
+  "readFiles" : [ {
+    "path" : "README.md",
+    "evidenceRole" : "documentation",
+    "readAt" : "2026-10-26T01:18:45.087135Z",
+    "readRunId" : "run-1792977352552",
+    "readNodeId" : "implement.claude_self_test_report",
+    "lastSeenStage" : "stage-implement",
+    "sha" : "0af74daeacfdd946a47e88d3b3f28d41ef125285084fd5f1c8735859e5caaae5",
+    "summary" : "headings: normalize_newlines —— 换行规范化函数; 语义规则; 导入方式; 用法示例; 运行测试 | relevant: 本仓库提供纯函数 `normalize_newlines(text: str) -> str`：把 CRLF（`\\r\\n`）与孤立 CR（`\\r`）统一转换为 LF（`\\n`），其余内容原样保留。仅使用 Python 标准库，不引入任何第…; 实现位于 `src/normalize_text.py`（src 布局）。导入前需把 `src` 加入模块搜索路径，两种等价做法：; 2. 在代码中把 `src/` 目录插入 `sys.path`（`tests/test_normalize_text.py` 顶部采用的就是这种做法：用 `pathlib` 定位仓库 `src/`，且仅在 `sys.path` 不含该路径…; 以下示例为 doctes…",
+    "trusted" : true,
+    "invalidationReason" : ""
+  }, {
+    "path" : "src/normalize_text.py",
+    "evidenceRole" : "source",
+    "readAt" : "2026-10-26T01:18:45.087135Z",
+    "readRunId" : "run-1792977352552",
+    "readNodeId" : "implement.claude_self_test_report",
+    "lastSeenStage" : "stage-implement",
+    "sha" : "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c",
+    "summary" : "defs: normalize_newlines",
+    "trusted" : true,
+    "invalidationReason" : ""
+  }, {
+    "path" : "tests/test_normalize_text.py",
+    "evidenceRole" : "source",
+    "readAt" : "2026-10-26T01:18:45.087135Z",
+    "readRunId" : "run-1792977352552",
+    "readNodeId" : "implement.claude_self_test_report",
+    "lastSeenStage" : "stage-implement",
+    "sha" : "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be",
+    "summary" : "defs/tests: TestNormalizeNewlines; test_empty_string_returns_empty; test_pure_lf_unchanged; test_crlf_becomes_single_lf; test_lone_cr_becomes_lf; test_mixed_newlines_normalized; test_unicode_and_line_separators_preserved; test_trailing_newline_present_kept; test_trailing_newline_absent_kept; test_consecutive_blank_lines_normalized; test_no_cr_left_in_output; test_idempotent_across_all_cases",
+    "trusted" : true,
+    "invalidationReason" : ""
+  } ],
+  "openIssues" : [ ],
+  "priorVerdicts" : [ ],
+  "priorFailures" : [ ],
+  "refsSemantics" : "latest_projection_refs",
+  "refs" : {
+    "repoMap" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/repo-map.json",
+    "stageScopePolicy" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/stage-scope-policy.json",
+    "repositoryFactBinding" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/binding.json",
+    "fileRelevancePlan" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/file-relevance-plan.json",
+    "fileSummaries" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/file-summaries.json",
+    "readReuseContract" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/read-reuse-contract.json",
+    "workingSet" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/working-set.json"
+  },
+  "generatedAt" : "2026-10-26T01:19:58.427992Z",
+  "qualifiedTaskContract" : {
+    "contractId" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile_execution-027",
+    "phase" : "EXECUTION",
+    "status" : "qualified_projection",
+    "sha256" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+    "contractVersion" : 1,
+    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json",
+    "epoch" : 1
+  },
+  "lastStageOutcome" : { },
+  "fieldSemantics" : {
+    "projectionOnlyFields" : [ "summary", "desc", "verificationSummary" ],
+    "machineDecisionFields" : [ "decision", "stage_outcome", "lifecycle_status", "blocking", "sourceField", "status" ]
+  },
+  "updatedAt" : "2026-10-26T01:21:00.045649Z"
+}

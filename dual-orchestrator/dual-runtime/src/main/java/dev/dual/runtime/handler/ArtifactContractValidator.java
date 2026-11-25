@@ -27,8 +27,13 @@ public final class ArtifactContractValidator {
     private final AgentResultEnvelopeParser resultParser = new AgentResultEnvelopeParser();
     private final AgentResultEnvelopeValidator resultValidator = new AgentResultEnvelopeValidator();
     private final AgentResultDocumentProjector resultProjector = new AgentResultDocumentProjector();
-    private final TaskContractRevisionContextResolver revisionContextResolver =
-            new TaskContractRevisionContextResolver();
+    private final dev.dual.ledger.file.WorkflowFileLedger ledger;
+    private final TaskContractRevisionContextResolver revisionContextResolver;
+
+    public ArtifactContractValidator(dev.dual.ledger.file.WorkflowFileLedger ledger) {
+        this.ledger = java.util.Objects.requireNonNull(ledger);
+        this.revisionContextResolver = new TaskContractRevisionContextResolver(ledger);
+    }
     private final TaskContractProposalRevisionMerger revisionMerger =
             new TaskContractProposalRevisionMerger();
 
@@ -54,19 +59,35 @@ public final class ArtifactContractValidator {
             List<String> inputRefs,
             NodeResult result
     ) throws Exception {
-        if (EvidenceCollection.FAILURE.equals(result.outcome())) return result;
+        return prepare(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result)
+                .complete(workspaceRoot, false, ledger);
+    }
+
+    /** Validate in memory, persist one execution decision, then publish only eligible candidates. */
+    public NodeResult validateAndFinalize(
+            Path workspaceRoot, String workstreamId, String nodeInstanceId,
+            NodeDefinition nodeDefinition, List<String> inputRefs, NodeResult result
+    ) throws Exception {
+        return prepare(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result)
+                .complete(workspaceRoot, true, ledger);
+    }
+
+    private Validation prepare(
+            Path workspaceRoot, String workstreamId, String nodeInstanceId,
+            NodeDefinition nodeDefinition, List<String> inputRefs, NodeResult result
+    ) throws Exception {
+        if (AgentExecutionResultFacts.inputPreparationFailed(result)) return new Validation(result, null);
+        if (EvidenceCollection.FAILURE.equals(result.outcome())) return new Validation(result, null);
         if (!"acpx.agent_run".equals(nodeDefinition.handlerType()) || Boolean.TRUE.equals(result.result().get("prepared"))) {
-            return result;
+            return new Validation(result, null);
         }
         try {
-            EvidenceCollection.verify(workspaceRoot, workstreamId, nodeInstanceId);
+            EvidenceCollection.verify(ledger, workspaceRoot, workstreamId, nodeInstanceId);
         } catch (java.io.IOException | IllegalArgumentException invalid) {
-            return new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
-                    Map.of("failure_code", EvidenceCollection.FAILURE, "error", String.valueOf(invalid.getMessage())),
-                    invalid.getMessage());
+            return evidenceFailure(result, invalid);
         }
         if (!ContractRegistry.hasContract(nodeDefinition.id())) {
-            return result;
+            return new Validation(result, null);
         }
         var acquisitionContract = AgentExecutionResultFacts.agentResultContract(result);
         if (acquisitionContract.present() && !acquisitionContract.valid()) {
@@ -78,7 +99,24 @@ public final class ArtifactContractValidator {
         return validateAgentOutput(workspaceRoot, workstreamId, nodeInstanceId, nodeDefinition, inputRefs, result);
     }
 
-    private NodeResult validateAgentOutput(
+    private static Validation evidenceFailure(NodeResult source, Exception failure) {
+        return new Validation(evidenceFailureResult(source, failure), null);
+    }
+
+    static NodeResult evidenceFailureResult(NodeResult source, Exception failure) {
+        var facts = new LinkedHashMap<String, Object>(source.result());
+        facts.put("failure_code", EvidenceCollection.FAILURE);
+        facts.put("error", String.valueOf(failure.getMessage()));
+        var failed = new NodeResult(EvidenceCollection.FAILURE, NodeStatus.FAILED, source.outputRefs(), facts, failure.getMessage());
+        if (AgentExecutionResultFacts.present(source)) {
+            failed = AgentExecutionResultFacts.attach(failed, AgentExecutionResultFacts.agentResultContract(source),
+                    List.of(new ArtifactContractResult("verification_evidence", true, true, false, "", EvidenceCollection.FAILURE,
+                            String.valueOf(failure.getMessage()))), AgentExecutionResultFacts.rereadReasons(source));
+        }
+        return failed;
+    }
+
+    private Validation validateAgentOutput(
             Path workspaceRoot,
             String workstreamId,
             String nodeInstanceId,
@@ -91,11 +129,14 @@ public final class ArtifactContractValidator {
         ContractViolation lastInvalid = null;
         String lastSourceRef = "";
         var repositoryFactBindingRef = text(result.result().get("repository_fact_binding_ref"));
+        var observations = result.result().get(VerificationEvidence.FACT);
+        var observationRef = observations == null ? "" : new com.fasterxml.jackson.databind.ObjectMapper()
+                .convertValue(observations, dev.dual.core.contract.TaskContract.Reference.class).ref();
         for (int i = result.outputRefs().size() - 1; i >= 0; i--) {
             var ref = result.outputRefs().get(i);
             if (ref.startsWith("artifact://")
                     || !ref.endsWith(".json")
-                    || ref.equals(repositoryFactBindingRef)) {
+                    || ref.equals(repositoryFactBindingRef) || ref.equals(observationRef)) {
                 continue;
             }
             var path = root.resolve(ref).normalize();
@@ -121,13 +162,12 @@ public final class ArtifactContractValidator {
                 break;
             }
             try {
-                EvidenceCollection.verifyResult(root, workstreamId, nodeInstanceId, parsed.envelope().result());
+                EvidenceCollection.verifyResult(ledger, root, workstreamId, nodeInstanceId, parsed.envelope().result());
             } catch (java.io.IOException | IllegalArgumentException invalid) {
-                return new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
-                        Map.of("failure_code", EvidenceCollection.FAILURE, "error", String.valueOf(invalid.getMessage())), invalid.getMessage());
+                return evidenceFailure(result, invalid);
             }
             if (parsed.envelope().result() instanceof AgentResultEnvelope.DesignResult design) {
-                var errors = DesignScopeValidator.validate(root, workstreamId, design.design());
+                var errors = DesignScopeValidator.validate(ledger, root, workstreamId, design.design());
                 if (!errors.isEmpty()) {
                     return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref,
                             parsed.envelope(), ContractViolation.of("DESIGN_SCOPE_INVALID",
@@ -135,7 +175,7 @@ public final class ArtifactContractValidator {
                 }
             }
             if (parsed.envelope().result() instanceof AgentResultEnvelope.PlanResult plan) {
-                var errors = PlanScopeValidator.validate(root, workstreamId, plan.plan());
+                var errors = PlanScopeValidator.validate(ledger, root, workstreamId, plan.plan());
                 if (!errors.isEmpty()) {
                     return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, ref,
                             parsed.envelope(), ContractViolation.of("PLAN_SCOPE_INVALID",
@@ -194,16 +234,26 @@ public final class ArtifactContractValidator {
                     Map.of("errors", resolved.errors())));
         }
         var context = resolved.context();
+        ContractRevisionBinding fixedBinding;
+        try {
+            fixedBinding = ContractRevisionBinding.verifyPublication(root,workstreamId,nodeInstanceId,envelope.runId(),context);
+            if (context.revision() && fixedBinding.allowedForms().contains("GOAL_REPROPOSAL")
+                    != revisionContextResolver.goalReproposalAllowed(root,workstreamId,context,nodeInstanceId))
+                throw new java.io.IOException("revision form eligibility differs from R01");
+        } catch (Exception invalid) {
+            return ProposalResolution.failure(ContractViolation.of("TASK_CONTRACT_REVISION_BINDING_INVALID",
+                    "program revision input could not be verified",Map.of("errors",List.of(invalid.toString()))));
+        }
         TaskContractProposal proposal;
         AgentOutputContractDocument.ProposalDerivation derivation = null;
         if (isProposal) {
-            if (context.revision()) {
-                return ProposalResolution.failure(ContractViolation.of(
-                        "TASK_CONTRACT_REVISION_SHAPE_INVALID",
-                        "revision iteration requires task_contract_revision_patch",
-                        Map.of()));
-            }
             var proposalResult = (AgentResultEnvelope.TaskContractProposalResult) envelope.result();
+            if (context.revision() ? !fixedBinding.allowedForms().contains("GOAL_REPROPOSAL")
+                    || !fixedBinding.baseProposalReference().proposalId().equals(proposalResult.baseProposalId())
+                    : proposalResult.baseProposalId() != null) {
+                return ProposalResolution.failure(ContractViolation.of("TASK_CONTRACT_REVISION_SHAPE_INVALID",
+                        "full proposal requires eligible goal change and exact base ID; ordinary revision requires task_contract_revision_patch",Map.of()));
+            }
             var resolvedScope = new TaskContractScopeResolver().resolve(
                     proposalResult.scope().included(), root);
             if (!resolvedScope.valid()) {
@@ -213,6 +263,14 @@ public final class ArtifactContractValidator {
                         Map.of("errors", resolvedScope.errors())));
             }
             proposal = resultProjector.taskContractProposal(proposalResult, resolvedScope.entries());
+            if (context.revision()) {
+                var bounded = new TaskContractProposalValidator().validateGoalReproposal(context.previousProposal(),proposal);
+                if (!bounded.isEmpty()) return ProposalResolution.failure(ContractViolation.of("TASK_CONTRACT_REVISION_DELTA_INVALID",
+                        "invalid goal re-proposal",Map.of("errors",bounded)));
+                var base=fixedBinding.baseProposalReference();
+                derivation=new AgentOutputContractDocument.ProposalDerivation("goal_reproposal",base.proposalId(),
+                        base.sha256(),base,sourceOutputRef);
+            }
         } else {
             if (!context.revision()) {
                 return ProposalResolution.failure(ContractViolation.of(
@@ -279,7 +337,7 @@ public final class ArtifactContractValidator {
         return new ProposalResolution(proposal, derivation, repositoryFactBinding.verified(), null);
     }
 
-    private NodeResult withResultSidecars(
+    private Validation withResultSidecars(
             Path root,
             String workstreamId,
             String nodeInstanceId,
@@ -331,7 +389,7 @@ public final class ArtifactContractValidator {
         var sidecarPath = AgentOutputContractSidecar.pathFor(outputPath);
         if (AuthoredStageLineageResolver.participates(nodeDefinition.id())) {
             try {
-                var authoredRef = AuthoredExecutionContext.validatePublication(root, workstreamId, nodeInstanceId,
+                var authoredRef = AuthoredExecutionContext.validatePublication(ledger, root, workstreamId, nodeInstanceId,
                         envelope.runId(), envelope.result());
                 document.put("authored_context", Map.of("ref", authoredRef.ref(), "sha256", authoredRef.sha256()));
             } catch (java.io.IOException | IllegalArgumentException failure) {
@@ -340,57 +398,86 @@ public final class ArtifactContractValidator {
             }
         }
         try {
-            EvidenceCollection.verifyResult(root, workstreamId, nodeInstanceId, envelope.result());
+            EvidenceCollection.verifyResult(ledger, root, workstreamId, nodeInstanceId, envelope.result());
         } catch (java.io.IOException | IllegalArgumentException invalid) {
-            return new NodeResult(EvidenceCollection.FAILURE, dev.dual.core.workflow.NodeStatus.FAILED, List.of(),
-                    Map.of("failure_code", EvidenceCollection.FAILURE, "error", String.valueOf(invalid.getMessage())), invalid.getMessage());
+            return evidenceFailure(result, invalid);
         }
-        Files.writeString(sidecarPath,
-                OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",
-                StandardCharsets.UTF_8);
-        var sidecarRef = root.relativize(sidecarPath).toString();
-        var outputRefs = new ArrayList<>(result.outputRefs());
-        if (!outputRefs.contains(sidecarRef)) {
-            outputRefs.add(sidecarRef);
+        try {
+            VerificationEvidence.verify(ledger, root, workstreamId, nodeInstanceId, result, envelope.result());
+        } catch (java.io.IOException | IllegalArgumentException invalid) {
+            return contractViolation(root, workstreamId, nodeInstanceId, nodeDefinition, result, contract, outputRef,
+                    envelope, ContractViolation.of("VERIFICATION_EVIDENCE_INVALID", invalid.getMessage(), Map.of()));
         }
-
-        Optional<TaskContractProposalReference.Published> proposalReference = Optional.empty();
-        if (proposalResolution.proposal() != null) {
-            proposalReference = Optional.of(
-                    envelope.result() instanceof AgentResultEnvelope.TaskContractRevisionPatchResult
-                            ? TaskContractProposalReference.publishRevisionDerived(
-                            root, workstreamId, sidecarPath, validatedDocument, OBJECT_MAPPER)
-                            : TaskContractProposalReference.publishInitial(
-                            root, workstreamId, sidecarPath, validatedDocument, OBJECT_MAPPER));
-            if (!outputRefs.contains(proposalReference.get().referenceRef())) {
-                outputRefs.add(proposalReference.get().referenceRef());
-            }
-        }
-
-        var planArtifactRef = writePlanArtifactSidecars(
-                root, envelope, outputPath);
-        planArtifactRef.ifPresent(ref -> {
-            if (!outputRefs.contains(ref)) {
-                outputRefs.add(ref);
-            }
-        });
-
-        var augmented = new LinkedHashMap<String, Object>();
-        augmented.putAll(result.result());
-        augmented.put("decision", envelope.result().decision());
-        augmented.put("summary", envelope.result().summary());
-        augmented.put("contract_sidecar_ref", sidecarRef);
-        augmented.put("contract_sidecar_sha256", AgentOutputContractSidecar.sha256(sidecarPath));
-        proposalReference.ifPresent(reference -> {
-            augmented.put("task_contract_proposal_ref", reference.referenceRef());
-            augmented.put("task_contract_proposal_id", reference.reference().proposalId());
-        });
-        planArtifactRef.ifPresent(ref -> augmented.put("plan_artifact_ref", ref));
-        return AgentExecutionResultFacts.attach(new NodeResult(
-                        result.outcome(), result.status(), outputRefs, augmented, result.errorMessage()),
+        var validated = AgentExecutionResultFacts.attach(result,
                 AgentResultContractResult.valid(envelope.result().decision()),
                 List.of(ArtifactContractResult.requiredValid(envelope.result().artifactType())),
                 document.get("reread_reasons"));
+        validated = PermissionEvidence.assess(ledger, root, workstreamId, nodeInstanceId, nodeDefinition.id(),
+                validated, envelope.result());
+        var bytes = (OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n").getBytes(StandardCharsets.UTF_8);
+        var sidecarRef = root.relativize(sidecarPath).toString();
+        var writes = new LinkedHashMap<String, String>();
+        writes.put(sidecarRef, java.util.Base64.getEncoder().encodeToString(bytes));
+        var refs = new ArrayList<>(result.outputRefs());
+        if (!refs.contains(sidecarRef)) refs.add(sidecarRef);
+        var fields = new LinkedHashMap<String, Object>();
+        fields.put("decision", envelope.result().decision()); fields.put("summary", envelope.result().summary());
+        fields.put("contract_sidecar_ref", sidecarRef); fields.put("contract_sidecar_sha256", TaskContractArtifactWriter.sha256(bytes));
+        if (proposalResolution.proposal() != null) {
+            var proposal = TaskContractProposalReference.preparePublication(root, workstreamId, sidecarPath, validatedDocument, bytes, OBJECT_MAPPER);
+            writes.put(proposal.referenceRef(), java.util.Base64.getEncoder().encodeToString(OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(proposal.reference())));
+            refs.add(proposal.referenceRef()); fields.put("task_contract_proposal_ref", proposal.referenceRef());
+            fields.put("task_contract_proposal_id", proposal.reference().proposalId());
+        }
+        if (envelope.result() instanceof AgentResultEnvelope.PlanResult plan) {
+            var ref = root.relativize(PlanArtifactSidecar.pathFor(outputPath)).toString();
+            writes.put(ref, java.util.Base64.getEncoder().encodeToString((OBJECT_MAPPER.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(resultProjector.planArtifact(plan)) + "\n").getBytes(StandardCharsets.UTF_8)));
+            refs.add(ref); fields.put("plan_artifact_ref", ref);
+        }
+        return new Validation(validated, new Publication(workstreamId, nodeInstanceId, refs, fields, writes,
+                new dev.dual.core.contract.TaskContract.Reference(outputRef, TaskContractArtifactWriter.sha256(outputPath))));
+    }
+
+    /** Fixed byte publication, subordinate to the unique execution outcome. No reevaluation on restart. */
+    record Publication(String workstream, String node, List<String> outputRefs,
+                       Map<String, Object> fields, Map<String, String> bytes,
+                       dev.dual.core.contract.TaskContract.Reference candidate) {
+        NodeResult publish(dev.dual.ledger.file.WorkflowFileLedger ledger, Path root, NodeResult execution) throws Exception {
+            EvidenceCollection.verify(ledger, root, workstream, node);
+            VerificationEvidence.verifyPublication(ledger, root, workstream, node, execution, candidate);
+            for (var entry : bytes.entrySet()) {
+                var path = root.toAbsolutePath().normalize().resolve(entry.getKey()).normalize();
+                if (!path.startsWith(root.toAbsolutePath().normalize()) || Path.of(entry.getKey()).isAbsolute())
+                    throw new java.io.IOException("publication escapes workspace");
+                var content = java.util.Base64.getDecoder().decode(entry.getValue());
+                if (Files.exists(path)) {
+                    if (!java.util.Arrays.equals(Files.readAllBytes(path), content)) throw new java.io.IOException("publication target changed: " + entry.getKey());
+                } else new dev.dual.ledger.file.AtomicJsonWriter().writeBytes(path, content);
+            }
+            var facts = new LinkedHashMap<String, Object>(execution.result()); facts.putAll(fields);
+            return new NodeResult(execution.outcome(), execution.status(), outputRefs, facts, execution.errorMessage());
+        }
+    }
+
+    private record Validation(NodeResult result, Publication publication) {
+        NodeResult complete(Path root, boolean persistExecution, dev.dual.ledger.file.WorkflowFileLedger ledger) throws Exception {
+            var finalizer = new AgentRunMetadataFinalizer();
+            if (persistExecution && publication != null) AgentRunCommitProtocol.recordPublication(root, result, publication);
+            var execution = persistExecution ? finalizer.finalizeNodeResult(root, result)
+                    : publication == null ? result : finalizer.assessPublication(root, result);
+            if (publication == null || execution.status() == NodeStatus.FAILED) return execution;
+            return publication.publish(ledger, root, execution);
+        }
+    }
+
+    public static NodeResult completeRecorded(dev.dual.ledger.file.WorkflowFileLedger ledger, Path root, dev.dual.ledger.file.WorkstreamPaths paths,
+                                              dev.dual.ledger.file.NodeExecutionDocument execution) throws Exception {
+        var candidate = AgentRunCommitProtocol.recordedCandidate(paths, execution);
+        var finalized = new AgentRunMetadataFinalizer().finalizeNodeResult(root, candidate);
+        var publication = AgentRunCommitProtocol.recordedPublication(root, paths, execution);
+        if (publication == null || finalized.status() == NodeStatus.FAILED) return finalized;
+        return publication.publish(ledger, root, finalized);
     }
 
     private record ProposalResolution(
@@ -432,22 +519,6 @@ public final class ArtifactContractValidator {
                 OBJECT_MAPPER);
     }
 
-    private Optional<String> writePlanArtifactSidecars(
-            Path root,
-            AgentResultEnvelope envelope,
-            Path outputPath
-    ) throws Exception {
-        if (!(envelope.result() instanceof AgentResultEnvelope.PlanResult planResult)) {
-            return Optional.empty();
-        }
-        var document = resultProjector.planArtifact(planResult);
-        var sidecarPath = PlanArtifactSidecar.pathFor(outputPath);
-        Files.writeString(sidecarPath,
-                OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(document) + "\n",
-                StandardCharsets.UTF_8);
-        return Optional.of(root.relativize(sidecarPath).toString());
-    }
-
     private static List<String> stringList(Object value) {
         if (!(value instanceof List<?> list)) {
             return List.of();
@@ -466,7 +537,7 @@ public final class ArtifactContractValidator {
         return text;
     }
 
-    private static NodeResult contractViolation(
+    private static Validation contractViolation(
             Path workspaceRoot,
             String workstreamId,
             String nodeInstanceId,
@@ -518,14 +589,14 @@ public final class ArtifactContractValidator {
         if (diagnostic.present() && !outputRefs.contains(diagnostic.markdownRef())) {
             outputRefs.add(diagnostic.markdownRef());
         }
-        return AgentExecutionResultFacts.attach(new NodeResult(
+        return new Validation(AgentExecutionResultFacts.attach(new NodeResult(
                 "AGENT_OUTPUT_CONTRACT_VIOLATION",
                 NodeStatus.FAILED,
                 outputRefs,
                 failed,
                 message
         ), terminalResultFor(reason, message, validatedEnvelope),
-                List.of(artifactResultFor(nodeDefinition, reason, message, validatedEnvelope)), null);
+                List.of(artifactResultFor(nodeDefinition, reason, message, validatedEnvelope)), null), null);
     }
 
     private static AgentResultContractResult terminalResultFor(

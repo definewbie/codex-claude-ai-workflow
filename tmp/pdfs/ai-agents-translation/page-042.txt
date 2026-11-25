@@ -1,0 +1,18 @@
+  Figure 1-5. A stateless agent treats every call independently, while a stateful agent reads from and
+                                 writes to shared state at every step.
+
+Based on input and logic, it transitions to the next state, and each state has
+an associated function or behavior. In LangGraph, this can be any Python
+type, but is typically a TypedDict or Pydantic BaseModel. The
+following outlines LangGraph’s key concepts to build stateful, adaptable AI
+agents:
+
+State
+
+  A shared data structure that represents the current snapshot of an
+    application.
+
+Nodes
+
+   Functions that encode the agent’s logic. They take the current state,
+   perform computation or side effects, and return an updated state.

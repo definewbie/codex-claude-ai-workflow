@@ -1,0 +1,25 @@
+{
+  "files": {
+    "workstream.json": "04b739cdb92c87a9692b773f530121576f41fec54233f7f93525812e2cee8098",
+    "settings.json": "240abb101d0ea85552e1c38d454a5f4662fbd0778498c87808a06bb8dcfc7a4f",
+    "timeline.jsonl": "31068af8edc6f5cdd8591c04a49d50b86d37e8c1e3f42b43933110192f41ddcf",
+    "requirement.md": "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0",
+    "timeline.json": "5fde5d19dba482fa1f07ea0a80d7288e90b726edfd45a5e7a35149410a6341fb",
+    "events.jsonl": "3dbbfe11a1cb2d72b1e0166377c5703deee26f782793a7fc5b60cc5e69d04ac4",
+    "projection-status.json": "cf5eb5e54403fde1c71e2670487d4ca5f65693d51a055b1b124d09686e92bb3f",
+    "metrics/workstream-metrics.md": "87abe05f73ec3c8585a0d98ba20dd476055253b1dd475bb3934f95b53ac3f938",
+    "metrics/workstream-metrics.json": "efcefb0c700fe97d2fed46167b56f51d97a487f2ce32e79484d8232061861001",
+    "nodes/node-context-intake_claude_brainstorm-001.json": "3c358137715c0624a2b6fcda3a0a81e9804ef9d07e30dcbe3b52a18385ad48dd",
+    "checkpoints/checkpoint-initial.json": "47240f33126086c53d608deb5c7b41c2a23323f46809e26034c4218fc948ce7c",
+    "workspaces/wsp-20261023T005431Z-29TT.json": "4c9b6fd18a1f4a3933fe41d3f78b7e5dcf4c224ea5e6d6204522c3c70a689555",
+    "current/iteration.json": "a8ec786aef21f6597719891e61e50c63a6444d6b9590b82df4bfd91e8cc61f4c",
+    "current/checkpoint.json": "47240f33126086c53d608deb5c7b41c2a23323f46809e26034c4218fc948ce7c",
+    "current/stage.json": "1a59dc261ddb6068f5dbc52419b24497555c6b28f164604ae458859c79f9fdcd",
+    "workflow/instance.json": "59eebcddf541478c4eecc6d39fe8cdeacbb55978a0c3b65df0f164b7a3238878",
+    "workflow/current.json": "9abdf89811a85694ddfe35ad7e22f44a764d321b14a92d8d2b9c4584858ebcfb",
+    "workflow/definition.json": "8313a022f5687f035a349f86f511cb11ab672659a5e1a4cec0ee093299d36542",
+    "iterations/iter-001.json": "b8566937a2fe7a4ad31980ba0b2a1d30c27ebeb8a94a3ddbd61497b2c54839e0",
+    "stages/01-design/stage.json": "1a59dc261ddb6068f5dbc52419b24497555c6b28f164604ae458859c79f9fdcd",
+    "stages/01-design/iterations/001/iteration.json": "a8ec786aef21f6597719891e61e50c63a6444d6b9590b82df4bfd91e8cc61f4c"
+  }
+}

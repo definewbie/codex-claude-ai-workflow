@@ -1,0 +1,36 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792021366580-011dd372",
+  "agentTaskId" : "agt-1792021366575-5404f47a",
+  "workflowExecutionId" : "wfe-1792021366504-5fdcd585",
+  "nodeInstanceId" : "node-intake-decision-005",
+  "nodeDefinitionId" : "intake.decision",
+  "handlerType" : "review.decision",
+  "status" : "SUCCEEDED",
+  "pid" : 87257,
+  "outcome" : "NEEDS_REVISION",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792021315581/binding.json", ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_started_at" : "2026-10-14T23:42:45.343Z",
+      "input_identity" : "1744438fc6385ece680200cafbbaa3bae67bb5073a9ace5556b44871b31a0903",
+      "executor_pid" : 87257
+    },
+    "decision" : "NEEDS_REVISION",
+    "source" : "contract-sidecar",
+    "summary" : "功能语义与验收要求完整，但排除项提前锁定了文件集合，与文件须经后续设计、计划和执行批准的要求冲突。",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-14T23:42:46.580045Z",
+  "finishedAt" : "2026-10-14T23:42:46.628422Z",
+  "durationMs" : 48
+}

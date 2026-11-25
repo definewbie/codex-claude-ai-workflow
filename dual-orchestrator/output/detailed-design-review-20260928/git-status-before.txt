@@ -1,0 +1,53 @@
+ M dual-orchestrator/docs/design/dual-orchestrator-current-architecture.zh-CN.md
+ M dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+ M dual-orchestrator/docs/testing/verification-gates/20260909-okx-profile-aligned-fresh-e2e.md
+ M dual-orchestrator/dual-adapter-acpx/pom.xml
+ M dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+ M dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java
+ M dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AuthoredManifestDispatchTest.java
+ M dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/RetryFailureContextSequenceTest.java
+ M dual-orchestrator/dual-cli/src/test/java/dev/dual/cli/RecoveryShowCommandTest.java
+ M dual-orchestrator/dual-core/src/main/java/dev/dual/core/workflow/HumanGateActionSemantics.java
+ M dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java
+ M dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RoutingEngine.java
+ M dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkflowGateResolutionTest.java
+ M dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionResultFacts.java
+ M dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunMetadataFinalizer.java
+ M dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
+ M dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/FailureArbiter.java
+ M dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java
+ M dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json
+ M dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.full.json
+ M dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json
+ M dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
+ M dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AuthoredBoundarySequenceTest.java
+ M dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractCompileHandlerTest.java
+ M dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRepairWorkflowDefinitionTest.java
+ M dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/AcceptanceRevisionBudgetTest.java
+ M dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/FullWorkflowDefinitionTest.java
+ M dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/lifecycle/SmallWorkflowProfileDefinitionTest.java
+ M dual-orchestrator/dual-runtime/src/test/resources/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json
+ M dual-orchestrator/dual-server/src/test/java/dev/dual/server/WorkstreamApiControllerTest.java
+ M dual-orchestrator/scripts/fixtures/emit-strict-agent-result.py
+ M dual-orchestrator/scripts/semantic-boundary-smoke.sh
+ M dual-orchestrator/scripts/smoke-test.sh
+?? .playwright-cli/
+?? dual-orchestrator/.playwright-cli/
+?? dual-orchestrator/docs/design/20260913-dual-evolution-retrospective-and-handoff.zh-CN.md
+?? dual-orchestrator/docs/plans/20260910-harness-overall-convergence-review.zh-CN.md
+?? dual-orchestrator/docs/plans/20260910-human-disposition-and-evidence-continuation-design-review.zh-CN.md
+?? dual-orchestrator/docs/plans/20260910-workflow-continuation-and-liteflow-bounded-assessment.zh-CN.md
+?? dual-orchestrator/docs/plans/20260912-dual-end-to-end-development-capability-review.zh-CN.md
+?? dual-orchestrator/docs/plans/20260913-workflow-first-convergence-redesign.zh-CN.md
+?? dual-orchestrator/docs/plans/20260913-workflow-first-implementation-checkpoint.zh-CN.md
+?? dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md
+?? dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+?? dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+?? dual-orchestrator/docs/testing/capability-proofs/20260907-phase-a-network-grant-effect-result/
+?? dual-orchestrator/docs/testing/verification-gates/20260903-okx-s2-recovery-and-terminal-completion.md
+?? dual-orchestrator/docs/testing/verification-gates/20260907-spm9-after-phase-a-readiness.md
+?? dual-orchestrator/docs/testing/verification-gates/20260909-scope-deviation-disposition-policy.zh-CN.md
+?? dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java
+?? dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java
+?? dual-orchestrator/output/
+?? output/

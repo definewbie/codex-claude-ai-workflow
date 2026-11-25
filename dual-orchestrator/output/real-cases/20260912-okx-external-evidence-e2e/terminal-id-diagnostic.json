@@ -1,0 +1,11 @@
+{
+  "expected": "sha256:41f08fffbe5deec3cb0e54e6e03236e163f7249ac771bfc2ed8963db5cef46ae#human-note:0",
+  "actual": "sha256:41f08fffbe5deec3cb0e54e6e03236e163f7249ac77a7bfc2ed8963db5cef46ae#human-note:0",
+  "expectedHashLength": 64,
+  "actualHashLength": 65,
+  "promptContainsExpected": true,
+  "promptContainsActual": false,
+  "responseCount": 14,
+  "contractSidecarPublished": false,
+  "rawJsonParseable": true
+}

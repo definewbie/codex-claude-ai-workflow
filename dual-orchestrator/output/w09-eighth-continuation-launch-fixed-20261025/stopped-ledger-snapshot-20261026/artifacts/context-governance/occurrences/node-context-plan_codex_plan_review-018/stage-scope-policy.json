@@ -1,0 +1,21 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "stage_scope_policy",
+  "workstreamId" : "ws-20261023T005431Z-9YYF",
+  "stageId" : "plan",
+  "nodeInstanceId" : "node-context-plan_codex_plan_review-018",
+  "nodeDefinitionId" : "context.plan_codex_plan_review",
+  "builderNodeDefinitionId" : "context.plan_codex_plan_review",
+  "targetNodeDefinitionId" : "plan.codex_plan_review",
+  "iterationId" : "iter-002",
+  "writeScope" : [ ],
+  "previouslyReadFiles" : [ ],
+  "readReusePolicy" : {
+    "avoidRepeatedReads" : [ ],
+    "requireReasonWhenRereading" : false,
+    "reasonField" : "",
+    "preferExistingEvidence" : true
+  },
+  "forbiddenScope" : [ ".git/**", ".agent/workstreams/**/workflow/**", ".agent/workstreams/**/nodes/**", "business source writes" ],
+  "generatedAt" : "2026-10-23T01:34:56.779095Z"
+}

@@ -35,7 +35,7 @@ public final class CompletionEvidenceLineageResolver {
     private CompletionEvidenceLineageResolver() {
     }
 
-    public static Resolution resolveCurrent(Path workspaceRoot, String workstreamId) {
+    public static Resolution resolveCurrent(WorkflowFileLedger ledger, Path workspaceRoot, String workstreamId) {
         var root = workspaceRoot.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
         if (!Files.isRegularFile(paths.goalSatisfactionJson())) {
@@ -46,7 +46,6 @@ public final class CompletionEvidenceLineageResolver {
             if (!workstreamId.equals(goal.workstreamId())) {
                 return Resolution.invalid(GOAL_INVALID, "goal workstream_id does not match", goal);
             }
-            var ledger = new WorkflowFileLedger();
             var current = ledger.loadCurrent(paths);
             var instance = OBJECT_MAPPER.readValue(paths.workflowInstanceJson().toFile(), WorkflowInstanceDocument.class);
             var definitionDocument = OBJECT_MAPPER.readValue(
@@ -77,19 +76,21 @@ public final class CompletionEvidenceLineageResolver {
                 return Resolution.invalid(GOAL_INVALID, decisionViolation, goal);
             }
 
-            var acceptance = acceptanceEvidence(root, workstreamId, paths, definition, goal, decisionNode);
+            var acceptance = acceptanceEvidence(ledger, root, workstreamId, paths, definition, goal, decisionNode);
             if (acceptance.failure() != null) {
                 return Resolution.invalid(ACCEPTANCE_INVALID, acceptance.failure(), goal);
             }
-            var context = contextNode(root, workstreamId, paths, definition, goal, acceptance.evidence());
+            var context = contextNode(ledger, root, workstreamId, paths, definition, goal, acceptance.evidence());
             if (context.failure() != null) {
                 return Resolution.invalid(CONTEXT_INVALID, context.failure(), goal);
             }
             var selfTest = selfTestEvidence(
-                    root, workstreamId, paths, definition, goal, context.node(), context.definitionConfig());
+                    ledger, root, workstreamId, paths, definition, goal, context.node(), context.definitionConfig());
             if (selfTest.failure() != null) {
                 return Resolution.invalid(SELF_TEST_INVALID, selfTest.failure(), goal);
             }
+            VerificationEvidence.verifyPublished(ledger, root, workstreamId, acceptance.evidence().document());
+            VerificationEvidence.verifyPublished(ledger, root, workstreamId, selfTest.evidence().document());
             return Resolution.available(goal, decisionNode, context.node(), acceptance.evidence(), selfTest.evidence());
         } catch (Exception e) {
             return Resolution.invalid(GOAL_INVALID, "completion evidence cannot be resolved: " + e.getMessage(), null);
@@ -97,11 +98,12 @@ public final class CompletionEvidenceLineageResolver {
     }
 
     public static Resolution resolveForReport(
+            WorkflowFileLedger ledger,
             Path workspaceRoot,
             String workstreamId,
             NodeInstance reportNode
     ) {
-        var resolution = resolveCurrent(workspaceRoot, workstreamId);
+        var resolution = resolveCurrent(ledger, workspaceRoot, workstreamId);
         if (resolution.status() != Status.AVAILABLE) {
             return resolution;
         }
@@ -138,6 +140,7 @@ public final class CompletionEvidenceLineageResolver {
     }
 
     private static EvidenceRead acceptanceEvidence(
+            WorkflowFileLedger ledger,
             Path root,
             String workstreamId,
             WorkstreamPaths paths,
@@ -150,7 +153,7 @@ public final class CompletionEvidenceLineageResolver {
                     .filter(edge -> "acceptance.decision".equals(edge.to()))
                     .map(edge -> edge.from())
                     .collect(java.util.stream.Collectors.toUnmodifiableSet());
-            var matches = AgentEvidenceIndex.fromRefs(root, workstreamId, decisionNode.outputRefs(), OBJECT_MAPPER)
+            var matches = AgentEvidenceIndex.fromRefs(ledger, root, workstreamId, decisionNode.outputRefs(), OBJECT_MAPPER)
                     .recent(Math.max(1, decisionNode.outputRefs().size()))
                     .stream()
                     .filter(entry -> predecessors.contains(entry.document().nodeId()))
@@ -164,7 +167,7 @@ public final class CompletionEvidenceLineageResolver {
                 return EvidenceRead.failed("expected exactly one routed final acceptance sidecar, found " + matches.size());
             }
             var entry = matches.getFirst();
-            var producer = new WorkflowFileLedger().loadNode(paths, entry.document().nodeInstanceId());
+            var producer = ledger.loadNode(paths, entry.document().nodeInstanceId());
             if (!goal.iterationId().equals(producer.iterationId())) {
                 return EvidenceRead.failed("acceptance sidecar producer is from another iteration");
             }
@@ -175,6 +178,7 @@ public final class CompletionEvidenceLineageResolver {
     }
 
     private static ContextRead contextNode(
+            WorkflowFileLedger ledger,
             Path root,
             String workstreamId,
             WorkstreamPaths paths,
@@ -183,7 +187,6 @@ public final class CompletionEvidenceLineageResolver {
             Evidence acceptance
     ) {
         try {
-            var ledger = new WorkflowFileLedger();
             var producer = ledger.loadNode(paths, acceptance.document().nodeInstanceId());
             var packageRefs = producer.inputRefs().stream()
                     .filter(ref -> canonicalContextPackageRef(workstreamId, ref))
@@ -226,6 +229,7 @@ public final class CompletionEvidenceLineageResolver {
     }
 
     private static EvidenceRead selfTestEvidence(
+            WorkflowFileLedger ledger,
             Path root,
             String workstreamId,
             WorkstreamPaths paths,
@@ -242,7 +246,7 @@ public final class CompletionEvidenceLineageResolver {
                     || !"acpx.agent_run".equals(requiredDefinition.handlerType())) {
                 return EvidenceRead.failed("required self-test evidence is not compatible with its workflow contract");
             }
-            var matches = AgentEvidenceIndex.fromRefs(root, workstreamId, contextNode.inputRefs(), OBJECT_MAPPER)
+            var matches = AgentEvidenceIndex.fromRefs(ledger, root, workstreamId, contextNode.inputRefs(), OBJECT_MAPPER)
                     .recent(Math.max(1, contextNode.inputRefs().size()))
                     .stream()
                     .filter(entry -> required.nodeId().equals(entry.document().nodeId()))
@@ -254,7 +258,7 @@ public final class CompletionEvidenceLineageResolver {
                 return EvidenceRead.failed("expected exactly one routed self-test sidecar, found " + matches.size());
             }
             var entry = matches.getFirst();
-            var producer = new WorkflowFileLedger().loadNode(paths, entry.document().nodeInstanceId());
+            var producer = ledger.loadNode(paths, entry.document().nodeInstanceId());
             if (!goal.iterationId().equals(producer.iterationId())) {
                 return EvidenceRead.failed("self-test sidecar producer is from another iteration");
             }

@@ -1,8 +1,6 @@
 package dev.dual.cli;
 
-import dev.dual.ledger.file.LockOwner;
 import dev.dual.ledger.file.WorkflowFileLedger;
-import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -22,6 +20,9 @@ public class ReviewReviseCommand implements Callable<Integer> {
     @Parameters(index = "0")
     String workstreamId;
 
+    @Option(names = "--subject", description = "Expected current occurrence; required for readiness failure repair.")
+    String subject;
+
     @Option(names = "--feedback-file", required = true)
     Path feedbackFile;
 
@@ -35,11 +36,9 @@ public class ReviewReviseCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new dev.dual.core.id.DualId(workstreamId));
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "review revise"))) {
-            var ledger = CliLedgerFactory.create();
-            var feedback = Files.readString(feedbackFile.toAbsolutePath().normalize());
-            ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), "revise", feedback);
-        }
+        var ledger = CliLedgerFactory.create();
+        var feedback = Files.readString(feedbackFile.toAbsolutePath().normalize());
+        dev.dual.runtime.handler.ReviewGateActions.revise(ledger, paths, subject, feedback);
         System.out.println("Human gate revision requested");
         System.out.println("Workstream: " + workstreamId);
         System.out.println("Feedback: " + feedbackFile.toAbsolutePath().normalize());
@@ -48,8 +47,6 @@ public class ReviewReviseCommand implements Callable<Integer> {
             return 0;
         }
         System.out.println("Running workflow until next gate...");
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "run"))) {
-            return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
-        }
+        return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
     }
 }

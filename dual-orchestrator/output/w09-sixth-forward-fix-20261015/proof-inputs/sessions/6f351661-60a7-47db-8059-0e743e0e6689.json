@@ -1,0 +1,440 @@
+{
+  "schema": "acpx.session.v1",
+  "acpx_record_id": "6f351661-60a7-47db-8059-0e743e0e6689",
+  "acp_session_id": "e4d34f6c-2aa7-4011-81a4-42ef0d961aa7",
+  "agent_command": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0",
+  "cwd": "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+  "name": "claude-main-ws-20261014T234009Z-RN9X-run-1792021247531",
+  "created_at": "2026-10-14T23:40:49.954Z",
+  "last_used_at": "2026-10-14T23:41:30.540Z",
+  "last_seq": 3759,
+  "last_request_id": "3",
+  "event_log": {
+    "active_path": "/Users/kriswang/.acpx/sessions/6f351661-60a7-47db-8059-0e743e0e6689.stream.ndjson",
+    "segment_count": 5,
+    "max_segment_bytes": 67108864,
+    "max_segments": 5,
+    "last_write_at": "2026-10-14T23:41:29.959Z",
+    "last_write_error": null
+  },
+  "closed": false,
+  "pid": 84247,
+  "agent_started_at": "2026-10-14T23:40:51.436Z",
+  "last_prompt_at": "2026-10-14T23:40:52.238Z",
+  "protocol_version": 1,
+  "agent_capabilities": {
+    "_meta": {
+      "claudeCode": {
+        "promptQueueing": true
+      }
+    },
+    "promptCapabilities": {
+      "image": true,
+      "embeddedContext": true
+    },
+    "mcpCapabilities": {
+      "http": true,
+      "sse": true
+    },
+    "auth": {
+      "logout": {}
+    },
+    "providers": {},
+    "loadSession": true,
+    "sessionCapabilities": {
+      "additionalDirectories": {},
+      "close": {},
+      "delete": {},
+      "fork": {},
+      "list": {},
+      "resume": {}
+    }
+  },
+  "title": "## Execution Workspace Guard - Effective workspace: /private/tmp/dual-w09-newlines-20261015-fresh-06/worktree - This intake run uses restricted contract discovery. Use orchestrator-provided context a…",
+  "messages": [
+    {
+      "User": {
+        "id": "3a584dd5-9f55-4971-afab-da6d2f179e89",
+        "content": [
+          {
+            "Text": "## Execution Workspace Guard\n\n- Effective workspace: /private/tmp/dual-w09-newlines-20261015-fresh-06/worktree\n- This intake run uses restricted contract discovery. Use orchestrator-provided context and bounded discovery only.\n- Do not output shell commands or Bash code fences as a substitute for the required structured artifact.\n- Modify files only inside the effective workspace.\n- Ignore absolute paths outside the effective workspace even if they appear in quoted prior outputs.\n- Do not run commands with `git -C` pointing outside the effective workspace.\n\n## Response Language Policy\n\n- Use Simplified Chinese for human-readable string values inside the final JSON result.\n- Keep JSON keys, enum values, file paths, and code identifiers exactly as specified.\n- Do not wrap the final JSON in Markdown.\n\n\n\n# Claude Intake Brainstorm\n\nWorkstream: ws-20261014T234009Z-RN9X\nNode: intake.claude_brainstorm\nTemplate: intake-claude-brainstorm\nLedger: .agent/workstreams/ws-20261014T234009Z-RN9X\n\nYou are Claude acting as the primary developer and product-design partner.\n\nUse the orchestrator-provided seed, tracked-path inventory, memory, contract scope, and context recommendations to clarify the user request before implementation. This intake stage permits targeted Read/Grep/Glob discovery inside the effective workspace so the contract can be grounded in repository facts. Start from the projected repo map, inspect only the files needed to determine exact scope and acceptance semantics, and do not start an open-ended repository survey. Terminal, Bash, execute, write, edit, and file creation remain prohibited. When the tracked inventory is non-empty, `evidence_refs` must include at least one existing repository file that supports the proposed scope; other references must also be canonical product-tree paths backed by repository facts. Do not return `READY_FOR_PRODUCT_REVIEW` from filenames or requirement prose alone. If evidence remains insufficient, preserve the uncertainty in supported fields for reviewer/human judgment; do not end with a prose-only \"I need to inspect the repo\" message.\n\nIf the context package includes a previous Codex review, Must Fix list, or revision request, treat it as mandatory feedback for this intake revision. Explicitly address each Must Fix in the updated artifact instead of repeating the previous draft.\n\nRevision convergence policy:\n\n- Must Fix feedback is stronger than the previous draft. The revised proposal must change the contract enough that each Must Fix is satisfied by construction.\n- Do not move an already-specified user constraint into `open_questions`. If the user request or Codex Must Fix already states the rule, encode the rule directly into `acceptance_criteria`, `constraints`, and `test_requirements`.\n- Before returning `READY_FOR_PRODUCT_REVIEW`, account for every explicit user objective, allowed/excluded file, behavior constraint, acceptance criterion, and verification requirement in a binding proposal field: `objective`, `scope`, `acceptance_criteria`, `test_requirements`, `constraints`, or `non_goals`. A requirement mentioned only in `risk_areas`, `open_questions`, or `evidence_refs` is not preserved.\n- For an initial proposal over a non-empty tracked inventory, include at least one `evidence_refs` entry from the projected repo map. Evidence references support scope reasoning but never authorize edits by themselves.\n- Do not copy the current node's `AgentResultEnvelope`, JSON-only output, or workflow-routing protocol into the task proposal. Those are enforced independently by the orchestrator's Output Contract and are not product or implementation requirements.\n- Preserve the user's semantic boundary exactly. Do not broaden or narrow behavior based on language-specific edge cases, inferred product preferences, or a conservative implementation choice that the user did not request.\n- Treat intake file entries as proposals, not authorization. GOAL approval confirms the objective, acceptance and exclusions; exact implementation files and operations are approved in EXECUTION after design and plan review. Keep any proposed paths canonical and evidence-grounded. The approved EXECUTION `scope.included` is the exhaustive authorization set; it does not require every declared path to be changed. Do not use acceptance criteria, constraints, risks, or other prose to authorize undeclared paths. When a revision obligation identifies a scope gap, use only the exact typed scope-addition field rendered by the Output Contract and map the obligation to one or more genuinely relevant clause IDs.\n- Use `open_questions` only for real product ambiguity that cannot be resolved from the user request, repository evidence, or prior Codex feedback.\n- If an implementation tradeoff does not change user-visible semantics, choose the simplest compliant implementation and record material risk in `risk_areas`. If it would change the accepted input, output, scope, or observable behavior, preserve the literal user requirement and record the unresolved choice without turning it into a constraint or test.\n- When revising after a Codex Must Fix, include at least one acceptance criterion or test requirement for each Must Fix. Do not claim readiness while leaving a Must Fix as a future human decision.\n\nLedger write policy:\n\n- Do not create, edit, or delete files under .agent/.\n- Only the orchestrator writes run ledger artifacts.\n- Return your artifact in stdout using the contract below.\n- Even when repository evidence is insufficient, the final assistant message must be the required strict JSON result. A prose-only response is a contract failure.\n\n## User Request\n\n# 换行规范化函数\n\n在新的本地 Python 仓库提供 `normalize_newlines(text: str) -> str`：将 CRLF 和单独 CR 转为 LF，保留其他字符、空串、已有 LF，以及末尾有无换行。只使用 Python 标准库，不引入第三方依赖、网络、数据库、浏览器、后台服务或机器配置修改。\n\n提供 unittest 测试和 README 用法。建议文件为 `src/normalize_text.py`、`tests/test_normalize_text.py`、`README.md`；它们是待设计与计划确认的提案，最终具体文件和 CREATE/MODIFY 在实现前单独批准。\n\n验收：\n\n- AC-1：空串、纯 LF、CRLF、单 CR、混合换行、Unicode、末尾有/无换行、连续空行至少八种输入有明确期望，重复规范化保持相同结果。\n- AC-2：实际执行测试，实际输出明确显示覆盖数、零 failure/error，并与测试源码中的案例相符。本任务不要求工具提供独立测量的真实退出码，但测试完成状态或文字结论本身不能替代实际输入/输出与测试结果。\n- AC-3：README 例子与代码一致，包含导入和典型混合换行输入/输出；实际读取源码/文档或执行例子支持这一结论。\n\n\n## Context Package\n\n- .agent/workstreams/ws-20261014T234009Z-RN9X/context/node-context-intake_claude_brainstorm-001.md\n\n```text\n# Context Package\n\n- Workstream: ws-20261014T234009Z-RN9X\n- Builder Node: context.intake_claude_brainstorm\n- Target Node: intake.claude_brainstorm\n- Generated At: 2026-10-14T23:40:27.169647Z\n- Profile: intake\n- Total: 153 / 3.0k tokens\n\n## Context Governance\n\n| Section | Level | Degraded | Original | Current |\n|---|---|---|---|---|\n| task_contract | full | - | 0 | 0 |\n| ledger_pointers | pointer_only | yes | 139 | 153 |\n\nDegraded sections have full data at their original paths listed below.\n\n## State & Evidence Boundary\n\nThis package separates deterministic harness facts from agent proposals.\n\n### Trusted Harness Facts\n\n- TaskContract qualification: not available\n- Git Evidence: not generated yet\n\n### Human Decisions\n\n- Requirement Resolution: not available\n\n### Agent Proposed States\n\n- No routed validated agent sidecars yet\n\n### Pending Contract/Evidence Gaps\n\n- No contract failure diagnostics recorded\n\n## Repo Scope Guidance\n\nThis section is a passive harness guardrail. It guides repository exploration but does not replace task contract, artifact validation, or human approval.\n\n- Stage: intake\n- Repo map: .agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-context-intake_claude_brainstorm-001/repo-map.json\n- Repository fact binding: .agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-context-intake_claude_brainstorm-001/binding.json\n- Tracked inventory: count=0; head=; sha256=\n\n- File relevance plan: .agent/workstreams/ws-20261014T234009Z-RN9X/artifacts/context-governance/occurrences/node-context-intake_claude_brainstorm-001/file-relevance-plan.j..."
+          }
+        ]
+      }
+    },
+    {
+      "Agent": {
+        "content": [
+          {
+            "Thinking": {
+              "text": "Let me analyze this task carefully.\n\nThe user request is to create a newline normalization function in a new local Python repository. The context says:\n- Tracked inventory: count=0 (empty repository, only the initial commit \"Initialize fresh Dual verification target\")\n- So evidence_refs can be empty (`evidence_refs=[]`) since the tracked inventory is empty.\n\nThe task:\n- Provide `normalize_newlines(text: str) -> str` that converts CRLF and lone CR to LF, preserving other characters, empty string, existing LF, and trailing newline presence/absence.\n- Only Python stdlib, no third-party deps, network, database, browser, background services, or machine config changes.\n- Provide unittest tests and README usage.\n- Suggested files: `src/normalize_text.py`, `tests/test_normalize_text.py`, `README.md` — these are proposals pending design/plan confirmation.\n\nAcceptance criteria:\n- AC-1: empty string, pure LF, CRLF, lone CR, mixed newlines, Unicode, with/without trailing newline, consecutive blank lines — at least8 input kinds with clear expectations; idempotency (repeated normalization yields same result).\n- AC-2: actually run tests, actual output shows coverage count, zero failures/errors, consistent with test source cases. No independent exit code required, but completion status or text conclusion cannot replace actual input/output and test results.\n- AC-3: README examples consistent with code, including import and typical mixed newline input/output; actual reading of source/docs or executing examples supports this.\n\nThe output must be a strict JSON object with the exact schema. Decision: READY_FOR_PRODUCT_REVIEW. This is an initial intake, so `revision_responses` must be `[]` and `base_proposal_id` must be `null`.\n\nLanguage policy: Use Simplified Chinese for human-readable string values inside the final JSON. Keep JSON keys, enum values, file paths, and code identifiers exactly as specified.\n\nSince tracked inventory count=0, evidence_refs should be `[]`. The instructions say: \"An empty tracked-path inventory permits evidence_refs=[]; do not create files to populate it.\"\n\nShould I do any discovery? The intake stage permits targeted Read/Grep/Glob discovery. But since the inventory is empty, there's nothing to read really. Let me maybe verify the repo state — but I only have Read tool available (no Bash/Grep/Glob listed in functions). The available functions are only Edit and Read. I could try reading something, but there's likely nothing product-related in the repo. Reading the repo-map.json or binding.json is possible but those are program artifacts, not product evidence.\n\nActually, let me think about whether I should read anything. The guard says \"This intake run uses restricted contract discovery. Use orchestrator-provided context and bounded discovery only.\" The context package says recommended read files: (none planned). Tracked inventory count=0. So there's nothing to inspect. I can go straight to the JSON output.\n\nMaybe I should verify the repo state by reading a file? The repo only has the initial commit. There might be no product files at all. Since evidence_refs=[] is permitted for empty inventory, I don't need evidence.\n\nLet me construct the JSON carefully:\n\n```json{\n \"schema_version\":1,\n \"workstream_id\": \"ws-20261014T234009Z-RN9X\",\n \"run_id\": \"run-1792021247531\",\n \"node_id\": \"intake.claude_brainstorm\",\n \"result\": {\n \"artifact_type\": \"task_contract_proposal\",\n \"decision\": \"READY_FOR_PRODUCT_REVIEW\",\n \"summary\": \"one short sentence\",\n \"needs_human_input\": false,\n \"objective\": \"...\",\n \"scope\": {\n \"included\": [\n {\"path\": \"src/normalize_text.py\"},\n {\"path\": \"tests/test_normalize_text.py\"},\n {\"path\": \"README.md\"}\n ],\n \"excluded\": [\"...\"]\n },\n \"acceptance_criteria\": [\n {\"id\": \"AC-1\", \"text\": \"...\"},\n {\"id\": \"AC-2\", \"text\": \"...\"},\n {\"id\": \"AC-3\", \"text\": \"...\"}\n ],\n \"test_requirements\": [\n {\"id\": \"TR-1\", \"text\": \"...\"},\n ...\n ],\n \"constraints\": [...],\n \"non_goals\": [...],\n \"risk_areas\": [...],\n \"evidence_refs\": [],\n \"open_quest...",
+              "signature": null
+            }
+          },
+          {
+            "Text": "{\"schema_version\":1,\"workstream_id\":\"ws-20261014T234009Z-RN9X\",\"run_id\":\"run-1792021247531\",\"node_id\":\"intake.claude_brainstorm\",\"result\":{\"artifact_type\":\"task_contract_proposal\",\"decision\":\"READY_FOR_PRODUCT_REVIEW\",\"summary\":\"在空仓库中提案新建换行规范化函数 normalize_newlines、配套 unittest测试与 README，语义限定为 CRLF 与单独 CR 转 LF 且其余内容保持不变。\",\"needs_human_input\":false,\"objective\":\"在本地 Python仓库中交付 normalize_newlines(text: str) -> str：将 CRLF 与单独 CR统一转换为 LF，保留其他所有字符、空串、已有 LF 以及末尾换行的有/无，并附带标准库 unittest测试与 README 用法说明。\",\"scope\":{\"included\":[{\"path\":\"src/normalize_text.py\"},{\"path\":\"tests/test_normalize_text.py\"},{\"path\":\"README.md\"}],\"excluded\":[\"不修改 .git/ 下任何内容\",\"不修改 .agent/工作流账本或上下文产物\",\"不创建 src/normalize_text.py、tests/test_normalize_text.py、README.md之外的产物文件\"]},\"acceptance_criteria\":[{\"id\":\"AC-1\",\"text\":\"测试源码至少覆盖八类输入并各有明确期望结果：空串、纯 LF、CRLF、单独 CR、混合换行、Unicode 内容、末尾有/无换行、连续空行；且重复调用 normalize_newlines 得到相同结果（幂等）。\"},{\"id\":\"AC-2\",\"text\":\"实际执行 unittest测试并记录真实运行输出，输出明确显示用例覆盖数（如 Ran N tests）且 failure=0、error=0，运行结果与测试源码中的案例相符；仅有测试完成状态或文字结论不能替代实际输入/输出与测试结果（本任务不要求独立测量的真实退出码）。\"},{\"id\":\"AC-3\",\"text\":\"README示例与 src/normalize_text.py代码一致，包含函数导入方式和典型混合换行输入/输出示例，并通过实际读取源码/文档或执行示例来支持该结论。\"}],\"test_requirements\":[{\"id\":\"TR-1\",\"text\":\"使用 Python标准库 unittest 编写 tests/test_normalize_text.py，覆盖 AC-1 所列至少八类输入并包含幂等性断言（对规范化结果再次规范化保持不变）。\"},{\"id\":\"TR-2\",\"text\":\"以 python -m unittest（或等价标准库方式）实际运行测试并保存真实 stdout，展示 Ran 数量与 OK /0 failures、0 errors 结果，作为 AC-2 的证据。\"},{\"id\":\"TR-3\",\"text\":\"实际读取 src/normalize_text.py 与 README.md 并比对（或直接执行 README示例代码），确认导入路径、函数名与混合换行输入/输出一致，作为 AC-3 的证据。\"}],\"constraints\":[{\"id\":\"C-1\",\"text\":\"仅使用 Python标准库；不得引入第三方依赖，不得使用网络、数据库、浏览器、后台服务，也不得修改机器配置。\"},{\"id\":\"C-2\",\"text\":\"语义边界：仅将 CRLF 与单独 CR转换为 LF；不得增删或改变其他任何字符（含 Unicode）、空串、已有 LF，以及末尾换行的有/无。\"},{\"id\":\"C-3\",\"text\":\"src/normalize_text.py、tests/test_normalize_text.py、README.md 为待设计与计划确认的提案路径；最终具体文件与 CREATE/MODIFY 操作须在 EXECUTION阶段经批准后执行。\"}],\"non_goals\":[{\"id\":\"NG-1\",\"text\":\"不做换行转换以外的文本规范化，如去除行尾空白、Unicode规范化（NFC/NFD）、制表符或全半角转换。\"},{\"id\":\"NG-2\",\"text\":\"不提供命令行入口、打包发布、CI 配置或与其他仓库/系统的集成。\"},{\"id\":\"NG-3\",\"text\":\"不引入第三方依赖，不进行网络访问、数据库、浏览器、后台服务调用或机器配置修改。\"}],\"risk_areas\":[{\"id\":\"R-1\",\"text\":\"CRLF 与单独 CR 的转换顺序需正确（先处理 CRLF 再处理剩余 CR，或使用等价的一次遍历替换），避免出现 CR LF被拆成两个 LF 或残留 CR 的边界错误。\"},{\"id\":\"R-2\",\"text\":\"仓库 tracked inventory 为0，src/ 与 tests/ 目录尚不存在，需在实现时新建目录结构；因此 evidence_refs 为空且无既有产品文件可引用。\"},{\"id\":\"R-3\",\"text\":\"README示例若纯手工书写可能与代码实现漂移，须按 TR-3 通过实际读取或执行示例验证一致性。\"}],\"evidence_refs\":[],\"open_questions\":[],\"revision_responses\":[],\"base_proposal_id\":null}}"
+          }
+        ],
+        "tool_results": {}
+      }
+    }
+  ],
+  "updated_at": "2026-10-14T23:41:30.539Z",
+  "cumulative_token_usage": {
+    "input_tokens": 4906,
+    "output_tokens": 3753,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "total_tokens": 8659
+  },
+  "cumulative_cost": {
+    "amount": 0.11835499999999999,
+    "currency": "USD"
+  },
+  "request_token_usage": {
+    "3a584dd5-9f55-4971-afab-da6d2f179e89": {
+      "input_tokens": 4906,
+      "output_tokens": 3753,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "total_tokens": 8659
+    }
+  },
+  "acpx": {
+    "current_model_id": "default",
+    "available_models": [
+      "default",
+      "opus",
+      "sonnet",
+      "haiku"
+    ],
+    "model_control": "config_option",
+    "available_commands": [
+      {
+        "name": "deep-research",
+        "description": "Deep research harness — fan-out web searches, fetch sources, adversarially verify claims, synthesize a cited report. (dynamic workflow)",
+        "has_input": false
+      },
+      {
+        "name": "design-sync",
+        "description": "Push a React design system to claude.ai/design. This runs a converter that bundles the real component code (from Storybook or a bare package) and uploads it. Use when the user runs /design-sync or says \"sync my design system to Claude Design\".",
+        "has_input": true
+      },
+      {
+        "name": "dataviz",
+        "description": "Use this skill whenever you are about to create ANY chart, graph, plot, dashboard, or data visualization, in ANY output medium — an HTML or React artifact, inline SVG, plotting code in any library (matplotlib, plotly, d3, Recharts, …), an image/PNG you will render and upload, or a chart shared into Slack. Read it BEFORE writing the first line of chart code, choosing chart colors, building a stat tile / meter / KPI row, or laying out a dashboard. Produces visualizations that read as one system — elegant, accessible, consistent in light and dark — using a brand-neutral placeholder palette you swap for your own. Teaches a design-system-agnostic method: a form heuristic, a color formula with a runnable validator, mark specs, and interaction rules. A validated default palette is documented in `references/palette.md` — swap that file's values for your brand's. Triggers on: \"chart\", \"graph\", \"plot\", \"data viz\", \"visualization\", \"dashboard\", \"analytics\", \"visualize data\", \"categorical colors\", \"sequential / diverging palette\", \"stat tile\", \"sparkline\", \"heatmap\", \"legend\", \"axis\", \"tooltip\", \"chart colors\", \"color by series\".",
+        "has_input": false
+      },
+      {
+        "name": "update-config",
+        "description": "Use this skill to configure the Claude Code harness via settings.json. Automated behaviors (\"from now on when X\", \"each time X\", \"whenever X\", \"before/after X\") require hooks configured in settings.json - the harness executes these, not Claude, so memory/preferences cannot fulfill them. Also use for: permissions (\"allow X\", \"add permission\", \"move permission to\"), env vars (\"set X=Y\"), hook troubleshooting, or any changes to settings.json/settings.local.json files. Examples: \"allow npm commands\", \"add bq permission to global settings\", \"move permission to user settings\", \"set DEBUG=true\", \"when claude stops show X\". For simple settings like theme/model, suggest the /config command.",
+        "has_input": false
+      },
+      {
+        "name": "verify",
+        "description": "Verify that a code change actually does what it's supposed to by exercising it end-to-end and observing behavior — drive the affected flow, not just tests or typecheck. Run before committing nontrivial changes; bootstraps this repo's project verify skill if none exists yet. Don't invoke it on a diff that only touches tests, docs, or other code with no runtime surface to drive (a change to product source always has one) — there's nothing to observe.",
+        "has_input": false
+      },
+      {
+        "name": "debug",
+        "description": "Enable debug logging for this session and help diagnose issues",
+        "has_input": true
+      },
+      {
+        "name": "code-review",
+        "description": "Review the current diff, or a PR number/branch/path target, for correctness bugs and reuse/simplification/efficiency cleanups at the given effort level (low/medium: fewer, high-confidence findings; high→max: broader coverage, may include uncertain findings); with no level given, it reuses the level you typed last. Pass --comment to post findings as inline PR comments, or --fix to apply the findings to the working tree after the review.",
+        "has_input": true
+      },
+      {
+        "name": "simplify",
+        "description": "Review the changed code for reuse, simplification, efficiency, and altitude cleanups, then apply the fixes. Quality only — it does not hunt for bugs; use /code-review for that.",
+        "has_input": true
+      },
+      {
+        "name": "batch",
+        "description": "Research and plan a large-scale change, then execute it in parallel across 5–30 isolated worktree agents that each open a PR.",
+        "has_input": true
+      },
+      {
+        "name": "fewer-permission-prompts",
+        "description": "Scan your transcripts for common read-only Bash and MCP tool calls, then add a prioritized allowlist to project .claude/settings.json to reduce permission prompts.",
+        "has_input": false
+      },
+      {
+        "name": "loop",
+        "description": "Run a prompt or slash command on a recurring interval (e.g. /loop 5m /foo). Omit the interval to let the model self-pace.",
+        "has_input": true
+      },
+      {
+        "name": "claude-api",
+        "description": "Reference for the Claude API / Anthropic SDK — model ids, pricing, params, streaming, tool use, MCP, agents, caching, token counting, model migration.\nTRIGGER — read BEFORE opening the target file; don't skip because it \"looks like a one-liner\" — whenever: the prompt names Claude/Anthropic in any form (Claude, Anthropic, Fable, Opus, Sonnet, Haiku, `anthropic`, `@anthropic-ai`, `claude-*`, `us.anthropic.*`, `[1m]`); the user asks about an LLM (pricing/model choice/limits/caching) — never answer from memory; OR the task is LLM-shaped with provider unstated (agent/MCP/tool-definition/multi-agent/RAG/LLM-judge/computer-use; generate/summarize/extract/classify/rewrite/converse over NL; debugging refusals/cutoffs/streaming/tool-calls/tokens).\nSKIP only when another provider is being worked on (overrides all triggers): OpenAI/GPT/Gemini/Llama/Mistral/Cohere/Ollama named in the query; OR `grep -rE 'openai|langchain_openai|google.generativeai|genai|mistralai|cohere|ollama'` over the project hits (run this grep FIRST if no provider named — don't Read the file).",
+        "has_input": false
+      },
+      {
+        "name": "run",
+        "description": "Launch and drive this project's app to see a change working. Use when asked to run, start, or screenshot the app, or to confirm a change works in the real app (not just tests). First looks for a project skill that already covers launching the app; otherwise falls back to built-in patterns per project type (CLI, server, TUI, Electron, browser-driven, library).",
+        "has_input": false
+      },
+      {
+        "name": "run-skill-generator",
+        "description": "Author or improve the run-<unit> skill — a per-project skill that tells agents how to build, launch, and drive this project's app. Use when the user asks to set up the project, get it running, write run instructions, or verify build/run steps work from a clean environment.",
+        "has_input": false
+      },
+      {
+        "name": "agents",
+        "description": "(removed) Ask Claude to create/manage subagents, or edit .claude/agents/",
+        "has_input": false
+      },
+      {
+        "name": "auto-mode-setup",
+        "description": "Set up and customise auto mode — environment context, plus optional rule tweaks",
+        "has_input": true
+      },
+      {
+        "name": "autocompact",
+        "description": "Configure the auto-compact window size",
+        "has_input": true
+      },
+      {
+        "name": "compact",
+        "description": "Free up context by summarizing the conversation so far",
+        "has_input": true
+      },
+      {
+        "name": "config",
+        "description": "Set a setting by key",
+        "has_input": true
+      },
+      {
+        "name": "context",
+        "description": "Show current context usage",
+        "has_input": false
+      },
+      {
+        "name": "effort",
+        "description": "Set effort level for model usage",
+        "has_input": true
+      },
+      {
+        "name": "fast",
+        "description": "Toggle fast mode (Opus 5)",
+        "has_input": true
+      },
+      {
+        "name": "heapdump",
+        "description": "Dump the JS heap to ~/Desktop",
+        "has_input": false
+      },
+      {
+        "name": "init",
+        "description": "Initialize a new CLAUDE.md file with codebase documentation",
+        "has_input": false
+      },
+      {
+        "name": "mcp",
+        "description": "Manage MCP servers",
+        "has_input": true
+      },
+      {
+        "name": "import",
+        "description": "Import config from another AI coding agent",
+        "has_input": false
+      },
+      {
+        "name": "model",
+        "description": "Set the AI model for Claude Code",
+        "has_input": true
+      },
+      {
+        "name": "__remote-workflow",
+        "description": "Run the workflow script delivered in this session environment (server-launched sessions only)",
+        "has_input": false
+      },
+      {
+        "name": "workflow-launch-exec",
+        "description": "Execute a server-launched workflow handoff (workflow_launch event sessions only)",
+        "has_input": false
+      },
+      {
+        "name": "reload-skills",
+        "description": "Pick up skills added or changed on disk during this session",
+        "has_input": false
+      },
+      {
+        "name": "rename",
+        "description": "Rename the current conversation",
+        "has_input": true
+      },
+      {
+        "name": "security-review",
+        "description": "Complete a security review of the pending changes on the current branch",
+        "has_input": false
+      },
+      {
+        "name": "usage",
+        "description": "Show session cost, plan usage, and what's contributing to your limits",
+        "has_input": false
+      },
+      {
+        "name": "insights",
+        "description": "Generate a report analyzing your Claude Code sessions",
+        "has_input": false
+      },
+      {
+        "name": "recap",
+        "description": "Generate a one-line session recap now",
+        "has_input": false
+      },
+      {
+        "name": "skill-doctor",
+        "description": "Show which loaded skills are unused and costing context",
+        "has_input": false
+      },
+      {
+        "name": "goal",
+        "description": "Set a goal — keep working until the condition is met",
+        "has_input": false
+      },
+      {
+        "name": "design",
+        "description": "Grant or revoke Claude agent access to your Design projects",
+        "has_input": true
+      },
+      {
+        "name": "design-consent",
+        "description": "Grant Claude agent access to your Design projects",
+        "has_input": false
+      },
+      {
+        "name": "design-revoke",
+        "description": "Revoke Claude agent access to your Design projects",
+        "has_input": false
+      },
+      {
+        "name": "list-agents",
+        "description": "List subagents and other Claude sessions you can message",
+        "has_input": false
+      },
+      {
+        "name": "team-onboarding",
+        "description": "Help teammates ramp on Claude Code with a guide from your usage",
+        "has_input": false
+      }
+    ],
+    "config_options": [
+      {
+        "id": "mode",
+        "name": "Mode",
+        "description": "Session permission mode",
+        "category": "mode",
+        "type": "select",
+        "currentValue": "default",
+        "options": [
+          {
+            "value": "auto",
+            "name": "Auto",
+            "description": "Use a model classifier to approve/deny permission prompts"
+          },
+          {
+            "value": "default",
+            "name": "Manual",
+            "description": "Standard behavior, prompts for dangerous operations"
+          },
+          {
+            "value": "acceptEdits",
+            "name": "Accept Edits",
+            "description": "Auto-accept file edit operations"
+          },
+          {
+            "value": "plan",
+            "name": "Plan Mode",
+            "description": "Planning mode, no actual tool execution"
+          },
+          {
+            "value": "dontAsk",
+            "name": "Don't Ask",
+            "description": "Don't prompt for permissions, deny if not pre-approved"
+          },
+          {
+            "value": "bypassPermissions",
+            "name": "Bypass Permissions",
+            "description": "Bypass all permission checks"
+          }
+        ]
+      },
+      {
+        "id": "model",
+        "name": "Model",
+        "description": "AI model to use",
+        "category": "model",
+        "type": "select",
+        "currentValue": "default",
+        "options": [
+          {
+            "value": "default",
+            "name": "Default (recommended)",
+            "description": "glm-5.3[1m]"
+          },
+          {
+            "value": "opus",
+            "name": "glm-5.3",
+            "description": "Custom Opus model"
+          },
+          {
+            "value": "sonnet",
+            "name": "glm-5.3",
+            "description": "Custom Sonnet model"
+          },
+          {
+            "value": "haiku",
+            "name": "glm-4.7-air",
+            "description": "Custom Haiku model"
+          }
+        ]
+      },
+      {
+        "id": "effort",
+        "name": "Effort",
+        "description": "Available effort levels for this model",
+        "category": "thought_level",
+        "type": "select",
+        "currentValue": "default",
+        "options": [
+          {
+            "value": "default",
+            "name": "Default"
+          },
+          {
+            "value": "low",
+            "name": "Low"
+          },
+          {
+            "value": "medium",
+            "name": "Medium"
+          },
+          {
+            "value": "high",
+            "name": "High"
+          },
+          {
+            "value": "xhigh",
+            "name": "Xhigh"
+          },
+          {
+            "value": "max",
+            "name": "Max"
+          }
+        ]
+      }
+    ],
+    "session_options": {
+      "allowed_tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
+      "claude_execution_policy_ref": ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021247531/execution-authority/claude-execution-policy.json",
+      "claude_execution_policy_sha256": "32bcb9a38144f99da4c9e012ec9b57af8cc4969bc57759f4d8688f17e590f07a"
+    }
+  }
+}

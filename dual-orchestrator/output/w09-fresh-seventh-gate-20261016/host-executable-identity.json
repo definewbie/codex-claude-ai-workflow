@@ -1,0 +1,61 @@
+{
+  "binaries": [
+    {
+      "name": "java",
+      "path": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin/java",
+      "realpath": "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin/java",
+      "sha256": "35c0e7afcaeb977100d0b90725cc52ee73123c9286cdf3b423fe53d7f0ea0491",
+      "meaning": "Measured current binary, not a historical byte comparison or product version lock"
+    },
+    {
+      "name": "python3",
+      "path": "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3",
+      "realpath": "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13",
+      "sha256": "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+      "meaning": "Measured current binary, not a historical byte comparison or product version lock"
+    },
+    {
+      "name": "node",
+      "path": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/node",
+      "realpath": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/node",
+      "sha256": "64bcb939f5f8c921d104b02d0eb960781c13b49b9133d1d71a768eadd62da401",
+      "meaning": "Measured current binary, not a historical byte comparison or product version lock"
+    },
+    {
+      "name": "git",
+      "path": "/opt/homebrew/bin/git",
+      "realpath": "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+      "sha256": "971d6f2a523854035f836bb4a994c8e64efa87b30bcd3d799dab439e9d0d34f5",
+      "meaning": "Measured current binary, not a historical byte comparison or product version lock"
+    },
+    {
+      "name": "rtk",
+      "path": "/opt/homebrew/bin/rtk",
+      "realpath": "/opt/homebrew/Cellar/rtk/0.42.3/bin/rtk",
+      "sha256": "b243916c1ee1dd54efa11e8a40e72ff948efbd617e373a18e631410dee1df89e",
+      "meaning": "Measured current binary, not a historical byte comparison or product version lock"
+    },
+    {
+      "name": "claude",
+      "path": "/opt/homebrew/bin/claude",
+      "realpath": "/opt/homebrew/Caskroom/claude-code/2.1.277/claude",
+      "sha256": "73d6a2a55c46907e49bd8bb7608e134333bd71173351ee16ddce7d7db9914b9c",
+      "meaning": "Measured current binary, not a historical byte comparison or product version lock"
+    },
+    {
+      "name": "codex",
+      "path": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "realpath": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+      "meaning": "Measured current binary, not a historical byte comparison or product version lock"
+    },
+    {
+      "name": "acpx",
+      "path": "/Users/kriswang/.nvm/versions/node/v22.21.0/bin/acpx",
+      "realpath": "/Users/kriswang/.nvm/versions/node/v22.21.0/lib/node_modules/acpx/dist/cli.js",
+      "sha256": "85fdd3fb1e8bfec5477089430fd8b04d825083a2ab79becfb542f164375e0400",
+      "meaning": "Measured current binary, not a historical byte comparison or product version lock"
+    }
+  ],
+  "native_clients_executed": false
+}

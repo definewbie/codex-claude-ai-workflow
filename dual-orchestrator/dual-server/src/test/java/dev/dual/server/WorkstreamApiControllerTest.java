@@ -34,11 +34,27 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class WorkstreamApiControllerTest {
     @TempDir
     Path tempDir;
+
+    @Test
+    void adoptionPayloadIsDistinctFromStopAndRetryAndRejectsBeforeChangingLedger() throws Exception {
+        var controller = controller();
+        var json = new ObjectMapper().registerModule(new JavaTimeModule());
+        var payload = json.readValue("{\"decision\":{\"disposition\":\"AUTHORIZE_NEW_ATTEMPT\"}}",
+                WorkstreamApiController.RecoveryStaleRequest.class);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () ->
+                controller.recoverStaleRunning("ws-no-side-effect", tempDir.toString(), payload));
+        var conflicting = new WorkstreamApiController.RecoveryStaleRequest("", true, payload.decision());
+        var failure = org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () ->
+                controller.recoverStaleRunning("ws-no-side-effect", tempDir.toString(), conflicting));
+        assertTrue(failure.getMessage().contains("separate"));
+        assertFalse(Files.exists(tempDir.resolve(".agent")));
+    }
 
     @Test
     @SuppressWarnings("unchecked")
@@ -139,7 +155,7 @@ class WorkstreamApiControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void timelineReturnsNodesInChronologicalOrder() throws Exception {
+    void timelineIgnoresStaleCacheAndOrdersCurrentLedgerNodes() throws Exception {
         var fixture = createWorkstream("ws-api-timeline-order");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
         Files.writeString(paths.timelineJson(), """
@@ -171,13 +187,14 @@ class WorkstreamApiControllerTest {
         var timeline = controller.timeline(fixture.workstreamId(), tempDir.toString());
 
         var nodes = (List<Map<String, Object>>) timeline.get("nodes");
-        assertEquals("early", nodes.get(0).get("nodeDefinitionId"));
-        assertEquals("late", nodes.get(1).get("nodeDefinitionId"));
+        assertEquals("first", nodes.get(0).get("nodeDefinitionId"));
+        assertEquals("review.gate", nodes.get(1).get("nodeDefinitionId"));
+        assertEquals("WAITING_FOR_HUMAN", timeline.get("workflowStatus"));
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    void overviewReturnsTraceSummary() throws Exception {
+    void overviewReturnsTraceSummaryWithoutTrustingUnprovenAcceptance() throws Exception {
         var fixture = createWorkstream("ws-api-overview");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
         Files.createDirectories(paths.workstreamDir().resolve("reports"));
@@ -218,17 +235,12 @@ class WorkstreamApiControllerTest {
         assertEquals("workflow_current", workflow.get("statusSource"));
         assertEquals("review.gate", workflow.get("currentNode"));
         var acceptance = (Map<String, Object>) response.get("acceptance");
-        assertEquals("ACCEPT_WITH_NOTES", acceptance.get("finalDecision"));
-        assertEquals("MEDIUM", acceptance.get("verificationConfidence"));
-        assertEquals("real_case_summary_projection", acceptance.get("verificationConfidenceSource"));
+        assertEquals("none", acceptance.get("finalDecision"));
+        assertEquals("UNKNOWN", acceptance.get("verificationConfidence"));
+        assertEquals("completion_evidence_status", acceptance.get("verificationConfidenceSource"));
         assertEquals(1, acceptance.get("repairLoopCount"));
         var completionEvidence = (Map<String, Object>) response.get("completionEvidence");
-        assertEquals("available", completionEvidence.get("status"));
-        assertEquals("ACCEPT_WITH_NOTES", completionEvidence.get("goalOutcome"));
-        assertEquals("acceptance.codex_verifier_review",
-                ((Map<String, Object>) completionEvidence.get("acceptance")).get("nodeId"));
-        assertEquals("implement.claude_self_test_report",
-                ((Map<String, Object>) completionEvidence.get("selfTest")).get("nodeId"));
+        assertEquals("unavailable", completionEvidence.get("status"));
         assertEquals(true, response.get("whyStopped").toString().contains("Waiting for human review"));
         assertEquals(true, response.get("nextAction").toString().contains("dualctl review show"));
         var attention = (List<Map<String, Object>>) response.get("attention");
@@ -236,7 +248,7 @@ class WorkstreamApiControllerTest {
         assertEquals(sharedAttention.detail(), response.get("whyStopped"));
         assertEquals(sharedNextAction(sharedAttention), response.get("nextAction"));
         assertEquals(sharedAttention.toMap(), attention.getFirst());
-        assertEquals(true, attention.stream().anyMatch(item -> "Accepted with notes".equals(item.get("title"))));
+        assertEquals(false, attention.stream().anyMatch(item -> "Accepted with notes".equals(item.get("title"))));
         assertEquals(true, attention.stream().anyMatch(item -> "Repair loop occurred".equals(item.get("title"))));
         assertEquals(true, attention.stream().anyMatch(item -> "Human gate is open".equals(item.get("title"))));
         assertEquals(false, ((List<Map<String, Object>>) response.get("recentTimeline")).isEmpty());
@@ -259,6 +271,35 @@ class WorkstreamApiControllerTest {
         assertFalse(response.containsKey("deliveryMerge"));
         var delivery = (Map<String, Object>) response.get("deliveryView");
         assertEquals("WORKFLOW_NOT_DELIVERABLE", delivery.get("reasonCode"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void serverProjectsAcceptedEvidenceFromApprovedExecutionAndIndependentReview() throws Exception {
+        var ws = "ws-api-proven-acceptance";
+        dev.dual.runtime.handler.CompletionEvidenceLineageFixture.prepareApproved(
+                tempDir, ws, "ACCEPT_WITH_NOTES", "Accepted with notes.", ServerLedgerFactory.create());
+        var reports = new WorkstreamPaths(tempDir, new DualId(ws)).workstreamDir().resolve("reports");
+        Files.createDirectories(reports);
+        Files.writeString(reports.resolve("real-case-summary.json"),
+                "{\"verification_confidence\":\"MEDIUM\"}");
+        var controller = controller();
+        var overview = controller.overview(ws, tempDir.toString());
+        var acceptance = (Map<String, Object>) overview.get("acceptance");
+        var completion = (Map<String, Object>) overview.get("completionEvidence");
+        assertEquals("ACCEPT_WITH_NOTES", acceptance.get("finalDecision"));
+        assertEquals("MEDIUM", acceptance.get("verificationConfidence"));
+        assertEquals("real_case_summary_projection", acceptance.get("verificationConfidenceSource"));
+        assertEquals("available", completion.get("status"));
+        assertEquals("ACCEPT_WITH_NOTES", completion.get("goalOutcome"));
+        assertEquals("acceptance.codex_verifier_review",
+                ((Map<String, Object>) completion.get("acceptance")).get("nodeId"));
+        assertEquals("implement.claude_self_test_report",
+                ((Map<String, Object>) completion.get("selfTest")).get("nodeId"));
+        var attention = (List<Map<String, Object>>) overview.get("attention");
+        assertTrue(attention.stream().anyMatch(item -> "Accepted with notes".equals(item.get("title"))));
+        var status = controller.status(ws, tempDir);
+        assertEquals("available", ((Map<String, Object>) status.get("completionEvidence")).get("status"));
     }
 
     @Test
@@ -351,7 +392,7 @@ class WorkstreamApiControllerTest {
     void statusAndOverviewExposeAgentTaskDispatchReadModel() throws Exception {
         var fixture = createRunningWorkstream("ws-api-agent-task");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         var definition = new NodeDefinition(node.nodeDefinitionId(), NodeKind.TASK, node.handlerType(), Map.of(
@@ -360,8 +401,15 @@ class WorkstreamApiControllerTest {
                 "prompt_template", "implementation-claude",
                 "expected_contract", "implementation_handoff"
         ));
-        var task = ledger.createAgentTask(paths, "wfe-api-agent-task", definition, node);
-        ledger.markAgentTaskRunning(paths, task, "nxe-api-agent-task");
+        try (var write = ledger.writeSession(paths, "claim queued task", "query-fixture")) {
+            var scoped = write.ledger();
+            var execution = scoped.startWorkflowExecution(paths, scoped.loadCurrent(paths), "query-fixture");
+            var task = scoped.createAgentTask(paths, execution.workflowExecutionId(), definition, node);
+            var claim = scoped.startNodeExecution(paths, execution.workflowExecutionId(), node, task, ProcessHandle.current().pid());
+            scoped.markAgentTaskRunning(paths, task, claim.nodeExecutionId());
+            scoped.markRunning(paths, node.nodeInstanceId(), ProcessHandle.current().pid());
+            write.commit();
+        }
         var controller = controller();
 
         var status = controller.status(fixture.workstreamId(), tempDir);
@@ -379,7 +427,7 @@ class WorkstreamApiControllerTest {
 
         var latestAgentTasks = (List<Map<String, Object>>) overview.get("latestAgentTasks");
         assertEquals(1, latestAgentTasks.size());
-        assertEquals("nxe-api-agent-task", latestAgentTasks.get(0).get("nodeExecutionId"));
+        assertEquals(ledger.loadNode(paths, node.nodeInstanceId()).latestExecutionId(), latestAgentTasks.get(0).get("nodeExecutionId"));
         assertEquals("implementation_handoff", latestAgentTasks.get(0).get("expectedContract"));
     }
 
@@ -657,7 +705,7 @@ class WorkstreamApiControllerTest {
     void overviewFlagsStaleRunningWhenRecordedPidIsGone() throws Exception {
         var fixture = createRunningWorkstream("ws-api-dead-pid");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var activeNodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         ledger.markRunning(paths, activeNodeId, Long.MAX_VALUE);
         var controller = controller();
@@ -675,7 +723,7 @@ class WorkstreamApiControllerTest {
     void currentReviewReturnsActiveGatePacket() throws Exception {
         var fixture = createWorkstream("ws-api-review");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var activeNodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         var packetPath = paths.workstreamDir().resolve("reviews").resolve(activeNodeId + ".md");
         Files.createDirectories(packetPath.getParent());
@@ -700,7 +748,7 @@ class WorkstreamApiControllerTest {
     void reviewReturnsGatePacketByNodeInstanceId() throws Exception {
         var fixture = createWorkstream("ws-api-review-by-node");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var activeNodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().get(0);
         var packetPath = paths.workstreamDir().resolve("reviews").resolve(activeNodeId + ".md");
         Files.createDirectories(packetPath.getParent());
@@ -722,7 +770,7 @@ class WorkstreamApiControllerTest {
     }
 
     @Test
-    void currentRecoveryReturnsFailureSummaryWhenPresent() throws Exception {
+    void currentRecoveryDoesNotPresentHistoricalFailureAtAnActiveHumanGate() throws Exception {
         var fixture = createWorkstream("ws-api-recovery");
         var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
         Files.createDirectories(paths.recoveryDir());
@@ -736,10 +784,10 @@ class WorkstreamApiControllerTest {
 
         var response = controller.currentRecovery(fixture.workstreamId(), tempDir.toString());
 
-        assertEquals(true, response.get("available"));
+        assertEquals(false, response.get("available"));
         assertEquals(".agent/workstreams/" + fixture.workstreamId() + "/recovery/current-failure.md",
                 response.get("recoveryPath"));
-        assertEquals(true, response.get("markdown").toString().contains("IMPLEMENTATION_BUG"));
+        assertEquals("", response.get("markdown"));
     }
 
     @Test
@@ -758,7 +806,7 @@ class WorkstreamApiControllerTest {
                   "recovery_hint": "Ask the agent to emit the typed artifact."
                 }
                 """, StandardCharsets.UTF_8);
-        var ledger = new WorkflowFileLedger();
+        var ledger = ServerLedgerFactory.create();
         var current = ledger.loadCurrent(paths);
         var activeNodeId = current.activeNodeInstanceIds().get(0);
         var node = ledger.loadNode(paths, activeNodeId);
@@ -817,14 +865,65 @@ class WorkstreamApiControllerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void preparationFailureKeepsTheSameReasonInRecoveryAndOverview() throws Exception {
+        var fixture = createFailedWorkstream("ws-api-input-recovery");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        var ledger = ServerLedgerFactory.create();
+        var current = ledger.loadCurrent(paths);
+        var failure = dev.dual.runtime.handler.AgentExecutionResultFacts.inputPreparationFailed(
+                "TASK_CONTRACT_REVISION_CONTEXT_INVALID", "TASK_CONTRACT_REVISION_CONTEXT_INVALID", List.of("gate subject mismatch"));
+        ledger.completeAndRoute(paths, ledger.loadDefinition(paths), current.activeNodeInstanceIds().getFirst(),
+                failure.status(), failure.outcome(), failure.outputRefs(), failure.result());
+        var node = ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
+        var shared = dev.dual.ledger.file.RecoveryAssessment.from(node, tempDir, fixture.workstreamId());
+        var response = controller().currentRecovery(fixture.workstreamId(), tempDir.toString());
+        var assessment = (Map<String, Object>) response.get("assessment");
+        assertEquals("input_preparation_failure", assessment.get("classification"));
+        assertEquals(shared.reason(), assessment.get("reason"));
+        assertEquals(false, assessment.get("retrySafe"));
+        var overview = controller().overview(fixture.workstreamId(), tempDir.toString());
+        assertEquals(true, overview.toString().contains("gate subject mismatch"));
+        assertFalse(overview.toString().contains("AGENT_RESULT_MISSING"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void incompleteProcessKeepsRecoveryAndAttentionOnExecutionRatherThanOutputRepair() throws Exception {
+        var fixture = createFailedWorkstream("ws-api-process-incomplete");
+        var paths = new WorkstreamPaths(tempDir, new DualId(fixture.workstreamId()));
+        var ledger = ServerLedgerFactory.create();
+        var nodeId = ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst();
+        ledger.completeAndRoute(paths, ledger.loadDefinition(paths), nodeId, NodeStatus.FAILED,
+                "process_output_incomplete", List.of(), Map.of("agent_execution_outcome", Map.of(
+                        "status", "OUTPUT_INCOMPLETE", "primaryReason", "process_output_incomplete",
+                        "recoveryCategory", "OUTPUT_INCOMPLETE", "operatorMessage", "The process did not complete reliably.",
+                        "nodeMaySucceed", false, "retryPolicy", "MANUAL_ONLY")));
+        var assessment = (Map<String, Object>) controller().currentRecovery(
+                fixture.workstreamId(), tempDir.toString()).get("assessment");
+        assertEquals("agent_output_incomplete", assessment.get("classification"));
+        assertEquals("RETRY_AFTER_EXTERNAL_FIX", assessment.get("retryReadiness"));
+        assertEquals(false, assessment.get("retrySafe"));
+        var overview = controller().overview(fixture.workstreamId(), tempDir.toString());
+        var shared = (Map<String, Object>) overview.get("recoveryAssessment");
+        assertEquals(assessment.get("reason"), shared.get("reason"));
+        assertEquals(assessment.get("retryReadiness"), shared.get("retryReadiness"));
+        assertTrue(overview.toString().contains("Inspect the recorded agent process"));
+        assertFalse(overview.toString().contains("Inspect the agent output contract"));
+    }
+
+    @Test
     void streamReturnsSseEmitter() throws Exception {
         var fixture = createWorkstream("ws-api-stream");
         var controller = controller();
 
-        var emitter = controller.stream(fixture.workstreamId(), tempDir.toString(), 1000);
-
-        assertNotNull(emitter);
-        emitter.complete();
+        var serviceField=WorkstreamApiController.class.getDeclaredField("streamService"); serviceField.setAccessible(true);
+        var ownedStream=(WorkstreamStreamService)serviceField.get(controller);
+        try {
+            var emitter = controller.stream(fixture.workstreamId(), tempDir.toString(), 1000);
+            assertNotNull(emitter);
+            emitter.complete();
+        } finally { closeAndAwaitOwnedStream(ownedStream); }
     }
 
     @Test
@@ -839,7 +938,7 @@ class WorkstreamApiControllerTest {
         streamService.overviewStream(tempDir, fixture.workstreamId(), 60_000);
 
         assertEquals(1, streamService.activeStreamCount());
-        streamService.closeActiveStreams();
+        closeAndAwaitOwnedStream(streamService);
         assertEquals(0, streamService.activeStreamCount());
     }
 
@@ -867,13 +966,30 @@ class WorkstreamApiControllerTest {
         ));
     }
 
+    @Test
+    void malformedDeliveryResolutionIsRejectedByTheSameOwnerWithoutCreatingAnOperation() throws Exception {
+        var bytes = "{\"schema\":1,\"schema\":2}".getBytes(StandardCharsets.UTF_8);
+        var result = controller().deliveryResolve("ws-invalid-delivery", tempDir.toString(), bytes);
+        assertEquals("BLOCKED", result.get("status")); assertEquals("DELIVERY_INVALID", result.get("reasonCode"));
+        assertEquals(java.util.List.of(), result.get("currentActions"));
+        assertTrue(!Files.exists(tempDir.resolve(".agent/workstreams/ws-invalid-delivery/delivery/merge-plan.json")));
+    }
+
+    private static void closeAndAwaitOwnedStream(WorkstreamStreamService service) throws Exception {
+        // An emitter without a servlet handler does not invoke completion callbacks in this unit fixture.
+        var field=WorkstreamStreamService.class.getDeclaredField("activeStreams"); field.setAccessible(true);
+        var pools=new java.util.ArrayList<>(((Map<?,?>)field.get(service)).values());
+        service.closeActiveStreams();
+        for(var pool:pools) assertTrue(((java.util.concurrent.ExecutorService)pool).awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS), "owned polling task must stop before @TempDir removal");
+    }
+
     private WorkstreamApiController controller() {
         var objectMapper = new ObjectMapper();
         var deliveryViewService = new DeliveryViewService(objectMapper);
         var queryService = new WorkstreamQueryService(objectMapper, deliveryViewService);
         return new WorkstreamApiController(
                 queryService,
-                new WorkstreamActionService(new WorkflowFileLedger(), () -> command ->
+                new WorkstreamActionService(ServerLedgerFactory.create(), () -> command ->
                         new dev.dual.runtime.WorkflowRuntimeResult(command.workstreamId(),
                                 dev.dual.core.workflow.WorkflowStatus.COMPLETED, "", "unused")),
                 new WorkstreamStreamService(queryService, objectMapper),
@@ -892,16 +1008,14 @@ class WorkstreamApiControllerTest {
         var workstreamId = new DualId(workstreamIdValue);
         var workspaceId = new DualId("wsp-" + workstreamIdValue);
         var paths = new WorkstreamPaths(tempDir, workstreamId);
-        new FileLedgerStore().initializeWorkstream(
-                paths,
-                Workstream.created(
+        var fixtureWorkstream = Workstream.created(
                         workstreamId,
                         "api test",
                         new Workstream.RepositoryRef(tempDir.resolve("repo"), tempDir.resolve("repo")),
                         workspaceId,
                         Instant.parse("2026-06-01T00:00:00Z")
-                ),
-                Workspace.primaryGitWorktree(
+                );
+        var fixtureWorkspace = Workspace.primaryGitWorktree(
                         workspaceId,
                         workstreamId,
                         tempDir.resolve("repo"),
@@ -909,9 +1023,8 @@ class WorkstreamApiControllerTest {
                         "ai/" + workstreamIdValue,
                         "main",
                         "abc123"
-                ),
-                "# Requirement\n"
-        );
+                );
+        var fixtureRequirement = "# Requirement\n";
         var definition = new WorkflowDefinition(
                 "api-workflow",
                 1,
@@ -943,8 +1056,8 @@ class WorkstreamApiControllerTest {
                         new EdgeDefinition("acceptance.decision", "ACCEPT_WITH_NOTES",
                                 "acceptance.generate_final_report"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-" + workstreamIdValue, definition);
+        var ledger = ServerLedgerFactory.create();
+        ledger.initialize(paths, fixtureWorkstream, fixtureWorkspace, fixtureRequirement, dev.dual.ledger.file.WorkstreamSettingsDocument.of("auto"), "wf-" + workstreamIdValue, definition);
         var current = ledger.loadCurrent(paths);
         var first = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
@@ -956,16 +1069,14 @@ class WorkstreamApiControllerTest {
         var workstreamId = new DualId(workstreamIdValue);
         var workspaceId = new DualId("wsp-" + workstreamIdValue);
         var paths = new WorkstreamPaths(tempDir, workstreamId);
-        new FileLedgerStore().initializeWorkstream(
-                paths,
-                Workstream.created(
+        var fixtureWorkstream = Workstream.created(
                         workstreamId,
                         "api running test",
                         new Workstream.RepositoryRef(tempDir.resolve("repo"), tempDir.resolve("repo")),
                         workspaceId,
                         Instant.parse("2026-06-01T00:00:00Z")
-                ),
-                Workspace.primaryGitWorktree(
+                );
+        var fixtureWorkspace = Workspace.primaryGitWorktree(
                         workspaceId,
                         workstreamId,
                         tempDir.resolve("repo"),
@@ -973,9 +1084,8 @@ class WorkstreamApiControllerTest {
                         "ai/" + workstreamIdValue,
                         "main",
                         "abc123"
-                ),
-                "# Requirement\n"
-        );
+                );
+        var fixtureRequirement = "# Requirement\n";
         var definition = new WorkflowDefinition(
                 "api-workflow",
                 1,
@@ -983,7 +1093,7 @@ class WorkstreamApiControllerTest {
                 List.of(new NodeDefinition("first", NodeKind.TASK, "noop.task", Map.of())),
                 List.of()
         );
-        new WorkflowFileLedger().initialize(paths, "wf-" + workstreamIdValue, definition);
+        ServerLedgerFactory.create().initialize(paths, fixtureWorkstream, fixtureWorkspace, fixtureRequirement, dev.dual.ledger.file.WorkstreamSettingsDocument.of("auto"), "wf-" + workstreamIdValue, definition);
         return new Fixture(workstreamIdValue);
     }
 
@@ -991,16 +1101,14 @@ class WorkstreamApiControllerTest {
         var workstreamId = new DualId(workstreamIdValue);
         var workspaceId = new DualId("wsp-" + workstreamIdValue);
         var paths = new WorkstreamPaths(tempDir, workstreamId);
-        new FileLedgerStore().initializeWorkstream(
-                paths,
-                Workstream.created(
+        var fixtureWorkstream = Workstream.created(
                         workstreamId,
                         "api failed test",
                         new Workstream.RepositoryRef(tempDir.resolve("repo"), tempDir.resolve("repo")),
                         workspaceId,
                         Instant.parse("2026-06-01T00:00:00Z")
-                ),
-                Workspace.primaryGitWorktree(
+                );
+        var fixtureWorkspace = Workspace.primaryGitWorktree(
                         workspaceId,
                         workstreamId,
                         tempDir.resolve("repo"),
@@ -1008,9 +1116,8 @@ class WorkstreamApiControllerTest {
                         "ai/" + workstreamIdValue,
                         "main",
                         "abc123"
-                ),
-                "# Requirement\n"
-        );
+                );
+        var fixtureRequirement = "# Requirement\n";
         var definition = new WorkflowDefinition(
                 "api-recovery-workflow",
                 1,
@@ -1018,8 +1125,8 @@ class WorkstreamApiControllerTest {
                 List.of(new NodeDefinition("agent.step", NodeKind.TASK, "acpx.agent_run", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-" + workstreamIdValue, definition);
+        var ledger = ServerLedgerFactory.create();
+        ledger.initialize(paths, fixtureWorkstream, fixtureWorkspace, fixtureRequirement, dev.dual.ledger.file.WorkstreamSettingsDocument.of("auto"), "wf-" + workstreamIdValue, definition);
         var current = ledger.loadCurrent(paths);
         var node = ledger.loadNode(paths, current.activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.FAILED,

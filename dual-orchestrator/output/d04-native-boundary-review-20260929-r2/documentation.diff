@@ -1,0 +1,63 @@
+--- before/dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ after/dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -1,6 +1,6 @@
+ # Dual 生命周期可靠性：详细设计候选
+ 
+-日期：2026-09-28。阶段：P0。当前状态：**九项设计冻结，D04 技术阻塞；全案未具备实施条件、未获实施授权**。用户带回的冻结候选 CC 评审为 PASS；D01/D02/D03/D05–D10 依该结论及两项 LOW 采纳固定设计基线，见 §13/§15.1。LOW 增量由作者核验，未另经 CC 复审。2026-09-29 已纠正实验路由：本机一直使用的 Claude Code＋GLM 原生读取通过；§8.15 已补原生写入/隐藏工具及配置/scratch 切片；Codex 额外 collaboration 控制面的硬限制仍未证明，D04 不冻结。本轮仅修订材料，无 provider 调用、额外 agent 或产品实施；历史评审和实验保留。
++日期：2026-09-28。阶段：P0。当前状态：**九项设计冻结，D04 技术阻塞；全案未具备实施条件、未获实施授权**。用户带回的冻结候选 CC 评审为 PASS；D01/D02/D03/D05–D10 依该结论及两项 LOW 采纳固定设计基线，见 §13/§15.1。LOW 增量由作者核验，未另经 CC 复审。2026-09-29 已纠正实验路由：本机一直使用的 Claude Code＋GLM 原生读取通过；§8.15 已补原生写入/隐藏工具及配置/scratch 切片；本轮原生补证已获用户带回的 CC 材料层 PASS，见 §8.16；Codex 额外能力上限（collaboration 及网络工具）仍未完整证明，D04 不冻结。本轮仅修订材料，无 provider 调用、额外 agent 或产品实施；历史评审和实验保留。
+ 
+ 上位契约：[R3](20260923-dual-lifecycle-reliability-design.zh-CN.md)。唯一工作索引：[主清单](20260927-dual-lifecycle-worklist.zh-CN.md)。本文展开 D01–D10，不另建工作清单或降低 R3 验收。全文“增加、迁移、必须”描述拟议目标；现状另行标明。未落实的能力不能用于当前运行准入。
+ 
+@@ -490,6 +490,16 @@
+ 
+ 本轮诊断预算已结束，相关能力上限结论停止。已准备 [简洁 CC prompt](../../output/d04-native-boundary-review-20260929/cc-review-prompt.txt)，由用户发起独立复审；不预设冻结 PASS。九项设计冻结不变，本次不授实施、合入或真实 E2E 权限。
+ 
++### 8.16 原生补证材料 CC PASS 与剩余核验约束（2026-09-29）
++
++用户带回的 CC 结论为材料层 PASS、2 LOW，D04 仍不可冻结。[评审处置](../../output/d04-native-boundary-review-20260929-r2/review-disposition.md)保存原文、定点核对与受审文档快照；旧包字节不改。CC 接受 Claude 与 Codex 所列原生切片的冻结前证据，不代替 adapter 全入口、收尾及 D06/D07 集成验收。
++
++- LOW-1 已纳入同一额外能力上限核验：旧配置确有 `web_search="disabled"`，两次实际请求与嵌套工具清单均未暴露网络工具；但 schema 可表达、配置关闭、未暴露均不等于隐藏调用在副作用前必被拒。与 collaboration 一起核验现有接口及强制分发边界，不重开 R4/Phase B、不调用真实外网服务；不能保证无副作用时只做静态调查。
++- LOW-2 固定后续入口：所有 native 补证从 `probe-guard-repair/` 修正副本派生，新目录、新 Gate、明确增量预算；旧 driver 不再用于运行。现有写入 guard 不通用于所有控制动作，新增动作须先补对应 typed 结果判定和离线止损注入，意外成功/未知/异常必须阻止后继。5 项旧离线测试不冒称控制面 guard 已完成或已在 native 生效。
++- 证据口径收窄：拒绝文案提及 subagent 不等于实测后代会话，实际子 agent 启动仍禁止；`is_error` 省略须结合 call ID、正向 oracle 及错误/缺失反证，不能独自判成功；collaboration 是独立顶层 namespace，并非 exec 的嵌套工具。
++
++当前剩余问题是 Codex 额外能力上限的强制性，不能把它缩写为“只剩一个开关”。先查既有接口；须改引擎、加外层机制、改变 authority/分工或成本收益偏离时，依 §8.6 停止交用户决定。旧实验预算已结束，本次零新增 native/模型/agent 调用，无产品改动。两项 LOW 为约束文本已吸收，具体补证仍未完成；本次增量是作者核验，未经再次独立评审，不自动启动实验或实施。
++
+ ## 9. D09：交付外部窗口与处置
+ 
+ 复用 DeliveryMergePlan 四状态；新增操作意图与观察字段，不新建交付状态机。建议 `apply_intent` 包含 operation id、candidate/ref/SHA、批准引用、canonical target Git identity、base/index/worktree 基准、expected tree；`observation` 保存检查到的 HEAD/index/worktree/commit 引用与检查时点。恢复的“已知/不明”由这些事实派生，failureCode 可显示未知，不能仅凭 status=FAILED 再 apply。
+@@ -583,7 +593,7 @@
+ | D01 | 附录 §2 + precondition-map：前置/消费者/规则身份、coverage、L03/L04 | DESIGN_FROZEN；实现后证明分类/UNKNOWN、语义常量映射与合法续作 |
+ | D02 | 附录 §3 + 补记 LOW-2：精确 signal 关联、EXECUTION 可审计声明、不可降级清单 | DESIGN_FROZEN；typed 字段及两条合法通道、拒绝序列、E02 常驻回归仍待实施 |
+ | D03 | 附录 §4 + examples：两阶段合同、reviewed_candidate、外部批准、逐 consumer/四变体迁移 | DESIGN_FROZEN；实施后验收无循环批准、自动推进、严格授权及新旧拒绝 |
+-| D04 | 附录 §4.1 + 主文 §8：绑定/回执/session/writer；已有局部实证 | **DESIGN GAP**：§8.14/§8.15 已补必要读取、原生拒绝/Code Mode/配置与 scratch 切片及现有绑定接口；Codex collaboration 硬限制仍未证。adapter 全入口接入在实施后验收，不以 CLI 切片替代 |
++| D04 | 附录 §4.1 + 主文 §8：绑定/回执/session/writer；已有局部实证 | **DESIGN GAP**：§8.14/§8.15 已补必要读取、原生拒绝/Code Mode/配置与 scratch 切片及现有绑定接口；§8.16 已吸收 CC 两项 LOW；Codex collaboration 及网络工具的完整能力上限仍未证。adapter 全入口接入在实施后验收，不以 CLI 切片替代 |
+ | D05 | 附录 §5：真实生产者与增量、机器/人工出口样本分列 | DESIGN_FROZEN；实现后验证生产者→消费者，不将合成样例/人工声明当机器证明 |
+ | D06 | 附录 §6 + 142 文件入口对账：写集/会话/锁/原子写/失败前缀 | DESIGN_FROZEN；本机存储原语不代替产品冷 JVM/中断/并发反证 |
+ | D07 | 附录 §7：M6 函数桥接、identity、恢复 payload/入口、未知裁定 | DESIGN_FROZEN；实现后证明恢复/终态及人裁定不冒充机器事实 |
+--- before/dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ after/dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -351,3 +351,9 @@
+ 见 [D04 复审包](../../output/d04-native-boundary-review-20260929/review-package.md)与详设 §8.15：Claude 11 负例/合法读取/开放写对照，Codex Code Mode/patch/提权/配置与 scratch 切片已有原生证据；6 个离线 native session、零真实模型调用，无额外 agent/产品实现。原诊断汇总错误及离线重判全部保留。
+ 
+ D04 仍未冻结：multi_agent 开关关闭后 Codex collaboration 控制面仍暴露，强制限制未证；不得用“只读 shell 已通过”关闭该项。已补现有 adapter 接线落点与程序 writer 设计，并形成简洁 CC prompt，请其独立判断证据与必要前置，不预填 PASS。若必须改变引擎/新增平台或接受 native 自行委派，仍走用户方向决定；W01–W09 未因此完成/获准开工。
++
++### 9.9 原生补证材料复审已回写，D04 未冻结（2026-09-29）
++
++CC 材料层 PASS、2 LOW；详见详设 §8.16 与 [处置补记](../../output/d04-native-boundary-review-20260929-r2/review-disposition.md)。本次将网络工具上限并入 Codex collaboration 的既有能力调查，并要求后续 native 补证从修正 guard 副本派生、先完成动作对应的 typed 判定与离线止损测试，再核对新 Gate/预算；不使用旧 driver 继续试错。既有 `web_search="disabled"` 与未暴露事实已核实，隐藏调用硬拒绝仍未证明。
++
++同时收窄评审推断：子代理拒绝文案不等于子会话实测；可选 `is_error` 不是单独成功判据；顶层 collaboration 与 exec 嵌套工具不能混同。Claude/Codex 已有切片证据不因此作废，也不外推任意能力。两项 LOW 的约束文本已吸收，剩余能力证明未完成；D04 DESIGN GAP、九项已冻结状态及 W01–W09 开工条件不变。本次仅文档与证据核对，零新增 native/模型/agent，旧评审包保留；该增量未经再次独立评审。
+--- before/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ after/dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -2,9 +2,9 @@
+ 
+ ## 当前入口：2026-09-28 生命周期详细设计候选
+ 
+-2026-09-29 最新：已完成本轮剩余原生补证及 [CC 复审包](../../output/d04-native-boundary-review-20260929/review-package.md)。Claude 的 11 项原生拒绝/合法读取/开放 Write 对照，Codex 的 Code Mode/patch/提权/配置与 scratch 切片已有证据；零真实模型调用、无额外 agent/产品实现。D04 尚未冻结：Codex 在相关 multi-agent 开关关闭后仍暴露 collaboration 控制面，硬限制尚未证明；不会把其存在直接判越权，也不在用户禁止额外 agent 时调用试错。具体见详设 §8.15、主清单 §9.8，prompt 已提供，未直接调用 CC。
+-
+-当前状态：用户带回冻结候选 CC PASS；两项 LOW 已吸收，D01/D02/D03/D05–D10 九项设计冻结，D04 技术阻塞。详设 §13/§15.1、主清单 §9.5 与 [处置补记](../../output/freeze-review-20260928-r2/review-disposition.md)同步。修订固定了显式内核注入及执行合同中可审计的非必需声明；增量由作者核验，未另经 CC 复审。D04 当前缺口以详设 §8.15 为准：原生只读切片已有实证，额外 collaboration 控制面的完整上限尚未证明。全案未具备实施条件，未取得实施授权；本次无 provider/agent、产品改动或历史恢复。原冻结包与旧证据保留，以下为历史进展，不能覆盖本段当前状态。
++2026-09-29 最新：用户带回原生补证 CC **材料层 PASS，2 LOW**；已回写详设 §8.16、主清单 §9.9 与 [处置补记](../../output/d04-native-boundary-review-20260929-r2/review-disposition.md)。Claude/Codex 已测原生切片获认可，D04 仍不可冻结：Codex collaboration 及网络工具的完整能力上限未证明。后续同查既有接口，native 补证须使用修正 guard 派生入口、补动作对应止损测试并明确新 Gate/预算；旧预算不续用。已收窄子代理拒绝文案、可选错误字段及顶层/嵌套工具的三处评审推断。本次零新增 native/模型/agent、无产品改动，旧证据不覆写；增量为作者核验，未再次独立评审。
++
++当前状态：用户带回冻结候选 CC PASS；两项 LOW 已吸收，D01/D02/D03/D05–D10 九项设计冻结，D04 技术阻塞。详设 §13/§15.1、主清单 §9.5 与 [处置补记](../../output/freeze-review-20260928-r2/review-disposition.md)同步。修订固定了显式内核注入及执行合同中可审计的非必需声明；增量由作者核验，未另经 CC 复审。D04 当前缺口以详设 §8.16 为准：原生只读切片已有实证，额外控制面及网络工具的完整能力上限尚未证明。全案未具备实施条件，未取得实施授权；本次无 provider/agent、产品改动或历史恢复。原冻结包与旧证据保留，以下为历史进展，不能覆盖本段当前状态。
+ 
+ 最新决定：用户已接受 D04“经过证明的必要受限执行”候选，并授权调整后进行有界原生能力实验。当前口径见详细设计 §8.9/主清单 §8.3；下文无 execute 及验证未授权记录均为此前状态。结论确定前不承诺可行，不开始产品实现；D04 仍待证。[本轮结果](../../output/d04-restricted-execution-20260928/result.md)：Codex 原生命令沙箱切片通过，模型切片因探针关闭必要工具宿主而 INVALID，已停止不自动补测。补测前修正前提检查/停止条件并确认增量预算，不改旧证据。
+ 

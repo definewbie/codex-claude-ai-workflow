@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "node_instance_id" : "node-context-design_codex_arch_review-014",
+  "run_id" : "",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/file-summaries.json",
+      "sha256" : "b9d2a110f0e555a17ee2b4590a4ad2964ac159adb00761e75fd104b4f2b589fa"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/stage-scope-policy.json",
+      "sha256" : "a11fe3c291658153f46a4afda38ce86d5042d8a9268df972c47548298cdf0f71"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/file-relevance-plan.json",
+      "sha256" : "08c0cd582cffb0af95ac35246d3b2667bac9eecb214ba72f0f4fed92a8356ce6"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/working-set.json",
+      "sha256" : "3e73ec21d99f13d694d683b4f1ab8bab69961f883dd194bc469466102565f1d4"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/read-reuse-contract.json",
+      "sha256" : "2067b43de06b47b441219490c5918e27226ea9edc70e3ca14e5e89fb87442f16"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/agent-capability-catalog.json",
+      "sha256" : "dcb73970d6f61746cd3b4e90b0fb807f1b5f3c4405c1bd433aa629aaaa03b736"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/planned-report.json",
+      "sha256" : "1d85d03c978ed1805f2ad72dd3e31d4ad0d4d970526fa897c702cc343f07a52a"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/repo-map.json",
+      "sha256" : "3d45a4495190625479649c23a922236b147f2dc8783643d2fda46a72aea3b1fc"
+    }
+  }
+}

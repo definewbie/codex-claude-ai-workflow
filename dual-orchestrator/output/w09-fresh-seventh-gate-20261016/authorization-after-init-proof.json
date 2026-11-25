@@ -1,0 +1,7 @@
+{
+  "status": "PASS_EXPECTED_REJECTION",
+  "exit": 1,
+  "unchanged_ledger_files": 21,
+  "steps_created": false,
+  "native_provider_calls": 0
+}

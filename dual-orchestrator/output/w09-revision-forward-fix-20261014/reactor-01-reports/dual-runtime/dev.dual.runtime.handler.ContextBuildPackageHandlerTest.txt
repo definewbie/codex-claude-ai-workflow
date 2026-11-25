@@ -1,0 +1,41 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.runtime.handler.ContextBuildPackageHandlerTest
+-------------------------------------------------------------------------------
+Tests run: 61, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 9.629 s <<< FAILURE! -- in dev.dual.runtime.handler.ContextBuildPackageHandlerTest
+dev.dual.runtime.handler.ContextBuildPackageHandlerTest.productReviewContextProjectsCompleteProposalFromValidatedReference -- Time elapsed: 0.016 s <<< ERROR!
+java.lang.IllegalArgumentException: validated task-contract proposal lineage is required
+	at dev.dual.runtime.handler.TaskContractProposalReference.publishVerified(TaskContractProposalReference.java:100)
+	at dev.dual.runtime.handler.TaskContractProposalReference.publishInitial(TaskContractProposalReference.java:51)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.productReviewContextProjectsCompleteProposalFromValidatedReference(ContextBuildPackageHandlerTest.java:964)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+dev.dual.runtime.handler.ContextBuildPackageHandlerTest.productReviewContextRejectsVerifiedReferenceToUnsupportedProposalVersion -- Time elapsed: 0.017 s <<< ERROR!
+java.lang.IllegalArgumentException: validated task-contract proposal lineage is required
+	at dev.dual.runtime.handler.TaskContractProposalReference.publishVerified(TaskContractProposalReference.java:100)
+	at dev.dual.runtime.handler.TaskContractProposalReference.publishInitial(TaskContractProposalReference.java:51)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.productReviewContextRejectsVerifiedReferenceToUnsupportedProposalVersion(ContextBuildPackageHandlerTest.java:1070)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+dev.dual.runtime.handler.ContextBuildPackageHandlerTest.productReviewContextRejectsTamperedProposalBeforeReviewerCanStart -- Time elapsed: 0.015 s <<< ERROR!
+java.lang.IllegalArgumentException: validated task-contract proposal lineage is required
+	at dev.dual.runtime.handler.TaskContractProposalReference.publishVerified(TaskContractProposalReference.java:100)
+	at dev.dual.runtime.handler.TaskContractProposalReference.publishInitial(TaskContractProposalReference.java:51)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.productReviewContextRejectsTamperedProposalBeforeReviewerCanStart(ContextBuildPackageHandlerTest.java:1024)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+dev.dual.runtime.handler.ContextBuildPackageHandlerTest.reviewTargetReceivesTypedSourceRereadAllowance -- Time elapsed: 0.017 s <<< ERROR!
+java.lang.IllegalArgumentException: validated task-contract proposal lineage is required
+	at dev.dual.runtime.handler.TaskContractProposalReference.publishVerified(TaskContractProposalReference.java:100)
+	at dev.dual.runtime.handler.TaskContractProposalReference.publishInitial(TaskContractProposalReference.java:51)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.publishProposalReference(ContextBuildPackageHandlerTest.java:2379)
+	at dev.dual.runtime.handler.ContextBuildPackageHandlerTest.reviewTargetReceivesTypedSourceRereadAllowance(ContextBuildPackageHandlerTest.java:2174)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+

@@ -1,0 +1,47 @@
+{
+  "verdict": "FAIL",
+  "reason": "PREEXISTING_HARDLINK_BYPASSES_PROTECTED_PATH_WRITE_DENIAL",
+  "approvedManifestSha256": "2f2698cf7fe743d463450feff007346368b15284296888989c7cf41fb64b560f",
+  "cases": {
+    "claude": "FAIL",
+    "codex": "NOT_RUN_STOP_LOSS"
+  },
+  "nativeSessionsStarted": 1,
+  "nativeChildrenStarted": 0,
+  "localRequests": 13,
+  "issuedToolCalls": 12,
+  "realModelCalls": 0,
+  "billingMode": "local-stub",
+  "usageBasis": "synthetic_not_billable",
+  "elapsedSeconds": 1.4540336249629036,
+  "nativePositiveObservations": [
+    "read_product",
+    "write_product",
+    "edit_product",
+    "read_control",
+    "bash_legal_write"
+  ],
+  "nativeDeniedObservations": [
+    "write_control",
+    "edit_control",
+    "write_alias",
+    "bash_control_write",
+    "bash_control_new",
+    "bash_symlink_write"
+  ],
+  "failedToolUseId": "bash_hardlink_write",
+  "programWriterObserved": true,
+  "beforeSha256": "ff27255e7956b3e4906ec9eefd3176e857999fdec30d2093931e99462053b3ca",
+  "afterSha256": "de6b9d5b9a7c9e99a9421d284164b52c8a53000380d39e9e52117f4c3da4caf9",
+  "sameDeviceAndInodeVerified": true,
+  "existingAliasCreatedBy": "diagnostic preparation before native startup",
+  "notProven": [
+    "model can create a new hard link at runtime",
+    "normal rename/delete/write-restore cases",
+    "Codex internal carve-out and child inheritance",
+    "all descendants stopped solely from parent exit",
+    "full Dual implementation and end-to-end recovery"
+  ],
+  "stopDisposition": "STOP_ENTIRE_GATE_NO_CONTINUE_NO_RETRY",
+  "localEvidenceAssertions": "PASS (classification only, not Gate PASS)"
+}

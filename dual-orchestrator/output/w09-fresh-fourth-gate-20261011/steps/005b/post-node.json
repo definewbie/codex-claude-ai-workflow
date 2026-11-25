@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-intake-decision-005",
+  "nodeDefinitionId": "intake.decision",
+  "kind": "DECISION",
+  "handlerType": "review.decision",
+  "status": "COMPLETED",
+  "stageId": "stage-intake",
+  "iterationId": "iter-001",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.stderr.log",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.transcript.log",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.json",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/binding.json",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.contract.json"
+  ],
+  "inputTransition": {
+    "transition_type": "normal",
+    "condition": "unconditional",
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256": "ff1ca960d2155c74ff8dba5d7a83eecf9cf1e71d873ef0e8419bd37a987e6237",
+    "source_node_instance_id": "node-intake-codex_product_review-004",
+    "required": true
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.stderr.log",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.transcript.log",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.json",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1791694259389/binding.json",
+    ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.contract.json"
+  ],
+  "result": {
+    "summary": "函数行为与标准库约束已完整保留，但实际输入输出证据要求和候选文件的审批边界需要修订。",
+    "source": "contract-sidecar",
+    "decision": "NEEDS_REVISION"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1791694484694-19a4ba3e",
+  "startedAt": "2026-10-11T04:54:44.704489Z",
+  "finishedAt": "2026-10-11T04:54:44.746117Z"
+}

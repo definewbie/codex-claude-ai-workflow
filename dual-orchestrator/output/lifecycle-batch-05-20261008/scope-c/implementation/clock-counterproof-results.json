@@ -1,0 +1,10 @@
+{
+  "status": "EXPECTED_FAILURE",
+  "mutation": "isolated copy stops ignoring readiness observation-time metadata",
+  "exit_code": 1,
+  "real_source_unchanged_sha256": "d15dc5d94796fa19761626bcfc5b31aa24b69e4802c6cbcfb09ebb6311526f92",
+  "copied_mutated_sha256": "f1dd5bbb16bd93e47efd17b90e4d056e4c7cd538995de00785b8e8301874ced3",
+  "native_provider_calls": 0,
+  "log": "clock-counterproof.log",
+  "not_in_maven_test_count": true
+}

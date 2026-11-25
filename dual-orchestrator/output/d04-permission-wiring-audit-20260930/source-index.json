@@ -1,0 +1,398 @@
+[
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/types.ts",
+    "sha256": "4729bb92952d3bb383afdf3f5ecc6591a6a8fb5a22b0e96d72cb0e156dcebfdc",
+    "ranges": [
+      [
+        18,
+        40
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/permissions.ts",
+    "sha256": "b20f3f5b60cf1f6a57e61deb15b89c16168e76018e519e36446e6de1f5247ddc",
+    "ranges": [
+      [
+        254,
+        346
+      ],
+      [
+        368,
+        442
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/permission-prompt.ts",
+    "sha256": "6f86467b09ac08f2b560127eedae43c71d15775280c23a99e95f26be5ae931e1",
+    "ranges": [
+      [
+        1,
+        33
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts",
+    "sha256": "d727f05adfa38beadbc4214fbbc5a14c864dfa1eead4dd5e2a0a734a63e65a88",
+    "ranges": [
+      [
+        962,
+        979
+      ],
+      [
+        1307,
+        1404
+      ],
+      [
+        1561,
+        1594
+      ],
+      [
+        1679,
+        1697
+      ],
+      [
+        2000,
+        2019
+      ],
+      [
+        2101,
+        2194
+      ],
+      [
+        2365,
+        2380
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/queue/messages.ts",
+    "sha256": "c6d4f0fb3f3ed524b8f169460b6734208d21d3316e158ee42c7fce9544cd88ea",
+    "ranges": [
+      [
+        24,
+        174
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/queue/ipc-server.ts",
+    "sha256": "fc4b19e89178f4f2da6c826a456e891fb67fe4173aa20fa7089cd9ab9983395e",
+    "ranges": [
+      [
+        377,
+        458
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/session/queue-owner-runtime.ts",
+    "sha256": "41bfb42527fe043ff921550b21758443fdf4f1e73f8aa3b3056239be3e3b3c87",
+    "ranges": [
+      [
+        483,
+        520
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/session/runtime.ts",
+    "sha256": "261cf649683ddcfe0421e85aaefd6e623d884341ca2866b35e0f0199860fc109",
+    "ranges": [
+      [
+        1103,
+        1126
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/runtime/public/contract.ts",
+    "sha256": "6cfe889b372e1477fc3ed033269d3743f79c283660656057069b1a1f1c4ad620",
+    "ranges": [
+      [
+        353,
+        370
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/filesystem.ts",
+    "sha256": "46e7eee0d04ff262029958a232ea68acc4279c84f3e10c4941dc0a12013d5bba",
+    "ranges": [
+      [
+        125,
+        184
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/terminal-manager.ts",
+    "sha256": "cfc45722970c870175f1534335dd79d8b7f9b4e26b748746f097d282986c5196",
+    "ranges": [
+      [
+        430,
+        445
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/node_modules/@agentclientprotocol/sdk/dist/jsonrpc.js",
+    "sha256": "1f322c9397c55282710f22f7bf0163f04b084efa6f1b108d3a2fb040426022a7",
+    "ranges": [
+      [
+        468,
+        478
+      ],
+      [
+        544,
+        580
+      ],
+      [
+        793,
+        818
+      ],
+      [
+        851,
+        864
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java",
+    "sha256": "866b1524a904f6fd4a68dfa40d07493d7371d9791125aec151dd51dc55dc32bd",
+    "ranges": [
+      [
+        245,
+        355
+      ],
+      [
+        435,
+        466
+      ],
+      [
+        514,
+        568
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionStreamProjector.java",
+    "sha256": "24a72f472c6aa3e708f8ec66e4a180919aa5b94767b77c978cecfe323b013d28",
+    "ranges": [
+      [
+        68,
+        138
+      ],
+      [
+        257,
+        275
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentExecutionHealth.java",
+    "sha256": "e7f2c1f46e9c9e05195b6edf68118b74c38608c0441ca97619ff8eb9f6363656",
+    "ranges": [
+      [
+        68,
+        119
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentRunMetadataWriter.java",
+    "sha256": "7eb8a3379f1d0cf1a8ca7f78b816c1d0737b8b91fbec524b316203dcd2b62063",
+    "ranges": [
+      [
+        374,
+        441
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentRunDocument.java",
+    "sha256": "3b84c3746cb8d9ee4d9428860da575117979fc368c6832130d350709788e6f37",
+    "ranges": [
+      [
+        1,
+        57
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+    "sha256": "d86b86cbc66c03ffe3e4c21dcbd4f533865a6760c0c3ca5a34dded888a457ff2",
+    "ranges": [
+      [
+        670,
+        694
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/NodeStateWriter.java",
+    "sha256": "6311d14d6ed98543e8f137bb4f14adddf6c72b294d812a3b90ec7134756fe40a",
+    "ranges": [
+      [
+        160,
+        203
+      ],
+      [
+        310,
+        345
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/RecoveryAssessment.java",
+    "sha256": "d3f4c41a41da14a225af3d0f862663435b933af7ed1de0c984a9041edce01d63",
+    "ranges": [
+      [
+        83,
+        111
+      ],
+      [
+        447,
+        487
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/java/dev/dual/ledger/file/HumanActionRequest.java",
+    "sha256": "3cebc3cbbafc300ef2eccffc03c5393ce6566e5aae0429c8475f3c249df20e80",
+    "ranges": [
+      [
+        1,
+        22
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/RunCommand.java",
+    "sha256": "0193fe0761545c8c3508ec9b2c71e4adfc17b9c367802536dcd4f5b6a7131cbc",
+    "ranges": [
+      [
+        31,
+        39
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/main/java/dev/dual/cli/WorkerRunOnceCommand.java",
+    "sha256": "33d2e2f071fee90157b4b449518292298783436d4425c623853c78845246d836",
+    "ranges": [
+      [
+        26,
+        39
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/src/main/java/dev/dual/server/WorkstreamActionService.java",
+    "sha256": "a7554fee6dd0824732f22ae5669a5bdcaa9e68cba455b68defb6d518b266fc2e",
+    "ranges": [
+      [
+        72,
+        113
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/WorkflowRuntime.java",
+    "sha256": "9ab613172eac3692a027586b88098744506377b799dc3b4645955a9d2964302f",
+    "ranges": [
+      [
+        304,
+        345
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/AgentWorker.java",
+    "sha256": "f599616969156c626a453edea565aa0684c2a2421948f2a164728ce87063dec5",
+    "ranges": [
+      [
+        92,
+        143
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js",
+    "sha256": "f0cbbe408bb758cc4bacdae9a244bcac6efbdb6413f680195d017648abc6d816",
+    "ranges": [
+      [
+        4006,
+        4050
+      ],
+      [
+        4117,
+        4194
+      ],
+      [
+        4195,
+        4270
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js",
+    "sha256": "4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268",
+    "ranges": [
+      [
+        25192,
+        25210
+      ],
+      [
+        25312,
+        25423
+      ],
+      [
+        25632,
+        25737
+      ],
+      [
+        26125,
+        26190
+      ],
+      [
+        29199,
+        29245
+      ],
+      [
+        34320,
+        34356
+      ]
+    ],
+    "coverage": "targeted static inspection only"
+  }
+]

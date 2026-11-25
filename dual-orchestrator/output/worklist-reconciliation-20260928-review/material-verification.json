@@ -1,0 +1,36 @@
+{
+  "verifiedAt": "2026-09-27T23:13:49.499519+00:00",
+  "reviewSource": {
+    "path": "cc-review.txt",
+    "sha256": "c9412369954c8b5454663e68cecbdf2bc4d7430b339c379625a3bccaa98ec216"
+  },
+  "documents": {
+    "dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md": {
+      "reviewedSha256": "ec0907f402a50e126f1bff26f33c1a475768f93438a12737990fb7706d9aa2d6",
+      "afterSha256": "f6a61050f0c752ebcf6444414810ca14f6322ab59ffa9e4714f384da690b488e",
+      "beforeSnapshot": "dual-orchestrator/output/worklist-reconciliation-20260928-review/before-20260923-dual-lifecycle-reliability-design.zh-CN.md"
+    },
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": {
+      "reviewedSha256": "1bb6ee17c36fdcbd8766fcf0b57aa9c3c3c8c7a33c199e47d047293a84f7959a",
+      "afterSha256": "80dc842c9e7091ec1938549ecb3dd6cfeba68d8d3ed90a6cfee4f313d2355f2d",
+      "beforeSnapshot": "dual-orchestrator/output/worklist-reconciliation-20260928-review/before-__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+    },
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": {
+      "reviewedSha256": "e10184dcdf9afbc589eb8ea2b066fb628298f8a728ff0b6160eb58cddc8bca14",
+      "afterSha256": "2e74a0cb3287484526a5dc08a6f229d37e5fc17760e41d4d8b5f9f4db11be955",
+      "beforeSnapshot": "dual-orchestrator/output/worklist-reconciliation-20260928-review/before-20260927-dual-lifecycle-worklist.zh-CN.md"
+    }
+  },
+  "changedFilesAgainstOriginal1317": [
+    "dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "unchangedFilesAgainstOriginal1317": 1315,
+  "missingMainDocumentLinks": [],
+  "reconciledFileRows": 35,
+  "workItems": 10,
+  "coverageEntries": 15,
+  "designDecisions": 10,
+  "testsRerun": false,
+  "scope": "Documentation LOW corrections and review status only; source/test files unchanged; post-review delta author-checked, not independently re-reviewed."
+}

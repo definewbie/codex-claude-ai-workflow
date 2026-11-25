@@ -1,0 +1,16 @@
+{
+  "case": "OKX_JAVA_MODIFY_CANDIDATE",
+  "product_scope_confirmed": true,
+  "baseline_selection_confirmed": true,
+  "budget_approved": false,
+  "real_run_authorized": false,
+  "business_gates_delegated": false,
+  "commit_delegated": false,
+  "approved_launch_identity_sha256": null,
+  "workstream": "ws-20261026T142203Z-7SNA",
+  "budget_sha256": "c0d97fbbb233865d8768b1ad9dfca97cb7b0e52a6714ae2d2dfab150f7e7fb29",
+  "note": "Current confirmation accepts the product slice and offline preparation only. No prior case authorization is reused.",
+  "offline_preparation_authorized": true,
+  "approval_ref": null,
+  "initial_ledger_sha256": "d1b747b38d4ad8ec5cfbffb303162d8232e7568b0409ffc908bf7c3923df908b"
+}

@@ -150,6 +150,8 @@ final class WorkstreamMemoryUpdater {
                 "status", "qualified_projection",
                 "contractId", document.id(),
                 "contractVersion", document.version(),
+                "phase", document.phase().name(),
+                "epoch", document.epoch(),
                 "ref", text(contractRef),
                 "sha256", text(contractSha256)));
     }
@@ -177,7 +179,7 @@ final class WorkstreamMemoryUpdater {
                         .map(TaskContract.ScopeEntry::path)
                         .forEach(phrases::add);
             }
-            phrases.addAll(document.acceptanceCriteria());
+            phrases.addAll(document.acceptanceCriteria().stream().map(dev.dual.core.contract.TaskContract.Clause::text).toList());
         });
         var tokens = new LinkedHashSet<String>();
         for (var phrase : phrases) {

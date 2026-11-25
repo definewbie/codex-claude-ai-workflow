@@ -1,0 +1,3 @@
+Default sandbox blocked ps when inspecting only the two recorded CLI runner PIDs (PermissionError: Operation not permitted).
+All preceding source/JAR/ledger/target/link checks passed; this is not product/Gate evidence.
+Narrow authorized process observation performed separately; no native prompt, retry or broad process inventory.

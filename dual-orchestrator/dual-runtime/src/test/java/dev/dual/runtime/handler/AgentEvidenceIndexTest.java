@@ -31,12 +31,7 @@ class AgentEvidenceIndexTest {
                 "acceptance.codex_verifier_review", "REJECT");
         AgentOutputLineageFixture.publish(workspace, "ws-index", sidecar);
 
-        var latest = AgentEvidenceIndex.latestFromRefs(
-                workspace,
-                "ws-index",
-                List.of(".agent/workstreams/ws-index/runs/run-001/outputs/acceptance.contract.json"),
-                objectMapper
-        );
+        var latest = AgentEvidenceIndex.latestFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), workspace, "ws-index", List.of(".agent/workstreams/ws-index/runs/run-001/outputs/acceptance.contract.json"), objectMapper);
 
         assertEquals("REJECT", latest.orElseThrow().document().decision());
     }
@@ -58,15 +53,10 @@ class AgentEvidenceIndexTest {
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(latest.toFile(), json);
         AgentOutputLineageFixture.publish(workspace, "ws-index", latest);
 
-        var read = AgentEvidenceIndex.latestDecisionFromRefs(
-                workspace,
-                "ws-index",
-                List.of(
+        var read = AgentEvidenceIndex.latestDecisionFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), workspace, "ws-index", List.of(
                         workspace.relativize(older).toString(),
                         workspace.relativize(latest).toString()
-                ),
-                objectMapper
-        );
+                ), objectMapper);
 
         assertTrue(!read.missing());
         assertEquals("CONTRACT_SIDECAR_MISSING_DECISION", read.errorCode());
@@ -80,11 +70,7 @@ class AgentEvidenceIndexTest {
         writeSidecar(workspace, sidecar, "run-forged", "node-forged",
                 "acceptance.codex_verifier_review", "REJECT");
 
-        assertThrows(IllegalStateException.class, () -> AgentEvidenceIndex.latestFromRefs(
-                workspace,
-                "ws-index",
-                List.of(workspace.relativize(sidecar).toString()),
-                objectMapper));
+        assertThrows(IllegalStateException.class, () -> AgentEvidenceIndex.latestFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), workspace, "ws-index", List.of(workspace.relativize(sidecar).toString()), objectMapper));
     }
 
     @Test
@@ -100,11 +86,7 @@ class AgentEvidenceIndexTest {
         json.put("decision", "SELF_TEST_COMPLETE");
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), json);
 
-        assertThrows(IllegalStateException.class, () -> AgentEvidenceIndex.latestFromRefs(
-                workspace,
-                "ws-index",
-                List.of(workspace.relativize(sidecar).toString()),
-                objectMapper));
+        assertThrows(IllegalStateException.class, () -> AgentEvidenceIndex.latestFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), workspace, "ws-index", List.of(workspace.relativize(sidecar).toString()), objectMapper));
     }
 
     @Test
@@ -120,11 +102,7 @@ class AgentEvidenceIndexTest {
         json.put("summary", "PROMPT_INJECTION");
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), json);
 
-        assertThrows(IllegalStateException.class, () -> AgentEvidenceIndex.latestFromRefs(
-                workspace,
-                "ws-index",
-                List.of(workspace.relativize(sidecar).toString()),
-                objectMapper));
+        assertThrows(IllegalStateException.class, () -> AgentEvidenceIndex.latestFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), workspace, "ws-index", List.of(workspace.relativize(sidecar).toString()), objectMapper));
     }
 
     @Test
@@ -140,22 +118,13 @@ class AgentEvidenceIndexTest {
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(sidecar.toFile(), json);
         AgentOutputLineageFixture.publish(workspace, "ws-index", sidecar);
 
-        var document = AgentEvidenceIndex.validatedDocument(
-                workspace,
-                "ws-index",
-                workspace.relativize(sidecar).toString(),
-                objectMapper
-        ).orElseThrow();
+        var document = AgentEvidenceIndex.validatedDocument(dev.dual.runtime.RuntimeTestLedger.ledger(), workspace, "ws-index", workspace.relativize(sidecar).toString(), objectMapper).orElseThrow();
         var projection = objectMapper.writeValueAsString(document);
 
         assertTrue(projection.contains("summary"));
         assertFalse(projection.contains("PROMPT_INJECTION"));
         assertFalse(projection.contains("untyped_payload"));
-        var index = AgentEvidenceIndex.fromRefs(
-                workspace,
-                "ws-index",
-                List.of(workspace.relativize(sidecar).toString()),
-                objectMapper);
+        var index = AgentEvidenceIndex.fromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), workspace, "ws-index", List.of(workspace.relativize(sidecar).toString()), objectMapper);
         assertFalse(index.recent(1).getFirst().evidenceState().containsKey("untyped_payload"));
         assertFalse(index.recent(1).getFirst().evidenceState().containsValue("EVIDENCE_STATE_INJECTION"));
     }
@@ -172,11 +141,7 @@ class AgentEvidenceIndexTest {
         Files.createSymbolicLink(sidecar, target);
         AgentOutputLineageFixture.publish(workspace, "ws-index", sidecar);
 
-        var latest = AgentEvidenceIndex.latestFromRefs(
-                workspace,
-                "ws-index",
-                List.of(workspace.relativize(sidecar).toString()),
-                objectMapper);
+        var latest = AgentEvidenceIndex.latestFromRefs(dev.dual.runtime.RuntimeTestLedger.ledger(), workspace, "ws-index", List.of(workspace.relativize(sidecar).toString()), objectMapper);
 
         assertTrue(latest.isEmpty());
     }

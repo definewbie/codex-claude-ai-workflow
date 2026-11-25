@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/opt/homebrew/Cellar/rtk/0.42.3/bin/rtk",
+    "proxy",
+    "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin/java",
+    "-jar",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015/release/dual-cli-0.1.0-SNAPSHOT.jar",
+    "review",
+    "revise",
+    "--workdir=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/worktree",
+    "--subject=node-gate-human_plan_approval-021",
+    "--feedback-file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-budget-continuation-20261026/plan-readiness-revision-feedback.txt",
+    "ws-20261026T142203Z-7SNA"
+  ],
+  "delegation_ref": "automatic-decision-scope.json",
+  "delegation_sha256": "0bf9265d5a19c035c6f8d5bb2d46f078623ab3b89abf9c74b9b94f661bbbd118",
+  "model_calls": 0
+}

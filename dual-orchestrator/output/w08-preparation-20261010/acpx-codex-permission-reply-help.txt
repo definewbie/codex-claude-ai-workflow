@@ -1,0 +1,8 @@
+Usage: acpx codex permission-reply [options]
+
+Reply once to an exact live permission request; never retries
+
+Options:
+  --reply <json>        Committed exact reply JSON
+  -s, --session <name>  Use named session instead of cwd default
+  -h, --help            display help for command

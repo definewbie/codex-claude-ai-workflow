@@ -1,0 +1,231 @@
+{
+  "status": "SYNTHETIC_DESIGN_ONLY_NOT_EXECUTABLE_PROOF",
+  "note": "Only result payloads are shown. Existing envelope lineage fields remain mandatory. Synthetic digest hashes synthetic_base_bytes_utf8, not a real sidecar; all file references are illustrative and do not exist. No runtime parser/validator invoked.",
+  "synthetic_base_bytes_utf8": "{\"acceptance_criteria\":[{\"id\":\"AC-1\",\"text\":\"Preserve non-newline characters and verify expected outputs.\"}],\"artifact_type\":\"task_contract_proposal\",\"constraints\":[{\"id\":\"C-1\",\"text\":\"Use only Python standard library.\"}],\"decision\":\"READY_FOR_PRODUCT_REVIEW\",\"evidence_refs\":[],\"needs_human_input\":false,\"non_goals\":[{\"id\":\"NG-1\",\"text\":\"No network service.\"}],\"objective\":\"Normalize newlines using three fixed candidate files.\",\"open_questions\":[],\"revision_responses\":[],\"risk_areas\":[{\"id\":\"R-1\",\"text\":\"Preserve terminal newline presence.\"}],\"scope\":{\"excluded\":[\"Do not modify program control files.\",\"Do not use product files outside these three candidate paths.\"],\"included\":[{\"path\":\"src/normalize_text.py\"},{\"path\":\"tests/test_normalize_text.py\"},{\"path\":\"README.md\"}]},\"summary\":\"Synthetic initial candidate\",\"test_requirements\":[{\"id\":\"TR-1\",\"text\":\"Run standard-library tests and retain actual output.\"}]}",
+  "synthetic_base_digest": "5f620d50e30724f46a2f5023fe3cedc020a35cd11ec8e38a7f4b896c29717436",
+  "initial_result": {
+    "artifact_type": "task_contract_proposal",
+    "decision": "READY_FOR_PRODUCT_REVIEW",
+    "summary": "Synthetic initial candidate",
+    "needs_human_input": false,
+    "objective": "Normalize newlines using three fixed candidate files.",
+    "scope": {
+      "included": [
+        {
+          "path": "src/normalize_text.py"
+        },
+        {
+          "path": "tests/test_normalize_text.py"
+        },
+        {
+          "path": "README.md"
+        }
+      ],
+      "excluded": [
+        "Do not modify program control files.",
+        "Do not use product files outside these three candidate paths."
+      ]
+    },
+    "acceptance_criteria": [
+      {
+        "id": "AC-1",
+        "text": "Preserve non-newline characters and verify expected outputs."
+      }
+    ],
+    "test_requirements": [
+      {
+        "id": "TR-1",
+        "text": "Run standard-library tests and retain actual output."
+      }
+    ],
+    "constraints": [
+      {
+        "id": "C-1",
+        "text": "Use only Python standard library."
+      }
+    ],
+    "non_goals": [
+      {
+        "id": "NG-1",
+        "text": "No network service."
+      }
+    ],
+    "risk_areas": [
+      {
+        "id": "R-1",
+        "text": "Preserve terminal newline presence."
+      }
+    ],
+    "evidence_refs": [],
+    "open_questions": [],
+    "revision_responses": []
+  },
+  "ordinary_patch_result": {
+    "artifact_type": "task_contract_revision_patch",
+    "decision": "READY_FOR_PRODUCT_REVIEW",
+    "summary": "Respond to ordinary clause obligation.",
+    "base_proposal_id": "synthetic-author-001:5f620d50e30724f4",
+    "obligation_patches": [
+      {
+        "review_obligation_id": "CO-PATCH",
+        "resolved_by_clause_ids": [
+          "TR-1"
+        ],
+        "clause_changes": [
+          {
+            "operation": "REPLACE",
+            "section": "TEST_REQUIREMENTS",
+            "id": "TR-1",
+            "text": "Retain actual test input/output; require measured exit only if that criterion explicitly requires it."
+          }
+        ],
+        "scope_additions": [],
+        "evidence_ref_additions": []
+      }
+    ]
+  },
+  "goal_reproposal_result": {
+    "artifact_type": "task_contract_proposal",
+    "decision": "READY_FOR_PRODUCT_REVIEW",
+    "summary": "Change objective/exclusions as a candidate for independent re-review and fresh GOAL approval.",
+    "needs_human_input": false,
+    "objective": "Normalize newlines and preserve other characters. Candidate file choices remain subject to design and EXECUTION approval.",
+    "scope": {
+      "included": [
+        {
+          "path": "src/normalize_text.py"
+        },
+        {
+          "path": "tests/test_normalize_text.py"
+        },
+        {
+          "path": "README.md"
+        }
+      ],
+      "excluded": [
+        "Do not modify program control files."
+      ]
+    },
+    "acceptance_criteria": [
+      {
+        "id": "AC-1",
+        "text": "Preserve non-newline characters and verify expected outputs."
+      }
+    ],
+    "test_requirements": [
+      {
+        "id": "TR-1",
+        "text": "Retain actual input/output and results; measured exit is required only by an explicitly approved criterion."
+      }
+    ],
+    "constraints": [
+      {
+        "id": "C-1",
+        "text": "Use only Python standard library; candidate paths are not write authorization."
+      }
+    ],
+    "non_goals": [
+      {
+        "id": "NG-1",
+        "text": "No network service."
+      }
+    ],
+    "risk_areas": [
+      {
+        "id": "R-1",
+        "text": "Preserve terminal newline presence."
+      }
+    ],
+    "evidence_refs": [],
+    "open_questions": [],
+    "revision_responses": [
+      {
+        "review_obligation_id": "CO-1",
+        "resolved_by_clause_ids": [
+          "C-1"
+        ]
+      },
+      {
+        "review_obligation_id": "CO-2",
+        "resolved_by_clause_ids": [
+          "TR-1"
+        ]
+      }
+    ],
+    "base_proposal_id": "synthetic-author-001:5f620d50e30724f4"
+  },
+  "program_owned_R01_binding_increment": {
+    "contract_revision": {
+      "iteration_id": "synthetic-iteration-002",
+      "base_proposal_reference": {
+        "schema_version": 1,
+        "proposal_id": "synthetic-author-001:5f620d50e30724f4",
+        "workstream_id": "ws-SYNTHETIC",
+        "producer_node_id": "intake.claude_brainstorm",
+        "producer_node_instance_id": "synthetic-author-001",
+        "artifact_ref": ".agent/workstreams/ws-SYNTHETIC/runs/synthetic-base/outputs/proposal.contract.json",
+        "sha256": "5f620d50e30724f46a2f5023fe3cedc020a35cd11ec8e38a7f4b896c29717436"
+      },
+      "obligations": [
+        {
+          "id": "CO-1",
+          "text": "Remove premature file lock from objective/exclusions."
+        },
+        {
+          "id": "CO-2",
+          "text": "Use the approved per-criterion exit evidence rule."
+        }
+      ],
+      "allowed_forms": [
+        "REVISION_PATCH",
+        "GOAL_REPROPOSAL"
+      ]
+    }
+  },
+  "program_owned_goal_derivation": {
+    "kind": "goal_reproposal",
+    "base_proposal_id": "synthetic-author-001:5f620d50e30724f4",
+    "base_proposal_sha256": "5f620d50e30724f46a2f5023fe3cedc020a35cd11ec8e38a7f4b896c29717436",
+    "base_proposal_reference": {
+      "schema_version": 1,
+      "proposal_id": "synthetic-author-001:5f620d50e30724f4",
+      "workstream_id": "ws-SYNTHETIC",
+      "producer_node_id": "intake.claude_brainstorm",
+      "producer_node_instance_id": "synthetic-author-001",
+      "artifact_ref": ".agent/workstreams/ws-SYNTHETIC/runs/synthetic-base/outputs/proposal.contract.json",
+      "sha256": "5f620d50e30724f46a2f5023fe3cedc020a35cd11ec8e38a7f4b896c29717436"
+    },
+    "patch_source_output_ref": ".agent/workstreams/ws-SYNTHETIC/runs/synthetic-revision/outputs/proposal.json"
+  },
+  "negative_deltas": [
+    {
+      "id": "OLD_MODEL_SHA",
+      "change": {
+        "result.base_proposal_sha256": "5f620d50e30724f46a2f5023fe3cedc020a35cd11ec8e38a7f4b896c29717436"
+      },
+      "expected": "strict new result contract rejects unknown field; no silent deletion"
+    },
+    {
+      "id": "WRONG_BASE",
+      "change": {
+        "result.base_proposal_id": "synthetic-other:0000000000000000"
+      },
+      "expected": "no publication"
+    },
+    {
+      "id": "FULL_WITHOUT_GOAL_CHANGE",
+      "change": "full proposal with base objective/excluded unchanged",
+      "expected": "patch required"
+    },
+    {
+      "id": "OLD_APPROVAL",
+      "change": "new subject paired with prior subject approval",
+      "expected": "no GOAL compile or implementation"
+    },
+    {
+      "id": "BASE_CHANGED_AFTER_R01",
+      "change": "same ID string, different full reference/bytes at validation",
+      "expected": "full identity guard rejects"
+    }
+  ]
+}

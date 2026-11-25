@@ -1,0 +1,81 @@
+{
+  "commit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+  "files": [
+    {
+      "path": "codex-rs/hooks/src",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "entries": [
+        {
+          "name": "bin",
+          "path": "codex-rs/hooks/src/bin",
+          "type": "dir"
+        },
+        {
+          "name": "config_rules.rs",
+          "path": "codex-rs/hooks/src/config_rules.rs",
+          "type": "file"
+        },
+        {
+          "name": "declarations.rs",
+          "path": "codex-rs/hooks/src/declarations.rs",
+          "type": "file"
+        },
+        {
+          "name": "engine",
+          "path": "codex-rs/hooks/src/engine",
+          "type": "dir"
+        },
+        {
+          "name": "events",
+          "path": "codex-rs/hooks/src/events",
+          "type": "dir"
+        },
+        {
+          "name": "legacy_notify.rs",
+          "path": "codex-rs/hooks/src/legacy_notify.rs",
+          "type": "file"
+        },
+        {
+          "name": "lib.rs",
+          "path": "codex-rs/hooks/src/lib.rs",
+          "type": "file"
+        },
+        {
+          "name": "mcp.rs",
+          "path": "codex-rs/hooks/src/mcp.rs",
+          "type": "file"
+        },
+        {
+          "name": "output_spill.rs",
+          "path": "codex-rs/hooks/src/output_spill.rs",
+          "type": "file"
+        },
+        {
+          "name": "output_spill_tests.rs",
+          "path": "codex-rs/hooks/src/output_spill_tests.rs",
+          "type": "file"
+        },
+        {
+          "name": "registry.rs",
+          "path": "codex-rs/hooks/src/registry.rs",
+          "type": "file"
+        },
+        {
+          "name": "schema.rs",
+          "path": "codex-rs/hooks/src/schema.rs",
+          "type": "file"
+        },
+        {
+          "name": "types.rs",
+          "path": "codex-rs/hooks/src/types.rs",
+          "type": "file"
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/hooks/src/lib.rs",
+      "url": "https://api.github.com/repos/openai/codex/contents/codex-rs/hooks/src/lib.rs?ref=3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+      "error": "IncompleteRead(5529 bytes read, 1262 more expected)"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion" : 1,
+  "gateId" : "gate-node-gate-human_requirement_review-011",
+  "nodeInstanceId" : "node-gate-human_requirement_review-011",
+  "gateType" : "human.review",
+  "status" : "resolved",
+  "allowedActions" : [ "approve", "revise" ],
+  "openedAt" : "2026-10-11T04:58:21.754586Z",
+  "resolvedAt" : "2026-10-11T06:25:43.156182Z",
+  "result" : {
+    "subject_input_refs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791694645369/binding.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.contract.json" ],
+    "source_node_instance_id" : "node-intake-decision-010",
+    "source_outcome" : "READY_FOR_PRODUCT_REVIEW",
+    "human_action" : "approved",
+    "note" : "用户在当前 GOAL 材料展示后明确批准目标、验收和排除范围；不批准精确实施范围或最终交付。",
+    "decision_checks" : {
+      "schemaVersion" : 1,
+      "family" : "TaskContractProjectionVerifier",
+      "familyCoverage" : "NOT_INVOKED",
+      "gateNodeInstanceId" : "node-gate-human_requirement_review-011",
+      "sourceNodeInstanceId" : "node-intake-decision-010",
+      "subjectRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-intake-codex_product_review-009-run-1791694645369/binding.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694645369/outputs/intake-codex-product-review.contract.json" ],
+      "runtimeIdentitySha256" : "390b16750ef5a6f952e23849d88ee3cf51d2ca22cd3349778d566e46a5cc16f5",
+      "checks" : [ ]
+    }
+  }
+}

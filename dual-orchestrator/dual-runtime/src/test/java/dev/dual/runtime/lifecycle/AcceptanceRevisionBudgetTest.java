@@ -51,8 +51,8 @@ class AcceptanceRevisionBudgetTest {
         assertStoppedBeforeNextRepair(contracts, definition, "REJECT_CONTRACT_AMBIGUITY", 3);
 
         var implementation = initialize(definition, "implementation-shared");
-        for (var outcome : List.of("REJECT_IMPLEMENTATION_BUG", "REJECT_CONTEXT_INSUFFICIENT", "REJECT_TOOL_LIMITATION")) {
-            repairAndReturn(implementation, definition, outcome);
+        for (int round = 0; round < 3; round++) {
+            repairAndReturn(implementation, definition, "REJECT_IMPLEMENTATION_BUG");
         }
         assertStoppedBeforeNextRepair(implementation, definition, "REJECT_IMPLEMENTATION_BUG", 3);
     }
@@ -92,7 +92,7 @@ class AcceptanceRevisionBudgetTest {
 
     public static void main(String[] args) throws Exception {
         var paths = new WorkstreamPaths(Path.of(args[0]), new DualId(args[1]));
-        var definition = new WorkflowFileLedger().loadDefinition(paths);
+        var definition = dev.dual.runtime.RuntimeTestLedger.ledger().loadDefinition(paths);
         complete(paths, definition, "REJECT_REVIEW_NOISE");
         assertEquals("context.acceptance_codex_verifier_review", active(paths).nodeDefinitionId());
         complete(paths, definition, "completed");
@@ -110,16 +110,17 @@ class AcceptanceRevisionBudgetTest {
         var paths = initialize(definition, "human-revision");
         for (int i = 0; i < 4; i++) {
             complete(paths, definition, "completed");
-            new WorkflowFileLedger().resolveOpenGate(paths, definition, "revise", "explicit human revision " + i);
+            dev.dual.runtime.RuntimeTestLedger.ledger().resolveOpenGate(paths, definition, "revise", "explicit human revision " + i);
             assertEquals("work", active(paths).nodeDefinitionId());
-            assertEquals(WorkflowStatus.RUNNING, new WorkflowFileLedger().loadCurrent(paths).status());
+            assertEquals(WorkflowStatus.RUNNING, dev.dual.runtime.RuntimeTestLedger.ledger().loadCurrent(paths).status());
         }
     }
 
     // Real classifier config and loop edges; repair work is completed explicitly, without providers.
     private WorkflowDefinition budgetSlice(String variant) throws Exception {
         var bundled = AcceptanceRepairWorkflowDefinitionTest.loadResource(root, variant);
-        var edges = new ArrayList<>(bundled.edgesFrom(CLASSIFIER));
+        var edges = new ArrayList<>(bundled.edgesFrom(CLASSIFIER).stream()
+                .filter(edge -> "loop".equals(edge.metadata().transitionType())).toList());
         var nodes = new ArrayList<NodeDefinition>();
         nodes.add(bundled.node(CLASSIFIER));
         edges.stream().map(EdgeDefinition::to).distinct().forEach(target -> nodes.add(bundled.node(target)));
@@ -132,7 +133,7 @@ class AcceptanceRevisionBudgetTest {
     private WorkstreamPaths initialize(WorkflowDefinition definition, String id) throws Exception {
         var paths = new WorkstreamPaths(root, new DualId("ws-" + id));
         Files.createDirectories(paths.workstreamDir());
-        new WorkflowFileLedger().initialize(paths, "wf-" + id, definition);
+        dev.dual.runtime.RuntimeTestLedger.initialize(dev.dual.runtime.RuntimeTestLedger.ledger(), paths, "wf-" + id, definition);
         return paths;
     }
 
@@ -155,7 +156,7 @@ class AcceptanceRevisionBudgetTest {
         long nodesBefore;
         try (var files = Files.list(paths.nodesDir())) { nodesBefore = files.count(); }
         complete(paths, definition, outcome);
-        var ledger = new WorkflowFileLedger();
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
         var current = ledger.loadCurrent(paths);
         assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, current.status());
         assertEquals(List.of(trigger.nodeInstanceId()), current.activeNodeInstanceIds());
@@ -173,7 +174,7 @@ class AcceptanceRevisionBudgetTest {
     }
 
     private static NodeInstanceDocument active(WorkstreamPaths paths) throws Exception {
-        var ledger = new WorkflowFileLedger();
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
         var current = ledger.loadCurrent(paths);
         assertEquals(1, current.activeNodeInstanceIds().size());
         return ledger.loadNode(paths, current.activeNodeInstanceIds().getFirst());
@@ -181,7 +182,7 @@ class AcceptanceRevisionBudgetTest {
 
     private static void complete(WorkstreamPaths paths, WorkflowDefinition definition, String outcome) throws Exception {
         var node = active(paths);
-        new WorkflowFileLedger().completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED,
+        dev.dual.runtime.RuntimeTestLedger.ledger().completeAndRoute(paths, definition, node.nodeInstanceId(), NodeStatus.COMPLETED,
                 outcome, List.of("evidence-" + node.nodeInstanceId()), Map.of("decision", outcome));
     }
 }

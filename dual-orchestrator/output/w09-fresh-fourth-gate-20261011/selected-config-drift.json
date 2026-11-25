@@ -1,0 +1,10 @@
+{
+  "differences": [
+    {
+      "path": "/Users/kriswang/.codex/config.toml",
+      "before_sha256": "0ec7e2b53ce588b8720129658f61322784ee023a7bda70b5b1c6f7d5dce70892",
+      "after_sha256": "924857f60b2c56f27709d7750759ef320b6b142c35da45e68ba067f1da704474"
+    }
+  ],
+  "new_dispatch_blocked": true
+}

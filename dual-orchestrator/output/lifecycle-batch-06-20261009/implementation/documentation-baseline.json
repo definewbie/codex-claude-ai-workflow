@@ -1,0 +1,10 @@
+{
+  "status": "MATCHES_MEASURED_PREIMAGE_SHA",
+  "method": "reverse only this B06 document edit in memory; compare with measured before_sha256 from scope-candidates",
+  "not_claimed": "not an additional start-time text capture",
+  "checks": {
+    "docs/quickstart.md": true,
+    "docs/quickstart.zh-CN.md": true,
+    "docs/reference.md": true
+  }
+}

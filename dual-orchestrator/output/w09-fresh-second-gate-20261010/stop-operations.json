@@ -1,0 +1,34 @@
+[
+  {
+    "label": "native-session-close",
+    "argv": [
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "--format",
+      "json",
+      "claude",
+      "sessions",
+      "close",
+      "claude-main-ws-20261010T085617Z-8SVF-run-1791622684632"
+    ],
+    "exit": 0,
+    "at": "2026-10-10T17:06:46.480263+08:00",
+    "stdout_sha256": "8c8a3d4979559fc1e29b3393ead2a75dec71c745f2776bee1e034e70a8ff555d",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "native-session-after-close",
+    "argv": [
+      "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/bin/acpx",
+      "--format",
+      "json",
+      "claude",
+      "sessions",
+      "show",
+      "claude-main-ws-20261010T085617Z-8SVF-run-1791622684632"
+    ],
+    "exit": 0,
+    "at": "2026-10-10T17:06:46.579658+08:00",
+    "stdout_sha256": "73bfee1d0bb4a7542b1949ae7b657e6dff7b4d0b0b17bc4dd614a4ecc57d75b8",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

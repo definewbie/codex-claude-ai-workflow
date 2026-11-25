@@ -1,0 +1,36 @@
+  MODERNIZED ENCODER–DECODER ARCHITECTURE:
+             FLASH ATTENTION T5
+
+  Encoder–decoder architectures can in some cases outperform pure
+  decoder-only models, especially in multitask or zero-shot settings. Flash
+  Attention T5 (FAT5) is a modernized encoder–decoder model that
+  updates the original T51 design for today’s efficiency standards. By
+  integrating Flash Attention into T5’s architecture, it removes the main
+  attention bottleneck, achieves near-linear memory behavior, and
+  supports significantly longer context windows. The model preserves
+  strong generation capabilities while enabling efficient encoder-only
+  fine-tuning for classification tasks, reducing training time without
+  losing accuracy.
+
+One approach is to reuse KV caches for shared prefixes across beams
+during beam search decoding to avoid redundant attention computations.
+This can significantly cut memory usage and speed up inference, especially
+in large-beam setups. As the context grows, implement prefix trimming or a
+sliding window mechanism once the sequence approaches the model’s
+maximum context size. Older tokens that no longer contribute meaningfully
+to the output can be safely dropped, reducing memory use. In addition to
+memory optimization, this is also a practical mitigation for the haystack
+problem, where too much historical context obscures relevant information.
+
+
+      SOFTMAX AND THE HAYSTACK PROBLEM
+
+      In transformers, attention weights are computed with softmax. As the context grows, the
+      denominator of softmax, which sums over all token scores, becomes very large while
+      each individual score stays roughly the same. This flattens the distribution, reduces
+       contrast between important and irrelevant tokens, and makes it harder for the model to
+       identify key information. This challenge is known as the haystack problem.
+
+
+In deployment, you should continuously monitor cache hit ratio and
+memory pressure. Low hit ratios often reveal inefficient scheduling or

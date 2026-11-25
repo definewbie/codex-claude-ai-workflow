@@ -1,0 +1,68 @@
+{
+  "artifact_type" : "agent_output_contract",
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261010T124812Z-XCZL",
+  "run_id" : "run-1791636690133",
+  "node_id" : "intake.codex_product_review",
+  "node_instance_id" : "node-intake-codex_product_review-004",
+  "handler_type" : "acpx.agent_run",
+  "decision" : "NEEDS_REVISION",
+  "summary" : "功能与验收要求覆盖充分，但 C-4 将建议文件固化为产品约束，未保留用户要求的设计、计划确认及实现前单独批准边界。",
+  "required_keys" : [ "summary", "decision" ],
+  "allowed_decisions" : [ "READY_FOR_PRODUCT_REVIEW", "NEEDS_REVISION", "BLOCKED" ],
+  "source_output_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636690133/outputs/intake-codex-product-review.json",
+  "source_artifact_type" : "agent_output_contract",
+  "generated_at" : "2026-10-10T12:52:26.052372Z",
+  "control" : {
+    "summary" : "功能与验收要求覆盖充分，但 C-4 将建议文件固化为产品约束，未保留用户要求的设计、计划确认及实现前单独批准边界。",
+    "decision" : "NEEDS_REVISION"
+  },
+  "control_source" : {
+    "kind" : "strict_agent_result_envelope"
+  },
+  "lifecycle_status" : "NEEDS_REVISION",
+  "blocking" : true,
+  "checks" : [ "已先审阅 Review Evidence Brief，再依据上下文内完整提案，从产品完整性、架构适配和最终用户验收三个角度核对。", "函数签名、换行转换、其他字符保留、幂等性、标准库限制以及 README 要求均有绑定字段覆盖。", "AC-2 与 TR-2 要求实际测试命令和输出，未将退出码独立测量新增为验收条件。", "未要求提案重复编排器负责的输出协议或路由协议。" ],
+  "evidence" : [ "用户明确说明三个建议文件须经设计与计划确认，最终具体路径及 CREATE/MODIFY 在实现前单独批准。", "提案 scope.included 列出三个 CREATE 候选条目本身合理，但 C-4 将产品变更限定为这三个文件，且没有绑定字段明确候选范围与最终 EXECUTION 授权的区别。", "AC-1、AC-4 和 TR-3 覆盖输入类别、明确期望及重复规范化；AC-3 和 TR-4 覆盖 README 导入、混合换行示例与实际核对。", "上下文报告 tracked 文件数为 0；本次结论基于用户请求和完整提案，未声称已验证实现或执行测试。" ],
+  "missing_evidence" : [ ],
+  "must_fix" : [ "修改 C-4 并补充绑定约束：当前文件条目仅为候选；设计与计划评审后，在实现前单独批准具体路径及 CREATE/MODIFY。GOAL 批准不固定实施文件集，只有获批 EXECUTION scope.included 构成穷尽的变更授权，其他文字不能扩展授权。" ],
+  "acceptance_notes" : [ "本轮需要修订的是授权边界，无须用户重新决定已明确的函数行为，也无须现在增加实现文件或测试证据。" ],
+  "open_risks" : [ ],
+  "changed_files" : [ ],
+  "verification_summary" : "已完成提案与原始需求的语义核对；未读取或修改文件，未执行测试。范围批准要求尚未完整保留。",
+  "failure" : {
+    "category_hint" : "契约要求覆盖缺口",
+    "verification_remediation" : "NONE",
+    "contract_gaps" : [ "C-4 提前固定建议文件集，且缺少设计与计划确认后、实现前单独批准精确路径和操作的绑定要求。" ],
+    "out_of_scope_files" : [ ],
+    "missing_tests" : [ ],
+    "context_gaps" : [ ],
+    "reason" : "用户明确要求的文件范围确认与单独执行批准尚未写入绑定字段，当前提案不能据此安全进入后续批准流程。"
+  },
+  "checks_run" : [ ],
+  "checks_skipped" : [ ],
+  "contract_obligations" : [ {
+    "id" : "CO-1",
+    "text" : "保留文件范围的分阶段确认要求：当前 scope.included 是候选，设计与计划形成最终候选后，须在实现前单独批准每个精确仓库相对路径及 CREATE/MODIFY；仅获批 EXECUTION scope.included 授权仓库变更，不要求每个获批路径都必须改动。"
+  } ],
+  "reread_reasons" : [ ],
+  "review_subject" : {
+    "schema_version" : 1,
+    "artifact_ref" : ".agent/workstreams/ws-20261010T124812Z-XCZL/runs/run-1791636537680/outputs/intake-claude-brainstorm.contract.json",
+    "producer_node_id" : "intake.claude_brainstorm",
+    "producer_node_instance_id" : "node-intake-claude_brainstorm-002",
+    "sha256" : "44bd6b6d7b34152796f68e8b35358a55f20aa90e97e1bea46bc935e031f38722",
+    "proposal_id" : "node-intake-claude_brainstorm-002:44bd6b6d7b341527",
+    "workstream_id" : "ws-20261010T124812Z-XCZL"
+  },
+  "stage_outcome" : "NEEDS_REVISION",
+  "stage_outcome_source" : "invalid",
+  "evidence_state" : {
+    "blocking" : true,
+    "evidence_count" : 4,
+    "missing_evidence_count" : 0,
+    "must_fix_count" : 1,
+    "acceptance_note_count" : 1,
+    "open_risk_count" : 0
+  }
+}

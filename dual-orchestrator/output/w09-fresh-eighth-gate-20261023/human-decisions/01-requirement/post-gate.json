@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "gateId": "gate-node-gate-human_requirement_review-006",
+  "nodeInstanceId": "node-gate-human_requirement_review-006",
+  "gateType": "human.review",
+  "status": "resolved",
+  "allowedActions": [
+    "approve",
+    "revise"
+  ],
+  "openedAt": "2026-10-23T01:07:01.473672Z",
+  "resolvedAt": "2026-10-23T01:19:26.457789Z",
+  "result": {
+    "subject_input_refs": [
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json",
+      ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json"
+    ],
+    "source_outcome": "READY_FOR_PRODUCT_REVIEW",
+    "source_node_instance_id": "node-intake-decision-005",
+    "human_action": "approved",
+    "note": "用户已批准当前需求与验收标准，仅允许形成GOAL并进入设计；具体产品文件写权限仍须EXECUTION批准。",
+    "decision_checks": {
+      "schemaVersion": 1,
+      "family": "TaskContractProjectionVerifier",
+      "familyCoverage": "NOT_INVOKED",
+      "gateNodeInstanceId": "node-gate-human_requirement_review-006",
+      "sourceNodeInstanceId": "node-intake-decision-005",
+      "subjectRefs": [
+        ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log",
+        ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log",
+        ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json",
+        ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json",
+        ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json"
+      ],
+      "runtimeIdentitySha256": "4b8226f4d961c4003741f72ea7b4f53da8b4677ad50b9ab140f7785eaea496d6",
+      "checks": []
+    }
+  }
+}

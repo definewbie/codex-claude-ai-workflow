@@ -1,0 +1,28 @@
+{
+  "generated_at" : "2026-09-08T17:05:08.169082Z",
+  "network_transport_owner" : "claude_sandbox",
+  "node_instance_id" : "node-intake-claude_brainstorm-002",
+  "provider_subprocess_denied_env_names" : [ "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL" ],
+  "run_id" : "run-1788887108117",
+  "sandbox" : {
+    "allow_unsandboxed_commands" : false,
+    "auto_allow_sandboxed_bash" : true,
+    "enabled" : true,
+    "fail_if_unavailable" : true,
+    "filesystem" : {
+      "allow_read" : [ "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260908T170320Z-6KVE", "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T" ],
+      "allow_write" : [ "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260908T170320Z-6KVE", "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T" ],
+      "deny_read" : [ ],
+      "deny_write" : [ "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260908T170320Z-6KVE/.agent/workstreams/ws-20260908T170320Z-6KVE/nodes", "/Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260908T170320Z-6KVE/.agent/workstreams/ws-20260908T170320Z-6KVE/execution-authority" ]
+    },
+    "network" : {
+      "allow_local_binding" : false,
+      "allow_unix_sockets" : [ ],
+      "allowed_domains" : [ ],
+      "strict_allowlist" : true
+    }
+  },
+  "schema_version" : "claude_execution_policy.v2",
+  "setting_sources" : [ ],
+  "workstream_id" : "ws-20260908T170320Z-6KVE"
+}

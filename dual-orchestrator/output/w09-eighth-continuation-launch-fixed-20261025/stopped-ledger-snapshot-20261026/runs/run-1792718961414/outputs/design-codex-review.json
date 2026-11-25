@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "workstream_id": "ws-20261023T005431Z-9YYF",
+  "run_id": "run-1792718961414",
+  "node_id": "design.codex_arch_review",
+  "result": {
+    "artifact_type": "agent_output_contract",
+    "decision": "READY_FOR_ARCH_REVIEW",
+    "summary": "完整修订设计与需求一致，AR-1、AR-2 已在设计层面解决，可以进入后续计划评审。",
+    "lifecycle_status": "READY",
+    "blocking": false,
+    "checks": [
+      "已先审阅 Review Evidence Brief，再核对完整当前设计、三个计划文件职责、验收映射及两项修订义务，未仅依赖 ADDRESSED 声明。",
+      "AR-1 已解决：当前 CASES、混合换行测试设计和 README 示例统一使用正确期望 \"a\\nb\\nc\\nd\"，与两步替换算法一致。",
+      "AR-2 已解决：当前设计明确合并采集 stdout 与 stderr，或分别完整保留两者，并要求实际报告与源码案例核对。",
+      "语义与覆盖完整：先替换 CRLF、再替换单独 CR，保留其他字符及末尾换行存在性；九类输入均有明确期望，并安排全表幂等性断言。",
+      "文件职责完整：src/normalize_text.py、tests/test_normalize_text.py、README.md 分别承担实现、测试和使用说明，导入方案可在这三个候选文件内完成。",
+      "已复核生命周期适用性：函数无共享可变状态、I/O 或外部副作用；测试导入路径设置仅限进程内，无需新增并发协调、超时恢复、事务、回滚或补偿机制。",
+      "范围与授权一致：仅使用标准库，保持用户规定的排除项；当前 GOAL 批准不授权产品文件写入。"
+    ],
+    "evidence": [
+      "当前设计的测试文件职责与 README 职责均明确 \"a\\r\\nb\\rc\\nd\" → \"a\\nb\\nc\\nd\"；逐步替换推导也得到同一结果，支持关闭 AR-1。",
+      "当前设计明确使用 python -m unittest discover -s tests -v 2>&1，并禁止只保存 stdout 或以预期成功文本替代实际结果；README 职责同步注明 stderr 采集，支持关闭 AR-2。",
+      "当前 CASES 列出空串、纯 LF、CRLF、单 CR、混合换行、Unicode、末尾有换行、末尾无换行和连续空行；11 个计划测试方法包含全表无 CR 与幂等性检查。",
+      "AC-3 验证方案包含实际读取源码与 README，或在指定导入路径下运行 doctest；当前提供的是验证方案，尚无实现测试结果。"
+    ],
+    "missing_evidence": [],
+    "must_fix": [],
+    "contract_obligations": [],
+    "acceptance_notes": [
+      "两项既有义务在本次设计审查中通过核对；实现正确性与测试取证仍须在 EXECUTION 阶段实际验证。",
+      "Ran 11 tests 表示计划测试方法数，输入类别覆盖仍须结合 CASES 核对；实际数量变化应据实记录。",
+      "实施前仍须单独批准精确路径及 CREATE/MODIFY 操作组成的穷尽 EXECUTION 授权集合。"
+    ],
+    "open_risks": [],
+    "changed_files": [],
+    "verification_summary": "依据所提供完整当前设计完成静态审查，两项既有阻断均已修正，未发现新的设计阻断；未修改文件或执行测试。",
+    "failure": {
+      "category_hint": "",
+      "verification_remediation": "NONE",
+      "contract_gaps": [],
+      "out_of_scope_files": [],
+      "missing_tests": [],
+      "context_gaps": [],
+      "reason": ""
+    },
+    "reread_reasons": []
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "workstream_id": "ws-20261023T005431Z-9YYF",
+  "run_id": "run-1792977598143",
+  "node_id": "acceptance.codex_verifier_review",
+  "result": {
+    "artifact_type": "acceptance_review",
+    "decision": "ACCEPT",
+    "summary": "三个获批文件满足 AC-1～AC-3，独立执行测试与文档示例全部通过。",
+    "lifecycle_status": "ACCEPTED",
+    "blocking": false,
+    "checks": [
+      "产品验收：九类输入均有明确期望，规范化结果及幂等性符合要求。",
+      "架构验收：实现仅使用 str.replace，先处理 CRLF 再处理单独 CR，无外部依赖或副作用。",
+      "用户验收：README 包含导入说明、混合换行输入输出及测试命令，示例实际执行通过。",
+      "范围验收：五份指定 Git 证据及当前状态一致，仅新增三个获批文件。",
+      "为绑定当前验收对象，读取文件字节计算 SHA-256 并执行测试与文档示例；三个哈希均与开发者证据一致，未修改文件。"
+    ],
+    "evidence": [
+      "diff.patch 显示实现、九项 CASES、11 个测试方法和 README 示例；与 changed-files.txt、diff.stat、git-status-short.txt、git-evidence.json 一致。",
+      "已检查开发者 verification-observations.json 中实际测试命令及输出，包含 11 个逐项通过结果、Ran 11 tests 和 OK。",
+      "本次独立执行逐项输出九组输入、期望、实际结果及幂等性；全部相符。",
+      "本次 unittest 输出 Ran 11 tests、OK，另明确输出 failures 0、errors 0。",
+      "本次 README doctest 显示导入及四个调用共五项全部通过。"
+    ],
+    "missing_evidence": [],
+    "must_fix": [],
+    "acceptance_notes": [
+      "三个交付文件当前仍为未跟踪文件；本次验收不包含提交或最终交付批准。",
+      "开发者所称工作区干净应理解为无测试副产物，不能理解为 Git 无未提交文件。"
+    ],
+    "open_risks": [],
+    "changed_files": [
+      "README.md",
+      "src/normalize_text.py",
+      "tests/test_normalize_text.py"
+    ],
+    "verification_summary": "源码补丁、文件哈希、开发者原始执行记录与本次独立程序输出相互印证，三项验收证据充分。",
+    "failure": {
+      "category_hint": "",
+      "verification_remediation": "NONE",
+      "contract_gaps": [],
+      "out_of_scope_files": [],
+      "missing_tests": [],
+      "context_gaps": [],
+      "reason": ""
+    },
+    "verification_checks": [
+      {
+        "criterion_id": "AC-1",
+        "assertion": "九类输入覆盖空串、纯 LF、CRLF、单 CR、混合换行、Unicode、末尾有换行、末尾无换行及连续空行；逐项实际结果等于明确期望，重复规范化均保持相同结果。",
+        "execution_ref": "CURRENT",
+        "tool_call_ids": [],
+        "material_refs": [
+          {
+            "ref": "tests/test_normalize_text.py",
+            "sha256": "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be"
+          },
+          {
+            "ref": "src/normalize_text.py",
+            "sha256": "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c"
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC-2",
+        "assertion": "实际发现并运行 11 个 unittest 测试，逐项名称与测试源码一致；输出 Ran 11 tests、OK，并明确统计 failures 0、errors 0，同时保留九组实际输入与输出。",
+        "execution_ref": "CURRENT",
+        "tool_call_ids": [],
+        "material_refs": [
+          {
+            "ref": "tests/test_normalize_text.py",
+            "sha256": "31baf228b3689d2469fd14f95f90ca53423bac9868996fa9052fc9ac8876a1be"
+          }
+        ]
+      },
+      {
+        "criterion_id": "AC-3",
+        "assertion": "README 的导入语句及混合换行、空串、末尾有换行、末尾无换行示例共五项 doctest 全部通过；混合输入实际得到 'a\\nb\\nc\\nd'，与文档和实现一致。",
+        "execution_ref": "CURRENT",
+        "tool_call_ids": [],
+        "material_refs": [
+          {
+            "ref": "README.md",
+            "sha256": "0af74daeacfdd946a47e88d3b3f28d41ef125285084fd5f1c8735859e5caaae5"
+          },
+          {
+            "ref": "src/normalize_text.py",
+            "sha256": "68ab651db3f65927edab5e52962f5c92bc6654c14363e936a0d570f2b497de3c"
+          }
+        ]
+      }
+    ]
+  }
+}

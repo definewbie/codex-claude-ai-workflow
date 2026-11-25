@@ -13,6 +13,11 @@ public final class HumanGateActionSemantics {
     private HumanGateActionSemantics() {
     }
 
+    /** A human revision supplies new instructions regardless of the model's recommendation. */
+    public static boolean requiresDecisionNote(String action, String sourceOutcome) {
+        return "revise".equals(action) || "clarify".equals(action) || "BLOCKED".equals(sourceOutcome);
+    }
+
     public static List<String> allowedActions(NodeDefinition definition) {
         var configured = definition.config().get("allowed_actions");
         if (configured instanceof List<?> list && !list.isEmpty()) {

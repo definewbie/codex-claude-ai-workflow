@@ -72,6 +72,10 @@ record AgentLifecycleEvent(
         return permissionEvent(sequence, Kind.PERMISSION_CANCELLED, evidence);
     }
 
+    static AgentLifecycleEvent permissionUnresolved(long sequence, PermissionEvidence evidence) {
+        return permissionEvent(sequence, Kind.PERMISSION_UNRESOLVED, evidence);
+    }
+
     private static AgentLifecycleEvent textLine(long sequence, Source source, String text) {
         return new AgentLifecycleEvent(sequence, source, classifyText(source, text), text == null ? "" : text, null, null);
     }
@@ -147,11 +151,19 @@ record AgentLifecycleEvent(
             String title,
             String resource,
             java.util.List<String> requestedOptions,
-            String disposition
+            String disposition,
+            dev.dual.core.execution.AdapterSignal.OperationRef operationRef
     ) {
         static final PermissionEvidence EMPTY = new PermissionEvidence(
                 "", "", "", "", "", java.util.List.of(), "UNAVAILABLE");
 
+        PermissionEvidence(String toolCallId, String kind, String name, String title, String resource,
+                           java.util.List<String> options, String disposition) {
+            this(toolCallId, kind, name, title, resource, options, disposition, null);
+        }
+        PermissionEvidence withOperation(dev.dual.core.execution.AdapterSignal.OperationRef operation) {
+            return new PermissionEvidence(toolCallId, toolKind, toolName, title, resource, requestedOptions, disposition, operation);
+        }
         PermissionEvidence {
             toolCallId = toolCallId == null ? "" : toolCallId;
             toolKind = toolKind == null ? "" : toolKind;
@@ -163,7 +175,7 @@ record AgentLifecycleEvent(
         }
 
         PermissionEvidence withDisposition(String value) {
-            return new PermissionEvidence(toolCallId, toolKind, toolName, title, resource, requestedOptions, value);
+            return new PermissionEvidence(toolCallId, toolKind, toolName, title, resource, requestedOptions, value, operationRef);
         }
 
         String summary() {
@@ -186,6 +198,7 @@ record AgentLifecycleEvent(
         PERMISSION_APPROVED,
         PERMISSION_DENIED,
         PERMISSION_CANCELLED,
+        PERMISSION_UNRESOLVED,
         TOOL_RESULT,
         USAGE_UPDATE,
         RECONNECT_SIGNAL,

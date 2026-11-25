@@ -33,6 +33,14 @@ final class AgentTaskLedgerWriter {
             NodeDefinition definition,
             NodeInstanceDocument node
     ) throws IOException {
+        var current = jsonWriter.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
+        var actual = jsonWriter.read(paths.nodeJson(node.nodeInstanceId()), NodeInstanceDocument.class);
+        if (current.status().isTerminal() || !current.activeNodeInstanceIds().contains(node.nodeInstanceId())
+                || actual.status() != dev.dual.core.workflow.NodeStatus.READY || !actual.equals(node))
+            throw new IOException("task enqueue requires the current active READY occurrence");
+        if (readAgentTasks(paths).stream().anyMatch(task -> task.nodeInstanceId().equals(node.nodeInstanceId())
+                && (task.status() == AgentTaskStatus.QUEUED || task.status() == AgentTaskStatus.RUNNING)))
+            throw new IOException("node already has a queued or claimed task");
         var now = Instant.now();
         var dispatch = new LinkedHashMap<String, Object>();
         dispatch.put("kind", definition.kind().name());
@@ -71,6 +79,12 @@ final class AgentTaskLedgerWriter {
 
     AgentTaskDocument markRunning(WorkstreamPaths paths, AgentTaskDocument task, String nodeExecutionId)
             throws IOException {
+        task = requireCurrent(paths, task, AgentTaskStatus.QUEUED);
+        var execution = jsonWriter.read(paths.nodeExecutionJson(nodeExecutionId), NodeExecutionDocument.class);
+        if (!task.agentTaskId().equals(execution.agentTaskId())
+                || !task.nodeInstanceId().equals(execution.nodeInstanceId())
+                || execution.status() != NodeExecutionStatus.RUNNING)
+            throw new IOException("claim does not identify this task's running execution");
         var document = new AgentTaskDocument(
                 task.schemaVersion(),
                 task.agentTaskId(),
@@ -98,6 +112,19 @@ final class AgentTaskLedgerWriter {
 
     AgentTaskDocument markFinished(WorkstreamPaths paths, AgentTaskDocument task, NodeResult result)
             throws IOException {
+        task = requireCurrent(paths, task, AgentTaskStatus.RUNNING);
+        return writeFinished(paths, task, result);
+    }
+
+    AgentTaskDocument adoptVerifiedResult(WorkstreamPaths paths, AgentTaskDocument task, NodeResult result) throws IOException {
+        task = requireCurrent(paths, task, AgentTaskStatus.FAILED);
+        var node = jsonWriter.read(paths.nodeJson(task.nodeInstanceId()), NodeInstanceDocument.class);
+        if (!node.latestExecutionId().equals(task.nodeExecutionId()) || !"UNKNOWN".equals(node.result().get("external_effect")))
+            throw new IOException("task is not the current unknown execution");
+        return writeFinished(paths, task, result);
+    }
+
+    private AgentTaskDocument writeFinished(WorkstreamPaths paths, AgentTaskDocument task, NodeResult result) throws IOException {
         var dispatch = new LinkedHashMap<String, Object>();
         dispatch.putAll(task.dispatch());
         if (result != null) {
@@ -118,6 +145,7 @@ final class AgentTaskLedgerWriter {
 
     AgentTaskDocument markFailed(WorkstreamPaths paths, AgentTaskDocument task, Exception failure)
             throws IOException {
+        task = requireCurrent(paths, task, AgentTaskStatus.RUNNING);
         var dispatch = new LinkedHashMap<String, Object>();
         dispatch.putAll(task.dispatch());
         dispatch.put("exception_type", failure == null ? "" : failure.getClass().getName());
@@ -128,17 +156,17 @@ final class AgentTaskLedgerWriter {
     }
 
     List<AgentTaskDocument> readAgentTasks(WorkstreamPaths paths) throws IOException {
-        if (!java.nio.file.Files.isDirectory(paths.agentTasksDir())) {
+        if (!jsonWriter.exists(paths.agentTasksDir())) {
             return List.of();
         }
         var documents = new ArrayList<AgentTaskDocument>();
-        try (var stream = java.nio.file.Files.list(paths.agentTasksDir())) {
+        try (var stream = jsonWriter.list(paths.agentTasksDir()).stream()) {
             var files = stream
                     .filter(path -> path.getFileName().toString().endsWith(".json"))
                     .sorted()
                     .toList();
             for (var file : files) {
-                documents.add(jsonWriter.objectMapper().readValue(file.toFile(), AgentTaskDocument.class));
+                documents.add(jsonWriter.read(file, AgentTaskDocument.class));
             }
         }
         return documents;
@@ -149,10 +177,10 @@ final class AgentTaskLedgerWriter {
             return Optional.empty();
         }
         var path = paths.agentTaskJson(agentTaskId);
-        if (!java.nio.file.Files.isRegularFile(path)) {
+        if (!jsonWriter.exists(path)) {
             return Optional.empty();
         }
-        return Optional.of(jsonWriter.objectMapper().readValue(path.toFile(), AgentTaskDocument.class));
+        return Optional.of(jsonWriter.read(path, AgentTaskDocument.class));
     }
 
     Optional<AgentTaskDocument> firstQueued(WorkstreamPaths paths) throws IOException {
@@ -188,6 +216,20 @@ final class AgentTaskLedgerWriter {
                 task.claimedAt(),
                 Instant.now()
         );
+    }
+
+    private AgentTaskDocument requireCurrent(WorkstreamPaths paths, AgentTaskDocument task, AgentTaskStatus expected)
+            throws IOException {
+        var actual = jsonWriter.read(paths.agentTaskJson(task.agentTaskId()), AgentTaskDocument.class);
+        if (!actual.equals(task) || actual.status() != expected)
+            throw new IOException("stale or already consumed task claim: " + task.agentTaskId());
+        var current = jsonWriter.read(paths.workflowCurrentJson(), WorkflowCurrentDocument.class);
+        var node = jsonWriter.read(paths.nodeJson(actual.nodeInstanceId()), NodeInstanceDocument.class);
+        if (current.status().isTerminal() || !current.activeNodeInstanceIds().contains(node.nodeInstanceId()))
+            throw new IOException("task occurrence is no longer eligible");
+        if (expected == AgentTaskStatus.RUNNING && !node.latestExecutionId().equals(actual.nodeExecutionId()))
+            throw new IOException("task execution has been replaced");
+        return actual;
     }
 
     private static Optional<String> latestInputRef(NodeInstanceDocument node, String marker) {

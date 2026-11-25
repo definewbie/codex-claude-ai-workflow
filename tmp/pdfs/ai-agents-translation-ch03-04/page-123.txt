@@ -1,0 +1,37 @@
+across multiple trajectories so the LLM-judge can rank subtle differences such as
+more coherent reasoning flow, fewer hallucinations, and clearer logic.
+
+For deterministic problems such as the countdown tasks, where the objective is to
+reach a specific target using a fixed set of numbers and arithmetic operations, the
+reward can be defined programmatically. A rule-based reward works well here
+because correctness is binary and can be verified automatically.
+
+However, when you extend the system to include explanatory or reflective
+reasoning, where the agent must describe how it arrived at a valid expression or
+justify each operation, the evaluation criteria become more nuanced. In these
+cases, a hybrid reward can be introduced. This mechanism combines the precision
+of a deterministic correctness check with the qualitative judgment of RULER, so
+that only valid mathematical solutions are scored while their reasoning quality,
+structure, and clarity still influence the final reward.
+
+This concept is not limited to numerical reasoning. The same hybrid reward can be
+applied to code agents, where functional correctness can be checked
+programmatically but style, readability, or documentation quality may require
+language model evaluation. It can also be extended to text-generation tasks by
+mapping objective measures, such as factual accuracy or constraint satisfaction, to
+scalar correctness scores and combining them with RULER-style assessments.
+
+In essence, the hybrid reward offers an easy way to merge symbolic verification
+with language-based evaluation, creating reward functions that balance precision
+and interpretability. “The ART of Learning from Experience” demonstrates how
+this can be implemented in practice using ART and GRPO to train an agent to
+solve the countdown tasks.
+
+The ART of Learning from Experience
+
+Now that you know how RULER works, you’re ready to take your agent to the
+next step and actually produce trajectories for a task using ART to help it improve.
+In the following example, you’ll teach your agent to solve the mathematical
+countdown tasks with a hybrid reward. The setup combines deterministic rewards
+for numerical correctness with RULER-based scoring for reasoning quality,
+allowing your agent to learn both precision and clarity.

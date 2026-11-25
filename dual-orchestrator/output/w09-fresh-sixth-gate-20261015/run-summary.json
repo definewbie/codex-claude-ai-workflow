@@ -1,0 +1,15 @@
+{
+  "gate_result": "FAIL",
+  "workflow_status": "WAITING_FOR_RECOVERY",
+  "request_count": 4,
+  "known_partial_tokens": 51231,
+  "complete_aggregate_tokens": null,
+  "diagnostic_only_native_sum": 70801,
+  "diagnostic_is_not_budget_authority": true,
+  "active_step_seconds": 216.292,
+  "sessions_closed_observed": 3,
+  "snapshot_files": 191,
+  "next_dispatch_forbidden": true,
+  "production_code_modified": false,
+  "new_real_case_authorized": false
+}

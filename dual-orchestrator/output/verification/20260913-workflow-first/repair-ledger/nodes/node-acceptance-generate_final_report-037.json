@@ -1,0 +1,28 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-acceptance-generate_final_report-037",
+  "nodeDefinitionId" : "acceptance.generate_final_report",
+  "kind" : "TASK",
+  "handlerType" : "report.generate_final",
+  "status" : "COMPLETED",
+  "stageId" : "stage-acceptance",
+  "iterationId" : "iter-002",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315606445/outputs/acceptance-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315606445/outputs/acceptance-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315606445/outputs/acceptance-codex-review.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1789315606445/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315606445/outputs/acceptance-codex-review.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/reports/iter-002-final-report.md", ".agent/workstreams/ws-20260913T160441Z-H55W/reports/latest-final-report.md" ],
+  "result" : {
+    "report_path" : ".agent/workstreams/ws-20260913T160441Z-H55W/reports/iter-002-final-report.md",
+    "latest_report_path" : ".agent/workstreams/ws-20260913T160441Z-H55W/reports/latest-final-report.md",
+    "iteration_id" : "iter-002",
+    "generated_at" : "2026-09-13T16:06:56.942847Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315616911-805654b4",
+  "startedAt" : "2026-09-13T16:06:56.925262Z",
+  "finishedAt" : "2026-09-13T16:06:56.955154Z"
+}

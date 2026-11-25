@@ -1,0 +1,36 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1792977560818-bd4b0c2f",
+  "workflowExecutionId" : "wfe-1792977560720-19a70148",
+  "nodeInstanceId" : "node-implement-artifact_validation-033",
+  "nodeDefinitionId" : "implement.artifact_validation",
+  "nodeKind" : "TASK",
+  "handlerType" : "artifact.validate",
+  "status" : "SUCCEEDED",
+  "agent" : "",
+  "session" : "",
+  "promptTemplate" : "",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "artifact.validate",
+    "agent" : "",
+    "session" : "",
+    "prompt_template" : "",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "route_scope_violation" : true,
+      "required_contract_phase" : "EXECUTION"
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 13
+  },
+  "nodeExecutionId" : "nxe-1792977560824-4b07cd83",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-26T01:19:20.818880Z",
+  "claimedAt" : "2026-10-26T01:19:20.832158Z",
+  "completedAt" : "2026-10-26T01:19:21.133929Z"
+}

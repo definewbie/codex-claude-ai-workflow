@@ -1,0 +1,6 @@
+{
+  "source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/check_budget.py",
+  "unchanged_check_prefix_sha256": "7a4cbd970d52d55c40920c14cf99fac2c478ed9abcc47156ba3f6d2436a3ff41",
+  "change": "Reuse existing check(); old calibration self_check excluded because constants belong to old case. New budget supplied only.",
+  "does_not_launch": true
+}

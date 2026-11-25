@@ -1,0 +1,33 @@
+Chapter 4. Models Behind the
+Agents: Capabilities and
+Optimization
+
+
+
+By now you have already done the hard work to understand how to design
+AI agents and make them better. This is the right moment for me to ask you
+to step back, look behind the scenes, and think more deeply about the
+models that make them intelligent. You might ask yourself why I didn’t
+introduce the models at the beginning. There is a reason. Let me tell you.
+
+For this chapter it’s crucial to understand what you can do with your AI
+agents, because it completes the narrative arc of how I want you to think
+about them. I want you to think about your agents as if you were hiring
+team members. To do that well, you need the bigger picture: how your team
+interacts, how you structure it, and how you coach it to improve and
+collaborate. All of this was covered in the previous chapters.
+
+This is my own mental model for designing AI agents. I think of agents as
+dynamic, collaborative systems rather than isolated components. Every
+model size and model family has a distinct skill profile. If you build your
+multi-agent system with that in mind, you’ll not only get better results, but
+you’ll also save money. Let’s think of it a different way. You have learned
+how to manage your team; now it’s time to learn how to hire team
+members. In this chapter you learn how you decide who to onboard to the
+team, what skills they bring, and why that matters for performance,
+improvement, and cost.
+
+Just as in human teams, each member has different strengths, weaknesses,
+and ways of working, and their skills complement one another. The same
+holds true with AI agents—when you combine them thoughtfully, they
+achieve much more together than any single model could on its own. Once

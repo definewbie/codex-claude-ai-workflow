@@ -49,7 +49,7 @@ class WorkstreamMemoryProjectionTest {
                  "nonGoals":[],"acceptanceCriteria":["login works"],"constraints":[],"riskAreas":[]}
                 """);
         var b = new StringBuilder();
-        WorkstreamMemoryProjection.appendAgentHandoff(b, workstreamDir("ws-handoff"), tempDir);
+        WorkstreamMemoryProjection.appendAgentHandoff(dev.dual.runtime.RuntimeTestLedger.ledger(), b, workstreamDir("ws-handoff"), tempDir);
         var text = b.toString();
         assertTrue(text.contains("add login"), text);
         assertTrue(text.contains("SSO"), text);
@@ -74,7 +74,7 @@ class WorkstreamMemoryProjectionTest {
                  "nonGoals":[],"acceptanceCriteria":[],"constraints":[],"riskAreas":[]}
                 """);
         var b = new StringBuilder();
-        WorkstreamMemoryProjection.appendAgentHandoff(b, workstreamDir("ws-inv"), tempDir);
+        WorkstreamMemoryProjection.appendAgentHandoff(dev.dual.runtime.RuntimeTestLedger.ledger(), b, workstreamDir("ws-inv"), tempDir);
         var text = b.toString();
         assertTrue(text.contains("src/config.py"), text);
         assertTrue(text.toLowerCase().contains("fresh read") || text.toLowerCase().contains("invalidated"), text);
@@ -95,7 +95,7 @@ class WorkstreamMemoryProjectionTest {
                 """);
         writeGitChangedFiles("ws-review", "src/auth.py\nsrc/main.py\n");
         var b = new StringBuilder();
-        WorkstreamMemoryProjection.appendReviewEvidenceBrief(b, workstreamDir("ws-review"), tempDir);
+        WorkstreamMemoryProjection.appendReviewEvidenceBrief(dev.dual.runtime.RuntimeTestLedger.ledger(), b, workstreamDir("ws-review"), tempDir);
         var text = b.toString();
         assertTrue(text.contains("Prior verdict") && text.contains("REJECTED"), text);
         assertTrue(text.contains("fix token race"), text);
@@ -120,7 +120,7 @@ class WorkstreamMemoryProjectionTest {
                  "nonGoals":[],"acceptanceCriteria":[],"constraints":[],"riskAreas":[]}
                 """);
         var b = new StringBuilder();
-        WorkstreamMemoryProjection.appendReviewEvidenceBrief(b, workstreamDir("ws-nogit"), tempDir);
+        WorkstreamMemoryProjection.appendReviewEvidenceBrief(dev.dual.runtime.RuntimeTestLedger.ledger(), b, workstreamDir("ws-nogit"), tempDir);
         var text = b.toString();
         assertTrue(text.contains("src/x.py"), text);
     }
@@ -132,7 +132,7 @@ class WorkstreamMemoryProjectionTest {
                  "priorVerdicts":[],"openIssues":[],"readFiles":[],"decisions":[]}
                 """);
         var b = new StringBuilder();
-        WorkstreamMemoryProjection.appendReviewEvidenceBrief(b, workstreamDir("ws-empty-r"), tempDir);
+        WorkstreamMemoryProjection.appendReviewEvidenceBrief(dev.dual.runtime.RuntimeTestLedger.ledger(), b, workstreamDir("ws-empty-r"), tempDir);
         var text = b.toString();
         assertFalse(text.contains("(no structured review evidence yet)"), text);
         assertTrue(text.contains("workstream-memory.json"), text);
@@ -150,7 +150,7 @@ class WorkstreamMemoryProjectionTest {
                 """);
 
         var builder = new StringBuilder();
-        WorkstreamMemoryProjection.appendReviewEvidenceBrief(
+        WorkstreamMemoryProjection.appendReviewEvidenceBrief(dev.dual.runtime.RuntimeTestLedger.ledger(),
                 builder, workstreamDir("ws-contract-only"), tempDir);
         var text = builder.toString();
 
@@ -174,7 +174,7 @@ class WorkstreamMemoryProjectionTest {
                  "non_goals":[],"acceptance_criteria":[],"constraints":[],"risk_areas":[]}
                 """);
         var b = new StringBuilder();
-        WorkstreamMemoryProjection.appendAgentHandoff(b, workstreamDir("ws-sem-proj"), tempDir);
+        WorkstreamMemoryProjection.appendAgentHandoff(dev.dual.runtime.RuntimeTestLedger.ledger(), b, workstreamDir("ws-sem-proj"), tempDir);
         var text = b.toString();
         assertTrue(text.contains("refreshToken"), text);
         assertTrue(text.contains("AuthClient"), text);
@@ -188,7 +188,7 @@ class WorkstreamMemoryProjectionTest {
                  "decidedScope":[],"nonGoals":[],"readFiles":[],"decisions":[],"openIssues":[]}
                 """);
         var b = new StringBuilder();
-        WorkstreamMemoryProjection.appendAgentHandoff(b, workstreamDir("ws-empty"), tempDir);
+        WorkstreamMemoryProjection.appendAgentHandoff(dev.dual.runtime.RuntimeTestLedger.ledger(), b, workstreamDir("ws-empty"), tempDir);
         var text = b.toString();
         assertFalse(text.contains("(no stage handoff evidence yet)"), text);
         assertTrue(text.contains("task-contract.json") || text.contains("workstream-memory.json"), text);

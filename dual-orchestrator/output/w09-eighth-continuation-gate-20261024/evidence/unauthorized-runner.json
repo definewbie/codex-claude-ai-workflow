@@ -1,0 +1,6 @@
+{
+  "exit": 1,
+  "expected_rejection": true,
+  "steps_created": false,
+  "java_native_provider_calls": 0
+}

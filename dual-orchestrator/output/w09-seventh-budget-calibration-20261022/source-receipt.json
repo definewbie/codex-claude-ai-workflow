@@ -1,0 +1,194 @@
+{
+  "scope": "Six archived real cases only; no experiment, provider, native command, Gate runner or old-ledger write",
+  "sources": [
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-current-transcript-forward-fix-20261011/actual-current-transcripts-offline-proof.stdout",
+      "sha256": "00837392fd0d60b0b0f381175aa427c7c8f2b45468eff738dc1b7f9389757ca0"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728289467/outputs/intake-claude-brainstorm.transcript.log",
+      "sha256": "dfd36342ea1792e4b9c827c5daae1a35805c642aacd9d623002f6d99c4b4d00c"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728289467/run.json",
+      "sha256": "ab93f791eb0480a1f4da3fbbe1096b923ac4dab16eacff11abdb251b43a5d02f"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728450947/outputs/intake-codex-product-review.transcript.log",
+      "sha256": "d16edf6efd9089bb63348d54d822d0d43aa0efb1c334bdde76754f41fba6be45"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728450947/run.json",
+      "sha256": "df1c9ed809d925c94f65bd97c00433e487630950d03f2e4c1822d27b6f1c5cc6"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728580831/outputs/intake-claude-brainstorm.transcript.log",
+      "sha256": "6853673d59e29de66e2ec03a257e997b0c3d9121c5410bab4644d1507e673854"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011/stopped-ledger-snapshot/runs/run-1791728580831/run.json",
+      "sha256": "83c6d5bbab173e7b80d22bf8eecd493e8992dcb2b40d3c32af117d91de012155"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791694107574/outputs/intake-claude-brainstorm.transcript.log",
+      "sha256": "abbb2bb3b2a26cd186ce984449f5d3433cc9ba7c405dce177132fd2402dfe7cd"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791694107574/run.json",
+      "sha256": "16bcde5dda3b1be95dbfd1f171ecc09f58571de76f9302838b61547d2899603f"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791694259389/outputs/intake-codex-product-review.transcript.log",
+      "sha256": "14b57e7f273b17f06c10b9a29c24463f6948b43567ed56ecfb4fdba324b7b394"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791694259389/run.json",
+      "sha256": "54a4eea93bf49f99e04bfb1d083eb874be09bd799f96db78b8c24b12dd6de472"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791694532578/outputs/intake-claude-brainstorm.transcript.log",
+      "sha256": "0247c689904c260a498a1a4d265ff10c11470679b8c93bd5b7f1b193937a538b"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791694532578/run.json",
+      "sha256": "d76ca0d45caa741396fc285a00372cf1bb66e78621c85cd25fb2768912ecb696"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791694645369/outputs/intake-codex-product-review.transcript.log",
+      "sha256": "a1a120db207072ba728cc6b430270af0e2e70828c69d632f8709688a970baac2"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791694645369/run.json",
+      "sha256": "d72147d4b5e2dc1953e20cf08c8dc54fc7d8e662d768ada21c466b49fcd8584d"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791699968740/outputs/design-claude.transcript.log",
+      "sha256": "707a13c2cbe370fd5f56513515cf9a40e8701615cc21e6bf086feed1bb5673a2"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791699968740/run.json",
+      "sha256": "bca971bedd2f174cceb520b8ade1fbec2a0463164285bcd8b5ef68b7abfc6f08"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791700195359/outputs/design-codex-review.transcript.log",
+      "sha256": "e2a8f4958c222dff1fcf4be3195196cdf4a711d7ce11b9689a886bfe50aa27f8"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791700195359/run.json",
+      "sha256": "c36cb6b04e41052df466a84c9410295db334faef7006a4c4f9f26842139f2d4e"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791700286570/outputs/design-claude.transcript.log",
+      "sha256": "2f889cfe6f5215e17e51a8c6a3267c1466d2615ee977dc48ef73a7accca5ec13"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791700286570/run.json",
+      "sha256": "1a0d1adc3cf691623bdc442700b58b0d0c2d47d667113d2fffc7270a607fcb48"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791701323469/outputs/design-codex-review.transcript.log",
+      "sha256": "ed8e1962ee334834faec321ee710baee0d68c51ca08c2e355f2e845a3f903d8a"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fourth-gate-20261011/stopped-ledger-snapshot/runs/run-1791701323469/run.json",
+      "sha256": "3c34c0211766d0563012fea05e6310b86249470bf065e1e960c73033bd64683e"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-second-gate-20261010/stopped-ledger-snapshot/runs/run-1791622684632/outputs/intake-claude-brainstorm.contract-correction.transcript.log",
+      "sha256": "48f794cc314e8b2316f93528aa66e0af022bf38578fa6abd0a4378197e5a9948"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-second-gate-20261010/stopped-ledger-snapshot/runs/run-1791622684632/outputs/intake-claude-brainstorm.transcript.log",
+      "sha256": "627c686b4c05a4dcff0be48ffcfb0842449699c6624468f5649427f72f41c838"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-second-gate-20261010/stopped-ledger-snapshot/runs/run-1791622684632/run.json",
+      "sha256": "69cc29797859a809f53b32245199637a1d7eb23d77b0cdc8c73ccf8fa00af378"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-second-gate-20261010/usage-attribution-discrepancy.json",
+      "sha256": "8b962a15ba93d2b1ff82eb9995fb3f4058df1ee7a91fc8dc410ac43bdb951550"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-seventh-gate-20261016/budget.json",
+      "sha256": "1d1402bd192298e111327ce46afaad37c52a41b4955c22fd2b4e06101e86c6b1"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-sixth-gate-20261015/stopped-ledger-snapshot/runs/run-1792021247531/outputs/intake-claude-brainstorm.transcript.log",
+      "sha256": "7f63e06cdb56b1b8b010d345690736c674bc7a20c2513bff5967ccfd45ededdc"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-sixth-gate-20261015/stopped-ledger-snapshot/runs/run-1792021247531/run.json",
+      "sha256": "a0d0cdde06681bef9b5f92b08f8f4d0ac2c06b94616449be6ec3a0836882845e"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-sixth-gate-20261015/stopped-ledger-snapshot/runs/run-1792021315581/outputs/intake-codex-product-review.transcript.log",
+      "sha256": "7518b1a4c6d24b259fbf6a47196e5f46f7c7c065c3d3f43ddc7dfddb3cea8354"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-sixth-gate-20261015/stopped-ledger-snapshot/runs/run-1792021315581/run.json",
+      "sha256": "7b2bc8d7b9e76682ebacbbbf883cf5d42e74e039a2b40fde1ac732abf9e86a25"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-sixth-gate-20261015/stopped-ledger-snapshot/runs/run-1792021385197/outputs/intake-claude-brainstorm.contract-correction.transcript.log",
+      "sha256": "88599829277f37c27ca34b47ffe95682f7e9e0d964a0233162d1f85791d64ff2"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-sixth-gate-20261015/stopped-ledger-snapshot/runs/run-1792021385197/outputs/intake-claude-brainstorm.transcript.log",
+      "sha256": "14357e80203a94e1815b14abe7dd034b62ac93088954e4f793adfd1ae376d907"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-sixth-gate-20261015/stopped-ledger-snapshot/runs/run-1792021385197/run.json",
+      "sha256": "61f4110b969daaef097eacf8f0c3c6c517e6e7562e2513cae990f936bae4ab20"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-third-gate-20261010/stopped-ledger-snapshot/runs/run-1791636537680/outputs/intake-claude-brainstorm.transcript.log",
+      "sha256": "6e15c1e35e97f9ca2fcdce206c497fb26996747dfcde2afe6cf7315d19efa30d"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-third-gate-20261010/stopped-ledger-snapshot/runs/run-1791636537680/run.json",
+      "sha256": "60cb6ccb0e2a9f72174c6cc53ddc75dd1dedfd9adef15037c4d4651c2d4f6015"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-third-gate-20261010/stopped-ledger-snapshot/runs/run-1791636690133/outputs/intake-codex-product-review.transcript.log",
+      "sha256": "4851e59803cb38ce2f1b9e4da46d6f607d5e594fa1aeca46a79501548da1d4db"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-third-gate-20261010/stopped-ledger-snapshot/runs/run-1791636690133/run.json",
+      "sha256": "0a799c46eb9ed8b4b4331f148ac60726586ad8d403e2ea54c8a291d07cf5e809"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-third-gate-20261010/stopped-ledger-snapshot/runs/run-1791636803114/outputs/intake-claude-brainstorm.transcript.log",
+      "sha256": "3613c0bf91b7216ca302ceda537c5234adfb189f6c4cbc9abfbe5189b7b3189a"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-third-gate-20261010/stopped-ledger-snapshot/runs/run-1791636803114/run.json",
+      "sha256": "8ee6b751391fc2d92b99b979a35429fd76508b5fba14e89255cd7e9bff3300f9"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-third-gate-20261010/stopped-ledger-snapshot/runs/run-1791637010369/outputs/intake-codex-product-review.transcript.log",
+      "sha256": "f42f503c9d540440bcf608bec561b913a4174a1223c0720998221d55ca086366"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-third-gate-20261010/stopped-ledger-snapshot/runs/run-1791637010369/run.json",
+      "sha256": "7eea8c03a82685a29f5cb928e650718e9e8baad7ef58830a39e235a945791890"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-third-gate-20261010/stopped-ledger-snapshot/runs/run-1791641578962/outputs/design-claude.transcript.log",
+      "sha256": "73769597dbcfb3f2b5fbcea7b2d2b75e681d4aae718972f99892ce4101c3412e"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-third-gate-20261010/stopped-ledger-snapshot/runs/run-1791641578962/run.json",
+      "sha256": "d8400a93a4e97b8bc0663e6214b8f19bd4cea188babd51ce07a1a8c081656b16"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-real-gate-20261010/stopped-ledger-snapshot/runs/run-1791614610585/run.json",
+      "sha256": "89cb6e569d6d7af640e55ac01acdbc87bbf0e936056c711b0cfe2016704667c8"
+    },
+    {
+      "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015/historical-sixth.stdout",
+      "sha256": "e60a6f26925541236abc0fb0d2f177bd61157e5a2504c2977f3e319411a733f0"
+    }
+  ],
+  "selected_sources_unchanged_after_analysis": true
+}

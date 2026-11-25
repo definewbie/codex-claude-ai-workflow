@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "transcript",
+  "runId" : "run-1791699968740",
+  "workstreamId" : "ws-20261011T044656Z-BMDJ",
+  "nodeId" : "design.claude_design",
+  "agent" : "claude",
+  "session" : "claude-main-ws-20261011T044656Z-BMDJ-run-1791699968740",
+  "promptTemplate" : "design-claude",
+  "workdir" : "/private/tmp/dual-w09-newlines-20261011-fresh-04/worktree",
+  "artifactPath" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791699968740/outputs/design-claude.transcript.log",
+  "contentType" : "text/plain",
+  "byteSize" : 3491896,
+  "estimatedTokens" : 872974,
+  "lineCount" : 13916,
+  "sha256" : "707a13c2cbe370fd5f56513515cf9a40e8701615cc21e6bf086feed1bb5673a2",
+  "generatedAt" : "2026-10-11T06:29:19.842767Z"
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "output",
+  "runId" : "run-1791694259389",
+  "workstreamId" : "ws-20261011T044656Z-BMDJ",
+  "nodeId" : "intake.codex_product_review",
+  "agent" : "codex",
+  "session" : "codex-reviewer-ws-20261011T044656Z-BMDJ",
+  "promptTemplate" : "intake-codex-product-review",
+  "workdir" : "/private/tmp/dual-w09-newlines-20261011-fresh-04/worktree",
+  "artifactPath" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791694259389/outputs/intake-codex-product-review.json",
+  "contentType" : "application/json",
+  "byteSize" : 3843,
+  "estimatedTokens" : 961,
+  "lineCount" : 62,
+  "sha256" : "8854aa0a099f80043b2fee7fb4a3cd3331f757fa41cb179fb1625439af9632ca",
+  "generatedAt" : "2026-10-11T04:52:01.836595Z"
+}

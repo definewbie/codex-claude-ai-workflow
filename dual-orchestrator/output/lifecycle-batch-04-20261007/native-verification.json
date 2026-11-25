@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "node": "24.19.0",
+  "pnpm": "10.34.5",
+  "full_check_exit_code": 0,
+  "full_check": "native-check-final.log",
+  "test_run": {
+    "tests": 1005,
+    "pass": 1005,
+    "failures": 0,
+    "errors": 0,
+    "skip": 0
+  },
+  "coverage_subset_rerun": 143,
+  "coverage_subset_not_added_to_test_total": true,
+  "docs_check_exit_code": 0,
+  "docs_check": "native-docs.log",
+  "clean_patch_replay": "patch-replay.json",
+  "built_identity": {
+    "upstream_commit": "fd173f04aa1b56f9e3f5ca5190c034ddcae28792",
+    "patch_sha256": "1517f828d303ea720a7a153e6dc8c33265ba1ea100d2b9260c98327b5604468c",
+    "policy_schema": "claude_execution_policy.v2"
+  },
+  "installed_client_update": "NOT_PERFORMED",
+  "live_native_provider_runs": 0,
+  "local_sdk_cli_ipc_peers": true,
+  "ui_projection": "ui-projection-final.log",
+  "ui_proof_boundary": "Node VM DOM substitute, not browser runtime",
+  "assembly_boundary": "source/dist locally built; installer not rerun, installation registration not refreshed; real Gate must check actual selected assembly"
+}

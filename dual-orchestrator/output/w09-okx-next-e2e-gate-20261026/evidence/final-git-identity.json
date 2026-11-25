@@ -1,0 +1,19 @@
+{
+  "source_commit": "931db5db8fc468c61eb2c441d21a1da7facf69a1",
+  "source_tree": "3b10c1f77f3b140d3a8ef8d8e73f7ca2dc3b7547",
+  "case": {
+    "target": {
+      "head": "7c5facc37538b717b061bbc53da7f0c2a5bbffa0",
+      "tree": "3b10c1f77f3b140d3a8ef8d8e73f7ca2dc3b7547",
+      "common_dir": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/target/.git",
+      "status": ""
+    },
+    "workspace": {
+      "head": "7c5facc37538b717b061bbc53da7f0c2a5bbffa0",
+      "tree": "3b10c1f77f3b140d3a8ef8d8e73f7ca2dc3b7547",
+      "common_dir": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/case/target/.git",
+      "status": ""
+    }
+  },
+  "fresh_base_commit_is_not_source_commit": true
+}

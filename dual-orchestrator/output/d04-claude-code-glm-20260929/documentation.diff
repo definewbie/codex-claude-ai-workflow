@@ -1,0 +1,61 @@
+--- before/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -1,6 +1,6 @@
+ # Dual 生命周期可靠性：详细设计候选
+ 
+-日期：2026-09-28。阶段：P0。当前状态：**九项设计冻结，D04 技术阻塞；全案未具备实施条件、未获实施授权**。用户带回的冻结候选 CC 评审为 PASS；D01/D02/D03/D05–D10 依该结论及两项 LOW 采纳固定设计基线，见 §13/§15.1。LOW 增量由作者核验，未另经 CC 复审。D04 的 Claude 实际读取/限制仍受认证阻塞，工具宿主、额外配置/读取与 scratch 上限也未整体证明。本轮仅修订材料，无 provider 调用、额外 agent 或产品实施；历史评审和实验保留。
++日期：2026-09-28。阶段：P0。当前状态：**九项设计冻结，D04 技术阻塞；全案未具备实施条件、未获实施授权**。用户带回的冻结候选 CC 评审为 PASS；D01/D02/D03/D05–D10 依该结论及两项 LOW 采纳固定设计基线，见 §13/§15.1。LOW 增量由作者核验，未另经 CC 复审。2026-09-29 已纠正实验路由：本机一直使用的 Claude Code＋GLM 原生读取通过；写入/隐藏工具与配置/scratch 边界仍待证，见 §8.14。本轮仅修订材料，无 provider 调用、额外 agent 或产品实施；历史评审和实验保留。
+ 
+ 上位契约：[R3](20260923-dual-lifecycle-reliability-design.zh-CN.md)。唯一工作索引：[主清单](20260927-dual-lifecycle-worklist.zh-CN.md)。本文展开 D01–D10，不另建工作清单或降低 R3 验收。全文“增加、迁移、必须”描述拟议目标；现状另行标明。未落实的能力不能用于当前运行准入。
+ 
+@@ -470,6 +470,16 @@
+ 
+ 本地 auth status 仍仅显示已登录，服务端有效性未证明；已询问用户是否恢复原认证，回复前不重复模型请求、不自行改凭据。新 [单次补测 Gate](../../output/d04-feasibility-followup-20260929/verification-gate.md)及无确认即拒绝的启动检查已准备；本轮模型调用为 0。D04 保持 DESIGN GAP，既有九项设计冻结不变；之后须以可行性证据交 CC 独立判断，不以这次离线 PASS 或“进入下一步”自动获得实施授权。
+ 
++### 8.14 既有 Claude Code＋GLM 路由纠正及读取实证（2026-09-29）
++
++用户澄清 Claude 一直绑定 GLM，Dual 不应依赖模型品牌。此前把另一份 native 的 Anthropic OAuth 401 推为本机需要登录，属于作者选错实验对象/错误归因，§8.13 的“等待恢复认证”前置撤销；旧证据仍 INVALID，不改成安全或可用性失败。[本轮报告](../../output/d04-claude-code-glm-20260929/result.md)保留具体差异和职责纠正。
++
++当前规范：Claude/Codex 指客户端/adapter 执行面和分工，不硬编码其底层模型品牌；模型/连接从配置进入，实际身份继续用于审计、成本和同版本恢复。必要连接参数与自定义 hooks/工具/权限配置分开消费，不因禁用后者而静默切到另一后端。只读能力绑定针对客户端执行面；任何模型产物仍经同一严格 contract 校验，不能为某模型加宽松解析分支。
++
++在 SDK 0.3.232＋本机 Claude Code 2.1.277、既有 GLM-5.3 路由下，单次 10.19 秒、4 次真实工具调用完成随机数据搜索/读取与 control 读取，oracle 正确、fixture 无变化；init 仅 Glob/Grep/Read、dontAsk、无 MCP/plugins/skills/slash_commands。结论 PASS_NATIVE_READ_SURFACE。Write/Edit 无实际调用，拒绝能力 NOT_TESTED；隐藏工具/配置/scratch 上限仍未证明，不因 --restricted 参数存在而关闭。最终文本含解释和 fenced JSON，严格纯 JSON 提示未满足；本轮只验证读取值，未验证 Dual artifact/correction，不放宽产品合同。
++
++模型调用为 1，零自动重跑/子 agent；SDK usage 原值和 costBasis=unknown 独立保存，估算金额不是 GLM 账单，firstParty 原始标签不冒充 Anthropic provider。此 native 版本的正向实证不外推到旧 pinned adapter；D04 仍 DESIGN GAP，九项设计冻结/实施未授权状态不变。本次预算已使用，继续真实调用须有针对剩余缺口的有界 Gate；证据齐备后再交 CC 冻结复审。
++
+ ## 9. D09：交付外部窗口与处置
+ 
+ 复用 DeliveryMergePlan 四状态；新增操作意图与观察字段，不新建交付状态机。建议 `apply_intent` 包含 operation id、candidate/ref/SHA、批准引用、canonical target Git identity、base/index/worktree 基准、expected tree；`observation` 保存检查到的 HEAD/index/worktree/commit 引用与检查时点。恢复的“已知/不明”由这些事实派生，failureCode 可显示未知，不能仅凭 status=FAILED 再 apply。
+@@ -563,7 +573,7 @@
+ | D01 | 附录 §2 + precondition-map：前置/消费者/规则身份、coverage、L03/L04 | DESIGN_FROZEN；实现后证明分类/UNKNOWN、语义常量映射与合法续作 |
+ | D02 | 附录 §3 + 补记 LOW-2：精确 signal 关联、EXECUTION 可审计声明、不可降级清单 | DESIGN_FROZEN；typed 字段及两条合法通道、拒绝序列、E02 常驻回归仍待实施 |
+ | D03 | 附录 §4 + examples：两阶段合同、reviewed_candidate、外部批准、逐 consumer/四变体迁移 | DESIGN_FROZEN；实施后验收无循环批准、自动推进、严格授权及新旧拒绝 |
+-| D04 | 附录 §4.1 + 主文 §8：绑定/回执/session/writer；已有局部实证 | **DESIGN GAP**：Claude 原生必要读取/限制及工具宿主、配置/读取与 scratch 上限尚未整体证明；adapter 接入验收仍在实施后，不提前豁免 |
++| D04 | 附录 §4.1 + 主文 §8：绑定/回执/session/writer；已有局部实证 | **DESIGN GAP**：§8.14 已证明本机 Claude Code＋GLM 必要读取；真实写入/隐藏工具拒绝、配置/读取与 scratch 上限、目标 adapter 启动组合仍待证；adapter 全入口接入验收在实施后，不提前豁免 |
+ | D05 | 附录 §5：真实生产者与增量、机器/人工出口样本分列 | DESIGN_FROZEN；实现后验证生产者→消费者，不将合成样例/人工声明当机器证明 |
+ | D06 | 附录 §6 + 142 文件入口对账：写集/会话/锁/原子写/失败前缀 | DESIGN_FROZEN；本机存储原语不代替产品冷 JVM/中断/并发反证 |
+ | D07 | 附录 §7：M6 函数桥接、identity、恢复 payload/入口、未知裁定 | DESIGN_FROZEN；实现后证明恢复/终态及人裁定不冒充机器事实 |
+--- before/20260927-dual-lifecycle-worklist.zh-CN.md
++++ dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -341,3 +341,7 @@
+ ### 9.6 D04 下一步已进入，认证前置待确认（2026-09-29）
+ 
+ 用户要求进入可行性补测；[本轮报告](../../output/d04-feasibility-followup-20260929/result.md)记录共享首错消费者 18 项离线序列通过、语法/dry-run/缺确认拒绝通过。本机 loggedIn=true 不代表服务端已接受，恢复认证的确认仍待用户回复，因此本轮未发模型请求。旧证据不改，产品工作项未完成，九项设计冻结与 D04 DESIGN GAP 状态维持；后续证据齐备才交 CC 冻结复审及实施范围对账，不自动实施。
++
++### 9.7 纠正实验对象：既有 GLM 路径读取通过（2026-09-29）
++
++用户明确 Claude 一直连接 GLM、Dual 不依赖模型品牌，因此 §9.6 的认证恢复前置属于错误推断，现撤销，非用户改方案。按详设 §8.14 使用本机实际 Claude Code 与既有路由，单次原生读取 PASS，10.19 秒/4 工具；[原始结果及边界](../../output/d04-claude-code-glm-20260929/result.md)。纯 JSON 提示未满足，实际写拒绝/隐藏工具/配置/scratch 未证明，不升级为 D04 冻结。运行配置保留实际模型以追溯/成本/恢复，核心流程不增加模型品牌分支；产品实现与 CC 调用均未发生。
+--- before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
++++ dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md
+@@ -2,9 +2,9 @@
+ 
+ ## 当前入口：2026-09-28 生命周期详细设计候选
+ 
+-2026-09-29 进展：用户已要求进入 D04 可行性补测。新探针的首次错误停止已有 18 项离线序列证明，详见 [报告](../../output/d04-feasibility-followup-20260929/result.md)。Claude 本地仍显示已登录，但不能据此证明服务端认证恢复；已请求用户确认，尚未发模型任务，也未开始产品实现。后续仍需原生能力证据和 CC 冻结复审。
+-
+-当前状态：用户带回冻结候选 CC PASS；两项 LOW 已吸收，D01/D02/D03/D05–D10 九项设计冻结，D04 技术阻塞。详设 §13/§15.1、主清单 §9.5 与 [处置补记](../../output/freeze-review-20260928-r2/review-disposition.md)同步。修订固定了显式内核注入及执行合同中可审计的非必需声明；增量由作者核验，未另经 CC 复审。D04 仍缺 Claude 原生必要读取/限制、工具宿主、额外配置/读取与 scratch 上限证据，不是只差登录。全案未具备实施条件，未取得实施授权；本次无 provider/agent、产品改动或历史恢复。原冻结包与旧证据保留，以下为历史进展，不能覆盖本段当前状态。
++2026-09-29 最新：用户澄清 Claude 一直使用 GLM，Dual 核心不依赖底层模型品牌。此前“等待恢复 Anthropic 登录”是实验对象选错造成的错误前提，已撤销。使用本机 Claude Code＋既有 GLM-5.3 路由完成单次读取实证，10.19 秒/4 次工具、随机 oracle 正确、fixture 未变，见 [报告](../../output/d04-claude-code-glm-20260929/result.md)。真实写拒绝/隐藏工具/配置/scratch 尚未证明，纯 JSON 提示未满足，D04 仍未冻结。九项设计冻结状态不变，无产品实施/CC 调用。
++
++当前状态：用户带回冻结候选 CC PASS；两项 LOW 已吸收，D01/D02/D03/D05–D10 九项设计冻结，D04 技术阻塞。详设 §13/§15.1、主清单 §9.5 与 [处置补记](../../output/freeze-review-20260928-r2/review-disposition.md)同步。修订固定了显式内核注入及执行合同中可审计的非必需声明；增量由作者核验，未另经 CC 复审。D04 当前缺口以详设 §8.14 为准：必要读取已有实证，真实拒绝/工具宿主、配置/读取与 scratch 上限仍待证。全案未具备实施条件，未取得实施授权；本次无 provider/agent、产品改动或历史恢复。原冻结包与旧证据保留，以下为历史进展，不能覆盖本段当前状态。
+ 
+ 最新决定：用户已接受 D04“经过证明的必要受限执行”候选，并授权调整后进行有界原生能力实验。当前口径见详细设计 §8.9/主清单 §8.3；下文无 execute 及验证未授权记录均为此前状态。结论确定前不承诺可行，不开始产品实现；D04 仍待证。[本轮结果](../../output/d04-restricted-execution-20260928/result.md)：Codex 原生命令沙箱切片通过，模型切片因探针关闭必要工具宿主而 INVALID，已停止不自动补测。补测前修正前提检查/停止条件并确认增量预算，不改旧证据。
+ 

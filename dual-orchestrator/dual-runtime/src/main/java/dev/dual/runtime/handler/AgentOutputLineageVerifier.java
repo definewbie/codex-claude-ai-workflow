@@ -15,6 +15,7 @@ final class AgentOutputLineageVerifier {
     }
 
     static Optional<String> violation(
+            WorkflowFileLedger assembledLedger,
             Path workspaceRoot,
             String workstreamId,
             Path sidecarPath,
@@ -25,7 +26,7 @@ final class AgentOutputLineageVerifier {
         }
         try {
             var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-            var ledger = new WorkflowFileLedger();
+            return assembledLedger.inspect(paths, (ledger, files) -> {
             var node = ledger.loadNode(paths, document.nodeInstanceId());
             if (!document.nodeId().equals(node.nodeDefinitionId())) {
                 return Optional.of("sidecar node_id does not match the ledger node occurrence");
@@ -70,7 +71,15 @@ final class AgentOutputLineageVerifier {
             if (!expectedHash.equals(text(actual.result().get("contract_sidecar_sha256")))) {
                 return Optional.of("sidecar content hash does not match the node execution result");
             }
+            if (document.proposalDerivation()!=null) {
+                if (!ContractRevisionBinding.validSource(workspaceRoot,workstreamId,document))
+                    return Optional.of("proposal derivation is not bound to its exact R01");
+                var completion=AgentRunCommitProtocol.readCompletion(paths,actual);
+                if (!containsRef(completion.outputRefs(),sidecarRef))
+                    return Optional.of("proposal is not fixed by R03");
+            }
             return Optional.empty();
+            });
         } catch (Exception e) {
             return Optional.of("sidecar ledger occurrence cannot be resolved: " + e.getMessage());
         }

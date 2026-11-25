@@ -1,0 +1,34 @@
+{
+  "result": "PASS_OFFLINE_ONLY",
+  "receipt_ref": "preflight-receipts/1793024960405097000/result.json",
+  "receipt_sha256": "68d36245ef9f34dd3b40f2b5d6f6ef9207adad0b86ae6b8be6ab798e121b1a7b",
+  "active_seconds_including_that_receipt": 2.6706297919154167,
+  "tokens": 0,
+  "requests": 0,
+  "workstream": "ws-20261026T142203Z-7SNA",
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261026T142203Z-7SNA",
+    "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-context-intake_claude_brainstorm-001"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000001",
+    "updatedAt": "2026-10-26T14:22:03.577440Z",
+    "commitSequence": 1
+  },
+  "process_observation": {
+    "status": "NO_UNRESOLVED_PIDS",
+    "checked_pids": [],
+    "scope": "Prior confirmed absence only; no current process-table or child-tree claim",
+    "previously_confirmed_absent": []
+  },
+  "native_tool_execution": "NOT_RUN",
+  "run_authorized": false,
+  "initial_ledger_sha256": "d1b747b38d4ad8ec5cfbffb303162d8232e7568b0409ffc908bf7c3923df908b",
+  "launch_sha256": "ed183a55113d8c86a56e92f4b058b24a2106f1a85be6331b41c5a111b8d3be29"
+}

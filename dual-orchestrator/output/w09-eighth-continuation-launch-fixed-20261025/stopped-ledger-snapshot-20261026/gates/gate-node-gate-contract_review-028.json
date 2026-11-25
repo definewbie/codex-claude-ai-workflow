@@ -1,0 +1,2784 @@
+{
+  "schemaVersion" : 1,
+  "gateId" : "gate-node-gate-contract_review-028",
+  "nodeInstanceId" : "node-gate-contract_review-028",
+  "gateType" : "human.review",
+  "status" : "resolved",
+  "allowedActions" : [ "approve", "clarify", "reject" ],
+  "openedAt" : "2026-10-25T22:22:52.999603Z",
+  "resolvedAt" : "2026-10-25T22:35:57.232286Z",
+  "result" : {
+    "source_node_instance_id" : "node-contract-compile_execution-027",
+    "subject_input_refs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json" ],
+    "source_outcome" : "completed",
+    "human_action" : "approved",
+    "note" : "用户批准当前EXECUTION epoch1合同，仅CREATE src/normalize_text.py、tests/test_normalize_text.py、README.md；继续实现、自测和独立验收。原累计1700000token/18请求/3600活动秒及储备规则、原停止记录保留，最终交付批准和用户commit不在本次授权。",
+    "decision_checks" : {
+      "schemaVersion" : 1,
+      "family" : "TaskContractProjectionVerifier",
+      "familyCoverage" : "COVERED",
+      "gateNodeInstanceId" : "node-gate-contract_review-028",
+      "sourceNodeInstanceId" : "node-contract-compile_execution-027",
+      "subjectRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json" ],
+      "runtimeIdentitySha256" : "4b8226f4d961c4003741f72ea7b4f53da8b4677ad50b9ab140f7785eaea496d6",
+      "checks" : [ {
+        "ruleId" : "TaskContractProjectionVerifier.executionCandidate.contract_candidate_requires_its_current_waiting_gate",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "active" : [ "node-gate-contract_review-028" ],
+          "status" : "WAITING_FOR_HUMAN",
+          "expectedGate" : "node-gate-contract_review-028"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "25c35cf95c08f716ecad7baa883a95d5292ff014dba6728db98b6ff3a52268cd",
+          "eventId" : "evt-000001",
+          "sequence" : 1
+        } ],
+        "inputValues" : {
+          "sequence" : 1,
+          "previous" : -1
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.routing_event_does_not_have_a_workflow_event_id",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "event" : {
+            "event_id" : "domain-node-contract-compile_execution-027",
+            "ts" : "2026-10-25T22:22:52.825739Z",
+            "event_type" : "contract_compilation_completed",
+            "payload" : {
+              "handler_type" : "contract.compile",
+              "node_id" : "contract.compile_execution",
+              "node_instance_id" : "node-contract-compile_execution-027",
+              "contract_id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile_execution-027",
+              "contract_status" : "READY_FOR_REVIEW"
+            }
+          }
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "c97944a374918c3e527a773ff7b0a12747e9ccdfbb004cd0f11073b5c9eed92e",
+          "eventId" : "evt-000002",
+          "sequence" : 2
+        } ],
+        "inputValues" : {
+          "sequence" : 2,
+          "previous" : 1
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "482267b2bfbc46009631a193979ddf3eea006a088d252c546a19b03bb21ea90e",
+          "eventId" : "evt-000003",
+          "sequence" : 3
+        } ],
+        "inputValues" : {
+          "sequence" : 3,
+          "previous" : 2
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "d3299af51472ee5c5fe731cfa9fc9d4ab8b5eb7a50a88f3fe6603dd53ba40866",
+          "eventId" : "evt-000004",
+          "sequence" : 4
+        } ],
+        "inputValues" : {
+          "sequence" : 4,
+          "previous" : 3
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "e3061fcf25d9587d76f46814fd8016566509e7b315e25e6b5670b00049d9d519",
+          "eventId" : "evt-000005",
+          "sequence" : 5
+        } ],
+        "inputValues" : {
+          "sequence" : 5,
+          "previous" : 4
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "b032677a71a2ea45c15880b9bd6c36852a1c4634fab9f5df340f6fb6b87a15de",
+          "eventId" : "evt-000006",
+          "sequence" : 6
+        } ],
+        "inputValues" : {
+          "sequence" : 6,
+          "previous" : 5
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "559b86043cdd1f4f0c822cc943d0d4fdae864798766a44240b26e6e12f6e5cd1",
+          "eventId" : "evt-000007",
+          "sequence" : 7
+        } ],
+        "inputValues" : {
+          "sequence" : 7,
+          "previous" : 6
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "de9915bf0cd023c38d43c40bfe1f05318ea36cd43ba91954dbb2a755cdb1ad42",
+          "eventId" : "evt-000008",
+          "sequence" : 8
+        } ],
+        "inputValues" : {
+          "sequence" : 8,
+          "previous" : 7
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "a11b002674cb219943aa5fb143dbb33b1cca2fa6bd03e0a73b0fea863d7393c9",
+          "eventId" : "evt-000009",
+          "sequence" : 9
+        } ],
+        "inputValues" : {
+          "sequence" : 9,
+          "previous" : 8
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "11895c7276422958f10bddc152f230756fc8c1f76de6eee8cda7e6d7147cb1c1",
+          "eventId" : "evt-000010",
+          "sequence" : 10
+        } ],
+        "inputValues" : {
+          "sequence" : 10,
+          "previous" : 9
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "da79fc5976a6f56dffd8aeb119938808cbab63f2e20f7de561a42a4a6e1a8fda",
+          "eventId" : "evt-000011",
+          "sequence" : 11
+        } ],
+        "inputValues" : {
+          "sequence" : 11,
+          "previous" : 10
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "d3a00b3151b849aaa06d051dc41dface36c6c71c89414e913abd85d668013bcd",
+          "eventId" : "evt-000012",
+          "sequence" : 12
+        } ],
+        "inputValues" : {
+          "sequence" : 12,
+          "previous" : 11
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "70be7a48eceb02ef8d9064a8f359dd5bfa336dcbd6aec11bc73d884eb6670b87",
+          "eventId" : "evt-000013",
+          "sequence" : 13
+        } ],
+        "inputValues" : {
+          "sequence" : 13,
+          "previous" : 12
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "e82f892dd46b8518cc6972fff4d6c8cb8aa20223b4709911978d9ac0d235526f",
+          "eventId" : "evt-000014",
+          "sequence" : 14
+        } ],
+        "inputValues" : {
+          "sequence" : 14,
+          "previous" : 13
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "c7c62c5d7697fa3be9959e7a70aa9617fb4bf2ff84940c3d59d7523a6a74c9c9",
+          "eventId" : "evt-000015",
+          "sequence" : 15
+        } ],
+        "inputValues" : {
+          "sequence" : 15,
+          "previous" : 14
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "f1d1e4b923e1bb4bbca20cd82ffd1f86e72c4539ef4417d33369827894651f15",
+          "eventId" : "evt-000016",
+          "sequence" : 16
+        } ],
+        "inputValues" : {
+          "sequence" : 16,
+          "previous" : 15
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "db47d929e8bc47724b85763d486488b23e8f3f2c6e8a0a84a02ebc05cf650764",
+          "eventId" : "evt-000017",
+          "sequence" : 17
+        } ],
+        "inputValues" : {
+          "sequence" : 17,
+          "previous" : 16
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "319564e0f0469eaa13bb551421156a6d90b307e6a609c55fd22f4cc31a9f7a2c",
+          "eventId" : "evt-000018",
+          "sequence" : 18
+        } ],
+        "inputValues" : {
+          "sequence" : 18,
+          "previous" : 17
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "157a0f0f581597680f195599048bbb9f72851dc8bce10f5e33a5166ca4115a60",
+          "eventId" : "evt-000019",
+          "sequence" : 19
+        } ],
+        "inputValues" : {
+          "sequence" : 19,
+          "previous" : 18
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "ed3b539b8318d5ec351c08efd4ce279d47b4cdfb217b01037c80d00bb662378c",
+          "eventId" : "evt-000020",
+          "sequence" : 20
+        } ],
+        "inputValues" : {
+          "sequence" : 20,
+          "previous" : 19
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "687bb46286dc0e7e9705e4340b5a4a28e1da434a91c0f7bcb420b5a999aa3a54",
+          "eventId" : "evt-000021",
+          "sequence" : 21
+        } ],
+        "inputValues" : {
+          "sequence" : 21,
+          "previous" : 20
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "cbc1da20444037e9e00fd4c8a0da6cafba56dd81a5e681905e3a85cb8d75cff5",
+          "eventId" : "evt-000022",
+          "sequence" : 22
+        } ],
+        "inputValues" : {
+          "sequence" : 22,
+          "previous" : 21
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "6bd2da73383f986c061447cb9f07f6ea3be8e092bd82c31fec2ff9b296458c6f",
+          "eventId" : "evt-000023",
+          "sequence" : 23
+        } ],
+        "inputValues" : {
+          "sequence" : 23,
+          "previous" : 22
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "76d2fa797069d035e21cb07e4aa302465f44f2685ec33e3c973318ef33f179f9",
+          "eventId" : "evt-000024",
+          "sequence" : 24
+        } ],
+        "inputValues" : {
+          "sequence" : 24,
+          "previous" : 23
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "85c4876de83ca1d6166ab2970d68d8891e11b0fde11aa2252411d47d203daa4a",
+          "eventId" : "evt-000025",
+          "sequence" : 25
+        } ],
+        "inputValues" : {
+          "sequence" : 25,
+          "previous" : 24
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "3df04d7e09d93483c48417ecdc7bdf638eb5f13c4c72596a35e868e313c582db",
+          "eventId" : "evt-000026",
+          "sequence" : 26
+        } ],
+        "inputValues" : {
+          "sequence" : 26,
+          "previous" : 25
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "0738d849b1e0fc9ee69864e5e02bb264eccd649ebf36f4ed835e7aee0828e07b",
+          "eventId" : "evt-000027",
+          "sequence" : 27
+        } ],
+        "inputValues" : {
+          "sequence" : 27,
+          "previous" : 26
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "e06887b2396e84c7ee46b53c4a662a174bbfbfe2de35e9c2b8dc34e172aa75d8",
+          "eventId" : "evt-000028",
+          "sequence" : 28
+        } ],
+        "inputValues" : {
+          "sequence" : 28,
+          "previous" : 27
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.lastContractGateOccurrence.contract_gate_routing_event_has_incomplete_source_lineage",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "e06887b2396e84c7ee46b53c4a662a174bbfbfe2de35e9c2b8dc34e172aa75d8",
+          "eventId" : "evt-000028",
+          "sequence" : 28
+        } ],
+        "inputValues" : {
+          "gateId" : "gate-node-gate-contract_review-028",
+          "nodeInstanceId" : "node-gate-contract_review-028",
+          "sourceNodeInstanceId" : "node-contract-compile_execution-027",
+          "from" : "contract.compile_execution"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.executionCandidate.contract_gate_subject_or_route_is_inconsistent",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "gateNode" : {
+            "schemaVersion" : 1,
+            "nodeInstanceId" : "node-gate-contract_review-028",
+            "nodeDefinitionId" : "gate.contract_review",
+            "kind" : "GATE",
+            "handlerType" : "human.review",
+            "status" : "WAITING",
+            "stageId" : "stage-gate",
+            "iterationId" : "iter-003",
+            "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json" ],
+            "inputTransition" : {
+              "required" : true,
+              "source_node_instance_id" : "node-contract-compile_execution-027",
+              "source_node_sha256" : "7a0476c75450acaacda1b87c65b17b7e9ac00094fcd5f04b99662d1e61ba7c1c",
+              "purpose" : "Seed the first Claude intake run with repo-scope context.",
+              "condition" : "unconditional",
+              "transition_type" : "normal"
+            },
+            "outputRefs" : [ ],
+            "result" : {
+              "source_node_instance_id" : "node-contract-compile_execution-027"
+            },
+            "runRef" : null,
+            "latestExecutionId" : "",
+            "startedAt" : null,
+            "finishedAt" : null
+          },
+          "gate" : {
+            "schemaVersion" : 1,
+            "gateId" : "gate-node-gate-contract_review-028",
+            "nodeInstanceId" : "node-gate-contract_review-028",
+            "gateType" : "human.review",
+            "status" : "open",
+            "allowedActions" : [ "approve", "clarify", "reject" ],
+            "openedAt" : "2026-10-25T22:22:52.999603Z",
+            "resolvedAt" : null,
+            "result" : {
+              "source_node_instance_id" : "node-contract-compile_execution-027",
+              "subject_input_refs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json" ],
+              "source_outcome" : "completed"
+            }
+          },
+          "origin" : {
+            "eventId" : "evt-000028",
+            "gateId" : "gate-node-gate-contract_review-028",
+            "nodeInstanceId" : "node-gate-contract_review-028",
+            "sourceNodeInstanceId" : "node-contract-compile_execution-027",
+            "fromNodeDefinitionId" : "contract.compile_execution"
+          },
+          "originFailure" : null
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.executionCandidate.contract_gate_does_not_bind_its_completed_execution_compiler",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "compiler" : {
+            "schemaVersion" : 1,
+            "nodeInstanceId" : "node-contract-compile_execution-027",
+            "nodeDefinitionId" : "contract.compile_execution",
+            "kind" : "TASK",
+            "handlerType" : "contract.compile",
+            "status" : "COMPLETED",
+            "stageId" : "stage-contract",
+            "iterationId" : "iter-003",
+            "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.contract.json" ],
+            "inputTransition" : {
+              "required" : true,
+              "source_node_instance_id" : "node-plan-decision-026",
+              "source_node_sha256" : "7cd1081dbf5e2f349a2ce47c08aad26ad6a66a829ade97a5f3cbbf825038bc08",
+              "purpose" : "Seed the first Claude intake run with repo-scope context.",
+              "condition" : "unconditional",
+              "transition_type" : "normal"
+            },
+            "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json" ],
+            "result" : {
+              "contract_phase" : "EXECUTION",
+              "contract_version" : 1,
+              "contract_id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile_execution-027",
+              "contract_resolution_sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417",
+              "contract_epoch" : 1,
+              "task_contract_sha256" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+              "contract_status" : "READY_FOR_REVIEW",
+              "generated_at" : "2026-10-25T22:22:52.814268Z",
+              "compilation_pass" : 1
+            },
+            "runRef" : null,
+            "latestExecutionId" : "nxe-1792966972677-45f67930",
+            "startedAt" : "2026-10-25T22:22:52.686787Z",
+            "finishedAt" : "2026-10-25T22:22:52.827321Z"
+          },
+          "gateSource" : "node-contract-compile_execution-027",
+          "gateInputTransition" : {
+            "required" : true,
+            "source_node_instance_id" : "node-contract-compile_execution-027",
+            "source_node_sha256" : "7a0476c75450acaacda1b87c65b17b7e9ac00094fcd5f04b99662d1e61ba7c1c",
+            "purpose" : "Seed the first Claude intake run with repo-scope context.",
+            "condition" : "unconditional",
+            "transition_type" : "normal"
+          },
+          "routeFrom" : "contract.compile_execution"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.executionCandidate.contract_candidate_references_are_not_published_by_its_compiler",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "compilerRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json" ],
+          "gateRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json" ],
+          "contractRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json",
+          "resolutionRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.approved_contract_or_requirement_resolution_artifact_is_missing",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "contractPath" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json",
+          "resolutionPath" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json",
+          "contractPresent" : true,
+          "resolutionObserved" : true,
+          "resolutionPresent" : true
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.executionCandidate.contract_candidate_bytes_or_identity_changed",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "contract" : {
+            "schema_version" : 2,
+            "phase" : "EXECUTION",
+            "epoch" : 1,
+            "id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile_execution-027",
+            "version" : 1,
+            "created_at" : "2026-10-25T22:22:52.814268Z",
+            "objective" : "在本地 Python 仓库提供 normalize_newlines(text: str) -> str：将 CRLF 与单独 CR 转换为 LF，其余字符、空串、已有 LF 与末尾换行有无全部原样保留，仅使用标准库实现，并以实际执行的 unittest 测试和与代码一致的 README 示例完成验收。",
+            "scope" : {
+              "included" : [ {
+                "path" : "src/normalize_text.py",
+                "operation" : "CREATE"
+              }, {
+                "path" : "tests/test_normalize_text.py",
+                "operation" : "CREATE"
+              }, {
+                "path" : "README.md",
+                "operation" : "CREATE"
+              } ],
+              "excluded" : [ "不创建或修改 .git/ 与 .agent/ 下的任何文件", "不引入第三方依赖、网络访问、数据库、浏览器、后台服务或机器配置修改", "不做 CRLF/单独 CR 转 LF 之外的换行处理（不转换 U+2028/U+2029 等 Unicode 行/段分隔符），不新增或删除末尾换行" ]
+            },
+            "acceptance_criteria" : [ {
+              "id" : "AC-1",
+              "text" : "测试源码覆盖至少八类输入——空串、纯 LF、CRLF、单 CR、混合换行、Unicode 字符、末尾有换行、末尾无换行、连续空行——每类输入都有明确断言的期望输出，并断言重复规范化（对已规范化结果再次调用）保持相同结果。"
+            }, {
+              "id" : "AC-2",
+              "text" : "实际执行 unittest 测试并保留真实输出：输出明确显示覆盖的用例数（如 Ran N tests）且 failure=0、error=0，输出所列用例与测试源码中的案例相符；本任务不要求工具提供独立测量的真实退出码，但测试完成状态或文字结论本身不能替代实际输入/输出与测试结果。"
+            }, {
+              "id" : "AC-3",
+              "text" : "README 用法示例与 src/normalize_text.py 实际实现一致，至少包含函数导入语句和一个典型混合换行输入/输出示例；该一致性由实际读取源码/文档或实际执行示例支持。"
+            } ],
+            "test_requirements" : [ {
+              "id" : "TR-1",
+              "text" : "在 tests/test_normalize_text.py 中使用 unittest 编写测试，覆盖 AC-1 列出的全部输入类别，每类输入断言精确的期望输出字符串，并包含对已规范化结果再次调用的幂等性断言。"
+            }, {
+              "id" : "TR-2",
+              "text" : "实际执行测试（如 python -m unittest 或 python -m unittest discover，具体命令在 EXECUTION 计划中确认）并保留真实命令输出，输出须显示 Ran N tests 且 OK（零 failure、零 error），并与测试源码中的案例一一对应。"
+            }, {
+              "id" : "TR-3",
+              "text" : "通过实际读取 src/normalize_text.py 与 README.md（或实际运行示例）验证 README 示例与实现一致，验证范围包含导入语句和典型混合换行输入的逐字符输出（例如 \"a\\r\\nb\\rc\\nd\" 型输入的期望结果）。"
+            } ],
+            "constraints" : [ "normalize_newlines 语义边界精确为：将输入中每个 CRLF（\"\\r\\n\"）和单独 CR（\"\\r\"）转换为 LF（\"\\n\"）；除此之外不改变任何字符（包括 Unicode 字符与 U+2028/U+2029 等），空串返回空串，已有 LF 原样保留，末尾有/无换行的状态原样保留；函数为纯函数且重复调用幂等。", "仅使用 Python 标准库；不引入任何第三方依赖，不使用网络、数据库、浏览器、后台服务，不做机器配置修改。", "src/normalize_text.py、tests/test_normalize_text.py、README.md 为 intake 提案路径，不构成写授权；最终具体文件与 CREATE/MODIFY 操作须在 EXECUTION 阶段经设计与计划确认并批准后实施。" ],
+            "non_goals" : [ "不引入第三方依赖，也不生成 requirements.txt、pyproject.toml 等依赖清单。", "不进行网络访问、数据库、浏览器、后台服务或机器配置修改。", "不扩展换行处理范围：不转换 LF 以外的 Unicode 行/段分隔符，不添加、删除或补齐末尾换行，不提供 CLI 或打包发布。" ],
+            "risk_areas" : [ "仓库当前 git 跟踪清单为空（repo-map fileCount=0），全部产物需新建；测试对 src.normalize_text 的导入方式（如包结构、__init__.py、sys.path 或 unittest discover 的启动目录）需在 EXECUTION 计划中确定，避免因导入路径导致测试无法实际执行。", "AC-2 的覆盖数以 unittest 实际输出的 Ran N tests 为准，执行记录必须保留真实命令输出而非转述，防止以“测试已完成”之类结论替代实测结果。" ],
+            "evidence_refs" : [ ],
+            "ambiguity_notes" : [ ],
+            "human_questions" : [ ],
+            "status" : "READY_FOR_REVIEW",
+            "compilation_pass" : 1,
+            "source" : {
+              "raw_request_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/requirement.md",
+              "created_by" : "contract.compile",
+              "proposal" : {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.contract.json",
+                "sha256" : "cd7b184f400271deea36266d6b5d111e4cb6684a236f3e03f67b5ab989852d83"
+              },
+              "goal_approval" : {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+                "sha256" : "76bcb776879eb930700c63983c5cf7c4b254815ec9beec069e466698e89d308d"
+              }
+            },
+            "goal_contract" : {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+              "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+            },
+            "reviewed_candidates" : [ {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-design-decision-016.json",
+              "sha256" : "e14f6e8c78b136449f68f13bd52e194bc31cfa44e57fd44f5ff34ef32389b45d"
+            }, {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-plan-decision-026.json",
+              "sha256" : "7cd1081dbf5e2f349a2ce47c08aad26ad6a66a829ade97a5f3cbbf825038bc08"
+            } ],
+            "verification_bindings" : [ {
+              "criterion_id" : "AC-1",
+              "method" : "在仓库根执行 python -m unittest discover -s tests -v 2>&1 并采集实际输出；断言逐用例全部通过、结尾为 Ran 11 tests 与 OK（零 failure/零 error）；逐条核对 tests/test_normalize_text.py 中共享 CASES 表覆盖九类输入（空串、纯 LF、CRLF、单 CR、混合换行 \"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、Unicode 含 U+2028 保留、末尾有换行、末尾无换行、连续空行 \"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"），且 test_idempotent_across_all_cases 以 subTest 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json",
+                "sha256" : "afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json",
+                "sha256" : "afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            }, {
+              "criterion_id" : "AC-2",
+              "method" : "实际执行 python -m unittest discover -s tests -v 2>&1 并合并采集 stdout 与 stderr（unittest 默认将逐用例行、Ran 11 tests 与 OK/FAILED 写入 stderr）；实际输出须明确显示覆盖数（Ran 11 tests）与零 failure/error，并与测试源码中的 11 个方法名及 CASES 一一核对；不以完成状态或文字结论替代实际输入/输出与测试结果。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json",
+                "sha256" : "81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json",
+                "sha256" : "81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            }, {
+              "criterion_id" : "AC-3",
+              "method" : "实际读取 src/normalize_text.py 与 README.md，逐字符比对 README 中的导入语句（from normalize_text import normalize_newlines）与典型混合换行示例输入/输出（\"a\\r\\nb\\rc\\nd\" → 'a\\nb\\nc\\nd'，另含空串与末尾换行示例）与实现一致；或额外执行 PYTHONPATH=src python -m doctest README.md 作为支持证据（TR-3 允许任一途径）。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json",
+                "sha256" : "ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json",
+                "sha256" : "ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            } ],
+            "authority_refs" : [ ],
+            "nonessential_operation_declarations" : [ ]
+          },
+          "compiler" : {
+            "schemaVersion" : 1,
+            "nodeInstanceId" : "node-contract-compile_execution-027",
+            "nodeDefinitionId" : "contract.compile_execution",
+            "kind" : "TASK",
+            "handlerType" : "contract.compile",
+            "status" : "COMPLETED",
+            "stageId" : "stage-contract",
+            "iterationId" : "iter-003",
+            "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.contract.json" ],
+            "inputTransition" : {
+              "required" : true,
+              "source_node_instance_id" : "node-plan-decision-026",
+              "source_node_sha256" : "7cd1081dbf5e2f349a2ce47c08aad26ad6a66a829ade97a5f3cbbf825038bc08",
+              "purpose" : "Seed the first Claude intake run with repo-scope context.",
+              "condition" : "unconditional",
+              "transition_type" : "normal"
+            },
+            "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json" ],
+            "result" : {
+              "contract_phase" : "EXECUTION",
+              "contract_version" : 1,
+              "contract_id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile_execution-027",
+              "contract_resolution_sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417",
+              "contract_epoch" : 1,
+              "task_contract_sha256" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+              "contract_status" : "READY_FOR_REVIEW",
+              "generated_at" : "2026-10-25T22:22:52.814268Z",
+              "compilation_pass" : 1
+            },
+            "runRef" : null,
+            "latestExecutionId" : "nxe-1792966972677-45f67930",
+            "startedAt" : "2026-10-25T22:22:52.686787Z",
+            "finishedAt" : "2026-10-25T22:22:52.827321Z"
+          },
+          "contractSha" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+          "resolutionSha" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.task_contract_json_is_invalid",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json",
+          "sha256" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+          "eventId" : "",
+          "sequence" : -1
+        } ],
+        "inputValues" : {
+          "contract" : {
+            "schema_version" : 2,
+            "phase" : "EXECUTION",
+            "epoch" : 1,
+            "id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile_execution-027",
+            "version" : 1,
+            "created_at" : "2026-10-25T22:22:52.814268Z",
+            "objective" : "在本地 Python 仓库提供 normalize_newlines(text: str) -> str：将 CRLF 与单独 CR 转换为 LF，其余字符、空串、已有 LF 与末尾换行有无全部原样保留，仅使用标准库实现，并以实际执行的 unittest 测试和与代码一致的 README 示例完成验收。",
+            "scope" : {
+              "included" : [ {
+                "path" : "src/normalize_text.py",
+                "operation" : "CREATE"
+              }, {
+                "path" : "tests/test_normalize_text.py",
+                "operation" : "CREATE"
+              }, {
+                "path" : "README.md",
+                "operation" : "CREATE"
+              } ],
+              "excluded" : [ "不创建或修改 .git/ 与 .agent/ 下的任何文件", "不引入第三方依赖、网络访问、数据库、浏览器、后台服务或机器配置修改", "不做 CRLF/单独 CR 转 LF 之外的换行处理（不转换 U+2028/U+2029 等 Unicode 行/段分隔符），不新增或删除末尾换行" ]
+            },
+            "acceptance_criteria" : [ {
+              "id" : "AC-1",
+              "text" : "测试源码覆盖至少八类输入——空串、纯 LF、CRLF、单 CR、混合换行、Unicode 字符、末尾有换行、末尾无换行、连续空行——每类输入都有明确断言的期望输出，并断言重复规范化（对已规范化结果再次调用）保持相同结果。"
+            }, {
+              "id" : "AC-2",
+              "text" : "实际执行 unittest 测试并保留真实输出：输出明确显示覆盖的用例数（如 Ran N tests）且 failure=0、error=0，输出所列用例与测试源码中的案例相符；本任务不要求工具提供独立测量的真实退出码，但测试完成状态或文字结论本身不能替代实际输入/输出与测试结果。"
+            }, {
+              "id" : "AC-3",
+              "text" : "README 用法示例与 src/normalize_text.py 实际实现一致，至少包含函数导入语句和一个典型混合换行输入/输出示例；该一致性由实际读取源码/文档或实际执行示例支持。"
+            } ],
+            "test_requirements" : [ {
+              "id" : "TR-1",
+              "text" : "在 tests/test_normalize_text.py 中使用 unittest 编写测试，覆盖 AC-1 列出的全部输入类别，每类输入断言精确的期望输出字符串，并包含对已规范化结果再次调用的幂等性断言。"
+            }, {
+              "id" : "TR-2",
+              "text" : "实际执行测试（如 python -m unittest 或 python -m unittest discover，具体命令在 EXECUTION 计划中确认）并保留真实命令输出，输出须显示 Ran N tests 且 OK（零 failure、零 error），并与测试源码中的案例一一对应。"
+            }, {
+              "id" : "TR-3",
+              "text" : "通过实际读取 src/normalize_text.py 与 README.md（或实际运行示例）验证 README 示例与实现一致，验证范围包含导入语句和典型混合换行输入的逐字符输出（例如 \"a\\r\\nb\\rc\\nd\" 型输入的期望结果）。"
+            } ],
+            "constraints" : [ "normalize_newlines 语义边界精确为：将输入中每个 CRLF（\"\\r\\n\"）和单独 CR（\"\\r\"）转换为 LF（\"\\n\"）；除此之外不改变任何字符（包括 Unicode 字符与 U+2028/U+2029 等），空串返回空串，已有 LF 原样保留，末尾有/无换行的状态原样保留；函数为纯函数且重复调用幂等。", "仅使用 Python 标准库；不引入任何第三方依赖，不使用网络、数据库、浏览器、后台服务，不做机器配置修改。", "src/normalize_text.py、tests/test_normalize_text.py、README.md 为 intake 提案路径，不构成写授权；最终具体文件与 CREATE/MODIFY 操作须在 EXECUTION 阶段经设计与计划确认并批准后实施。" ],
+            "non_goals" : [ "不引入第三方依赖，也不生成 requirements.txt、pyproject.toml 等依赖清单。", "不进行网络访问、数据库、浏览器、后台服务或机器配置修改。", "不扩展换行处理范围：不转换 LF 以外的 Unicode 行/段分隔符，不添加、删除或补齐末尾换行，不提供 CLI 或打包发布。" ],
+            "risk_areas" : [ "仓库当前 git 跟踪清单为空（repo-map fileCount=0），全部产物需新建；测试对 src.normalize_text 的导入方式（如包结构、__init__.py、sys.path 或 unittest discover 的启动目录）需在 EXECUTION 计划中确定，避免因导入路径导致测试无法实际执行。", "AC-2 的覆盖数以 unittest 实际输出的 Ran N tests 为准，执行记录必须保留真实命令输出而非转述，防止以“测试已完成”之类结论替代实测结果。" ],
+            "evidence_refs" : [ ],
+            "ambiguity_notes" : [ ],
+            "human_questions" : [ ],
+            "status" : "READY_FOR_REVIEW",
+            "compilation_pass" : 1,
+            "source" : {
+              "raw_request_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/requirement.md",
+              "created_by" : "contract.compile",
+              "proposal" : {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.contract.json",
+                "sha256" : "cd7b184f400271deea36266d6b5d111e4cb6684a236f3e03f67b5ab989852d83"
+              },
+              "goal_approval" : {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+                "sha256" : "76bcb776879eb930700c63983c5cf7c4b254815ec9beec069e466698e89d308d"
+              }
+            },
+            "goal_contract" : {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+              "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+            },
+            "reviewed_candidates" : [ {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-design-decision-016.json",
+              "sha256" : "e14f6e8c78b136449f68f13bd52e194bc31cfa44e57fd44f5ff34ef32389b45d"
+            }, {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-plan-decision-026.json",
+              "sha256" : "7cd1081dbf5e2f349a2ce47c08aad26ad6a66a829ade97a5f3cbbf825038bc08"
+            } ],
+            "verification_bindings" : [ {
+              "criterion_id" : "AC-1",
+              "method" : "在仓库根执行 python -m unittest discover -s tests -v 2>&1 并采集实际输出；断言逐用例全部通过、结尾为 Ran 11 tests 与 OK（零 failure/零 error）；逐条核对 tests/test_normalize_text.py 中共享 CASES 表覆盖九类输入（空串、纯 LF、CRLF、单 CR、混合换行 \"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、Unicode 含 U+2028 保留、末尾有换行、末尾无换行、连续空行 \"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"），且 test_idempotent_across_all_cases 以 subTest 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json",
+                "sha256" : "afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json",
+                "sha256" : "afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            }, {
+              "criterion_id" : "AC-2",
+              "method" : "实际执行 python -m unittest discover -s tests -v 2>&1 并合并采集 stdout 与 stderr（unittest 默认将逐用例行、Ran 11 tests 与 OK/FAILED 写入 stderr）；实际输出须明确显示覆盖数（Ran 11 tests）与零 failure/error，并与测试源码中的 11 个方法名及 CASES 一一核对；不以完成状态或文字结论替代实际输入/输出与测试结果。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json",
+                "sha256" : "81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json",
+                "sha256" : "81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            }, {
+              "criterion_id" : "AC-3",
+              "method" : "实际读取 src/normalize_text.py 与 README.md，逐字符比对 README 中的导入语句（from normalize_text import normalize_newlines）与典型混合换行示例输入/输出（\"a\\r\\nb\\rc\\nd\" → 'a\\nb\\nc\\nd'，另含空串与末尾换行示例）与实现一致；或额外执行 PYTHONPATH=src python -m doctest README.md 作为支持证据（TR-3 允许任一途径）。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json",
+                "sha256" : "ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json",
+                "sha256" : "ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            } ],
+            "authority_refs" : [ ],
+            "nonessential_operation_declarations" : [ ]
+          },
+          "validationErrors" : [ ]
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.approved_contract_compile_has_incomplete_artifact_sha_binding",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json",
+          "sha256" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+          "eventId" : "",
+          "sequence" : -1
+        }, {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json",
+          "sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417",
+          "eventId" : "",
+          "sequence" : -1
+        } ],
+        "inputValues" : {
+          "contractExpectedSha" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+          "resolutionExpectedSha" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.approved_contract_artifact_sha_256_does_not_match_compile_result",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json",
+          "sha256" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+          "eventId" : "",
+          "sequence" : -1
+        }, {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json",
+          "sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417",
+          "eventId" : "",
+          "sequence" : -1
+        } ],
+        "inputValues" : {
+          "contractSha" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+          "resolutionSha" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417",
+          "expectedContractSha" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+          "expectedResolutionSha" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.task_contract_json_identity_does_not_match_compile_result",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json",
+          "sha256" : "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+          "eventId" : "",
+          "sequence" : -1
+        } ],
+        "inputValues" : {
+          "contractId" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile_execution-027",
+          "contractStatus" : "READY_FOR_REVIEW",
+          "contractVersion" : 1,
+          "contractEpoch" : 1,
+          "compilerId" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile_execution-027",
+          "compilerStatus" : "READY_FOR_REVIEW",
+          "compilerVersion" : 1,
+          "compilerEpoch" : 1
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.goal_authorization_epoch_is_missing_or_duplicated",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "epoch" : 1,
+          "completedGoalCompilers" : [ {
+            "schemaVersion" : 1,
+            "nodeInstanceId" : "node-contract-compile-007",
+            "nodeDefinitionId" : "contract.compile",
+            "kind" : "TASK",
+            "handlerType" : "contract.compile",
+            "status" : "COMPLETED",
+            "stageId" : "stage-contract",
+            "iterationId" : "iter-001",
+            "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+            "inputTransition" : {
+              "required" : true,
+              "transition_type" : "normal",
+              "condition" : "unconditional",
+              "purpose" : "Seed the first Claude intake run with repo-scope context.",
+              "source_node_sha256" : "5b8cdbabca8e103004f5532f3f1b801b55298247b6b7a486d2b7879eb7488d62",
+              "source_node_instance_id" : "node-gate-human_requirement_review-006"
+            },
+            "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.md" ],
+            "result" : {
+              "contract_id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile-007",
+              "contract_status" : "READY_FOR_REVIEW",
+              "contract_version" : 1,
+              "contract_phase" : "GOAL",
+              "contract_epoch" : 1,
+              "task_contract_sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b",
+              "contract_resolution_sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417",
+              "compilation_pass" : 1,
+              "artifacts" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.md" ],
+              "generated_at" : "2026-10-23T01:19:39.409582Z"
+            },
+            "runRef" : null,
+            "latestExecutionId" : "nxe-1792718379338-0f765cde",
+            "startedAt" : "2026-10-23T01:19:39.347196Z",
+            "finishedAt" : "2026-10-23T01:19:39.417509Z"
+          } ]
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.goal_compile_does_not_publish_its_occurrence_artifacts",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-contract-compile-007.json",
+          "sha256" : "fa3b8d21f43e97edde90cf1be035cc453549a81c3ecf78cd963278780c48e0ea",
+          "eventId" : "",
+          "sequence" : -1
+        } ],
+        "inputValues" : {
+          "compiler" : {
+            "schemaVersion" : 1,
+            "nodeInstanceId" : "node-contract-compile-007",
+            "nodeDefinitionId" : "contract.compile",
+            "kind" : "TASK",
+            "handlerType" : "contract.compile",
+            "status" : "COMPLETED",
+            "stageId" : "stage-contract",
+            "iterationId" : "iter-001",
+            "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+            "inputTransition" : {
+              "required" : true,
+              "transition_type" : "normal",
+              "condition" : "unconditional",
+              "purpose" : "Seed the first Claude intake run with repo-scope context.",
+              "source_node_sha256" : "5b8cdbabca8e103004f5532f3f1b801b55298247b6b7a486d2b7879eb7488d62",
+              "source_node_instance_id" : "node-gate-human_requirement_review-006"
+            },
+            "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.md" ],
+            "result" : {
+              "contract_id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile-007",
+              "contract_status" : "READY_FOR_REVIEW",
+              "contract_version" : 1,
+              "contract_phase" : "GOAL",
+              "contract_epoch" : 1,
+              "task_contract_sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b",
+              "contract_resolution_sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417",
+              "compilation_pass" : 1,
+              "artifacts" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.md" ],
+              "generated_at" : "2026-10-23T01:19:39.409582Z"
+            },
+            "runRef" : null,
+            "latestExecutionId" : "nxe-1792718379338-0f765cde",
+            "startedAt" : "2026-10-23T01:19:39.347196Z",
+            "finishedAt" : "2026-10-23T01:19:39.417509Z"
+          },
+          "contractRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+          "resolutionRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.goal_identity_shape_or_immutable_bytes_do_not_match_its_compiler",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+          "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b",
+          "eventId" : "",
+          "sequence" : -1
+        }, {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json",
+          "sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417",
+          "eventId" : "",
+          "sequence" : -1
+        }, {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-contract-compile-007.json",
+          "sha256" : "fa3b8d21f43e97edde90cf1be035cc453549a81c3ecf78cd963278780c48e0ea",
+          "eventId" : "",
+          "sequence" : -1
+        } ],
+        "inputValues" : {
+          "compiler" : {
+            "schemaVersion" : 1,
+            "nodeInstanceId" : "node-contract-compile-007",
+            "nodeDefinitionId" : "contract.compile",
+            "kind" : "TASK",
+            "handlerType" : "contract.compile",
+            "status" : "COMPLETED",
+            "stageId" : "stage-contract",
+            "iterationId" : "iter-001",
+            "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+            "inputTransition" : {
+              "required" : true,
+              "transition_type" : "normal",
+              "condition" : "unconditional",
+              "purpose" : "Seed the first Claude intake run with repo-scope context.",
+              "source_node_sha256" : "5b8cdbabca8e103004f5532f3f1b801b55298247b6b7a486d2b7879eb7488d62",
+              "source_node_instance_id" : "node-gate-human_requirement_review-006"
+            },
+            "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.md" ],
+            "result" : {
+              "contract_id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile-007",
+              "contract_status" : "READY_FOR_REVIEW",
+              "contract_version" : 1,
+              "contract_phase" : "GOAL",
+              "contract_epoch" : 1,
+              "task_contract_sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b",
+              "contract_resolution_sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417",
+              "compilation_pass" : 1,
+              "artifacts" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.md" ],
+              "generated_at" : "2026-10-23T01:19:39.409582Z"
+            },
+            "runRef" : null,
+            "latestExecutionId" : "nxe-1792718379338-0f765cde",
+            "startedAt" : "2026-10-23T01:19:39.347196Z",
+            "finishedAt" : "2026-10-23T01:19:39.417509Z"
+          },
+          "contract" : {
+            "schema_version" : 2,
+            "phase" : "GOAL",
+            "epoch" : 1,
+            "id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile-007",
+            "version" : 1,
+            "created_at" : "2026-10-23T01:19:39.400098Z",
+            "objective" : "在本地 Python 仓库提供 normalize_newlines(text: str) -> str：将 CRLF 与单独 CR 转换为 LF，其余字符、空串、已有 LF 与末尾换行有无全部原样保留，仅使用标准库实现，并以实际执行的 unittest 测试和与代码一致的 README 示例完成验收。",
+            "scope" : {
+              "included" : [ ],
+              "excluded" : [ "不创建或修改 .git/ 与 .agent/ 下的任何文件", "不引入第三方依赖、网络访问、数据库、浏览器、后台服务或机器配置修改", "不做 CRLF/单独 CR 转 LF 之外的换行处理（不转换 U+2028/U+2029 等 Unicode 行/段分隔符），不新增或删除末尾换行" ]
+            },
+            "acceptance_criteria" : [ {
+              "id" : "AC-1",
+              "text" : "测试源码覆盖至少八类输入——空串、纯 LF、CRLF、单 CR、混合换行、Unicode 字符、末尾有换行、末尾无换行、连续空行——每类输入都有明确断言的期望输出，并断言重复规范化（对已规范化结果再次调用）保持相同结果。"
+            }, {
+              "id" : "AC-2",
+              "text" : "实际执行 unittest 测试并保留真实输出：输出明确显示覆盖的用例数（如 Ran N tests）且 failure=0、error=0，输出所列用例与测试源码中的案例相符；本任务不要求工具提供独立测量的真实退出码，但测试完成状态或文字结论本身不能替代实际输入/输出与测试结果。"
+            }, {
+              "id" : "AC-3",
+              "text" : "README 用法示例与 src/normalize_text.py 实际实现一致，至少包含函数导入语句和一个典型混合换行输入/输出示例；该一致性由实际读取源码/文档或实际执行示例支持。"
+            } ],
+            "test_requirements" : [ {
+              "id" : "TR-1",
+              "text" : "在 tests/test_normalize_text.py 中使用 unittest 编写测试，覆盖 AC-1 列出的全部输入类别，每类输入断言精确的期望输出字符串，并包含对已规范化结果再次调用的幂等性断言。"
+            }, {
+              "id" : "TR-2",
+              "text" : "实际执行测试（如 python -m unittest 或 python -m unittest discover，具体命令在 EXECUTION 计划中确认）并保留真实命令输出，输出须显示 Ran N tests 且 OK（零 failure、零 error），并与测试源码中的案例一一对应。"
+            }, {
+              "id" : "TR-3",
+              "text" : "通过实际读取 src/normalize_text.py 与 README.md（或实际运行示例）验证 README 示例与实现一致，验证范围包含导入语句和典型混合换行输入的逐字符输出（例如 \"a\\r\\nb\\rc\\nd\" 型输入的期望结果）。"
+            } ],
+            "constraints" : [ "normalize_newlines 语义边界精确为：将输入中每个 CRLF（\"\\r\\n\"）和单独 CR（\"\\r\"）转换为 LF（\"\\n\"）；除此之外不改变任何字符（包括 Unicode 字符与 U+2028/U+2029 等），空串返回空串，已有 LF 原样保留，末尾有/无换行的状态原样保留；函数为纯函数且重复调用幂等。", "仅使用 Python 标准库；不引入任何第三方依赖，不使用网络、数据库、浏览器、后台服务，不做机器配置修改。", "src/normalize_text.py、tests/test_normalize_text.py、README.md 为 intake 提案路径，不构成写授权；最终具体文件与 CREATE/MODIFY 操作须在 EXECUTION 阶段经设计与计划确认并批准后实施。" ],
+            "non_goals" : [ "不引入第三方依赖，也不生成 requirements.txt、pyproject.toml 等依赖清单。", "不进行网络访问、数据库、浏览器、后台服务或机器配置修改。", "不扩展换行处理范围：不转换 LF 以外的 Unicode 行/段分隔符，不添加、删除或补齐末尾换行，不提供 CLI 或打包发布。" ],
+            "risk_areas" : [ "仓库当前 git 跟踪清单为空（repo-map fileCount=0），全部产物需新建；测试对 src.normalize_text 的导入方式（如包结构、__init__.py、sys.path 或 unittest discover 的启动目录）需在 EXECUTION 计划中确定，避免因导入路径导致测试无法实际执行。", "AC-2 的覆盖数以 unittest 实际输出的 Ran N tests 为准，执行记录必须保留真实命令输出而非转述，防止以“测试已完成”之类结论替代实测结果。" ],
+            "evidence_refs" : [ ],
+            "ambiguity_notes" : [ ],
+            "human_questions" : [ ],
+            "status" : "READY_FOR_REVIEW",
+            "compilation_pass" : 1,
+            "source" : {
+              "raw_request_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/requirement.md",
+              "created_by" : "contract.compile",
+              "proposal" : {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.contract.json",
+                "sha256" : "cd7b184f400271deea36266d6b5d111e4cb6684a236f3e03f67b5ab989852d83"
+              },
+              "goal_approval" : {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+                "sha256" : "76bcb776879eb930700c63983c5cf7c4b254815ec9beec069e466698e89d308d"
+              }
+            },
+            "goal_contract" : null,
+            "reviewed_candidates" : [ ],
+            "verification_bindings" : [ ],
+            "authority_refs" : [ ],
+            "nonessential_operation_declarations" : [ ]
+          },
+          "contractSha" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b",
+          "resolutionSha" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.goal_approval_reference_is_not_an_unchanged_workstream_gate",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+          "sha256" : "76bcb776879eb930700c63983c5cf7c4b254815ec9beec069e466698e89d308d",
+          "eventId" : "",
+          "sequence" : -1
+        } ],
+        "inputValues" : {
+          "approval" : {
+            "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+            "sha256" : "76bcb776879eb930700c63983c5cf7c4b254815ec9beec069e466698e89d308d"
+          },
+          "approvalPath" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+          "expectedParent" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree/.agent/workstreams/ws-20261023T005431Z-9YYF/gates"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.goal_compiler_is_not_routed_from_the_matching_completed_human_decision",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+          "sha256" : "76bcb776879eb930700c63983c5cf7c4b254815ec9beec069e466698e89d308d",
+          "eventId" : "",
+          "sequence" : -1
+        }, {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-gate-human_requirement_review-006.json",
+          "sha256" : "5b8cdbabca8e103004f5532f3f1b801b55298247b6b7a486d2b7879eb7488d62",
+          "eventId" : "",
+          "sequence" : -1
+        }, {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-contract-compile-007.json",
+          "sha256" : "fa3b8d21f43e97edde90cf1be035cc453549a81c3ecf78cd963278780c48e0ea",
+          "eventId" : "",
+          "sequence" : -1
+        } ],
+        "inputValues" : {
+          "gate" : {
+            "schemaVersion" : 1,
+            "gateId" : "gate-node-gate-human_requirement_review-006",
+            "nodeInstanceId" : "node-gate-human_requirement_review-006",
+            "gateType" : "human.review",
+            "status" : "resolved",
+            "allowedActions" : [ "approve", "revise" ],
+            "openedAt" : "2026-10-23T01:07:01.473672Z",
+            "resolvedAt" : "2026-10-23T01:19:26.457789Z",
+            "result" : {
+              "subject_input_refs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+              "source_outcome" : "READY_FOR_PRODUCT_REVIEW",
+              "source_node_instance_id" : "node-intake-decision-005",
+              "human_action" : "approved",
+              "note" : "用户已批准当前需求与验收标准，仅允许形成GOAL并进入设计；具体产品文件写权限仍须EXECUTION批准。",
+              "decision_checks" : {
+                "schemaVersion" : 1,
+                "family" : "TaskContractProjectionVerifier",
+                "familyCoverage" : "NOT_INVOKED",
+                "gateNodeInstanceId" : "node-gate-human_requirement_review-006",
+                "sourceNodeInstanceId" : "node-intake-decision-005",
+                "subjectRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+                "runtimeIdentitySha256" : "4b8226f4d961c4003741f72ea7b4f53da8b4677ad50b9ab140f7785eaea496d6",
+                "checks" : [ ]
+              }
+            }
+          },
+          "gateNode" : {
+            "schemaVersion" : 1,
+            "nodeInstanceId" : "node-gate-human_requirement_review-006",
+            "nodeDefinitionId" : "gate.human_requirement_review",
+            "kind" : "GATE",
+            "handlerType" : "human.review",
+            "status" : "COMPLETED",
+            "stageId" : "stage-gate",
+            "iterationId" : "iter-001",
+            "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+            "inputTransition" : {
+              "transition_type" : "normal",
+              "required" : true,
+              "source_node_instance_id" : "node-intake-decision-005",
+              "source_node_sha256" : "f018cfe02a44d7a25a0d154185ead739a3dbea3e05960043c5b9c1622cf71154",
+              "purpose" : "Seed the first Claude intake run with repo-scope context.",
+              "condition" : "unconditional"
+            },
+            "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+            "result" : {
+              "note" : "用户已批准当前需求与验收标准，仅允许形成GOAL并进入设计；具体产品文件写权限仍须EXECUTION批准。",
+              "requested_action" : "approve",
+              "source_node_instance_id" : "node-intake-decision-005",
+              "decision_checks" : {
+                "schemaVersion" : 1,
+                "family" : "TaskContractProjectionVerifier",
+                "familyCoverage" : "NOT_INVOKED",
+                "gateNodeInstanceId" : "node-gate-human_requirement_review-006",
+                "sourceNodeInstanceId" : "node-intake-decision-005",
+                "subjectRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+                "runtimeIdentitySha256" : "4b8226f4d961c4003741f72ea7b4f53da8b4677ad50b9ab140f7785eaea496d6",
+                "checks" : [ ]
+              },
+              "human_action" : "approved"
+            },
+            "runRef" : null,
+            "latestExecutionId" : "",
+            "startedAt" : null,
+            "finishedAt" : "2026-10-23T01:19:26.461056Z"
+          },
+          "compiler" : {
+            "schemaVersion" : 1,
+            "nodeInstanceId" : "node-contract-compile-007",
+            "nodeDefinitionId" : "contract.compile",
+            "kind" : "TASK",
+            "handlerType" : "contract.compile",
+            "status" : "COMPLETED",
+            "stageId" : "stage-contract",
+            "iterationId" : "iter-001",
+            "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1792717558540/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.contract.json" ],
+            "inputTransition" : {
+              "required" : true,
+              "transition_type" : "normal",
+              "condition" : "unconditional",
+              "purpose" : "Seed the first Claude intake run with repo-scope context.",
+              "source_node_sha256" : "5b8cdbabca8e103004f5532f3f1b801b55298247b6b7a486d2b7879eb7488d62",
+              "source_node_instance_id" : "node-gate-human_requirement_review-006"
+            },
+            "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.md" ],
+            "result" : {
+              "contract_id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile-007",
+              "contract_status" : "READY_FOR_REVIEW",
+              "contract_version" : 1,
+              "contract_phase" : "GOAL",
+              "contract_epoch" : 1,
+              "task_contract_sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b",
+              "contract_resolution_sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417",
+              "compilation_pass" : 1,
+              "artifacts" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.md" ],
+              "generated_at" : "2026-10-23T01:19:39.409582Z"
+            },
+            "runRef" : null,
+            "latestExecutionId" : "nxe-1792718379338-0f765cde",
+            "startedAt" : "2026-10-23T01:19:39.347196Z",
+            "finishedAt" : "2026-10-23T01:19:39.417509Z"
+          }
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.approved_review_subject_is_not_verifiable",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "review" : {
+            "workstreamId" : "ws-20261023T005431Z-9YYF",
+            "runId" : "run-1792717558540",
+            "nodeId" : "intake.codex_product_review",
+            "nodeInstanceId" : "node-intake-codex_product_review-004",
+            "stageOutcome" : "READY",
+            "lifecycleStatus" : "READY",
+            "decision" : "READY_FOR_PRODUCT_REVIEW",
+            "summary" : "提案完整保留用户需求、验收证据要求和实施授权边界，可以进入后续目标审批与设计计划。",
+            "sourceArtifactType" : "agent_output_contract",
+            "sourceOutputRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717558540/outputs/intake-codex-product-review.json",
+            "blocking" : false,
+            "checks" : [ "产品完整性：objective、AC-1 与 C-1 明确保留函数签名、换行转换范围、其他字符不变、末尾换行状态和幂等性。", "架构适配：标准库纯函数适合本任务，第三方依赖、外部服务和机器配置修改均被明确排除。", "最终用户体验：AC-3 与 TR-3 要求 README 提供导入及混合换行输入输出，并以实际读取或执行支持一致性结论。", "验证要求：AC-1、AC-2 与 TR-1、TR-2 覆盖输入类别、明确期望、实际执行、覆盖数及零失败零错误，保留无需独立测量退出码的要求。", "范围授权：C-3 明确当前路径仅为提案，实施前仍需确认并批准具体路径与 CREATE/MODIFY 操作。", "协议归属：未要求产品提案重复编排器负责的输出封装与路由协议。" ],
+            "evidence" : [ "已先审阅 Review Evidence Brief；其中尚无已批准任务契约投影或累计审查结论，本次审查对象为 Required Review Subject 提供的完整 task_contract_proposal。", "提案 AC-1 明确列出全部输入类别，并要求精确期望和重复规范化结果不变。", "提案 AC-2 明确禁止以测试完成状态或文字结论替代实际输入输出与测试结果。", "提案 C-2、C-3 分别承接环境限制和实施前单独批准文件操作的要求。", "提供的仓库事实报告跟踪文件数为零，因此不要求提供现存产品文件引用。" ],
+            "mustFix" : [ ],
+            "contractObligations" : [ ],
+            "missingEvidence" : [ ],
+            "acceptanceNotes" : [ "本次认可的是 intake 提案完整性，不代表已经授权实施或已经通过代码与测试验收。", "后续 EXECUTION 批准的 scope.included 必须是精确路径及操作组成的穷尽授权集合；若导入方案需要新增文件，应先将具体路径和操作纳入审批。", "后续验证需核对实际输入类别与测试源码，不能仅凭 Ran N tests 推断覆盖充分；提案已明确要求执行输出与源码案例相符。" ],
+            "openRisks" : [ ],
+            "changedFiles" : [ ],
+            "verificationSummary" : "依据用户原始请求及所提供的完整提案完成产品、架构和用户视角审查，未发现当前阶段的阻断缺口；未修改文件或执行实现测试。",
+            "completedWork" : [ ],
+            "importantDecisions" : [ ],
+            "recommendedNextStage" : "",
+            "suggestedNextPrompt" : "",
+            "control" : {
+              "summary" : "提案完整保留用户需求、验收证据要求和实施授权边界，可以进入后续目标审批与设计计划。",
+              "decision" : "READY_FOR_PRODUCT_REVIEW"
+            },
+            "failure" : {
+              "categoryHint" : "",
+              "verificationRemediation" : "NONE",
+              "contractGaps" : [ ],
+              "outOfScopeFiles" : [ ],
+              "missingTests" : [ ],
+              "contextGaps" : [ ],
+              "reason" : ""
+            },
+            "rereadReasons" : [ ],
+            "reviewSubject" : {
+              "schema_version" : 1,
+              "proposal_id" : "node-intake-claude_brainstorm-002:cd7b184f400271de",
+              "workstream_id" : "ws-20261023T005431Z-9YYF",
+              "producer_node_id" : "intake.claude_brainstorm",
+              "producer_node_instance_id" : "node-intake-claude_brainstorm-002",
+              "artifact_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.contract.json",
+              "sha256" : "cd7b184f400271deea36266d6b5d111e4cb6684a236f3e03f67b5ab989852d83"
+            },
+            "taskContractProposal" : null,
+            "repositoryFactBinding" : null,
+            "proposalDerivation" : null,
+            "planArtifact" : null,
+            "design" : null,
+            "authoredRevisionResponses" : null,
+            "authoredContext" : null,
+            "verificationChecks" : [ ]
+          }
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.goal_does_not_bind_the_approved_proposal_bytes",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.contract.json",
+          "sha256" : "cd7b184f400271deea36266d6b5d111e4cb6684a236f3e03f67b5ab989852d83",
+          "eventId" : "",
+          "sequence" : -1
+        } ],
+        "inputValues" : {
+          "declaredProposal" : {
+            "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.contract.json",
+            "sha256" : "cd7b184f400271deea36266d6b5d111e4cb6684a236f3e03f67b5ab989852d83"
+          },
+          "reviewSubject" : {
+            "schema_version" : 1,
+            "proposal_id" : "node-intake-claude_brainstorm-002:cd7b184f400271de",
+            "workstream_id" : "ws-20261023T005431Z-9YYF",
+            "producer_node_id" : "intake.claude_brainstorm",
+            "producer_node_instance_id" : "node-intake-claude_brainstorm-002",
+            "artifact_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.contract.json",
+            "sha256" : "cd7b184f400271deea36266d6b5d111e4cb6684a236f3e03f67b5ab989852d83"
+          }
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "25c35cf95c08f716ecad7baa883a95d5292ff014dba6728db98b6ff3a52268cd",
+          "eventId" : "evt-000001",
+          "sequence" : 1
+        } ],
+        "inputValues" : {
+          "sequence" : 1,
+          "previous" : -1
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.invalid_route_event_identity",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "event" : {
+            "event_id" : "domain-node-contract-compile_execution-027",
+            "ts" : "2026-10-25T22:22:52.825739Z",
+            "event_type" : "contract_compilation_completed",
+            "payload" : {
+              "handler_type" : "contract.compile",
+              "node_id" : "contract.compile_execution",
+              "node_instance_id" : "node-contract-compile_execution-027",
+              "contract_id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile_execution-027",
+              "contract_status" : "READY_FOR_REVIEW"
+            }
+          }
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "c97944a374918c3e527a773ff7b0a12747e9ccdfbb004cd0f11073b5c9eed92e",
+          "eventId" : "evt-000002",
+          "sequence" : 2
+        } ],
+        "inputValues" : {
+          "sequence" : 2,
+          "previous" : 1
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "482267b2bfbc46009631a193979ddf3eea006a088d252c546a19b03bb21ea90e",
+          "eventId" : "evt-000003",
+          "sequence" : 3
+        } ],
+        "inputValues" : {
+          "sequence" : 3,
+          "previous" : 2
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "d3299af51472ee5c5fe731cfa9fc9d4ab8b5eb7a50a88f3fe6603dd53ba40866",
+          "eventId" : "evt-000004",
+          "sequence" : 4
+        } ],
+        "inputValues" : {
+          "sequence" : 4,
+          "previous" : 3
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "e3061fcf25d9587d76f46814fd8016566509e7b315e25e6b5670b00049d9d519",
+          "eventId" : "evt-000005",
+          "sequence" : 5
+        } ],
+        "inputValues" : {
+          "sequence" : 5,
+          "previous" : 4
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "b032677a71a2ea45c15880b9bd6c36852a1c4634fab9f5df340f6fb6b87a15de",
+          "eventId" : "evt-000006",
+          "sequence" : 6
+        } ],
+        "inputValues" : {
+          "sequence" : 6,
+          "previous" : 5
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "559b86043cdd1f4f0c822cc943d0d4fdae864798766a44240b26e6e12f6e5cd1",
+          "eventId" : "evt-000007",
+          "sequence" : 7
+        } ],
+        "inputValues" : {
+          "sequence" : 7,
+          "previous" : 6
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.invalid_goal_approval_routing_occurrence",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "559b86043cdd1f4f0c822cc943d0d4fdae864798766a44240b26e6e12f6e5cd1",
+          "eventId" : "evt-000007",
+          "sequence" : 7
+        } ],
+        "inputValues" : {
+          "previousApprovalEvent" : null,
+          "event" : {
+            "event_id" : "evt-000007",
+            "ts" : "2026-10-23T01:19:26.640410Z",
+            "event_type" : "node_routed",
+            "payload" : {
+              "transition" : {
+                "required" : true,
+                "transition_type" : "normal",
+                "condition" : "unconditional",
+                "purpose" : "Seed the first Claude intake run with repo-scope context.",
+                "source_node_sha256" : "5b8cdbabca8e103004f5532f3f1b801b55298247b6b7a486d2b7879eb7488d62",
+                "source_node_instance_id" : "node-gate-human_requirement_review-006"
+              },
+              "outcome" : "approved",
+              "to" : "contract.compile",
+              "source_node_instance_id" : "node-gate-human_requirement_review-006",
+              "from" : "gate.human_requirement_review",
+              "gate_id" : "",
+              "node_instance_id" : "node-contract-compile-007"
+            }
+          },
+          "compiler" : "node-contract-compile-007",
+          "gateNode" : "node-gate-human_requirement_review-006"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "de9915bf0cd023c38d43c40bfe1f05318ea36cd43ba91954dbb2a755cdb1ad42",
+          "eventId" : "evt-000008",
+          "sequence" : 8
+        } ],
+        "inputValues" : {
+          "sequence" : 8,
+          "previous" : 7
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "a11b002674cb219943aa5fb143dbb33b1cca2fa6bd03e0a73b0fea863d7393c9",
+          "eventId" : "evt-000009",
+          "sequence" : 9
+        } ],
+        "inputValues" : {
+          "sequence" : 9,
+          "previous" : 8
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "11895c7276422958f10bddc152f230756fc8c1f76de6eee8cda7e6d7147cb1c1",
+          "eventId" : "evt-000010",
+          "sequence" : 10
+        } ],
+        "inputValues" : {
+          "sequence" : 10,
+          "previous" : 9
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "da79fc5976a6f56dffd8aeb119938808cbab63f2e20f7de561a42a4a6e1a8fda",
+          "eventId" : "evt-000011",
+          "sequence" : 11
+        } ],
+        "inputValues" : {
+          "sequence" : 11,
+          "previous" : 10
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "d3a00b3151b849aaa06d051dc41dface36c6c71c89414e913abd85d668013bcd",
+          "eventId" : "evt-000012",
+          "sequence" : 12
+        } ],
+        "inputValues" : {
+          "sequence" : 12,
+          "previous" : 11
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "70be7a48eceb02ef8d9064a8f359dd5bfa336dcbd6aec11bc73d884eb6670b87",
+          "eventId" : "evt-000013",
+          "sequence" : 13
+        } ],
+        "inputValues" : {
+          "sequence" : 13,
+          "previous" : 12
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "e82f892dd46b8518cc6972fff4d6c8cb8aa20223b4709911978d9ac0d235526f",
+          "eventId" : "evt-000014",
+          "sequence" : 14
+        } ],
+        "inputValues" : {
+          "sequence" : 14,
+          "previous" : 13
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "c7c62c5d7697fa3be9959e7a70aa9617fb4bf2ff84940c3d59d7523a6a74c9c9",
+          "eventId" : "evt-000015",
+          "sequence" : 15
+        } ],
+        "inputValues" : {
+          "sequence" : 15,
+          "previous" : 14
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "f1d1e4b923e1bb4bbca20cd82ffd1f86e72c4539ef4417d33369827894651f15",
+          "eventId" : "evt-000016",
+          "sequence" : 16
+        } ],
+        "inputValues" : {
+          "sequence" : 16,
+          "previous" : 15
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "db47d929e8bc47724b85763d486488b23e8f3f2c6e8a0a84a02ebc05cf650764",
+          "eventId" : "evt-000017",
+          "sequence" : 17
+        } ],
+        "inputValues" : {
+          "sequence" : 17,
+          "previous" : 16
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "319564e0f0469eaa13bb551421156a6d90b307e6a609c55fd22f4cc31a9f7a2c",
+          "eventId" : "evt-000018",
+          "sequence" : 18
+        } ],
+        "inputValues" : {
+          "sequence" : 18,
+          "previous" : 17
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "157a0f0f581597680f195599048bbb9f72851dc8bce10f5e33a5166ca4115a60",
+          "eventId" : "evt-000019",
+          "sequence" : 19
+        } ],
+        "inputValues" : {
+          "sequence" : 19,
+          "previous" : 18
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "ed3b539b8318d5ec351c08efd4ce279d47b4cdfb217b01037c80d00bb662378c",
+          "eventId" : "evt-000020",
+          "sequence" : 20
+        } ],
+        "inputValues" : {
+          "sequence" : 20,
+          "previous" : 19
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "687bb46286dc0e7e9705e4340b5a4a28e1da434a91c0f7bcb420b5a999aa3a54",
+          "eventId" : "evt-000021",
+          "sequence" : 21
+        } ],
+        "inputValues" : {
+          "sequence" : 21,
+          "previous" : 20
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "cbc1da20444037e9e00fd4c8a0da6cafba56dd81a5e681905e3a85cb8d75cff5",
+          "eventId" : "evt-000022",
+          "sequence" : 22
+        } ],
+        "inputValues" : {
+          "sequence" : 22,
+          "previous" : 21
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "6bd2da73383f986c061447cb9f07f6ea3be8e092bd82c31fec2ff9b296458c6f",
+          "eventId" : "evt-000023",
+          "sequence" : 23
+        } ],
+        "inputValues" : {
+          "sequence" : 23,
+          "previous" : 22
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "76d2fa797069d035e21cb07e4aa302465f44f2685ec33e3c973318ef33f179f9",
+          "eventId" : "evt-000024",
+          "sequence" : 24
+        } ],
+        "inputValues" : {
+          "sequence" : 24,
+          "previous" : 23
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "85c4876de83ca1d6166ab2970d68d8891e11b0fde11aa2252411d47d203daa4a",
+          "eventId" : "evt-000025",
+          "sequence" : 25
+        } ],
+        "inputValues" : {
+          "sequence" : 25,
+          "previous" : 24
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "3df04d7e09d93483c48417ecdc7bdf638eb5f13c4c72596a35e868e313c582db",
+          "eventId" : "evt-000026",
+          "sequence" : 26
+        } ],
+        "inputValues" : {
+          "sequence" : 26,
+          "previous" : 25
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "0738d849b1e0fc9ee69864e5e02bb264eccd649ebf36f4ed835e7aee0828e07b",
+          "eventId" : "evt-000027",
+          "sequence" : 27
+        } ],
+        "inputValues" : {
+          "sequence" : 27,
+          "previous" : 26
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "ROUTE_EVENT",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/events.jsonl",
+          "sha256" : "e06887b2396e84c7ee46b53c4a662a174bbfbfe2de35e9c2b8dc34e172aa75d8",
+          "eventId" : "evt-000028",
+          "sequence" : 28
+        } ],
+        "inputValues" : {
+          "sequence" : 28,
+          "previous" : 27
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveGoal.goal_approval_route_is_missing",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "approvalEvent" : "evt-000007",
+          "compiler" : "node-contract-compile-007",
+          "gateNode" : "node-gate-human_requirement_review-006"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.validateExecutionInputs.current_goal_is_required",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "goalPresent" : true,
+          "goalFailure" : null
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.validateExecutionInputs.execution_contract_no_longer_binds_the_approved_goal",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+          "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b",
+          "eventId" : "",
+          "sequence" : -1
+        } ],
+        "inputValues" : {
+          "execution" : {
+            "schema_version" : 2,
+            "phase" : "EXECUTION",
+            "epoch" : 1,
+            "id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile_execution-027",
+            "version" : 1,
+            "created_at" : "2026-10-25T22:22:52.814268Z",
+            "objective" : "在本地 Python 仓库提供 normalize_newlines(text: str) -> str：将 CRLF 与单独 CR 转换为 LF，其余字符、空串、已有 LF 与末尾换行有无全部原样保留，仅使用标准库实现，并以实际执行的 unittest 测试和与代码一致的 README 示例完成验收。",
+            "scope" : {
+              "included" : [ {
+                "path" : "src/normalize_text.py",
+                "operation" : "CREATE"
+              }, {
+                "path" : "tests/test_normalize_text.py",
+                "operation" : "CREATE"
+              }, {
+                "path" : "README.md",
+                "operation" : "CREATE"
+              } ],
+              "excluded" : [ "不创建或修改 .git/ 与 .agent/ 下的任何文件", "不引入第三方依赖、网络访问、数据库、浏览器、后台服务或机器配置修改", "不做 CRLF/单独 CR 转 LF 之外的换行处理（不转换 U+2028/U+2029 等 Unicode 行/段分隔符），不新增或删除末尾换行" ]
+            },
+            "acceptance_criteria" : [ {
+              "id" : "AC-1",
+              "text" : "测试源码覆盖至少八类输入——空串、纯 LF、CRLF、单 CR、混合换行、Unicode 字符、末尾有换行、末尾无换行、连续空行——每类输入都有明确断言的期望输出，并断言重复规范化（对已规范化结果再次调用）保持相同结果。"
+            }, {
+              "id" : "AC-2",
+              "text" : "实际执行 unittest 测试并保留真实输出：输出明确显示覆盖的用例数（如 Ran N tests）且 failure=0、error=0，输出所列用例与测试源码中的案例相符；本任务不要求工具提供独立测量的真实退出码，但测试完成状态或文字结论本身不能替代实际输入/输出与测试结果。"
+            }, {
+              "id" : "AC-3",
+              "text" : "README 用法示例与 src/normalize_text.py 实际实现一致，至少包含函数导入语句和一个典型混合换行输入/输出示例；该一致性由实际读取源码/文档或实际执行示例支持。"
+            } ],
+            "test_requirements" : [ {
+              "id" : "TR-1",
+              "text" : "在 tests/test_normalize_text.py 中使用 unittest 编写测试，覆盖 AC-1 列出的全部输入类别，每类输入断言精确的期望输出字符串，并包含对已规范化结果再次调用的幂等性断言。"
+            }, {
+              "id" : "TR-2",
+              "text" : "实际执行测试（如 python -m unittest 或 python -m unittest discover，具体命令在 EXECUTION 计划中确认）并保留真实命令输出，输出须显示 Ran N tests 且 OK（零 failure、零 error），并与测试源码中的案例一一对应。"
+            }, {
+              "id" : "TR-3",
+              "text" : "通过实际读取 src/normalize_text.py 与 README.md（或实际运行示例）验证 README 示例与实现一致，验证范围包含导入语句和典型混合换行输入的逐字符输出（例如 \"a\\r\\nb\\rc\\nd\" 型输入的期望结果）。"
+            } ],
+            "constraints" : [ "normalize_newlines 语义边界精确为：将输入中每个 CRLF（\"\\r\\n\"）和单独 CR（\"\\r\"）转换为 LF（\"\\n\"）；除此之外不改变任何字符（包括 Unicode 字符与 U+2028/U+2029 等），空串返回空串，已有 LF 原样保留，末尾有/无换行的状态原样保留；函数为纯函数且重复调用幂等。", "仅使用 Python 标准库；不引入任何第三方依赖，不使用网络、数据库、浏览器、后台服务，不做机器配置修改。", "src/normalize_text.py、tests/test_normalize_text.py、README.md 为 intake 提案路径，不构成写授权；最终具体文件与 CREATE/MODIFY 操作须在 EXECUTION 阶段经设计与计划确认并批准后实施。" ],
+            "non_goals" : [ "不引入第三方依赖，也不生成 requirements.txt、pyproject.toml 等依赖清单。", "不进行网络访问、数据库、浏览器、后台服务或机器配置修改。", "不扩展换行处理范围：不转换 LF 以外的 Unicode 行/段分隔符，不添加、删除或补齐末尾换行，不提供 CLI 或打包发布。" ],
+            "risk_areas" : [ "仓库当前 git 跟踪清单为空（repo-map fileCount=0），全部产物需新建；测试对 src.normalize_text 的导入方式（如包结构、__init__.py、sys.path 或 unittest discover 的启动目录）需在 EXECUTION 计划中确定，避免因导入路径导致测试无法实际执行。", "AC-2 的覆盖数以 unittest 实际输出的 Ran N tests 为准，执行记录必须保留真实命令输出而非转述，防止以“测试已完成”之类结论替代实测结果。" ],
+            "evidence_refs" : [ ],
+            "ambiguity_notes" : [ ],
+            "human_questions" : [ ],
+            "status" : "READY_FOR_REVIEW",
+            "compilation_pass" : 1,
+            "source" : {
+              "raw_request_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/requirement.md",
+              "created_by" : "contract.compile",
+              "proposal" : {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.contract.json",
+                "sha256" : "cd7b184f400271deea36266d6b5d111e4cb6684a236f3e03f67b5ab989852d83"
+              },
+              "goal_approval" : {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+                "sha256" : "76bcb776879eb930700c63983c5cf7c4b254815ec9beec069e466698e89d308d"
+              }
+            },
+            "goal_contract" : {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+              "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+            },
+            "reviewed_candidates" : [ {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-design-decision-016.json",
+              "sha256" : "e14f6e8c78b136449f68f13bd52e194bc31cfa44e57fd44f5ff34ef32389b45d"
+            }, {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-plan-decision-026.json",
+              "sha256" : "7cd1081dbf5e2f349a2ce47c08aad26ad6a66a829ade97a5f3cbbf825038bc08"
+            } ],
+            "verification_bindings" : [ {
+              "criterion_id" : "AC-1",
+              "method" : "在仓库根执行 python -m unittest discover -s tests -v 2>&1 并采集实际输出；断言逐用例全部通过、结尾为 Ran 11 tests 与 OK（零 failure/零 error）；逐条核对 tests/test_normalize_text.py 中共享 CASES 表覆盖九类输入（空串、纯 LF、CRLF、单 CR、混合换行 \"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、Unicode 含 U+2028 保留、末尾有换行、末尾无换行、连续空行 \"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"），且 test_idempotent_across_all_cases 以 subTest 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json",
+                "sha256" : "afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json",
+                "sha256" : "afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            }, {
+              "criterion_id" : "AC-2",
+              "method" : "实际执行 python -m unittest discover -s tests -v 2>&1 并合并采集 stdout 与 stderr（unittest 默认将逐用例行、Ran 11 tests 与 OK/FAILED 写入 stderr）；实际输出须明确显示覆盖数（Ran 11 tests）与零 failure/error，并与测试源码中的 11 个方法名及 CASES 一一核对；不以完成状态或文字结论替代实际输入/输出与测试结果。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json",
+                "sha256" : "81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json",
+                "sha256" : "81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            }, {
+              "criterion_id" : "AC-3",
+              "method" : "实际读取 src/normalize_text.py 与 README.md，逐字符比对 README 中的导入语句（from normalize_text import normalize_newlines）与典型混合换行示例输入/输出（\"a\\r\\nb\\rc\\nd\" → 'a\\nb\\nc\\nd'，另含空串与末尾换行示例）与实现一致；或额外执行 PYTHONPATH=src python -m doctest README.md 作为支持证据（TR-3 允许任一途径）。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json",
+                "sha256" : "ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json",
+                "sha256" : "ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            } ],
+            "authority_refs" : [ ],
+            "nonessential_operation_declarations" : [ ]
+          },
+          "goal" : {
+            "schema_version" : 2,
+            "phase" : "GOAL",
+            "epoch" : 1,
+            "id" : "tc-ws-20261023T005431Z-9YYF-node-contract-compile-007",
+            "version" : 1,
+            "created_at" : "2026-10-23T01:19:39.400098Z",
+            "objective" : "在本地 Python 仓库提供 normalize_newlines(text: str) -> str：将 CRLF 与单独 CR 转换为 LF，其余字符、空串、已有 LF 与末尾换行有无全部原样保留，仅使用标准库实现，并以实际执行的 unittest 测试和与代码一致的 README 示例完成验收。",
+            "scope" : {
+              "included" : [ ],
+              "excluded" : [ "不创建或修改 .git/ 与 .agent/ 下的任何文件", "不引入第三方依赖、网络访问、数据库、浏览器、后台服务或机器配置修改", "不做 CRLF/单独 CR 转 LF 之外的换行处理（不转换 U+2028/U+2029 等 Unicode 行/段分隔符），不新增或删除末尾换行" ]
+            },
+            "acceptance_criteria" : [ {
+              "id" : "AC-1",
+              "text" : "测试源码覆盖至少八类输入——空串、纯 LF、CRLF、单 CR、混合换行、Unicode 字符、末尾有换行、末尾无换行、连续空行——每类输入都有明确断言的期望输出，并断言重复规范化（对已规范化结果再次调用）保持相同结果。"
+            }, {
+              "id" : "AC-2",
+              "text" : "实际执行 unittest 测试并保留真实输出：输出明确显示覆盖的用例数（如 Ran N tests）且 failure=0、error=0，输出所列用例与测试源码中的案例相符；本任务不要求工具提供独立测量的真实退出码，但测试完成状态或文字结论本身不能替代实际输入/输出与测试结果。"
+            }, {
+              "id" : "AC-3",
+              "text" : "README 用法示例与 src/normalize_text.py 实际实现一致，至少包含函数导入语句和一个典型混合换行输入/输出示例；该一致性由实际读取源码/文档或实际执行示例支持。"
+            } ],
+            "test_requirements" : [ {
+              "id" : "TR-1",
+              "text" : "在 tests/test_normalize_text.py 中使用 unittest 编写测试，覆盖 AC-1 列出的全部输入类别，每类输入断言精确的期望输出字符串，并包含对已规范化结果再次调用的幂等性断言。"
+            }, {
+              "id" : "TR-2",
+              "text" : "实际执行测试（如 python -m unittest 或 python -m unittest discover，具体命令在 EXECUTION 计划中确认）并保留真实命令输出，输出须显示 Ran N tests 且 OK（零 failure、零 error），并与测试源码中的案例一一对应。"
+            }, {
+              "id" : "TR-3",
+              "text" : "通过实际读取 src/normalize_text.py 与 README.md（或实际运行示例）验证 README 示例与实现一致，验证范围包含导入语句和典型混合换行输入的逐字符输出（例如 \"a\\r\\nb\\rc\\nd\" 型输入的期望结果）。"
+            } ],
+            "constraints" : [ "normalize_newlines 语义边界精确为：将输入中每个 CRLF（\"\\r\\n\"）和单独 CR（\"\\r\"）转换为 LF（\"\\n\"）；除此之外不改变任何字符（包括 Unicode 字符与 U+2028/U+2029 等），空串返回空串，已有 LF 原样保留，末尾有/无换行的状态原样保留；函数为纯函数且重复调用幂等。", "仅使用 Python 标准库；不引入任何第三方依赖，不使用网络、数据库、浏览器、后台服务，不做机器配置修改。", "src/normalize_text.py、tests/test_normalize_text.py、README.md 为 intake 提案路径，不构成写授权；最终具体文件与 CREATE/MODIFY 操作须在 EXECUTION 阶段经设计与计划确认并批准后实施。" ],
+            "non_goals" : [ "不引入第三方依赖，也不生成 requirements.txt、pyproject.toml 等依赖清单。", "不进行网络访问、数据库、浏览器、后台服务或机器配置修改。", "不扩展换行处理范围：不转换 LF 以外的 Unicode 行/段分隔符，不添加、删除或补齐末尾换行，不提供 CLI 或打包发布。" ],
+            "risk_areas" : [ "仓库当前 git 跟踪清单为空（repo-map fileCount=0），全部产物需新建；测试对 src.normalize_text 的导入方式（如包结构、__init__.py、sys.path 或 unittest discover 的启动目录）需在 EXECUTION 计划中确定，避免因导入路径导致测试无法实际执行。", "AC-2 的覆盖数以 unittest 实际输出的 Ran N tests 为准，执行记录必须保留真实命令输出而非转述，防止以“测试已完成”之类结论替代实测结果。" ],
+            "evidence_refs" : [ ],
+            "ambiguity_notes" : [ ],
+            "human_questions" : [ ],
+            "status" : "READY_FOR_REVIEW",
+            "compilation_pass" : 1,
+            "source" : {
+              "raw_request_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/requirement.md",
+              "created_by" : "contract.compile",
+              "proposal" : {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.contract.json",
+                "sha256" : "cd7b184f400271deea36266d6b5d111e4cb6684a236f3e03f67b5ab989852d83"
+              },
+              "goal_approval" : {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+                "sha256" : "76bcb776879eb930700c63983c5cf7c4b254815ec9beec069e466698e89d308d"
+              }
+            },
+            "goal_contract" : null,
+            "reviewed_candidates" : [ ],
+            "verification_bindings" : [ ],
+            "authority_refs" : [ ],
+            "nonessential_operation_declarations" : [ ]
+          },
+          "goalRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+          "goalSha" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.validateExecutionInputs.nonessential_declarations_must_bind_the_frozen_node_contracts",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ {
+          "kind" : "FILE",
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/workflow/definition.json",
+          "sha256" : "8313a022f5687f035a349f86f511cb11ab672659a5e1a4cec0ee093299d36542",
+          "eventId" : "",
+          "sequence" : -1
+        } ],
+        "inputValues" : {
+          "declared" : [ ],
+          "frozen" : [ ]
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.validateExecutionInputs.execution_contract_must_consume_its_routed_independent_reviews",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "declaredReviews" : [ {
+            "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-design-decision-016.json",
+            "sha256" : "e14f6e8c78b136449f68f13bd52e194bc31cfa44e57fd44f5ff34ef32389b45d"
+          }, {
+            "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-plan-decision-026.json",
+            "sha256" : "7cd1081dbf5e2f349a2ce47c08aad26ad6a66a829ade97a5f3cbbf825038bc08"
+          } ],
+          "routedReviews" : [ {
+            "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-design-decision-016.json",
+            "sha256" : "e14f6e8c78b136449f68f13bd52e194bc31cfa44e57fd44f5ff34ef32389b45d"
+          }, {
+            "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-plan-decision-026.json",
+            "sha256" : "7cd1081dbf5e2f349a2ce47c08aad26ad6a66a829ade97a5f3cbbf825038bc08"
+          } ]
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.validateExecutionInputs.dynamic_diagnostic_or_i_o_failure",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "PASSED",
+        "explanation" : "",
+        "inputRefs" : [ ],
+        "inputValues" : {
+          "readiness" : {
+            "bindings" : [ {
+              "criterion_id" : "AC-1",
+              "method" : "在仓库根执行 python -m unittest discover -s tests -v 2>&1 并采集实际输出；断言逐用例全部通过、结尾为 Ran 11 tests 与 OK（零 failure/零 error）；逐条核对 tests/test_normalize_text.py 中共享 CASES 表覆盖九类输入（空串、纯 LF、CRLF、单 CR、混合换行 \"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、Unicode 含 U+2028 保留、末尾有换行、末尾无换行、连续空行 \"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"），且 test_idempotent_across_all_cases 以 subTest 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json",
+                "sha256" : "afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json",
+                "sha256" : "afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            }, {
+              "criterion_id" : "AC-2",
+              "method" : "实际执行 python -m unittest discover -s tests -v 2>&1 并合并采集 stdout 与 stderr（unittest 默认将逐用例行、Ran 11 tests 与 OK/FAILED 写入 stderr）；实际输出须明确显示覆盖数（Ran 11 tests）与零 failure/error，并与测试源码中的 11 个方法名及 CASES 一一核对；不以完成状态或文字结论替代实际输入/输出与测试结果。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json",
+                "sha256" : "81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json",
+                "sha256" : "81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            }, {
+              "criterion_id" : "AC-3",
+              "method" : "实际读取 src/normalize_text.py 与 README.md，逐字符比对 README 中的导入语句（from normalize_text import normalize_newlines）与典型混合换行示例输入/输出（\"a\\r\\nb\\rc\\nd\" → 'a\\nb\\nc\\nd'，另含空串与末尾换行示例）与实现一致；或额外执行 PYTHONPATH=src python -m doctest README.md 作为支持证据（TR-3 允许任一途径）。",
+              "executor" : "AGENT",
+              "environment_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json",
+                "sha256" : "ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf"
+              } ],
+              "authority_refs" : [ ],
+              "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+              "feasibility_refs" : [ {
+                "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json",
+                "sha256" : "ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf"
+              } ],
+              "detail_owner" : "implement.claude_self_test_report",
+              "actual_exit_required" : false,
+              "expected_exit_code" : null
+            } ],
+            "goal" : {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+              "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+            },
+            "active_readiness" : [ {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json",
+              "sha256" : "afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd"
+            }, {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json",
+              "sha256" : "81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99"
+            }, {
+              "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json",
+              "sha256" : "ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf"
+            } ],
+            "requests" : {
+              ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json" : {
+                "declaration" : {
+                  "schema" : 1,
+                  "requestId" : "eighth-readiness-ac-1-20261023",
+                  "subject" : "node-gate-human_plan_approval-021",
+                  "goal" : {
+                    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+                    "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+                  },
+                  "epoch" : 1,
+                  "criterionIds" : [ "AC-1" ],
+                  "method" : "在仓库根执行 python -m unittest discover -s tests -v 2>&1 并采集实际输出；断言逐用例全部通过、结尾为 Ran 11 tests 与 OK（零 failure/零 error）；逐条核对 tests/test_normalize_text.py 中共享 CASES 表覆盖九类输入（空串、纯 LF、CRLF、单 CR、混合换行 \"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、Unicode 含 U+2028 保留、末尾有换行、末尾无换行、连续空行 \"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"），且 test_idempotent_across_all_cases 以 subTest 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。",
+                  "executor" : "AGENT",
+                  "evidenceKind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+                  "environment" : {
+                    "workspace" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+                    "identity" : "75699fd78966a84d628f2068928f08fb2cdfc6919d41d91a9c060068eb2c2771",
+                    "owner" : "kriswang/operator",
+                    "dependencies" : [ {
+                      "path" : "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13",
+                      "sha256" : "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+                      "absent" : false
+                    }, {
+                      "path" : "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/unittest/__init__.py",
+                      "sha256" : "7c22ee0c503b75aba5221e3e8189f9bf4632f85a43315ff841ec9d26a68e3551",
+                      "absent" : false
+                    }, {
+                      "path" : "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/importlib/__init__.py",
+                      "sha256" : "fa3881e319959a527916cef2a0b46e4d3b9fbf8dc631d4571bc930aaa2069f9f",
+                      "absent" : false
+                    } ]
+                  },
+                  "statement" : "用户已确认：同意以当前隔离工作区及已固定的宿主Python/标准库环境，按本条method由原生客户端尝试完成实际执行或读取并保留观察。此声明仅申报前提可用，不证明原生工具权限或测试已执行/成功；实际工具不可用或证据不足时按原规则停止，不降低验收。",
+                  "detailOwner" : "implement.claude_self_test_report",
+                  "lifetime" : "AUTHORIZATION_EPOCH",
+                  "expiresAt" : null,
+                  "action" : "RECORD",
+                  "supersedes" : null
+                },
+                "unexpired" : true,
+                "dependencies" : {
+                  "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13" : {
+                    "sha256" : "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+                    "canonical_file" : true
+                  },
+                  "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/unittest/__init__.py" : {
+                    "sha256" : "7c22ee0c503b75aba5221e3e8189f9bf4632f85a43315ff841ec9d26a68e3551",
+                    "canonical_file" : true
+                  },
+                  "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/importlib/__init__.py" : {
+                    "sha256" : "fa3881e319959a527916cef2a0b46e4d3b9fbf8dc631d4571bc930aaa2069f9f",
+                    "canonical_file" : true
+                  }
+                }
+              },
+              ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json" : {
+                "declaration" : {
+                  "schema" : 1,
+                  "requestId" : "eighth-readiness-ac-2-20261023",
+                  "subject" : "node-gate-human_plan_approval-021",
+                  "goal" : {
+                    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+                    "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+                  },
+                  "epoch" : 1,
+                  "criterionIds" : [ "AC-2" ],
+                  "method" : "实际执行 python -m unittest discover -s tests -v 2>&1 并合并采集 stdout 与 stderr（unittest 默认将逐用例行、Ran 11 tests 与 OK/FAILED 写入 stderr）；实际输出须明确显示覆盖数（Ran 11 tests）与零 failure/error，并与测试源码中的 11 个方法名及 CASES 一一核对；不以完成状态或文字结论替代实际输入/输出与测试结果。",
+                  "executor" : "AGENT",
+                  "evidenceKind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+                  "environment" : {
+                    "workspace" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+                    "identity" : "75699fd78966a84d628f2068928f08fb2cdfc6919d41d91a9c060068eb2c2771",
+                    "owner" : "kriswang/operator",
+                    "dependencies" : [ {
+                      "path" : "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13",
+                      "sha256" : "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+                      "absent" : false
+                    }, {
+                      "path" : "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/unittest/__init__.py",
+                      "sha256" : "7c22ee0c503b75aba5221e3e8189f9bf4632f85a43315ff841ec9d26a68e3551",
+                      "absent" : false
+                    }, {
+                      "path" : "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/importlib/__init__.py",
+                      "sha256" : "fa3881e319959a527916cef2a0b46e4d3b9fbf8dc631d4571bc930aaa2069f9f",
+                      "absent" : false
+                    } ]
+                  },
+                  "statement" : "用户已确认：同意以当前隔离工作区及已固定的宿主Python/标准库环境，按本条method由原生客户端尝试完成实际执行或读取并保留观察。此声明仅申报前提可用，不证明原生工具权限或测试已执行/成功；实际工具不可用或证据不足时按原规则停止，不降低验收。",
+                  "detailOwner" : "implement.claude_self_test_report",
+                  "lifetime" : "AUTHORIZATION_EPOCH",
+                  "expiresAt" : null,
+                  "action" : "RECORD",
+                  "supersedes" : null
+                },
+                "unexpired" : true,
+                "dependencies" : {
+                  "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13" : {
+                    "sha256" : "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+                    "canonical_file" : true
+                  },
+                  "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/unittest/__init__.py" : {
+                    "sha256" : "7c22ee0c503b75aba5221e3e8189f9bf4632f85a43315ff841ec9d26a68e3551",
+                    "canonical_file" : true
+                  },
+                  "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/importlib/__init__.py" : {
+                    "sha256" : "fa3881e319959a527916cef2a0b46e4d3b9fbf8dc631d4571bc930aaa2069f9f",
+                    "canonical_file" : true
+                  }
+                }
+              },
+              ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json" : {
+                "declaration" : {
+                  "schema" : 1,
+                  "requestId" : "eighth-readiness-ac-3-20261023",
+                  "subject" : "node-gate-human_plan_approval-021",
+                  "goal" : {
+                    "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+                    "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+                  },
+                  "epoch" : 1,
+                  "criterionIds" : [ "AC-3" ],
+                  "method" : "实际读取 src/normalize_text.py 与 README.md，逐字符比对 README 中的导入语句（from normalize_text import normalize_newlines）与典型混合换行示例输入/输出（\"a\\r\\nb\\rc\\nd\" → 'a\\nb\\nc\\nd'，另含空串与末尾换行示例）与实现一致；或额外执行 PYTHONPATH=src python -m doctest README.md 作为支持证据（TR-3 允许任一途径）。",
+                  "executor" : "AGENT",
+                  "evidenceKind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+                  "environment" : {
+                    "workspace" : "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+                    "identity" : "75699fd78966a84d628f2068928f08fb2cdfc6919d41d91a9c060068eb2c2771",
+                    "owner" : "kriswang/operator",
+                    "dependencies" : [ {
+                      "path" : "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13",
+                      "sha256" : "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+                      "absent" : false
+                    }, {
+                      "path" : "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/unittest/__init__.py",
+                      "sha256" : "7c22ee0c503b75aba5221e3e8189f9bf4632f85a43315ff841ec9d26a68e3551",
+                      "absent" : false
+                    }, {
+                      "path" : "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/importlib/__init__.py",
+                      "sha256" : "fa3881e319959a527916cef2a0b46e4d3b9fbf8dc631d4571bc930aaa2069f9f",
+                      "absent" : false
+                    } ]
+                  },
+                  "statement" : "用户已确认：同意以当前隔离工作区及已固定的宿主Python/标准库环境，按本条method由原生客户端尝试完成实际执行或读取并保留观察。此声明仅申报前提可用，不证明原生工具权限或测试已执行/成功；实际工具不可用或证据不足时按原规则停止，不降低验收。",
+                  "detailOwner" : "implement.claude_self_test_report",
+                  "lifetime" : "AUTHORIZATION_EPOCH",
+                  "expiresAt" : null,
+                  "action" : "RECORD",
+                  "supersedes" : null
+                },
+                "unexpired" : true,
+                "dependencies" : {
+                  "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3.13" : {
+                    "sha256" : "c65611dec5f4feb0adb0d7794e7c2914d28af727d771bdd5f0db7d012772f620",
+                    "canonical_file" : true
+                  },
+                  "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/unittest/__init__.py" : {
+                    "sha256" : "7c22ee0c503b75aba5221e3e8189f9bf4632f85a43315ff841ec9d26a68e3551",
+                    "canonical_file" : true
+                  },
+                  "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/importlib/__init__.py" : {
+                    "sha256" : "fa3881e319959a527916cef2a0b46e4d3b9fbf8dc631d4571bc930aaa2069f9f",
+                    "canonical_file" : true
+                  }
+                }
+              }
+            },
+            "check_times" : {
+              ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-1-20261023.json" : "2026-10-25T22:35:57.223730Z",
+              ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-2-20261023.json" : "2026-10-25T22:35:57.224651Z",
+              ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/verification-readiness/eighth-readiness-ac-3-20261023.json" : "2026-10-25T22:35:57.224865Z"
+            },
+            "fully_observed" : true
+          }
+        },
+        "comparable" : true
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.contract_approval_gate_node_is_missing",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.latest_contract_approval_gate_is_not_completed",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.latest_contract_gate_lineage_or_status_is_invalid",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.latest_contract_gate_action_is_not_approved",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.contract_gate_note_does_not_match_node_result",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.contract_gate_subject_refs_do_not_match_node_input_refs",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.contract_gate_source_occurrence_identity_is_missing_or_inconsistent",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.approved_source_is_not_a_completed_contract_compile_node",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.routing_event_source_does_not_match_approved_compile_node",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.completed_contract_compile_is_newer_than_the_approved_source",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveExecution.dynamic_diagnostic_or_i_o_failure",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.currentVerificationBindings.invalid_technical_continuation_approval_binding",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_lost_its_independent_reviews",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.currentVerificationBindings.technical_revision_changed_the_execution_authorization_boundary",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_route_source_changed",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_lineage_cycle",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveRoutedAcceptance.dynamic_diagnostic_or_i_o_failure",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.resolveRoutedAcceptance.qualified_task_contract_is_required",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.fromRefs.cannot_read_routed_acceptance_context_metadata",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.fromRefs.multiple_routed_acceptance_context_metadata_documents",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.fromRefs.routed_acceptance_context_metadata_has_no_task_contract_binding",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.AcceptanceContextBinding.validate.routed_context_sha_does_not_match_current_task_contract",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      }, {
+        "ruleId" : "TaskContractProjectionVerifier.AcceptanceContextBinding.validate.routed_context_compile_ref_does_not_match_current_binding",
+        "ruleVersion" : "45f3611509737b73698b534cd484d47ea041679276eed24bafa8b752c405f4b1",
+        "result" : "NOT_CHECKED",
+        "explanation" : "post-approval/target condition must be checked by its actual consumer",
+        "inputRefs" : [ ],
+        "inputValues" : { },
+        "comparable" : false
+      } ]
+    }
+  }
+}

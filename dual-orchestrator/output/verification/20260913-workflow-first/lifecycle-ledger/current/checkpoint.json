@@ -1,0 +1,17 @@
+{
+  "schemaVersion" : 1,
+  "checkpointId" : "checkpoint-initial",
+  "workstreamId" : "ws-20260913T160342Z-TVXE",
+  "workspaceId" : "wsp-20260913T160342Z-TA9R",
+  "stageId" : "stage-design",
+  "iterationId" : "iter-001",
+  "kind" : "stable",
+  "lastCompletedAction" : "workstream_created",
+  "pendingAction" : "claude_design",
+  "resumeReason" : "start_created_design_workstream",
+  "requiredArtifactRefs" : [ "artifact-requirement" ],
+  "recommendedContextPackageRef" : "current/context-package.json",
+  "sessionStrategy" : "reuse_or_recreate_by_transport_health",
+  "resumeCommand" : "dualctl resume ws-20260913T160342Z-TVXE",
+  "createdAt" : "2026-09-13T16:03:42.926886Z"
+}

@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "node_instance_id" : "node-context-plan_codex_plan_review-018",
+  "run_id" : "",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-plan_codex_plan_review-018/planned-report.json",
+      "sha256" : "bdbdec6865205bfe5c28d056afbcdf3cd9b5da9812192a62626ba93da747e68c"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-plan_codex_plan_review-018/agent-capability-catalog.json",
+      "sha256" : "bd4dceb0fb739023ab7add2512bd09b874968961273becb954c9ce4f6bafd342"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-plan_codex_plan_review-018/read-reuse-contract.json",
+      "sha256" : "4237356ead471796a8b55dedb6ff59a14c74fc698e87e65f659f4ce7f3be9d6d"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-plan_codex_plan_review-018/working-set.json",
+      "sha256" : "5b51921dd77166638b17f1d388f81d221d04db80b279f374d28179fe2a437aa2"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-plan_codex_plan_review-018/file-relevance-plan.json",
+      "sha256" : "fd92c600e2e580bb504f13e72afe0a06a005d3aef41656e167fc6e049c2d16c3"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-plan_codex_plan_review-018/stage-scope-policy.json",
+      "sha256" : "cfaaac2da4d6a953d2b36622eee59e36f3d00b54e8a940462048ecb38eaedc93"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-plan_codex_plan_review-018/file-summaries.json",
+      "sha256" : "5b2e83de922910d50de403fd7bcac8e3220a0239e9d86041d11888b5d08c70e2"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-plan_codex_plan_review-018/repo-map.json",
+      "sha256" : "cafbbac5db65678bdd119c01dea68c812db496c375c21bbab9243317820c5660"
+    }
+  }
+}

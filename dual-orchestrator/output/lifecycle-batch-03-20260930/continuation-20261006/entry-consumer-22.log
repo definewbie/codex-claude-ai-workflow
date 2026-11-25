@@ -1,0 +1,844 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] dual-cli                                                           [jar]
+[INFO] dual-server                                                        [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/9]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/9]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/9]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/9]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/9]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/9]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-acpx >---------------------
+[INFO] Building dual-adapter-acpx 0.1.0-SNAPSHOT                          [7/9]
+[INFO]   from dual-adapter-acpx/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-acpx ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 11 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-acpx ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-acpx ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-acpx ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-acpx ---
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-cli >--------------------------
+[INFO] Building dual-cli 0.1.0-SNAPSHOT                                   [8/9]
+[INFO]   from dual-cli/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-cli ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-cli ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-cli ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-cli ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 27 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-cli ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.cli.RecoveryShowCommandTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.216 s -- in dev.dual.cli.RecoveryShowCommandTest
+[INFO] Running dev.dual.cli.DeliveryMergeCommandTest
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.247 s <<< FAILURE! -- in dev.dual.cli.DeliveryMergeCommandTest
+[ERROR] dev.dual.cli.DeliveryMergeCommandTest.refusesLegacyAcceptanceThatIsNotBoundToCandidateBytes -- Time elapsed: 0.245 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: View[status=BLOCKED, reasonCode=LEGACY_NOT_BOUND, reason=final acceptance occurrence is missing, acceptanceDecision=, candidateRef=, candidateSha256=, changedFiles=[], excludedFiles=[], targetRepo=/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-16578604187585506444/repo, commit=, canMerge=false, canFinalize=false] ==> expected: <ACCEPTED_CANDIDATE_INVALID> but was: <LEGACY_NOT_BOUND>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.cli.DeliveryMergeCommandTest.refusesLegacyAcceptanceThatIsNotBoundToCandidateBytes(DeliveryMergeCommandTest.java:32)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.cli.RecoveryNetworkCommandTest
+{
+  "canApprove" : false,
+  "scope" : "one_execution",
+  "grantRef" : ".agent/workstreams/ws-cli-network/execution-authority/network-grants/grant-1632371e-ed5d-4c2c-958b-4b0a6bc0e40d.json",
+  "targets" : [ "verify.tests" ],
+  "grant" : {
+    "schemaVersion" : 1,
+    "workstreamId" : "ws-cli-network",
+    "sourceNodeInstanceId" : "node-verify-tests-001",
+    "targetNodeDefinitionId" : "verify.tests",
+    "definitionSha256" : "e7310c2e86d008a707720bee3c6c73a3a2293b674a8bffadb97004ac7ad9ac02",
+    "domains" : [ "api.example.org", "packages.example.org" ],
+    "note" : "approved tests",
+    "approvedAt" : "2026-10-06T11:10:47.489512Z",
+    "state" : "PENDING",
+    "claimedNodeInstanceId" : "",
+    "claimedRunId" : ""
+  },
+  "canCancel" : true
+}
+{
+  "canApprove" : true,
+  "scope" : "one_execution",
+  "grantRef" : ".agent/workstreams/ws-cli-network/execution-authority/network-grants/grant-1632371e-ed5d-4c2c-958b-4b0a6bc0e40d.json",
+  "targets" : [ "verify.tests" ],
+  "grant" : {
+    "schemaVersion" : 1,
+    "workstreamId" : "ws-cli-network",
+    "sourceNodeInstanceId" : "node-verify-tests-001",
+    "targetNodeDefinitionId" : "verify.tests",
+    "definitionSha256" : "e7310c2e86d008a707720bee3c6c73a3a2293b674a8bffadb97004ac7ad9ac02",
+    "domains" : [ "api.example.org", "packages.example.org" ],
+    "note" : "approved tests",
+    "approvedAt" : "2026-10-06T11:10:47.489512Z",
+    "state" : "CANCELLED",
+    "claimedNodeInstanceId" : "",
+    "claimedRunId" : ""
+  },
+  "canCancel" : false
+}
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.241 s -- in dev.dual.cli.RecoveryNetworkCommandTest
+[INFO] Running dev.dual.cli.ReviewRequestActionCommandTest
+Action need recorded. Gate remains waiting; no execution was authorized.
+Action need recorded. Gate remains waiting; no execution was authorized.
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.485 s -- in dev.dual.cli.ReviewRequestActionCommandTest
+[INFO] Running dev.dual.cli.SummaryCommandTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.987 s -- in dev.dual.cli.SummaryCommandTest
+[INFO] Running dev.dual.cli.ProjectionsRefreshCommandTest
+Workstream ledger not found: /var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-3527087899835148920/.agent/workstreams/ws-missing/workflow/current.json
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.608 s -- in dev.dual.cli.ProjectionsRefreshCommandTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   DeliveryMergeCommandTest.refusesLegacyAcceptanceThatIsNotBoundToCandidateBytes:32 View[status=BLOCKED, reasonCode=LEGACY_NOT_BOUND, reason=final acceptance occurrence is missing, acceptanceDecision=, candidateRef=, candidateSha256=, changedFiles=[], excludedFiles=[], targetRepo=/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-16578604187585506444/repo, commit=, canMerge=false, canFinalize=false] ==> expected: <ACCEPTED_CANDIDATE_INVALID> but was: <LEGACY_NOT_BOUND>
+[INFO] 
+[ERROR] Tests run: 21, Failures: 1, Errors: 0, Skipped: 0
+[INFO] 
+[ERROR] There are test failures.
+
+See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-cli/target/surefire-reports for the individual test results.
+See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[INFO] 
+[INFO] ------------------------< dev.dual:dual-server >------------------------
+[INFO] Building dual-server 0.1.0-SNAPSHOT                                [9/9]
+[INFO]   from dual-server/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-server ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 7 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-server ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-server ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-server ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 14 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-server ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.server.WorkstreamApiControllerTest
+[ERROR] Tests run: 29, Failures: 0, Errors: 18, Skipped: 0, Time elapsed: 6.767 s <<< FAILURE! -- in dev.dual.server.WorkstreamApiControllerTest
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.overviewFailsVisibleWhenPersistedCompletionAuditIsInvalid -- Time elapsed: 0.645 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.overviewFailsVisibleWhenPersistedCompletionAuditIsInvalid(WorkstreamApiControllerTest.java:550)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.overviewUsesGoalSatisfactionReadModel -- Time elapsed: 0.215 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.overviewUsesGoalSatisfactionReadModel(WorkstreamApiControllerTest.java:448)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.completedWorkflowWithoutCompletionEvidenceGetsWarningNotSuccess -- Time elapsed: 0.218 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.completedWorkflowWithoutCompletionEvidenceGetsWarningNotSuccess(WorkstreamApiControllerTest.java:358)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.overviewFlagsStaleRunningWhenRecordedPidIsGone -- Time elapsed: 0.252 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.overviewFlagsStaleRunningWhenRecordedPidIsGone(WorkstreamApiControllerTest.java:689)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.serverProjectsLegitimateNonFinalGoalWithoutCorruptionOrSuccessAttention -- Time elapsed: 0.215 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.serverProjectsLegitimateNonFinalGoalWithoutCorruptionOrSuccessAttention(WorkstreamApiControllerTest.java:318)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.overviewDoesNotRecomputeNextStageRequirementsWithoutCompletionAudit -- Time elapsed: 0.203 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.overviewDoesNotRecomputeNextStageRequirementsWithoutCompletionAudit(WorkstreamApiControllerTest.java:528)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.incompleteProcessKeepsRecoveryAndAttentionOnExecutionRatherThanOutputRepair -- Time elapsed: 0.395 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.incompleteProcessKeepsRecoveryAndAttentionOnExecutionRatherThanOutputRepair(WorkstreamApiControllerTest.java:883)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.timelineIgnoresStaleCacheAndOrdersCurrentLedgerNodes -- Time elapsed: 0.204 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.timeline(WorkstreamQueryService.java:178)
+	at dev.dual.server.WorkstreamQueryService.lambda$timeline$0(WorkstreamQueryService.java:175)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.timeline(WorkstreamQueryService.java:175)
+	at dev.dual.server.WorkstreamApiController.timeline(WorkstreamApiController.java:68)
+	at dev.dual.server.WorkstreamApiControllerTest.timelineIgnoresStaleCacheAndOrdersCurrentLedgerNodes(WorkstreamApiControllerTest.java:187)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.statusAndOverviewExposeAgentTaskDispatchReadModel -- Time elapsed: 0.272 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.statusAndOverviewExposeAgentTaskDispatchReadModel(WorkstreamApiControllerTest.java:402)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.overviewReturnsTraceSummary -- Time elapsed: 0.197 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.overviewReturnsTraceSummary(WorkstreamApiControllerTest.java:231)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.overviewFlagsStaleRunningWhenCurrentAgentRunFailed -- Time elapsed: 0.206 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.overviewFlagsStaleRunningWhenCurrentAgentRunFailed(WorkstreamApiControllerTest.java:671)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.preparationFailureKeepsTheSameReasonInRecoveryAndOverview -- Time elapsed: 0.354 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.preparationFailureKeepsTheSameReasonInRecoveryAndOverview(WorkstreamApiControllerTest.java:861)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.overviewUsesWorkflowCurrentWhenTimelineProjectionIsStale -- Time elapsed: 0.190 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.overviewUsesWorkflowCurrentWhenTimelineProjectionIsStale(WorkstreamApiControllerTest.java:590)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.serverProjectsNotConfiguredWithoutScanningDecoyAcceptanceRuns -- Time elapsed: 0.191 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.serverProjectsNotConfiguredWithoutScanningDecoyAcceptanceRuns(WorkstreamApiControllerTest.java:299)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.currentRecoveryReturnsStructuredAssessmentForContractFailures -- Time elapsed: 0.236 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.currentRecoveryReturnsStructuredAssessmentForContractFailures(WorkstreamApiControllerTest.java:825)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.overviewUsesPersistedCompletionAuditReadModel -- Time elapsed: 0.190 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.overviewUsesPersistedCompletionAuditReadModel(WorkstreamApiControllerTest.java:495)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.serverProjectsInvalidLineageAsUnavailableAndCritical -- Time elapsed: 0.197 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:192)
+	at dev.dual.server.WorkstreamQueryService.lambda$overview$0(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.overview(WorkstreamQueryService.java:189)
+	at dev.dual.server.WorkstreamApiController.overview(WorkstreamApiController.java:76)
+	at dev.dual.server.WorkstreamApiControllerTest.serverProjectsInvalidLineageAsUnavailableAndCritical(WorkstreamApiControllerTest.java:338)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[ERROR] dev.dual.server.WorkstreamApiControllerTest.timelineReturnsProjectionJson -- Time elapsed: 0.188 s <<< ERROR!
+java.lang.IllegalArgumentException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4644)
+	at com.fasterxml.jackson.databind.ObjectMapper.convertValue(ObjectMapper.java:4585)
+	at dev.dual.server.WorkstreamQueryService.normalizedTimeline(WorkstreamQueryService.java:273)
+	at dev.dual.server.WorkstreamQueryService.timeline(WorkstreamQueryService.java:178)
+	at dev.dual.server.WorkstreamQueryService.lambda$timeline$0(WorkstreamQueryService.java:175)
+	at dev.dual.server.WorkstreamQueryService.lambda$snapshot$0(WorkstreamQueryService.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.inspect(WorkflowFileLedger.java:82)
+	at dev.dual.server.WorkstreamQueryService.snapshot(WorkstreamQueryService.java:64)
+	at dev.dual.server.WorkstreamQueryService.timeline(WorkstreamQueryService.java:175)
+	at dev.dual.server.WorkstreamApiController.timeline(WorkstreamApiController.java:68)
+	at dev.dual.server.WorkstreamApiControllerTest.timelineReturnsProjectionJson(WorkstreamApiControllerTest.java:147)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
+	at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1340)
+	at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeFields(MapSerializer.java:808)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:764)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:720)
+	at com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:35)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
+	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
+	at com.fasterxml.jackson.databind.ObjectMapper._convert(ObjectMapper.java:4622)
+	... 13 more
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Errors: 
+[ERROR]   WorkstreamApiControllerTest.completedWorkflowWithoutCompletionEvidenceGetsWarningNotSuccess:358 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.currentRecoveryReturnsStructuredAssessmentForContractFailures:825 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.incompleteProcessKeepsRecoveryAndAttentionOnExecutionRatherThanOutputRepair:883 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.overviewDoesNotRecomputeNextStageRequirementsWithoutCompletionAudit:528 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.overviewFailsVisibleWhenPersistedCompletionAuditIsInvalid:550 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.overviewFlagsStaleRunningWhenCurrentAgentRunFailed:671 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.overviewFlagsStaleRunningWhenRecordedPidIsGone:689 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.overviewReturnsTraceSummary:231 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.overviewUsesGoalSatisfactionReadModel:448 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.overviewUsesPersistedCompletionAuditReadModel:495 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.overviewUsesWorkflowCurrentWhenTimelineProjectionIsStale:590 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.preparationFailureKeepsTheSameReasonInRecoveryAndOverview:861 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.serverProjectsInvalidLineageAsUnavailableAndCritical:338 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.serverProjectsLegitimateNonFinalGoalWithoutCorruptionOrSuccessAttention:318 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.serverProjectsNotConfiguredWithoutScanningDecoyAcceptanceRuns:299 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.statusAndOverviewExposeAgentTaskDispatchReadModel:402 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.timelineIgnoresStaleCacheAndOrdersCurrentLedgerNodes:187 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[ERROR]   WorkstreamApiControllerTest.timelineReturnsProjectionJson:147 » IllegalArgument Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: java.util.LinkedHashMap["updatedAt"])
+[INFO] 
+[ERROR] Tests run: 29, Failures: 0, Errors: 18, Skipped: 0
+[INFO] 
+[ERROR] 
+
+See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-server/target/surefire-reports for the individual test results.
+See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.244 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  0.028 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  0.051 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  0.014 s]
+[INFO] dual-runtime ....................................... SUCCESS [  0.069 s]
+[INFO] dual-adapter-acpx .................................. SUCCESS [  0.036 s]
+[INFO] dual-cli ........................................... SUCCESS [  4.742 s]
+[INFO] dual-server ........................................ SUCCESS [  7.309 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  12.640 s
+[INFO] Finished at: 2026-10-06T19:10:56+08:00
+[INFO] ------------------------------------------------------------------------

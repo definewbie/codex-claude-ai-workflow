@@ -1,0 +1,46 @@
+   Shared scratchpad objects that your tools read/write.
+
+   ReAct-style agent wired with your three tools.
+
+   Unique thread/seed per rollout → reproducibility and isolation.
+
+    Safety against infinite tool loops.
+
+    Persist the tool-returned answer on the trajectory.
+
+   Hard reward from deterministic judge.
+
+   Rubric used by RULER’s LLM-as-judge.
+
+Example 3-10 shows you how to apply RULER within each group.
+
+Example 3-10. Use RULER to score each group
+ruler_model_id = "openai/gpt-4.1"
+ruler_groups = []
+for group in judged:
+    try:
+        rg = await ruler_score_group(group, ruler_model_id, debug=True)
+    except Exception:
+        rg = None
+    ruler_groups.append(rg if rg is not None else group)
+
+   Ask the judge to score/rank within each group.
+
+    Fall back to the unjudged group if judging fails.
+
+Example 3-11 combines both signals to shape learning beyond correctness. Only
+correct solutions receive credit, and then RULER ranks them to refine the reward.
+
+Example 3-11. Combining correctness with RULER using a hybrid reward
+alpha, beta = 0.7, 0.3
+
+def _combine(groups, alpha: float = 1.0, beta: float = 1.0):
+    for g in groups:
+        raw = []
+        for t in g.trajectories:
+            try:
+                raw.append(float(t.reward))
+            except Exception:
+                raw.append(0.0)
+
+        rmin = min(raw) if raw else 0.0

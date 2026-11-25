@@ -1,0 +1,23 @@
+{
+  "requests": 7,
+  "counts": {
+    "/root": 5,
+    "/root/probe": 2
+  },
+  "threads": {
+    "/root": "01a0f029-fe96-7dc3-9736-851a8b50623e",
+    "/root/probe": "01a0f029-fea6-7751-9e57-f15fc6ab4bf7"
+  },
+  "child_done": true,
+  "interrupted": false,
+  "errors": [],
+  "status": "EVIDENCE_REQUIRES_REVIEW_NOT_PASS",
+  "exitCode": 0,
+  "fixture": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-child-implement-ve67f9gh",
+  "elapsedSeconds": 1.2869968749582767,
+  "lateWrite": false,
+  "parentExitDoesNotProveAllChildrenStopped": true,
+  "after": {
+    "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-child-implement-ve67f9gh/control/protected.txt": "a2da5a8914a43f9d2ff7883c5125f70c3e12d507f776f518bb939765eac49ae2"
+  }
+}

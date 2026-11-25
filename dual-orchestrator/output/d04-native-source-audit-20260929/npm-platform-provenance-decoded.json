@@ -1,0 +1,47 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "pkg:npm/%40openai/codex@0.153.4-darwin-arm64",
+      "digest": {
+        "sha512": "075aa13777dad5acb4474c06ce25ea8304a407989ca580a134a1e1b411df7ffd14b524c2ef3fa5f1a4edbcc9468c7dc4f0712f637fa78c825e94cf42000a155a"
+      }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+      "externalParameters": {
+        "workflow": {
+          "ref": "refs/tags/rust-v0.153.4",
+          "repository": "https://github.com/openai/codex",
+          "path": ".github/workflows/rust-release.yml"
+        }
+      },
+      "internalParameters": {
+        "github": {
+          "event_name": "push",
+          "repository_id": "965415649",
+          "repository_owner_id": "14957082"
+        }
+      },
+      "resolvedDependencies": [
+        {
+          "uri": "git+https://github.com/openai/codex@refs/tags/rust-v0.153.4",
+          "digest": {
+            "gitCommit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a"
+          }
+        }
+      ]
+    },
+    "runDetails": {
+      "builder": {
+        "id": "https://github.com/actions/runner/github-hosted"
+      },
+      "metadata": {
+        "invocationId": "https://github.com/openai/codex/actions/runs/33926543788/attempts/1"
+      }
+    }
+  }
+}

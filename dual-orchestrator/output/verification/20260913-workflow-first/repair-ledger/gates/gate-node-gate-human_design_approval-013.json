@@ -1,0 +1,17 @@
+{
+  "schemaVersion" : 1,
+  "gateId" : "gate-node-gate-human_design_approval-013",
+  "nodeInstanceId" : "node-gate-human_design_approval-013",
+  "gateType" : "human.review",
+  "status" : "resolved",
+  "allowedActions" : [ "approve", "revise" ],
+  "openedAt" : "2026-09-13T16:05:27.963076Z",
+  "resolvedAt" : "2026-09-13T16:05:29.752871Z",
+  "result" : {
+    "source_node_instance_id" : "node-design-decision-012",
+    "source_outcome" : "READY_FOR_ARCH_REVIEW",
+    "subject_input_refs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-design-codex_arch_review-011-run-1789315517524/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.contract.json" ],
+    "human_action" : "approved",
+    "note" : ""
+  }
+}

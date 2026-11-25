@@ -20,8 +20,8 @@ class ReviewRequestActionCommandTest {
                         "allowed_actions", List.of("collect_evidence"))),
                 new NodeDefinition("collect", NodeKind.TASK, "acpx.agent_run", Map.of("expected_artifact", "self_test_report"))),
                 List.of(new EdgeDefinition("start", "completed", "repair"), new EdgeDefinition("repair", "collect_evidence", "collect")));
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-collect", definition);
+        var ledger = CliLedgerFactory.create();
+        CliTestLedger.initialize(ledger, paths, "wf-collect", definition);
         ledger.completeAndRoute(paths, definition, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst(),
                 NodeStatus.COMPLETED, "completed", List.of(), Map.of());
         var before = ledger.loadCurrent(paths);
@@ -43,8 +43,8 @@ class ReviewRequestActionCommandTest {
                         "gate_purpose", "implementation_repair", "allowed_actions", List.of("revise", "request_action"))),
                 new NodeDefinition("after", NodeKind.TASK, "noop.task", Map.of())), List.of(
                 new EdgeDefinition("start", "completed", "repair"), new EdgeDefinition("repair", "revise", "after")));
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-cli-request", definition);
+        var ledger = CliLedgerFactory.create();
+        CliTestLedger.initialize(ledger, paths, "wf-cli-request", definition);
         ledger.completeAndRoute(paths, definition, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst(),
                 NodeStatus.COMPLETED, "completed", List.of(), Map.of());
         var before = ledger.loadCurrent(paths);
@@ -56,8 +56,14 @@ class ReviewRequestActionCommandTest {
         command.expectedResult = "Device verification";
         command.reason = "No available action";
         assertEquals(0, command.call());
+        var recorded = ledger.loadCurrent(paths);
+        assertEquals(before.status(), recorded.status());
+        assertEquals(before.activeNodeInstanceIds(), recorded.activeNodeInstanceIds());
+        assertEquals(before.openGateIds(), recorded.openGateIds());
+        assertEquals(before.lastEventId(), recorded.lastEventId());
+        assertEquals(before.commitSequence() + 1, recorded.commitSequence());
         assertEquals(0, command.call());
-        assertEquals(before, ledger.loadCurrent(paths));
+        assertEquals(recorded, ledger.loadCurrent(paths), "duplicate request must not commit again");
         assertEquals(1, ((List<?>) ledger.loadNode(paths, command.gate).result().get("action_requests")).size());
     }
 }

@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "observer_tests": 9,
+  "budget_cases": 13,
+  "native_provider_calls": 0,
+  "configuration_difference": "Only prior redundant fourth/fifth fixture trust entries; all other bytes checked against original assessed baseline",
+  "changes_to_observer_logic": "NONE; release selection and fresh case authorization labels only",
+  "runner_is_not_production_guard": true
+}

@@ -1,0 +1,5 @@
+feat: dual agent task ws-20261023T005431Z-9YYF
+
+# 换行规范化函数
+
+Run report: .agent/workstreams/ws-20261023T005431Z-9YYF/reports/latest-final-report.md

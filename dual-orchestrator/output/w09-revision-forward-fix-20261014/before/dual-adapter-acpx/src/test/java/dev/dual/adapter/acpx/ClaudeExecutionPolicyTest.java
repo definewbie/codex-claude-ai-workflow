@@ -1,0 +1,141 @@
+package dev.dual.adapter.acpx;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class ClaudeExecutionPolicyTest {
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void writesFixedFailClosedPolicyAndVerifiesItsLineage() throws Exception {
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
+
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+        binding.verify(tempDir);
+
+        Map<String, Object> document = MAPPER.readValue(
+                tempDir.resolve(binding.ref()).toFile(), new TypeReference<>() {
+                });
+        assertEquals(ClaudeExecutionPolicy.SCHEMA, document.get("schema_version"));
+        assertEquals(ClaudeExecutionPolicy.NETWORK_TRANSPORT_OWNER, document.get("network_transport_owner"));
+        assertEquals(List.of("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL"),
+                document.get("provider_subprocess_denied_env_names"));
+        assertEquals(List.of(), document.get("setting_sources"));
+        var sandbox = map(document.get("sandbox"));
+        assertEquals(true, sandbox.get("enabled"));
+        assertEquals(true, sandbox.get("fail_if_unavailable"));
+        assertEquals(false, sandbox.get("allow_unsandboxed_commands"));
+        assertEquals(false, sandbox.get("auto_allow_sandboxed_bash"));
+        var network = map(sandbox.get("network"));
+        assertEquals(true, network.get("strict_allowlist"));
+        assertEquals(List.of(), network.get("allowed_domains"));
+        assertEquals(false, network.get("allow_local_binding"));
+        assertEquals(List.of(), network.get("allow_unix_sockets"));
+        assertEquals(List.of(tempDir.toRealPath().resolve(".agent/workstreams/ws-1/nodes").toString(),
+                        tempDir.toRealPath().resolve(".agent/workstreams/ws-1/execution-authority").toString()),
+                map(sandbox.get("filesystem")).get("deny_write"));
+        var serialized = Files.readString(tempDir.resolve(binding.ref()));
+        assertFalse(serialized.contains("secret-value"));
+        assertTrue(serialized.contains("ANTHROPIC_AUTH_TOKEN"));
+        assertFalse(serialized.contains("HTTP_PROXY"));
+        assertFalse(serialized.contains("\"subprocess_denied_env_names\""));
+    }
+
+    @Test
+    void sandboxBashApprovalFollowsExecuteCapabilityNotTerminalOrWebSearch() throws Exception {
+        var profiles = List.of(AcpxPermissionProfile.contractDiscovery(), AcpxPermissionProfile.observe(),
+                AcpxPermissionProfile.review(), AcpxPermissionProfile.contractCorrection(),
+                AcpxPermissionProfile.review().withAutoApprovedTool("WebSearch"),
+                AcpxPermissionProfile.implement());
+        for (int i = 0; i < profiles.size(); i++) {
+            var profile = profiles.get(i);
+            var run = "run-profile-" + i;
+            var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/" + run));
+            var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", run, runDir, profile);
+            binding.verify(tempDir);
+            var document = MAPPER.readTree(tempDir.resolve(binding.ref()).toFile());
+            assertEquals(profile.autoApproveKinds().contains("execute") && !profile.denyAll(),
+                    document.path("sandbox").path("auto_allow_sandboxed_bash").booleanValue(), profile.name());
+        }
+    }
+
+    @Test
+    void enablesLocalBindingOnlyForImplementProfile() throws Exception {
+        var implementRun = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-implement"));
+        var reviewRun = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-review"));
+
+        var implement = ClaudeExecutionPolicy.write(
+                tempDir, "ws-1", "node-implement", "run-implement", implementRun,
+                AcpxPermissionProfile.implement());
+        var review = ClaudeExecutionPolicy.write(
+                tempDir, "ws-1", "node-review", "run-review", reviewRun,
+                AcpxPermissionProfile.review());
+
+        assertEquals(true, localBinding(implement));
+        assertEquals(false, localBinding(review));
+        assertTrue(AcpxPermissionProfile.implement().allowsLocalBinding());
+        assertFalse(AcpxPermissionProfile.contractDiscovery().allowsLocalBinding());
+        assertFalse(AcpxPermissionProfile.observe().allowsLocalBinding());
+        assertFalse(AcpxPermissionProfile.review().allowsLocalBinding());
+        assertFalse(AcpxPermissionProfile.contractCorrection().allowsLocalBinding());
+    }
+
+    @Test
+    void rejectsDeletionTamperingAndLineageDrift() throws Exception {
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+        var policy = tempDir.resolve(binding.ref());
+
+        Files.writeString(policy, "{}\n", StandardCharsets.UTF_8);
+        assertThrows(IOException.class, () -> binding.verify(tempDir));
+
+        var restored = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+        Files.delete(tempDir.resolve(restored.ref()));
+        assertThrows(IOException.class, () -> restored.verify(tempDir));
+
+        var valid = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+        var wrongLineage = new ClaudeExecutionPolicy.Binding(
+                valid.ref(), valid.sha256(), "ws-1", "node-2", "run-1");
+        assertThrows(IOException.class, () -> wrongLineage.verify(tempDir));
+    }
+
+    @Test
+    void rejectsRunDirectoryOutsideWorkspace() throws Exception {
+        var outside = Files.createDirectories(tempDir.getParent().resolve("outside-policy-run"));
+        try {
+            assertThrows(IOException.class,
+                    () -> ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", outside));
+        } finally {
+            Files.deleteIfExists(outside);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> map(Object value) {
+        return (Map<String, Object>) value;
+    }
+
+    private boolean localBinding(ClaudeExecutionPolicy.Binding binding) throws IOException {
+        Map<String, Object> document = MAPPER.readValue(
+                tempDir.resolve(binding.ref()).toFile(), new TypeReference<>() {
+                });
+        return (boolean) map(map(document.get("sandbox")).get("network")).get("allow_local_binding");
+    }
+}

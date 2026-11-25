@@ -1,0 +1,167 @@
+{
+  "sessions": [
+    {
+      "stream": "output/w09-fresh-third-gate-20261010/native-evidence/01a125de-60c0-7453-a3eb-cc55042b4faa.stream.ndjson",
+      "sha256": "376599ad49ef40294247b676c2f741f8c14d3e3a2643d310440feb50ef95735a",
+      "record_type": "session/new request",
+      "option_keys": [
+        "allowedTools"
+      ],
+      "explicit_cost_options": {}
+    },
+    {
+      "stream": "output/w09-fresh-third-gate-20261010/native-evidence/01a125de-60c0-7453-a3eb-cc55042b4faa.stream.ndjson",
+      "record_type": "session/new response",
+      "rpc_id": 2,
+      "options": [
+        {
+          "id": "mode",
+          "currentValue": "agent"
+        },
+        {
+          "id": "collaboration_mode",
+          "currentValue": "default"
+        },
+        {
+          "id": "model",
+          "currentValue": "gpt-6-astra"
+        },
+        {
+          "id": "reasoning_effort",
+          "currentValue": "high"
+        },
+        {
+          "id": "fast-mode",
+          "currentValue": "off"
+        }
+      ]
+    },
+    {
+      "stream": "output/w09-fresh-third-gate-20261010/native-evidence/26a99c40-bdba-4c61-9037-c7d68880d0bd.stream.ndjson",
+      "sha256": "e43fac4b46f5a0ace7b73bc4219973889ef8a1a9f5d581c4d92aff1f8395fbae",
+      "record_type": "session/new request",
+      "option_keys": [
+        "settingSources",
+        "allowedTools",
+        "sandbox",
+        "managedSettings"
+      ],
+      "explicit_cost_options": {
+        "settingSources": []
+      }
+    },
+    {
+      "stream": "output/w09-fresh-third-gate-20261010/native-evidence/26a99c40-bdba-4c61-9037-c7d68880d0bd.stream.ndjson",
+      "record_type": "session/new response",
+      "rpc_id": 2,
+      "options": [
+        {
+          "id": "mode",
+          "currentValue": "default"
+        },
+        {
+          "id": "model",
+          "currentValue": "default"
+        },
+        {
+          "id": "effort",
+          "currentValue": "default"
+        }
+      ]
+    },
+    {
+      "stream": "output/w09-fresh-third-gate-20261010/native-evidence/5d7146fd-ea25-4ae9-b028-2ea4ba57bb18.stream.ndjson",
+      "sha256": "88ec62d69866f728ecdaa414651a42e398f200aaeac626c8b2b1b1d505e6620a",
+      "record_type": "session/new request",
+      "option_keys": [
+        "settingSources",
+        "allowedTools",
+        "sandbox",
+        "managedSettings"
+      ],
+      "explicit_cost_options": {
+        "settingSources": []
+      }
+    },
+    {
+      "stream": "output/w09-fresh-third-gate-20261010/native-evidence/5d7146fd-ea25-4ae9-b028-2ea4ba57bb18.stream.ndjson",
+      "record_type": "session/new response",
+      "rpc_id": 2,
+      "options": [
+        {
+          "id": "mode",
+          "currentValue": "default"
+        },
+        {
+          "id": "model",
+          "currentValue": "default"
+        },
+        {
+          "id": "effort",
+          "currentValue": "default"
+        }
+      ]
+    },
+    {
+      "stream": "output/w09-fresh-third-gate-20261010/native-evidence/d1587a2b-1836-4d4d-aee2-b39a5762d344.stream.ndjson",
+      "sha256": "83477e084a2cc4e8afa87eb52faad4c6fb13aab926875f1b4128a68dc1d41c40",
+      "record_type": "session/new request",
+      "option_keys": [
+        "settingSources",
+        "allowedTools",
+        "sandbox",
+        "managedSettings"
+      ],
+      "explicit_cost_options": {
+        "settingSources": []
+      }
+    },
+    {
+      "stream": "output/w09-fresh-third-gate-20261010/native-evidence/d1587a2b-1836-4d4d-aee2-b39a5762d344.stream.ndjson",
+      "record_type": "session/new response",
+      "rpc_id": 2,
+      "options": [
+        {
+          "id": "mode",
+          "currentValue": "default"
+        },
+        {
+          "id": "model",
+          "currentValue": "default"
+        },
+        {
+          "id": "effort",
+          "currentValue": "default"
+        }
+      ]
+    }
+  ],
+  "design_completed_tools": [
+    {
+      "toolCallId": "call_f381930f507c47a89ea57d7a",
+      "text_chars": 12214,
+      "locations": [],
+      "text_sha256": "b9f8683a4bbe5908e1968f597d64303d31e152b291b2d3ff1d9284efa6f0bbd2",
+      "truncation_footer": [
+        "(Showing 100 of 287 matching files; 187 more are not listed. Narrow the pattern or path to see the rest.)"
+      ],
+      "path_count": 100,
+      "program_path_count": 100,
+      "visible_product_path_count": 0
+    },
+    {
+      "toolCallId": "call_057d4da0c8914f389de6c67e",
+      "text_chars": 4048,
+      "locations": [],
+      "text_sha256": "3c577c92c70327a6547f28181239ec5c0a503d80e209de59db9e77539677897a"
+    },
+    {
+      "toolCallId": "call_16d3c8d2154e4e8f872f6f59",
+      "text_chars": 2357,
+      "locations": [],
+      "text_sha256": "6f7b1a13fa856fb789a04a6abcf9d545f7760ab176880bfc5e9ad09fd341fee8"
+    }
+  ],
+  "meaning": "offered/effective ACP options are not proof of GLM provider enforcement or saved token percentage",
+  "internal_turn_count": "NOT_EXPOSED_IN_ARCHIVED_ACP_STREAM; unique tool ids are not model turn count"
+}

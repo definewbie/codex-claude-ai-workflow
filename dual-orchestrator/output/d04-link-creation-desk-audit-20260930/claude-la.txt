@@ -1,0 +1,1 @@
+function la(e,r,n,s){if(n.size===0)return[];return[`(${e} ${r.join(" ")}`,...[...n].map((h)=>`  ${h}`),`  (with message "${s}"))`]}

@@ -1,0 +1,337 @@
+[
+  {
+    "site": 1,
+    "rule": "LEGACY_FLAG",
+    "rule_id": "TaskContractProjectionVerifier.requiresContract.legacy_contract_qualification_flag_is_not_supported"
+  },
+  {
+    "site": 2,
+    "rule": "REQUIRED_PHASE_MISSING",
+    "rule_id": "TaskContractProjectionVerifier.requiredPhase.required_contract_phase_is_missing"
+  },
+  {
+    "site": 3,
+    "rule": "REQUIRED_PHASE_INVALID",
+    "rule_id": "TaskContractProjectionVerifier.requiredPhase.invalid_contract_phase"
+  },
+  {
+    "site": 4,
+    "rule": "SNAPSHOT_AVAILABLE",
+    "rule_id": "TaskContractProjectionVerifier.resolve.dynamic_diagnostic_or_i_o_failure"
+  },
+  {
+    "site": 5,
+    "rule": "GOAL_EPOCH",
+    "rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_authorization_epoch_is_missing_or_duplicated"
+  },
+  {
+    "site": 6,
+    "rule": "GOAL_OUTPUTS",
+    "rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_compile_does_not_publish_its_occurrence_artifacts"
+  },
+  {
+    "site": 7,
+    "rule": "GOAL_IDENTITY",
+    "rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_identity_shape_or_immutable_bytes_do_not_match_its_compiler"
+  },
+  {
+    "site": 8,
+    "rule": "GOAL_APPROVAL_BYTES",
+    "rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_approval_reference_is_not_an_unchanged_workstream_gate"
+  },
+  {
+    "site": 9,
+    "rule": "GOAL_APPROVAL_ROUTE",
+    "rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_compiler_is_not_routed_from_the_matching_completed_human_decision"
+  },
+  {
+    "site": 10,
+    "rule": "GOAL_REVIEW_SUBJECT",
+    "rule_id": "TaskContractProjectionVerifier.resolveGoal.approved_review_subject_is_not_verifiable"
+  },
+  {
+    "site": 11,
+    "rule": "GOAL_PROPOSAL_BYTES",
+    "rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_does_not_bind_the_approved_proposal_bytes"
+  },
+  {
+    "site": 12,
+    "rule": "GOAL_EVENT_ID",
+    "rule_id": "TaskContractProjectionVerifier.resolveGoal.invalid_route_event_identity"
+  },
+  {
+    "site": 13,
+    "rule": "GOAL_EVENT_ORDER",
+    "rule_id": "TaskContractProjectionVerifier.resolveGoal.unordered_workflow_events"
+  },
+  {
+    "site": 14,
+    "rule": "GOAL_EVENT_BINDING",
+    "rule_id": "TaskContractProjectionVerifier.resolveGoal.invalid_goal_approval_routing_occurrence"
+  },
+  {
+    "site": 15,
+    "rule": "GOAL_EVENT_PRESENT",
+    "rule_id": "TaskContractProjectionVerifier.resolveGoal.goal_approval_route_is_missing"
+  },
+  {
+    "site": 16,
+    "rule": "EXECUTION_GATE_PRESENT",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_approval_gate_node_is_missing"
+  },
+  {
+    "site": 17,
+    "rule": "EXECUTION_GATE_COMPLETED",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.latest_contract_approval_gate_is_not_completed"
+  },
+  {
+    "site": 18,
+    "rule": "EXECUTION_GATE_LINEAGE",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.latest_contract_gate_lineage_or_status_is_invalid"
+  },
+  {
+    "site": 19,
+    "rule": "EXECUTION_APPROVED",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.latest_contract_gate_action_is_not_approved"
+  },
+  {
+    "site": 20,
+    "rule": "EXECUTION_NOTE",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_gate_note_does_not_match_node_result"
+  },
+  {
+    "site": 21,
+    "rule": "EXECUTION_SUBJECT",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_gate_subject_refs_do_not_match_node_input_refs"
+  },
+  {
+    "site": 22,
+    "rule": "EXECUTION_SOURCE",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.contract_gate_source_occurrence_identity_is_missing_or_inconsistent"
+  },
+  {
+    "site": 23,
+    "rule": "EXECUTION_COMPILER",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_source_is_not_a_completed_contract_compile_node"
+  },
+  {
+    "site": 24,
+    "rule": "EXECUTION_EVENT_SOURCE",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.routing_event_source_does_not_match_approved_compile_node"
+  },
+  {
+    "site": 25,
+    "rule": "EXECUTION_NEWER_COMPILER",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.completed_contract_compile_is_newer_than_the_approved_source"
+  },
+  {
+    "site": 26,
+    "rule": "EXECUTION_ARTIFACTS",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_or_requirement_resolution_artifact_is_missing"
+  },
+  {
+    "site": 27,
+    "rule": "EXECUTION_OUTPUTS",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_compile_gate_refs_do_not_bind_both_contract_artifacts"
+  },
+  {
+    "site": 28,
+    "rule": "EXECUTION_PARSE",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_artifacts_cannot_be_parsed"
+  },
+  {
+    "site": 29,
+    "rule": "EXECUTION_SHAPE",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.task_contract_json_is_invalid"
+  },
+  {
+    "site": 30,
+    "rule": "EXECUTION_HASH_BINDING",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_compile_has_incomplete_artifact_sha_binding"
+  },
+  {
+    "site": 31,
+    "rule": "EXECUTION_HASH",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.approved_contract_artifact_sha_256_does_not_match_compile_result"
+  },
+  {
+    "site": 32,
+    "rule": "EXECUTION_IDENTITY",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.task_contract_json_identity_does_not_match_compile_result"
+  },
+  {
+    "site": 33,
+    "rule": "CURRENT_READINESS",
+    "rule_id": "TaskContractProjectionVerifier.resolveExecution.dynamic_diagnostic_or_i_o_failure"
+  },
+  {
+    "site": 34,
+    "rule": "TECHNICAL_APPROVAL",
+    "rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.invalid_technical_continuation_approval_binding"
+  },
+  {
+    "site": 35,
+    "rule": "TECHNICAL_REVIEW",
+    "rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_lost_its_independent_reviews"
+  },
+  {
+    "site": 36,
+    "rule": "TECHNICAL_BOUNDARY",
+    "rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_revision_changed_the_execution_authorization_boundary"
+  },
+  {
+    "site": 37,
+    "rule": "TECHNICAL_SOURCE",
+    "rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_route_source_changed"
+  },
+  {
+    "site": 38,
+    "rule": "TECHNICAL_CYCLE",
+    "rule_id": "TaskContractProjectionVerifier.currentVerificationBindings.technical_continuation_lineage_cycle"
+  },
+  {
+    "site": 39,
+    "rule": "GOAL_REQUIRED",
+    "rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.current_goal_is_required"
+  },
+  {
+    "site": 40,
+    "rule": "EXECUTION_GOAL",
+    "rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.execution_contract_no_longer_binds_the_approved_goal"
+  },
+  {
+    "site": 41,
+    "rule": "EXECUTION_DECLARATIONS",
+    "rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.nonessential_declarations_must_bind_the_frozen_node_contracts"
+  },
+  {
+    "site": 42,
+    "rule": "EXECUTION_REVIEWS",
+    "rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.execution_contract_must_consume_its_routed_independent_reviews"
+  },
+  {
+    "site": 43,
+    "rule": "CANDIDATE_READINESS",
+    "rule_id": "TaskContractProjectionVerifier.validateExecutionInputs.dynamic_diagnostic_or_i_o_failure"
+  },
+  {
+    "site": 44,
+    "rule": "CANDIDATE_CURRENT",
+    "rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_candidate_requires_its_current_waiting_gate"
+  },
+  {
+    "site": 45,
+    "rule": "CANDIDATE_SUBJECT",
+    "rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_gate_subject_or_route_is_inconsistent"
+  },
+  {
+    "site": 46,
+    "rule": "CANDIDATE_COMPILER",
+    "rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_gate_does_not_bind_its_completed_execution_compiler"
+  },
+  {
+    "site": 47,
+    "rule": "CANDIDATE_OUTPUTS",
+    "rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_candidate_references_are_not_published_by_its_compiler"
+  },
+  {
+    "site": 48,
+    "rule": "CANDIDATE_IDENTITY",
+    "rule_id": "TaskContractProjectionVerifier.executionCandidate.contract_candidate_bytes_or_identity_changed"
+  },
+  {
+    "site": 49,
+    "rule": "CANDIDATE_PASSTHROUGH",
+    "rule_id": "TaskContractProjectionVerifier.executionCandidate."
+  },
+  {
+    "site": 50,
+    "rule": "PAYLOAD_REQUIRED",
+    "rule_id": "TaskContractProjectionVerifier.trustedWrappedPayload.qualified_task_contract_is_required"
+  },
+  {
+    "site": 51,
+    "rule": "PAYLOAD_PASSTHROUGH",
+    "rule_id": "TaskContractProjectionVerifier.trustedWrappedPayload."
+  },
+  {
+    "site": 52,
+    "rule": "ACCEPTANCE_CONTEXT",
+    "rule_id": "TaskContractProjectionVerifier.resolveRoutedAcceptance.dynamic_diagnostic_or_i_o_failure"
+  },
+  {
+    "site": 53,
+    "rule": "ACCEPTANCE_CONTRACT",
+    "rule_id": "TaskContractProjectionVerifier.resolveRoutedAcceptance.qualified_task_contract_is_required"
+  },
+  {
+    "site": 54,
+    "rule": "EVENT_PARSE",
+    "rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_contains_invalid_json"
+  },
+  {
+    "site": 55,
+    "rule": "EVENT_ID",
+    "rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.routing_event_does_not_have_a_workflow_event_id"
+  },
+  {
+    "site": 56,
+    "rule": "EVENT_ORDER",
+    "rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.workflow_event_history_is_not_strictly_ordered"
+  },
+  {
+    "site": 57,
+    "rule": "EVENT_SOURCE",
+    "rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.contract_gate_routing_event_has_incomplete_source_lineage"
+  },
+  {
+    "site": 58,
+    "rule": "EVENT_READ",
+    "rule_id": "TaskContractProjectionVerifier.lastContractGateOccurrence.cannot_read_workflow_event_history"
+  },
+  {
+    "site": 59,
+    "rule": "GATE_DOCUMENT_PRESENT",
+    "rule_id": "TaskContractProjectionVerifier.readGate.contract_approval_gate_document_is_missing"
+  },
+  {
+    "site": 60,
+    "rule": "GATE_DOCUMENT_PARSE",
+    "rule_id": "TaskContractProjectionVerifier.readGate.contract_approval_gate_document_cannot_be_parsed"
+  },
+  {
+    "site": 61,
+    "rule": "NODE_DOCUMENT_READ",
+    "rule_id": "TaskContractProjectionVerifier.readNodes.cannot_read_node_ledger_document"
+  },
+  {
+    "site": 62,
+    "rule": "NODE_DIRECTORY_READ",
+    "rule_id": "TaskContractProjectionVerifier.readNodes.cannot_list_node_ledger"
+  },
+  {
+    "site": 63,
+    "rule": "ACCEPTANCE_CONTEXT_READ",
+    "rule_id": "TaskContractProjectionVerifier.fromRefs.cannot_read_routed_acceptance_context_metadata"
+  },
+  {
+    "site": 64,
+    "rule": "ACCEPTANCE_CONTEXT_UNIQUE",
+    "rule_id": "TaskContractProjectionVerifier.fromRefs.multiple_routed_acceptance_context_metadata_documents"
+  },
+  {
+    "site": 65,
+    "rule": "ACCEPTANCE_CONTEXT_BINDING",
+    "rule_id": "TaskContractProjectionVerifier.fromRefs.routed_acceptance_context_metadata_has_no_task_contract_binding"
+  },
+  {
+    "site": 66,
+    "rule": "ACCEPTANCE_HASH",
+    "rule_id": "TaskContractProjectionVerifier.AcceptanceContextBinding.validate.routed_context_sha_does_not_match_current_task_contract"
+  },
+  {
+    "site": 67,
+    "rule": "ACCEPTANCE_LINEAGE",
+    "rule_id": "TaskContractProjectionVerifier.AcceptanceContextBinding.validate.routed_context_compile_ref_does_not_match_current_binding"
+  }
+]

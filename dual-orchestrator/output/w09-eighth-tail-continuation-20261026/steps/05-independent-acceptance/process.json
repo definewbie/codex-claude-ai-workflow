@@ -1,0 +1,20 @@
+{
+  "pid": 42119,
+  "started_at": "2026-10-26T09:19:56.894459+08:00",
+  "argv": [
+    "/opt/homebrew/Cellar/rtk/0.42.3/bin/rtk",
+    "proxy",
+    "/Library/Java/JavaVirtualMachines/jdk-25.jdk/Contents/Home/bin/java",
+    "-Xlog:class+load=debug:file=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-tail-continuation-20261026/steps/05-independent-acceptance/classloading.log:uptime,level,tags",
+    "-jar",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-sixth-forward-fix-20261015/release/dual-cli-0.1.0-SNAPSHOT.jar",
+    "run",
+    "--workdir=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/worktree",
+    "--max-steps",
+    "1",
+    "--dispatch-mode",
+    "INLINE",
+    "ws-20261023T005431Z-9YYF"
+  ],
+  "expected_node": "acceptance.codex_verifier_review"
+}

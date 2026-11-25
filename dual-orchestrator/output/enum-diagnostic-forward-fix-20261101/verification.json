@@ -1,0 +1,139 @@
+{
+  "status": "PASS_DIAGNOSTIC_SLICE_ONLY",
+  "captured_utc": "2026-11-01T13:58:04.964662+00:00",
+  "tests": 165,
+  "failures": 0,
+  "errors": 0,
+  "new_test_methods": 7,
+  "provider_calls": 0,
+  "independent_review": false,
+  "historical_runtime_reproduction": false,
+  "historical_input_regression": true,
+  "historical_sequence_still_rejected": true,
+  "reports": [
+    {
+      "suite": "AgentResultEnvelopeParserTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.195,
+      "report": "output/enum-diagnostic-forward-fix-20261101/reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultEnvelopeParserTest.xml",
+      "sha256": "42f1e519c543f6e7e1a36d73bd6111b8490edea6ddd7a764e8fbced9cd57d7a4",
+      "mtime_utc": "2026-11-01T13:56:56.669478+00:00"
+    },
+    {
+      "suite": "AgentResultEnvelopeValidatorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.003,
+      "report": "output/enum-diagnostic-forward-fix-20261101/reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultEnvelopeValidatorTest.xml",
+      "sha256": "82d19d57b725a21ced2ff13b78a681e785fc9e7d6da9d5443402434afbf1fc41",
+      "mtime_utc": "2026-11-01T13:56:56.747726+00:00"
+    },
+    {
+      "suite": "AgentResultPromptContractTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.074,
+      "report": "output/enum-diagnostic-forward-fix-20261101/reports/dual-runtime/TEST-dev.dual.runtime.handler.AgentResultPromptContractTest.xml",
+      "sha256": "b31f6447813964edf57eb84a9b6e57b797c133ec5e08fb5a13edee130f8b8c7d",
+      "mtime_utc": "2026-11-01T13:56:56.744188+00:00"
+    },
+    {
+      "suite": "AcpxAgentResultAcquirerTest",
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.094,
+      "report": "output/enum-diagnostic-forward-fix-20261101/reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxAgentResultAcquirerTest.xml",
+      "sha256": "b759774543fb530c75267cec6cdbce4078730d4987d1a0c532391f298aca5cf8",
+      "mtime_utc": "2026-11-01T13:57:14.193246+00:00"
+    },
+    {
+      "suite": "AcpxAgentTaskHandlerTest",
+      "tests": 54,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 15.791,
+      "report": "output/enum-diagnostic-forward-fix-20261101/reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.xml",
+      "sha256": "3100ffefb556f41be8f6dd5ac5f1f1df062b7bb6ab0bfc1ee1c6beb774a38a4c",
+      "mtime_utc": "2026-11-01T13:57:14.107705+00:00"
+    },
+    {
+      "suite": "AgentExecutionOutcomeResolverTest",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.048,
+      "report": "output/enum-diagnostic-forward-fix-20261101/reports/dual-core/TEST-dev.dual.core.execution.AgentExecutionOutcomeResolverTest.xml",
+      "sha256": "c6b05c661c6e612f2a0c50776978d5940c0f282c24e032c989436ee4b4269dc3",
+      "mtime_utc": "2026-11-01T13:56:55.890191+00:00"
+    },
+    {
+      "suite": "WorkflowFirstLifecycleSequenceTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 234.842,
+      "report": "output/enum-diagnostic-forward-fix-20261101/reports/dual-adapter-acpx/TEST-dev.dual.adapter.acpx.WorkflowFirstLifecycleSequenceTest.xml",
+      "sha256": "d8d99bdfb89fd8b9300678540b68b7e83055f8d173d5485592a0f4c3cc607eb4",
+      "mtime_utc": "2026-11-01T13:56:38.040613+00:00"
+    }
+  ],
+  "fixtures": [
+    {
+      "path": "dual-adapter-acpx/src/test/resources/agent-result/hhzl-invalid-remediation.corrected.json",
+      "bytes": 2401,
+      "sha256": "b33d3a2ecbac2dd8f41ca3728157b5e6cd72be498813ba07be4e04e9c4139502"
+    },
+    {
+      "path": "dual-adapter-acpx/src/test/resources/agent-result/hhzl-invalid-remediation.json",
+      "bytes": 2572,
+      "sha256": "72956cadc7da1033068fe58b77ffcbac7f1ddcd874439ad1b8cdc7428568bbb9"
+    },
+    {
+      "path": "dual-adapter-acpx/src/test/resources/agent-result/hhzl-invalid-remediation.source.json",
+      "bytes": 1004,
+      "sha256": "04c63739bbc34c4bac6e4b26932ffa78f5210c7322cdeb2b7e872867306dc4d0"
+    }
+  ],
+  "source_sha256": {
+    "dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeParser.java": "b3818e10dd050c967715667e1ed3cfe3348c5fa1b3d66c7f6ac1351707d092fe",
+    "dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java": "1a6f8a44297d31a7c38de94c389bcd190488b7d25f537f63925e47d063cbdc91",
+    "dual-orchestrator/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeParserTest.java": "32b2b332f7fc301aaf4edf9522309d592f5809d522115ac19014aaeb663ee070",
+    "dual-orchestrator/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirerTest.java": "89a2db6cddf664df679bd7e0ab509c7c0882fef26bb593a38f7b7d6d83d9949a"
+  },
+  "compiled_classes_sha256": {
+    "dual-runtime/target/classes/dev/dual/runtime/handler/AgentResultEnvelopeParser.class": "e1c77d452bea8c4f0173788b094bb30e68b92f7d3c3f3d64dd9892249ab6c09f",
+    "dual-runtime/target/classes/dev/dual/runtime/handler/AgentResultEnvelopeParser$ParseDiagnostic.class": "7b5f2255fac489c806081dd7a596721bb15d8bc7f3a45486b2780bfb1fa5a913",
+    "dual-runtime/target/classes/dev/dual/runtime/handler/AgentResultEnvelopeParser$ParseFailureKind.class": "4f4140f0eab4a45cc21e52647b7b97b015adf2280b2e16394d5603cdb316aa47",
+    "dual-runtime/target/classes/dev/dual/runtime/handler/AgentResultEnvelopeParser$ParseResult.class": "60deb86c011dea2e6d2eb871a21b7ea809530a3c6cd8807440094476aa162dea",
+    "dual-adapter-acpx/target/classes/dev/dual/adapter/acpx/AcpxAgentResultAcquirer$Acquisition.class": "ef8d7162d11d23119ad9eca1a348b698d687e5c1c2067234511536a782f1b2d9",
+    "dual-adapter-acpx/target/classes/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.class": "d084fbd9e0c1a013dca1e3ed47d2568f30468ed76c3fced6dff708721be0bee0",
+    "dual-adapter-acpx/target/classes/dev/dual/adapter/acpx/AcpxAgentResultAcquirer$JsonFencePayload.class": "20cd0f33a67d72f8ed884334702a6f26b4f951afa49faf15de63e533a5fe00ca",
+    "dual-adapter-acpx/target/classes/dev/dual/adapter/acpx/AcpxAgentResultAcquirer$CorrectionDisposition.class": "7e3b1aa470433a9b9c7fff4d0321962fa73abfe71371dd0740b62ee298af631c",
+    "dual-adapter-acpx/target/classes/dev/dual/adapter/acpx/AcpxAgentResultAcquirer$ParsedPresentation.class": "309c3673b95e84ca0aec51d6577c4da31908c4297bf6f526522fd314f48086ae",
+    "dual-adapter-acpx/target/classes/dev/dual/adapter/acpx/AcpxAgentResultAcquirer$PresentationCandidate.class": "24b5ebb226f39f7331d1f56d0db89b25a947aed45e9a410315777b3b36a62468",
+    "dual-adapter-acpx/target/classes/dev/dual/adapter/acpx/AcpxAgentResultAcquirer$CorrectionReason.class": "41d8a6e2dbb171bb768f580310744dce08fa57a8233c538ce09d2d809e8c93a6",
+    "dual-adapter-acpx/target/classes/dev/dual/adapter/acpx/AcpxAgentResultAcquirer$PresentationDisposition.class": "a830b3ec782c63265f57ce89f8de152a30c394a35114837ad02fede517426a87"
+  },
+  "commands": {
+    "targeted": "mvn -o -q -pl dual-adapter-acpx -am -Dtest=AgentResultEnvelopeParserTest,AgentResultEnvelopeValidatorTest,AgentResultPromptContractTest,AcpxAgentResultAcquirerTest,AcpxAgentTaskHandlerTest,AgentExecutionOutcomeResolverTest -Dsurefire.failIfNoSpecifiedTests=false test",
+    "lifecycle": "Initial selected run also included WorkflowFirstLifecycleSequenceTest (18 PASS); test-only fixture correction did not change production binaries."
+  },
+  "limits": [
+    "No provider experiment, release freeze or external grader.",
+    "No new retry/resume/authorization path.",
+    "Before/after probe changes only parser with current dependencies; not historical binary replay.",
+    "Initial red test used prose-prefixed input: not enum-specific proof; corrected pure-JSON before/after probe is the enum regression evidence."
+  ]
+}

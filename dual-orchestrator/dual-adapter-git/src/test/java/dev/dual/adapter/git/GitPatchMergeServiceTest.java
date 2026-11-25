@@ -133,6 +133,54 @@ class GitPatchMergeServiceTest {
         return repo;
     }
 
+    @Test
+    void recordsTheActualChildBeforeInputAndItsMeasuredExitAfterApplication() throws Exception {
+        var target = createRepo();
+        var source = tempDir.resolve("callback-source");
+        git(target, "worktree", "add", source.toString(), "-b", "ai/callback");
+        Files.writeString(source.resolve("README.md"), "approved\n");
+        var service = new GitPatchMergeService();
+        var sequence = new java.util.ArrayList<String>();
+        var result = service.apply(target, service.capture(source).patch(), service.applicationObservation(target),
+                new GitPatchMergeService.ApplyLifecycle() {
+                    @Override public void started(Process process) throws java.io.IOException {
+                        assertTrue(process.pid() > 0);
+                        assertEquals("base\n", Files.readString(target.resolve("README.md")), "no input before receipt");
+                        sequence.add("started");
+                    }
+                    @Override public void exited(Process process, int exit) throws java.io.IOException {
+                        assertEquals(0, exit); assertFalse(process.isAlive());
+                        assertEquals("approved\n", Files.readString(target.resolve("README.md")));
+                        sequence.add("exited");
+                    }
+                });
+        assertEquals(java.util.List.of("started", "exited"), sequence);
+        assertTrue(result.succeeded());
+    }
+
+    @Test
+    void failedReceiptSuppliesNoPatchAndCleanHeadDriftStartsNoChild() throws Exception {
+        var target = createRepo();
+        var source = tempDir.resolve("guard-source");
+        git(target, "worktree", "add", source.toString(), "-b", "ai/guard");
+        Files.writeString(source.resolve("README.md"), "approved\n");
+        var service = new GitPatchMergeService(); var patch = service.capture(source).patch();
+        assertThrows(java.io.IOException.class, () -> service.apply(target, patch, service.applicationObservation(target),
+                new GitPatchMergeService.ApplyLifecycle() {
+                    @Override public void started(Process process) throws java.io.IOException { throw new java.io.IOException("receipt unavailable"); }
+                }));
+        assertEquals("base\n", Files.readString(target.resolve("README.md")));
+        assertTrue(git(target, "status", "--porcelain").isBlank());
+        var before = service.applicationObservation(target);
+        git(target, "commit", "--allow-empty", "-m", "head changed without tree changes");
+        var started = new java.util.concurrent.atomic.AtomicBoolean();
+        assertThrows(java.io.IOException.class, () -> service.apply(target, patch, before,
+                new GitPatchMergeService.ApplyLifecycle() {
+                    @Override public void started(Process process) { started.set(true); }
+                }));
+        assertFalse(started.get()); assertEquals("base\n", Files.readString(target.resolve("README.md")));
+    }
+
     private String git(Path workdir, String... args) throws Exception {
         var command = new java.util.ArrayList<String>();
         command.add("git");

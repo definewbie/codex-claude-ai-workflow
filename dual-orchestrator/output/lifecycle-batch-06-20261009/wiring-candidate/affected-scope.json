@@ -1,0 +1,213 @@
+{
+  "scope": "W06 D09 complete user delivery/recovery path; file candidates not a modification grant",
+  "existing_files": [
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/delivery/DeliveryApplicationService.java",
+      "before_sha256": "ddf2d6fa4bdd00a6496f0cdf6bdb1bfe3d2d1a62800c845d0e25ef6d16b60db6",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery/Git/plan",
+      "reason": "G02/G03/G04 identity, observation and operation guard; actual diff decided after protocol",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-runtime/src/main/java/dev/dual/runtime/delivery/AcceptedDeliveryCandidateResolver.java",
+      "before_sha256": "51f216160182923ef5594aef911c515d07e8d280583b6cc1646d7d3b7c66c5fa",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery/Git/plan",
+      "reason": "G02/G03/G04 identity, observation and operation guard; actual diff decided after protocol",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-adapter-git/src/main/java/dev/dual/adapter/git/GitPatchMergeService.java",
+      "before_sha256": "10a24744750dc42eee528dd6ca7e0c42eb97d51071a08669c73a013e394139f4",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery/Git/plan",
+      "reason": "G02/G03/G04 identity, observation and operation guard; actual diff decided after protocol",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryMergePlan.java",
+      "before_sha256": "09346829dac30101be00e479de045df3958dfc7e19111a1f43e37a4af40ad73c",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery/Git/plan",
+      "reason": "G02/G03/G04 identity, observation and operation guard; actual diff decided after protocol",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/DeliveryMergePlanWriter.java",
+      "before_sha256": "1358539434144f3b94577db620e9a6644203f84fbd00db9cb5c2bc8738865dfc",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery/Git/plan",
+      "reason": "G02/G03/G04 identity, observation and operation guard; actual diff decided after protocol",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/DeliveryCommand.java",
+      "before_sha256": "66f01a01ddf2821d7a0b70547bfff2eab4eafa1ea571e09acd90385c81c13949",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery facades/projections",
+      "reason": "G01 entry and G05 same-owner current action consumption; unchanged facade may need only test",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/DeliveryMergeCommand.java",
+      "before_sha256": "4347b8dc3f085d08af781d0cfb1e9ee31696d142f2d7e13b41687595368df914",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery facades/projections",
+      "reason": "G01 entry and G05 same-owner current action consumption; unchanged facade may need only test",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/DeliveryFinalizeCommand.java",
+      "before_sha256": "9d9a5be9333a6a093f08ca24535bbd709564d5ea5a8d1fa6273d121c45ceedbf",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery facades/projections",
+      "reason": "G01 entry and G05 same-owner current action consumption; unchanged facade may need only test",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-server/src/main/java/dev/dual/server/WorkstreamApiController.java",
+      "before_sha256": "0a0e893204c91fa8313fade65f14f17903dc743ebc10f6f1926be7892e77e139",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery facades/projections",
+      "reason": "G01 entry and G05 same-owner current action consumption; unchanged facade may need only test",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-server/src/main/java/dev/dual/server/DeliveryViewService.java",
+      "before_sha256": "19a9f628e7b82896b5268bed8a1c6c12137502077838b418180182902b4bfa6b",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery facades/projections",
+      "reason": "G01 entry and G05 same-owner current action consumption; unchanged facade may need only test",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/SummaryCommand.java",
+      "before_sha256": "3420db95f607eeb562c3cd286cb3a7fcbcdf1f207a0da656ff4c3c291d8ba1dc",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery facades/projections",
+      "reason": "G01 entry and G05 same-owner current action consumption; unchanged facade may need only test",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/StatusCommand.java",
+      "before_sha256": "cc6a423fa573419480d7f02d4dfd09e13d20512a08d76d15db88dfda270e9b54",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery facades/projections",
+      "reason": "G01 entry and G05 same-owner current action consumption; unchanged facade may need only test",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-server/src/main/java/dev/dual/server/WorkstreamQueryService.java",
+      "before_sha256": "93772fa8c6df949d457a366ae4d6d0617ceb35b7d2844d155681b245def3ddee",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery facades/projections",
+      "reason": "G01 entry and G05 same-owner current action consumption; unchanged facade may need only test",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-server/src/main/resources/static/console.js",
+      "before_sha256": "e57a394ead51ca29f45b7a2f27dc5f928c036480bf6e65ff179ee7aba45f8321",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery facades/projections",
+      "reason": "G01 entry and G05 same-owner current action consumption; unchanged facade may need only test",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-server/src/main/resources/static/mgt/app.js",
+      "before_sha256": "18fbde99856db98de1117fbcf99c48527b2faa73b5cc5ded501ac1b08683d35c",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "delivery facades/projections",
+      "reason": "G01 entry and G05 same-owner current action consumption; unchanged facade may need only test",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-runtime/src/test/java/dev/dual/runtime/delivery/DeliveryApplicationServiceTest.java",
+      "before_sha256": "9e0ce623d51253d480edf5588fe7cf83e4f93a3367eab22216b73b9a3deef9ae",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "regression",
+      "reason": "V01-V07 legal/refusal/prefix/cold/concurrency proof; no test count target",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-adapter-git/src/test/java/dev/dual/adapter/git/GitPatchMergeServiceTest.java",
+      "before_sha256": "c75771ec485de88f8ed1c2b4f6ee100c75ed3a12b16b340c2ff3f652d9a25800",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "regression",
+      "reason": "V01-V07 legal/refusal/prefix/cold/concurrency proof; no test count target",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-ledger-file/src/test/java/dev/dual/ledger/file/DeliveryMergePlanTest.java",
+      "before_sha256": "c16c15e5d64f6e6cf48db94fa7ed6f3ea1fe79fbfdd6e9be27cef2d0c0e22e4d",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "regression",
+      "reason": "V01-V07 legal/refusal/prefix/cold/concurrency proof; no test count target",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-cli/src/test/java/dev/dual/cli/DeliveryMergeCommandTest.java",
+      "before_sha256": "94ea76911a11f93a4848f3d0eac2401d121760d74a1fbad4e412a114ac91feac",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "regression",
+      "reason": "V01-V07 legal/refusal/prefix/cold/concurrency proof; no test count target",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-server/src/test/java/dev/dual/server/DeliveryViewServiceTest.java",
+      "before_sha256": "1f8f991fe7d3068b9d27a6e411e42d4fdf281d97712a3d884ba3e232cbb5efeb",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "regression",
+      "reason": "V01-V07 legal/refusal/prefix/cold/concurrency proof; no test count target",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java",
+      "before_sha256": "6045542d6303cb7997c4446abf1b5f38e3201c4e854e89605869b692577b64cd",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "regression",
+      "reason": "V01-V07 legal/refusal/prefix/cold/concurrency proof; no test count target",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "docs/reference.md",
+      "before_sha256": "03b6d93ddbaba446f1f936ff3e61b6493e5dad012156b3ea03998a183b4c226b",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "documentation",
+      "reason": "G01 legal action and actual output locations, scan sibling translations",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "docs/quickstart.md",
+      "before_sha256": "5c40a2fa1ec8f3cdd00e516fb82f653826106137fb8cff1883f8843a053ba434",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "documentation",
+      "reason": "G01 legal action and actual output locations, scan sibling translations",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    },
+    {
+      "path": "docs/quickstart.zh-CN.md",
+      "before_sha256": "ffadb04ef84d56679bfe66a48af88dce3a60c0591973c8c23363f7a1d381edfb",
+      "operation": "MODIFY_IF_NEEDED",
+      "owner": "documentation",
+      "reason": "G01 legal action and actual output locations, scan sibling translations",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    }
+  ],
+  "possible_new_files": [
+    {
+      "path": "dual-cli/src/main/java/dev/dual/cli/DeliveryResolveCommand.java",
+      "operation": "CREATE",
+      "owner": "CLI facade to existing delivery service.resolve",
+      "reason": "One named operator entry; no independent authority",
+      "status": "CANDIDATE_NOT_AUTHORIZED"
+    }
+  ],
+  "status": "DESIGN_CANDIDATE_NOT_A_FILE_GRANT",
+  "conditional_test_addition": "No unnamed source/test addition is admitted. Prefer existing named harnesses; if an extra cold-JVM/sequence helper is required, name it and reconcile approved scope before editing.",
+  "documentation_this_turn": [
+    "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "output/lifecycle-batch-06-20261009/preflight.md"
+  ]
+}

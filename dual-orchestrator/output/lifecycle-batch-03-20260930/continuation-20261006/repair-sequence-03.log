@@ -1,0 +1,231 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/6]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/6]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/6]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 68 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 24 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java使用了未经检查或不安全的操作。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/java/dev/dual/ledger/file/MetricsProjectionWriterTest.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/6]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/6]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/6]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 105 source files with javac [debug parameters release 21] to target/classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java使用了未经检查或不安全的操作。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentExecutionAttemptReconciler.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 86 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.runtime.handler.PhasedContractContinuationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.55 s -- in dev.dual.runtime.handler.PhasedContractContinuationTest
+[INFO] Running dev.dual.runtime.handler.AcceptanceRepairSequenceTest
+[ERROR] Tests run: 7, Failures: 4, Errors: 0, Skipped: 0, Time elapsed: 24.82 s <<< FAILURE! -- in dev.dual.runtime.handler.AcceptanceRepairSequenceTest
+[ERROR] dev.dual.runtime.handler.AcceptanceRepairSequenceTest.changedClauseReachesDownstreamOnlyAfterBothApprovals -- Time elapsed: 3.628 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <1> but was: <2>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest.changedClauseReachesDownstreamOnlyAfterBothApprovals(AcceptanceRepairSequenceTest.java:168)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AcceptanceRepairSequenceTest.contractReworkMustProduceTwoNewApprovalsBeforeFreshAuthoredExecution -- Time elapsed: 3.537 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <1> but was: <2>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest.contractReworkMustProduceTwoNewApprovalsBeforeFreshAuthoredExecution(AcceptanceRepairSequenceTest.java:129)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AcceptanceRepairSequenceTest.humanCanStillRequireRepairBackToTheOriginalScope -- Time elapsed: 2.567 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-stage-claude_handoff-040, nodeDefinitionId=stage.claude_handoff, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-stage, iterationId=iter-003, inputRefs=[.agent/workstreams/ws-repair-sequence/reports/iter-003-final-report.md, .agent/workstreams/ws-repair-sequence/reports/latest-final-report.md], inputTransition={purpose=Only verified complete self-test evidence may enter artifact validation., source_node_sha256=5cdb8f0453694d18244fa836e1356a7e008c8f7f35afdae90b6239b3da22d228, source_node_instance_id=node-acceptance-generate_final_report-039, required=true, transition_type=normal, condition=unconditional}, outputRefs=[.agent/workstreams/ws-repair-sequence/runs/test-run-14/outputs/result.json, .agent/workstreams/ws-repair-sequence/artifacts/context-governance/occurrences/node-stage-claude_handoff-040-test-run-14/binding.json, .agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-040.json, .agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-040.md], result={agent_execution_artifact_contract_results=[{contractType=stage_handoff, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff]}, contract_allowed_decisions=[HANDOFF_READY], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-040.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-040.json, contract_node_id=stage.claude_handoff, contract_required_keys=[decision, summary], exit_code=0, message=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff], parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[result.decision is not allowed for node stage.claude_handoff]}, message=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff]}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-repair-sequence/artifacts/context-governance/occurrences/node-stage-claude_handoff-040-test-run-14/binding.json, repository_fact_binding_sha256=57ff51eb1132588ba19ecaca1409772f55ac19c24619a4d9d53653c69cc84bd3, run_id=test-run-14, run_metadata=.agent/workstreams/ws-repair-sequence/runs/test-run-14/run.json, completion_ref=.agent/workstreams/ws-repair-sequence/runs/test-run-14/outputs/nxe-1791281094735-03bd5f45-completion.json, completion_sha256=b8f75af6fc18ca398cbc5bb486a93cdffc8778e5c738ff805f974a109c307a10}, runRef=null, latestExecutionId=nxe-1791281094735-03bd5f45, startedAt=2026-10-06T10:04:54.736094Z, finishedAt=2026-10-06T10:04:54.795575Z] ==> expected: not equal but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertNotEquals.failEqual(AssertNotEquals.java:277)
+	at org.junit.jupiter.api.AssertNotEquals.assertNotEquals(AssertNotEquals.java:269)
+	at org.junit.jupiter.api.Assertions.assertNotEquals(Assertions.java:2846)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.step(AcceptanceRepairSequenceTest.java:380)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.until(AcceptanceRepairSequenceTest.java:408)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest.humanCanStillRequireRepairBackToTheOriginalScope(AcceptanceRepairSequenceTest.java:65)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.runtime.handler.AcceptanceRepairSequenceTest.scopeRequestPreservesOldAuthorityUntilBothApprovalsThenPassesGitAgain -- Time elapsed: 4.502 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-stage-claude_handoff-063, nodeDefinitionId=stage.claude_handoff, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-stage, iterationId=iter-004, inputRefs=[.agent/workstreams/ws-repair-sequence/reports/iter-004-final-report.md, .agent/workstreams/ws-repair-sequence/reports/latest-final-report.md], inputTransition={purpose=Only verified complete self-test evidence may enter artifact validation., source_node_sha256=a5fdda72055720c803e265ca83f657f9e37904e39d7f5226df7661f585339741, source_node_instance_id=node-acceptance-generate_final_report-062, required=true, transition_type=normal, condition=unconditional}, outputRefs=[.agent/workstreams/ws-repair-sequence/runs/test-run-22/outputs/result.json, .agent/workstreams/ws-repair-sequence/artifacts/context-governance/occurrences/node-stage-claude_handoff-063-test-run-22/binding.json, .agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-063.json, .agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-063.md], result={agent_execution_artifact_contract_results=[{contractType=stage_handoff, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff]}, contract_allowed_decisions=[HANDOFF_READY], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-063.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-063.json, contract_node_id=stage.claude_handoff, contract_required_keys=[decision, summary], exit_code=0, message=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff], parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[result.decision is not allowed for node stage.claude_handoff]}, message=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff]}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-repair-sequence/artifacts/context-governance/occurrences/node-stage-claude_handoff-063-test-run-22/binding.json, repository_fact_binding_sha256=372d609d7b71c37e2aa5aa0b60b979fc9bcc46f915e5eb7371d7e24eedc307d5, run_id=test-run-22, run_metadata=.agent/workstreams/ws-repair-sequence/runs/test-run-22/run.json, completion_ref=.agent/workstreams/ws-repair-sequence/runs/test-run-22/outputs/nxe-1791281103054-3f90a5d0-completion.json, completion_sha256=10783a8a8decc3d27aec98ef4d2e168fe70ae1f6f37002ba09126036325b3a02}, runRef=null, latestExecutionId=nxe-1791281103054-3f90a5d0, startedAt=2026-10-06T10:05:03.055525Z, finishedAt=2026-10-06T10:05:03.131270Z] ==> expected: not equal but was: <WAITING_FOR_RECOVERY>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertNotEquals.failEqual(AssertNotEquals.java:277)
+	at org.junit.jupiter.api.AssertNotEquals.assertNotEquals(AssertNotEquals.java:269)
+	at org.junit.jupiter.api.Assertions.assertNotEquals(Assertions.java:2846)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.step(AcceptanceRepairSequenceTest.java:380)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest$Fixture.until(AcceptanceRepairSequenceTest.java:408)
+	at dev.dual.runtime.handler.AcceptanceRepairSequenceTest.scopeRequestPreservesOldAuthorityUntilBothApprovalsThenPassesGitAgain(AcceptanceRepairSequenceTest.java:49)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   AcceptanceRepairSequenceTest.changedClauseReachesDownstreamOnlyAfterBothApprovals:168 expected: <1> but was: <2>
+[ERROR]   AcceptanceRepairSequenceTest.contractReworkMustProduceTwoNewApprovalsBeforeFreshAuthoredExecution:129 expected: <1> but was: <2>
+[ERROR]   AcceptanceRepairSequenceTest.humanCanStillRequireRepairBackToTheOriginalScope:65 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-stage-claude_handoff-040, nodeDefinitionId=stage.claude_handoff, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-stage, iterationId=iter-003, inputRefs=[.agent/workstreams/ws-repair-sequence/reports/iter-003-final-report.md, .agent/workstreams/ws-repair-sequence/reports/latest-final-report.md], inputTransition={purpose=Only verified complete self-test evidence may enter artifact validation., source_node_sha256=5cdb8f0453694d18244fa836e1356a7e008c8f7f35afdae90b6239b3da22d228, source_node_instance_id=node-acceptance-generate_final_report-039, required=true, transition_type=normal, condition=unconditional}, outputRefs=[.agent/workstreams/ws-repair-sequence/runs/test-run-14/outputs/result.json, .agent/workstreams/ws-repair-sequence/artifacts/context-governance/occurrences/node-stage-claude_handoff-040-test-run-14/binding.json, .agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-040.json, .agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-040.md], result={agent_execution_artifact_contract_results=[{contractType=stage_handoff, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff]}, contract_allowed_decisions=[HANDOFF_READY], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-040.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-040.json, contract_node_id=stage.claude_handoff, contract_required_keys=[decision, summary], exit_code=0, message=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff], parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[result.decision is not allowed for node stage.claude_handoff]}, message=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff]}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-repair-sequence/artifacts/context-governance/occurrences/node-stage-claude_handoff-040-test-run-14/binding.json, repository_fact_binding_sha256=57ff51eb1132588ba19ecaca1409772f55ac19c24619a4d9d53653c69cc84bd3, run_id=test-run-14, run_metadata=.agent/workstreams/ws-repair-sequence/runs/test-run-14/run.json, completion_ref=.agent/workstreams/ws-repair-sequence/runs/test-run-14/outputs/nxe-1791281094735-03bd5f45-completion.json, completion_sha256=b8f75af6fc18ca398cbc5bb486a93cdffc8778e5c738ff805f974a109c307a10}, runRef=null, latestExecutionId=nxe-1791281094735-03bd5f45, startedAt=2026-10-06T10:04:54.736094Z, finishedAt=2026-10-06T10:04:54.795575Z] ==> expected: not equal but was: <WAITING_FOR_RECOVERY>
+[ERROR]   AcceptanceRepairSequenceTest.scopeRequestPreservesOldAuthorityUntilBothApprovalsThenPassesGitAgain:49 NodeInstanceDocument[schemaVersion=1, nodeInstanceId=node-stage-claude_handoff-063, nodeDefinitionId=stage.claude_handoff, kind=TASK, handlerType=acpx.agent_run, status=FAILED, stageId=stage-stage, iterationId=iter-004, inputRefs=[.agent/workstreams/ws-repair-sequence/reports/iter-004-final-report.md, .agent/workstreams/ws-repair-sequence/reports/latest-final-report.md], inputTransition={purpose=Only verified complete self-test evidence may enter artifact validation., source_node_sha256=a5fdda72055720c803e265ca83f657f9e37904e39d7f5226df7661f585339741, source_node_instance_id=node-acceptance-generate_final_report-062, required=true, transition_type=normal, condition=unconditional}, outputRefs=[.agent/workstreams/ws-repair-sequence/runs/test-run-22/outputs/result.json, .agent/workstreams/ws-repair-sequence/artifacts/context-governance/occurrences/node-stage-claude_handoff-063-test-run-22/binding.json, .agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-063.json, .agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-063.md], result={agent_execution_artifact_contract_results=[{contractType=stage_handoff, errorCode=AGENT_RESULT_CONTRACT_VIOLATION, errorMessage=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff], path=, present=false, required=true, valid=false}], agent_execution_outcome={nodeMaySucceed=false, operatorMessage=The final ACP assistant message did not contain a valid AgentResultEnvelope., primaryReason=agent_result_missing_or_invalid, recoveryCategory=OUTPUT_INCOMPLETE, retryPolicy=MANUAL_ONLY, secondarySignals=[], status=OUTPUT_INCOMPLETE}, agent_execution_result_contract={decision=, present=true, summary=, valid=false, validationError=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff]}, contract_allowed_decisions=[HANDOFF_READY], contract_failure_diagnostic_markdown_ref=.agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-063.md, contract_failure_diagnostic_ref=.agent/workstreams/ws-repair-sequence/artifacts/contract-failures/node-stage-claude_handoff-063.json, contract_node_id=stage.claude_handoff, contract_required_keys=[decision, summary], exit_code=0, message=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff], parse_error={code=AGENT_RESULT_CONTRACT_VIOLATION, details={errors=[result.decision is not allowed for node stage.claude_handoff]}, message=AgentResultEnvelope failed contract validation: [result.decision is not allowed for node stage.claude_handoff]}, reason=AGENT_OUTPUT_CONTRACT_VIOLATION, repository_fact_binding_ref=.agent/workstreams/ws-repair-sequence/artifacts/context-governance/occurrences/node-stage-claude_handoff-063-test-run-22/binding.json, repository_fact_binding_sha256=372d609d7b71c37e2aa5aa0b60b979fc9bcc46f915e5eb7371d7e24eedc307d5, run_id=test-run-22, run_metadata=.agent/workstreams/ws-repair-sequence/runs/test-run-22/run.json, completion_ref=.agent/workstreams/ws-repair-sequence/runs/test-run-22/outputs/nxe-1791281103054-3f90a5d0-completion.json, completion_sha256=10783a8a8decc3d27aec98ef4d2e168fe70ae1f6f37002ba09126036325b3a02}, runRef=null, latestExecutionId=nxe-1791281103054-3f90a5d0, startedAt=2026-10-06T10:05:03.055525Z, finishedAt=2026-10-06T10:05:03.131270Z] ==> expected: not equal but was: <WAITING_FOR_RECOVERY>
+[INFO] 
+[ERROR] Tests run: 17, Failures: 4, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.001 s]
+[INFO] dual-core .......................................... SUCCESS [  0.235 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  1.281 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  0.136 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  0.015 s]
+[INFO] dual-runtime ....................................... FAILURE [ 37.130 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  38.945 s
+[INFO] Finished at: 2026-10-06T18:05:08+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.2:test (default-test) on project dual-runtime: There are test failures.
+[ERROR] 
+[ERROR] See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :dual-runtime

@@ -1,0 +1,36 @@
+weights as needed. This modularity is especially useful in production
+environments where a single model backbone must support multiple
+domains or languages.
+
+A recent innovation that makes these ideas easy to implement is LoRA
+Exchange (LoRAX), which redefines how fine-tuned models are served in
+production. Instead of dedicating separate GPU resources to each LoRA
+adapter, LoRAX enables dynamic loading and batching of multiple fine-
+tuned models on a shared GPU. Through mechanisms such as dynamic
+adapter loading, tiered weight caching, and continuous multiadapter
+batching, LoRAX helps you to pack over a hundred specialized LoRA
+models into a single deployment.
+
+Dynamic adapter loading allows adapter weights to be fetched just-in-time
+at runtime, keeping latency minimal while eliminating the need to preload
+all fine-tuned variants. Tiered weight caching manages GPU, CPU, and disk
+memory to avoid out-of-memory errors, while continuous multiadapter
+batching ensures that requests for different adapters can be processed
+concurrently and fairly. Together, these strategies make it possible to serve
+many specialized adapters on a single GPU with one base model, helping
+you to lower your inference costs. For instance, a team could fine-tune
+different domain-specific models for customer support, legal analysis, or
+code generation, and deploy them all under one shared GPU pool,
+something that could otherwise cost tens of thousands of dollars in cloud
+resources.
+
+Quantization
+
+Quantization reduces model size and speeds up inference by representing
+weights with fewer bits, such as 8-bit or even 4-bit precision. This
+compresses the model’s memory footprint, lowers GPU requirements, and
+enables faster inference. Frameworks such as bitsandbytes and unsloth
+simplify this process, offering robust quantization routines and optimized
+training kernels. In addition, many recent models released by developers
+such as Meta, Google, or Alibaba Cloud already include quantized variants
+by default, which makes deployment easier and more cost-efficient.

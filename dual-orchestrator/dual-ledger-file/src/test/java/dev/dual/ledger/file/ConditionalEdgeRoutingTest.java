@@ -28,7 +28,7 @@ class ConditionalEdgeRoutingTest {
 
     @BeforeEach
     void setup() throws IOException {
-        ledger = new WorkflowFileLedger();
+        ledger = LedgerTestFixture.ledger();
     }
 
     @Test
@@ -36,7 +36,7 @@ class ConditionalEdgeRoutingTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-cond"));
         Files.createDirectories(paths.workstreamDir());
         var def = definitionWithConditionalEdges();
-        ledger.initialize(paths, "inst-001", def);
+        LedgerTestFixture.initialize(ledger, paths, "inst-001", def);
 
         // Complete the task node — result contains mode=strict
         ledger.completeAndRoute(paths, def, firstActiveNodeId(paths), NodeStatus.COMPLETED, "DONE",
@@ -52,7 +52,7 @@ class ConditionalEdgeRoutingTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-cond2"));
         Files.createDirectories(paths.workstreamDir());
         var def = definitionWithConditionalEdges();
-        ledger.initialize(paths, "inst-002", def);
+        LedgerTestFixture.initialize(ledger, paths, "inst-002", def);
 
         // Complete with mode=relaxed — should route to node_relaxed
         ledger.completeAndRoute(paths, def, firstActiveNodeId(paths), NodeStatus.COMPLETED, "DONE",
@@ -68,7 +68,7 @@ class ConditionalEdgeRoutingTest {
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-uncond"));
         Files.createDirectories(paths.workstreamDir());
         var def = definitionWithUnconditionalEdge();
-        ledger.initialize(paths, "inst-003", def);
+        LedgerTestFixture.initialize(ledger, paths, "inst-003", def);
 
         // No condition — should always route to node_b
         ledger.completeAndRoute(paths, def, firstActiveNodeId(paths), NodeStatus.COMPLETED, "DONE",

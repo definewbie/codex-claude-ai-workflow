@@ -1,0 +1,23 @@
+{
+  "verifiedAt": "2026-09-28T03:35:15.245387+00:00",
+  "baselineFileCount": 1319,
+  "changedExistingFiles": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "unchangedExistingFiles": 1316,
+  "documentHashes": {
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md": "04b2f4c4c4f18c6a72ab8d76d9bf0a6f02467a388da20510a454fdb41eb87784",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "3d9720060dc220808dc0e938f4f5e9d29c429255656fa326ca78a1e0cb35bbcf",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "90d2d296d830f4486dee128a8eceadc2bc2575c314746004ab23bd6119ece5dc"
+  },
+  "ccReviewSha256": "1d8bf07bff52331dd6dfdf2dcc6e393bba7a0ed798f5287c7fd7c38b0b1707ee",
+  "tablesChecked": 33,
+  "tableErrors": [],
+  "missingLinks": [],
+  "diffCheckExitCode": 0,
+  "productTestsRun": false,
+  "providerInvoked": false,
+  "review": "Author review-disposition check only; both LOW documentation changes applied with protocol attribution correction. D04 remains DESIGN GAP. Implementation not authorized."
+}

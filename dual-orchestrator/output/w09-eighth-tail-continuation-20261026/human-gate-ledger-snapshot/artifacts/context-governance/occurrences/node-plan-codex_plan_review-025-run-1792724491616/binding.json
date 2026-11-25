@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "node_instance_id" : "node-plan-codex_plan_review-025",
+  "run_id" : "run-1792724491616",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/agent-capability-catalog.json",
+      "sha256" : "bd4dceb0fb739023ab7add2512bd09b874968961273becb954c9ce4f6bafd342"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/planned-report.json",
+      "sha256" : "b9fde7859b291f8aa06c9f94da5422b7878eecec8269308c4476e8ce8099ac26"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/repo-map.json",
+      "sha256" : "ccd830d7200b2db2e1d0110ec3fdfff8e80e189680d067019eef0c7a50f9da90"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/file-summaries.json",
+      "sha256" : "f43727a2861fc0415bae9c6bf0ab2ae1617559973d77dc34a5b3637c923747db"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/stage-scope-policy.json",
+      "sha256" : "ceeaeae079b8aedf92a8b7d5126f5e2b62b36bf17bebfa122d8771599017db9c"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/file-relevance-plan.json",
+      "sha256" : "c5038b46aacb789905ffaa6b47b996bec46020b22083226c6ccb7b5e9a37dacf"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/working-set.json",
+      "sha256" : "81d21544cdc1ea1fcea1dce22956d1ad156482e022cde0bf1883d9687dcfd366"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/read-reuse-contract.json",
+      "sha256" : "09a19f4891d6337f5d192e6a3c76a1e8b6a1848bae703302b566e7be6f8ee39e"
+    }
+  }
+}

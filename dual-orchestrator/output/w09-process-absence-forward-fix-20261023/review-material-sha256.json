@@ -1,0 +1,27 @@
+{
+  "scope": "Review identity only; not Gate authorization or launch identity",
+  "files": {
+    "cc-review-prompt.md": "83245f772a70c7f49a2a1feddd9f64e65f3a8e574d1fa1c9664f1ce87e77ad46",
+    "scope-and-transition.md": "909ac1f9cb62a5411a4c9f276298492d5275ccb1bdd662b85ad6978ab3d9ab48",
+    "incremental.patch": "3e092062e506634da273919347f6b9286be24a872ebd5edef273e47462b8f7db",
+    "assessment.md": "4fdde46bdd24553a649a4594182c5d7708bbf88ed39a8a42376a23378d519d5b",
+    "candidate/pre-dispatch-recheck.py": "9e46e9d80e509a0d9761976f45edfd3e85198f0b45fe43d4182c18b68cd43b59",
+    "candidate/test_process_check.py": "d34e00a1104ce4d2c4cb46221f2de47acc6d74fc47f34bd7fc711f13bb6b2459",
+    "candidate/process_check.py": "443d6eaf761efcb8b3c51d6036edea348825428f8c3ab626824fad7409da4618",
+    "candidate/run-one-step.py": "e79ddba97e8be31f39e5a95689c573227f15423e65678f9941af03b4a8e17ba4",
+    "candidate/prepare-offline.py": "85755de901554f303c665ddb3729a347f3a4b6f982409694d9138c839d5c3aa5",
+    "evidence/before-sha256.json": "110289b5c64540301b6a76e67d49b9c05dccd877a24f8f4a5d6ccfc65cdc7d4c",
+    "evidence/test-results.json": "be273834fb4b28cf0a0ed990ef0b8059a4aa1c031560c69c66721ab69407ba61",
+    "evidence/targeted-tests.log": "a83e7c9abde6b063068eda2efcdbce92781d3d38fe3dc02382059ab619dc4452",
+    "evidence/preservation.json": "c8245901b81252d9d2514bc4fc935dd861bfe619fe2aad50086936ea54f30b41",
+    "evidence/recheck-confirmed-history.diff.txt": "8b07de480b188e8757d8591c21c7934672cebb038689db43fef1c64f2d480700",
+    "evidence/historical-read-only-comparison.json": "9cd31818b21e29f1c84e3fd9b3d3e6c95c2e5f94edafa8099f013d82ca9fa831",
+    "evidence/old-rule-counterexample.json": "8fd7cfb374000d46b5db9ff44ce37221aa255e0742842561d8f4ab85346eeaa3",
+    "evidence/skip-unresolved-reader.log": "db935f2eb4bab3ba440adbb04898a471fcffee84c140af346acd7b2db3d3600c",
+    "evidence/counterproof-results.json": "1962ce5d08b6493ff4dcb8be6890876dcf2cfcddc651a7f01b388ca929f2a92f",
+    "evidence/recheck-confirmed-history.log": "7c2edc2a01a83f6f80368cf059019e3aef560c072dd737992e1f6da41eba05d1",
+    "evidence/test-author-error-missing-session-checks.log": "8fda5b17762ba3aa8505daf1d46f17d74b55c4be52aa7a70ed88430243c52b71",
+    "evidence/test-author-error-missing-session-checks.json": "025b68cd8e487f8a25adc762d66afe63faa8a43832b545c8865e405c43c8ca5d",
+    "evidence/working-tree-status-before.txt": "cd87b236db2ee2cc36915bfe4e064510ce4653c849fa28d85282ac62664bcf5f"
+  }
+}

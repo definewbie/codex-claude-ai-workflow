@@ -1,0 +1,8 @@
+{
+  "type": "function_call",
+  "id": "wait_2",
+  "call_id": "wait_2",
+  "namespace": "collaboration",
+  "name": "wait_agent",
+  "arguments": "{\"timeout_ms\": 10000}"
+}

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "java",
+    "-Dprobe.source=/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/freeze-review-20260928/StorageProbe.java",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/freeze-review-20260928/StorageProbe.java",
+    "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/freeze-review-20260928/storage-fixture"
+  ],
+  "exitCode": 0,
+  "stdout": "{\"status\":\"PASS_STORAGE_PRIMITIVES\",\"atomicReplace\":true,\"sameJvmOverlapRejected\":true,\"crossJvmBlockedExit\":10,\"reacquire\":true}\n",
+  "stderr": "",
+  "scope": "Java NIO local filesystem primitives only; not product protocol or arbitrary mount/power-loss proof"
+}

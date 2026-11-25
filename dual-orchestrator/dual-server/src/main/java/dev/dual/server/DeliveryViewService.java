@@ -17,7 +17,7 @@ public class DeliveryViewService {
 
     @Autowired
     public DeliveryViewService(ObjectMapper ignored) {
-        this(new DeliveryApplicationService());
+        this(new DeliveryApplicationService(ServerLedgerFactory.create()));
     }
 
     DeliveryViewService(DeliveryApplicationService delivery) {
@@ -36,6 +36,18 @@ public class DeliveryViewService {
         return project(workstreamId, delivery.finalizeCommit(workspaceRoot, workstreamId, commit));
     }
 
+    public DeliveryApplicationService.View observe(Path root, String id) { return delivery.view(root, id, null); }
+
+    public Map<String, Object> inSnapshot(Path root, String id, DeliveryApplicationService.View sampled,
+            dev.dual.ledger.file.WorkflowFileLedger scoped) throws java.io.IOException {
+        return project(id, DeliveryApplicationService.inSnapshot(sampled, scoped,
+                new dev.dual.ledger.file.WorkstreamPaths(root.toAbsolutePath().normalize(), new dev.dual.core.id.DualId(id))));
+    }
+
+    public Map<String, Object> resolve(Path root, String id, byte[] request) throws Exception {
+        return project(id, delivery.resolve(root, id, request));
+    }
+
     private static Map<String, Object> project(String workstreamId, DeliveryApplicationService.View view) {
         var response = new LinkedHashMap<String, Object>();
         response.put("workstreamId", workstreamId);
@@ -52,58 +64,15 @@ public class DeliveryViewService {
         response.put("canMerge", view.canMerge());
         response.put("canFinalize", view.canFinalize());
         response.put("blockedReasons", view.reason().isBlank() ? List.of() : List.of(view.reason()));
-        response.put("nextAction", nextAction(view));
-        response.put("operatorNextAction", operatorNextAction(view));
-        response.put("nextCommands", nextCommands(view, workstreamId));
+        response.put("nextAction", view.nextAction());
+        response.put("operatorNextAction", view.nextAction());
+        response.put("nextCommands", view.nextCommands());
+        response.put("historicalStatus", view.historicalStatus());
+        response.put("targetObservation", view.targetObservation());
+        response.put("operationId", view.operationId()); response.put("planSha256", view.planSha256());
+        response.put("ledgerCommitSequence", view.ledgerCommitSequence()); response.put("stopBasis", view.stopBasis());
+        response.put("currentActions", view.currentActions()); response.put("resolutionTemplate", view.resolutionTemplate());
         return response;
     }
 
-    private static String nextAction(DeliveryApplicationService.View view) {
-        if ("WORKFLOW_NOT_DELIVERABLE".equals(view.reasonCode())) {
-            return "The workflow is not yet eligible for delivery.";
-        }
-        return switch (view.status()) {
-            case "READY" -> "Apply the accepted candidate to the original repository.";
-            case "APPLIED" -> "Review and commit the staged target diff, then finalize that commit.";
-            case "FAILED", "BLOCKED" -> "Resolve the recorded boundary failure before retrying delivery.";
-            case "COMMITTED" -> "The accepted delivery candidate has been committed.";
-            default -> "Refresh the delivery view.";
-        };
-    }
-
-    private static String operatorNextAction(DeliveryApplicationService.View view) {
-        if ("WORKFLOW_NOT_DELIVERABLE".equals(view.reasonCode())) {
-            return "当前尚不可交付；请先完成工作流与完成审计。";
-        }
-        return switch (view.status()) {
-            case "READY" -> "候选内容已与人工验收绑定，可以合回原始仓库。";
-            case "APPLIED" -> "改动已暂存。检查后手工提交，再登记提交 SHA 完成交付。";
-            case "FAILED", "BLOCKED" -> "先处理已记录的边界错误，再重试交付。";
-            case "COMMITTED" -> "已验证提交内容与获批候选完全一致。";
-            default -> "刷新交付视图。";
-        };
-    }
-
-    private static List<String> nextCommands(DeliveryApplicationService.View view, String workstreamId) {
-        if (view.targetRepo().isBlank()) return List.of();
-        var cd = "cd " + shellQuote(view.targetRepo());
-        if (view.canMerge()) {
-            return List.of(cd, "git status", "git diff --stat");
-        }
-        if (view.canFinalize()) {
-            return List.of(
-                    cd,
-                    "git diff --cached",
-                    "git commit -m " + shellQuote("feat: dual delivery " + workstreamId),
-                    "dualctl delivery finalize --commit $(git rev-parse HEAD) --workdir <source-worktree> " + workstreamId
-            );
-        }
-        return "COMMITTED".equals(view.status())
-                ? List.of(cd, "git show --stat " + view.commit())
-                : List.of();
-    }
-
-    private static String shellQuote(String value) {
-        return "'" + value.replace("'", "'\"'\"'") + "'";
-    }
 }

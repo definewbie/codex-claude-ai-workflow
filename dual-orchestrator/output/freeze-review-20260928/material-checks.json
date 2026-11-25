@@ -1,0 +1,27 @@
+{
+  "status": "PASS_MATERIAL_CHECKS_ONLY",
+  "checks": [
+    "all frozen source bytes unchanged",
+    "142 unique candidates, original 116 retained",
+    "every candidate has disposition and identity",
+    "all predicates bound to actual source",
+    "all design fixture ref/SHA pairs resolve",
+    "GOAL explicitly has no write scope",
+    "EXECUTION retains goal clauses and exact file operations",
+    "all required criteria have verification bindings",
+    "approval references contract without circular approval field",
+    "design reviewed candidate binds exact author",
+    "plan reviewed candidate binds exact author",
+    "tampered fixture hash rejected by material check",
+    "operator declaration not represented as program execution",
+    "actual producer sample NATIVE_TOOL_EVENTS",
+    "actual producer sample DIAGNOSTIC_RUN",
+    "actual producer sample LOCAL_COMMAND_RESULT",
+    "local storage primitive probe recorded successful exit"
+  ],
+  "count": 17,
+  "productValidatorsExecuted": false,
+  "providerCalls": 0,
+  "independentReview": false,
+  "limitation": "No production schema/ledger/adapter implementation is validated by these checks."
+}

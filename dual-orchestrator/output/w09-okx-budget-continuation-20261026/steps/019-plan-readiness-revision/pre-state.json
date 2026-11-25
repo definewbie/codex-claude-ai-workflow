@@ -1,0 +1,50 @@
+{
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261026T142203Z-7SNA",
+    "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-plan-claude_plan-022"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000023",
+    "updatedAt": "2026-10-26T21:04:22.730815Z",
+    "commitSequence": 84
+  },
+  "node": {
+    "schemaVersion": 1,
+    "nodeInstanceId": "node-plan-claude_plan-022",
+    "nodeDefinitionId": "plan.claude_plan",
+    "kind": "TASK",
+    "handlerType": "acpx.agent_run",
+    "status": "READY",
+    "stageId": "stage-plan",
+    "iterationId": "iter-003",
+    "inputRefs": [
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.stderr.log",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.transcript.log",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.json",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1793030916946/binding.json",
+      ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793030916946/outputs/plan-codex-review.contract.json"
+    ],
+    "inputTransition": {
+      "required": true,
+      "purpose": "Seed the first Claude intake run with repo-scope context.",
+      "source_node_instance_id": "node-gate-human_plan_approval-021",
+      "source_node_sha256": "aa080be8392d4d915fa4861934a31d40a3f78c199168ef0067958e3d40273650",
+      "transition_type": "loop",
+      "loop_reason": "Human resolution requires a fresh author and independent review",
+      "condition": "unconditional"
+    },
+    "outputRefs": [],
+    "result": {},
+    "runRef": null,
+    "latestExecutionId": "",
+    "startedAt": null,
+    "finishedAt": null
+  },
+  "prior_active_seconds": 1716.42963307967
+}

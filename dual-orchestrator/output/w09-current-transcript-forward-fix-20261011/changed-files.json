@@ -1,0 +1,50 @@
+[
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java",
+    "before_sha256": "23dff46be25e81980b83abb3ed5abea450252157448fd8fe71f5ae55f7015840",
+    "after_sha256": "f5f002a11bdb2638d83eae6c6474f86bf71749c3a7a593ecf281e7fcb4acc11c",
+    "change": "MODIFY"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxStreamWireLine.java",
+    "before_sha256": "5cb774d609ef12c590fa6978137a6b23379aecbe03e1589529bce63e2cf1a042",
+    "after_sha256": "b1889facdb65545dd43d1912c06fab8a5d10f143f0ec7757b9f58f3d29607171",
+    "change": "MODIFY"
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxUsageReader.java",
+    "before_sha256": "e3df7edb775ee9c9bd88b8fe48da8b384922684d3fcd55689e52bb6b83561020",
+    "after_sha256": "6563f657259a9c2a1ca6cd0c4e1b46e65eda4bd6968c101642cd5af63584deec",
+    "change": "MODIFY"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxAgentTaskHandlerTest.java",
+    "before_sha256": "26a69b46464947dbcd225616bc56621b0c051aa4eda17fb6c3a7439c7e0059a2",
+    "after_sha256": "16aeb8bedef33ad9bf4cb3aaf727ec52f6d3fd9709ddd7c5bbc09693f8c83be8",
+    "change": "MODIFY"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCurrentTranscriptUsageTest.java",
+    "before_sha256": null,
+    "after_sha256": "6da23cc299fcd4e62e63782a940defa6437cb68af3dc35550b1a07628338d747",
+    "change": "CREATE"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageReaderTest.java",
+    "before_sha256": "380f78176ec7262ac40502d42cfa7c984e9f35a5111e51b2d4e9b8d4e4a274ab",
+    "after_sha256": "82c928783d1241f4638e9ec8b422831df09d44637c750e6aa1d89446941d5a14",
+    "change": "MODIFY"
+  },
+  {
+    "path": "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxUsageWireCompletenessTest.java",
+    "before_sha256": null,
+    "after_sha256": "cdb41c474874d386189e86cb6743aaa2f3182a9390f0eb9900dc0e61e3dac0da",
+    "change": "CREATE"
+  },
+  {
+    "path": "docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "before_sha256": "92c5e33940948786d196b4931a6d8fb147bf84c86490e71736d384ce1c3cba30",
+    "after_sha256": "76a9801ea43118b5b0eebc876785fa61c770b77411641cecc026d4090ae44f27",
+    "change": "APPEND_23.16_AND_UPDATE_W08_W09_INDEX"
+  }
+]

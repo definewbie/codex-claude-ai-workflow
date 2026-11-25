@@ -1,0 +1,17 @@
+{
+  "rows": [
+    {
+      "name": "observer-global-history",
+      "status": "EXPECTED_FAILURE",
+      "exit": 1,
+      "method": "test_same_rpc_id_after_reinitialize_is_two_calls_and_history_append_stays_valid"
+    },
+    {
+      "name": "observer-fixed-anchor-removed",
+      "status": "EXPECTED_FAILURE",
+      "exit": 1,
+      "method": "test_missing_fixed_completion_and_log_drift_stop"
+    }
+  ],
+  "frozen_production_or_old_gate_modified": false
+}

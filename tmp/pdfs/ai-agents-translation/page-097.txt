@@ -1,0 +1,42 @@
+   Defines the writing assistant, responsible for synthesis and citation
+
+   Allows the writer to hand control back to the research assistant if more
+   evidence is needed
+
+Now that both roles are defined, we can wire them into a swarm. The
+swarm provides the coordination mechanism: it starts with the research
+assistant by default, but allows handoff to the writer and back again until
+the task is complete. The implementation is shown in Example 2-33.
+
+Example 2-33. Build research–writer swarm
+swarm = create_swarm(
+    agents=[research_assistant, writer_assistant],
+    default_active_agent="research_assistant",
+).compile()
+
+To test the system, you can run the following example prompt. Here, I
+requested a summary of fintech licensing in Switzerland. The swarm first
+searches for sources, then hands off to the writing assistant for synthesis,
+and if needed returns to research for more data. See Example 2-34 for the
+prompt.
+
+Example 2-34. Run research–writer swarm
+user_request = {
+    "messages": [
+        {
+            "role": "user",
+            "content": (
+                """Find the current Swiss fintech licensing options
+for small
+                 startups. Gather authoritative sources and produce
+a short
+                 summary with three bullet points and
+references."""
+            ),
+        }
+    ]
+}
+
+for chunk in swarm.stream(user_request):
+    print(chunk)
+    print()

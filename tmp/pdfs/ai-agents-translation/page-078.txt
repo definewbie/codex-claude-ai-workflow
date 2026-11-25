@@ -1,0 +1,42 @@
+Example 2-15. Approval gate for request
+def b_gate(state: BState) -> Command[Literal["b_call",
+"b_propose"]]:
+    v = interrupt({
+        "question": "Approve or revise request",
+        "proposed_request": state["proposed_request"],
+        "schema": {
+            "type": "object",
+            "properties": {
+                "action": {"enum": ["approve", "revise"]},
+                "update": {"type": "object"}
+            },
+            "required": ["action"]
+        }
+    })
+    action = v.get("action")
+    if action == "approve":
+        return Command(goto="b_call", update={"decision":
+"approved"})
+    upd = v.get("update") or {}
+    new_req = state["proposed_request"].copy()
+    if "url" in upd:
+        new_req["url"] = upd["url"]
+    if isinstance(upd.get("params"), dict):
+        new_req.setdefault("params", {}).update(upd["params"])
+    return Command(goto="b_gate", update={"proposed_request":
+new_req,
+    "decision": "revised"})
+
+   Pause execution and wait for human decision.
+
+    Present the proposed request for inspection.
+
+   Enforce structured approval/revision schema.
+
+  On approval, route to the call step.
+
+  On revision, loop back to the gate with updated request.
+
+On resume you pass Command(resume={"action":
+"approve"}) to continue, or {"action": "revise",
+"update": {...}} to merge edits and loop back to the gate.

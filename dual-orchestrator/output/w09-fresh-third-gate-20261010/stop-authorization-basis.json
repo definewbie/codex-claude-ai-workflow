@@ -1,0 +1,10 @@
+{
+  "basis": "Approved third Gate stop-loss: visible actual tokens >=160000",
+  "visible_actual_tokens": 235366,
+  "single_design_tokens": 130731,
+  "new_dispatch_stopped": true,
+  "next_ready_node": "context.design_codex_arch_review",
+  "case_result": "FAIL",
+  "not_a_model_artifact_rejection": true,
+  "native_provider_new_prompts_authorized": false
+}

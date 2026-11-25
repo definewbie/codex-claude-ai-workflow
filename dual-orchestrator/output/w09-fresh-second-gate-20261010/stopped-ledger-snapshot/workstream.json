@@ -1,0 +1,43 @@
+{
+  "schemaVersion" : 2,
+  "workstreamId" : "ws-20261010T085617Z-8SVF",
+  "title" : "# 换行规范化函数",
+  "status" : "created",
+  "repository" : {
+    "originalWorkdir" : "/private/tmp/dual-w09-newlines-20261010-fresh-02/target",
+    "gitRoot" : "/private/tmp/dual-w09-newlines-20261010-fresh-02/target"
+  },
+  "primaryWorkspaceId" : "wsp-20261010T085617Z-27ZA",
+  "currentStageId" : "stage-design",
+  "currentIterationId" : "iter-001",
+  "requirementPath" : "requirement.md",
+  "createdAt" : "2026-10-10T08:56:17.207970Z",
+  "updatedAt" : "2026-10-10T08:56:17.207970Z",
+  "frozenRuntimeIdentity" : {
+    "behavior.acpx.patch" : "1517f828d303ea720a7a153e6dc8c33265ba1ea100d2b9260c98327b5604468c",
+    "behavior.property.DUAL_SESSION_COMPACTION_IMPLEMENT_STABILITY_CACHED_READ_TOKENS" : "",
+    "behavior.property.DUAL_SESSION_COMPACTION_EXPERIMENT" : "",
+    "kernel.configured" : "liteflow",
+    "executable.cli" : "a1d1b011acfd45701012be170cc9facd6be171501307db16538e477f75b38f7b",
+    "kernel.effective" : "liteflow",
+    "behavior.property.dual.context.governance.enabled" : "",
+    "behavior.env.DUAL_ACPX_RECOVERABLE_SIGNAL_GRACE_SECONDS" : "",
+    "behavior.property.DUAL_SESSION_COMPACTION_STABILITY_CACHED_READ_TOKENS" : "",
+    "executable.server" : "1280ada807511ccc59ba6cabbdb69b246a85eb44f88a678406f779477b05c7f4",
+    "behavior.env.DUAL_SESSION_COMPACTION_EXPERIMENT" : "",
+    "behavior.env.DUAL_ACPX_QUEUE_TTL_SECONDS" : "",
+    "behavior.property.dual.context.memory.enabled" : "",
+    "behavior.env.DUAL_CONTEXT_GOVERNANCE_ENABLED" : "",
+    "behavior.env.DUAL_SESSION_COMPACTION_IMPLEMENT_STABILITY_CACHED_READ_TOKENS" : "",
+    "identity_schema" : "dual-runtime-content.v1",
+    "java.runtime" : "25.0.3+9-LTS-195",
+    "behavior.env.DUAL_CONTEXT_MEMORY_ENABLED" : "",
+    "behavior.env.API_TIMEOUT_MS" : "",
+    "behavior.acpx.upstream" : "fd173f04aa1b56f9e3f5ca5190c034ddcae28792",
+    "behavior.policy.schema" : "claude_execution_policy.v2",
+    "behavior.env.DUAL_ACPX_COMMAND_TIMEOUT_SECONDS" : "600",
+    "behavior.env.DUAL_ACPX_SESSION_COMMAND_TIMEOUT_SECONDS" : "",
+    "behavior.env.DUAL_ACPX_AGENT_PROGRESS_TIMEOUT_SECONDS" : "",
+    "behavior.env.DUAL_SESSION_COMPACTION_STABILITY_CACHED_READ_TOKENS" : ""
+  }
+}

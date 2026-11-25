@@ -1,0 +1,14 @@
+{
+  "schemaVersion" : 1,
+  "stageId" : "stage-design",
+  "workstreamId" : "ws-20261022T150557Z-Y2KB",
+  "workspaceId" : "wsp-20261022T150557Z-GRDT",
+  "type" : "design",
+  "status" : "pending",
+  "currentIterationId" : "iter-001",
+  "inputArtifactRefs" : [ "artifact-requirement" ],
+  "outputArtifactRefs" : [ ],
+  "gatePolicy" : {
+    "human_review_after_pass" : true
+  }
+}

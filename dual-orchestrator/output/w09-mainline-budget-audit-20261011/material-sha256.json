@@ -1,0 +1,21 @@
+{
+  "scope": "this offline material only; no old artifacts rewritten",
+  "files": {
+    "assessment.md": "c37f27be84e16e4b97f83a15fc082573054bf23e00311ca6b697091caa27a6fb",
+    "budget-dry-run.json": "2328b0b4dee9c6a25a64e798e82cdaee8f8df2e88d0c56fa14a4338864ea16e2",
+    "budget-proposal.json": "8646d4c553a2ed0e731c4f818590bd3352abc0c8773ad62d178504e1c58c5c87",
+    "cc-review-prompt.txt": "49dda3350c618d0bd09ff4476355581203844d3619c0458e709497f5b77cfe00",
+    "check-budget-offline.py": "5e815d6ab23b5f97797dffa795db7aa43725db976090cbb6586b77206ed2052f",
+    "collect-offline.py": "46c775b40cd95479fb6a792d00248e83c73799637aed3e249c378c77118b9e8a",
+    "config-observation.json": "4e3331b22abd071993ded69c3045d6f96b0f04469888530573ac483fc6822621",
+    "full-mainline-gate.md": "b01c8a21574b8534e020f531221a8a8032d9572af00cf6def30cb488363c5152",
+    "identity-before.json": "2b3c8ff1eced135c7bd6994a5f25885f7a56d2ad78161d061bba4b6249dd20b9",
+    "identity-final.json": "6281aa4a6af7818aeb262ed2ca4316a47cf605d205e4e7e39e96221cd9dd398c",
+    "input-observation.json": "7a02770b5d94541adbb3646d74c85ab50d2812fa4309a22a1aa737dc056aed19",
+    "material-validation.json": "4e6d403e523ca3da66fb47843fedf05787323dea5cc5a19477e844d1045d3e4f",
+    "native-config-and-tool-observation.json": "44ba68d98ac8377d756d86aca881123f8f8412c183eb8ebc0f3e964af0c2e52e",
+    "observed-costs.json": "07a802ccf6fbae541bc01cf487393ddcc9b9b4ad3b9bfed87e23122ea8f945a1",
+    "source-excerpts.txt": "205d6b15cf3d778dc68437ed34a454ee6bd28c183d0e90664583ad9bd1f37eef",
+    "source-index.json": "f953188287b585df2ce915f25bf8f45f0fbfe6f9b8a83b929637313a7c2534dc"
+  }
+}

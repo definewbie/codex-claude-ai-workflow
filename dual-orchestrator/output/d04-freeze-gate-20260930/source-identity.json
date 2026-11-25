@@ -1,0 +1,75 @@
+{
+  "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxPermissionProfile.java": {
+    "sha256": "0e0ccc8e7c904d2cb698c84f7c9c8a28bcaa9da6d6106e8bcb2dee3de29586cc",
+    "prior_sha256": "0e0ccc8e7c904d2cb698c84f7c9c8a28bcaa9da6d6106e8bcb2dee3de29586cc",
+    "unchanged": true
+  },
+  "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/ClaudeExecutionPolicy.java": {
+    "sha256": "bfcd9cdaa48c85a30fd5547a89c33cbfc505eb2f76f0932cfc500b4146a5d4c4",
+    "prior_sha256": "bfcd9cdaa48c85a30fd5547a89c33cbfc505eb2f76f0932cfc500b4146a5d4c4",
+    "unchanged": true
+  },
+  "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java": {
+    "sha256": "d86b86cbc66c03ffe3e4c21dcbd4f533865a6760c0c3ca5a34dded888a457ff2",
+    "prior_sha256": "d86b86cbc66c03ffe3e4c21dcbd4f533865a6760c0c3ca5a34dded888a457ff2",
+    "unchanged": true
+  },
+  "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java": {
+    "sha256": "866b1524a904f6fd4a68dfa40d07493d7371d9791125aec151dd51dc55dc32bd",
+    "prior_sha256": "866b1524a904f6fd4a68dfa40d07493d7371d9791125aec151dd51dc55dc32bd",
+    "unchanged": true
+  },
+  "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts": {
+    "sha256": "d727f05adfa38beadbc4214fbbc5a14c864dfa1eead4dd5e2a0a734a63e65a88",
+    "prior_sha256": "d727f05adfa38beadbc4214fbbc5a14c864dfa1eead4dd5e2a0a734a63e65a88",
+    "unchanged": true
+  },
+  "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/agent-command.ts": {
+    "sha256": "ccaaf63f555803452ff27a3c8fabb1ea5ec9fefe72d59876b5b0111446a8d91d",
+    "prior_sha256": "ccaaf63f555803452ff27a3c8fabb1ea5ec9fefe72d59876b5b0111446a8d91d",
+    "unchanged": true
+  },
+  "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/runtime/engine/session-options.ts": {
+    "sha256": "35c82adba710abba47d026c21109197fd9b1452c7e3ff1ca02282c40443c2fd9",
+    "prior_sha256": "35c82adba710abba47d026c21109197fd9b1452c7e3ff1ca02282c40443c2fd9",
+    "unchanged": true
+  },
+  "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/runtime/engine/connected-session.ts": {
+    "sha256": "6ef739b12327e159bec78b57ac76e0d499625c3cecb1b05a2b96062eae5970a7",
+    "prior_sha256": "6ef739b12327e159bec78b57ac76e0d499625c3cecb1b05a2b96062eae5970a7",
+    "unchanged": true
+  },
+  "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js": {
+    "sha256": "f0cbbe408bb758cc4bacdae9a244bcac6efbdb6413f680195d017648abc6d816",
+    "prior_sha256": "f0cbbe408bb758cc4bacdae9a244bcac6efbdb6413f680195d017648abc6d816",
+    "unchanged": true
+  },
+  "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/settings.js": {
+    "sha256": "629348525ddd007ace9c06a16a19af6877af2a090b58255dd7f5974a6bdf2932",
+    "prior_sha256": "629348525ddd007ace9c06a16a19af6877af2a090b58255dd7f5974a6bdf2932",
+    "unchanged": true
+  },
+  "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts": {
+    "sha256": "65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7",
+    "prior_sha256": "65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7",
+    "unchanged": true
+  },
+  "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js": {
+    "sha256": "4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268",
+    "prior_sha256": "4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268",
+    "unchanged": true
+  },
+  "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex/package.json": {
+    "sha256": "302ed64d0846795501768be9f60f78133688c0c09162c76e80a8a04b045664cb",
+    "prior_sha256": "302ed64d0846795501768be9f60f78133688c0c09162c76e80a8a04b045664cb",
+    "unchanged": true
+  },
+  "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex": {
+    "sha256": "b973d440acac501fd2594a43e7ca9ce41e0a65b9dfb28d0d7a7837c99e1261e3",
+    "unchanged": true
+  },
+  "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex-code-mode-host": {
+    "sha256": "d8a2222e017342718d16a5dbe092921c628961f812f62f42036b8d960e1ffe56",
+    "unchanged": true
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-plan-claude_plan-014",
+  "nodeDefinitionId" : "plan.claude_plan",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-plan",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-design-codex_arch_review-011-run-1789315517524/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315517524/outputs/design-codex-review.contract.json" ],
+  "inputTransition" : {
+    "required" : true,
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "transition_type" : "normal",
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315530064/outputs/plan-claude.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315530064/outputs/plan-claude.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315530064/outputs/plan-claude.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-plan-claude_plan-014-run-1789315530064/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315530064/outputs/plan-claude.contract.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315530064/outputs/plan-claude.plan.json" ],
+  "result" : {
+    "run_id" : "run-1789315530064",
+    "run_metadata" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315530064/run.json",
+    "agent" : "claude",
+    "session" : "claude-main-ws-20260913T160441Z-H55W-run-1789315530064",
+    "exit_code" : 0,
+    "transcript_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315530064/outputs/plan-claude.transcript.log",
+    "output_complete" : true,
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-plan-claude_plan-014-run-1789315530064/binding.json",
+    "repository_fact_binding_sha256" : "920377d542ea8fc1ce1cf6f2b441bc76c4e653d087d1ad21f235b62b65f3f7bd",
+    "process_usability" : "EXITED_ZERO",
+    "adapter_signals" : [ ],
+    "decision" : "READY_FOR_PLAN_REVIEW",
+    "summary" : "Plan body is complete.",
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315530064/outputs/plan-claude.contract.json",
+    "contract_sidecar_sha256" : "abd0cea8ff6c43ea00e824d68fbde7ae223f46980932ae1762111ead7d5c7743",
+    "plan_artifact_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315530064/outputs/plan-claude.plan.json",
+    "agent_execution_result_contract" : {
+      "present" : true,
+      "valid" : true,
+      "decision" : "READY_FOR_PLAN_REVIEW",
+      "summary" : "",
+      "validationError" : ""
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "plan_result",
+      "required" : true,
+      "present" : true,
+      "valid" : true,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "agent_execution_outcome" : {
+      "status" : "SUCCESS",
+      "primaryReason" : "completed",
+      "nodeMaySucceed" : true,
+      "retryPolicy" : "NONE",
+      "recoveryCategory" : "NONE",
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315530036-0fa1576a",
+  "startedAt" : "2026-09-13T16:05:30.056060Z",
+  "finishedAt" : "2026-09-13T16:05:40.588600Z"
+}

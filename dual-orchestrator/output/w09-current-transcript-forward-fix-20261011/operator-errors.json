@@ -1,0 +1,22 @@
+[
+  {
+    "kind": "OPERATOR_ERROR",
+    "issue": "First case manifest contains repository-relative paths, unlike later case-relative manifests; first audit resolved a docs path inside case folder",
+    "impact": "Read-only assertion failure; no files changed; corrected path classification before using audit result"
+  },
+  {
+    "kind": "ENVIRONMENT_LIMITATION",
+    "issue": "Sandbox ps denied; read-only process inventory escalation allowed; tests were still progressing through local fake peers",
+    "impact": "Not a product failure or native/provider execution"
+  },
+  {
+    "kind": "CREDENTIAL_LIMITATION",
+    "issue": "Focused-02 ran while guard/additional tests were evolving",
+    "impact": "Earlier compiled slice only; focused-03 and final clean reactor required for final source"
+  },
+  {
+    "kind": "PROOF_AUTHOR_ERROR",
+    "issue": "Observer candidate fixture initially omitted shared streams needed by two early Claude calls without current completion frames",
+    "impact": "Read-only fixture failure; copied original streams into isolated fixture, kept strict fallback; append-stability proof restricted to actual Codex record, not claimed for stream-only cross-generation reuse"
+  }
+]

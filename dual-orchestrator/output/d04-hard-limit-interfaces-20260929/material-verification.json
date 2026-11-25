@@ -1,0 +1,21 @@
+{
+  "status": "PASS_EVIDENCE_PACKAGING_NOT_FREEZE",
+  "changedExistingFiles": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "unchangedBaselineFiles": 1316,
+  "priorR2ManifestPreserved": 10,
+  "priorOriginalManifestPreservedViaSnapshots": 63,
+  "newLocalLinksChecked": 7,
+  "captureCandidateRegistrationTargets": "FAIL: both still advertise collaboration",
+  "D04": "DESIGN_GAP",
+  "nativeSessions": 2,
+  "realProviderCalls": 0,
+  "toolCommandsEmitted": 0,
+  "agentsSpawned": 0,
+  "productCodeChanged": false,
+  "independentCCReview": "NOT_RUN",
+  "implementationAuthorized": false
+}

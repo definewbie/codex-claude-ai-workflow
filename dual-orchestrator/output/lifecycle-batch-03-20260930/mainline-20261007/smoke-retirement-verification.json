@@ -1,0 +1,74 @@
+[
+  {
+    "script": "smoke-test.sh",
+    "args": [],
+    "exit_code": 2,
+    "side_effects": false,
+    "stderr": "RETIRED: old smoke results cannot prove the current approved lifecycle.\nOffline verification: from dual-orchestrator run rtk proxy mvn -q clean test.\nReal native/provider runs require a separately approved Verification Gate.\n"
+  },
+  {
+    "script": "smoke-test.sh",
+    "args": [
+      "--case",
+      "all"
+    ],
+    "exit_code": 2,
+    "side_effects": false,
+    "stderr": "RETIRED: old smoke results cannot prove the current approved lifecycle.\nOffline verification: from dual-orchestrator run rtk proxy mvn -q clean test.\nReal native/provider runs require a separately approved Verification Gate.\n"
+  },
+  {
+    "script": "smoke-test.sh",
+    "args": [
+      "--manual-gates",
+      "--skip-build"
+    ],
+    "exit_code": 2,
+    "side_effects": false,
+    "stderr": "RETIRED: old smoke results cannot prove the current approved lifecycle.\nOffline verification: from dual-orchestrator run rtk proxy mvn -q clean test.\nReal native/provider runs require a separately approved Verification Gate.\n"
+  },
+  {
+    "script": "smoke-test.sh",
+    "args": [
+      "--help"
+    ],
+    "exit_code": 2,
+    "side_effects": false,
+    "stderr": "RETIRED: old smoke results cannot prove the current approved lifecycle.\nOffline verification: from dual-orchestrator run rtk proxy mvn -q clean test.\nReal native/provider runs require a separately approved Verification Gate.\n"
+  },
+  {
+    "script": "semantic-boundary-smoke.sh",
+    "args": [],
+    "exit_code": 2,
+    "side_effects": false,
+    "stderr": "RETIRED: old smoke results cannot prove the current approved lifecycle.\nOffline verification: from dual-orchestrator run rtk proxy mvn -q clean test.\nReal native/provider runs require a separately approved Verification Gate.\n"
+  },
+  {
+    "script": "semantic-boundary-smoke.sh",
+    "args": [
+      "--case",
+      "all"
+    ],
+    "exit_code": 2,
+    "side_effects": false,
+    "stderr": "RETIRED: old smoke results cannot prove the current approved lifecycle.\nOffline verification: from dual-orchestrator run rtk proxy mvn -q clean test.\nReal native/provider runs require a separately approved Verification Gate.\n"
+  },
+  {
+    "script": "semantic-boundary-smoke.sh",
+    "args": [
+      "--manual-gates",
+      "--skip-build"
+    ],
+    "exit_code": 2,
+    "side_effects": false,
+    "stderr": "RETIRED: old smoke results cannot prove the current approved lifecycle.\nOffline verification: from dual-orchestrator run rtk proxy mvn -q clean test.\nReal native/provider runs require a separately approved Verification Gate.\n"
+  },
+  {
+    "script": "semantic-boundary-smoke.sh",
+    "args": [
+      "--help"
+    ],
+    "exit_code": 2,
+    "side_effects": false,
+    "stderr": "RETIRED: old smoke results cannot prove the current approved lifecycle.\nOffline verification: from dual-orchestrator run rtk proxy mvn -q clean test.\nReal native/provider runs require a separately approved Verification Gate.\n"
+  }
+]

@@ -1,0 +1,64 @@
+{
+  "recorded_at": "2026-10-23T09:08:57.197972+08:00",
+  "status": "PAUSED_AT_CURRENT_REQUIREMENT_HUMAN_GATE",
+  "experiment_result": "IN_PROGRESS_NOT_PASS_FAIL_OR_INVALID",
+  "domain_status": "WAITING_FOR_HUMAN",
+  "workstream": "ws-20261023T005431Z-9YYF",
+  "gate_id": "gate-node-gate-human_requirement_review-006",
+  "allowed_actions": [
+    "approve",
+    "revise"
+  ],
+  "proposal_reference": {
+    "schema_version": 1,
+    "proposal_id": "node-intake-claude_brainstorm-002:cd7b184f400271de",
+    "workstream_id": "ws-20261023T005431Z-9YYF",
+    "producer_node_id": "intake.claude_brainstorm",
+    "producer_node_instance_id": "node-intake-claude_brainstorm-002",
+    "artifact_ref": ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792717427983/outputs/intake-claude-brainstorm.contract.json",
+    "sha256": "cd7b184f400271deea36266d6b5d111e4cb6684a236f3e03f67b5ab989852d83"
+  },
+  "proposal_reference_sha256": "506ea780621048195029cdfcdea18cc07563a7b53c8ade6a07a96fdb3f54ba5b",
+  "actual_tokens": 51762,
+  "completed_calls": 2,
+  "active_seconds": 144.708,
+  "human_wait_clock": "PAUSED_AFTER_THIS_CHECKPOINT",
+  "budget_for_possible_next_design": {
+    "input": {
+      "actual_tokens": 51762,
+      "completed_calls": 2,
+      "active_seconds": 144.708,
+      "remaining_mainline": [
+        "design.claude_design",
+        "design.codex_arch_review",
+        "plan.claude_plan",
+        "plan.codex_plan_review",
+        "implement.claude_implement",
+        "implement.claude_self_test_report",
+        "acceptance.codex_verifier_review"
+      ],
+      "new_extra_calls": [],
+      "measurement_complete": true,
+      "external_pending": false
+    },
+    "result": {
+      "result": "ALLOW_BUDGET_ONLY",
+      "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+      "required_token_reserve": 1015000,
+      "required_call_reserve": 8,
+      "remaining_tokens": 1648238,
+      "remaining_calls": 16,
+      "warning": false
+    },
+    "note": "Planning only; no current business approval or dispatch authority"
+  },
+  "model_calls_new": 2,
+  "format_corrections": 0,
+  "semantic_revisions": 0,
+  "source_inputs_match": 659,
+  "jars_match": true,
+  "prior_material_239_files_unchanged": true,
+  "delivery": "NOT_STARTED",
+  "implementation": "NOT_AUTHORIZED_OR_STARTED",
+  "business_approval_awaited": true
+}

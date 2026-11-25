@@ -1,0 +1,57 @@
+Trace
+Workstream: ws-20261010T085617Z-8SVF
+Workspace: /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree
+Ledger: /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree/.agent/workstreams/ws-20261010T085617Z-8SVF
+Workflow: agent-lifecycle-terminal-delivery@5
+Status: WAITING_FOR_RECOVERY
+Current Node: intake.claude_brainstorm
+Open Gates: recovery-node-intake-claude_brainstorm-002
+Final Acceptance: none
+Goal Outcome: unknown
+End State: unknown
+Completion Audit: unknown
+Repair Loops: 0
+Verification Confidence: UNKNOWN
+
+Why:
+  Inspect the diagnostic details, prompt contract, and source output before retrying the node.
+
+Attention:
+  [critical] Artifact contract failed
+    Inspect the diagnostic details, prompt contract, and source output before retrying the node.
+    Command: dualctl retry --workdir /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree ws-20261010T085617Z-8SVF
+
+Timeline:
+  [ok] context.intake_claude_brainstorm  (iter-001, 53ms)
+  [fail] intake.claude_brainstorm  (iter-001, 438527ms)
+
+Latest Agent Tasks:
+  agt-1791622657661-021d3d7a  SUCCEEDED    context.intake_claude_brainstorm  nxe-1791622657668-d4e50ad9
+  agt-1791622684598-f52c41c9  FAILED  claude  intake.claude_brainstorm  nxe-1791622684602-4a7db768
+
+Latest Agent Runs:
+  run-1791622684632  claude  intake.claude_brainstorm  failed/CONTRACT_FAILED(required_artifact_contract_failed)  434495ms  scope=run seg=ws:ws-20261010T085617Z-8SVF/run:run-1791622684632  promptTokens=4187 topSections=context_package:1420,template_static_frame:1187,prompt_contract:922  tokens=53096 in=7900 out=9612 cachedRead=35584 cachedWrite=0 type=PROVIDER_RUN_USAGE src=agent_result_acquisition attr=MULTI_PROMPT_SUM
+
+Tool Governance:
+  toolCalls=3 reads=3 bash=0 missingRereadReasons=0
+  repeated reads: -
+Token Attribution:
+  top node: intake.claude_brainstorm (claude) total=53096 cachedRead=35584 output=9612 transcriptBytes=14748 heavy=[cachedRead, output, promptOverhead, tools]
+  usage visibility: {provider_run_usage=1}
+  execution latency: intake.claude_brainstorm run=run-1791622684632 totalMs=434495 terminalDetectedMs=0 processBeforeTerminalMs=0 terminalToProcessWaitMs=0 processWaitMs=341978 contractValidatedMs=434720 phase=process_wait
+  cost reliability: {provider_cache_tokens_reported=1} costEstimate={token_only=1} clientReported={USD=0.2975920000000001} officialCalculated={}
+  provider cache decision: {token_policy_active=1}
+  session ws:ws-20261010T085617Z-8SVF/run:run-1791622684632: transcriptGrowthRun=run-1791622684632
+
+Artifacts:
+  Final Report: missing
+  Workstream Summary: /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree/.agent/workstreams/ws-20261010T085617Z-8SVF/reports/workstream-summary.md
+  Handoff JSON: missing
+  Next-stage Prompt: missing
+  Delivery PR Body: missing
+  Delivery Merge Plan: missing
+  Current Failure: /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree/.agent/workstreams/ws-20261010T085617Z-8SVF/recovery/current-failure.md
+
+Next:
+Inspect the contract diagnostic and fix the output contract before retrying.
+dualctl retry --workdir /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree ws-20261010T085617Z-8SVF

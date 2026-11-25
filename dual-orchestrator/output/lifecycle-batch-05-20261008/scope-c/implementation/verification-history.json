@@ -1,0 +1,244 @@
+[
+  {
+    "log": "clock-comparison-proof-first.log",
+    "status": "FAIL_OR_INVALID_NOT_USABLE",
+    "suite_line_counts_only": {
+      "tests": 0,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "clock-comparison-proof.log",
+    "status": "SUPPLEMENT_PASS",
+    "suite_line_counts_only": {
+      "tests": 0,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "clock-counterproof.log",
+    "status": "EXPECTED_FAILURE",
+    "suite_line_counts_only": {
+      "tests": 0,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "compile-01.log",
+    "status": "FAIL_OR_INVALID_NOT_USABLE",
+    "suite_line_counts_only": {
+      "tests": 0,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-01.log",
+    "status": "FAIL_OR_INVALID_NOT_USABLE",
+    "suite_line_counts_only": {
+      "tests": 0,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-02.log",
+    "status": "FAIL_OR_INVALID_NOT_USABLE",
+    "suite_line_counts_only": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-03.log",
+    "status": "PASS",
+    "suite_line_counts_only": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-04.log",
+    "status": "PASS",
+    "suite_line_counts_only": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-05.log",
+    "status": "FAIL_OR_INVALID_NOT_USABLE",
+    "suite_line_counts_only": {
+      "tests": 15,
+      "failures": 2,
+      "errors": 1,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-06.log",
+    "status": "FAIL_OR_INVALID_NOT_USABLE",
+    "suite_line_counts_only": {
+      "tests": 4,
+      "failures": 2,
+      "errors": 1,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-07.log",
+    "status": "FAIL_OR_INVALID_NOT_USABLE",
+    "suite_line_counts_only": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-08.log",
+    "status": "PASS",
+    "suite_line_counts_only": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-09.log",
+    "status": "PASS",
+    "suite_line_counts_only": {
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-10.log",
+    "status": "PASS",
+    "suite_line_counts_only": {
+      "tests": 54,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-11.log",
+    "status": "FAIL_OR_INVALID_NOT_USABLE",
+    "suite_line_counts_only": {
+      "tests": 0,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-12.log",
+    "status": "PASS",
+    "suite_line_counts_only": {
+      "tests": 44,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-13.log",
+    "status": "FAIL_OR_INVALID_NOT_USABLE",
+    "suite_line_counts_only": {
+      "tests": 49,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-14.log",
+    "status": "FAIL_OR_INVALID_NOT_USABLE",
+    "suite_line_counts_only": {
+      "tests": 49,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "focused-15.log",
+    "status": "PASS",
+    "suite_line_counts_only": {
+      "tests": 49,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "reactor-01.log",
+    "status": "PASS",
+    "suite_line_counts_only": {
+      "tests": 1727,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "reactor-final.log",
+    "status": "PASS",
+    "suite_line_counts_only": {
+      "tests": 1731,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  },
+  {
+    "log": "red-sequence.log",
+    "status": "FAIL_OR_INVALID_NOT_USABLE",
+    "suite_line_counts_only": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "note": "Historical/focused logs are not spliced into final whole-reactor receipt."
+  }
+]

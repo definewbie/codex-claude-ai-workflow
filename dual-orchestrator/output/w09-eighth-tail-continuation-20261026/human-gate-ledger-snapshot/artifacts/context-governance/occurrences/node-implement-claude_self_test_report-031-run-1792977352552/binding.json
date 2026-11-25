@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "node_instance_id" : "node-implement-claude_self_test_report-031",
+  "run_id" : "run-1792977352552",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/stage-scope-policy.json",
+      "sha256" : "68eec532eb35638add9d7707a884933ac150ca900e4bbc94cdbee15e003be157"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/file-summaries.json",
+      "sha256" : "20e46d8d4ad57b26fbdcc2a7119e7af0eadda1085719c0122594ba4735f7c35e"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/repo-map.json",
+      "sha256" : "1ed954a6aef3e75f3e4e7dda4370e4250c0233841845afb16689366af6b5109b"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/planned-report.json",
+      "sha256" : "1e6e30fa96754d9295c5d97921caa65fa91e7f7f76d1c2e51f68547f9023dcd5"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/agent-capability-catalog.json",
+      "sha256" : "1058c06b29308342f141ecac7641dfbc014493251bf7e4fb26a20e5c2dfbcb6f"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/read-reuse-contract.json",
+      "sha256" : "8bd3a8272de76b2f9ddd29b807f7c77e0226a45f393768d9db2c17089c2babf7"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/working-set.json",
+      "sha256" : "273b5edef3de44ab919b9942c301f64e87f3331ed22a72fb251501f2a2338aed"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-implement-claude_self_test_report-031-run-1792977352552/file-relevance-plan.json",
+      "sha256" : "35956da36f1ddebe5a49eb28e6606f83365a46b358dbc0f45396e4e9453c6efa"
+    }
+  }
+}

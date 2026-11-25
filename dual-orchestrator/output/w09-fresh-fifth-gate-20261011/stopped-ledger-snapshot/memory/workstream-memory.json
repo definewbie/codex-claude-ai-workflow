@@ -1,0 +1,35 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "workstream_memory",
+  "workstreamId" : "ws-20261011T141651Z-MBC2",
+  "stageId" : "intake",
+  "nodeInstanceId" : "node-intake-claude_brainstorm-006",
+  "iterationId" : "iter-002",
+  "decidedScope" : [ ],
+  "nonGoals" : [ ],
+  "decisions" : [ ],
+  "readFiles" : [ ],
+  "openIssues" : [ ],
+  "priorVerdicts" : [ ],
+  "priorFailures" : [ ],
+  "refsSemantics" : "latest_projection_refs",
+  "refs" : {
+    "stageScopePolicy" : ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791728580831/stage-scope-policy.json",
+    "repoMap" : ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791728580831/repo-map.json",
+    "workingSet" : ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791728580831/working-set.json",
+    "readReuseContract" : ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791728580831/read-reuse-contract.json",
+    "fileSummaries" : ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791728580831/file-summaries.json",
+    "fileRelevancePlan" : ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791728580831/file-relevance-plan.json",
+    "repositoryFactBinding" : ".agent/workstreams/ws-20261011T141651Z-MBC2/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-006-run-1791728580831/binding.json"
+  },
+  "generatedAt" : "2026-10-11T14:23:00.894614Z",
+  "qualifiedTaskContract" : {
+    "status" : "stale_projection"
+  },
+  "lastStageOutcome" : { },
+  "fieldSemantics" : {
+    "machineDecisionFields" : [ "decision", "stage_outcome", "lifecycle_status", "blocking", "sourceField", "status" ],
+    "projectionOnlyFields" : [ "summary", "desc", "verificationSummary" ]
+  },
+  "updatedAt" : "2026-10-11T14:24:28.999869Z"
+}

@@ -1,0 +1,16 @@
+{
+  "original_status_same": true,
+  "original_status_entries": 92,
+  "original_observed_tracked_bytes_same": true,
+  "env_not_read": true,
+  "baseline305_same_in_both_test_and_new_workspace": true,
+  "initial_ledger_same": true,
+  "prior_stops_same": true,
+  "release_source_count": 659,
+  "jars": 2,
+  "client_config_entries": 33,
+  "client_config_same": true,
+  "native_sessions_for_new_workspace": 0,
+  "model_calls": 0,
+  "launch_sha256": "ed183a55113d8c86a56e92f4b058b24a2106f1a85be6331b41c5a111b8d3be29"
+}

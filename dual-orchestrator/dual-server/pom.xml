@@ -15,6 +15,13 @@
     <dependencies>
         <dependency>
             <groupId>dev.dual</groupId>
+            <artifactId>dual-runtime</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.dual</groupId>
             <artifactId>dual-core</artifactId>
             <version>${project.version}</version>
         </dependency>

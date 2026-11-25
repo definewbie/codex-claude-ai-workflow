@@ -1,0 +1,15 @@
+test_direct_selection_checks_bytes_and_client_overrides (test_continuation.AssemblyTest.test_direct_selection_checks_bytes_and_client_overrides) ... FAIL
+
+======================================================================
+FAIL: test_direct_selection_checks_bytes_and_client_overrides (test_continuation.AssemblyTest.test_direct_selection_checks_bytes_and_client_overrides)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/w09-launch-mutant-9g20qrw3/test_continuation.py", line 375, in test_direct_selection_checks_bytes_and_client_overrides
+    with self.assertRaisesRegex(AssertionError,'program bytes drift'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: AssertionError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.011s
+
+FAILED (failures=1)

@@ -59,6 +59,9 @@ public final class AuthoredInputFixture {
         var metadata = Files.exists(runPath) ? (com.fasterxml.jackson.databind.node.ObjectNode) JSON.readTree(runPath.toFile())
                 : JSON.createObjectNode();
         metadata.put("promptManifestPath", root.relativize(manifest).toString());
+        metadata.put("runId", run); metadata.put("workstreamId", context.workstreamId());
+        metadata.set("processResult", JSON.valueToTree(dev.dual.core.execution.ProcessResult.exitedZero()));
+        metadata.putArray("adapterSignals");
         JSON.writeValue(runPath.toFile(), metadata);
         AuthoredExecutionContext.verifyManifest(root, manifest, snapshot);
     }
@@ -81,6 +84,6 @@ public final class AuthoredInputFixture {
         var instance = new NodeInstanceDocument(1, nodeId, author.id(), NodeKind.TASK, author.handlerType(), NodeStatus.RUNNING,
                 "stage-design", "iter-001", List.of(), Map.of(), List.of(), Map.of(), null, "", Instant.now(), null);
         JSON.writeValue(paths.nodeJson(nodeId).toFile(), instance);
-        record(new TaskHandler.TaskContext(root, ws, author, new WorkflowFileLedger().loadCoreNode(paths, nodeId)), run);
+        record(new TaskHandler.TaskContext(root, ws, author, dev.dual.runtime.RuntimeTestLedger.ledger().loadCoreNode(paths, nodeId), dev.dual.runtime.RuntimeTestLedger.ledger()), run);
     }
 }

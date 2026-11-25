@@ -1,0 +1,18 @@
+{
+  "w09-fresh-sixth-gate-20261015": {
+    "files": 342,
+    "unchanged": true,
+    "manifest_sha256": "4a3200736811644d7fbd0fc0c03d78779667708ed2b1025a423e81c847d72a67"
+  },
+  "w09-sixth-forward-fix-20261015": {
+    "files": 320,
+    "unchanged": true,
+    "manifest_sha256": "99468616393a5017fcb20abdd83f5c611062704972e82c87763ab3a3fb580804"
+  },
+  "sixth_live_ledger": {
+    "files": 191,
+    "unchanged": true,
+    "lock_excluded": true,
+    "recovered": false
+  }
+}

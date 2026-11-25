@@ -1,0 +1,11 @@
+--- run-one-step.py
++++ mutant/run-one-step.py
+@@ -47,7 +47,7 @@
+ else:
+     assert active < 3600, 'Active time exhausted'
+ write(folder / 'pre-state.json', {'current': current, 'node': node, 'prior_active_seconds': active})
+-env = launch['environment']
++env = os.environ.copy()
+ args = [launch['executables']['rtk'], 'proxy', launch['executables']['java'], '-Xlog:class+load=debug:file=' + str(folder / 'classloading.log') + ':uptime,level,tags',
+         '-jar', release['application_jars']['dual-cli']['path'], 'run', '--workdir=' + str(workspace),
+         '--max-steps', '1', '--dispatch-mode', 'INLINE', loc['workstream']]

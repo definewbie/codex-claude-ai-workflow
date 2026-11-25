@@ -34,9 +34,14 @@ public record GateDocument(
     }
 
     GateDocument resolved(String action, String note) {
+        return resolved(action, note, null);
+    }
+
+    GateDocument resolved(String action, String note, ContractQualificationChecks.Decision checks) {
         var resolvedResult = new LinkedHashMap<String, Object>(result);
         resolvedResult.put("human_action", action == null ? "" : action);
         resolvedResult.put("note", note == null ? "" : note);
+        if (checks != null) resolvedResult.put("decision_checks", checks.toMap());
         return new GateDocument(
                 schemaVersion,
                 gateId,

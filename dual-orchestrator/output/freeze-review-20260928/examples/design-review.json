@@ -1,0 +1,12 @@
+{
+  "schema_version": 2,
+  "workstream_id": "EXAMPLE",
+  "node_instance_id": "design-review-001",
+  "artifact_type": "agent_output_contract",
+  "decision": "READY",
+  "review_subject": {
+    "ref": "examples/design-author.json",
+    "sha256": "f40fc12b3bb907a331df9ab3ba93ceabddbe70ce3e63fcb26aad044fc2f6fdde"
+  },
+  "obligations": []
+}

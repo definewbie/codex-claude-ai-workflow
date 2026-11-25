@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "workstream_id": "ws-20261023T005431Z-9YYF",
+  "run_id": "run-1792724491616",
+  "node_id": "plan.codex_plan_review",
+  "result": {
+    "artifact_type": "agent_output_contract",
+    "decision": "READY_TO_IMPLEMENT",
+    "summary": "环境与可行性引用已按人工要求补齐，原计划语义保持不变，复评通过，可进入当前 EXECUTION 精确审批。",
+    "lifecycle_status": "READY",
+    "blocking": false,
+    "checks": [
+      "已先审阅 Review Evidence Brief，再对照修订父版本、完整当前计划、人工修订义务和三项验证准备声明。",
+      "human-note:0 经独立核对已满足：AC-1、AC-2、AC-3 的 environment_refs 与 feasibility_refs 均使用各自登记的完整 ref/SHA，未混用或新增引用。",
+      "三个绑定的 criterion_id、method、executor、evidence_kind、detail_owner、actual_exit_required 和 expected_exit_code 与父版本保持一致。",
+      "完整计划仍保留三个 CREATE 文件、固定替换顺序、九类输入期望、11 个测试方法、幂等性检查、双流采集和 README 验证方案，与已审设计一致。",
+      "声明中的工作区与当前有效工作区一致，criterion、method、executor、evidenceKind 和 detailOwner 与对应绑定匹配。",
+      "当前计划明确区分 OPERATOR_ATTESTED 前提声明、实际执行证据与 EXECUTION 写授权，没有将人工声明作为测试成功或工具权限证明。"
+    ],
+    "evidence": [
+      "AC-1 两个引用字段均对应 eighth-readiness-ac-1-20261023.json，SHA 为 afa1aaa717cc99f02bcb8d751f2adf1423fc7c312f0bc5714cf80a39b4d50dbd，与人工指示及治理投影一致。",
+      "AC-2 两个引用字段均对应 eighth-readiness-ac-2-20261023.json，SHA 为 81b47708d2d9712c229301201b8f195a49833dcc5348f2eb335ac0825450df99，与人工指示及治理投影一致。",
+      "AC-3 两个引用字段均对应 eighth-readiness-ac-3-20261023.json，SHA 为 ccc4078bd115ef9ba71874df89c33099d48b4c94e6018a3130c6daec94fabfdf，与人工指示及治理投影一致。",
+      "三条治理声明均为 CURRENT_OPERATOR_DECLARATION，来源为 OPERATOR_ATTESTED；计划仍将实际验证责任交给 implement.claude_self_test_report。",
+      "当前 files 与父版本一致：CREATE src/normalize_text.py、CREATE tests/test_normalize_text.py、CREATE README.md；验证仍要求实际测试输出及源码案例核对。"
+    ],
+    "missing_evidence": [],
+    "must_fix": [],
+    "contract_obligations": [],
+    "acceptance_notes": [
+      "本次确认引用与所提供登记内容一致，未重新读取引用文件或计算其哈希，也未验证宿主环境和工具权限。",
+      "复评通过不构成文件写授权；仍须完成当前 EXECUTION 精确范围批准后实施。",
+      "准备声明不能替代实际输入输出、测试报告或 README 一致性证据；后续证据不足时不得宣告验收通过。"
+    ],
+    "open_risks": [],
+    "changed_files": [],
+    "verification_summary": "依据提供的完整计划、父版本和治理声明完成静态复评，人工修订义务已满足，未发现新增阻断；未修改文件或执行测试。",
+    "failure": {
+      "category_hint": "",
+      "verification_remediation": "NONE",
+      "contract_gaps": [],
+      "out_of_scope_files": [],
+      "missing_tests": [],
+      "context_gaps": [],
+      "reason": ""
+    },
+    "reread_reasons": []
+  }
+}

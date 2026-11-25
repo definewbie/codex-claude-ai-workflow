@@ -53,13 +53,14 @@ class ReportGenerateFinalHandlerTest {
 
     @Test
     void missingGoalFailsWithoutPublishingAReport() throws Exception {
+        var fixture = prepare("ws-rpt-missing");
         var wsDir = workstreamDir("ws-rpt-missing");
+        Files.delete(wsDir.resolve("domain/goal-satisfaction.json"));
         Files.createDirectories(wsDir.resolve("reports"));
         Files.writeString(wsDir.resolve("requirement.md"), "Minimal requirement.");
         Files.writeString(wsDir.resolve("reports/latest-final-report.md"), "historical report bytes");
 
-        var result = new ReportGenerateFinalHandler().execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rpt-missing", definition(), emptyReportNode("ws-rpt-missing")));
+        var result = new ReportGenerateFinalHandler().execute(new TaskHandler.TaskContext(tempDir, "ws-rpt-missing", definition(), emptyReportNode("ws-rpt-missing"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals(CompletionEvidenceLineageResolver.GOAL_NOT_CONFIGURED, result.result().get("failure_code"));
@@ -71,10 +72,9 @@ class ReportGenerateFinalHandlerTest {
     void configuredReportFailsBeforePublishingWithoutContractQualification() throws Exception {
         var definition = new NodeDefinition(
                 "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final",
-                Map.of("requires_approved_task_contract", true));
+                Map.of("required_contract_phase", "EXECUTION"));
 
-        var result = new ReportGenerateFinalHandler().execute(new TaskHandler.TaskContext(
-                tempDir, "ws-rpt-qualified", definition, emptyReportNode("ws-rpt-qualified")));
+        var result = new ReportGenerateFinalHandler().execute(new TaskHandler.TaskContext(tempDir, "ws-rpt-qualified", definition, emptyReportNode("ws-rpt-qualified"), dev.dual.runtime.RuntimeTestLedger.ledger()));
 
         assertEquals(NodeStatus.FAILED, result.status());
         assertEquals(TaskContractProjectionVerifier.FAILURE_OUTCOME, result.outcome());
@@ -100,7 +100,7 @@ class ReportGenerateFinalHandlerTest {
 
     @Test
     void acceptWithNotesClassificationIsRenderedAsNotesNotFailure() throws Exception {
-        var fixture = CompletionEvidenceLineageFixture.prepare(
+        var fixture = CompletionEvidenceLineageFixture.prepareApproved(
                 tempDir, "ws-rpt-notes", "ACCEPT_WITH_NOTES", "Accepted with runtime validation note.");
         var wsDir = workstreamDir("ws-rpt-notes");
         Files.createDirectories(wsDir.resolve("artifacts"));
@@ -179,24 +179,27 @@ class ReportGenerateFinalHandlerTest {
         var result = new ReportGenerateFinalHandler().execute(context("ws-rpt-resolution", fixture));
         var report = Files.readString(tempDir.resolve((String) result.result().get("report_path")));
         assertTrue(report.contains("## Requirement Resolution"));
-        assertTrue(report.contains("Should review be mandatory?"));
-        assertTrue(report.contains("Existing shortcut is intentionally removed."));
+        var contract = TaskContractProjectionVerifier.resolve(dev.dual.runtime.RuntimeTestLedger.ledger(), tempDir, "ws-rpt-resolution").qualified().orElseThrow();
+        assertTrue(report.contains(contract.resolutionRef()));
+        assertTrue(report.contains(contract.resolutionSha256()));
+        assertFalse(report.contains("Should review be mandatory?"), "unbound display files are not approval facts");
+        assertFalse(report.contains("Existing shortcut is intentionally removed."));
     }
 
     @Test
     void filenamesIncludeIterationId() throws Exception {
-        var fixture = CompletionEvidenceLineageFixture.prepare(
-                tempDir, "ws-rpt-filename", "ACCEPT", "Accepted.", "iter-003");
+        var fixture = CompletionEvidenceLineageFixture.prepareApproved(
+                tempDir, "ws-rpt-filename", "ACCEPT", "Accepted.");
         Files.writeString(workstreamDir("ws-rpt-filename").resolve("requirement.md"), "Filename test.");
 
         var result = new ReportGenerateFinalHandler().execute(context("ws-rpt-filename", fixture));
 
-        assertTrue(((String) result.result().get("report_path")).contains("iter-003-final-report.md"));
+        assertTrue(((String) result.result().get("report_path")).contains(fixture.reportNode().iterationId() + "-final-report.md"));
         assertTrue(((String) result.result().get("latest_report_path")).contains("latest-final-report.md"));
     }
 
     private CompletionEvidenceLineageFixture.Prepared prepare(String workstreamId) throws Exception {
-        return CompletionEvidenceLineageFixture.prepare(tempDir, workstreamId);
+        return CompletionEvidenceLineageFixture.prepareApproved(tempDir, workstreamId);
     }
 
     private Path workstreamDir(String workstreamId) {
@@ -207,12 +210,12 @@ class ReportGenerateFinalHandlerTest {
             String workstreamId,
             CompletionEvidenceLineageFixture.Prepared fixture
     ) {
-        return new TaskHandler.TaskContext(tempDir, workstreamId, definition(), fixture.reportNode());
+        return new TaskHandler.TaskContext(tempDir, workstreamId, definition(), fixture.reportNode(), dev.dual.runtime.RuntimeTestLedger.ledger());
     }
 
     private static NodeDefinition definition() {
         return new NodeDefinition(
-                "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of());
+                "acceptance.generate_final_report", NodeKind.TASK, "report.generate_final", Map.of("required_contract_phase", "EXECUTION"));
     }
 
     private static NodeInstance emptyReportNode(String workstreamId) {

@@ -1,0 +1,10 @@
+[acpx] spawning agent: /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0
+(node:65883) ExperimentalWarning: Importing JSON modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[acpx] initialized protocol version 1
+[session/query] sessionId=572ac958-e2a7-4373-90b5-b1cfd401c156 resume=none apiType=native baseUrl=native
+(node:65883) [CLAUDE_SDK_CAN_USE_TOOL_SHADOWED] Warning: canUseTool will not be invoked for: Read, Grep, Glob. Bare allowedTools entries auto-approve the whole tool before the callback is consulted. To gate every tool call, use a PreToolUse hook; or remove the bare names from allowedTools so they fall through to canUseTool. Allow rules from settings files can also shadow the callback but are not visible here.
+[acpx] created session claude-bootstrap-observe-20261023-pending-approval (572ac958-e2a7-4373-90b5-b1cfd401c156)
+[acpx] agent: claude
+[acpx] cwd: /private/tmp/dual-w09-newlines-20261022-offline-07/worktree
+[acpx] created named session "claude-bootstrap-observe-20261023-pending-approval": 572ac958-e2a7-4373-90b5-b1cfd401c156

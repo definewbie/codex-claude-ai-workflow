@@ -1,0 +1,15 @@
+{
+  "user_reply": "批准",
+  "scope": "Fresh second Gate local preparation and real execution under submitted limits; no preapproval of actual business gates or product commit",
+  "at": "2026-10-10T16:56:16.034213+08:00",
+  "budget": {
+    "top_level_calls_max": 18,
+    "single_command_seconds": 600,
+    "active_seconds_max": 3600,
+    "visible_actual_token_warning": 120000,
+    "visible_actual_token_stop": 160000,
+    "semantic_loops_max": 2
+  },
+  "prior_remaining_17_reused": false,
+  "provider_calls_so_far": 0
+}

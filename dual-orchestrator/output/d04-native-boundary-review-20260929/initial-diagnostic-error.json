@@ -1,0 +1,9 @@
+{
+  "status": "INVALID_HARNESS_POSTPROCESS",
+  "reason": "system permission_denied message is string; summary assumed every message was object",
+  "nativeRunCompleted": true,
+  "evidencePreserved": true,
+  "actualProviderCalls": 0,
+  "permittedCorrection": "One side-effect-free parser correction; rerun fresh under same Gate, total sessions <=4",
+  "oldDriverSha256": "d8bef7bd9d4b466f725979ff5e9867cf7a9106c170ca03154e5b81c521186646"
+}

@@ -20,14 +20,14 @@ import java.util.concurrent.Callable;
 @Component
 @Command(name = "timeline", description = "Show the workflow timeline projection.", mixinStandardHelpOptions = true)
 public final class TimelineCommand implements Callable<Integer> {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new dev.dual.ledger.file.AtomicJsonWriter().objectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
 
     @Option(names = "--workdir", description = "Effective workspace directory. Defaults to current directory.")
     Path workdir = Path.of(".");
 
-    @Option(names = "--raw", description = "Print raw timeline.json.")
+    @Option(names = "--raw", description = "Print the current ledger timeline as JSON.")
     boolean raw;
 
     @Parameters(index = "0")
@@ -37,18 +37,12 @@ public final class TimelineCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-        if (!Files.exists(paths.timelineJson())) {
-            System.err.println("Timeline projection not found: " + paths.timelineJson());
-            System.err.println("Run or resume the workflow once to generate timeline.json.");
-            return 1;
-        }
-
+        var timeline = CliLedgerFactory.create().timelineSnapshot(paths);
         if (raw) {
-            System.out.println(Files.readString(paths.timelineJson()));
+            System.out.println(OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(timeline));
             return 0;
         }
 
-        var timeline = OBJECT_MAPPER.readValue(paths.timelineJson().toFile(), MAP_TYPE);
         System.out.println("Timeline");
         System.out.println("Workstream: " + text(timeline.get("workstreamId")));
         System.out.println("Workflow: " + text(timeline.get("workflowId")) + "@" + text(timeline.get("definitionVersion")));

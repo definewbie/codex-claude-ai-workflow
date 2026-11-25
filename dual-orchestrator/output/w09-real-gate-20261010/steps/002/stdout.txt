@@ -1,0 +1,8 @@
+Step 1: intake.claude_brainstorm -> WAITING_FOR_RECOVERY (workflow stopped at FAILED)
+
+Next actions:
+  1. Inspect the recovery summary:
+     dualctl recovery show --workdir /private/tmp/dual-w09-newlines-20261010/worktree ws-20261010T055644Z-6QCS
+     summary: /private/tmp/dual-w09-newlines-20261010/worktree/.agent/workstreams/ws-20261010T055644Z-6QCS/recovery/current-failure.md
+  2. Inspect recovery evidence before deciding whether retry is safe.
+     dualctl retry --workdir /private/tmp/dual-w09-newlines-20261010/worktree ws-20261010T055644Z-6QCS  # only after fixing the recorded protocol/session mismatch; never resend an unknown call

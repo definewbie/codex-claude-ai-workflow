@@ -1,0 +1,11 @@
+{
+  "status": "FAIL",
+  "reason": "AGENT_RESULT_PARSE_FAILED_AND_CORRECTION_USAGE_UNAVAILABLE",
+  "primary_product_reason": "agent_result_missing_or_invalid",
+  "secondary_observation_issue": "INVALID_CURRENT_TRANSCRIPT / MULTI_PROMPT_USAGE_REQUIRES_OCCURRENCE_SUM",
+  "next_dispatch": "FORBIDDEN",
+  "four_actual_requests_counted": true,
+  "complete_aggregate_tokens": "UNAVAILABLE_NOT_ZERO",
+  "recorded_at": "2026-10-15T07:45:31.408158+08:00",
+  "no_recovery_or_new_attempt_authorized": true
+}

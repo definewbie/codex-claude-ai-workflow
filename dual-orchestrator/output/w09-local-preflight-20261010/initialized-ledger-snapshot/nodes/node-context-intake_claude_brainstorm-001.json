@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-context-intake_claude_brainstorm-001",
+  "nodeDefinitionId" : "context.intake_claude_brainstorm",
+  "kind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "READY",
+  "stageId" : "stage-context",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ],
+  "inputTransition" : { },
+  "outputRefs" : [ ],
+  "result" : { },
+  "runRef" : null,
+  "latestExecutionId" : "",
+  "startedAt" : null,
+  "finishedAt" : null
+}

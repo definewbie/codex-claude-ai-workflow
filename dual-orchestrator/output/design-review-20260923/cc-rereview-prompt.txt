@@ -1,0 +1,27 @@
+请对 Dual 生命周期可靠性设计 R2 做独立、只读的设计层复审。只输出评审，不修改文件、不实施、不提交、不启动 provider/真实 E2E、不恢复历史样本、不委派额外 agent。PASS 不授权实施。
+
+仓库：/Users/kriswang/work/projects/ai/codex-claude-ai-workflow
+项目：dual-orchestrator
+主文档：dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md
+入口：dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md（仅当前入口；以下历史指令不可直接执行）
+
+先遵守 AGENTS.md、docs/engineering-checklist.md、docs/design/boundary-drift-review.zh-CN.md，并使用 boundary-first-engineering。核对实际 HEAD 和未提交工作区；文档基线声明为 3362eb42 加既有未提交改进，不能把这些改进全算成本轮 R2。当前不需真实调用或测试执行；若未运行测试，明确只审设计和现有证据。
+
+背景与约束：目标是既有多 agent 经 acpx 完成研发、测试、验收、交付与恢复，保留严格身份、scope、批准和证据校验；不新增 model 层、DSL 或权限平台，不重开 R4/Phase B。关键授权及最终交付审批；其他有界自动推进。同一冻结版本可续作，外部结果未知人工裁定。精确文件/操作范围在只读设计计划后、首次实现前批准。这些产品要求已经确认。
+
+首轮 CC 结论为设计层 PASS，附三项 WARN：W1 允许动作与被拒续作前置之间没有运行时事实/检测 owner；W2 只读设计计划缺实际执行面绑定及收尾检查；W3 LiteFlow 全局 holder 并发缺临时操作约束。三项 LOW：L1 缺 acceptance REJECT→返工→再验收 transition 与 fork 范围声明；L2 已有 process counterproof 仅列为回归候选；L3 未承接 GCTW 机器身份回显负担及可复核冻结运行清单。首轮没有重跑测试、完整复核全部 diff、全量证据索引或深入 M6/worker/small。I3/I4/I5/I6 原有 DESIGN GAP 不能被首轮 PASS 抹去。
+
+R2 的作者处置索引在主文档 §8；它只是导航，不是已通过的证据。请自行重建控制链，判断这些修订是否解决原设计问题、是否引入新矛盾或把问题移给未命名下游。不要只逐项确认文字已出现，也不要以本文给出的测试清单代替独立反例。
+
+复审重点：
+1. 人工决定→真实作者输入→修订→复评→批准，及 acceptance REJECT→返工/补证据/授权变更→自测→再验收。核对合法续作和非法拒绝、revision budget、subject/合同变更、失败原因保真。W1 的事实产生、持久化和 RecoveryAssessment 消费是否有唯一 owner；能否区分契约矛盾、操作缺项与诊断不足；记录失败时是否仍有静默等待/错误 retry 的缝隙。
+2. 只读 design/plan 的真实 provider/profile/tool/terminal/session 绑定、输入准备和发布前基准检查。核对 Claude/Codex、inline/worker、correction 与旧 session 的差异。基准、程序工件豁免、异常退出和写后还原是否被正确处理；不能把事后检查或 profile 名称当事前隔离。
+3. LiteFlow holder 的 load/execute/clean/close 与所有路由/恢复入口；临时约束能否实际核验，是否被目录锁或一次性快照偷换，是否误称当前已有 enforcement。不要求为此替换引擎或扩建平台。
+4. 输入准备→执行→验证→发布→恢复解释，以及候选批准→Git 应用→提交。检查本轮设计增量对 durable write 前/间/后失败、重试、重启、reader 一致性及兄弟路径的影响；明确哪些仍依赖 I5/I6 未完成详细设计。
+5. L1–L3 是否真正承接：常驻反证义务是否可执行；身份减负是否保留机器身份及语义义务的严格性；冻结运行清单是否仅索引真实 SoT 而未成为第二 authority。确认 fork 的承诺范围没有外溢。
+
+至少对实际相关不变量核对 Declared by、Proven by、Consumed by、Enforced before、Failure route、Cannot-bypass test。设计义务成立与代码达到 MODELED/PROJECTED/VALIDATED/ENFORCED/PROVEN 必须分开。既要指出空缺，也要判断其是否真是本轮必要工作；不要默认要求新增通用机制。
+
+按需回查主文档链接的 9·13 设计/交接/checkpoint、R1 比较，以及 output/architecture-audit-20260917/assessment.zh-CN.md、case-evidence.zh-CN.md、process-failure-counterproof.xml。可读历史 ledger/log，不恢复运行。输出证据索引缺失时明确未核验，不能凭作者摘要给通过。
+
+输出：先给设计层 PASS/WARN/FAIL；发现按严重程度列出证据（文档/代码位置）、合法或拒绝流程反例、影响、最小修正。逐项给 W1–W3/L1–L3 的复审判断及理由，允许仍未解决。另列尚未核验范围、仍阻止实施的 DESIGN GAP，以及 R2 是否错误扩大范围或过度设计。若无新发现明确说明，不凑数。即使 PASS 也在评审处停止，不进入实现。

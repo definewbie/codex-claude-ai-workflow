@@ -1,0 +1,16 @@
+[
+  {
+    "pid": 23868,
+    "recorded_started_at": "2026-10-10T14:43:06.259952+08:00",
+    "ps_exit": 1,
+    "present_now": false,
+    "scope": "these recorded CLI runners only; no inference about arbitrary native child tree"
+  },
+  {
+    "pid": 24008,
+    "recorded_started_at": "2026-10-10T14:43:29.346071+08:00",
+    "ps_exit": 1,
+    "present_now": false,
+    "scope": "these recorded CLI runners only; no inference about arbitrary native child tree"
+  }
+]

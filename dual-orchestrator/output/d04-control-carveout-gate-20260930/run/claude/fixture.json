@@ -1,0 +1,12 @@
+{
+  "root": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-carveout-claude-q28aba9n",
+  "controlBefore": {
+    ".": {
+      "type": "directory"
+    },
+    "record.txt": {
+      "sha256": "ff27255e7956b3e4906ec9eefd3176e857999fdec30d2093931e99462053b3ca"
+    }
+  },
+  "inputToken": "c800f5fb42039f0a06b53f0516c2e23f"
+}

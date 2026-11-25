@@ -1,0 +1,30 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-acceptance-generate_final_report-037",
+  "nodeDefinitionId" : "acceptance.generate_final_report",
+  "kind" : "TASK",
+  "handlerType" : "report.generate_final",
+  "status" : "COMPLETED",
+  "stageId" : "stage-acceptance",
+  "iterationId" : "iter-003",
+  "inputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-acceptance-codex_verifier_review-035-run-1792977598143/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/verification-observations.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792977598143/outputs/acceptance-codex-review.contract.json" ],
+  "inputTransition" : {
+    "transition_type" : "normal",
+    "condition" : "unconditional",
+    "purpose" : "Only verified complete self-test evidence may enter artifact validation.",
+    "source_node_sha256" : "44defadf6bb9975a0187e75ea2c707426ec5972f30314f4498b9320bab4557f4",
+    "source_node_instance_id" : "node-acceptance-decision-036",
+    "required" : true
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/reports/iter-003-final-report.md", ".agent/workstreams/ws-20261023T005431Z-9YYF/reports/latest-final-report.md" ],
+  "result" : {
+    "report_path" : ".agent/workstreams/ws-20261023T005431Z-9YYF/reports/iter-003-final-report.md",
+    "latest_report_path" : ".agent/workstreams/ws-20261023T005431Z-9YYF/reports/latest-final-report.md",
+    "iteration_id" : "iter-003",
+    "generated_at" : "2026-10-26T01:21:36.444132Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1792977696028-23539cb1",
+  "startedAt" : "2026-10-26T01:21:36.039836Z",
+  "finishedAt" : "2026-10-26T01:21:36.452672Z"
+}

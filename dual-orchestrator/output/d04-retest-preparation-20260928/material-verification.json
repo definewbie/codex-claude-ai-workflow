@@ -1,0 +1,14 @@
+{
+  "changedDocuments": [
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "unchangedWorkspaceFiles": 1316,
+  "preservedPreviousEvidenceFiles": 29,
+  "guardTests": 10,
+  "providerCallsThisTurn": 0,
+  "budgetStatus": "PENDING_USER_CONFIRMATION",
+  "modelStartExists": false,
+  "productImplementation": false
+}

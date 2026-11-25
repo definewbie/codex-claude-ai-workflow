@@ -1,0 +1,46 @@
+{
+  "reviewedAt": "2026-09-28T14:04:13.509481+00:00",
+  "verdict": "INVALID_AUTHENTICATION",
+  "primaryAgentSelfReview": true,
+  "nativeInitToolsValidated": true,
+  "necessaryRead": "NOT_TESTED",
+  "writeDenial": "NOT_TESTED",
+  "internalAuthenticationRetryEvents": 2,
+  "stopDefect": "api_retry authentication errors were not detected; guard stopped on final assistant error, not first failure",
+  "reportedUsage": {
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 0,
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "",
+    "iterations": [],
+    "speed": "standard"
+  },
+  "reportedEstimatedCostUsd": 0,
+  "actualBillAmount": null,
+  "billingMode": "oauth_unpriced",
+  "fixtureUnchanged": true,
+  "evidenceSha256": {
+    "identity.json": "dd93a73dcebc32fa5166b2810d583b13d114259e8ec7f459190f67b3bbc8e937",
+    "verification-gate.md": "fcd40cb2e9f5b906732aa029a45e65275fe086a03d3d552ae1efdd7a183d643e",
+    "metadata-preflight.json": "e44fa501901f55a8f1c57afc89dc4a366562b5969628682e4d1239a861bde5d2",
+    "model-start.json": "e572e957086eb9a7161470ac071f23f242c9f581479cdb4724d6a1515587d467",
+    "model-result.json": "6282d97e67561b54429a21b280f74fbb7bf9a67b3cb7d35d8206bcd3d7cf19f5",
+    "model-events.jsonl": "5e61bac5dc78c97fba2051ac7178e84fb6874bd3552bb8e2a2a660f1f75f3941",
+    "model-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "model-probe.mjs": "473071232bb3ff2d23fa1cf3ac2332d68d21aed4d2ea46f9b200cf3a3f88dfbf",
+    "run-probe.py": "493e3c9fc0fdf7806a4f9a310a70cc9795e40aa8c08c9d2b91437637ff0d9f05"
+  }
+}

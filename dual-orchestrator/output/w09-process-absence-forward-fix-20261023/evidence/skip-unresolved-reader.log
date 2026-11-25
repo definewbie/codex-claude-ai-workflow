@@ -1,0 +1,36 @@
+test_unresolved_present_or_failed_observation_still_stops (test_process_check.HistoricalAbsenceTest.test_unresolved_present_or_failed_observation_still_stops) ... 
+  test_unresolved_present_or_failed_observation_still_stops (test_process_check.HistoricalAbsenceTest.test_unresolved_present_or_failed_observation_still_stops) (expected='PRESENT') ... FAIL
+  test_unresolved_present_or_failed_observation_still_stops (test_process_check.HistoricalAbsenceTest.test_unresolved_present_or_failed_observation_still_stops) (expected='UNKNOWN') ... FAIL
+  test_unresolved_present_or_failed_observation_still_stops (test_process_check.HistoricalAbsenceTest.test_unresolved_present_or_failed_observation_still_stops) (expected='UNKNOWN') ... FAIL
+
+======================================================================
+FAIL: test_unresolved_present_or_failed_observation_still_stops (test_process_check.HistoricalAbsenceTest.test_unresolved_present_or_failed_observation_still_stops) (expected='PRESENT')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmp3a6rch64/test_process_check.py", line 141, in test_unresolved_present_or_failed_observation_still_stops
+    with self.assertRaises(ProcessInspectionError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ProcessInspectionError not raised
+
+======================================================================
+FAIL: test_unresolved_present_or_failed_observation_still_stops (test_process_check.HistoricalAbsenceTest.test_unresolved_present_or_failed_observation_still_stops) (expected='UNKNOWN')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmp3a6rch64/test_process_check.py", line 141, in test_unresolved_present_or_failed_observation_still_stops
+    with self.assertRaises(ProcessInspectionError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ProcessInspectionError not raised
+
+======================================================================
+FAIL: test_unresolved_present_or_failed_observation_still_stops (test_process_check.HistoricalAbsenceTest.test_unresolved_present_or_failed_observation_still_stops) (expected='UNKNOWN')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmp3a6rch64/test_process_check.py", line 141, in test_unresolved_present_or_failed_observation_still_stops
+    with self.assertRaises(ProcessInspectionError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ProcessInspectionError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=3)

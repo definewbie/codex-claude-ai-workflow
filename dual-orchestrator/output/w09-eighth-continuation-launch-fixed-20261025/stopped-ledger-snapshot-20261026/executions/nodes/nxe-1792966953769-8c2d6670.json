@@ -1,0 +1,70 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792966953769-8c2d6670",
+  "agentTaskId" : "agt-1792966953764-88b467d5",
+  "workflowExecutionId" : "wfe-1792966953680-cedcf701",
+  "nodeInstanceId" : "node-plan-decision-026",
+  "nodeDefinitionId" : "plan.decision",
+  "handlerType" : "review.decision",
+  "status" : "SUCCEEDED",
+  "pid" : 34028,
+  "outcome" : "READY_TO_IMPLEMENT",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.contract.json" ],
+  "result" : {
+    "claim" : {
+      "executor_pid" : 34028,
+      "executor_started_at" : "2026-10-25T22:22:32.464Z",
+      "input_identity" : "6970a20c93bbc0ffe8a5d807dbc61c5a5ce5c774b84ce4cc4ae61dc22b0d3a2e"
+    },
+    "source" : "contract-sidecar",
+    "summary" : "环境与可行性引用已按人工要求补齐，原计划语义保持不变，复评通过，可进入当前 EXECUTION 精确审批。",
+    "decision" : "READY_TO_IMPLEMENT",
+    "reviewed_candidate" : {
+      "author_occurrence" : "node-plan-claude_plan-022",
+      "review_decision" : "READY_TO_IMPLEMENT",
+      "checks" : [ {
+        "result" : "PASSED",
+        "input_refs" : [ {
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.contract.json",
+          "sha256" : "7db15a9535462e8642d80db8eeb6857afa2865a040ff3210f8488e1b52118e06"
+        }, {
+          "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.contract.json",
+          "sha256" : "b021f9fb966c656895f91729e4c9045e6780e1ad5b9c162af0458be68a59f559"
+        } ],
+        "rule_version" : "2",
+        "rule_id" : "review.subject.and.route"
+      } ],
+      "review_artifact" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.contract.json",
+        "sha256" : "b021f9fb966c656895f91729e4c9045e6780e1ad5b9c162af0458be68a59f559"
+      },
+      "stage" : "plan",
+      "decision_occurrence" : "node-plan-decision-026",
+      "reviewer_occurrence" : "node-plan-codex_plan_review-025",
+      "schema_version" : 1,
+      "author_artifact" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.contract.json",
+        "sha256" : "7db15a9535462e8642d80db8eeb6857afa2865a040ff3210f8488e1b52118e06"
+      },
+      "contract" : {
+        "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b",
+        "epoch" : 1,
+        "phase" : "GOAL",
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json"
+      }
+    },
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "",
+  "agentRunRef" : "",
+  "agent" : "",
+  "session" : "",
+  "exitCode" : null,
+  "startedAt" : "2026-10-25T22:22:33.769247Z",
+  "finishedAt" : "2026-10-25T22:22:33.901730Z",
+  "durationMs" : 132
+}

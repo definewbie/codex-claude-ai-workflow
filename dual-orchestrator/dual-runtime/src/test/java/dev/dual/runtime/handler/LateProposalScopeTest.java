@@ -129,7 +129,7 @@ class LateProposalScopeTest {
         var candidates = List.of(new TaskContract.ScopeEntry("extra.py", TaskContract.ScopeOperation.CREATE));
         var errors = assertDoesNotThrow(() -> validator.validate(malformed, root, approved, base, candidates));
         assertTrue(errors.contains("scope review must preserve the approved contract outside candidate additions"));
-        assertTrue(errors.contains("scope.included must not be empty"));
+        assertTrue(errors.contains("scope.included must be present (GOAL may propose no files)"));
     }
 
     private ChangeScopeEvaluationArtifact.Verified evidence(ChangeScopeEvaluation evaluation) throws Exception {
@@ -218,9 +218,28 @@ class LateProposalScopeTest {
     }
 
     private static TaskContract contract(List<TaskContract.ScopeEntry> entries) {
-        return new TaskContract("task-ws", 1, Instant.now(), "Generic utility", new TaskContract.Scope(entries, List.of()),
-                List.of("Works", "Preserves data"), List.of("Run tests"), List.of("Stay in scope"),
-                List.of(), List.of(), List.of(), List.of(), ContractStatus.READY_FOR_REVIEW, 1,
-                new TaskContract.Source("REQUIREMENT.md", "test"));
+        return new TaskContract(2,
+                dev.dual.core.contract.TaskContract.Phase.EXECUTION,
+                1,
+                "task-ws",
+                1,
+                Instant.now(),
+                "Generic utility",
+                new TaskContract.Scope(entries, List.of()),
+                dev.dual.runtime.RuntimeTestLedger.clauses("AC-", List.of("Works", "Preserves data")),
+                dev.dual.runtime.RuntimeTestLedger.clauses("TR-", List.of("Run tests")),
+                List.of("Stay in scope"),
+                List.of(),
+                List.of(),
+                java.util.List.of(),
+                List.of(),
+                List.of(),
+                ContractStatus.READY_FOR_REVIEW,
+                1,
+                new TaskContract.Source("REQUIREMENT.md", "test", null, null),
+                null,
+                java.util.List.of(),
+                java.util.List.of(),
+                java.util.List.of());
     }
 }

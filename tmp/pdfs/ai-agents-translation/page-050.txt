@@ -1,0 +1,13 @@
+boundaries that keep them safe and usable. That said, agents are still
+constrained by the tools you give them, by safeguards you enforce, and by
+the workflows you allow them to operate within. These constraints are what
+make agents viable today: safe to deploy, predictable in behavior, and
+aligned with their intended goals.
+
+What current systems demonstrate is a form of orchestrated autonomy. As
+you saw in the LangGraph examples earlier (Example 1-5), agents can
+branch conditionally, call tools, or decide whether to continue a workflow.
+This already looks very different from a static prompt–response call, but it’s
+still bounded. The orchestration logic is fixed; within it, the LLM can make
+choices, but it can’t redefine its architecture. Table 1-2 gives a short
+overview of what agents can do so far.

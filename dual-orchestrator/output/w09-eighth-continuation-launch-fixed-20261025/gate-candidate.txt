@@ -1,0 +1,22 @@
+第八例具名续作 Gate：启动选择收敛候选
+
+状态：离线装配；真实运行未授权。run-authorization.json=false；approved_launch_identity_sha256=null。
+
+Verification Gate:
+Target: 在不重置累计预算、不改旧停止与业务批准的前提下，使用新受审启动组合继续同一第八例，走完原主流程。本轮仅验证 operator 接线，未来真实运行须另批。
+Source of truth: 既有 workflow/current、node/run/occurrence、R01-R03/L03、交付 owner；用量由原 gate_support reader 全量读取，operator 回执仅计本地活动时间。
+Trigger precondition: 用户批准本候选 launch SHA + 本 workstream/checkpoint 的具名续作；同实例无并行、外部无 pending、当前节点合法；程序/配置/发行/观察输入无漂移；累计储备足够。
+How precondition is checked before run: 用 local-launch-selection.json 指定的绝对 Python 解释器运行 pre-dispatch-recheck.py；run-one-step.py 再执行 authorize+inspect。不可用父 PATH 重新选择另一 Python。两入口/进程读取/Java Popen 消费唯一 E。真实授权后还须核最新外部状态，历史关闭元数据不等于今日所有子树全停。
+PASS: 原完整谱系、逐条验收、独立复评、人门、候选绑定、目标应用与用户 commit/finalize 成立；本轮离线 PASS 不代替它。
+FAIL: 实际合法流程误拒/死端、越权采纳、原因漂移、用量不可归因、储备或止损触发；领域合法完成事实保持。
+INVALID: 工件或启动输入错误/漂移、未知前提、擅改冻结输入/账本、配置组合未获批准；不得以准备通过冒充运行通过。
+Stop-loss: 原 1700000 token/18 请求/3600 活动秒，逐派发保护全部未完成主链+当次重入+一次修正；原业务批准、UNKNOWN 与 terminal guard 不变。BOUNDARY 立即停；TRANSIENT 仅按现有合法入口与预算/重试上限，不扩本候选。
+Run artifact freshness: 659 源输入+原2 JAR/受审 wrapper/dist+实际程序/私有配置 SHA+候选 observer_inputs 固定。Java 产品未变，不重建/不重跑 Maven，不将历史1813项报成本轮凭证。
+
+账目口径：848242 是已经发生且可归因的 token；851758 是 1700000−848242 的剩余额度，不是另一个总量；已用10，剩余8。尾链450000+修正150000=600000/4请求，保留尾链后机动251758/4请求。
+旧活动底数1263.444秒；带入前续作两次成功重核及已记录失败/诊断后1266.46780141676秒；新包每个重核/运行/人工命令回执继续累计，60分钟不是重新开始。离线开发/单元测试不是 case provider 活动时间。
+
+原包 stop、上一续作 stop 永久保留 SHA，不删除、不显式清空。新包若产生 stop 仍拒续作，不能拿“旧辅助误拒已修”作为豁免。运行批准仍不代替任何业务人门，business_gates_delegated=false。
+当前 Codex/config 作为新组合待用户决定；差异和将来观察点见 config-impact-map.txt。无 Relay 集成、无新模型/原生实验、无用户配置改动。
+
+未来最小动作：CC 只读合并复审→用户批准新组合和具名续作→用绝对解释器重跑只读重核→通过后原 Java 单步入口。当前不得直接启动 run-one-step。

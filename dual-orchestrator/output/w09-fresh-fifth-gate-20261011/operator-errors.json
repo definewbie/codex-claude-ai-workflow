@@ -1,0 +1,14 @@
+[
+  {
+    "phase": "read-only preparation",
+    "issue": "Two assumed historical filenames did not exist: fourth native-session-stop-observation and repair check-budget-offline",
+    "correction": "Read actual stop-session-proof and check_budget --self-check; zero native calls or ledger mutation",
+    "classification": "OPERATOR_INSPECTION_ERROR_NOT_GATE_FAILURE"
+  },
+  {
+    "phase": "stop archive read-only recheck",
+    "issue": "Initially treated old manifest external primary worklist as immutable, assertion failed after intentional later worklist updates",
+    "correction": "Explicitly exclude only mutable external worklist, retain historical SHA; recheck all archived case bytes",
+    "classification": "OPERATOR_INSPECTION_ERROR_NOT_GATE_FAILURE"
+  }
+]

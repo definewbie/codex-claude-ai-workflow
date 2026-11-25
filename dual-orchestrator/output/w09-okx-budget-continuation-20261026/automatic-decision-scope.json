@@ -1,0 +1,58 @@
+{
+  "source": "CURRENT_DIRECT_USER_AUTHORIZATION",
+  "quote": "批准，后面如果没有意外，自动执行，不需要我批准",
+  "approval_ref": "current-automatic-approval-20261027.txt",
+  "approval_sha256": "734a576fa48e678053257923a1bf4fdcb6ff4c5d7c365072a15a581e46ad912b",
+  "case": "OKX_JAVA_MODIFY_CANDIDATE",
+  "workstream": "ws-20261026T142203Z-7SNA",
+  "scope_files": [
+    {
+      "path": "src/main/java/app/cryptoincome/assessment/domain/PhaseOneAssessment.java",
+      "operation": "MODIFY"
+    },
+    {
+      "path": "src/main/java/app/cryptoincome/assessment/application/PhaseOneAssessmentService.java",
+      "operation": "MODIFY"
+    },
+    {
+      "path": "src/main/java/app/cryptoincome/cli/AssessIncomeCliRunner.java",
+      "operation": "MODIFY"
+    },
+    {
+      "path": "src/test/java/app/cryptoincome/assessment/PhaseOneAssessmentServiceTest.java",
+      "operation": "MODIFY"
+    },
+    {
+      "path": "src/test/java/app/cryptoincome/cli/AssessIncomeCliRunnerTest.java",
+      "operation": "MODIFY"
+    },
+    {
+      "path": "docs/15-Funding-Rate-Break-Even-Threshold.md",
+      "operation": "CREATE"
+    }
+  ],
+  "goal_ref": ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/contracts/node-contract-compile-007/task-contract.json",
+  "goal_sha256": "41f643f07f822573dfa2a13e8f5ede75aa2efd83fdca3efa20130ca0ae2bf04f",
+  "token_limit": 4000000,
+  "call_limit": 18,
+  "active_seconds_limit": 3600,
+  "normal_actions": [
+    "current readiness plan revise",
+    "EXECUTION review after qualified exact same-scope plan",
+    "final delivery review of independently accepted exact candidate",
+    "isolated target apply",
+    "isolated target commit",
+    "original finalize"
+  ],
+  "stop_on": [
+    "BOUNDARY failure",
+    "unknown external effects",
+    "budget/call/time reserve failure",
+    "unexpected scope or goal change",
+    "transient retry bound exhausted"
+  ],
+  "permission_model": "Normalize each authorized decision through existing Java CLI/core action; never edit domain ledger. This explicit new delegation supersedes earlier no-delegation instructions for subsequent normal decisions. Existing frozen budget/run authorization flags remain budget-only, never grant human authority.",
+  "reset_usage_time_or_stops": false,
+  "push_authorized": false,
+  "original_project_write_authorized": false
+}

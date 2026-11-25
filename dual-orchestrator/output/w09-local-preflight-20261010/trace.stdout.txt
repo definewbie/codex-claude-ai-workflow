@@ -1,0 +1,46 @@
+Trace
+Workstream: ws-20261010T055644Z-6QCS
+Workspace: /private/tmp/dual-w09-newlines-20261010/worktree
+Ledger: /private/tmp/dual-w09-newlines-20261010/worktree/.agent/workstreams/ws-20261010T055644Z-6QCS
+Workflow: agent-lifecycle-terminal-delivery@5
+Status: RUNNING
+Current Node: context.intake_claude_brainstorm
+Open Gates: -
+Final Acceptance: none
+Goal Outcome: unknown
+End State: unknown
+Completion Audit: unknown
+Repair Loops: 0
+Verification Confidence: UNKNOWN
+
+Why:
+  Workflow is running at context.intake_claude_brainstorm.
+
+Attention:
+  [info] Workflow is running
+    Workflow is running at context.intake_claude_brainstorm.
+
+Timeline:
+  [ ] context.intake_claude_brainstorm  (iter-001)
+
+Latest Agent Tasks:
+  -
+
+Latest Agent Runs:
+  -
+
+Tool Governance:
+  toolCalls=0 reads=0 bash=0 missingRereadReasons=0
+  repeated reads: -
+Token Attribution:
+
+Artifacts:
+  Final Report: missing
+  Workstream Summary: missing
+  Handoff JSON: missing
+  Next-stage Prompt: missing
+  Delivery PR Body: missing
+  Delivery Merge Plan: missing
+
+Next:
+Let the active node finish, or inspect the active execution if it appears stale.

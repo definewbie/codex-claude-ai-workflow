@@ -1,0 +1,35 @@
+{
+  "schema": "dual.w03.resolver-desk-check.v1",
+  "scope": "Imports unchanged source utility with synthetic filesystem fixtures; no acpx CLI, adapter/native, npm execution, network or provider",
+  "results": [
+    {
+      "name": "existing resolver selects installed bin, not package-exec",
+      "status": "PASS"
+    },
+    {
+      "name": "missing installation produces a package-exec plan without installed bin identity",
+      "status": "PASS"
+    },
+    {
+      "name": "configure default Codex pinned npx string is a custom launch, not a builtin installed binding",
+      "status": "PASS"
+    },
+    {
+      "name": "configure default Claude wrapper is a custom launch, not a builtin installed binding",
+      "status": "PASS"
+    },
+    {
+      "name": "custom direct command is not silently reclassified as installed builtin",
+      "status": "PASS"
+    },
+    {
+      "name": "same version and resolver result do not prove same executable bytes",
+      "status": "PASS"
+    },
+    {
+      "name": "unavailable installation and npm bridge do not produce fake identity",
+      "status": "PASS"
+    }
+  ],
+  "spawn_count": 0
+}

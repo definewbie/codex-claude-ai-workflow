@@ -1,0 +1,31 @@
+test_changed_parent_path_with_same_selected_environment (__main__.RequiredBehavior.test_changed_parent_path_with_same_selected_environment) ... FAIL
+test_runner_uses_selected_absolute_programs (__main__.RequiredBehavior.test_runner_uses_selected_absolute_programs) ... FAIL
+
+======================================================================
+FAIL: test_changed_parent_path_with_same_selected_environment (__main__.RequiredBehavior.test_changed_parent_path_with_same_selected_environment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<string>", line 11, in test_changed_parent_path_with_same_selected_environment
+    with patch.dict(os.environ,{'PATH':'/irrelevant-parent-only'}): c.inspect()
+                                                                    ~~~~~~~~~^^
+  File "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-eighth-continuation-launch-fixed-20261025/continuation.py", line 65, in inspect
+    assert hashlib.sha256(os.environ.get('PATH', '').encode()).hexdigest() == launch['process_path_sha256'], 'PATH drift'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: PATH drift
+
+======================================================================
+FAIL: test_runner_uses_selected_absolute_programs (__main__.RequiredBehavior.test_runner_uses_selected_absolute_programs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<string>", line 17, in test_runner_uses_selected_absolute_programs
+    self.assertEqual(selection['executables']['rtk'],self.argv[0])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '/opt/homebrew/bin/rtk' != 'rtk'
+- /opt/homebrew/bin/rtk
++ rtk
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.017s
+
+FAILED (failures=2)

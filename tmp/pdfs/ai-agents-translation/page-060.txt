@@ -1,0 +1,32 @@
+Table 2-2. Examples: Chain-of-thought prompts by scenario
+
+ Scenario     CoT prompt example
+
+ Planning        “Plan step-by-step to create a one-week blog schedule.
+                  Explain the reasoning behind each choice.”
+
+ Data analysis    “Begin by describing the dataset. Next highlight
+                    patterns or trends. Conclude with a clear summary of
+                    insights.”
+
+ Math problem   “Break the problem into smaller pieces. Solve each
+                  piece with explanation. Then combine the results for
+                   the final answer.”
+
+ Research task    “List the central questions first. Investigate them one
+                by one. Conclude with a synthesized summary.”
+
+ Debugging       “Start by listing possible causes. Test each cause in
+                     turn. Eliminate what does not fit and explain why until
+                you reach the fix.”
+
+ Decision         “List all available options. Consider pros and cons
+ making           step-by-step. Choose the option that best fits the
+                      criteria and explain why.”
+
+
+To make how you might want to implement this into your workflow more
+explicit, let’s look at an agent for data analysis. Since the core of a CoT-
+style agent is its ability to structure work into intermediate reasoning steps,
+data analysis is a useful example. The goal is not to expose unrestricted raw
+reasoning as the final answer, but to guide the agent through visible analysis

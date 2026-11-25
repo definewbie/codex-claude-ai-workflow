@@ -1,0 +1,146 @@
+{
+  "cases": [
+    {
+      "case": "current stopped checkpoint now funded",
+      "input": {
+        "actual_tokens": 1767028,
+        "completed_calls": 11,
+        "active_seconds": 1798.4491589584516,
+        "remaining_mainline": [
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 400000,
+        "required_call_reserve": 3,
+        "remaining_tokens": 1232972,
+        "remaining_calls": 7,
+        "warning": true
+      }
+    },
+    {
+      "case": "exact 400k reserve",
+      "input": {
+        "actual_tokens": 2600000,
+        "completed_calls": 11,
+        "active_seconds": 1798.4491589584516,
+        "remaining_mainline": [
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 400000,
+        "required_call_reserve": 3,
+        "remaining_tokens": 400000,
+        "remaining_calls": 7,
+        "warning": true
+      }
+    },
+    {
+      "case": "reserve short by one token",
+      "input": {
+        "actual_tokens": 2600001,
+        "completed_calls": 11,
+        "active_seconds": 1798.4491589584516,
+        "remaining_mainline": [
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "INSUFFICIENT_MAINLINE_AND_CORRECTION_RESERVE",
+        "required_token_reserve": 400000,
+        "required_call_reserve": 3,
+        "remaining_tokens": 399999,
+        "remaining_calls": 7,
+        "warning": true
+      }
+    },
+    {
+      "case": "request tail exhausted",
+      "input": {
+        "actual_tokens": 1767028,
+        "completed_calls": 16,
+        "active_seconds": 1798.4491589584516,
+        "remaining_mainline": [
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "INSUFFICIENT_ACTUAL_CALL_RESERVE",
+        "required_token_reserve": 400000,
+        "required_call_reserve": 3,
+        "remaining_tokens": 1232972,
+        "remaining_calls": 2,
+        "warning": true
+      }
+    },
+    {
+      "case": "time tail exhausted",
+      "input": {
+        "actual_tokens": 1767028,
+        "completed_calls": 11,
+        "active_seconds": 2101,
+        "remaining_mainline": [
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "INSUFFICIENT_ACTIVE_TIME_RESERVE",
+        "required_token_reserve": 400000,
+        "required_call_reserve": 3,
+        "remaining_tokens": 1232972,
+        "remaining_calls": 7,
+        "warning": true
+      }
+    },
+    {
+      "case": "usage incomplete",
+      "input": {
+        "actual_tokens": 1767028,
+        "completed_calls": 11,
+        "active_seconds": 1798.4491589584516,
+        "remaining_mainline": [
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": false,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "MEASUREMENT_OR_EXTERNAL_RESULT_UNCERTAIN"
+      }
+    }
+  ],
+  "native_calls": 0,
+  "expected_current_reserve": 400000,
+  "evidence": "Actual checkpoint counts with synthetic negative/threshold perturbations; no native cost claim"
+}

@@ -25,6 +25,17 @@ final class AcpxSessionStreamProjector {
     private AcpxPromptCompletion promptCompletion = AcpxPromptCompletion.EMPTY;
     private final Map<String, AgentLifecycleEvent.PermissionEvidence> permissionDetails = new HashMap<>();
     private final Map<String, String> toolNamesByCallId = new HashMap<>();
+    private String currentSession = "";
+    private boolean promptActive;
+    private final Map<String, dev.dual.core.execution.AdapterSignal.OperationRef> permissionOperations = new HashMap<>();
+    private final Map<String, Map<String,String>> permissionOptionKinds = new HashMap<>();
+    private final java.util.Set<String> seenPermissionIds = new java.util.HashSet<>();
+    private final java.util.Set<String> invalidPermissionIds = new java.util.HashSet<>();
+    private final AcpxToolObservations toolObservations = new AcpxToolObservations();
+
+    List<dev.dual.core.execution.AgentExecutionEvidence.ToolObservation> toolObservations() {
+        return toolObservations.values();
+    }
 
     Optional<AgentLifecycleEvent> accept(long sequence, AcpxStreamWireLine wire) {
         return accept(sequence, wire, true);
@@ -79,13 +90,27 @@ final class AcpxSessionStreamProjector {
         }
         if ("session/prompt".equals(wire.method())) {
             startPrompt(wire.requestId());
+            currentSession = wire.request().sessionId(); promptActive = currentSession != null && !currentSession.isBlank();
+            permissionDetails.clear(); permissionOperations.clear(); permissionOptionKinds.clear();
+            toolNamesByCallId.clear(); toolObservations.start(currentSession, currentPromptRequestId);
         }
         if ("session/new".equals(wire.method()) || "session/resume".equals(wire.method())) {
             sessionReady = false;
         }
         if ("session/request_permission".equals(wire.method())) {
-            var evidence = permissionEvidence(wire.request());
+            var request = wire.request();
+            if (!seenPermissionIds.add(wire.requestId())) invalidPermissionIds.add(wire.requestId());
+            var evidence = permissionEvidence(request);
             permissionDetails.put(wire.requestId(), evidence);
+            // A current but uncorrelated request still produces a blocking permission fact.
+            // It cannot acquire an operation identity eligible for nonessential assessment.
+            if (!promptActive || !currentSession.equals(request.sessionId()))
+                return Optional.of(AgentLifecycleEvent.permissionRequested(sequence, evidence));
+            permissionOptionKinds.put(wire.requestId(), request.permissionOptionKinds());
+            permissionOperations.put(wire.requestId(), new dev.dual.core.execution.AdapterSignal.OperationRef(
+                    currentSession, currentPromptRequestId, wire.requestId(), request.permissionToolCallId(), sequence, -1,
+                    request.permissionToolKind(), dev.dual.core.execution.AdapterSignal.parametersHash(request.permissionRawInput()),
+                    request.permissionRequestJson(), dev.dual.core.execution.AdapterSignal.digest(request.permissionRequestJson()), "", ""));
             return Optional.of(AgentLifecycleEvent.permissionRequested(sequence, evidence));
         }
         return switch (wire.method()) {
@@ -117,8 +142,10 @@ final class AcpxSessionStreamProjector {
             promptCompletion = new AcpxPromptCompletion(
                     requestId,
                     promptStopReason,
-                    finalAssistantMessage()
+                    finalAssistantMessage(),
+                    currentSession
             );
+            toolObservations.finish(); promptActive = false;
             return Optional.of(AgentLifecycleEvent.promptCompleted(sequence));
         }
         if (currentObservation && "session/request_permission".equals(method)) {
@@ -126,15 +153,26 @@ final class AcpxSessionStreamProjector {
             if (evidence == null) {
                 return Optional.empty();
             }
+            var operation = permissionOperations.remove(wire.requestId());
+            var options = permissionOptionKinds.remove(wire.requestId());
             var outcome = wire.result() == null ? "" : wire.result().permissionOutcome();
             var optionId = wire.result() == null ? "" : wire.result().permissionOptionId();
-            if ("selected".equals(outcome) && ("allow".equals(optionId) || "allow_always".equals(optionId))) {
+            var optionKind = options == null ? "" : options.getOrDefault(optionId, "");
+            boolean current = promptActive && operation != null && currentSession.equals(operation.sessionId())
+                    && !invalidPermissionIds.contains(wire.requestId());
+            if (current && "selected".equals(outcome) && ("reject_once".equals(optionKind) || "reject_always".equals(optionKind))) {
+                var response = wire.result().responseJson();
+                operation = new dev.dual.core.execution.AdapterSignal.OperationRef(operation.sessionId(), operation.promptId(),
+                        operation.requestId(), operation.toolCallId(), operation.requestSequence(), sequence, operation.kind(),
+                        operation.parametersSha256(), operation.requestJson(), operation.requestSha256(), response,
+                        dev.dual.core.execution.AdapterSignal.digest(response));
+                return Optional.of(AgentLifecycleEvent.permissionDenied(sequence, evidence.withDisposition("DENIED").withOperation(operation)));
+            }
+            if (current && "selected".equals(outcome) && ("allow_once".equals(optionKind) || "allow_always".equals(optionKind)))
                 return Optional.of(AgentLifecycleEvent.permissionApproved(sequence, evidence.withDisposition("APPROVED")));
-            }
-            if ("selected".equals(outcome) && optionId.startsWith("reject")) {
-                return Optional.of(AgentLifecycleEvent.permissionDenied(sequence, evidence.withDisposition("DENIED")));
-            }
-            return Optional.of(AgentLifecycleEvent.permissionCancelled(sequence, evidence.withDisposition("CANCELLED")));
+            if (current && "cancelled".equals(outcome))
+                return Optional.of(AgentLifecycleEvent.permissionCancelled(sequence, evidence.withDisposition("CANCELLED")));
+            return Optional.of(AgentLifecycleEvent.permissionUnresolved(sequence, evidence.withDisposition("UNKNOWN")));
         }
         if (wire.result() != null && wire.result().usage() != null) {
             return Optional.of(AgentLifecycleEvent.usageUpdate(sequence));
@@ -167,6 +205,7 @@ final class AcpxSessionStreamProjector {
             return Optional.empty();
         }
         var notification = wire.notification();
+        if (currentObservation && notification != null) toolObservations.accept(notification);
         var updateKind = notification == null ? "" : notification.updateKind();
         if (notification != null
                 && !notification.toolCallId().isBlank()

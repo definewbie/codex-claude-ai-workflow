@@ -1,0 +1,35 @@
+{
+  "requestId": "device-evidence-example-1",
+  "preparation": {
+    "ref": "examples/operator-preparation.json",
+    "sha256": "fac5ecbd9b666a3cdc16c9b19b2ba829487f7768c63e0109af31752c01189246"
+  },
+  "baseline": {
+    "gateNodeInstanceId": "device-material-gate-001",
+    "contractRef": "examples/operator-approved-subject.json",
+    "contractSha256": "4fd598fc14b69a4154cc51a1878fa16862f2f3c66f82d827889949c773887d11",
+    "head": "1111111111111111111111111111111111111111",
+    "indexSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+    "sourceSha256": "3333333333333333333333333333333333333333333333333333333333333333",
+    "paths": [
+      "src/app.js"
+    ]
+  },
+  "declaredExecution": {
+    "command": "人工触控步骤",
+    "environment": "example-device",
+    "startedAt": "2026-09-28T00:01:00Z",
+    "finishedAt": "2026-09-28T00:02:00Z",
+    "exitCode": 0,
+    "purpose": "DEVICE-1 人工验证，非机器日志"
+  },
+  "note": "仅示范现有 ExternalVerificationEvidence DTO 的形状；基准与路径为设计 fixture，不具执行资格",
+  "materials": [
+    {
+      "ref": "examples/operator-observation.json",
+      "sha256": "29535d5cd83e9ff2ac431e1dbf4c081c5b664d7ca80761cee909465a5b955735",
+      "size": 170,
+      "name": "operator-observation.json"
+    }
+  ]
+}

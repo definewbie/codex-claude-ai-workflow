@@ -1,0 +1,13 @@
+{
+  "schemaVersion" : 1,
+  "iterationId" : "iter-003",
+  "parentIterationId" : "iter-002",
+  "number" : 3,
+  "stageId" : "stage-design",
+  "status" : "active",
+  "triggerNodeInstanceId" : "node-design-decision-016",
+  "triggerAction" : "NEEDS_REVISION",
+  "targetNodeDefinitionId" : "design.claude_design",
+  "reason" : "三文件设计与算法符合目标，但实际返回值的展示仍是可选步骤，未完整落实 AC-2 的强制证据要求。",
+  "createdAt" : "2026-10-11T06:30:53.341643Z"
+}

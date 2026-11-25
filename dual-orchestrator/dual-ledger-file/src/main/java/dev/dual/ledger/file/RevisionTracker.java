@@ -17,13 +17,11 @@ final class RevisionTracker {
     private final AtomicJsonWriter jsonWriter;
     private final ObjectMapper objectMapper;
     private final LedgerEventLog eventLog;
-    private final FailureSummaryWriter failureSummaryWriter;
 
     RevisionTracker(AtomicJsonWriter jsonWriter, ObjectMapper objectMapper, LedgerEventLog eventLog) {
         this.jsonWriter = jsonWriter;
         this.objectMapper = objectMapper;
         this.eventLog = eventLog;
-        this.failureSummaryWriter = new FailureSummaryWriter(objectMapper);
     }
 
     WorkflowIterationDocument nextRevisionIteration(
@@ -127,14 +125,13 @@ final class RevisionTracker {
         );
         jsonWriter.write(paths.workflowCurrentJson(), stopped);
         eventLog.writeInstanceFromCurrent(paths, stopped, now);
-        failureSummaryWriter.write(paths, node.nodeInstanceId());
     }
 
     int maxIterationNumber(WorkstreamPaths paths) throws IOException {
-        if (!Files.exists(paths.iterationsDir())) {
+        if (!jsonWriter.exists(paths.iterationsDir())) {
             return 1;
         }
-        try (var stream = Files.list(paths.iterationsDir())) {
+        try (var stream = jsonWriter.list(paths.iterationsDir()).stream()) {
             return stream
                     .filter(Files::isRegularFile)
                     .map(path -> path.getFileName().toString())
@@ -150,38 +147,30 @@ final class RevisionTracker {
             String triggerNodeDefinitionId,
             String targetNodeDefinitionId
     ) throws IOException {
-        if (!Files.exists(paths.iterationsDir())) {
+        if (!jsonWriter.exists(paths.iterationsDir())) {
             return 0;
         }
-        try (var stream = Files.list(paths.iterationsDir())) {
-            var iterations = stream
-                    .filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().matches("iter-\\d{3}\\.json"))
-                    .map(path -> readIterationOrNull(path))
-                    .filter(iteration -> iteration != null)
-                    .filter(iteration -> targetNodeDefinitionId.equals(iteration.targetNodeDefinitionId()))
-                    .filter(iteration -> !"workflow_started".equals(iteration.triggerAction()))
-                    .toList();
-            var count = 0;
-            for (var iteration : iterations) {
-                var triggerNode = objectMapper.readValue(
-                        paths.nodeJson(iteration.triggerNodeInstanceId()).toFile(),
-                        NodeInstanceDocument.class
-                );
-                if (triggerNodeDefinitionId.equals(triggerNode.nodeDefinitionId())) {
-                    count++;
-                }
-            }
-            return count;
+        int count = 0;
+        for (var path : jsonWriter.list(paths.iterationsDir())) {
+            if (!Files.isRegularFile(path) || !path.getFileName().toString().matches("iter-\\d{3,}\\.json")) continue;
+            // An unreadable revision cannot be silently removed from the stage budget.
+            var iteration = jsonWriter.read(path, WorkflowIterationDocument.class);
+            if ("workflow_started".equals(iteration.triggerAction())) continue;
+            var trigger = jsonWriter.read(paths.nodeJson(iteration.triggerNodeInstanceId()), NodeInstanceDocument.class);
+            // Readiness repair is another entrance to the existing plan budget, not a fresh allowance.
+            boolean planRepair = planTarget(targetNodeDefinitionId) && planTarget(iteration.targetNodeDefinitionId());
+            if (planRepair && ("plan.decision".equals(triggerNodeDefinitionId)
+                    || "gate.human_plan_approval".equals(triggerNodeDefinitionId))) {
+                if ("revise_readiness".equals(iteration.triggerAction()) || "plan.decision".equals(trigger.nodeDefinitionId())
+                        || "gate.human_plan_approval".equals(trigger.nodeDefinitionId())) count++;
+            } else if (targetNodeDefinitionId.equals(iteration.targetNodeDefinitionId())
+                    && triggerNodeDefinitionId.equals(trigger.nodeDefinitionId())) count++;
         }
+        return count;
     }
 
-    private WorkflowIterationDocument readIterationOrNull(Path path) {
-        try {
-            return objectMapper.readValue(path.toFile(), WorkflowIterationDocument.class);
-        } catch (IOException e) {
-            return null;
-        }
+    private static boolean planTarget(String id) {
+        return "plan.claude_plan".equals(id) || "context.plan_claude".equals(id);
     }
 
     static boolean startsNewIteration(String nodeDefinitionId, String outcome, String targetNodeDefinitionId) {

@@ -33,16 +33,14 @@ class StatusCommandTest {
         var workstreamId = new DualId("ws-status");
         var workspaceId = new DualId("wsp-status");
         var paths = new WorkstreamPaths(tempDir, workstreamId);
-        new FileLedgerStore().initializeWorkstream(
-                paths,
-                Workstream.created(
+        var fixtureWorkstream = Workstream.created(
                         workstreamId,
                         "status test",
                         new Workstream.RepositoryRef(tempDir.resolve("repo"), tempDir.resolve("repo")),
                         workspaceId,
                         Instant.parse("2026-06-01T00:00:00Z")
-                ),
-                Workspace.primaryGitWorktree(
+                );
+        var fixtureWorkspace = Workspace.primaryGitWorktree(
                         workspaceId,
                         workstreamId,
                         tempDir.resolve("repo"),
@@ -50,9 +48,8 @@ class StatusCommandTest {
                         "ai/ws-status",
                         "main",
                         "abc123"
-                ),
-                "# Requirement\n"
-        );
+                );
+        var fixtureRequirement = "# Requirement\n";
         var definition = new WorkflowDefinition(
                 "status-workflow",
                 1,
@@ -60,7 +57,7 @@ class StatusCommandTest {
                 List.of(new NodeDefinition("implementation.claude", NodeKind.TASK, "agent.acpx", Map.of())),
                 List.of()
         );
-        new WorkflowFileLedger().initialize(paths, "wf-status", definition);
+        CliLedgerFactory.create().initialize(paths, fixtureWorkstream, fixtureWorkspace, fixtureRequirement, dev.dual.ledger.file.WorkstreamSettingsDocument.of("auto"), "wf-status", definition);
 
         var command = new StatusCommand();
         command.workdir = tempDir;
@@ -94,16 +91,14 @@ class StatusCommandTest {
         var workstreamId = new DualId("ws-status-stale");
         var workspaceId = new DualId("wsp-status-stale");
         var paths = new WorkstreamPaths(tempDir, workstreamId);
-        new FileLedgerStore().initializeWorkstream(
-                paths,
-                Workstream.created(
+        var fixtureWorkstream = Workstream.created(
                         workstreamId,
                         "status stale test",
                         new Workstream.RepositoryRef(tempDir.resolve("repo"), tempDir.resolve("repo")),
                         workspaceId,
                         Instant.parse("2026-06-01T00:00:00Z")
-                ),
-                Workspace.primaryGitWorktree(
+                );
+        var fixtureWorkspace = Workspace.primaryGitWorktree(
                         workspaceId,
                         workstreamId,
                         tempDir.resolve("repo"),
@@ -111,9 +106,8 @@ class StatusCommandTest {
                         "ai/ws-status-stale",
                         "main",
                         "abc123"
-                ),
-                "# Requirement\n"
-        );
+                );
+        var fixtureRequirement = "# Requirement\n";
         var definition = new WorkflowDefinition(
                 "status-workflow",
                 1,
@@ -121,8 +115,8 @@ class StatusCommandTest {
                 List.of(new NodeDefinition("implementation.claude", NodeKind.TASK, "agent.acpx", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-status-stale", definition);
+        var ledger = CliLedgerFactory.create();
+        ledger.initialize(paths, fixtureWorkstream, fixtureWorkspace, fixtureRequirement, dev.dual.ledger.file.WorkstreamSettingsDocument.of("auto"), "wf-status-stale", definition);
         ledger.markRunning(paths, "node-implementation-claude-001", 999999L);
 
         var command = new StatusCommand();

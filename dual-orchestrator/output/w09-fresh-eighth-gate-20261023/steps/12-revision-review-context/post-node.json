@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-context-design_codex_arch_review-014",
+  "nodeDefinitionId": "context.design_codex_arch_review",
+  "kind": "TASK",
+  "handlerType": "context.build_package",
+  "status": "COMPLETED",
+  "stageId": "stage-context",
+  "iterationId": "iter-002",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.stderr.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.transcript.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-design-claude_design-012-run-1792718732583/binding.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.contract.json"
+  ],
+  "inputTransition": {
+    "condition": "unconditional",
+    "transition_type": "normal",
+    "required": true,
+    "source_node_instance_id": "node-design-claude_design-012",
+    "source_node_sha256": "f1f286bb797744d064634a9883e36ac0cd3eaa492025784f82b6523732a33c39",
+    "purpose": "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-design_codex_arch_review-014.md"
+  ],
+  "result": {
+    "context_package": ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-design_codex_arch_review-014.md",
+    "context_package_metadata": ".agent/workstreams/ws-20261023T005431Z-9YYF/context/node-context-design_codex_arch_review-014.json",
+    "target_node": "design.codex_arch_review",
+    "profile": "architecture_review",
+    "sections": [
+      "input_artifacts",
+      "iteration_history",
+      "review_evidence",
+      "human_feedback",
+      "recent_agent_outputs",
+      "ledger_pointers"
+    ],
+    "input_ref_count": 5,
+    "generated_at": "2026-10-23T01:29:09.730985Z"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1792718949588-d29c3491",
+  "startedAt": "2026-10-23T01:29:09.597951Z",
+  "finishedAt": "2026-10-23T01:29:09.745719Z"
+}

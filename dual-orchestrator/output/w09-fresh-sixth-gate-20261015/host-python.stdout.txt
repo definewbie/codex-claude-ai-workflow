@@ -1,0 +1,1 @@
+{"executable": "/Users/kriswang/.pyenv/versions/3.13.0/bin/python3", "version": "3.13.0 (main, Nov 13 2024, 16:57:27) [Clang 15.0.0 (clang-1500.3.9.4)]", "unittest": "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/unittest/__init__.py", "importlib": "/Users/kriswang/.pyenv/versions/3.13.0/lib/python3.13/importlib/__init__.py", "isolated": 1}

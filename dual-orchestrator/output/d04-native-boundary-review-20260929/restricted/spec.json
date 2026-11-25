@@ -1,0 +1,10 @@
+{
+  "workspace": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-y4tjqq61/work",
+  "home": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-y4tjqq61/home",
+  "config": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-y4tjqq61/config",
+  "tmp": "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-dispatch-y4tjqq61/tmp",
+  "binary": "/opt/homebrew/Caskroom/claude-code/2.1.277/claude",
+  "open": false,
+  "endpoint": "http://127.0.0.1:54260",
+  "stderr": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/d04-native-boundary-review-20260929/restricted/stderr.txt"
+}

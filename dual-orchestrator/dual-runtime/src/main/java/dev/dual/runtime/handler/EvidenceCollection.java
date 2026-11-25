@@ -17,8 +17,14 @@ public final class EvidenceCollection {
     /** CLI/API already hold the workstream lock; ordinary decisions retain their existing semantics. */
     public static void resolveGate(WorkflowFileLedger ledger, WorkstreamPaths paths, WorkflowDefinition definition,
                                    String action, String note) throws IOException {
+        resolveGate(ledger, paths, definition, action, note, null);
+    }
+
+    static void resolveGate(WorkflowFileLedger ledger, WorkstreamPaths paths, WorkflowDefinition definition,
+                            String action, String note, String expectedGate) throws IOException {
         if (!HumanGateActionSemantics.COLLECT_EVIDENCE.equals(action)) {
-            ledger.resolveOpenGate(paths, definition, action, note);
+            if (expectedGate == null) ledger.resolveOpenGate(paths, definition, action, note);
+            else ledger.resolveOpenGate(paths, definition, action, note, expectedGate);
             return;
         }
         if (note == null || note.isBlank()) throw new IOException("collection requires an explicit note");
@@ -36,7 +42,7 @@ public final class EvidenceCollection {
         if (gate == null || !HumanGateActionSemantics.allowedActions(definition.node(node.nodeDefinitionId()),
                 String.valueOf(gate.result().get("source_outcome"))).contains(action))
             throw new IOException("collection is not available at this gate");
-        var resolution = TaskContractProjectionVerifier.resolve(paths.workspaceRoot(), paths.workstreamId().value());
+        var resolution = TaskContractProjectionVerifier.resolve(ledger, paths.workspaceRoot(), paths.workstreamId().value());
         var qualified = resolution.qualified().orElseThrow(() -> new IOException(
                 "collection requires a qualified approved task contract: " + resolution.failure()));
         var included = qualified.contract().scope().included().stream().map(entry -> entry.path()).toList();
@@ -50,11 +56,12 @@ public final class EvidenceCollection {
     @FunctionalInterface public interface Execution { NodeResult run() throws Exception; }
 
     /** Advisory projection only; execute() and publication validation own enforcement. */
-    public static Optional<String> promptInstruction(Path root, String workstreamId, String nodeId) throws IOException {
-        var file = new WorkstreamPaths(root, new DualId(workstreamId)).nodeJson(nodeId);
-        if (!Files.isRegularFile(file)
-                || !MAPPER.readTree(file.toFile()).path("inputTransition").has("evidence_collection_gate")) return Optional.empty();
-        var refs = requiredReferences(root, workstreamId, nodeId);
+    public static Optional<String> promptInstruction(WorkflowFileLedger ledger, Path root, String workstreamId, String nodeId) throws IOException {
+        var paths = new WorkstreamPaths(root, new DualId(workstreamId));
+        var refs = requiredReferences(ledger, root, workstreamId, nodeId);
+        var collecting = ledger.inspect(paths, (scoped, files) ->
+                scoped.loadNode(paths, nodeId).inputTransition().containsKey("evidence_collection_gate"));
+        if (!collecting) return Optional.empty();
         return Optional.of("This occurrence collects evidence against a human-approved source baseline. "
                 + "Do not modify product source, tests, dependencies, or Git state. "
                 + "Write evidence only to the designated run artifacts. If verification needs a code change, "
@@ -65,15 +72,18 @@ public final class EvidenceCollection {
                 + "Do not replace refs with summaries or treat a submission as approval."));
     }
 
-    static List<String> requiredReferences(Path root, String workstreamId, String nodeId) throws IOException {
+    static List<String> requiredReferences(WorkflowFileLedger ledger, Path root, String workstreamId, String nodeId) throws IOException {
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
-        if (!Files.isRegularFile(paths.nodeJson(nodeId))) return List.of();
-        var guard = open(root, workstreamId, MAPPER.readValue(paths.nodeJson(nodeId).toFile(), NodeInstanceDocument.class));
-        return guard == null || guard.submission() == null ? List.of() : ExternalVerificationEvidence.refs(paths, guard.submission());
+        if (!Files.exists(paths.workstreamJson()) && !Files.exists(paths.nodeJson(nodeId))) return List.of();
+        return ledger.inspect(paths, (scoped, files) -> {
+            if (!files.exists(paths.nodeJson(nodeId))) return List.of();
+            var guard = openSnapshot(ledger, scoped, root, workstreamId, scoped.loadNode(paths, nodeId));
+            return guard == null || guard.submission() == null ? List.of() : ExternalVerificationEvidence.refs(paths, guard.submission());
+        });
     }
 
-    static void verifyResult(Path root, String workstreamId, String nodeId, AgentResultEnvelope.AgentResult result) throws IOException {
-        var refs = requiredReferences(root, workstreamId, nodeId);
+    static void verifyResult(WorkflowFileLedger ledger, Path root, String workstreamId, String nodeId, AgentResultEnvelope.AgentResult result) throws IOException {
+        var refs = requiredReferences(ledger, root, workstreamId, nodeId);
         if (refs.isEmpty()) return;
         List<String> evidence = result instanceof AgentResultEnvelope.SelfTestResult self ? self.evidence()
                 : result instanceof AgentResultEnvelope.AcceptanceReviewResult acceptance ? acceptance.evidence() : null;
@@ -82,33 +92,47 @@ public final class EvidenceCollection {
             throw new IOException("result.evidence must contain every exact bound material ref");
     }
 
-    public static NodeResult execute(Path root, String workstreamId, NodeInstanceDocument node, Execution execution)
+    public static NodeResult execute(WorkflowFileLedger ledger, Path root, String workstreamId, NodeInstanceDocument node, Execution execution)
             throws Exception {
         Guard guard;
-        try { guard = open(root, workstreamId, node); }
-        catch (IOException | IllegalArgumentException invalid) { return rejected(invalid); }
+        try { guard = open(ledger, root, workstreamId, node); }
+        catch (IOException | IllegalArgumentException invalid) { return AgentExecutionResultFacts.inputPreparationFailed(FAILURE, FAILURE, List.of(String.valueOf(invalid.getMessage()))); }
         if (guard == null) return execution.run();
         NodeResult result;
         try { result = execution.run(); }
         catch (Exception failure) {
             try { guard.verify(); }
-            catch (IOException | IllegalArgumentException invalid) { return rejected(invalid); }
+            catch (IOException | IllegalArgumentException invalid) { failure.addSuppressed(invalid); }
             throw failure;
         }
         try { guard.verify(); }
-        catch (IOException | IllegalArgumentException invalid) { return rejected(invalid); }
+        catch (IOException | IllegalArgumentException invalid) { return ArtifactContractValidator.evidenceFailureResult(result, invalid); }
         return result;
     }
 
     /** Recheck at sidecar publication too, including cold or direct validator calls. */
-    static void verify(Path root, String workstreamId, String nodeId) throws IOException {
+    static void verify(WorkflowFileLedger ledger, Path root, String workstreamId, String nodeId) throws IOException {
         var paths = new WorkstreamPaths(root, new DualId(workstreamId));
-        var file = paths.nodeJson(nodeId);
-        if (!Files.isRegularFile(file)) return; // Ordinary standalone validators have no ledger occurrence.
-        open(root, workstreamId, MAPPER.readValue(file.toFile(), NodeInstanceDocument.class));
+        if (!Files.exists(paths.workstreamJson()) && !Files.exists(paths.nodeJson(nodeId))) return;
+        ledger.inspect(paths, (scoped, files) -> {
+            if (files.exists(paths.nodeJson(nodeId))) openSnapshot(ledger, scoped, root, workstreamId, scoped.loadNode(paths, nodeId));
+            return null;
+        });
     }
 
-    static Guard open(Path root, String workstreamId, NodeInstanceDocument node) throws IOException {
+    static Guard open(WorkflowFileLedger ledger, Path root, String workstreamId, NodeInstanceDocument node) throws IOException {
+        var paths = new WorkstreamPaths(root, new DualId(workstreamId));
+        return ledger.inspect(paths, (scoped, files) -> {
+            var actual = scoped.loadNode(paths, node.nodeInstanceId());
+            if (!actual.nodeDefinitionId().equals(node.nodeDefinitionId()) || !actual.iterationId().equals(node.iterationId())
+                    || !actual.inputTransition().equals(node.inputTransition()) || !actual.inputRefs().equals(node.inputRefs()))
+                throw new IOException("collection input identity changed before execution");
+            return openSnapshot(ledger, scoped, root, workstreamId, actual);
+        });
+    }
+
+    private static Guard openSnapshot(WorkflowFileLedger owner, WorkflowFileLedger scoped, Path root,
+                                      String workstreamId, NodeInstanceDocument node) throws IOException {
         var transition = node.inputTransition();
         var id = transition.get("evidence_collection_gate");
         var sha = transition.get("evidence_collection_gate_sha256");
@@ -161,26 +185,29 @@ public final class EvidenceCollection {
         if ("submit_evidence".equals(approval.result().get("human_action")) != (submission != null)
                 || (submission != null && !baseline.equals(submission.baseline())))
             throw new IOException("missing or inconsistent external material binding");
-        var guard = new Guard(root, paths, file, hash, gateFile, TaskContractArtifactWriter.sha256(gateFile),
+        var guard = new Guard(owner, root, paths, file, hash, gateFile, TaskContractArtifactWriter.sha256(gateFile),
                 node.nodeInstanceId(), baseline, submission);
-        guard.verify();
+        guard.verifySnapshot(scoped);
         return guard;
     }
 
-    record Guard(Path root, WorkstreamPaths paths, Path approvalFile, String approvalSha, Path gateFile,
+    record Guard(WorkflowFileLedger ledger, Path root, WorkstreamPaths paths, Path approvalFile, String approvalSha, Path gateFile,
                  String gateSha, String nodeId, EvidenceCollectionBaseline baseline, EvidenceSubmission submission) {
         void verify() throws IOException {
+            ledger.inspect(paths, (scoped, files) -> { verifySnapshot(scoped); return null; });
+        }
+        private void verifySnapshot(WorkflowFileLedger scoped) throws IOException {
             requireCanonical(root, approvalFile);
             if (!approvalSha.equals(TaskContractArtifactWriter.sha256(approvalFile)))
                 throw new IOException("collection approval changed during execution");
             requireCanonical(root, gateFile);
             if (!gateSha.equals(TaskContractArtifactWriter.sha256(gateFile)))
                 throw new IOException("collection gate changed during execution");
-            var node = MAPPER.readValue(paths.nodeJson(nodeId).toFile(), NodeInstanceDocument.class);
+            var node = scoped.loadNode(paths, nodeId);
             if (!baseline.gateNodeInstanceId().equals(node.inputTransition().get("evidence_collection_gate"))
                     || !approvalSha.equals(node.inputTransition().get("evidence_collection_gate_sha256")))
                 throw new IOException("collection execution lost its approval binding");
-            if (!baseline.contractRef().equals(".agent/workstreams/" + paths.workstreamId().value() + "/artifacts/task-contract.json"))
+            if (!baseline.contractRef().startsWith(".agent/workstreams/" + paths.workstreamId().value() + "/artifacts/contracts/"))
                 throw new IOException("collection contract belongs to another workstream");
             verifySource(root, baseline);
             if (submission != null) {

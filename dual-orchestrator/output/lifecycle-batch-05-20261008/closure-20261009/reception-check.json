@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-10-09T06:39:02.274541+08:00",
+  "scope": "author receipt integrity check, not independent code review or a test rerun",
+  "checks": {
+    "post-format-source-sha256.json": {
+      "count": 653,
+      "mismatches": []
+    },
+    "material-sha256.json": {
+      "count": 474,
+      "mismatches": []
+    },
+    "increment": {
+      "count": 24,
+      "mismatches": []
+    },
+    "xml": {
+      "count": 206,
+      "mismatches": []
+    },
+    "final_log_matches": true
+  },
+  "test_receipt": {
+    "tests": 1731,
+    "suites": 206,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "live_provider_runs": 0,
+    "live_native_runs": 0
+  },
+  "post_reactor_format_receipt": "../scope-c/implementation/format-proof.json",
+  "new_tests_run": false
+}

@@ -1,0 +1,149 @@
+{
+  "observed_at": "2026-10-10T14:48:28.329819+08:00",
+  "workstream": "ws-20261010T055644Z-6QCS",
+  "workflow_status": "WAITING_FOR_RECOVERY",
+  "node_status": "FAILED",
+  "run_ref": ".agent/workstreams/ws-20261010T055644Z-6QCS/runs/run-1791614610585/run.json",
+  "run_sha256": "89cb6e569d6d7af640e55ac01acdbc87bbf0e936056c711b0cfe2016704667c8",
+  "execution_id": "nxe-1791614610553-b1df99de",
+  "core_outcome": {
+    "status": "RECOVERABLE_ADAPTER_FAILURE",
+    "primaryReason": "adapter_incompatible",
+    "nodeMaySucceed": false,
+    "retryPolicy": "MANUAL_ONLY",
+    "recoveryCategory": "RECOVERABLE_ADAPTER_FAILURE",
+    "operatorMessage": "Blocking adapter signal: ADAPTER_INCOMPATIBLE - {\"source\":\"acpx.sessions.show\",\"native_version\":\"UNKNOWN\",\"schema\":\"acpx.session.v1\",\"acpxRecordId\":\"1d507713-7c39-44bd-9010-2a15019a4f1e\",\"acpSessionId\":\"1d507713-7c39-44bd-9010-2a15019a4f1e\",\"cwd\":\"/private/tmp/dual-w09-newlines-20261010/worktree\",\"name\":\"claude-main-ws-20261010T055644Z-6QCS-run-1791614610585\",\"protocolVersion\":1,\"closed\":false,\"agentCapabilities\":{\"loadSession\":true,\"promptCapabilities\":{\"image\":true,\"embeddedContext\":true}},\"compatible\":false,\"failure\":\"missing session identity: agentSessionId\"}",
+    "secondarySignals": [
+      {
+        "type": "ADAPTER_INCOMPATIBLE",
+        "severity": "BLOCKING",
+        "message": "{\"source\":\"acpx.sessions.show\",\"native_version\":\"UNKNOWN\",\"schema\":\"acpx.session.v1\",\"acpxRecordId\":\"1d507713-7c39-44bd-9010-2a15019a4f1e\",\"acpSessionId\":\"1d507713-7c39-44bd-9010-2a15019a4f1e\",\"cwd\":\"/private/tmp/dual-w09-newlines-20261010/worktree\",\"name\":\"claude-main-ws-20261010T055644Z-6QCS-run-1791614610585\",\"protocolVersion\":1,\"closed\":false,\"agentCapabilities\":{\"loadSession\":true,\"promptCapabilities\":{\"image\":true,\"embeddedContext\":true}},\"compatible\":false,\"failure\":\"missing session identity: agentSessionId\"}",
+        "observedSequence": 0,
+        "source": "session_command",
+        "sessionId": "",
+        "superseded": false
+      }
+    ]
+  },
+  "agent_attempt": {
+    "attemptId": "att-run-1791614610585",
+    "runId": "run-1791614610585",
+    "workstreamId": "ws-20261010T055644Z-6QCS",
+    "nodeId": "intake.claude_brainstorm",
+    "agent": "claude",
+    "status": "RECOVERABLE_FAILED",
+    "processStatus": "FAILED",
+    "failureSignal": "ADAPTER_INCOMPATIBLE",
+    "recoverable": true,
+    "retrySafe": true,
+    "message": "Blocking adapter signal: ADAPTER_INCOMPATIBLE - {\"source\":\"acpx.sessions.show\",\"native_version\":\"UNKNOWN\",\"schema\":\"acpx.session.v1\",\"acpxRecordId\":\"1d507713-7c39-44bd-9010-2a15019a4f1e\",\"acpSessionId\":\"1d507713-7c39-44bd-9010-2a15019a4f1e\",\"cwd\":\"/private/tmp/dual-w09-newlines-20261010/worktree\",\"name\":\"claude-main-ws-20261010T055644Z-6QCS-run-1791614610585\",\"protocolVersion\":1,\"closed\":false,\"agentCapabilities\":{\"loadSession\":true,\"promptCapabilities\":{\"image\":true,\"embeddedContext\":true}},\"compatible\":false,\"failure\":\"missing session identity: agentSessionId\"}",
+    "stderrPath": ".agent/workstreams/ws-20261010T055644Z-6QCS/runs/run-1791614610585/outputs/intake-claude-brainstorm.stderr.log",
+    "transcriptPath": ".agent/workstreams/ws-20261010T055644Z-6QCS/runs/run-1791614610585/outputs/intake-claude-brainstorm.transcript.log",
+    "sessionName": "claude-main-ws-20261010T055644Z-6QCS-run-1791614610585",
+    "sessionId": "",
+    "sessionScope": "run",
+    "sessionSegmentKey": "ws:ws-20261010T055644Z-6QCS/run:run-1791614610585",
+    "startedAt": "2026-10-10T06:43:34.020260Z",
+    "finishedAt": "2026-10-10T06:43:34.133630Z"
+  },
+  "usage_original": {
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "cachedReadTokens": 0,
+    "cachedWriteTokens": 0,
+    "totalTokens": 0,
+    "costAmount": null,
+    "costCurrency": "",
+    "source": "not_available",
+    "measurementType": "UNAVAILABLE",
+    "attribution": "",
+    "cumulative": false,
+    "contextUsedTokens": 0,
+    "sessionCostAmount": null,
+    "sessionCostCurrency": "",
+    "providerId": "zhipu",
+    "model": "glm-5.3",
+    "billingMode": "subscription_token_only",
+    "providerMetadataSource": "claude_settings_env",
+    "unavailableReason": "ADAPTER_INCOMPATIBLE"
+  },
+  "usage_interpretation": "UNAVAILABLE; raw zero numeric slots are NOT measured zero tokens/cost",
+  "provider_model_original": {
+    "billingMode": "subscription_token_only",
+    "model": "glm-5.3",
+    "confidence": "high",
+    "source": "claude_settings_env",
+    "provider": "zhipu"
+  },
+  "provider_model_interpretation": "configuration observation only (claude_settings_env); no live model response or billed usage proven",
+  "node_CLI_elapsed_seconds": 4.965,
+  "run_duration_ms": 113,
+  "duration_scope": "run duration describes rejected compatibility command; not total preparation/client startup window",
+  "commands": [
+    {
+      "ref": ".agent/workstreams/ws-20261010T055644Z-6QCS/runs/run-1791614610585/outputs/nxe-1791614610553-b1df99de-command-f381bebb-b131-45d3-8191-dbd5b2c4cfa3-result.json",
+      "sha256": "99b742c86e212babf5e78e444e5765eb774178dc494f20bbe1e89442577e652f",
+      "purpose": "build_identity",
+      "ordinal": 1,
+      "observation": {
+        "exit_code": 0,
+        "output": "{\"upstream_commit\":\"fd173f04aa1b56f9e3f5ca5190c034ddcae28792\",\"patch_sha256\":\"1517f828d303ea720a7a153e6dc8c33265ba1ea100d2b9260c98327b5604468c\",\"policy_schema\":\"claude_execution_policy.v2\"}\n",
+        "success": true,
+        "timed_out": false
+      }
+    },
+    {
+      "ref": ".agent/workstreams/ws-20261010T055644Z-6QCS/runs/run-1791614610585/outputs/nxe-1791614610553-b1df99de-command-7d58d068-8c24-4e2b-be0b-5a5df3b5c55a-result.json",
+      "sha256": "03d89d1e2afb7065ded06a3c9be4a30c1d05b262b364039ad25d942f6a18a006",
+      "purpose": "session_ensure",
+      "ordinal": 2,
+      "observation": {
+        "exit_code": 0,
+        "output": "[acpx] created session claude-main-ws-20261010T055644Z-6QCS-run-1791614610585 (1d507713-7c39-44bd-9010-2a15019a4f1e)\n[acpx] agent: claude\n[acpx] cwd: /private/tmp/dual-w09-newlines-20261010/worktree\n1d507713-7c39-44bd-9010-2a15019a4f1e\n",
+        "success": true,
+        "timed_out": false
+      }
+    },
+    {
+      "ref": ".agent/workstreams/ws-20261010T055644Z-6QCS/runs/run-1791614610585/outputs/nxe-1791614610553-b1df99de-command-ef81ace7-cba1-4a38-a005-64fd5ce2e185-result.json",
+      "sha256": "0c19e058c56558a5be3b627ac6e84d28e7c9ba365c40cea2d5d8135776bc5398",
+      "purpose": "session_compatibility",
+      "ordinal": 3,
+      "observation": {
+        "exit_code": 0,
+        "session_metadata": {
+          "acpSessionId": "1d507713-7c39-44bd-9010-2a15019a4f1e",
+          "acpxRecordId": "1d507713-7c39-44bd-9010-2a15019a4f1e",
+          "agentCapabilities": {
+            "loadSession": true,
+            "promptCapabilities": {
+              "embeddedContext": true,
+              "image": true
+            }
+          },
+          "closed": false,
+          "compatible": false,
+          "cwd": "/private/tmp/dual-w09-newlines-20261010/worktree",
+          "failure": "missing session identity: agentSessionId",
+          "name": "claude-main-ws-20261010T055644Z-6QCS-run-1791614610585",
+          "native_version": "UNKNOWN",
+          "protocolVersion": 1,
+          "schema": "acpx.session.v1",
+          "source": "acpx.sessions.show"
+        },
+        "success": true,
+        "timed_out": false
+      }
+    }
+  ],
+  "actual_business_prompt_intents": 0,
+  "corrections_or_semantic_revisions": 0,
+  "native_sessions_created": 1,
+  "workflow_agent_attempts": 1,
+  "conservative_call_pool_charge": 1,
+  "remaining_reserved_top_level_pool": 17,
+  "native_internal_calls": "not measured; no fabricated zero",
+  "actual_permission_ask": "NOT_EXERCISED",
+  "independent_review_and_business_gates": "NOT_REACHED",
+  "sidecar_published": false
+}

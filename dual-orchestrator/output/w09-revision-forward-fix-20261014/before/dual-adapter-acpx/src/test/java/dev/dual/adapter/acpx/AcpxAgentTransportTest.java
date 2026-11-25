@@ -1,0 +1,1878 @@
+package dev.dual.adapter.acpx;
+
+import dev.dual.core.execution.AdapterSignalType;
+import dev.dual.core.execution.AgentExecutionTimelineEventKind;
+import dev.dual.core.execution.ProcessUsability;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class AcpxAgentTransportTest {
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void zeroExitWithoutCompletionAtDeclaredDeadlineIsTimedOut() {
+        var startedAt = Instant.parse("2026-09-03T00:00:00Z");
+
+        var usability = AcpxAgentTransport.exitedUsability(
+                0,
+                AcpxPromptCompletion.EMPTY,
+                List.of("acpx", "--timeout", "600", "claude"),
+                startedAt,
+                startedAt.plusSeconds(604)
+        );
+
+        assertEquals(ProcessUsability.TIMED_OUT, usability);
+    }
+
+    @Test
+    void completedPromptKeepsExitSemanticsEvenAtDeclaredDeadline() {
+        var startedAt = Instant.parse("2026-09-03T00:00:00Z");
+        var completion = new AcpxPromptCompletion("request-1", "end_turn", "{}");
+
+        assertEquals(ProcessUsability.EXITED_ZERO, AcpxAgentTransport.exitedUsability(
+                0, completion, List.of("acpx", "--timeout", "600"), startedAt, startedAt.plusSeconds(604)));
+        assertEquals(ProcessUsability.EXITED_NON_ZERO_WITH_COMPLETE_OUTPUT,
+                AcpxAgentTransport.exitedUsability(
+                        5, completion, List.of("acpx", "--timeout", "600"),
+                        startedAt, startedAt.plusSeconds(604)));
+    }
+
+    @Test
+    void commandTimeoutConfigurationIsExplicitAndBounded() {
+        assertEquals(Duration.ZERO, AcpxAgentTransport.configuredCommandTimeout(null));
+        assertEquals(Duration.ZERO, AcpxAgentTransport.configuredCommandTimeout(" "));
+        assertEquals(Duration.ZERO, AcpxAgentTransport.configuredCommandTimeout("0"));
+        assertEquals(Duration.ofSeconds(1200), AcpxAgentTransport.configuredCommandTimeout("1200"));
+        assertThrows(IllegalArgumentException.class, () -> AcpxAgentTransport.configuredCommandTimeout("-1"));
+        assertThrows(IllegalArgumentException.class, () -> AcpxAgentTransport.configuredCommandTimeout("invalid"));
+    }
+
+    @Test
+    void processStartFailureReturnsTransportOwnedTypedFacts() throws Exception {
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(tempDir.resolve("missing-acpx").toString())
+                .runClaudeDesign(new AcpxRunRequest(
+                        tempDir,
+                        "claude-main",
+                        prompt,
+                        stdout,
+                        stderr,
+                        AcpxPermissionProfile.implement()
+                ));
+
+        // Proactive ensure runs before the prompt: a missing acpx executable fails
+        // session bootstrap first, forming a typed SESSION_BOOTSTRAP_FAILED result
+        // rather than a process-stall guess. The prompt process never starts.
+        assertEquals(ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT,
+                result.processResult().usability());
+        assertEquals(4, result.exitCode());
+        assertEquals(1, result.activeAdapterSignals().size());
+        assertEquals(AdapterSignalType.SESSION_BOOTSTRAP_FAILED, result.activeAdapterSignals().get(0).type());
+        assertTrue(Files.readString(stderr).contains("[dual] acpx session ensure failed"));
+    }
+
+    @Test
+    void codexEnsuresNamedSessionBeforePromptRun() throws Exception {
+        var invocationLog = tempDir.resolve("codex-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-codex-ensure.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                if [ "$1" = "--help" ]; then exit 0; fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("codex-prompt.md");
+        var stdout = tempDir.resolve("codex-stdout.md");
+        var stderr = tempDir.resolve("codex-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        new AcpxAgentTransport(fakeAcpx.toString()).runCodexDesignReview(new AcpxRunRequest(
+                tempDir, "codex-reviewer", prompt, stdout, stderr, AcpxPermissionProfile.implement()
+        ));
+
+        var log = Files.readString(invocationLog);
+        var ensureIdx = log.indexOf("codex sessions ensure --name codex-reviewer");
+        var promptIdx = log.indexOf(" -f ");
+        assertTrue(ensureIdx >= 0, "Codex must ensure the named session before the prompt: " + log);
+        assertTrue(promptIdx > ensureIdx, "session ensure must precede the prompt run: " + log);
+        assertFalse(log.contains("build-info"), "Codex must not inherit the Claude E1 identity preflight");
+    }
+
+    @Test
+    void observeProfileEnsureCommandCarriesScopedPermissions() throws Exception {
+        var invocationLog = tempDir.resolve("observe-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-observe.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("observe-prompt.md");
+        var stdout = tempDir.resolve("observe-stdout.md");
+        var stderr = tempDir.resolve("observe-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir, "claude-observe", prompt, stdout, stderr, AcpxPermissionProfile.observe()
+        ));
+
+        var log = Files.readString(invocationLog);
+        // Command-boundary assertion only: observe uses `sessions ensure` (not `new`) and
+        // carries its scoped permission args. This fake does NOT prove acpx reuses an
+        // existing session — that reuse-ignore semantics is established from the acpx
+        // 0.11.0 source (ensureSession returns the existing record unchanged), not here.
+        var ensureLine = log.lines().filter(line -> line.contains(" sessions ensure ")).findFirst().orElse("");
+        assertTrue(ensureLine.contains("sessions ensure --name claude-observe"),
+                "observe must use sessions ensure: " + log);
+        assertFalse(ensureLine.contains(" sessions new "), "observe must not force a fresh session: " + log);
+        assertTrue(ensureLine.contains("--approve-reads"), "observe ensure must carry read approval: " + ensureLine);
+        assertTrue(ensureLine.contains("--allowed-tools"), "observe ensure must carry allowed-tools: " + ensureLine);
+        assertTrue(ensureLine.contains("--permission-policy"), "observe ensure must carry permission policy: " + ensureLine);
+    }
+
+    @Test
+    void implementProfileEnsureCommandCarriesImplementationPermissions() throws Exception {
+        var invocationLog = tempDir.resolve("implement-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-implement.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("implement-prompt.md");
+        var stdout = tempDir.resolve("implement-stdout.md");
+        var stderr = tempDir.resolve("implement-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        new AcpxAgentTransport(fakeAcpx.toString()).runCodexDesignReview(new AcpxRunRequest(
+                tempDir, "codex-implement", prompt, stdout, stderr, AcpxPermissionProfile.implement()
+        ));
+
+        var log = Files.readString(invocationLog);
+        // Command-boundary assertion only (see observe test): reuse-ignore semantics is
+        // proven from acpx 0.11.0 source, not from this fake.
+        var ensureLine = log.lines().filter(line -> line.contains(" sessions ensure ")).findFirst().orElse("");
+        assertTrue(ensureLine.contains("sessions ensure --name codex-implement"),
+                "implement must use sessions ensure: " + log);
+        assertFalse(ensureLine.contains(" sessions new "), "implement must not force a fresh session: " + log);
+        assertFalse(ensureLine.contains("--approve-all"), "implement must not auto-approve network tools: " + ensureLine);
+        assertTrue(ensureLine.contains("\"autoApprove\":[\"read\",\"search\",\"edit\",\"execute\"]"), ensureLine);
+        assertTrue(ensureLine.contains("\"escalate\":[\"fetch\"]"), ensureLine);
+        assertTrue(ensureLine.contains("--allowed-tools Read,Write,Edit,MultiEdit,Grep,Glob,Bash"), ensureLine);
+        assertFalse(ensureLine.contains("WebSearch"), ensureLine);
+        assertFalse(ensureLine.contains("WebFetch"), ensureLine);
+    }
+
+    @Test
+    void contractCorrectionUsesExistingSessionWithoutBootstrapCommand() throws Exception {
+        var invocationLog = tempDir.resolve("invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-correction.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("correction.md");
+        var stdout = tempDir.resolve("correction.stdout");
+        var stderr = tempDir.resolve("correction.stderr");
+        Files.writeString(prompt, "Return strict JSON only.\n", StandardCharsets.UTF_8);
+        var request = new AcpxRunRequest(
+                tempDir,
+                "existing-session",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.contractCorrection()
+        );
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString())
+                .runAgentResultCorrection("claude", request);
+
+        assertEquals(0, result.exitCode());
+        var invocation = Files.readString(invocationLog);
+        assertTrue(invocation.contains("claude -s existing-session -f"));
+        assertTrue(invocation.contains("--deny-all"));
+        assertTrue(invocation.contains("--no-terminal"));
+        assertFalse(invocation.contains("sessions new"));
+        assertFalse(invocation.contains("sessions ensure"));
+    }
+
+    @Test
+    void claudeSessionPromptAndCorrectionCarryTheSameVerifiedPolicyBinding() throws Exception {
+        var invocationLog = tempDir.resolve("policy-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-policy.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                if [ "$1" = "build-info" ]; then
+                  cat <<'EOF'
+                {"upstream_commit":"fd173f04aa1b56f9e3f5ca5190c034ddcae28792","patch_sha256":"__PATCH_SHA__","policy_schema":"claude_execution_policy.v2"}
+                EOF
+                fi
+                exit 0
+                """.replace("__LOG__", invocationLog.toString())
+                        .replace("__PATCH_SHA__", ReviewedAcpxBuildIdentity.PATCH_SHA256), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+        var prompt = tempDir.resolve("policy-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+        var request = new AcpxRunRequest(
+                tempDir, "claude-policy", prompt,
+                tempDir.resolve("policy.stdout"), tempDir.resolve("policy.stderr"),
+                AcpxPermissionProfile.implement(), AcpxExecutionEventSink.NOOP, binding);
+
+        assertEquals(0, new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(request).exitCode());
+        assertEquals(0, new AcpxAgentTransport(fakeAcpx.toString())
+                .runAgentResultCorrection("claude", request).exitCode());
+
+        var lines = Files.readAllLines(invocationLog);
+        assertTrue(lines.size() >= 3, "ensure, prompt and correction must all be observed");
+        var policyBearingLines = lines.stream()
+                .filter(line -> line.contains(" sessions ") || line.contains(" -f "))
+                .toList();
+        for (var line : policyBearingLines) {
+            assertTrue(line.contains("--claude-execution-policy-ref " + binding.ref()), line);
+            assertTrue(line.contains("--claude-execution-policy-sha256 " + binding.sha256()), line);
+        }
+        assertTrue(policyBearingLines.stream().anyMatch(line -> line.contains("claude sessions ensure")), lines.toString());
+        assertTrue(policyBearingLines.stream().filter(line -> line.contains("claude -s claude-policy -f")).count() >= 2,
+                lines.toString());
+        assertTrue(lines.getFirst().contains("build-info --json"), lines.toString());
+        assertEquals(2, lines.stream().filter(line -> line.contains("build-info --json")).count(), lines.toString());
+    }
+
+    @Test
+    void unreviewedAcpxFailsBeforePolicyBoundSessionOrPrompt() throws Exception {
+        var invocationLog = tempDir.resolve("unreviewed-acpx.log");
+        var fakeAcpx = tempDir.resolve("acpx-unreviewed.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                if [ "$1" = "build-info" ]; then
+                  echo '{"upstream_commit":"wrong","patch_sha256":"wrong","policy_schema":"wrong"}'
+                fi
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-unreviewed"));
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-unreviewed", runDir);
+        var prompt = tempDir.resolve("unreviewed-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir, "claude-unreviewed", prompt,
+                tempDir.resolve("unreviewed.stdout"), tempDir.resolve("unreviewed.stderr"),
+                AcpxPermissionProfile.implement(), AcpxExecutionEventSink.NOOP, binding));
+
+        assertEquals(4, result.exitCode());
+        assertEquals(AdapterSignalType.SESSION_BOOTSTRAP_FAILED, result.activeAdapterSignals().getFirst().type());
+        assertTrue(result.activeAdapterSignals().getFirst().message().contains("build identity mismatch"));
+        assertEquals(List.of("build-info --json"), Files.readAllLines(invocationLog));
+    }
+
+    @Test
+    void unreviewedAcpxCannotBypassIdentityCheckThroughCorrection() throws Exception {
+        var invocationLog = tempDir.resolve("unreviewed-correction.log");
+        var fakeAcpx = tempDir.resolve("acpx-unreviewed-correction.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                echo '{"upstream_commit":"wrong","patch_sha256":"wrong","policy_schema":"wrong"}'
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-correction"));
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-correction", runDir);
+        var prompt = tempDir.resolve("correction-prompt.md");
+        Files.writeString(prompt, "# Correction\n", StandardCharsets.UTF_8);
+        var request = new AcpxRunRequest(
+                tempDir, "claude-correction", prompt,
+                tempDir.resolve("correction.stdout"), tempDir.resolve("correction.stderr"),
+                AcpxPermissionProfile.contractCorrection(), AcpxExecutionEventSink.NOOP, binding);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString())
+                .runAgentResultCorrection("claude", request);
+
+        assertEquals(4, result.exitCode());
+        assertEquals(AdapterSignalType.SESSION_BOOTSTRAP_FAILED, result.activeAdapterSignals().getFirst().type());
+        assertEquals(List.of("build-info --json"), Files.readAllLines(invocationLog));
+    }
+
+    @Test
+    void configuredTotalDeadlineIsPassedToAcpxWithoutChangingProgressTimeout() throws Exception {
+        var invocationLog = tempDir.resolve("deadline-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-deadline.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("deadline-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        new AcpxAgentTransport(
+                fakeAcpx.toString(), Duration.ofSeconds(30), Duration.ofSeconds(600),
+                Duration.ofSeconds(45), Duration.ofSeconds(1200)
+        ).runClaudeDesign(new AcpxRunRequest(
+                tempDir, "claude-deadline", prompt,
+                tempDir.resolve("deadline.stdout"), tempDir.resolve("deadline.stderr"),
+                AcpxPermissionProfile.observe()));
+
+        assertTrue(Files.readString(invocationLog).contains("--timeout 1200"));
+    }
+
+    @Test
+    void activeClaudeCodexAndCorrectionOutliveProgressWindowWithoutTotalDeadline() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-active.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                case " $* " in
+                  *" sessions "*|*" cancel "*) exit 0 ;;
+                  *" --timeout "*) exit 99 ;;
+                esac
+                i=0
+                while [ "$i" -lt 6 ]; do
+                  echo "[thinking] working $i"
+                  sleep 1
+                  i=$((i + 1))
+                done
+                echo "ACPX_DONE"
+                """);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("active-prompt.md");
+        Files.writeString(prompt, "# Prompt\n");
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30),
+                Duration.ofSeconds(4), Duration.ofSeconds(5), Duration.ZERO);
+        for (var mode : List.of("claude", "codex", "correction")) {
+            var request = new AcpxRunRequest(tempDir, mode + "-active", prompt,
+                    tempDir.resolve(mode + ".stdout"), tempDir.resolve(mode + ".stderr"),
+                    AcpxPermissionProfile.observe());
+            var result = switch (mode) {
+                case "claude" -> transport.runClaudeDesign(request);
+                case "codex" -> transport.runCodexDesignReview(request);
+                default -> transport.runAgentResultCorrection("claude", request);
+            };
+            assertEquals(0, result.exitCode(), mode);
+            assertFalse(result.command().contains("--timeout"), mode);
+            assertTrue(Files.readString(request.stdoutPath()).contains("ACPX_DONE"), mode);
+            assertTrue(result.activeAdapterSignals().isEmpty(), mode);
+        }
+    }
+
+    @Test
+    void silentProcessIsStoppedWithoutTotalDeadline() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-silent.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                case " $* " in *" sessions "*|*" cancel "*) exit 0 ;; esac
+                sleep 20
+                echo "MUST_NOT_COMPLETE"
+                """);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("silent-prompt.md");
+        Files.writeString(prompt, "# Prompt\n");
+        var request = new AcpxRunRequest(tempDir, "silent", prompt,
+                tempDir.resolve("silent.stdout"), tempDir.resolve("silent.stderr"), AcpxPermissionProfile.observe());
+        var result = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30),
+                Duration.ofSeconds(1), Duration.ofSeconds(5), Duration.ZERO).runClaudeDesign(request);
+        assertEquals(4, result.exitCode());
+        assertTrue(result.activeAdapterSignals().stream().anyMatch(signal -> signal.type() == AdapterSignalType.PROCESS_STALLED));
+        assertFalse(Files.readString(request.stdoutPath()).contains("MUST_NOT_COMPLETE"));
+    }
+
+    @Test
+    void invalidPolicyBindingFailsBeforeAcpxInvocation() throws Exception {
+        var invocationLog = tempDir.resolve("invalid-policy-invocations.log");
+        var fakeAcpx = tempDir.resolve("acpx-invalid-policy.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                echo "$@" >> "__LOG__"
+                exit 0
+                """.replace("__LOG__", invocationLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+        Files.delete(tempDir.resolve(binding.ref()));
+        var prompt = tempDir.resolve("invalid-policy-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+        var request = new AcpxRunRequest(
+                tempDir, "claude-policy", prompt,
+                tempDir.resolve("invalid-policy.stdout"), tempDir.resolve("invalid-policy.stderr"),
+                AcpxPermissionProfile.implement(), AcpxExecutionEventSink.NOOP, binding);
+
+        assertThrows(IOException.class,
+                () -> new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(request));
+        assertFalse(Files.exists(invocationLog), "invalid policy must fail before any acpx side effect");
+    }
+
+    @Test
+    void policyBindingCannotBeSentToCodexOrApproveAllClaude() throws Exception {
+        var runDir = Files.createDirectories(tempDir.resolve(".agent/workstreams/ws-1/runs/run-1"));
+        var binding = ClaudeExecutionPolicy.write(tempDir, "ws-1", "node-1", "run-1", runDir);
+        var prompt = tempDir.resolve("wrong-owner-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+        var codexRequest = new AcpxRunRequest(
+                tempDir, "codex-policy", prompt,
+                tempDir.resolve("codex-policy.stdout"), tempDir.resolve("codex-policy.stderr"),
+                AcpxPermissionProfile.review(), AcpxExecutionEventSink.NOOP, binding);
+        var approveAllRequest = new AcpxRunRequest(
+                tempDir, "claude-policy", prompt,
+                tempDir.resolve("approve-all.stdout"), tempDir.resolve("approve-all.stderr"),
+                AcpxPermissionProfile.fromName("", true), AcpxExecutionEventSink.NOOP, binding);
+        var transport = new AcpxAgentTransport(tempDir.resolve("never-called").toString());
+
+        assertThrows(IOException.class, () -> transport.runCodexDesignReview(codexRequest));
+        assertThrows(IOException.class, () -> transport.runClaudeDesign(approveAllRequest));
+    }
+
+    @Test
+    void doesNotExitEarlyWhenReconnectSignalAppearsBeforeProcessExit() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-fake.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                echo "agent needs reconnect" >&2
+                sleep 3
+                exit 0
+                """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(5));
+        var started = System.nanoTime();
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.implement()
+        ));
+        var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+        assertEquals(0, result.exitCode());
+        assertTrue(elapsedMs >= 2_500, "reconnect is a recoverable diagnostic, not a process-interrupt signal");
+        assertTrue(Files.readString(stderr).contains("agent needs reconnect"));
+    }
+
+    @Test
+    void stopsWhenReconnectSignalPersistsBeforeTerminalContract() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-reconnect-stuck.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                echo "agent needs reconnect" >&2
+                echo "[client] initialize (running)"
+                echo
+                echo "[client] session/load (running)"
+                sleep 20
+                exit 0
+                """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+        var started = System.nanoTime();
+        var result = transport.runCodexDesignReview(new AcpxRunRequest(
+                tempDir,
+                "codex-reviewer",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.implement()
+        ));
+        var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+        assertEquals(4, result.exitCode());
+        assertTrue(elapsedMs < 12_000, "stuck reconnect should rebuild once, then enter recovery before acpx timeout");
+        assertTrue(Files.readString(stdout).contains("session/load"));
+        assertTrue(Files.readString(stderr).contains("agent needs reconnect"));
+    }
+
+    @Test
+    void doesNotKillWhenSessionStreamShowsReconnectRecovered() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "11111111-2222-3333-4444-555555555555";
+        Files.createDirectories(sessionsDir);
+        var fakeAcpx = tempDir.resolve("acpx-reconnect-recovered-stream.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                echo "[acpx] session claude-main (__SESSION_ID__) · agent needs reconnect" >&2
+                cat > "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":1,"method":"session/new","params":{}}
+                {"jsonrpc":"2.0","result":{"sessionId":"fresh-session"},"id":1}
+                {"jsonrpc":"2.0","id":2,"method":"session/prompt","params":{}}
+                EOF
+                sleep 3
+                echo "ACPX_RECOVERED_AND_COMPLETED"
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+            var started = System.nanoTime();
+            var result = transport.runClaudeDesign(new AcpxRunRequest(
+                    tempDir,
+                    "claude-main",
+                    prompt,
+                    stdout,
+                    stderr,
+                    false
+            ));
+            var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+            assertEquals(0, result.exitCode());
+            assertTrue(elapsedMs >= 2_500, "recovered reconnect should not be killed by stale stderr");
+            assertTrue(Files.readString(stdout).contains("ACPX_RECOVERED_AND_COMPLETED"));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void sessionUpdateBodyWithFailureWordsCannotTerminateTransport() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("body-words-home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "33333333-4444-5555-6666-777777777777";
+        Files.createDirectories(sessionsDir);
+        var fakeAcpx = tempDir.resolve("acpx-body-words.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
+                cat > "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"Discuss quota, rate limit, agent needs reconnect, api error: 429 and tool_use_error as plain review text."}}}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"tool_call_update","rawOutput":{"is_error":false,"text":"Request rejected (429) was only a fixture."}}}}
+                EOF
+                sleep 3
+                echo "ACPX_BODY_WORDS_COMPLETED"
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("body-words-prompt.md");
+        var stdout = tempDir.resolve("body-words-stdout.md");
+        var stderr = tempDir.resolve("body-words-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+            var started = System.nanoTime();
+            var result = transport.runCodexDesignReview(new AcpxRunRequest(
+                    tempDir,
+                    "codex-reviewer",
+                    prompt,
+                    stdout,
+                    stderr,
+                    AcpxPermissionProfile.review()
+            ));
+            var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+            assertEquals(0, result.exitCode());
+            assertTrue(elapsedMs >= 2_500, "payload words must not terminate the process early");
+            assertTrue(Files.readString(stdout).contains("ACPX_BODY_WORDS_COMPLETED"));
+            assertFalse(result.executionTimeline().stream()
+                    .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.RECOVERABLE_SIGNAL_DETECTED));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void returnsCurrentPromptFinalAssistantJsonFromTypedSessionStream() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("prompt-completion-home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "55555555-6666-7777-8888-999999999999";
+        Files.createDirectories(sessionsDir);
+        Files.writeString(sessionsDir.resolve("index.json"), """
+                {"entries":[{"name":"codex-reviewer","cwd":"%s","acpxRecordId":"%s","closed":false,"lastUsedAt":"2026-08-14T00:00:00Z"}]}
+                """.formatted(tempDir.toAbsolutePath(), sessionId), StandardCharsets.UTF_8);
+        var fakeAcpx = tempDir.resolve("acpx-prompt-completion.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
+                cat > "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":11,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"tool_call_update","messageId":"tool-1","content":{"type":"text","text":"{\\"decision\\":\\"WRONG\\"}"}}}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","messageId":"assistant-1","content":{"type":"text","text":"{\\"schema_version\\":1,\\"run_id\\":\\"run-1\\"}"}}}}
+                {"jsonrpc":"2.0","id":11,"result":{"stopReason":"end_turn"}}
+                EOF
+                sleep 3
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt-completion.md");
+        var stdout = tempDir.resolve("prompt-completion.stdout");
+        var stderr = tempDir.resolve("prompt-completion.stderr");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30));
+            var durableEvents = new ArrayList<AcpxExecutionEvent>();
+            var result = transport.runCodexDesignReview(new AcpxRunRequest(
+                    tempDir,
+                    "codex-reviewer",
+                    prompt,
+                    stdout,
+                    stderr,
+                    AcpxPermissionProfile.review(),
+                    durableEvents::add
+            ));
+
+            assertEquals(0, result.exitCode());
+            assertTrue(result.promptCompletion().completed());
+            assertEquals("11", result.promptCompletion().requestId());
+            assertEquals("end_turn", result.promptCompletion().stopReason());
+            assertEquals("{\"schema_version\":1,\"run_id\":\"run-1\"}",
+                    result.promptCompletion().finalAssistantMessage());
+            assertTrue(durableEvents.stream()
+                    .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.PROMPT_ACCEPTED));
+            assertTrue(durableEvents.stream()
+                    .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.PROMPT_COMPLETED));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void executionEventPersistenceFailureStopsTheRunAsTypedTransportFailure() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-event-persistence-failure.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if printf '%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                sleep 30
+                """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("event-failure-prompt.md");
+        var stdout = tempDir.resolve("event-failure.stdout");
+        var stderr = tempDir.resolve("event-failure.stderr");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.observe(),
+                event -> {
+                    if (event.kind() == AgentExecutionTimelineEventKind.PROCESS_STARTED) {
+                        throw new IllegalStateException("simulated durable event write failure");
+                    }
+                }
+        ));
+
+        assertEquals(ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT,
+                result.processResult().usability());
+        assertTrue(result.processResult().pid() != null && result.processResult().pid() > 0,
+                "the typed transport failure must retain the launched process pid");
+        assertEquals(AdapterSignalType.PROCESS_STALLED, result.activeAdapterSignals().get(0).type());
+        assertTrue(result.activeAdapterSignals().get(0).message().contains("durable event write failure"));
+        var pid = result.processResult().pid();
+        ProcessHandle.of(pid).ifPresent(handle -> assertDoesNotThrow(
+                () -> handle.onExit().get(2, TimeUnit.SECONDS),
+                "event persistence failure must terminate the launched provider process"
+        ));
+        assertFalse(ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false),
+                "the launched provider process must not survive an execution-event persistence failure");
+    }
+
+    @Test
+    void processStartBaselineRejectsStalePromptResponseUntilCurrentRequestCompletes() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("prompt-occurrence-home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "56565656-6767-7878-8989-909090909090";
+        var stream = sessionsDir.resolve(sessionId + ".stream.ndjson");
+        Files.createDirectories(sessionsDir);
+        Files.writeString(stream, """
+                {"jsonrpc":"2.0","id":20,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","messageId":"old","content":{"type":"text","text":"{\\\"run_id\\\":\\\"old\\\"}"}}}}
+                {"jsonrpc":"2.0","id":20,"result":{"stopReason":"end_turn"}}
+                """, StandardCharsets.UTF_8);
+        Files.writeString(sessionsDir.resolve("index.json"), """
+                {"entries":[{"name":"codex-reviewer","cwd":"%s","acpxRecordId":"%s","closed":false,"lastUsedAt":"2026-08-14T00:00:00Z"}]}
+                """.formatted(tempDir.toAbsolutePath(), sessionId), StandardCharsets.UTF_8);
+        var exactResponseWritten = tempDir.resolve("current-exact-response-written");
+        var fakeAcpx = tempDir.resolve("acpx-prompt-occurrence.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
+                cat >> "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":21,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","id":20,"result":{"stopReason":"end_turn"}}
+                EOF
+                sleep 3
+                cat >> "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","messageId":"new","content":{"type":"text","text":"{\\\"run_id\\\":\\\"new\\\"}"}}}}
+                {"jsonrpc":"2.0","id":21,"result":{"stopReason":"end_turn"}}
+                EOF
+                touch "__SENTINEL__"
+                sleep 3
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", stream.toString())
+                .replace("__SENTINEL__", exactResponseWritten.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt-occurrence.md");
+        var stdout = tempDir.resolve("prompt-occurrence.stdout");
+        var stderr = tempDir.resolve("prompt-occurrence.stderr");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var result = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30))
+                    .runCodexDesignReview(new AcpxRunRequest(
+                            tempDir,
+                            "codex-reviewer",
+                            prompt,
+                            stdout,
+                            stderr,
+                            AcpxPermissionProfile.review()));
+
+            assertEquals(0, result.exitCode());
+            assertTrue(Files.exists(exactResponseWritten),
+                    "the stale pre-baseline response must not terminate the wrapper before id=21 completes");
+            assertTrue(result.promptCompletion().completed());
+            assertEquals("21", result.promptCompletion().requestId());
+            assertEquals("{\"run_id\":\"new\"}", result.promptCompletion().finalAssistantMessage());
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void processStartBaselineAndStaleResponseCannotCompleteCurrentPrompt() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("stale-only-home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "57575757-6868-7979-8080-919191919191";
+        var stream = sessionsDir.resolve(sessionId + ".stream.ndjson");
+        Files.createDirectories(sessionsDir);
+        Files.writeString(stream, """
+                {"jsonrpc":"2.0","id":20,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"update":{"sessionUpdate":"agent_message_chunk","messageId":"old","content":{"type":"text","text":"{\\\"run_id\\\":\\\"old\\\"}"}}}}
+                {"jsonrpc":"2.0","id":20,"result":{"stopReason":"end_turn"}}
+                """, StandardCharsets.UTF_8);
+        var fakeAcpx = tempDir.resolve("acpx-stale-only.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
+                cat >> "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":21,"method":"session/prompt","params":{}}
+                {"jsonrpc":"2.0","id":20,"result":{"stopReason":"end_turn"}}
+                EOF
+                sleep 3
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", stream.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("stale-only-prompt.md");
+        var stdout = tempDir.resolve("stale-only.stdout");
+        var stderr = tempDir.resolve("stale-only.stderr");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var result = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30))
+                    .runCodexDesignReview(new AcpxRunRequest(
+                            tempDir,
+                            "codex-reviewer",
+                            prompt,
+                            stdout,
+                            stderr,
+                            AcpxPermissionProfile.review()));
+
+            assertEquals(0, result.exitCode());
+            assertFalse(result.promptCompletion().completed());
+            assertNotEquals("20", result.promptCompletion().requestId());
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void topLevelPromptRateLimitTerminatesThroughTypedStreamError() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("typed-429-home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "44444444-5555-6666-7777-888888888888";
+        Files.createDirectories(sessionsDir);
+        var fakeAcpx = tempDir.resolve("acpx-typed-429.sh");
+        var secondHalfWritten = tempDir.resolve("typed-429-second-half-written");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent connected" >&2
+                cat > "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":9,"method":"session/prompt","params":{}}
+                EOF
+                sleep 2
+                printf '%s' '{"jsonrpc":"2.0","id":9,"error":{"code":-32603,"message":"Internal error","data":{"message":"status=429 rate_' >> "__STREAM__"
+                sleep 2
+                printf '%s\n' 'limit_exceeded: too many requests"}}}' >> "__STREAM__"
+                : > "__SECOND_HALF_WRITTEN__"
+                sleep 20
+                echo "MUST_NOT_COMPLETE"
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__SECOND_HALF_WRITTEN__", secondHalfWritten.toString())
+                .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("typed-429-prompt.md");
+        var stdout = tempDir.resolve("typed-429-stdout.md");
+        var stderr = tempDir.resolve("typed-429-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+            var result = transport.runCodexDesignReview(new AcpxRunRequest(
+                    tempDir,
+                    "codex-reviewer",
+                    prompt,
+                    stdout,
+                    stderr,
+                    AcpxPermissionProfile.review()
+            ));
+
+            assertEquals(4, result.exitCode());
+            assertTrue(Files.isRegularFile(secondHalfWritten), "the partial line must not terminate before completion");
+            assertFalse(Files.readString(stdout).contains("MUST_NOT_COMPLETE"));
+            assertTrue(result.executionTimeline().stream()
+                    .filter(event -> event.kind() == AgentExecutionTimelineEventKind.RECOVERABLE_SIGNAL_DETECTED)
+                    .map(event -> event.details().get("failureReason"))
+                    .anyMatch(AdapterSignalType.RATE_LIMITED.name()::equals));
+            assertTrue(result.activeAdapterSignals().stream()
+                    .anyMatch(signal -> signal.type() == AdapterSignalType.RATE_LIMITED));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void stopsWhenSessionPromptStallsAfterReconnectRecovery() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("home");
+        var sessionsDir = fakeHome.resolve(".acpx").resolve("sessions");
+        var sessionId = "22222222-3333-4444-5555-666666666666";
+        Files.createDirectories(sessionsDir);
+        var fakeAcpx = tempDir.resolve("acpx-reconnect-prompt-stalls.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                echo "[acpx] session codex-reviewer (__SESSION_ID__) · agent needs reconnect" >&2
+                cat > "__STREAM__" <<'EOF'
+                {"jsonrpc":"2.0","id":1,"method":"session/new","params":{}}
+                {"jsonrpc":"2.0","result":{"sessionId":"fresh-session"},"id":1}
+                {"jsonrpc":"2.0","id":2,"method":"session/prompt","params":{}}
+                EOF
+                echo "[client] initialize (running)"
+                echo
+                echo "[client] session/new (running)"
+                sleep 20
+                exit 0
+                """
+                .replace("__SESSION_ID__", sessionId)
+                .replace("__STREAM__", sessionsDir.resolve(sessionId + ".stream.ndjson").toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var transport = new AcpxAgentTransport(
+                    fakeAcpx.toString(),
+                    Duration.ofSeconds(30),
+                    Duration.ofSeconds(1),
+                    Duration.ofSeconds(1)
+            );
+            var started = System.nanoTime();
+            var result = transport.runCodexDesignReview(new AcpxRunRequest(
+                    tempDir,
+                    "codex-reviewer",
+                    prompt,
+                    stdout,
+                    stderr,
+                    AcpxPermissionProfile.review()
+            ));
+            var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+            assertEquals(4, result.exitCode());
+            assertTrue(elapsedMs < 8_000, "prompt accepted without trusted progress must enter recovery");
+            var stderrText = Files.readString(stderr);
+            assertTrue(stderrText.contains("reason=PROCESS_STALLED"), stderrText);
+            assertTrue(stderrText.contains("progress_timeout_ms=1000"), stderrText);
+            assertEquals(ProcessUsability.STALLED, result.processResult().usability());
+            assertTrue(result.activeAdapterSignals().stream()
+                    .anyMatch(signal -> signal.type() == AdapterSignalType.PROCESS_STALLED));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void rebuildsReadOnlySessionOnceWhenReconnectRunDoesNotCompleteTerminalContract() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-reconnect-rebuild.sh");
+        var state = tempDir.resolve("state.txt");
+        var argsLog = tempDir.resolve("args.log");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                printf '%s\\n' "$*" >> "__ARGS_LOG__"
+                if printf '%s ' "$@" | grep -qF ' sessions close '; then
+                  echo "closed" >> "__STATE__"
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions ensure '; then
+                  echo "ensured" >> "__STATE__"
+                  exit 0
+                fi
+                if ! grep -q "failed" "__STATE__" 2>/dev/null; then
+                  echo "agent needs reconnect" >&2
+                  echo "[client] initialize (running)"
+                  echo "[client] session/new (running)"
+                  echo "[done] cancelled"
+                  echo "[error] RUNTIME: Interrupted"
+                  echo "failed" >> "__STATE__"
+                  exit 4
+                fi
+                echo "ACPX_AFTER_RECONNECT"
+                exit 0
+                """
+                .replace("__ARGS_LOG__", argsLog.toString())
+                .replace("__STATE__", state.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+        var result = transport.runCodexDesignReview(new AcpxRunRequest(
+                tempDir,
+                "codex-reviewer",
+                prompt,
+                stdout,
+                stderr,
+                false
+        ));
+
+        assertEquals(0, result.exitCode());
+        assertTrue(Files.readString(stdout).contains("ACPX_AFTER_RECONNECT"));
+        var args = Files.readString(argsLog);
+        assertTrue(args.contains("codex sessions close codex-reviewer"));
+        assertTrue(args.contains("codex sessions ensure --name codex-reviewer"));
+    }
+
+    @Test
+    void boundsSessionBootstrapAfterSessionMissing() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-session-new-hangs.sh");
+        var state = tempDir.resolve("state.txt");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions ensure '; then
+                  echo "ensuring session"
+                  sleep 20
+                  exit 0
+                fi
+                if [ -f "__STATE__" ]; then
+                  echo "SECOND_MAIN_AGENT_SHOULD_NOT_RUN" >&2
+                  exit 4
+                fi
+                touch "__STATE__"
+                echo "No acpx session found" >&2
+                exit 4
+                """.replace("__STATE__", state.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(
+                fakeAcpx.toString(),
+                Duration.ofSeconds(1),
+                Duration.ofSeconds(1)
+        );
+        var started = System.nanoTime();
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.implement()
+        ));
+        var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+        assertEquals(4, result.exitCode());
+        assertEquals(AdapterSignalType.SESSION_BOOTSTRAP_FAILED,
+                result.activeAdapterSignals().get(0).type());
+        assertTrue(elapsedMs < 8_000, "proactive session bootstrap must be bounded");
+        assertFalse(Files.exists(state), "prompt side effect must not occur when bootstrap fails");
+        var stderrText = Files.readString(stderr);
+        assertFalse(stderrText.contains("No acpx session found"),
+                "ensure is proactive; the prompt-run session-missing stderr must not appear");
+        assertFalse(stderrText.contains("SECOND_MAIN_AGENT_SHOULD_NOT_RUN"), stderrText);
+        assertTrue(stderrText.contains("[dual] acpx session ensure failed"));
+        assertTrue(stderrText.contains("timed_out=true"));
+    }
+
+    @Test
+    void rebuildsSessionWhenReconnectRunHasOnlyThinkingFrame() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-reconnect-thinking.sh");
+        var state = tempDir.resolve("state.txt");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                if [ ! -f "__STATE__" ]; then
+                  echo "agent needs reconnect" >&2
+                  echo "[client] initialize (running)"
+                  echo
+                  echo "[client] session/load (running)"
+                  echo
+                  echo "[thinking] analyzing previous review"
+                  echo "           must fix one"
+                  echo "           must fix two"
+                  echo
+                  echo "[done] cancelled"
+                  echo "[error] RUNTIME: Interrupted"
+                  touch "__STATE__"
+                  exit 4
+                fi
+                echo "ACPX_AFTER_THINKING_RECONNECT"
+                exit 0
+                """.replace("__STATE__", state.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main-run-001",
+                prompt,
+                stdout,
+                stderr,
+                false
+        ));
+
+        assertEquals(0, result.exitCode());
+        assertTrue(Files.readString(stdout).contains("ACPX_AFTER_THINKING_RECONNECT"));
+    }
+
+    @Test
+    void allowsTransientRecoverableStderrSignalToCompleteWithinGracePeriod() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-transient.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                echo "agent needs reconnect" >&2
+                sleep 1
+                echo "ACPX_PROBE_OK"
+                exit 0
+                """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(5));
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main",
+                prompt,
+                stdout,
+                stderr,
+                false
+        ));
+
+        assertEquals(0, result.exitCode());
+        assertTrue(Files.readString(stdout).contains("ACPX_PROBE_OK"));
+        assertTrue(Files.readString(stderr).contains("agent needs reconnect"));
+    }
+
+    @Test
+    void passesAllowedToolsWhenPermissionProfileIsReadOnlyObservation() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-args.sh");
+        var argsLog = tempDir.resolve("args.log");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                printf '%s\\n' "$@" >> "__ARGS_LOG__"
+                printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__ARGS_LOG__"
+                echo "ACPX_DONE"
+                exit 0
+                """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main-run-001",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.observe()
+        ));
+
+        assertEquals(0, result.exitCode());
+        var args = Files.readString(argsLog);
+        assertTrue(args.contains("claude\n-s\nclaude-main-run-001\n-f\n" + prompt));
+        assertTrue(args.contains("--approve-reads"));
+        assertTrue(args.contains("--non-interactive-permissions"));
+        assertTrue(args.contains("--permission-policy"));
+        assertTrue(args.contains("\"autoApprove\":[\"read\",\"search\"]"));
+        assertTrue(args.contains("--allowed-tools"));
+        assertTrue(args.contains("Read,Grep,Glob"));
+        assertFalse(args.contains("Bash(git *)"));
+        assertFalse(args.contains("\"execute\""));
+    }
+
+    @Test
+    void runsContractDiscoveryThroughAcpxSessionWithHardToolBoundary() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-contract-discovery.sh");
+        var acpxLog = tempDir.resolve("acpx.log");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                printf '%s\\n' "$@" >> "__ACPX_LOG__"
+                printf 'CLAUDE_CODE_SIMPLE=%s\\n' "$CLAUDE_CODE_SIMPLE" >> "__ACPX_LOG__"
+                if printf '%s ' "$@" | grep -qF ' sessions new '; then
+                  exit 0
+                fi
+                echo "# Intake"
+                echo
+                echo '```dual-control'
+                echo 'decision: READY_FOR_PRODUCT_REVIEW'
+                echo 'summary: acpx restricted runner completed'
+                echo '```'
+                exit 0
+                """.replace("__ACPX_LOG__", acpxLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\nUse orchestrator seed only.\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(
+                fakeAcpx.toString(),
+                Duration.ofSeconds(1)
+        );
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main-run-001",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.contractDiscovery()
+        ));
+
+        assertEquals(0, result.exitCode());
+        var args = Files.readString(acpxLog);
+        assertFalse(args.contains("--deny-all"), args);
+        assertTrue(args.contains("--approve-reads"), args);
+        assertTrue(args.contains("--non-interactive-permissions\nfail"), args);
+        assertTrue(args.contains("--permission-policy"), args);
+        assertTrue(args.contains("\"autoApprove\":[\"read\",\"search\"]"), args);
+        assertTrue(args.contains("--allowed-tools\nRead,Grep,Glob"), args);
+        assertTrue(args.contains("--no-terminal"), args);
+        assertTrue(args.contains("claude\nsessions\nnew\n--name\nclaude-main-run-001"), args);
+        assertTrue(args.contains("claude\n-s\nclaude-main-run-001\n-f\n" + prompt), args);
+        assertTrue(args.contains("CLAUDE_CODE_SIMPLE=1"), args);
+        assertTrue(Files.readString(stdout).contains("READY_FOR_PRODUCT_REVIEW"));
+        assertFalse(args.contains("--print"), "contract discovery must not use native claude --print");
+    }
+
+    @Test
+    void addsPromptRetryForReadOnlyProfilesOnly() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-readonly-retry-args.sh");
+        var argsLog = tempDir.resolve("args.log");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                printf '%s\\n' "$@" >> "__ARGS_LOG__"
+                echo "ACPX_DONE"
+                exit 0
+                """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+        var result = transport.runCodexDesignReview(new AcpxRunRequest(
+                tempDir,
+                "codex-reviewer-run-001",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.review()
+        ));
+
+        assertEquals(0, result.exitCode());
+        var args = Files.readString(argsLog);
+        assertTrue(args.contains("codex\n-s\ncodex-reviewer-run-001\n-f\n" + prompt));
+        assertTrue(args.contains("--prompt-retries\n1\n"));
+    }
+
+    @Test
+    void doesNotAddPromptRetryForImplementationProfile() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-implement-retry-args.sh");
+        var argsLog = tempDir.resolve("args.log");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                printf '%s\\n' "$@" >> "__ARGS_LOG__"
+                echo "ACPX_DONE"
+                exit 0
+                """.replace("__ARGS_LOG__", argsLog.toString()), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main-run-001",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.implement()
+        ));
+
+        assertEquals(0, result.exitCode());
+        var args = Files.readString(argsLog);
+        assertTrue(args.contains("claude\n-s\nclaude-main-run-001\n-f\n" + prompt));
+        assertFalse(args.contains("--prompt-retries"));
+        assertFalse(args.contains("--approve-all"));
+        assertTrue(args.contains("\"escalate\":[\"fetch\"]"));
+        assertFalse(args.contains("WebSearch"));
+        assertFalse(args.contains("WebFetch"));
+    }
+
+    @Test
+    void stopsWhenReconnectSignalPersistsEvenIfOutputKeepsGrowing() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-progress.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                echo "agent needs reconnect" >&2
+                sleep 1
+                echo "thinking"
+                sleep 20
+                echo "ACPX_DONE"
+                exit 0
+                """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.implement()
+        ));
+
+        assertEquals(4, result.exitCode());
+        var output = Files.readString(stdout);
+        assertTrue(output.contains("thinking"));
+        assertFalse(output.contains("ACPX_DONE"), output);
+        assertTrue(Files.readString(stderr).contains("agent needs reconnect"));
+    }
+
+    @Test
+    void dualControlLookingStdoutCannotStopTheProcess() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-terminal-contract.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                cat <<'EOF'
+                # Done
+
+                ```dual-control
+                decision: READY_FOR_PRODUCT_REVIEW
+                summary: terminal contract is complete
+                ```
+
+                [done] end_turn
+                EOF
+                sleep 3
+                exit 0
+                """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30));
+        var started = System.nanoTime();
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.fromName("", false)
+        ));
+        var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+        assertEquals(0, result.exitCode());
+        assertTrue(elapsedMs >= 2_500, "stdout Markdown must not bypass the ACP completion boundary");
+        assertTrue(Files.readString(stdout).contains("[done] end_turn"));
+        assertFalse(result.promptCompletion().completed());
+    }
+
+    @Test
+    void malformedTerminalControlCannotStopProcessEarly() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-malformed-terminal-contract.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                cat <<'EOF'
+                ```dual-control
+                decision: READY
+                decision: PASS
+                summary: duplicate key must not stop the process
+                ```
+                [done] end_turn
+                EOF
+                sleep 3
+                exit 0
+                """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(30));
+        var started = System.nanoTime();
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.fromName("", false)
+        ));
+        var elapsedMs = (System.nanoTime() - started) / 1_000_000;
+
+        assertEquals(0, result.exitCode());
+        assertTrue(elapsedMs >= 2_500, "invalid control must wait for the real process exit");
+    }
+
+    @Test
+    void wrapperPermissionTextAloneCannotCreatePermissionAuthority() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-permission-blocked.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                echo "Tool permission request failed: Error: Tool use aborted"
+                i=0
+                while [ "$i" -lt 2 ]; do
+                  echo "thinking $i"
+                  i=$((i + 1))
+                  sleep 1
+                done
+                exit 0
+                """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("prompt.md");
+        var stdout = tempDir.resolve("stdout.md");
+        var stderr = tempDir.resolve("stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var transport = new AcpxAgentTransport(fakeAcpx.toString(), Duration.ofSeconds(1));
+        var result = transport.runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-main",
+                prompt,
+                stdout,
+                stderr,
+                false
+        ));
+
+        assertEquals(0, result.exitCode());
+        assertTrue(Files.readString(stdout).contains("Tool permission request failed"));
+        assertTrue(result.activeAdapterSignals().stream()
+                .noneMatch(signal -> signal.type() == AdapterSignalType.PERMISSION_BLOCKED));
+    }
+
+    @Test
+    void bareAcpxExitFiveCannotFabricatePermissionAuthority() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-permission-denied-exit.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if [ "$1" = "--help" ]; then
+                  exit 0
+                fi
+                if printf '%s ' "$@" | grep -qF ' sessions '; then
+                  exit 0
+                fi
+                printf '%s\n' '{"incomplete":"candidate"}'
+                exit 5
+                """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+
+        var prompt = tempDir.resolve("permission-prompt.md");
+        var stdout = tempDir.resolve("permission-stdout.md");
+        var stderr = tempDir.resolve("permission-stderr.log");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-permission",
+                prompt,
+                stdout,
+                stderr,
+                AcpxPermissionProfile.observe()
+        ));
+
+        assertEquals(5, result.exitCode());
+        assertEquals(ProcessUsability.EXITED_NON_ZERO_WITH_INCOMPLETE_OUTPUT, result.processResult().usability());
+        assertTrue(result.activeAdapterSignals().stream()
+                .noneMatch(candidate -> candidate.type() == AdapterSignalType.PERMISSION_BLOCKED));
+        assertTrue(result.executionTimeline().stream()
+                .anyMatch(event -> event.kind() == AgentExecutionTimelineEventKind.SESSION_CLOSURE));
+    }
+
+    @Test
+    void historicalPermissionDenialBeforeNamedSessionBaselineCannotPolluteCurrentTurn() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("home-historical-permission");
+        var sessions = fakeHome.resolve(".acpx/sessions");
+        var recordId = "11111111-1111-1111-1111-111111111111";
+        Files.createDirectories(sessions);
+        Files.writeString(sessions.resolve(recordId + ".stream.ndjson"), """
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"toolCall":{"title":"Old request","rawInput":{"command":"old command"}}}}
+                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                """, StandardCharsets.UTF_8);
+        Files.writeString(sessions.resolve("index.json"), """
+                {"entries":[{"name":"claude-historical","cwd":"%s","acpxRecordId":"%s","closed":false,"lastUsedAt":"2026-08-14T00:00:00Z"}]}
+                """.formatted(tempDir.toAbsolutePath(), recordId), StandardCharsets.UTF_8);
+        var fakeAcpx = tempDir.resolve("acpx-historical-permission.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if printf '%%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                if printf '%%s ' "$@" | grep -qF ' cancel '; then exit 0; fi
+                echo "connected (%s)" >&2
+                exit 5
+                """.formatted(recordId), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("historical-permission-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                    tempDir,
+                    "claude-historical",
+                    prompt,
+                    tempDir.resolve("historical-permission.stdout"),
+                    tempDir.resolve("historical-permission.stderr"),
+                    AcpxPermissionProfile.observe()
+            ));
+
+            assertEquals(5, result.exitCode());
+            assertTrue(result.activeAdapterSignals().stream()
+                    .noneMatch(signal -> signal.type() == AdapterSignalType.PERMISSION_BLOCKED));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void missingSessionIndexCannotReplayHistoricalPermissionDenialAsCurrent() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("home-missing-session-index");
+        var sessions = fakeHome.resolve(".acpx/sessions");
+        var recordId = "12121212-1212-1212-1212-121212121212";
+        Files.createDirectories(sessions);
+        Files.writeString(sessions.resolve(recordId + ".stream.ndjson"), """
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"toolCall":{"title":"Historical request","rawInput":{"command":"old command"}}}}
+                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                """, StandardCharsets.UTF_8);
+        var fakeAcpx = tempDir.resolve("acpx-missing-session-index.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if printf '%%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                if printf '%%s ' "$@" | grep -qF ' cancel '; then exit 0; fi
+                echo "connected (%s)" >&2
+                exit 5
+                """.formatted(recordId), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("missing-session-index-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                    tempDir,
+                    "claude-missing-index",
+                    prompt,
+                    tempDir.resolve("missing-session-index.stdout"),
+                    tempDir.resolve("missing-session-index.stderr"),
+                    AcpxPermissionProfile.observe()
+            ));
+
+            assertEquals(5, result.exitCode());
+            assertTrue(result.activeAdapterSignals().stream()
+                    .noneMatch(signal -> signal.type() == AdapterSignalType.PERMISSION_BLOCKED));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void currentPermissionDenialIsTypedAndAbnormalReturnCancelsExactNamedSession() throws Exception {
+        var previousHome = System.getProperty("user.home");
+        var fakeHome = tempDir.resolve("home-current-permission");
+        var sessions = fakeHome.resolve(".acpx/sessions");
+        var recordId = "22222222-2222-2222-2222-222222222222";
+        var commandLog = tempDir.resolve("permission-command.log");
+        Files.createDirectories(sessions);
+        Files.writeString(sessions.resolve(recordId + ".stream.ndjson"), "", StandardCharsets.UTF_8);
+        Files.writeString(sessions.resolve("index.json"), """
+                {"entries":[{"name":"claude-current","cwd":"%s","acpxRecordId":"%s","closed":false,"lastUsedAt":"2026-08-14T00:00:00Z"}]}
+                """.formatted(tempDir.toAbsolutePath(), recordId), StandardCharsets.UTF_8);
+        var fakeAcpx = tempDir.resolve("acpx-current-permission.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                printf '%%s\n' "$*" >> '%s'
+                if printf '%%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                if printf '%%s ' "$@" | grep -qF ' cancel '; then exit 0; fi
+                echo "connected (%s)" >&2
+                cat >> '%s' <<'EOF'
+                {"jsonrpc":"2.0","id":91,"method":"session/prompt","params":{"sessionId":"session-current","prompt":[]}}
+                {"jsonrpc":"2.0","method":"session/update","params":{"sessionId":"session-current","update":{"sessionUpdate":"tool_call_update","toolCallId":"call-current-1","_meta":{"claudeCode":{"toolName":"WebSearch"}}}}}
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"sessionId":"session-current","options":[{"optionId":"allow","kind":"allow_once"},{"optionId":"reject","kind":"reject_once"}],"toolCall":{"toolCallId":"call-current-1","kind":"fetch","title":"Mailpit latest stable Docker tag","rawInput":{"query":"Mailpit latest stable Docker tag"}}}}
+                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                EOF
+                exit 5
+                """.formatted(commandLog, recordId, sessions.resolve(recordId + ".stream.ndjson")), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("current-permission-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        try {
+            System.setProperty("user.home", fakeHome.toString());
+            var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                    tempDir,
+                    "claude-current",
+                    prompt,
+                    tempDir.resolve("current-permission.stdout"),
+                    tempDir.resolve("current-permission.stderr"),
+                    AcpxPermissionProfile.observe()
+            ));
+
+            var permission = result.activeAdapterSignals().stream()
+                    .filter(signal -> signal.type() == AdapterSignalType.PERMISSION_BLOCKED)
+                    .findFirst()
+                    .orElseThrow();
+            assertEquals("acpx_stream", permission.source());
+            assertTrue(permission.message().contains("Mailpit latest stable Docker tag"));
+            assertTrue(Files.readString(commandLog).contains("claude cancel -s claude-current"));
+            var permissionEvent = result.executionTimeline().stream()
+                    .filter(event -> event.kind() == AgentExecutionTimelineEventKind.PERMISSION_DECISION)
+                    .findFirst()
+                    .orElseThrow();
+            assertEquals("WebSearch", permissionEvent.details().get("toolName"));
+            assertEquals("call-current-1", permissionEvent.details().get("toolCallId"));
+            assertEquals("fetch", permissionEvent.details().get("toolKind"));
+            assertEquals("claude-current", permissionEvent.details().get("sessionName"));
+            assertEquals(java.util.List.of("allow", "reject"), permissionEvent.details().get("requestedOptions"));
+            assertEquals("DENIED", permissionEvent.details().get("disposition"));
+            assertEquals("ESCALATION_REQUIRED", permissionEvent.details().get("authorityDisposition"));
+            assertTrue(result.executionTimeline().stream().anyMatch(event ->
+                    event.kind() == AgentExecutionTimelineEventKind.SESSION_CLOSURE
+                            && "CANCELLED".equals(event.details().get("disposition"))));
+        } finally {
+            System.setProperty("user.home", previousHome);
+        }
+    }
+
+    @Test
+    void abnormalReturnCannotLeavePersistentTurnWritingAfterTransportReturns() throws Exception {
+        var marker = tempDir.resolve("persistent-turn-marker.log");
+        var ownerPid = tempDir.resolve("persistent-turn.pid");
+        var fakeAcpx = tempDir.resolve("acpx-persistent-turn.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                if printf '%%s ' "$@" | grep -qF ' sessions '; then exit 0; fi
+                if printf '%%s ' "$@" | grep -qF ' cancel '; then
+                  kill "$(cat '%s')" 2>/dev/null || true
+                  exit 0
+                fi
+                sh -c 'while true; do echo tick >> "%s"; sleep 0.1; done' >/dev/null 2>&1 &
+                echo $! > '%s'
+                exit 5
+                """.formatted(ownerPid, marker, ownerPid), StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("persistent-turn-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-persistent",
+                prompt,
+                tempDir.resolve("persistent-turn.stdout"),
+                tempDir.resolve("persistent-turn.stderr"),
+                AcpxPermissionProfile.observe()
+        ));
+        var sizeAtReturn = Files.size(marker);
+        Thread.sleep(500);
+
+        assertEquals(sizeAtReturn, Files.size(marker));
+        assertTrue(result.executionTimeline().stream().anyMatch(event ->
+                event.kind() == AgentExecutionTimelineEventKind.SESSION_CLOSURE
+                        && "CANCELLED".equals(event.details().get("disposition"))));
+    }
+
+    @Test
+    void failedCancelAndCloseRemainFailClosedAsProcessStalled() throws Exception {
+        var fakeAcpx = tempDir.resolve("acpx-closure-fails.sh");
+        Files.writeString(fakeAcpx, """
+                #!/bin/sh
+                args=" $* "
+                case "$args" in
+                  *" sessions ensure "*) exit 0 ;;
+                  *" sessions close "*) exit 9 ;;
+                  *" cancel "*) exit 8 ;;
+                  *) exit 5 ;;
+                esac
+                """, StandardCharsets.UTF_8);
+        SessionMetadataFixture.install(fakeAcpx);
+        assertTrue(fakeAcpx.toFile().setExecutable(true));
+        var prompt = tempDir.resolve("closure-fails-prompt.md");
+        Files.writeString(prompt, "# Prompt\n", StandardCharsets.UTF_8);
+
+        var result = new AcpxAgentTransport(fakeAcpx.toString()).runClaudeDesign(new AcpxRunRequest(
+                tempDir,
+                "claude-closure-fails",
+                prompt,
+                tempDir.resolve("closure-fails.stdout"),
+                tempDir.resolve("closure-fails.stderr"),
+                AcpxPermissionProfile.observe()
+        ));
+
+        assertTrue(result.activeAdapterSignals().stream().anyMatch(signal ->
+                signal.type() == AdapterSignalType.PROCESS_STALLED
+                        && "session_closure".equals(signal.source())
+                        && "claude-closure-fails".equals(signal.sessionId())));
+        assertTrue(result.executionTimeline().stream().anyMatch(event ->
+                event.kind() == AgentExecutionTimelineEventKind.SESSION_CLOSURE
+                        && "FAILED".equals(event.details().get("disposition"))));
+    }
+}

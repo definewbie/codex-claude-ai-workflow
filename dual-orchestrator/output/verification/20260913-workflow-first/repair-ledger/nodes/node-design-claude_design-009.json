@@ -1,0 +1,64 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-design-claude_design-009",
+  "nodeDefinitionId" : "design.claude_design",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-design",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/task-contract.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/task-contract.md", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/contract-resolution.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/contract-resolution.md" ],
+  "inputTransition" : {
+    "required" : true,
+    "purpose" : "Seed the first Claude intake run with repo-scope context.",
+    "transition_type" : "normal",
+    "condition" : "unconditional"
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315506905/outputs/design-claude.stderr.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315506905/outputs/design-claude.transcript.log", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315506905/outputs/design-claude.json", ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-design-claude_design-009-run-1789315506905/binding.json", ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315506905/outputs/design-claude.contract.json" ],
+  "result" : {
+    "run_id" : "run-1789315506905",
+    "run_metadata" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315506905/run.json",
+    "agent" : "claude",
+    "session" : "claude-main-ws-20260913T160441Z-H55W-run-1789315506905",
+    "exit_code" : 0,
+    "transcript_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315506905/outputs/design-claude.transcript.log",
+    "output_complete" : true,
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/artifacts/context-governance/occurrences/node-design-claude_design-009-run-1789315506905/binding.json",
+    "repository_fact_binding_sha256" : "09a43bf45e1b81c0690f9c57732587cb35d3e55cb19c6b89e16c8871baf8e2fa",
+    "process_usability" : "EXITED_ZERO",
+    "adapter_signals" : [ ],
+    "decision" : "READY_FOR_ARCH_REVIEW",
+    "summary" : "Add goodbye() and its documentation within the approved two-file scope.",
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20260913T160441Z-H55W/runs/run-1789315506905/outputs/design-claude.contract.json",
+    "contract_sidecar_sha256" : "e411b4a8cde89e753769c544b261a85dff4802aad982f514b18ed41706cfa95c",
+    "agent_execution_result_contract" : {
+      "present" : true,
+      "valid" : true,
+      "decision" : "READY_FOR_ARCH_REVIEW",
+      "summary" : "",
+      "validationError" : ""
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "design_result",
+      "required" : true,
+      "present" : true,
+      "valid" : true,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "agent_execution_outcome" : {
+      "status" : "SUCCESS",
+      "primaryReason" : "completed",
+      "nodeMaySucceed" : true,
+      "retryPolicy" : "NONE",
+      "recoveryCategory" : "NONE",
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315506881-09c68820",
+  "startedAt" : "2026-09-13T16:05:06.896763Z",
+  "finishedAt" : "2026-09-13T16:05:17.413886Z"
+}

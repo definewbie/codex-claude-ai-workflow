@@ -37,7 +37,7 @@ public final class ProjectionsRefreshCommand implements Callable<Integer> {
             return 1;
         }
 
-        new WorkflowFileLedger().refreshProjections(paths);
+        CliLedgerFactory.create().refreshProjections(paths);
         System.out.println("Projections refreshed");
         System.out.println("Timeline: " + paths.timelineJson());
         System.out.println("Metrics: " + paths.workstreamMetricsJson());
@@ -47,10 +47,8 @@ public final class ProjectionsRefreshCommand implements Callable<Integer> {
     }
 
     private java.util.Optional<String> executionConsistencySummary(WorkstreamPaths paths) throws Exception {
-        if (!Files.isRegularFile(paths.workstreamMetricsJson())) {
-            return java.util.Optional.empty();
-        }
-        var metrics = OBJECT_MAPPER.readValue(paths.workstreamMetricsJson().toFile(), MAP_TYPE);
+        var metrics = CliLedgerFactory.create().metricsSnapshot(paths);
+        if ("STALE".equals(metrics.get("status"))) return java.util.Optional.of("STALE: " + metrics.get("reason"));
         var providerMetrics = map(metrics.get("providerMetrics"));
         var counts = map(providerMetrics.get("executionConsistencyCounts"));
         var summary = counts.entrySet().stream()

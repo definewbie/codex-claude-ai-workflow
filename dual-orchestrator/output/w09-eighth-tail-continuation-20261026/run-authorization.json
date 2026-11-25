@@ -1,0 +1,12 @@
+{
+  "case": "EIGHTH_CONTINUATION_LAUNCH_RECONCILED",
+  "workstream": "ws-20261023T005431Z-9YYF",
+  "checkpoint_sha256": "5cc5c75e9291ca72c02ff121c209d324fcec888f555dccce89c0feaeeca3c3bc",
+  "token_limit": 3000000,
+  "call_limit": 18,
+  "active_seconds_limit": 3600,
+  "continuation_run_authorized": true,
+  "approval_ref": "approval-evidence.txt",
+  "approved_launch_identity_sha256": "b2d85e695a7edc0e0c820385594813c468d64438b60bdc3476535ba3c44058ce",
+  "business_gates_delegated": false
+}

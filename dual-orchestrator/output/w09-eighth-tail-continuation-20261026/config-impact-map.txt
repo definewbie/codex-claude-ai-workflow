@@ -1,0 +1,14 @@
+新组合影响映射（CC LOW-1；仅静态事实，尚未批准运行）
+
+完整旧 config SHA：61caf49514401ce6ffb089620de56ecdc9f1a22db4d6a0900cc276f234752452。
+当前私有候选 config SHA：d6e48e362ced42a8a61e3615be4c9fefc6bc3979132fd33b735a6aa0eb9faab6。
+当前 Codex 程序 SHA：a04752e4d46a4d89e53e6f61c59c5349a638c8ce172ffbf391fd482b4d902a4e。
+具体值保留在0700目录/0600文件；不导出环境敏感值。用户配置未修改。
+
+1. mcp_servers.node_repl.env.BROWSER_USE_CODEX_APP_VERSION：node_repl 相关浏览器/应用桥接环境的版本输入改变；影响的是该工具连接/兼容性，不能据字段名宣称已兼容。未来首次受控使用若需要该工具，观察真实工具声明、初始化及调用结果；不另加原生探针，不要求本 Gate 使用浏览器。
+2. mcp_servers.node_repl.env.NODE_REPL_TRUSTED_SERVICES：node_repl 的服务信任输入改变，可能影响其允许访问的服务。未来首次实际需要该服务时，消费原生权限/真实工具结果；不可把接口不可用或拒绝解释为已成功。该字段本身不授 Dual scope 或业务批准。
+3. plugins.code-review@openai-bundled 项移除：可能改变该插件提供的工具/指令可用性；不能把插件名等同于 Dual 的 Codex 独立复评角色。复评角色仍由既有 definition/contract/client 调用，未来实际接口检查和复评结果才能证明其必要能力。若批准任务依赖已不存在的工具，停止提交证据，不自行安装或代换。
+4. 第八例 target 信任注册：仅在原有同值、最近祖先窄例外内；不豁免前三处变化或 Codex 程序字节变化。
+
+九组相同仅限既有结构比较列明的 model/effort/context/compaction/approval/reviewer/mode/features/shell policy；不扩大成整体语义等价。
+LOW-1 处置是影响和观察点明确化，不是兼容证明。当前整体为 UNAPPROVED_CANDIDATE_ONLY。用户未来需批准本 launch-identity SHA 所绑定组合和具名续作；旧 frozenRuntimeIdentity、历史 R01、原失败分类均不改写。

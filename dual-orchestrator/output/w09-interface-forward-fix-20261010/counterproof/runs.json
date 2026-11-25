@@ -1,0 +1,74 @@
+[
+  {
+    "kind": "compatibility",
+    "variant": "claude",
+    "mode": "control",
+    "exit": 0,
+    "expected_assertion_failure": false,
+    "owner_source_sha256": "54aa0f2a406344aca7923b311468082bf44d46973830db11570289b7be806f2e",
+    "log": "counterproof/compatibility-claude-control.log"
+  },
+  {
+    "kind": "compatibility",
+    "variant": "claude",
+    "mode": "mutant",
+    "exit": 0,
+    "expected_assertion_failure": true,
+    "owner_source_sha256": "56a03d86225676adebd4c16d88be34231e55234cefe11398b7828bf2f1369f55",
+    "log": "counterproof/compatibility-claude-mutant.log"
+  },
+  {
+    "kind": "compatibility",
+    "variant": "codex",
+    "mode": "control",
+    "exit": 0,
+    "expected_assertion_failure": false,
+    "owner_source_sha256": "54aa0f2a406344aca7923b311468082bf44d46973830db11570289b7be806f2e",
+    "log": "counterproof/compatibility-codex-control.log"
+  },
+  {
+    "kind": "compatibility",
+    "variant": "codex",
+    "mode": "mutant",
+    "exit": 0,
+    "expected_assertion_failure": true,
+    "owner_source_sha256": "56a03d86225676adebd4c16d88be34231e55234cefe11398b7828bf2f1369f55",
+    "log": "counterproof/compatibility-codex-mutant.log"
+  },
+  {
+    "kind": "summary",
+    "variant": "false",
+    "mode": "control",
+    "exit": 0,
+    "expected_assertion_failure": false,
+    "owner_source_sha256": "0d2dd922fdbab9e4b90fbe1ab42ba0116e91a62f5900ac55101a3f67db608666",
+    "log": "counterproof/summary-false-control.log"
+  },
+  {
+    "kind": "summary",
+    "variant": "false",
+    "mode": "mutant",
+    "exit": 0,
+    "expected_assertion_failure": true,
+    "owner_source_sha256": "a2d03952533d2bff4baabc2ae8b1e347afd6b80eb4103c95153adeac0638ddc0",
+    "log": "counterproof/summary-false-mutant.log"
+  },
+  {
+    "kind": "summary",
+    "variant": "true",
+    "mode": "control",
+    "exit": 0,
+    "expected_assertion_failure": false,
+    "owner_source_sha256": "0d2dd922fdbab9e4b90fbe1ab42ba0116e91a62f5900ac55101a3f67db608666",
+    "log": "counterproof/summary-true-control.log"
+  },
+  {
+    "kind": "summary",
+    "variant": "true",
+    "mode": "mutant",
+    "exit": 0,
+    "expected_assertion_failure": true,
+    "owner_source_sha256": "a2d03952533d2bff4baabc2ae8b1e347afd6b80eb4103c95153adeac0638ddc0",
+    "log": "counterproof/summary-true-mutant.log"
+  }
+]

@@ -1,0 +1,16 @@
+✔ CLI live ask -> exact IPC reply -> original ACP continuation; saved old reply cannot replay (3670.628625ms)
+✔ concurrent asks retain exact per-request allow/deny decisions; repeats never send twice (1.261041ms)
+✔ wrong owner/prompt/session/RPC/hash/deadline/choice does not poison a legal ask (0.153667ms)
+✔ cancel/turn replacement/owner restart never restore an old callback from a commit (0.118583ms)
+✔ deadline and request publication failure cancel instead of falling through (42.6585ms)
+✔ wire rejects absent/changed generations, unbounded asks and prompt retry (0.469709ms)
+✔ live IPC replies bypass queued prompts and never recreate consumed callbacks (19.733834ms)
+✔ lost or silent IPC receipt makes one attempt and no owner recovery or resend (204.556917ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3706.019166

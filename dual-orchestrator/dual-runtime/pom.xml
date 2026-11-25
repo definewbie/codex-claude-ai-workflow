@@ -13,6 +13,22 @@
     <artifactId>dual-runtime</artifactId>
     <name>dual-runtime</name>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>shared-lifecycle-test-fixtures</id>
+                        <phase>test-compile</phase>
+                        <goals><goal>test-jar</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>dev.dual</groupId>

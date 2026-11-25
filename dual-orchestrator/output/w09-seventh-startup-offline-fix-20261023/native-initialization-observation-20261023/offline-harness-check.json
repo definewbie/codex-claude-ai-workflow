@@ -1,0 +1,18 @@
+{
+  "local_harness_checks": [
+    {
+      "case": "local normal exit",
+      "result": "PASS"
+    },
+    {
+      "case": "local timeout terminates owned group",
+      "result": "PASS"
+    }
+  ],
+  "argv_only_verbose_and_diagnostic_name": true,
+  "native_initializations": 0,
+  "model_calls": 0,
+  "harness_sha256": "badea8ab6a10084aff8fb2349331d0ab51876f0fbe8385a5f104c6a345a7003c",
+  "no_prompt_command_static_check": true,
+  "full_observation": "NOT_RUN"
+}

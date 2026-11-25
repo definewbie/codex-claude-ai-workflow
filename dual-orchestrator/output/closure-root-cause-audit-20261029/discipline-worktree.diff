@@ -1,0 +1,141 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index 0ba883be..6983ccec 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -44,11 +44,61 @@
+ 
+ 同行评审 prompt 必须要求评审完整 transition 和失败切面，但不得预填期望结论或给出逐行答案，以保留独立发现问题的空间。
+ 
++## Failure Severity Triage
++
++任何失败必须先分类，再决定处置仪式级别。分类以失败的唯一 typed primaryReason 及其 authoritative evidence 为依据，不由失败是否被用户注意到、改动行数或模块数量决定。
++
++- TRANSIENT：批准、身份与状态依据仍可信，能够在不改变既有 workflow definition、contract schema 或状态模型的前提下恢复，且重试不会重复不安全的外部副作用。典型：满足上述条件的模型输出格式噪声（JSON 前后多余文字、未知非关键字段、非关键 artifact 字段缺失）、会话/网络瞬断、仅影响观测且不参与预算止损或控制决策的计量脚本缺陷。
++  处置：允许有界自动重试（默认每节点 2 次，deny-all 格式修正算 1 次）；不触发 boundary review，不冻结发行，不请求用户批准，不重跑全模块回归（跑该模块 targeted tests + lifecycle smoke 即可）。
++  记录：写入 ledger transient-failures/，含 typed reason、重试次数、最终结果。记录即视为处置完毕。
++  升级规则：同一 TRANSIENT 根因在 3 个不同 case 重复出现，或耗尽允许的重试次数后仍失败 → 升级为 BOUNDARY；升级后不能仅以已记录宣称处置完成。
++- BOUNDARY：触及 source of truth、状态模型、contract schema、ledger 写序、权限边界的失败，包括批准/身份/SHA 校验或消费错误；即使仅修改局部条件、无需变更 schema，也不能降为 TRANSIENT。外部副作用是否已发生或重试是否安全无法确认时，停止自动重试，按 BOUNDARY 处置，不靠重试探测状态。
++  处置：走原有全套仪式——transition table 重建、前向修复、全模块离线回归、重冻发行、CC 独立评审、用户批准。
++- 禁止：把 TRANSIENT 当 BOUNDARY 处置（仪式膨胀），也禁止把 BOUNDARY 当 TRANSIENT 重试掩盖（纪律漂移）。
++
++格式修正和重试仍须通过原有 typed artifact contract、身份/SHA、批准、scope、权限与 terminal guard。字段是否非关键由既有 contract 定义，agent 不得临时豁免必填字段或猜测批准事实。此处 ledger 记录是诊断证据，不成为第二状态来源；重试仅使用既有合法执行入口，不重开终态。
++
++## Regression Scope Proportionality
++
++修复后的回归与重冻范围必须与改动的爆炸半径成比例；BOUNDARY 档优先，不能因改动只在一个模块而降低边界验证要求：
++
++- 单模块改动，且不属于 BOUNDARY、不触碰 workflow definition、contract schema/registry、source of truth、状态模型、ledger 写序、权限边界 → targeted tests（该模块+直接依赖）+ 一次 lifecycle smoke 即可重冻发行；作者自查 + 成对回归即可，不强制 CC 独立评审。
++- BOUNDARY 级修复，或触碰上述流程、契约、状态、账本、权限边界 → 保留全模块离线回归 + CC 独立评审 + 用户批准。
++- 纯文档记录（docs、测试记录、状态报告）不适用 Verification Gate，不触发重冻。
++
+ ## Technical Debt Principle
+ 
+-原则上不保留技术债务。只有在非常有必要时才允许记录技术债，例如未来方向存在真实不确定性、当前修复会明显干扰主流程、或修复成本和当前收益严重不匹配。
++技术债按影响分级处置：
++
++- 第一类：触碰 source of truth、状态一致性、artifact contract、权限边界的债。仍然默认必须修复，不允许登记后延后。
++- 第二类：仅影响观测、报告、文档措辞、投影文案，不影响控制流的债。登记后可延后，在下一次触及同模块的批次里顺带解决，不单开批次、不阻塞交付。
++- 禁止：用"延后"处理第一类债；用"必须修"让第二类债阻塞交付或真实运行。
++
++记录技术债时必须标注类别；未标注视为第一类。
+ 
+-如果技术债已经影响主流程稳定性、职责边界、状态一致性、artifact contract、测试可信度或后续开发速度，必须优先修复，而不是写入 TODO 后继续叠功能。
++## Acceptance Outcomes
++
++验收节点的合法结果包括以下三种；它们不是 workstream 的三种终态：
++
++- ACCEPTED：全部契约通过。
++- ACCEPT_WITH_NOTES：主链产物有效，验收意见为非阻塞性备注（文档措辞、命名、非关键路径小缺陷）。这是允许进入交付的合法验收结果，notes 随 delivery merge 一并交付。流程层不得因"存在 notes"拒绝进入 delivery，也不得将其描述为"带病收口"。
++- REJECTED：产物不满足验收标准，经既有合法转换进入 repair loop，不因此把 workstream 标为终态。
++
++产品验收判定权在验收节点（Codex 验收 / human gate）；流程层消费经校验的 typed 结果，不另行凭 notes 改判。ACCEPTED / ACCEPT_WITH_NOTES 仍须经过既有交付资格、必要批准与状态提交，才能进入 workstream 终态。已经终态的 workstream 仍受 terminal guard 保护，不因本节而获得重开、retry 或 repair 权限。
++
++## Standing Authorization Envelope
++
++用户可一次性签发授权包：{预算上限，case 数上限，失败处置策略}。
++包内每次新 case / Verification Gate 的启动不再单独请求批准，仍须通过既有 Verification Gate 的技术前置检查。该授权不自动代替需求、scope、产品验收或交付等业务 human gate 的决定；agent 代决必须有用户显式授予的范围，并经既有 action 归一化、批准和权限校验。
++
++出现以下任一情况立即停止并回到人工：
++
++- 预算累计消耗或 case 数达到上限；
++- 出现 BOUNDARY 级失败；
++- 单 case 内 TRANSIENT 失败超过上限；
++- 任何需要扩大包条款的情况。
++
++授权包条款只能由用户显式修改，agent 不得扩张解释。
+ 
+ ## Objective Preservation Principle
+ 
+@@ -105,7 +155,7 @@ Verification Gate:
+ - 触发条件在当前 case 中必然可达；如果依赖阈值、provider metadata、pricing、billing mode、session state 或历史 token，必须先用 ledger/read model 计算并确认会触发。不能靠“应该会触发”启动真实 provider 消耗。
+ - 验收字段必须在 run metadata / metrics / typed artifact 中有明确字段；如果字段为 `null`、`measure_only`、`pricing_unknown`、`not_applicable` 或 fallback reason，必须视为未验证，不得解释为成功。
+ - 中途一旦发现核心验收字段不满足，必须停止该 case 并报告根因；不能继续跑完整流程来弥补前置验证失败。
+-- 如果同一类验证连续失败两次，必须回到模型边界分析，重新定义 trigger / owner / SoT / projection；不能继续调阈值或补 prompt。
++- 如果同一类 BOUNDARY 验证连续失败两次，必须回到模型边界分析，重新定义 trigger / owner / SoT / projection；不能继续调阈值或补 prompt。TRANSIENT 按 Failure Severity Triage 的重试与升级规则处置，不以本条提前触发全套仪式。
+ 
+ 真实验证的结论必须区分三类：
+ 
+@@ -123,6 +173,8 @@ Verification Gate:
+ 
+ ## Mandatory Checklist
+ 
++失败处置先遵守 Failure Severity Triage，修复验证遵守 Regression Scope Proportionality；满足条件的 TRANSIENT 不进入全套边界审查流程，BOUNDARY 保留 End-to-End State Transition Closure 的全部要求。以下清单与 skill 的适用范围服从此分级，不能用宽泛触发词重新扩大 TRANSIENT 的处置仪式；纯文档修改不触发 Verification Gate。
++
+ 修改 workflow、orchestrator、agent lifecycle、artifact contract、human gate、recovery、delivery lifecycle、UI/CLI/ledger projection 相关代码前，必须先阅读并遵守：
+ 
+ - `dual-orchestrator/docs/engineering-checklist.md`
+@@ -142,4 +194,4 @@ Verification Gate:
+ - LLM 输出必须进入结构化 artifact contract，orchestrator 不直接猜自然语言正文。
+ - 新规则优先放入语义类、catalog 或 contract validator，不散落在 handler、CLI、UI 中。
+ - completion/recovery/human gate 这类边界状态必须有测试覆盖。
+-- 技术债默认要修复；只有说明必要性、边界、风险和重新评估条件后，才允许保留。
++- 技术债按 Technical Debt Principle 标注并分级：第一类必须修复，第二类登记后搭车解决，不阻塞交付；未标注视为第一类。
+diff --git a/dual-orchestrator/docs/engineering-checklist.md b/dual-orchestrator/docs/engineering-checklist.md
+index fbd748e9..a61158f3 100644
+--- a/dual-orchestrator/docs/engineering-checklist.md
++++ b/dual-orchestrator/docs/engineering-checklist.md
+@@ -3,6 +3,8 @@
+ Use this checklist before changing workflow, recovery, artifact contract, human
+ gate, delivery, or observability code.
+ 
++For failure handling, apply [Failure Severity Triage](../../AGENTS.md#failure-severity-triage) first; qualifying `TRANSIENT` failures do not enter the full boundary-review process. Regression scope follows [Regression Scope Proportionality](../../AGENTS.md#regression-scope-proportionality), with the `BOUNDARY` tier taking precedence. Documentation-only changes do not require a Verification Gate.
++
+ For boundary-sensitive changes, first apply the stricter engineering discipline
+ in `docs/design/boundary-first-engineering-discipline.zh-CN.md`. The checklist
+ below is not enough by itself when the issue involves lifecycle semantics,
+@@ -70,6 +72,8 @@ visible", or "ran one case" as promotion evidence. Promotion evidence must name
+ the source of truth, the command or replay/calibration used, and the PASS /
+ FAIL / INVALID criteria.
+ 
++Failures must first follow [AGENTS.md — Failure Severity Triage](../../AGENTS.md#failure-severity-triage). `TRANSIENT` failures follow that section's bounded retry and ledger-recording rules and do not enter this checklist's process; failures classified or escalated as `BOUNDARY` retain the full checklist requirements.
++
+ The executable gate in `scripts/lib/mainline-decision-gate.sh` must reject any
+ current `Target phase` outside P0/P0.5. If the script and this checklist
+ disagree, treat that as a boundary drift bug and fix the gate before continuing
+@@ -286,18 +290,14 @@ source-of-truth model, projection behavior, and regression tests to agree.
+ 
+ ## Technical Debt
+ 
+-- Default to fixing technical debt when it affects the main lifecycle,
+-  correctness, stability, domain boundaries, artifact contracts, tests, or future
+-  development speed.
+-- Keep debt only when there is a clear reason:
+-  - future direction is genuinely uncertain;
+-  - fixing now would distract from the main lifecycle;
+-  - current cost is clearly disproportionate to near-term value;
+-  - the debt is isolated behind a named boundary.
+-- Every accepted debt item must document:
+-  - why it is being kept;
+-  - why it does not block the main workflow;
+-  - what signal should trigger revisiting it.
++- Apply [AGENTS.md — Technical Debt Principle](../../AGENTS.md#technical-debt-principle).
++- Category 1 affects source of truth, state consistency, artifact contracts, or
++  permission boundaries: fix it; recording it does not authorize deferral.
++- Category 2 affects only observation, reports, documentation wording, or
++  projection text, without affecting control flow: record it and resolve it in
++  the next batch touching that module. Do not create a separate batch or block
++  delivery or real runs for it.
++- Every debt record must state its category; unclassified debt is Category 1.
+ - Do not keep compatibility code that preserves an unsafe or deprecated path
+   unless it is required for real users and guarded by explicit tests.
+ 

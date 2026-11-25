@@ -1,0 +1,141 @@
+{
+  "transcript_bytes": 3703403,
+  "counts": {
+    "": 6,
+    "available_commands_update": 2,
+    "usage_update": 7,
+    "agent_thought_chunk": 12946,
+    "tool_call": 3,
+    "tool_call_update": 9,
+    "agent_message_chunk": 1770,
+    "session_info_update": 1
+  },
+  "assistant_text_chars": {
+    "agent_thought_chunk": 47122,
+    "agent_message_chunk": 4320
+  },
+  "tool_updates": [
+    {
+      "sessionUpdate": "tool_call",
+      "toolCallId": "call_f381930f507c47a89ea57d7a",
+      "title": "Find",
+      "status": "pending",
+      "kind": "search",
+      "locations": [],
+      "content_chars": 2
+    },
+    {
+      "sessionUpdate": "tool_call_update",
+      "toolCallId": "call_f381930f507c47a89ea57d7a",
+      "title": "Find `**/*`",
+      "kind": "search",
+      "locations": [],
+      "content_chars": 2
+    },
+    {
+      "sessionUpdate": "tool_call_update",
+      "toolCallId": "call_f381930f507c47a89ea57d7a",
+      "content_chars": 2
+    },
+    {
+      "sessionUpdate": "tool_call_update",
+      "toolCallId": "call_f381930f507c47a89ea57d7a",
+      "status": "completed",
+      "content_chars": 12376
+    },
+    {
+      "sessionUpdate": "tool_call",
+      "toolCallId": "call_057d4da0c8914f389de6c67e",
+      "title": "Read File",
+      "status": "pending",
+      "kind": "read",
+      "locations": [],
+      "content_chars": 2
+    },
+    {
+      "sessionUpdate": "tool_call_update",
+      "toolCallId": "call_057d4da0c8914f389de6c67e",
+      "title": "Read .agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/task-contract.json",
+      "kind": "read",
+      "locations": [
+        {
+          "path": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/task-contract.json",
+          "line": 1
+        }
+      ],
+      "content_chars": 2
+    },
+    {
+      "sessionUpdate": "tool_call_update",
+      "toolCallId": "call_057d4da0c8914f389de6c67e",
+      "content_chars": 2
+    },
+    {
+      "sessionUpdate": "tool_call_update",
+      "toolCallId": "call_057d4da0c8914f389de6c67e",
+      "status": "completed",
+      "content_chars": 4451
+    },
+    {
+      "sessionUpdate": "tool_call",
+      "toolCallId": "call_16d3c8d2154e4e8f872f6f59",
+      "title": "Read File",
+      "status": "pending",
+      "kind": "read",
+      "locations": [],
+      "content_chars": 2
+    },
+    {
+      "sessionUpdate": "tool_call_update",
+      "toolCallId": "call_16d3c8d2154e4e8f872f6f59",
+      "title": "Read .agent/workstreams/ws-20261010T124812Z-XCZL/gates/gate-node-gate-human_requirement_review-011.json",
+      "kind": "read",
+      "locations": [
+        {
+          "path": "/private/tmp/dual-w09-newlines-20261010-fresh-03/worktree/.agent/workstreams/ws-20261010T124812Z-XCZL/gates/gate-node-gate-human_requirement_review-011.json",
+          "line": 1
+        }
+      ],
+      "content_chars": 2
+    },
+    {
+      "sessionUpdate": "tool_call_update",
+      "toolCallId": "call_16d3c8d2154e4e8f872f6f59",
+      "content_chars": 2
+    },
+    {
+      "sessionUpdate": "tool_call_update",
+      "toolCallId": "call_16d3c8d2154e4e8f872f6f59",
+      "status": "completed",
+      "content_chars": 2574
+    }
+  ],
+  "observed_run_tool_usage": {
+    "schemaVersion": 1,
+    "toolCallCount": 12,
+    "readCount": 12,
+    "writeCount": 0,
+    "bashCount": 0,
+    "otherCount": 0,
+    "byTool": {
+      "Read": 8,
+      "Glob": 4
+    },
+    "toolIds": [
+      "Glob",
+      "Read"
+    ],
+    "readFiles": [
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/task-contract.json",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/gates/gate-node-gate-human_requirement_review-011.json"
+    ],
+    "directReadFiles": [
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/artifacts/contracts/node-contract-compile-012/task-contract.json",
+      ".agent/workstreams/ws-20261010T124812Z-XCZL/gates/gate-node-gate-human_requirement_review-011.json"
+    ],
+    "writeFiles": [],
+    "bashCommands": [],
+    "commandExecutables": []
+  },
+  "scope": "read-only size and typed tool observation; no causal model claim from counts alone"
+}

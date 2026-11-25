@@ -1,0 +1,55 @@
+{
+  "elapsed_seconds": 0.7721163749229163,
+  "exit": 0,
+  "budget_input": {
+    "actual_tokens": 0,
+    "completed_calls": 0,
+    "active_seconds": 2.670470376033336,
+    "remaining_mainline": [
+      "intake.claude_brainstorm",
+      "intake.codex_product_review",
+      "design.claude_design",
+      "design.codex_arch_review",
+      "plan.claude_plan",
+      "plan.codex_plan_review",
+      "implement.claude_implement",
+      "implement.claude_self_test_report",
+      "acceptance.codex_verifier_review"
+    ],
+    "new_extra_calls": [],
+    "measurement_complete": true,
+    "external_pending": false
+  },
+  "budget_result": {
+    "result": "ALLOW_BUDGET_ONLY",
+    "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+    "required_token_reserve": 2365000,
+    "required_call_reserve": 10,
+    "remaining_tokens": 3000000,
+    "remaining_calls": 18,
+    "warning": false
+  },
+  "process_observation": {
+    "status": "NO_UNRESOLVED_PIDS",
+    "checked_pids": [],
+    "scope": "Prior confirmed absence only; no current process-table or child-tree claim",
+    "previously_confirmed_absent": []
+  },
+  "current": {
+    "schemaVersion": 1,
+    "workstreamId": "ws-20261026T142203Z-7SNA",
+    "workflowInstanceId": "wf-ws-20261026T142203Z-7SNA",
+    "workflowId": "agent-lifecycle-terminal-delivery",
+    "definitionVersion": 5,
+    "status": "RUNNING",
+    "activeNodeInstanceIds": [
+      "node-context-intake_claude_brainstorm-001"
+    ],
+    "openGateIds": [],
+    "lastEventId": "evt-000001",
+    "updatedAt": "2026-10-26T14:22:03.577440Z",
+    "commitSequence": 1
+  },
+  "native_model_calls": 0,
+  "dispatch_performed": false
+}

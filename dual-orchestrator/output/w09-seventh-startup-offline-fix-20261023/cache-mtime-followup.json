@@ -1,0 +1,72 @@
+{
+  "observed_at": "2026-10-22T23:02:12.254784+00:00",
+  "historical_window": [
+    "2026-10-22T23:19:50+08:00",
+    "2026-10-22T23:20:45+08:00"
+  ],
+  "paths": [
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968",
+      "exists": true,
+      "mtime_ns": 1788142847856246685,
+      "mtime": "2026-08-31T10:20:47.856247+08:00",
+      "mtime_in_historical_window": false,
+      "kind": "directory"
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/package.json",
+      "exists": true,
+      "mtime_ns": 1788142847842503137,
+      "mtime": "2026-08-31T10:20:47.842503+08:00",
+      "mtime_in_historical_window": false,
+      "kind": "file"
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/package-lock.json",
+      "exists": true,
+      "mtime_ns": 1788142847856395310,
+      "mtime": "2026-08-31T10:20:47.856395+08:00",
+      "mtime_in_historical_window": false,
+      "kind": "file"
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules",
+      "exists": true,
+      "mtime_ns": 1788142847863836935,
+      "mtime": "2026-08-31T10:20:47.863837+08:00",
+      "mtime_in_historical_window": false,
+      "kind": "directory"
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol",
+      "exists": true,
+      "mtime_ns": 1788142755034101066,
+      "mtime": "2026-08-31T10:19:15.034101+08:00",
+      "mtime_in_historical_window": false,
+      "kind": "directory"
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp",
+      "exists": true,
+      "mtime_ns": 1788142755137013948,
+      "mtime": "2026-08-31T10:19:15.137014+08:00",
+      "mtime_in_historical_window": false,
+      "kind": "directory"
+    },
+    {
+      "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/package.json",
+      "exists": true,
+      "mtime_ns": 1788142755135272416,
+      "mtime": "2026-08-31T10:19:15.135273+08:00",
+      "mtime_in_historical_window": false,
+      "kind": "file"
+    }
+  ],
+  "limits": [
+    "Current mtime does not prove historical reads or metadata consultation",
+    "Directory mtime records entry changes, not descendant file access or all file updates",
+    "Later writes can replace historical mtime; consultation may occur in npm content cache or memory",
+    "No native command, npm CLI, network or model invoked"
+  ],
+  "conclusion": "No causal attribution from these timestamps alone"
+}

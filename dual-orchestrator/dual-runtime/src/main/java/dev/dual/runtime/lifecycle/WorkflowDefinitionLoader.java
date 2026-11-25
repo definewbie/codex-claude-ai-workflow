@@ -192,7 +192,17 @@ public final class WorkflowDefinitionLoader {
             throw new IllegalArgumentException("contract-purpose gate must declare exactly one approved successor");
         }
         var approvedEdge = approvedEdges.getFirst();
-        var negotiation = reachable(definition, definition.entryNodeId(), approvedEdge);
+        var reuseEdges = definition.edges().stream().filter(edge -> "authorization_unchanged".equals(edge.on())).toList();
+        if (reuseEdges.size() > 1) throw new IllegalArgumentException("at most one same-authorization continuation is supported");
+        var reuse = reuseEdges.isEmpty() ? null : reuseEdges.getFirst();
+        var reuseOwner = reuse == null ? null : definition.node(reuse.from());
+        if (reuse != null && (!"contract.compile".equals(reuseOwner.handlerType())
+                || !"EXECUTION".equals(reuseOwner.config().get("contract_phase"))
+                || !approvedEdge.to().equals(reuse.to()) || !"unconditional".equals(reuse.condition().type())
+                || !"normal".equals(reuse.metadata().transitionType()) || !reuse.metadata().required()))
+            throw new IllegalArgumentException("same-authorization continuation must be produced by EXECUTION compilation and rejoin the approved successor");
+        // The compiler proves an existing approval; graph reachability alone cannot grant that authority.
+        var negotiation = reachable(definition, definition.entryNodeId(), reuse == null ? Set.of(approvedEdge) : Set.of(approvedEdge, reuse));
         if (negotiation.contains(approvedEdge.to())) {
             throw new IllegalArgumentException("contract approved successor overlaps the pre-approval negotiation region");
         }
@@ -217,18 +227,32 @@ public final class WorkflowDefinitionLoader {
                 throw new IllegalArgumentException("acceptance contract repair must cross from post-contract to negotiation");
             }
         }
+        var goalCompilers = definition.nodes().stream().filter(node -> "contract.compile".equals(node.handlerType())
+                && "GOAL".equals(node.config().get("contract_phase"))).toList();
+        var executionCompilers = definition.nodes().stream().filter(node -> "contract.compile".equals(node.handlerType())
+                && "EXECUTION".equals(node.config().get("contract_phase"))).toList();
+        if (goalCompilers.size() != 1 || executionCompilers.size() != 1)
+            throw new IllegalArgumentException("workflow requires one compiler for each contract phase");
+        var goalEdges = definition.edgesFrom(goalCompilers.getFirst().id());
+        if (goalEdges.size() != 1 || !"completed".equals(goalEdges.getFirst().on()))
+            throw new IllegalArgumentException("GOAL compiler requires one completed successor");
+        var beforeGoal = reachable(definition, definition.entryNodeId(), goalEdges.getFirst());
+        if (beforeGoal.contains(goalEdges.getFirst().to()))
+            throw new IllegalArgumentException("GOAL successor bypasses approved GOAL compilation");
+        var executionEdges = definition.edgesFrom(executionCompilers.getFirst().id());
+        if (executionEdges.size() != (reuse == null ? 1 : 2) || (reuse != null && !executionEdges.contains(reuse))
+                || executionEdges.stream().filter(edge -> "completed".equals(edge.on())
+                        && contractGate.id().equals(edge.to())).count() != 1)
+            throw new IllegalArgumentException("EXECUTION compiler must feed the exact-scope approval gate");
         for (var node : definition.nodes()) {
-            var configured = node.config().get("requires_approved_task_contract");
-            if (postContract.contains(node.id())) {
-                if (!Boolean.TRUE.equals(configured)) {
-                    throw new IllegalArgumentException(
-                            "post-contract node must declare requires_approved_task_contract=true: " + node.id());
-                }
-            } else if (negotiation.contains(node.id()) && configured != null && !Boolean.FALSE.equals(configured)) {
-                throw new IllegalArgumentException(
-                        "pre-approval negotiation node cannot require an approved task contract: " + node.id());
-            }
+            if (node.config().containsKey("requires_approved_task_contract"))
+                throw new IllegalArgumentException("legacy contract requirement is unsupported: " + node.id());
+            var expected = postContract.contains(node.id()) ? "EXECUTION" : beforeGoal.contains(node.id()) ? null : "GOAL";
+            if (!java.util.Objects.equals(expected, node.config().get("required_contract_phase")))
+                throw new IllegalArgumentException("contract phase requirement mismatch: " + node.id() + ", expected " + expected);
         }
+        if (definition.edges().stream().anyMatch(edge -> "fork".equals(edge.metadata().transitionType())))
+            throw new IllegalArgumentException("fork is not supported by this lifecycle commit protocol");
     }
 
     private static Set<EdgeDefinition> validateContractRepairEdges(WorkflowDefinition definition) {
@@ -247,7 +271,7 @@ public final class WorkflowDefinitionLoader {
                     : source.id().equals("acceptance.classify_failure") && source.kind() == NodeKind.TASK
                         && source.handlerType().equals("acceptance.failure_classify");
             if (!sourceValid
-                    || !Boolean.TRUE.equals(source.config().get("requires_approved_task_contract"))
+                    || !"EXECUTION".equals(source.config().get("required_contract_phase"))
                     || !"context.intake_claude_brainstorm".equals(context.id())
                     || context.kind() != NodeKind.TASK
                     || !"context.build_package".equals(context.handlerType())
@@ -287,6 +311,10 @@ public final class WorkflowDefinitionLoader {
             String start,
             EdgeDefinition excludedEdge
     ) {
+        return reachable(definition, start, Set.of(excludedEdge));
+    }
+
+    private static Set<String> reachable(WorkflowDefinition definition, String start, Set<EdgeDefinition> excludedEdges) {
         var reached = new HashSet<String>();
         var queue = new ArrayDeque<String>();
         queue.add(start);
@@ -296,7 +324,7 @@ public final class WorkflowDefinitionLoader {
                 continue;
             }
             definition.edgesFrom(nodeId).stream()
-                    .filter(edge -> !edge.equals(excludedEdge))
+                    .filter(edge -> !excludedEdges.contains(edge))
                     .forEach(edge -> queue.addLast(edge.to()));
         }
         return Set.copyOf(reached);

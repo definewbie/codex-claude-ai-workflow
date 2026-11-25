@@ -1,0 +1,42 @@
+[
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalValidator.java",
+    "sha256": "8fc052420901198dd12874755357d9f08aa007d4ac8b2d3606a9fdaa7cc65d71",
+    "unchanged_from_batch_baseline": true
+  },
+  {
+    "path": "dual-core/src/main/java/dev/dual/core/contract/TaskContractValidator.java",
+    "sha256": "61a4a30d463e4747c1a70c201ea85fd4ca76bb4a1104b880647c8936bd7c147d",
+    "unchanged_from_batch_baseline": true
+  },
+  {
+    "path": "dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java",
+    "sha256": "a24db51b397eef2a02f8700572b6cd541b2e0fde431d48388afde78432317abd",
+    "unchanged_from_batch_baseline": true
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java",
+    "sha256": "3dfd8d2531fab9c496145d8818be233c23e4687c961b444600021cb9b2eae8cf",
+    "unchanged_from_batch_baseline": true
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentRunMetadataWriter.java",
+    "sha256": "84676d619001bb1c2d192a44f6080c0b9f95d77793660e07743e8d4f1ec05b35",
+    "unchanged_from_batch_baseline": true
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentResultAcquirer.java",
+    "sha256": "c6fb4c855fbcf55f112b629c89a855f5f1a60d0d9abf304329f323a2ebd1182c",
+    "unchanged_from_batch_baseline": true
+  },
+  {
+    "path": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AgentLifecycleEventReader.java",
+    "sha256": "ad29825eee93b5c0b87d3771dd9b8521ea5b37681e6456c009ed75a046019a06",
+    "unchanged_from_batch_baseline": true
+  },
+  {
+    "path": "dual-ledger-file/src/main/java/dev/dual/ledger/file/MetricsProjectionWriter.java",
+    "sha256": "b8dda0e433c71c3039f4129ed5133014d69a4744af32e696610eaee4b13f6d0a",
+    "unchanged_from_batch_baseline": true
+  }
+]

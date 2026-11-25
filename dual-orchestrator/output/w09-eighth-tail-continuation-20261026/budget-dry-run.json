@@ -1,0 +1,576 @@
+{
+  "status": "PASS_OFFLINE_ARITHMETIC_ONLY",
+  "cases": [
+    {
+      "case": "fresh nine-node mainline",
+      "expected": "ALLOW_BUDGET_ONLY",
+      "input": {
+        "actual_tokens": 0,
+        "completed_calls": 0,
+        "active_seconds": 0,
+        "remaining_mainline": [
+          "intake.claude_brainstorm",
+          "intake.codex_product_review",
+          "design.claude_design",
+          "design.codex_arch_review",
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 1105000,
+        "required_call_reserve": 10,
+        "remaining_tokens": 3000000,
+        "remaining_calls": 18,
+        "warning": false
+      }
+    },
+    {
+      "case": "actual third pre-design state would have reserve",
+      "expected": "ALLOW_BUDGET_ONLY",
+      "input": {
+        "actual_tokens": 104635,
+        "completed_calls": 4,
+        "active_seconds": 356.79,
+        "remaining_mainline": [
+          "design.claude_design",
+          "design.codex_arch_review",
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 1015000,
+        "required_call_reserve": 8,
+        "remaining_tokens": 2895365,
+        "remaining_calls": 14,
+        "warning": false
+      }
+    },
+    {
+      "case": "actual third post-design budget alone permits remaining stages",
+      "expected": "ALLOW_BUDGET_ONLY",
+      "input": {
+        "actual_tokens": 235366,
+        "completed_calls": 5,
+        "active_seconds": 557.255,
+        "remaining_mainline": [
+          "design.codex_arch_review",
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 865000,
+        "required_call_reserve": 7,
+        "remaining_tokens": 2764634,
+        "remaining_calls": 13,
+        "warning": false
+      }
+    },
+    {
+      "case": "nine runs need not imply eighteen consumed prompts",
+      "expected": "ALLOW_BUDGET_ONLY",
+      "input": {
+        "actual_tokens": 450000,
+        "completed_calls": 9,
+        "active_seconds": 800,
+        "remaining_mainline": [
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 600000,
+        "required_call_reserve": 4,
+        "remaining_tokens": 2550000,
+        "remaining_calls": 9,
+        "warning": false
+      }
+    },
+    {
+      "case": "mainline plus readiness and one semantic loop",
+      "expected": "ALLOW_BUDGET_ONLY",
+      "input": {
+        "actual_tokens": 0,
+        "completed_calls": 0,
+        "active_seconds": 0,
+        "remaining_mainline": [
+          "intake.claude_brainstorm",
+          "intake.codex_product_review",
+          "design.claude_design",
+          "design.codex_arch_review",
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "intake.claude_brainstorm",
+          "intake.codex_product_review"
+        ],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 1370000,
+        "required_call_reserve": 14,
+        "remaining_tokens": 3000000,
+        "remaining_calls": 18,
+        "warning": false
+      }
+    },
+    {
+      "case": "whole unfinished tail protected, not just next small call",
+      "expected": "STOP",
+      "input": {
+        "actual_tokens": 2550000,
+        "completed_calls": 8,
+        "active_seconds": 900,
+        "remaining_mainline": [
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "INSUFFICIENT_MAINLINE_AND_CORRECTION_RESERVE",
+        "required_token_reserve": 600000,
+        "required_call_reserve": 4,
+        "remaining_tokens": 450000,
+        "remaining_calls": 10,
+        "warning": true
+      }
+    },
+    {
+      "case": "format correction cannot be hidden in one run",
+      "expected": "STOP",
+      "input": {
+        "actual_tokens": 2850000,
+        "completed_calls": 10,
+        "active_seconds": 900,
+        "remaining_mainline": [
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "INSUFFICIENT_MAINLINE_AND_CORRECTION_RESERVE",
+        "required_token_reserve": 250000,
+        "required_call_reserve": 2,
+        "remaining_tokens": 150000,
+        "remaining_calls": 8,
+        "warning": true
+      }
+    },
+    {
+      "case": "actual top-level call pool exhausted",
+      "expected": "STOP",
+      "input": {
+        "actual_tokens": 700000,
+        "completed_calls": 17,
+        "active_seconds": 700,
+        "remaining_mainline": [
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "INSUFFICIENT_ACTUAL_CALL_RESERVE",
+        "required_token_reserve": 250000,
+        "required_call_reserve": 2,
+        "remaining_tokens": 2300000,
+        "remaining_calls": 1,
+        "warning": false
+      }
+    },
+    {
+      "case": "unknown usage is never zero",
+      "expected": "STOP",
+      "input": {
+        "actual_tokens": null,
+        "completed_calls": 5,
+        "active_seconds": 500,
+        "remaining_mainline": [
+          "design.codex_arch_review",
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": false,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "MEASUREMENT_UNAVAILABLE_OR_INVALID"
+      }
+    },
+    {
+      "case": "native pending result blocks admission",
+      "expected": "STOP",
+      "input": {
+        "actual_tokens": 200000,
+        "completed_calls": 5,
+        "active_seconds": 500,
+        "remaining_mainline": [
+          "design.codex_arch_review",
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": true
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "MEASUREMENT_OR_EXTERNAL_RESULT_UNCERTAIN"
+      }
+    },
+    {
+      "case": "active time cannot reserve next two-call block",
+      "expected": "STOP",
+      "input": {
+        "actual_tokens": 200000,
+        "completed_calls": 5,
+        "active_seconds": 2500,
+        "remaining_mainline": [
+          "design.codex_arch_review",
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "INSUFFICIENT_ACTIVE_TIME_RESERVE",
+        "required_token_reserve": 865000,
+        "required_call_reserve": 7,
+        "remaining_tokens": 2800000,
+        "remaining_calls": 13,
+        "warning": false
+      }
+    },
+    {
+      "case": "unknown path is not silently cheap",
+      "expected": "STOP",
+      "input": {
+        "actual_tokens": 200000,
+        "completed_calls": 5,
+        "active_seconds": 500,
+        "remaining_mainline": [
+          "new.unknown.stage"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "UNKNOWN_STAGE_REQUIRES_EXPLICIT_PLANNING"
+      }
+    },
+    {
+      "case": "observed total at stop is still a stop",
+      "expected": "STOP",
+      "input": {
+        "actual_tokens": 3000000,
+        "completed_calls": 5,
+        "active_seconds": 500,
+        "remaining_mainline": [
+          "design.codex_arch_review",
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "OBSERVED_TOKEN_STOP",
+        "required_token_reserve": 865000,
+        "required_call_reserve": 7,
+        "remaining_tokens": 0,
+        "remaining_calls": 13,
+        "warning": true
+      }
+    },
+    {
+      "case": "calibrated readiness plus design loop",
+      "expected": "ALLOW_BUDGET_ONLY",
+      "input": {
+        "actual_tokens": 0,
+        "completed_calls": 0,
+        "active_seconds": 0,
+        "remaining_mainline": [
+          "intake.claude_brainstorm",
+          "intake.codex_product_review",
+          "design.claude_design",
+          "design.codex_arch_review",
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "design.claude_design",
+          "design.codex_arch_review"
+        ],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 1520000,
+        "required_call_reserve": 14,
+        "remaining_tokens": 3000000,
+        "remaining_calls": 18,
+        "warning": false
+      }
+    },
+    {
+      "case": "calibrated readiness plus both semantic loops",
+      "expected": "ALLOW_BUDGET_ONLY",
+      "input": {
+        "actual_tokens": 0,
+        "completed_calls": 0,
+        "active_seconds": 0,
+        "remaining_mainline": [
+          "intake.claude_brainstorm",
+          "intake.codex_product_review",
+          "design.claude_design",
+          "design.codex_arch_review",
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "implement.claude_implement",
+          "implement.claude_self_test_report",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [
+          "plan.claude_plan",
+          "plan.codex_plan_review",
+          "intake.claude_brainstorm",
+          "intake.codex_product_review",
+          "design.claude_design",
+          "design.codex_arch_review"
+        ],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 1610000,
+        "required_call_reserve": 16,
+        "remaining_tokens": 3000000,
+        "remaining_calls": 18,
+        "warning": false
+      }
+    },
+    {
+      "case": "exact token reserve boundary allows",
+      "expected": "ALLOW_BUDGET_ONLY",
+      "input": {
+        "actual_tokens": 2750000,
+        "completed_calls": 10,
+        "active_seconds": 900,
+        "remaining_mainline": [
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 250000,
+        "required_call_reserve": 2,
+        "remaining_tokens": 250000,
+        "remaining_calls": 8,
+        "warning": true
+      }
+    },
+    {
+      "case": "one token below necessary tail reserve stops",
+      "expected": "STOP",
+      "input": {
+        "actual_tokens": 2750001,
+        "completed_calls": 10,
+        "active_seconds": 900,
+        "remaining_mainline": [
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "INSUFFICIENT_MAINLINE_AND_CORRECTION_RESERVE",
+        "required_token_reserve": 250000,
+        "required_call_reserve": 2,
+        "remaining_tokens": 249999,
+        "remaining_calls": 8,
+        "warning": true
+      }
+    },
+    {
+      "case": "exact call reserve boundary allows",
+      "expected": "ALLOW_BUDGET_ONLY",
+      "input": {
+        "actual_tokens": 1000000,
+        "completed_calls": 16,
+        "active_seconds": 900,
+        "remaining_mainline": [
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 250000,
+        "required_call_reserve": 2,
+        "remaining_tokens": 2000000,
+        "remaining_calls": 2,
+        "warning": false
+      }
+    },
+    {
+      "case": "exact active time reserve boundary allows",
+      "expected": "ALLOW_BUDGET_ONLY",
+      "input": {
+        "actual_tokens": 1000000,
+        "completed_calls": 10,
+        "active_seconds": 2100,
+        "remaining_mainline": [
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "ALLOW_BUDGET_ONLY",
+        "reason": "WITHIN_PROPOSED_OPERATOR_BUDGET",
+        "required_token_reserve": 250000,
+        "required_call_reserve": 2,
+        "remaining_tokens": 2000000,
+        "remaining_calls": 8,
+        "warning": false
+      }
+    },
+    {
+      "case": "one second below time reserve stops",
+      "expected": "STOP",
+      "input": {
+        "actual_tokens": 1000000,
+        "completed_calls": 10,
+        "active_seconds": 2101,
+        "remaining_mainline": [
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "INSUFFICIENT_ACTIVE_TIME_RESERVE",
+        "required_token_reserve": 250000,
+        "required_call_reserve": 2,
+        "remaining_tokens": 2000000,
+        "remaining_calls": 8,
+        "warning": false
+      }
+    },
+    {
+      "case": "duplicate mandatory tail is rejected",
+      "expected": "STOP",
+      "input": {
+        "actual_tokens": 0,
+        "completed_calls": 0,
+        "active_seconds": 0,
+        "remaining_mainline": [
+          "acceptance.codex_verifier_review",
+          "acceptance.codex_verifier_review"
+        ],
+        "new_extra_calls": [],
+        "measurement_complete": true,
+        "external_pending": false
+      },
+      "output": {
+        "result": "STOP",
+        "reason": "MAINLINE_AND_REPEATED_WORK_MUST_BE_SEPARATE"
+      }
+    }
+  ],
+  "not_proven": "native costs, runtime dispatch enforcement, seventh authorization or historical recovery",
+  "native_provider_calls": 0
+}

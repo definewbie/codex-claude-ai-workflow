@@ -1,0 +1,33 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-context-design_codex_arch_review-019",
+  "nodeDefinitionId" : "context.design_codex_arch_review",
+  "kind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "COMPLETED",
+  "stageId" : "stage-context",
+  "iterationId" : "iter-003",
+  "inputRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/design-claude.stderr.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/design-claude.transcript.log", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/design-claude.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-design-claude_design-017-run-1791700286570/binding.json", ".agent/workstreams/ws-20261011T044656Z-BMDJ/runs/run-1791700286570/outputs/design-claude.contract.json" ],
+  "inputTransition" : {
+    "condition" : "unconditional",
+    "transition_type" : "normal",
+    "required" : true,
+    "source_node_instance_id" : "node-design-claude_design-017",
+    "source_node_sha256" : "049a535ccffc57498920c19b74ce4aa0ba5aee2968a8970fd44cadb3e835fa51",
+    "purpose" : "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-design_codex_arch_review-019.md" ],
+  "result" : {
+    "context_package" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-design_codex_arch_review-019.md",
+    "context_package_metadata" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/context/node-context-design_codex_arch_review-019.json",
+    "target_node" : "design.codex_arch_review",
+    "profile" : "architecture_review",
+    "sections" : [ "input_artifacts", "iteration_history", "review_evidence", "human_feedback", "recent_agent_outputs", "ledger_pointers" ],
+    "input_ref_count" : 5,
+    "generated_at" : "2026-10-11T06:48:27.055528Z"
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1791701306905-80457503",
+  "startedAt" : "2026-10-11T06:48:26.914984Z",
+  "finishedAt" : "2026-10-11T06:48:27.075884Z"
+}

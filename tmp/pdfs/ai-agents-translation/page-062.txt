@@ -1,0 +1,39 @@
+)
+tools = [python_repl]
+
+Now to use the prompt with your agent, you just need to create a single
+agent as shown in Example 2-3.
+
+Example 2-3. CoT agent
+agent = create_react_agent(
+    model=llm,
+    tools=tools,
+    prompt=SYSTEM_INSTRUCTIONS,
+)
+
+When I ran the code, the agent produced a correct description of the demo
+dataset, an accurate analysis of the patterns and trends, as well as a bar chart
+and a summary of its insights.
+
+This example illustrates how CoT enables the agent to make its reasoning
+process visible and verifiable. If you use the code from this example, you
+basically force the agent to externalize its intermediate steps, and with that
+you not only gain confidence in the results but also create a transparent
+audit trail of how conclusions are reached.
+
+Generating a Tree of Possibilities
+
+Now think of a scenario where you have a more complex task, but you
+don’t want to use a reasoning model or a full multi-agent architecture. Still,
+a more exploratory and strategic approach is needed. In such cases, you can
+use tree-of-thoughts prompting (ToT).2 ToT expands CoT reasoning into a
+branching search process, where multiple reasoning paths are explored and
+evaluated before deciding on the best next step.
+
+In the code examples (Examples 2-4 through 2-6), I’ll show you how to
+implement ToT as a staged workflow rather than a full multi-agent system.
+The key idea is to use one generation stage to propose multiple potential
+paths, an evaluation stage to score or select among them, and an execution
+stage to follow the chosen path. These stages can be implemented as
+separate agent roles, graph nodes, or LLM calls, and they may use different
+models depending on cost and quality requirements. The simplified ToT

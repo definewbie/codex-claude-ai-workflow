@@ -1,9 +1,7 @@
 package dev.dual.cli;
 
 import dev.dual.core.id.DualId;
-import dev.dual.ledger.file.LockOwner;
 import dev.dual.ledger.file.WorkflowFileLedger;
-import dev.dual.ledger.file.WorkstreamLock;
 import dev.dual.ledger.file.WorkstreamPaths;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
@@ -25,6 +23,9 @@ public final class ReviewDecideCommand implements Callable<Integer> {
     @Option(names = "--note", description = "Optional decision note.")
     String note = "";
 
+    @Option(names = "--subject", description = "Gate node instance id the decision was composed against (the gate shown by review show). The decision is refused if that gate is no longer the open gate.")
+    String subject;
+
     @Option(names = "--run", description = "After deciding, immediately run until the next gate, recovery, failure, or completion.")
     boolean runImmediately;
 
@@ -38,13 +39,8 @@ public final class ReviewDecideCommand implements Callable<Integer> {
     public Integer call() throws Exception {
         var workspaceRoot = workdir.toAbsolutePath().normalize();
         var paths = new WorkstreamPaths(workspaceRoot, new DualId(workstreamId));
-        var resolvedAction = "";
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "review decide"))) {
-            var ledger = CliLedgerFactory.create();
-            var definition = ledger.loadDefinition(paths);
-            resolvedAction = requireAction(action);
-            dev.dual.runtime.handler.EvidenceCollection.resolveGate(ledger, paths, definition, resolvedAction, note);
-        }
+        var resolvedAction = requireAction(action);
+        dev.dual.runtime.handler.ReviewGateActions.resolve(CliLedgerFactory.create(), paths, resolvedAction, note, subject);
         System.out.println("Human gate decided");
         System.out.println("Workstream: " + workstreamId);
         System.out.println("Action: " + resolvedAction);
@@ -53,9 +49,7 @@ public final class ReviewDecideCommand implements Callable<Integer> {
             return 0;
         }
         System.out.println("Running workflow until next gate...");
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "run"))) {
-            return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
-        }
+        return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
     }
 
     private static String requireAction(String requestedAction) {

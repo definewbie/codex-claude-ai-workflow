@@ -1,0 +1,28 @@
+{
+  "files": {
+    "analysis-before-edit.md": "8f00fc91b34dfae08e86929cfe8024834c4ec29a662f500693a4a2f65dfeb6c5",
+    "assessment.md": "50cd9328a9020b40f0454b72b6c1f66483b33a12f6a425269eceb052005c8ae0",
+    "before-inputs.json": "60aa9b94c85b66576458e96c11c2f3bf5c234447bcda9471845066291e4caaa2",
+    "cc-review-prompt.txt": "11a885f999a2b64167d9fb8e318a05cfe9b686d6206b1bb3ccdfea02b2ba1657",
+    "historical-log-availability.json": "5530955d62eb611f71a40348b2b127eb4cc91343ebde4909e11beadda530a46e",
+    "historical-system-log-check.json": "306dd7b788b9508e84d7fa2662768600435493b22b7ec5a85d05cdcc3c1d527b",
+    "npm-resolution-proof.cjs": "c068038165dfcc877976de98beda601726d251478ba9cf53136bdf99821a56d0",
+    "npm-resolution-proof.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "npm-resolution-proof.stdout.json": "6cf1cf1f6f0fb772b4a0392732792b011c2c79f87773aacab2bca8371005ec16",
+    "old-vs-new-process-proof.json": "33f429f12bcfafcd245bca23d4d8dcbce7290baa662fd0fde537b9ff307b5979",
+    "operation-notes.md": "c632ff03dfa16427ac2121a7a8644daefb301aa49c54501b98f9821b2f79609f",
+    "pre-dispatch-recheck.py.candidate": "dbbd5b146d2080897fcd933b32e004bdeeda9df5aa552cb322d2b47b1b346bd1",
+    "pre-dispatch-recheck.py.diff": "8b080b5c6b0d0fc7e63045b32c8cde8af475026161b6dbc8868316a336cfab01",
+    "prepare-offline.py.candidate": "a2ea48809aec935636ff0f24e2e396d12517de1f9101f14a59dceaff3c2e14d8",
+    "prepare-offline.py.diff": "43ed45732638ab33859114d3ec40c5d46646f8f38259a4caebff07f222a731bf",
+    "preservation-check.json": "486862128d1e2ca26d3c848d3dc7ab5c0c5ecf133f31750d739d8c024c3968dd",
+    "process_check.py": "bc4096a74380601004831fb8e0b0fbc19fc4e5a0081f62f07ee5070ddc47266f",
+    "readable-process-proof.json": "b8c1bd57598dd680bc2e6275f1101e0c3b9680052f83d97c073200ac75f8753a",
+    "restricted-process-proof.json": "c7db3df7daa800dcfa9ffa4a39271e60dc670b94c394b2502bbbc0cf81a353f3",
+    "source-index.json": "a438343548870194355ddc43f813823bbfd72a412ee4ffc53bfa450258a71d2f",
+    "test-process.stderr.txt": "366a935300df16ff4cd1689a173700a2e4335d00f241525ba44eee5cd29c4343",
+    "test-process.stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test-results.json": "2ede92a548d35904ce6fed8ad7b050a138e0dc3b1e2a0376d80339614f273e33",
+    "test_process_check.py": "1bb91d26dc82749387ae2eeb3443dcbe40056287db47974582252d3e037d91b8"
+  }
+}

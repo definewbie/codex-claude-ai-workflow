@@ -1,0 +1,18 @@
+{
+  "approved": true,
+  "approvedManifestSha256": "6f04789282c801f1919ae20e16806d2f095c41e7fb98511a3ceb9bbafd40fe86",
+  "source": "User explicit approval: 批准",
+  "recordedAt": "2026-09-30T02:32:47.447468+00:00",
+  "scope": "Only Gate d04-native-child-boundary-20260930; no product implementation or chat agent delegation",
+  "limits": {
+    "sessions": 3,
+    "childrenPerSession": 1,
+    "requestsPerSession": 12,
+    "totalRequests": 36,
+    "secondsPerSession": 80,
+    "totalSeconds": 300,
+    "lateObservationSeconds": 25,
+    "realProviderCalls": 0,
+    "automaticRetries": 0
+  }
+}

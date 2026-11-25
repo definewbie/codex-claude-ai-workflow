@@ -1,0 +1,12 @@
+Human gate decided
+Workstream: ws-20260911T231749Z-GCTW
+Action: revise
+Running workflow until next gate...
+Step 1: design.claude_design -> WAITING_FOR_RECOVERY (workflow stopped at FAILED)
+
+Next actions:
+  1. Inspect the recovery summary:
+     dualctl recovery show --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260911T231749Z-GCTW ws-20260911T231749Z-GCTW
+     summary: /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260911T231749Z-GCTW/.agent/workstreams/ws-20260911T231749Z-GCTW/recovery/current-failure.md
+  2. Inspect the agent output contract, then retry the same active node.
+     dualctl retry --workdir /Users/kriswang/work/projects/ai/okx-btc-k-line-demo-agent-runs/ws-20260911T231749Z-GCTW ws-20260911T231749Z-GCTW

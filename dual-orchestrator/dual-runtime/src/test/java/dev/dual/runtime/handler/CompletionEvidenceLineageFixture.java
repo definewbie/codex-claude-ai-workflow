@@ -21,7 +21,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-final class CompletionEvidenceLineageFixture {
+public final class CompletionEvidenceLineageFixture {
     private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
     private static final Instant NOW = Instant.parse("2026-08-29T00:00:00Z");
 
@@ -55,7 +55,7 @@ final class CompletionEvidenceLineageFixture {
         Files.createDirectories(workstreamDir.resolve("domain"));
 
         var definitions = definitions();
-        new WorkflowFileLedger().initialize(
+        dev.dual.runtime.RuntimeTestLedger.initialize(dev.dual.runtime.RuntimeTestLedger.ledger(),
                 new WorkstreamPaths(root, new DualId(workstreamId)),
                 workflowInstanceId,
                 new WorkflowDefinition(
@@ -142,6 +142,47 @@ final class CompletionEvidenceLineageFixture {
                 contextNodeId, decisionNode.nodeInstanceId());
     }
 
+    // Reports consume the real approved contract and routed acceptance chain.
+    // The isolated prepare() above remains useful for corrupt-lineage resolver tests only.
+    static Prepared prepareApproved(Path root, String ws) throws Exception {
+        return prepareApproved(root, ws, "ACCEPT", "Codex accepts the implementation.");
+    }
+
+    public static Prepared prepareApproved(Path root, String ws, String decision, String summary) throws Exception {
+        return prepareApproved(root, ws, decision, summary, dev.dual.runtime.RuntimeTestLedger.ledger());
+    }
+
+    public static Prepared prepareApproved(Path root, String ws, String decision, String summary,
+                                           WorkflowFileLedger ledger) throws Exception {
+        var f = new AcceptanceRepairSequenceTest.Fixture(root, "IMPLEMENTATION_BUG", "product.txt", ws,
+                "contract", ledger);
+        f.acceptanceCount = 1; // First review succeeds; no repair scenario in these report tests.
+        f.outputMutation = result -> {
+            if (result.path("decision").asText().equals("ACCEPT")) {
+                result.put("decision", decision).put("summary", summary);
+                result.put("lifecycle_status", decision.equals("ACCEPT_WITH_NOTES") ? "ACCEPTED_WITH_NOTES" : "ACCEPTED");
+                result.put("verification_summary", "All checks green.");
+                result.putArray("evidence").add("diff matches contract");
+            }
+            if (result.path("decision").asText().equals("SELF_TEST_COMPLETE")) {
+                result.put("verification_summary", "Tests: 42 passed");
+                result.putArray("evidence").add("unit tests passed");
+            }
+        };
+        f.until("acceptance.generate_final_report");
+        var node = f.ledger.loadNode(f.paths, f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst());
+        var report = new NodeInstance(node.nodeInstanceId(), node.nodeDefinitionId(), node.kind(), node.handlerType(),
+                node.status(), node.stageId(), node.iterationId(), node.inputRefs(), node.outputRefs(), node.result(),
+                "", node.startedAt(), node.finishedAt());
+        var resolved = CompletionEvidenceLineageResolver.resolveForReport(f.ledger, f.root, ws, report);
+        org.junit.jupiter.api.Assertions.assertEquals(CompletionEvidenceLineageResolver.Status.AVAILABLE, resolved.status(), resolved.toString());
+        var ctx = resolved.contextNode();
+        return new Prepared(report, relative(f.root, resolved.selfTest().path()), relative(f.root, resolved.acceptance().path()),
+                ctx.outputRefs().stream().filter(r -> r.endsWith(".md")).findFirst().orElseThrow(),
+                ctx.outputRefs().stream().filter(r -> r.endsWith(".json")).findFirst().orElseThrow(),
+                ctx.nodeInstanceId(), resolved.goal().nodeInstanceId());
+    }
+
     private static List<NodeDefinition> definitions() {
         return List.of(
                 new NodeDefinition("implement.claude_self_test_report", NodeKind.TASK, "acpx.agent_run", Map.of()),
@@ -162,7 +203,7 @@ final class CompletionEvidenceLineageFixture {
         return root.toAbsolutePath().normalize().relativize(path.toAbsolutePath().normalize()).toString();
     }
 
-    record Prepared(
+    public record Prepared(
             NodeInstance reportNode,
             String selfTestRef,
             String acceptanceRef,

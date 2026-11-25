@@ -1,0 +1,567 @@
+
+scripts/acpx-claude-agent-env.sh:36-68
+36: load_claude_settings_env() {
+37:   [[ -f "$CLAUDE_SETTINGS_PATH" ]] || return 0
+38:   command -v node >/dev/null 2>&1 || fail "node is required to read $CLAUDE_SETTINGS_PATH"
+39: 
+40:   # 固定 allowlist 是 adapter 连接输入，不是通用 settings passthrough。
+41:   while IFS= read -r -d '' key && IFS= read -r -d '' value; do
+42:     export "$key=$value"
+43:   done < <(node - "$CLAUDE_SETTINGS_PATH" <<'NODE'
+44: const fs = require("fs");
+45: const path = process.argv[2];
+46: let root = {};
+47: try {
+48:   root = JSON.parse(fs.readFileSync(path, "utf8"));
+49: } catch {
+50:   process.exit(0);
+51: }
+52: const env = root && typeof root.env === "object" && !Array.isArray(root.env) ? root.env : {};
+53: const allowed = new Set([
+54:   "ANTHROPIC_BASE_URL",
+55:   "ANTHROPIC_AUTH_TOKEN",
+56:   "ANTHROPIC_API_KEY",
+57:   "ANTHROPIC_MODEL",
+58:   "ANTHROPIC_DEFAULT_SONNET_MODEL",
+59:   "ANTHROPIC_DEFAULT_OPUS_MODEL",
+60:   "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+61:   "CLAUDE_CODE_MODEL",
+62: ]);
+63: for (const [key, value] of Object.entries(env)) {
+64:   if (!allowed.has(key)) {
+65:     continue;
+66:   }
+67:   if (value === null || value === undefined) {
+68:     continue;
+
+.tools/acpx-e1/source/src/acp/agent-command.ts:301-327
+301: export function buildClaudeCodeOptionsMeta(
+302:   options: AcpClientOptions["sessionOptions"],
+303:   claudeAcp = false,
+304:   cwd = process.cwd(),
+305: ): Record<string, unknown> | undefined {
+306:   const claudeCodeOptions: Record<string, unknown> = {};
+307:   if (claudeAcp) {
+308:     claudeCodeOptions.settingSources = resolveClaudeCodeSettingSources();
+309:   }
+310:   if (options) {
+311:     assignClaudeCodeOptions(claudeCodeOptions, options);
+312:     assignClaudeExecutionPolicyOptions(claudeCodeOptions, options, claudeAcp, cwd);
+313:   }
+314: 
+315:   const meta: Record<string, unknown> = {};
+316:   if (Object.keys(claudeCodeOptions).length > 0) {
+317:     meta.claudeCode = { options: claudeCodeOptions };
+318:   }
+319: 
+320:   assignClaudeCodeSystemPrompt(meta, options?.systemPrompt);
+321: 
+322:   if (Object.keys(meta).length === 0) {
+323:     return undefined;
+324:   }
+325: 
+326:   return meta;
+327: }
+
+.tools/acpx-e1/source/src/acp/agent-command.ts:350-369
+350: export function resolveClaudeCodeSettingSources(env: NodeJS.ProcessEnv = process.env): string[] {
+351:   if (env.ACPX_CLAUDE_INCLUDE_USER_SETTINGS?.trim() === "1") {
+352:     return ["user", ...CLAUDE_CODE_DEFAULT_SETTING_SOURCES];
+353:   }
+354:   return [...CLAUDE_CODE_DEFAULT_SETTING_SOURCES];
+355: }
+356: 
+357: function assignClaudeCodeOptions(
+358:   target: Record<string, unknown>,
+359:   options: NonNullable<AcpClientOptions["sessionOptions"]>,
+360: ): void {
+361:   if (typeof options.model === "string" && options.model.trim().length > 0) {
+362:     target.model = options.model;
+363:   }
+364:   if (Array.isArray(options.allowedTools)) {
+365:     target.allowedTools = [...options.allowedTools];
+366:   }
+367:   if (typeof options.maxTurns === "number") {
+368:     target.maxTurns = options.maxTurns;
+369:   }
+
+.tools/acpx-e1/source/src/acp/claude-execution-policy.ts:50-90
+50: 
+51: export type ClaudeExecutionPolicyOptions = {
+52:   settingSources: [];
+53:   sandbox: JsonObject;
+54:   managedSettings: { sandbox: JsonObject; permissions: { deny: string[] } };
+55: };
+56: 
+57: export function loadClaudeExecutionPolicy(
+58:   cwd: string,
+59:   binding: ClaudeExecutionPolicyBinding,
+60: ): ClaudeExecutionPolicyOptions {
+61:   const policyPath = resolvePolicyPath(cwd, binding.ref);
+62:   const bytes = fs.readFileSync(policyPath);
+63:   const actualSha = createHash("sha256").update(bytes).digest("hex");
+64:   if (!SHA256_PATTERN.test(binding.sha256) || actualSha !== binding.sha256) {
+65:     throw new Error("claude execution policy SHA-256 mismatch");
+66:   }
+67: 
+68:   const raw = bytes.toString("utf8");
+69:   assertNoDuplicateObjectKeys(raw);
+70:   const parsed = JSON.parse(raw) as unknown;
+71:   const policy = requireObject(parsed, "claude execution policy");
+72:   assertExactKeys(policy, POLICY_KEYS, "claude execution policy");
+73:   assertText(policy, "schema_version", CLAUDE_EXECUTION_POLICY_SCHEMA);
+74:   assertIdentifier(policy, "workstream_id");
+75:   assertIdentifier(policy, "node_instance_id");
+76:   assertIdentifier(policy, "run_id");
+77:   assertText(policy, "network_transport_owner", NETWORK_TRANSPORT_OWNER);
+78:   assertEmptyArray(policy.setting_sources, "setting_sources");
+79:   assertGeneratedAt(policy.generated_at);
+80: 
+81:   const sdkSandbox = validatedSandboxOptions(policy.sandbox);
+82:   assertDeniedEnvironment(policy.provider_subprocess_denied_env_names);
+83:   if (containsSecretLikeValue(policy)) {
+84:     throw new Error("claude execution policy contains a secret-like value");
+85:   }
+86:   return {
+87:     settingSources: [],
+88:     sandbox: sdkSandbox,
+89:     managedSettings: {
+90:       sandbox: managedSandboxOptions(sdkSandbox),
+
+.tools/acpx-e1/source/src/acp/client.ts:1180-1200
+1180:   async createSession(cwd = this.options.cwd): Promise<SessionCreateResult> {
+1181:     const connection = this.getConnection();
+1182:     const { command, args } = resolveAgentCommandParts(
+1183:       this.options.agentCommand,
+1184:       this.options.agentArgv,
+1185:     );
+1186:     const claudeAcp = isClaudeAcpCommand(command, args);
+1187:     const sessionCwd = await resolveAgentSessionCwd(cwd, this.options.agentCommand);
+1188: 
+1189:     let result: NewSessionResponse;
+1190:     try {
+1191:       const createPromise = this.runConnectionRequest(() =>
+1192:         connection.newSession({
+1193:           cwd: sessionCwd,
+1194:           mcpServers: this.options.mcpServers ?? [],
+1195:           _meta: buildClaudeCodeOptionsMeta(
+1196:             this.options.sessionOptions,
+1197:             claudeAcp,
+1198:             this.options.cwd,
+1199:           ),
+1200:         }),
+
+.tools/acpx-e1/source/src/acp/client.ts:1429-1449
+1429:   async setSessionConfigOption(
+1430:     sessionId: string,
+1431:     configId: string,
+1432:     value: string,
+1433:   ): Promise<SetSessionConfigOptionResponse> {
+1434:     const connection = this.getConnection();
+1435:     try {
+1436:       return await this.runConnectionRequest(() =>
+1437:         connection.setSessionConfigOption({
+1438:           sessionId,
+1439:           configId,
+1440:           value,
+1441:         }),
+1442:       );
+1443:     } catch (error) {
+1444:       throw maybeWrapSessionControlError(
+1445:         "session/set_config_option",
+1446:         error,
+1447:         `for "${configId}"="${value}"`,
+1448:       );
+1449:     }
+
+.tools/acpx-e1/source/src/runtime/engine/session-options.ts:1-38
+1: import type { SessionRecord } from "../../types.js";
+2: 
+3: export type SystemPromptOption = string | { append: string };
+4: 
+5: export type SessionAgentOptions = {
+6:   model?: string;
+7:   allowedTools?: string[];
+8:   maxTurns?: number;
+9:   systemPrompt?: SystemPromptOption;
+10:   /**
+11:    * Per-agent environment variables injected into the spawned agent child
+12:    * process and persisted with the session record for reconnects. Keys here
+13:    * override the parent process environment for the spawned child, except
+14:    * acpx-managed auth credential keys. Do not put secrets here; use
+15:    * authCredentials for credentials. Callers are responsible for sanitizing
+16:    * dangerous keys such as `PATH`, `LD_PRELOAD`, and `NODE_OPTIONS` before
+17:    * passing them to acpx.
+18:    */
+19:   env?: Record<string, string>;
+20:   claudeExecutionPolicyRef?: string;
+21:   claudeExecutionPolicySha256?: string;
+22: };
+23: 
+24: export function mergeSessionOptions(
+25:   preferred: SessionAgentOptions | undefined,
+26:   fallback: SessionAgentOptions | undefined,
+27: ): SessionAgentOptions | undefined {
+28:   const merged: SessionAgentOptions = { ...fallback };
+29:   assignDefinedOption(merged, "model", preferred?.model);
+30:   assignDefinedOption(merged, "allowedTools", preferred?.allowedTools);
+31:   assignDefinedOption(merged, "maxTurns", preferred?.maxTurns);
+32:   assignDefinedOption(merged, "systemPrompt", preferred?.systemPrompt);
+33:   assignDefinedOption(merged, "env", mergeEnvRecords(fallback?.env, preferred?.env));
+34:   assignPolicyBinding(merged, preferred);
+35:   return Object.keys(merged).length > 0 ? merged : undefined;
+36: }
+37: 
+38: export function assertCompatiblePersistentSessionOptions(
+
+.tools/acpx-e1/source/src/cli/flags.ts:338-350
+338:     )
+339:     .option("--format <fmt>", "Output format: text, json, quiet", parseOutputFormat)
+340:     .option("--suppress-reads", "Suppress raw read-file contents in output")
+341:     .option("--model <id>", "Agent model id")
+342:     .option(
+343:       "--allowed-tools <list>",
+344:       'Allowed tool names as a comma-separated list (use "" for no tools)',
+345:       parseAllowedTools,
+346:     )
+347:     .option("--max-turns <count>", "Maximum turns for the session", parseMaxTurns)
+348:     .option(
+349:       "--system-prompt <text>",
+350:       "Replace the agent system prompt (claude-agent-acp via ACP _meta.systemPrompt)",
+
+.tools/acpx-e1/source/src/cli/command-handlers.ts:185-202
+185: 
+186: type ResolvedAgentInvocation = ReturnType<typeof resolveAgentInvocation>;
+187: 
+188: function sessionOptionsFromGlobalFlags(
+189:   globalFlags: GlobalFlags,
+190: ): NonNullable<Parameters<SessionModule["createSession"]>[0]["sessionOptions"]> {
+191:   return {
+192:     model: globalFlags.model,
+193:     allowedTools: globalFlags.allowedTools,
+194:     maxTurns: globalFlags.maxTurns,
+195:     systemPrompt: globalFlags.systemPrompt,
+196:     claudeExecutionPolicyRef: globalFlags.claudeExecutionPolicyRef,
+197:     claudeExecutionPolicySha256: globalFlags.claudeExecutionPolicySha256,
+198:   };
+199: }
+200: 
+201: async function resolvePermissionPolicyFromFlags(
+202:   globalFlags: GlobalFlags,
+
+.tools/acpx-e1/source/src/cli/command-registration.ts:267-291
+267:   });
+268: 
+269:   const setConfigCommand = parent
+270:     .command("set")
+271:     .description(descriptions.setConfig)
+272:     .argument("<key>", "Config option id", (value: string) =>
+273:       parseNonEmptyValue("Config option key", value),
+274:     )
+275:     .argument("<value>", "Config option value", (value: string) =>
+276:       parseNonEmptyValue("Config option value", value),
+277:     );
+278:   addSessionNameOption(setConfigCommand);
+279:   setConfigCommand.action(async function (
+280:     this: Command,
+281:     key: string,
+282:     value: string,
+283:     flags: StatusFlags,
+284:   ) {
+285:     await handleSetConfigOption(explicitAgentName, key, value, flags, this, config);
+286:   });
+287: 
+288:   registerStatusCommand(parent, explicitAgentName, config, descriptions.status);
+289: }
+290: 
+291: export function registerAgentCommand(
+
+/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js:233-266
+233: export async function claudeCliPath() {
+234:     if (process.env.CLAUDE_CODE_EXECUTABLE) {
+235:         return process.env.CLAUDE_CODE_EXECUTABLE;
+236:     }
+237:     // The SDK's CLI is a native binary shipped as a platform-specific optional
+238:     // dependency of @anthropic-ai/claude-agent-sdk. Resolve via a require bound
+239:     // to the SDK so nested installs are found even when npm doesn't hoist.
+240:     const { createRequire } = await import("node:module");
+241:     const req = createRequire(import.meta.resolve("@anthropic-ai/claude-agent-sdk"));
+242:     const ext = process.platform === "win32" ? ".exe" : "";
+243:     // On linux, both glibc and musl variants may be installed side-by-side
+244:     // (e.g. bunx hydrates every optional dep), so picking one by trial is
+245:     // unreliable: the wrong binary segfaults at runtime instead of failing to
+246:     // spawn. Detect the runtime libc and prefer the matching variant, falling
+247:     // back to the other only if the preferred one isn't installed.
+248:     const candidates = process.platform === "linux"
+249:         ? isMuslLibc()
+250:             ? [
+251:                 `@anthropic-ai/claude-agent-sdk-linux-${process.arch}-musl/claude${ext}`,
+252:                 `@anthropic-ai/claude-agent-sdk-linux-${process.arch}/claude${ext}`,
+253:             ]
+254:             : [
+255:                 `@anthropic-ai/claude-agent-sdk-linux-${process.arch}/claude${ext}`,
+256:                 `@anthropic-ai/claude-agent-sdk-linux-${process.arch}-musl/claude${ext}`,
+257:             ]
+258:         : [`@anthropic-ai/claude-agent-sdk-${process.platform}-${process.arch}/claude${ext}`];
+259:     for (const candidate of candidates) {
+260:         try {
+261:             return req.resolve(candidate);
+262:         }
+263:         catch {
+264:             // try next candidate
+265:         }
+266:     }
+
+/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js:4764-4773
+4764:         const permissionMode = resolvePermissionMode(settingsManager.getSettings().permissions?.defaultMode, this.logger);
+4765:         // Extract options from _meta if provided
+4766:         const sessionMeta = params._meta;
+4767:         const userProvidedOptions = sessionMeta?.claudeCode?.options;
+4768:         const forwardSubagentText = supportsSubagentTranscript(this.clientCapabilities) ||
+4769:             userProvidedOptions?.forwardSubagentText === true;
+4770:         // Configure thinking behavior from environment variable
+4771:         const thinking = resolveThinkingConfig(process.env.MAX_THINKING_TOKENS, this.logger);
+4772:         // Parse model configuration from environment (e.g. Bedrock model overrides)
+4773:         const modelConfig = parseModelConfig(process.env.CLAUDE_MODEL_CONFIG);
+
+/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js:4866-4890
+4866:         const options = {
+4867:             systemPrompt,
+4868:             settingSources: ["user", "project", "local"],
+4869:             ...(thinking !== undefined && { thinking }),
+4870:             ...userProvidedOptions,
+4871:             ...(settings && { settings }),
+4872:             env,
+4873:             // Override certain fields that must be controlled by ACP
+4874:             cwd: params.cwd,
+4875:             includePartialMessages: true,
+4876:             forwardSubagentText,
+4877:             mcpServers: {
+4878:                 ...(userProvidedOptions?.mcpServers || {}),
+4879:                 ...mcpServers,
+4880:                 ...(fileChangeAuditSupport
+4881:                     ? { [FILE_CHANGE_AUDIT_SERVER_NAME]: fileChangeAuditSupport.mcpServer }
+4882:                     : {}),
+4883:             },
+4884:             // If we want bypassPermissions to be an option, we have to allow it here.
+4885:             // But it doesn't work in root mode, so we only activate it if it will work.
+4886:             allowDangerouslySkipPermissions: ALLOW_BYPASS,
+4887:             permissionMode,
+4888:             canUseTool: this.canUseTool(sessionId),
+4889:             // Forward MCP elicitation requests onto ACP elicitation. Only attached
+4890:             // when the client advertised support, so non-supporting clients keep the
+
+/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js:5120-5129
+5120:         const configOptions = buildConfigOptions(modes, models, modelInfos, settingsManager.getSettings().effortLevel, agents, currentAgent, fastMode);
+5121:         // Apply the initial effort level to the SDK so it matches the UI default
+5122:         const initialEffort = configOptions.find((o) => o.id === EFFORT_CONFIG_ID);
+5123:         if (initialEffort &&
+5124:             typeof initialEffort.currentValue === "string" &&
+5125:             initialEffort.currentValue !== "default") {
+5126:             await q.applyFlagSettings({
+5127:                 effortLevel: toSdkEffortLevel(initialEffort.currentValue),
+5128:             });
+5129:         }
+
+/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js:5617-5643
+5617:     // Add effort level option based on the currently selected model
+5618:     const currentModelInfo = modelInfos.find((m) => m.value === models.currentModelId);
+5619:     const supportedLevels = currentModelInfo?.supportsEffort
+5620:         ? (currentModelInfo.supportedEffortLevels ?? [])
+5621:         : [];
+5622:     if (supportedLevels.length > 0) {
+5623:         const effortOptions = [
+5624:             { value: "default", name: "Default" },
+5625:             ...supportedLevels.map((level) => ({
+5626:                 value: level,
+5627:                 name: level
+5628:                     .split(/[_-]/)
+5629:                     .map((part) => (part ? part.charAt(0).toUpperCase() + part.slice(1) : part))
+5630:                     .join(" "),
+5631:             })),
+5632:         ];
+5633:         const includes = (l) => l === "default" || supportedLevels.includes(l);
+5634:         const validEffort = currentEffortLevel && includes(currentEffortLevel) ? currentEffortLevel : "default";
+5635:         options.push({
+5636:             id: EFFORT_CONFIG_ID,
+5637:             name: "Effort",
+5638:             description: "Available effort levels for this model",
+5639:             category: "thought_level",
+5640:             type: "select",
+5641:             currentValue: validEffort,
+5642:             options: effortOptions,
+5643:         });
+
+/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js:7065-7079
+7065: /** Translate the legacy `MAX_THINKING_TOKENS` env var into the SDK's `thinking`
+7066:  *  option. The `maxThinkingTokens` option it used to feed is deprecated and
+7067:  *  reduced to on/off on current models, so map the value to explicit thinking
+7068:  *  config instead: unset → `undefined` (SDK default, adaptive on models that
+7069:  *  support it); `0` → disabled; a positive integer → a fixed token budget.
+7070:  *  Anything else is ignored with a warning. */
+7071: function resolveThinkingConfig(raw, logger) {
+7072:     if (raw === undefined)
+7073:         return undefined;
+7074:     const parsed = Number.parseInt(raw, 10);
+7075:     if (Number.isNaN(parsed) || parsed < 0) {
+7076:         logger.error(`Ignoring MAX_THINKING_TOKENS: expected a non-negative integer, got '${raw}'.`);
+7077:         return undefined;
+7078:     }
+7079:     return parsed === 0 ? { type: "disabled" } : { type: "enabled", budgetTokens: parsed };
+
+/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/settings.js:74-103
+74:      * containing directories means we pick up file creation as well as edits.
+75:      */
+76:     getWatchedPaths() {
+77:         return [
+78:             path.join(CLAUDE_CONFIG_DIR, "settings.json"),
+79:             path.join(this.cwd, ".claude", "settings.json"),
+80:             path.join(this.cwd, ".claude", "settings.local.json"),
+81:             getManagedSettingsPath(),
+82:         ];
+83:     }
+84:     /**
+85:      * Resolves the effective settings via the SDK and applies the CLI's trust
+86:      * filter for escalating `permissions.defaultMode` values.
+87:      */
+88:     async loadAllSettings() {
+89:         try {
+90:             const resolved = await resolveSettings({ cwd: this.cwd });
+91:             this.effective = filterEscalatingDefaultMode(resolved);
+92:         }
+93:         catch (error) {
+94:             this.logger.error("Failed to resolve settings:", error);
+95:             this.effective = {};
+96:         }
+97:     }
+98:     /**
+99:      * Sets up file watchers for all settings files
+100:      */
+101:     setupWatchers() {
+102:         for (const filePath of this.getWatchedPaths()) {
+103:             try {
+
+/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts:1665-1719
+1665:     /**
+1666:      * Controls Claude's thinking/reasoning behavior.
+1667:      *
+1668:      * - `{ type: 'adaptive' }` — Claude decides when and how much to think (Opus 4.6+).
+1669:      *   This is the default for models that support it.
+1670:      * - `{ type: 'enabled', budgetTokens: number }` — Fixed thinking token budget (older models)
+1671:      * - `{ type: 'disabled' }` — No extended thinking
+1672:      *
+1673:      * When set, takes precedence over the deprecated `maxThinkingTokens`.
+1674:      *
+1675:      * @see https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking
+1676:      */
+1677:     thinking?: ThinkingConfig;
+1678:     /**
+1679:      * Controls how much effort Claude puts into its response.
+1680:      * Works with adaptive thinking to guide thinking depth.
+1681:      *
+1682:      * - `'low'` — Minimal thinking, fastest responses
+1683:      * - `'medium'` — Moderate thinking
+1684:      * - `'high'` — Deep reasoning (default)
+1685:      * - `'xhigh'` — Deeper than high (Fable 5, Opus 4.7+, Sonnet 5)
+1686:      * - `'max'` — Maximum effort (Fable 5, Opus 4.6+, Sonnet 4.6+)
+1687:      *
+1688:      * @see https://platform.claude.com/docs/en/build-with-claude/effort
+1689:      */
+1690:     effort?: EffortLevel;
+1691:     /**
+1692:      * Maximum number of tokens the model can use for its thinking/reasoning process.
+1693:      * Helps control cost and latency for complex tasks.
+1694:      *
+1695:      * @deprecated Use `thinking` instead. On Opus 4.6, this is treated as on/off
+1696:      * (0 = disabled, any other value = adaptive). For explicit control, use
+1697:      * `thinking: { type: 'adaptive' }` or `thinking: { type: 'enabled', budgetTokens: N }`.
+1698:      */
+1699:     maxThinkingTokens?: number;
+1700:     /**
+1701:      * Maximum number of conversation turns before the query stops.
+1702:      * A turn consists of a user message and assistant response.
+1703:      */
+1704:     maxTurns?: number;
+1705:     /**
+1706:      * Maximum budget in USD for the query. The query will stop if this
+1707:      * budget is exceeded, returning an `error_max_budget_usd` result.
+1708:      */
+1709:     maxBudgetUsd?: number;
+1710:     /**
+1711:      * API-side task budget in tokens. When set, the model is made aware of
+1712:      * its remaining token budget so it can pace tool use and wrap up before
+1713:      * the limit. Sent as `output_config.task_budget` with the
+1714:      * `task-budgets-2026-03-13` beta header.
+1715:      * @alpha
+1716:      */
+1717:     taskBudget?: {
+1718:         total: number;
+1719:     };
+
+/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js:28406-28427
+28406:   async newSession(request) {
+28407:     const additionalDirectories = readAdditionalDirectories(request.cwd, request.additionalDirectories, request._meta);
+28408:     await this.refreshSkills(request.cwd, additionalDirectories);
+28409:     const response = await this.codexClient.threadStart({
+28410:       config: await this.createSessionConfig(request.cwd, additionalDirectories, request.mcpServers),
+28411:       modelProvider: this.getModelProvider(),
+28412:       cwd: request.cwd
+28413:     });
+28414:     const codexModels = await this.fetchAvailableModels();
+28415:     if (codexModels.length === 0) {
+28416:       throw new Error("Codex did not return any models");
+28417:     }
+28418:     const currentModelId = this.createModelId(codexModels, response.model, response.reasoningEffort).toString();
+28419:     return {
+28420:       sessionId: response.thread.id,
+28421:       currentModelId,
+28422:       models: codexModels,
+28423:       collaborationMode: this.getCollaborationMode(response.thread.id),
+28424:       modelProvider: response.modelProvider,
+28425:       currentServiceTier: response.serviceTier ?? null,
+28426:       additionalDirectories
+28427:     };
+
+/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js:28655-28672
+28655:   async sendPrompt(request, agentMode, modelId, serviceTier, disableSummary, cwd, additionalDirectories, onTurnStarted, shouldCancel) {
+28656:     const input = buildPromptItems(request.prompt);
+28657:     const effort = modelId.effort;
+28658:     await this.refreshSkills(cwd, additionalDirectories);
+28659:     if (shouldCancel?.()) {
+28660:       return null;
+28661:     }
+28662:     return await this.codexClient.runTurn({
+28663:       threadId: request.sessionId,
+28664:       input,
+28665:       approvalPolicy: agentMode.approvalPolicy,
+28666:       approvalsReviewer: agentMode.approvalsReviewer,
+28667:       sandboxPolicy: addAdditionalDirectoriesToSandboxPolicy(agentMode.sandboxPolicy, additionalDirectories),
+28668:       summary: disableSummary ? "none" : "auto",
+28669:       effort,
+28670:       model: modelId.model,
+28671:       serviceTier
+28672:     }, onTurnStarted);
+
+/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js:33165-33183
+33165:       throw RequestError.invalidParams();
+33166:     }
+33167:     const currentEffort = ModelId.fromString(sessionState.currentModelId).effort;
+33168:     const effort = findSupportedEffort(model.supportedReasoningEfforts, currentEffort) ?? model.defaultReasoningEffort;
+33169:     this.applyModelAndEffort(sessionState, model, effort);
+33170:   }
+33171:   applyReasoningEffortChange(sessionState, value) {
+33172:     const effort = findSupportedEffort(sessionState.supportedReasoningEfforts, value);
+33173:     if (!effort) {
+33174:       throw RequestError.invalidParams();
+33175:     }
+33176:     const { model } = ModelId.fromString(sessionState.currentModelId);
+33177:     sessionState.currentModelId = ModelId.create(model, effort).toString();
+33178:   }
+33179:   applyModelAndEffort(sessionState, model, effort) {
+33180:     sessionState.currentModelId = ModelId.fromComponents(model, effort).toString();
+33181:     sessionState.supportedReasoningEfforts = model.supportedReasoningEfforts;
+33182:     sessionState.supportedInputModalities = model.inputModalities;
+33183:     sessionState.currentModelSupportsFast = modelSupportsFast(model);
+
+/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs: character offset 885521, env schema only
+UT:()=>pke,CLAUDE_CODE_GZIP_REQUEST_BODIES:()=>ike,CLAUDE_CODE_MAX_CONTEXT_TOKENS:()=>VTe,CLAUDE_CODE_MAX_OUTPUT_TOKENS:()=>GTe,CLAUDE_CODE_MAX_RETRIES:()=>WTe,CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY:()=>YTe,CLAUDE_CODE_MAX_TURNS:()=>JTe,CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS:()=>hke,CLAUDE_CODE_RETRY_WATCHDOG:()=>uke,CLAUDE_CODE_SLOW_OPERATION_THRESHOLD_MS:()=>mke,CLAUDE_ENABLE_BYTE_WATCHDOG

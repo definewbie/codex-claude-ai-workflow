@@ -1,0 +1,26 @@
+{
+  "verifiedAt": "2026-09-27T23:45:19.341480+00:00",
+  "baselineFileCount": 1318,
+  "changedExistingFiles": [
+    "dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md"
+  ],
+  "unchangedExistingFiles": 1315,
+  "newDesign": {
+    "path": "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+    "sha256": "b8fc76dfb9ff1cee1a60c7394338b667f4ac63d160d8ff5d8cad7075478ae614",
+    "lines": 402
+  },
+  "documentHashes": {
+    "dual-orchestrator/docs/plans/20260923-dual-lifecycle-reliability-design.zh-CN.md": "fece1a746d641f6dc69474ecfeb07490adbf66c8c8d2c0c5a923da4ec0d292b3",
+    "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md": "faa272e0998e6162d6f212e434d6df1ea6dbb6908f3d264a48b268eaaca638eb",
+    "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md": "4a1361fcd539d63e5f95341124c5d813dd66a0fcaaa85b356ffbfee6d3e5548b"
+  },
+  "sourceAnchorsUnchanged": 29,
+  "tablesChecked": 19,
+  "tableErrors": [],
+  "missingLinks": [],
+  "testsRun": false,
+  "review": "Author self-check only. DESIGN GAP remains as enumerated in section 13. No independent review or implementation readiness."
+}

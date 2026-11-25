@@ -1,0 +1,29 @@
+{
+  "copied_unchanged": {
+    "gate_support.py": "22b709c9e5fa22abd7fdc9059ad9a988a8b8923d1600aa477f91f3f191ec09d5",
+    "check_budget.py": "ec44b480ce3fad03aad83a808a717f41461a465e778ad6cc9054738e5d6c72d0",
+    "budget.json": "9c326c7191d9f7a60ef768e16cb712507de653183a7b4dd7cb72f06e87873ea5",
+    "test_gate_observer.py": "5d6a067af41aa8944b4dbd482dac43e9c017920376223d1fe662f2d03e580232",
+    "selected-release.json": "721be0fe743ad021f7b0004a94f45ecdf77021a9a938ece6ff157fc6b46acdee",
+    "instance-location.json": "da46f9bc6a7385a672c74e93326a87ec4a3c2a33ea63db5483a3f7bd136331c0",
+    "local-launch-selection.json": "bac9edc709b3e5deedef6b83564af9bdfefedbf54ea2305e42836132408d1ec0",
+    "host-environment-identity.json": "6826157086e28201de554a633ed50b6259c82a4782e66ebd19e56e85055e07b0",
+    "observed-sdk-identity.json": "3e1094819af908747b2b931bf7d8a2b1c19923f221e8852da0cac1a7d6fb2596",
+    "verification-exits.md": "82d209bc3223e11b5cb3aec9899aa125475af12d1a31084de1cbf98ec16b9127",
+    "execution-boundaries.md": "bd23161c9b741e59c303519ee5e00b2c392bbb0898a32e620980ee1cb8d3a609",
+    "task-requirement.md": "71bb70cf6635fe9c7de490190c0ae09f19ed6f67b68e07af87ddca8cd381cbb0"
+  },
+  "reviewed_process_candidate": {
+    "process_check.py": {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-process-absence-forward-fix-20261023/candidate/process_check.py",
+      "sha256": "443d6eaf761efcb8b3c51d6036edea348825428f8c3ab626824fad7409da4618"
+    },
+    "test_process_check.py": {
+      "ref": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-process-absence-forward-fix-20261023/candidate/test_process_check.py",
+      "sha256": "d34e00a1104ce4d2c4cb46221f2de47acc6d74fc47f34bd7fc711f13bb6b2459"
+    }
+  },
+  "observation_count": 83,
+  "native_provider_calls": 0,
+  "new_case_created": false
+}

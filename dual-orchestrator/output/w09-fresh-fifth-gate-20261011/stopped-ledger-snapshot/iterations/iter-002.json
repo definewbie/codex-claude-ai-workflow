@@ -1,0 +1,13 @@
+{
+  "schemaVersion" : 1,
+  "iterationId" : "iter-002",
+  "parentIterationId" : "iter-001",
+  "number" : 2,
+  "stageId" : "stage-intake",
+  "status" : "active",
+  "triggerNodeInstanceId" : "node-intake-decision-005",
+  "triggerAction" : "NEEDS_REVISION",
+  "targetNodeDefinitionId" : "intake.claude_brainstorm",
+  "reason" : "功能语义与主要验收要求完整，但文件范围约束与提案性质冲突，且缺少退出码验证豁免。",
+  "createdAt" : "2026-10-11T14:22:34.061760Z"
+}

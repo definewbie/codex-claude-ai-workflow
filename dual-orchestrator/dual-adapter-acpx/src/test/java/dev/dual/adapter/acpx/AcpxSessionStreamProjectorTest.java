@@ -5,8 +5,20 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class AcpxSessionStreamProjectorTest {
+    @Test
+    void completionPreservesCurrentAcpSessionForUsageAssociation() {
+        var projector = new AcpxSessionStreamProjector();
+        accept(projector, 1, "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"native-current\"}}");
+        accept(projector, 2, update("message", "answer"));
+        accept(projector, 3, "{\"jsonrpc\":\"2.0\",\"id\":3,\"result\":{\"stopReason\":\"end_turn\"}}");
+        assertEquals("native-current", projector.promptCompletion().sessionId());
+        assertEquals("3", projector.promptCompletion().requestId());
+        assertTrue(projector.promptCompletion().completed());
+    }
+
     @Test
     void projectsClaudeUngroupedDeltasAndFinalSnapshotOnce() {
         var projector = new AcpxSessionStreamProjector();
@@ -158,16 +170,43 @@ class AcpxSessionStreamProjectorTest {
     @Test
     void correlatesCurrentPermissionRequestAndDeniedDecision() {
         var projector = new AcpxSessionStreamProjector();
+        projector.accept(0, AcpxStreamWireLine.parse("{\"jsonrpc\":\"2.0\",\"id\":99,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s\"}}"));
         var requested = projector.accept(1, AcpxStreamWireLine.parse("""
-                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"toolCall":{"title":"Run tests","rawInput":{"command":"mvn test"}}}}
+                {"jsonrpc":"2.0","id":0,"method":"session/request_permission","params":{"sessionId":"s","toolCall":{"toolCallId":"t","kind":"execute","title":"Run tests","rawInput":{"command":"mvn test"}},"options":[{"optionId":"opaque","kind":"reject_once"}]}}
                 """)).orElseThrow();
         var denied = projector.accept(2, AcpxStreamWireLine.parse("""
-                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
+                {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"opaque"}}}
                 """)).orElseThrow();
 
         assertEquals(AgentLifecycleEvent.Kind.PERMISSION_REQUESTED, requested.kind());
         assertEquals(AgentLifecycleEvent.Kind.PERMISSION_DENIED, denied.kind());
+        assertTrue(denied.permissionEvidence().operationRef().complete());
         assertTrue(denied.text().contains("mvn test"));
+    }
+
+    @Test
+    void currentRequestWithoutSessionBindingStillBlocksButCannotSupplyOperationProof() {
+        var projector = new AcpxSessionStreamProjector();
+        projector.accept(1, AcpxStreamWireLine.parse("{\"id\":7,\"method\":\"session/request_permission\",\"params\":{\"toolCall\":{\"title\":\"unknown binding\"}}}"));
+        var response = projector.accept(2, AcpxStreamWireLine.parse("{\"id\":7,\"result\":{\"outcome\":{\"outcome\":\"selected\",\"optionId\":\"reject\"}}}" )).orElseThrow();
+        assertEquals("PERMISSION_UNRESOLVED", response.kind().name());
+        assertEquals("UNKNOWN", response.permissionEvidence().disposition());
+        assertNull(response.permissionEvidence().operationRef());
+        var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), java.time.Duration.ofSeconds(30));
+        health.observe(response);
+        assertTrue(health.assess(java.time.Duration.ZERO).signals().stream().anyMatch(signal ->
+                signal.type() == dev.dual.core.execution.AdapterSignalType.PERMISSION_BLOCKED
+                        && signal.message().contains("unresolved")));
+    }
+
+    @Test
+    void actualNativeCancellationRemainsDistinctFromUnresolvedReply() {
+        var projector = new AcpxSessionStreamProjector();
+        projector.accept(0, AcpxStreamWireLine.parse("{\"id\":99,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s\"}}"));
+        projector.accept(1, AcpxStreamWireLine.parse("{\"id\":7,\"method\":\"session/request_permission\",\"params\":{\"sessionId\":\"s\",\"toolCall\":{\"toolCallId\":\"read-1\",\"kind\":\"read\",\"rawInput\":{\"file_path\":\"README.md\"}}}}"));
+        var response = projector.accept(2, AcpxStreamWireLine.parse("{\"id\":7,\"result\":{\"outcome\":{\"outcome\":\"cancelled\"}}}" )).orElseThrow();
+        assertEquals(AgentLifecycleEvent.Kind.PERMISSION_CANCELLED, response.kind());
+        assertEquals("CANCELLED", response.permissionEvidence().disposition());
     }
 
     @Test
@@ -190,6 +229,94 @@ class AcpxSessionStreamProjectorTest {
         assertTrue(projector.accept(2, AcpxStreamWireLine.parse("""
                 {"jsonrpc":"2.0","id":0,"result":{"outcome":{"outcome":"selected","optionId":"reject"}}}
                 """), true).isEmpty());
+    }
+
+    @Test
+    void duplicatePermissionRpcIdCannotTransferDecisionToAnotherOperation() {
+        var projector = project("""
+                {"id":99,"method":"session/prompt","params":{"sessionId":"s"}}
+                """);
+        accept(projector, 1, permissionRequest(7, "tool-a", "README.md"));
+        accept(projector, 2, permissionRequest(7, "tool-b", "main.py"));
+        var ambiguous = projector.accept(3, AcpxStreamWireLine.parse(permissionReply(7, "yes"))).orElseThrow();
+        assertEquals(AgentLifecycleEvent.Kind.PERMISSION_UNRESOLVED, ambiguous.kind());
+        assertNull(ambiguous.permissionEvidence().operationRef());
+        assertTrue(projector.accept(4, AcpxStreamWireLine.parse(permissionReply(7, "no"))).isEmpty());
+        assertPermissionBlocked(ambiguous);
+
+        // A distinct, unambiguous request remains usable; duplication is not a blanket rejection.
+        accept(projector, 5, permissionRequest(8, "tool-c", "main.py"));
+        var valid = projector.accept(6, AcpxStreamWireLine.parse(permissionReply(8, "no"))).orElseThrow();
+        assertEquals(AgentLifecycleEvent.Kind.PERMISSION_DENIED, valid.kind());
+        assertTrue(valid.permissionEvidence().operationRef().complete());
+        assertEquals("tool-c", valid.permissionEvidence().operationRef().toolCallId());
+    }
+
+    @Test
+    void permissionRpcIdReusedInLaterPromptCannotReusePriorDecisionIdentity() {
+        var projector = project("""
+                {"id":99,"method":"session/prompt","params":{"sessionId":"s"}}
+                """);
+        accept(projector, 1, permissionRequest(7, "old-tool", "README.md"));
+        var old = projector.accept(2, AcpxStreamWireLine.parse(permissionReply(7, "no"))).orElseThrow();
+        assertTrue(old.permissionEvidence().operationRef().complete());
+        accept(projector, 3, "{\"id\":99,\"result\":{\"stopReason\":\"end_turn\"}}");
+        accept(projector, 4, "{\"id\":100,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s\"}}");
+        accept(projector, 5, permissionRequest(7, "new-tool", "main.py"));
+        var reused = projector.accept(6, AcpxStreamWireLine.parse(permissionReply(7, "yes"))).orElseThrow();
+        assertEquals(AgentLifecycleEvent.Kind.PERMISSION_UNRESOLVED, reused.kind());
+        assertNull(reused.permissionEvidence().operationRef());
+        assertPermissionBlocked(reused);
+        assertEquals("99", old.permissionEvidence().operationRef().promptId());
+        assertEquals("old-tool", old.permissionEvidence().operationRef().toolCallId());
+    }
+
+    @Test
+    void sameTurnQueuedPermissionsKeepAllowAndDenySeparateWhenRepliesArriveOutOfOrder() {
+        var projector = project("""
+                {"id":99,"method":"session/prompt","params":{"sessionId":"s"}}
+                """);
+        accept(projector, 1, permissionRequest(7, "tool-a", "README.md"));
+        accept(projector, 2, permissionRequest(8, "tool-b", "main.py"));
+        var denied = projector.accept(3, AcpxStreamWireLine.parse(permissionReply(8, "no"))).orElseThrow();
+        var approved = projector.accept(4, AcpxStreamWireLine.parse(permissionReply(7, "yes"))).orElseThrow();
+        assertEquals(AgentLifecycleEvent.Kind.PERMISSION_APPROVED, approved.kind());
+        assertEquals("tool-a", approved.permissionEvidence().toolCallId());
+        assertEquals(AgentLifecycleEvent.Kind.PERMISSION_DENIED, denied.kind());
+        var operation = denied.permissionEvidence().operationRef();
+        assertTrue(operation.complete());
+        assertEquals("8", operation.requestId());
+        assertEquals("tool-b", operation.toolCallId());
+        assertEquals("99", operation.promptId());
+        assertEquals(2, operation.requestSequence());
+        assertEquals(3, operation.decisionSequence());
+        assertTrue(operation.requestJson().contains("main.py"));
+        assertTrue(projector.accept(5, AcpxStreamWireLine.parse(permissionReply(8, "yes"))).isEmpty());
+
+        var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), java.time.Duration.ofSeconds(30));
+        health.observe(denied);
+        health.observe(approved);
+        var blocked = health.assess(java.time.Duration.ZERO).signals();
+        assertEquals(1, blocked.size());
+        assertEquals(dev.dual.core.execution.AdapterSignalType.PERMISSION_BLOCKED, blocked.get(0).type());
+        assertEquals(operation, blocked.get(0).operationRef());
+    }
+
+    private static void assertPermissionBlocked(AgentLifecycleEvent event) {
+        var health = new AgentExecutionHealth(new AcpxFailureSignalCatalog(), java.time.Duration.ofSeconds(30));
+        health.observe(event);
+        assertTrue(health.assess(java.time.Duration.ZERO).signals().stream().anyMatch(signal ->
+                signal.type() == dev.dual.core.execution.AdapterSignalType.PERMISSION_BLOCKED));
+    }
+
+    private static String permissionRequest(int id, String tool, String path) {
+        return "{\"id\":" + id + ",\"method\":\"session/request_permission\",\"params\":{\"sessionId\":\"s\","
+                + "\"toolCall\":{\"toolCallId\":" + quote(tool) + ",\"kind\":\"read\",\"rawInput\":{\"path\":" + quote(path) + "}},"
+                + "\"options\":[{\"optionId\":\"yes\",\"kind\":\"allow_once\"},{\"optionId\":\"no\",\"kind\":\"reject_once\"}]}}";
+    }
+
+    private static String permissionReply(int id, String option) {
+        return "{\"id\":" + id + ",\"result\":{\"outcome\":{\"outcome\":\"selected\",\"optionId\":" + quote(option) + "}}}";
     }
 
     private static String update(String messageId, String text) {

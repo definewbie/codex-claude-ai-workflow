@@ -24,7 +24,7 @@ class ProjectionsRefreshCommandTest {
     void refreshesTimelineAndMetricsFromExistingLedger() throws Exception {
         writeLedgerWithoutProjections();
         var workflowCurrent = tempDir.resolve(".agent/workstreams/ws-refresh/workflow/current.json");
-        var nodeJson = tempDir.resolve(".agent/workstreams/ws-refresh/nodes/node-1.json");
+        var nodeJson = tempDir.resolve(".agent/workstreams/ws-refresh/nodes/node-agent-001.json");
         var runJson = tempDir.resolve(".agent/workstreams/ws-refresh/runs/run-1/run.json");
         var workflowBefore = Files.readString(workflowCurrent, StandardCharsets.UTF_8);
         var nodeBefore = Files.readString(nodeJson, StandardCharsets.UTF_8);
@@ -73,7 +73,7 @@ class ProjectionsRefreshCommandTest {
     void refreshSurfacesExecutionConsistencyWarningsWithoutMutatingLedger() throws Exception {
         writeStaleRunningLedgerWithoutProjections();
         var workflowCurrent = tempDir.resolve(".agent/workstreams/ws-stale/workflow/current.json");
-        var nodeJson = tempDir.resolve(".agent/workstreams/ws-stale/nodes/node-1.json");
+        var nodeJson = tempDir.resolve(".agent/workstreams/ws-stale/nodes/node-agent-001.json");
         var runJson = tempDir.resolve(".agent/workstreams/ws-stale/runs/run-stale/run.json");
         var workflowBefore = Files.readString(workflowCurrent, StandardCharsets.UTF_8);
         var nodeBefore = Files.readString(nodeJson, StandardCharsets.UTF_8);
@@ -106,7 +106,7 @@ class ProjectionsRefreshCommandTest {
     void refreshSurfacesHistoricalDeadPidRunningNodeWithoutMutatingLedger() throws Exception {
         writeHistoricalDeadPidRunningLedgerWithoutProjections();
         var workflowCurrent = tempDir.resolve(".agent/workstreams/ws-historical-stale/workflow/current.json");
-        var nodeJson = tempDir.resolve(".agent/workstreams/ws-historical-stale/nodes/node-1.json");
+        var nodeJson = tempDir.resolve(".agent/workstreams/ws-historical-stale/nodes/node-agent-001.json");
         var runJson = tempDir.resolve(".agent/workstreams/ws-historical-stale/runs/run-old/run.json");
         var workflowBefore = Files.readString(workflowCurrent, StandardCharsets.UTF_8);
         var nodeBefore = Files.readString(nodeJson, StandardCharsets.UTF_8);
@@ -142,7 +142,7 @@ class ProjectionsRefreshCommandTest {
     void refreshSurfacesAttemptOutcomeConflictsWithoutMutatingLedger() throws Exception {
         writeAttemptOutcomeConflictLedgerWithoutProjections();
         var workflowCurrent = tempDir.resolve(".agent/workstreams/ws-conflict/workflow/current.json");
-        var nodeJson = tempDir.resolve(".agent/workstreams/ws-conflict/nodes/node-1.json");
+        var nodeJson = tempDir.resolve(".agent/workstreams/ws-conflict/nodes/node-agent-001.json");
         var runJson = tempDir.resolve(".agent/workstreams/ws-conflict/runs/run-conflict/run.json");
         var workflowBefore = Files.readString(workflowCurrent, StandardCharsets.UTF_8);
         var nodeBefore = Files.readString(nodeJson, StandardCharsets.UTF_8);
@@ -171,8 +171,19 @@ class ProjectionsRefreshCommandTest {
                 "projection replay must not mutate run.json execution read model");
     }
 
+    private void initializeProjectionFixture(String id) throws Exception {
+        var paths = new dev.dual.ledger.file.WorkstreamPaths(tempDir, new dev.dual.core.id.DualId(id));
+        var definition = new dev.dual.core.workflow.WorkflowDefinition("projection-fixture", 1, "agent",
+                java.util.List.of(new dev.dual.core.workflow.NodeDefinition("agent", dev.dual.core.workflow.NodeKind.TASK,
+                        "acpx.agent_run", java.util.Map.of())), java.util.List.of());
+        CliTestLedger.initialize(CliLedgerFactory.create(), paths, "wf-" + id, definition);
+        Files.deleteIfExists(paths.timelineJson());
+        Files.deleteIfExists(paths.workstreamMetricsJson());
+    }
+
     private void writeLedgerWithoutProjections() throws Exception {
         var root = tempDir.resolve(".agent/workstreams/ws-refresh");
+        initializeProjectionFixture("ws-refresh");
         Files.createDirectories(root.resolve("workflow"));
         Files.createDirectories(root.resolve("nodes"));
         Files.createDirectories(root.resolve("runs/run-1"));
@@ -180,21 +191,22 @@ class ProjectionsRefreshCommandTest {
         Files.writeString(root.resolve("workflow/current.json"), """
                 {
                   "schemaVersion": 1,
+                  "commitSequence": 1,
                   "workstreamId": "ws-refresh",
                   "workflowInstanceId": "wf-refresh",
                   "workflowId": "agent-lifecycle-full",
                   "definitionVersion": 1,
                   "status": "RUNNING",
-                  "activeNodeInstanceIds": ["node-1"],
+                  "activeNodeInstanceIds": ["node-agent-001"],
                   "openGateIds": [],
                   "lastEventId": "evt-1",
                   "updatedAt": "2026-06-30T00:00:00Z"
                 }
                 """, StandardCharsets.UTF_8);
-        Files.writeString(root.resolve("nodes/node-1.json"), """
+        Files.writeString(root.resolve("nodes/node-agent-001.json"), """
                 {
                   "schemaVersion": 1,
-                  "nodeInstanceId": "node-1",
+                  "nodeInstanceId": "node-agent-001",
                   "nodeDefinitionId": "implement.claude_implement",
                   "kind": "TASK",
                   "handlerType": "acpx.agent_run",
@@ -242,6 +254,7 @@ class ProjectionsRefreshCommandTest {
 
     private void writeStaleRunningLedgerWithoutProjections() throws Exception {
         var root = tempDir.resolve(".agent/workstreams/ws-stale");
+        initializeProjectionFixture("ws-stale");
         Files.createDirectories(root.resolve("workflow"));
         Files.createDirectories(root.resolve("nodes"));
         Files.createDirectories(root.resolve("runs/run-stale"));
@@ -249,21 +262,22 @@ class ProjectionsRefreshCommandTest {
         Files.writeString(root.resolve("workflow/current.json"), """
                 {
                   "schemaVersion": 1,
+                  "commitSequence": 1,
                   "workstreamId": "ws-stale",
                   "workflowInstanceId": "wf-stale",
                   "workflowId": "agent-lifecycle-full",
                   "definitionVersion": 1,
                   "status": "RUNNING",
-                  "activeNodeInstanceIds": ["node-1"],
+                  "activeNodeInstanceIds": ["node-agent-001"],
                   "openGateIds": [],
                   "lastEventId": "evt-1",
                   "updatedAt": "2026-06-30T00:00:00Z"
                 }
                 """, StandardCharsets.UTF_8);
-        Files.writeString(root.resolve("nodes/node-1.json"), """
+        Files.writeString(root.resolve("nodes/node-agent-001.json"), """
                 {
                   "schemaVersion": 1,
-                  "nodeInstanceId": "node-1",
+                  "nodeInstanceId": "node-agent-001",
                   "nodeDefinitionId": "implement.claude_implement",
                   "kind": "TASK",
                   "handlerType": "acpx.agent_run",
@@ -314,6 +328,7 @@ class ProjectionsRefreshCommandTest {
 
     private void writeHistoricalDeadPidRunningLedgerWithoutProjections() throws Exception {
         var root = tempDir.resolve(".agent/workstreams/ws-historical-stale");
+        initializeProjectionFixture("ws-historical-stale");
         Files.createDirectories(root.resolve("workflow"));
         Files.createDirectories(root.resolve("nodes"));
         Files.createDirectories(root.resolve("runs/run-old"));
@@ -321,21 +336,22 @@ class ProjectionsRefreshCommandTest {
         Files.writeString(root.resolve("workflow/current.json"), """
                 {
                   "schemaVersion": 1,
+                  "commitSequence": 1,
                   "workstreamId": "ws-historical-stale",
                   "workflowInstanceId": "wf-historical-stale",
                   "workflowId": "agent-lifecycle-full",
                   "definitionVersion": 1,
                   "status": "RUNNING",
-                  "activeNodeInstanceIds": ["node-1"],
+                  "activeNodeInstanceIds": ["node-agent-001"],
                   "openGateIds": [],
                   "lastEventId": "evt-1",
                   "updatedAt": "2026-06-30T00:00:00Z"
                 }
                 """, StandardCharsets.UTF_8);
-        Files.writeString(root.resolve("nodes/node-1.json"), """
+        Files.writeString(root.resolve("nodes/node-agent-001.json"), """
                 {
                   "schemaVersion": 1,
-                  "nodeInstanceId": "node-1",
+                  "nodeInstanceId": "node-agent-001",
                   "nodeDefinitionId": "implement.claude_self_test_report",
                   "kind": "TASK",
                   "handlerType": "acpx.agent_run",
@@ -377,6 +393,7 @@ class ProjectionsRefreshCommandTest {
 
     private void writeAttemptOutcomeConflictLedgerWithoutProjections() throws Exception {
         var root = tempDir.resolve(".agent/workstreams/ws-conflict");
+        initializeProjectionFixture("ws-conflict");
         Files.createDirectories(root.resolve("workflow"));
         Files.createDirectories(root.resolve("nodes"));
         Files.createDirectories(root.resolve("runs/run-conflict"));
@@ -384,21 +401,22 @@ class ProjectionsRefreshCommandTest {
         Files.writeString(root.resolve("workflow/current.json"), """
                 {
                   "schemaVersion": 1,
+                  "commitSequence": 1,
                   "workstreamId": "ws-conflict",
                   "workflowInstanceId": "wf-conflict",
                   "workflowId": "agent-lifecycle-full",
                   "definitionVersion": 1,
                   "status": "RUNNING",
-                  "activeNodeInstanceIds": ["node-1"],
+                  "activeNodeInstanceIds": ["node-agent-001"],
                   "openGateIds": [],
                   "lastEventId": "evt-1",
                   "updatedAt": "2026-06-30T00:00:00Z"
                 }
                 """, StandardCharsets.UTF_8);
-        Files.writeString(root.resolve("nodes/node-1.json"), """
+        Files.writeString(root.resolve("nodes/node-agent-001.json"), """
                 {
                   "schemaVersion": 1,
-                  "nodeInstanceId": "node-1",
+                  "nodeInstanceId": "node-agent-001",
                   "nodeDefinitionId": "intake.codex_product_review",
                   "kind": "TASK",
                   "handlerType": "acpx.agent_run",

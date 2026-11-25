@@ -1,0 +1,17 @@
+{
+  "files": [
+    "dual-ledger-file/src/main/java/dev/dual/ledger/file/FailureSummaryWriter.java",
+    "dual-ledger-file/src/test/java/dev/dual/ledger/file/WorkstreamAttentionEvaluatorTest.java",
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java",
+    "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AcpxCompatibilitySequenceTest.java",
+    "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java",
+    "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/SessionMetadataFixture.java",
+    "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/NativePermissionTransportSequenceTest.java",
+    "dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/WorkflowFirstLifecycleSequenceTest.java"
+  ],
+  "production_files": [
+    "dual-ledger-file/src/main/java/dev/dual/ledger/file/FailureSummaryWriter.java",
+    "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxSessionCompatibility.java"
+  ],
+  "baseline": "pre-repair dirty workspace, not HEAD"
+}

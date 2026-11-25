@@ -1,0 +1,66 @@
+{
+  "schemaVersion" : 1,
+  "nodeInstanceId" : "node-intake-claude_brainstorm-002",
+  "nodeDefinitionId" : "intake.claude_brainstorm",
+  "kind" : "TASK",
+  "handlerType" : "acpx.agent_run",
+  "status" : "COMPLETED",
+  "stageId" : "stage-intake",
+  "iterationId" : "iter-001",
+  "inputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/context/node-context-intake_claude_brainstorm-001.md" ],
+  "inputTransition" : {
+    "transition_type" : "normal",
+    "condition" : "unconditional",
+    "required" : true,
+    "purpose" : "Seed the first Claude intake run with repo-scope context."
+  },
+  "outputRefs" : [ ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315423259/outputs/intake-claude-brainstorm.stderr.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315423259/outputs/intake-claude-brainstorm.transcript.log", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315423259/outputs/intake-claude-brainstorm.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789315423259/binding.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315423259/outputs/intake-claude-brainstorm.contract.json", ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-c931e46e7c397806.ref.json" ],
+  "result" : {
+    "run_id" : "run-1789315423259",
+    "run_metadata" : ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315423259/run.json",
+    "agent" : "claude",
+    "session" : "claude-main-ws-20260913T160342Z-TVXE-run-1789315423259",
+    "exit_code" : 0,
+    "transcript_ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315423259/outputs/intake-claude-brainstorm.transcript.log",
+    "output_complete" : true,
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/context-governance/occurrences/node-intake-claude_brainstorm-002-run-1789315423259/binding.json",
+    "repository_fact_binding_sha256" : "f13c8e7f0407f61ff1db978262aee5217704e3b53f01e4853f7df0d69505ff52",
+    "process_usability" : "EXITED_ZERO",
+    "adapter_signals" : [ ],
+    "decision" : "READY_FOR_PRODUCT_REVIEW",
+    "summary" : "Requirement is clear enough for product review.",
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/runs/run-1789315423259/outputs/intake-claude-brainstorm.contract.json",
+    "contract_sidecar_sha256" : "c931e46e7c3978061c4da1ce391a16229727fb16f64e2712cafad03e3b1d0416",
+    "task_contract_proposal_ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/artifacts/task-contract-proposals/node-intake-claude_brainstorm-002-c931e46e7c397806.ref.json",
+    "task_contract_proposal_id" : "node-intake-claude_brainstorm-002:c931e46e7c397806",
+    "agent_execution_result_contract" : {
+      "present" : true,
+      "valid" : true,
+      "decision" : "READY_FOR_PRODUCT_REVIEW",
+      "summary" : "",
+      "validationError" : ""
+    },
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "task_contract_proposal",
+      "required" : true,
+      "present" : true,
+      "valid" : true,
+      "path" : "",
+      "errorCode" : "",
+      "errorMessage" : ""
+    } ],
+    "agent_execution_outcome" : {
+      "status" : "SUCCESS",
+      "primaryReason" : "completed",
+      "nodeMaySucceed" : true,
+      "retryPolicy" : "NONE",
+      "recoveryCategory" : "NONE",
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "secondarySignals" : [ ]
+    }
+  },
+  "runRef" : null,
+  "latestExecutionId" : "nxe-1789315423251-e03499a6",
+  "startedAt" : "2026-09-13T16:03:43.256794Z",
+  "finishedAt" : "2026-09-13T16:03:53.776403Z"
+}

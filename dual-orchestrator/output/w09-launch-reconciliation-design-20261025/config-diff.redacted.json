@@ -1,0 +1,63 @@
+{
+  "recorded_at": "2026-10-25T22:24:29.184254+08:00",
+  "old_snapshot": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-seventh-gate-calibrated-20261022/private-baseline/config.toml",
+  "old_snapshot_sha256": "61caf49514401ce6ffb089620de56ecdc9f1a22db4d6a0900cc276f234752452",
+  "matches_eighth_fixed_config": true,
+  "current_file": "/Users/kriswang/.codex/config.toml",
+  "current_sha256": "d6e48e362ced42a8a61e3615be4c9fefc6bc3979132fd33b735a6aa0eb9faab6",
+  "changes_without_values": [
+    {
+      "path": [
+        "mcp_servers",
+        "node_repl",
+        "env",
+        "BROWSER_USE_CODEX_APP_VERSION"
+      ],
+      "kind": "CHANGED",
+      "old_type": "str",
+      "new_type": "str"
+    },
+    {
+      "path": [
+        "mcp_servers",
+        "node_repl",
+        "env",
+        "NODE_REPL_TRUSTED_SERVICES"
+      ],
+      "kind": "CHANGED",
+      "old_type": "str",
+      "new_type": "str"
+    },
+    {
+      "path": [
+        "plugins",
+        "code-review@openai-bundled"
+      ],
+      "kind": "REMOVED",
+      "value_type": "dict"
+    },
+    {
+      "path": [
+        "projects",
+        "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fixtures/eighth-20261023/target"
+      ],
+      "kind": "ADDED",
+      "value_type": "dict"
+    }
+  ],
+  "unchanged_key_groups": {
+    "model": true,
+    "model_reasoning_effort": true,
+    "model_context_window": true,
+    "model_auto_compact_token_limit": true,
+    "approval_policy": true,
+    "approvals_reviewer": true,
+    "sandbox_mode": true,
+    "features": true,
+    "shell_environment_policy": true
+  },
+  "difference_is_not_permission_or_compatibility_approval": true,
+  "native_calls": 0,
+  "workflow_calls": 0,
+  "added_target_trust_equals_nearest_existing_ancestor": true
+}

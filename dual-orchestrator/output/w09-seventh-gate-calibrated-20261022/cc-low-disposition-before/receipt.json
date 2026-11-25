@@ -1,0 +1,11 @@
+{
+  "purpose": "Preserve pre-disposition reviewed material, not new runtime evidence",
+  "files": {
+    "material-verification.json": "eb079276fe59efb77faf16161d5de4e202ec91a943126bc143bbad2736d9ce98",
+    "fresh-seventh-gate.md": "9be236bddb08075bb1e8fb4bd17a6c91655e78e6e62758bb083223633ca9f0c7",
+    "material-sha256.json": "cbb8ea36941395de1c6ee6d2e535a066b62b87fb6d9fcd52f001fb0614e1915f",
+    "assessment.md": "2692a6745b21a6d87edc87a9466a1a52fda3094a21375f1d23d521f11d5c496e",
+    "launch-identity.json": "175c03d34af9e4de6fc25c8ad76621ea8d247679b8c61b99a3a2a3b5b908b64d",
+    "preflight-summary.json": "14faf4df5ac6cac04b52dd7fa0ec4362f445f2975408e673dcff558ea84d3fd7"
+  }
+}

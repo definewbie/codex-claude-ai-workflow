@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-intake-decision-005",
+  "nodeDefinitionId": "intake.decision",
+  "kind": "DECISION",
+  "handlerType": "review.decision",
+  "status": "COMPLETED",
+  "stageId": "stage-intake",
+  "iterationId": "iter-001",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1793027022575/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.contract.json"
+  ],
+  "inputTransition": {
+    "transition_type": "normal",
+    "condition": "unconditional",
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "source_node_sha256": "e533430ee33a935e44d18215f2a3fde2d82c1a25bf0f6f10756ed5d127de0f6e",
+    "source_node_instance_id": "node-intake-codex_product_review-004",
+    "required": true
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.stderr.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.transcript.log",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/artifacts/context-governance/occurrences/node-intake-codex_product_review-004-run-1793027022575/binding.json",
+    ".agent/workstreams/ws-20261026T142203Z-7SNA/runs/run-1793027022575/outputs/intake-codex-product-review.contract.json"
+  ],
+  "result": {
+    "decision": "READY_FOR_PRODUCT_REVIEW",
+    "source": "contract-sidecar",
+    "summary": "提案完整保留用户要求，计算、证据可用性和展示职责清楚，可进入后续设计与批准。"
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1793027169469-bc8f6946",
+  "startedAt": "2026-10-26T15:06:09.479774Z",
+  "finishedAt": "2026-10-26T15:06:09.521142Z"
+}

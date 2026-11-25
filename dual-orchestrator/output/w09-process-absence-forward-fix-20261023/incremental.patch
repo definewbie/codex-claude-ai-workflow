@@ -1,0 +1,298 @@
+--- historical/pre-dispatch-recheck.py
++++ candidate/pre-dispatch-recheck.py
+@@ -1,4 +1,4 @@
+-from process_check import require_known_pids_absent
++from process_check import require_unresolved_pids_absent
+ """Read-only pre-dispatch checks. Does not grant authorization or dispatch."""
+ import datetime
+ import hashlib
+@@ -29,7 +29,7 @@
+ for row in old['sessions']:
+     meta = read(Path.home()/'.acpx/sessions'/(row['record_id']+'.json'))
+     assert meta['closed'] is True and meta['name']==row['name'], 'Prior named session is active'
+-process_observation = require_known_pids_absent([row['pid'] for row in old['known_pids']])
++process_observation = require_unresolved_pids_absent(old['known_pids'])
+ for role, location in [('target',Path(loc['target'])),('workspace',workspace)]:
+     for label,args in [('head',['rev-parse','HEAD']),('tree',['rev-parse','HEAD^{tree}']),
+                        ('common-dir',['rev-parse','--path-format=absolute','--git-common-dir']),
+--- historical/prepare-offline.py
++++ candidate/prepare-offline.py
+@@ -1,4 +1,4 @@
+-from process_check import require_known_pids_absent
++from process_check import require_unresolved_pids_absent
+ """Bounded local preparation. Never starts acpx, Claude, Codex or a provider.
+ 
+ The only Java action is original `start` WITHOUT --run in a new empty fixture.
+@@ -75,7 +75,9 @@
+     assert meta['closed'] is True and meta['name'] == row['name'], 'Known old session not closed'
+     session_checks.append(dict(row, metadata_sha256=sha(path)))
+ pid_checks = []
+-process_observation = require_known_pids_absent([row['pid'] for row in old_execution['known_pids']])
++# Fresh preparation establishes its own successful observation. Do not accept
++# an unbound absent=True assertion from a manually collected PID input list.
++process_observation = require_unresolved_pids_absent([{'pid': row['pid']} for row in old_execution['known_pids']])
+ pid_checks = [dict(pid=pid, absent=True) for pid in process_observation['checked_pids']]
+ write(OUT/'prepare-process-observation.json', process_observation)
+ write(OUT/'old-execution-recheck.json', dict(sessions=session_checks, known_pids=pid_checks,
+--- historical/process_check.py
++++ candidate/process_check.py
+@@ -8,6 +8,33 @@
+     def __init__(self, status, message):
+         super().__init__(message)
+         self.status = status
++
++
++def require_unresolved_pids_absent(records):
++    """Consume caller-verified records; a PID number is not a durable identity.
++
++    absent=True must come from an earlier successful check in the caller's
++    frozen inputs, never from a model assertion. That old process cannot return
++    after confirmed absence. Unconfirmed records still use the strict reader.
++    """
++    if not isinstance(records, list):
++        raise ProcessInspectionError("UNKNOWN", "Invalid process records")
++    seen, confirmed, unresolved = set(), [], []
++    for row in records:
++        if not isinstance(row, dict):
++            raise ProcessInspectionError("UNKNOWN", "Invalid process record")
++        pid = row.get("pid")
++        if type(pid) is not int or pid <= 0 or pid in seen:
++            raise ProcessInspectionError("UNKNOWN", "Invalid or duplicate recorded PID")
++        if "absent" in row and type(row["absent"]) is not bool:
++            raise ProcessInspectionError("UNKNOWN", "Invalid prior absence fact")
++        seen.add(pid)
++        (confirmed if row.get("absent") is True else unresolved).append(pid)
++    observation = (require_known_pids_absent(unresolved) if unresolved else {
++        "status": "NO_UNRESOLVED_PIDS", "checked_pids": [],
++        "scope": "Prior confirmed absence only; no current process-table or child-tree claim",
++    })
++    return {**observation, "previously_confirmed_absent": sorted(confirmed)}
+ 
+ 
+ def require_known_pids_absent(pids):
+--- historical/run-one-step.py
++++ candidate/run-one-step.py
+@@ -7,7 +7,7 @@
+ from pathlib import Path
+ from gate_support import OUT, read, write, frozen_check, measure, planning
+ from check_budget import check
+-from process_check import require_known_pids_absent
++from process_check import require_unresolved_pids_absent
+ 
+ # This is a candidate runner, not permission to reuse a prior case or budget.
+ authorization = read(OUT / 'run-authorization.json')
+@@ -35,7 +35,7 @@
+ assert identity['executable.server'] == release['application_jars']['dual-server']['sha256']
+ assert identity['kernel.effective'] == 'liteflow' and identity['behavior.env.DUAL_ACPX_COMMAND_TIMEOUT_SECONDS'] == '600'
+ # Same reviewed prerequisite before any step directory or Java side effect.
+-process_observation = require_known_pids_absent([r['pid'] for r in read(OUT/'old-execution-recheck.json')['known_pids']])
++process_observation = require_unresolved_pids_absent(read(OUT/'old-execution-recheck.json')['known_pids'])
+ folder.mkdir(parents=True)
+ write(folder/'old-process-observation.json', process_observation)
+ is_model = expected in [s['node'] for s in read(OUT / 'budget.json')['stages']]
+--- historical/test_process_check.py
++++ candidate/test_process_check.py
+@@ -4,10 +4,12 @@
+ import sys
+ import tempfile
+ import unittest
++import hashlib
++import importlib.util
+ from pathlib import Path
+ from unittest.mock import patch
+ 
+-from process_check import ProcessInspectionError, require_known_pids_absent
++from process_check import ProcessInspectionError, require_known_pids_absent, require_unresolved_pids_absent
+ 
+ 
+ class ProcessCheckTest(unittest.TestCase):
+@@ -87,7 +89,7 @@
+             ("run-one-step.py", "runner", "folder.mkdir(parents=True)"),
+         ]:
+             source = Path(name).read_text()
+-            self.assertLess(source.index("process_observation = require_known_pids_absent("),
++            self.assertLess(source.index("process_observation = require_unresolved_pids_absent("),
+                             source.index(later_marker))
+             tree = ast.parse(source)
+             assignment = next(n for n in tree.body if isinstance(n, ast.Assign)
+@@ -99,7 +101,7 @@
+                                       (self.result(1, "", "Operation not permitted"), False),
+                                       (self.result(0, "99 running command\n"), False)]:
+                 context = {variable: {"known_pids": [{"pid": 99}]}, "following": [],
+-                           "require_known_pids_absent": require_known_pids_absent,
++                           "require_unresolved_pids_absent": require_unresolved_pids_absent,
+                            "read": lambda path: {"known_pids": [{"pid": 99}]}, "OUT": Path(".")}
+                 with patch("process_check.subprocess.run", return_value=response):
+                     if allowed:
+@@ -110,5 +112,171 @@
+                 self.assertEqual(["reached"] if allowed else [], context["following"])
+ 
+ 
++class HistoricalAbsenceTest(unittest.TestCase):
++    def test_confirmed_history_is_not_a_current_absence_claim(self):
++        with patch("process_check.subprocess.run", return_value=subprocess.CompletedProcess(
++                [], 0, "12 unrelated process\n", "")) as command:
++            result = require_unresolved_pids_absent([{"pid": 83976, "absent": True}])
++            command.assert_not_called()
++        self.assertEqual("NO_UNRESOLVED_PIDS", result["status"])
++        self.assertEqual([83976], result["previously_confirmed_absent"])
++        self.assertEqual([], result["checked_pids"])
++        self.assertNotIn("ps_exit", result)
++
++    def test_mixed_records_only_check_unresolved_targets(self):
++        response = subprocess.CompletedProcess([], 0, "99 new unrelated process\n", "")
++        with patch("process_check.subprocess.run", return_value=response) as command:
++            value = require_unresolved_pids_absent([{"pid": 99, "absent": True}, {"pid": 88}])
++        self.assertEqual(1, command.call_count)
++        self.assertEqual([88], value["checked_pids"])
++        self.assertEqual([99], value["previously_confirmed_absent"])
++
++    def test_unresolved_present_or_failed_observation_still_stops(self):
++        cases = [(0, "88 old or unidentified process\n", "", "PRESENT"),
++                 (1, "", "Operation not permitted", "UNKNOWN"),
++                 (0, "", "", "UNKNOWN")]
++        for code, stdout, stderr, expected in cases:
++            with self.subTest(expected=expected), patch("process_check.subprocess.run",
++                    return_value=subprocess.CompletedProcess([], code, stdout, stderr)):
++                with self.assertRaises(ProcessInspectionError) as caught:
++                    require_unresolved_pids_absent([{"pid": 99, "absent": True}, {"pid": 88, "absent": False}])
++                self.assertEqual(expected, caught.exception.status)
++
++    def test_invalid_history_cannot_silently_remove_a_target(self):
++        cases = [None, {}, [None], [{"pid": True}], [{"pid": -1}],
++                 [{"pid": 99, "absent": "true"}], [{"pid": 99, "absent": 1}],
++                 [{"pid": 99, "absent": None}], [{"pid": 99}, {"pid": 99, "absent": True}]]
++        for records in cases:
++            with self.subTest(records=records), patch("process_check.subprocess.run") as command:
++                with self.assertRaises(ProcessInspectionError) as caught:
++                    require_unresolved_pids_absent(records)
++                self.assertEqual("UNKNOWN", caught.exception.status)
++                command.assert_not_called()
++
++    def test_empty_watchlist_is_not_a_synthetic_successful_read(self):
++        with patch("process_check.subprocess.run") as command:
++            result = require_unresolved_pids_absent([])
++        command.assert_not_called()
++        self.assertEqual("NO_UNRESOLVED_PIDS", result["status"])
++        self.assertNotIn("observed_processes", result)
++
++    def test_first_preparation_never_trusts_input_absence_assertion(self):
++        source = Path("prepare-offline.py").read_text()
++        tree = ast.parse(source)
++        guard = next(n for n in tree.body if isinstance(n, ast.Assign)
++                     and any(isinstance(t, ast.Name) and t.id == "process_observation" for t in n.targets))
++        context = {"old_execution": {"known_pids": [{"pid": 99, "absent": True}]},
++                   "require_unresolved_pids_absent": require_unresolved_pids_absent}
++        with patch("process_check.subprocess.run", return_value=subprocess.CompletedProcess([], 0, "99 process\n", "")):
++            with self.assertRaises(ProcessInspectionError) as caught:
++                exec(compile(ast.Module(body=[guard], type_ignores=[]), "prepare-offline.py", "exec"), context)
++        self.assertEqual("PRESENT", caught.exception.status)
++
++    def test_preparation_preserves_successfully_observed_records(self):
++        source = ast.parse(Path("prepare-offline.py").read_text())
++        assignments = [n for n in source.body if isinstance(n, ast.Assign)
++                       and any(isinstance(t, ast.Name) and t.id in {"process_observation", "pid_checks"}
++                               for t in n.targets)]
++        context = {"old_execution": {"known_pids": [{"pid": 99}]},
++                   "require_unresolved_pids_absent": require_unresolved_pids_absent}
++        with patch("process_check.subprocess.run", return_value=subprocess.CompletedProcess([], 0, "12 unrelated\n", "")):
++            exec(compile(ast.Module(body=assignments, type_ignores=[]), "prepare-offline.py", "exec"), context)
++        self.assertEqual([{"pid": 99, "absent": True}], context["pid_checks"])
++        self.assertEqual([99], context["process_observation"]["checked_pids"])
++
++    def test_three_entrypoints_share_guard_and_frozen_check_precedes_it(self):
++        for name in ["prepare-offline.py", "pre-dispatch-recheck.py", "run-one-step.py"]:
++            source = Path(name).read_text()
++            self.assertIn("from process_check import require_unresolved_pids_absent", source)
++            self.assertLess(source.index("release = frozen_check()"),
++                            source.index("process_observation = require_unresolved_pids_absent("))
++        for name in ["pre-dispatch-recheck.py", "run-one-step.py"]:
++            source = Path(name).read_text()
++            self.assertIn("old-execution-recheck.json", source)
++            self.assertNotIn("process_observation = require_known_pids_absent(", source)
++
++    def test_preparation_receipt_write_failures_prevent_fixture_creation(self):
++        source = ast.parse(Path("prepare-offline.py").read_text())
++        begin = next(i for i, n in enumerate(source.body) if isinstance(n, ast.Assign)
++                     and any(isinstance(t, ast.Name) and t.id == "process_observation" for t in n.targets))
++        end = next(i for i, n in enumerate(source.body) if isinstance(n, ast.Expr)
++                   and isinstance(n.value, ast.Call) and ast.unparse(n.value.func) == "PARENT.mkdir")
++        body = ast.Module(body=source.body[begin:end + 1], type_ignores=[])
++        for fail_at in [1, 2, None]:
++            with self.subTest(write_failure=fail_at), tempfile.TemporaryDirectory() as folder:
++                root = Path(folder); written = []
++                def write(path, value):
++                    if len(written) + 1 == fail_at:
++                        raise OSError("Injected receipt write failure")
++                    path.write_text(json.dumps(value)); written.append(path)
++                context = {"OUT": root, "PARENT": root / "fixture", "write": write,
++                           "session_checks": [],
++                           "old_execution": {"known_pids": [{"pid": 99}]},
++                           "require_unresolved_pids_absent": require_unresolved_pids_absent}
++                with patch("process_check.subprocess.run", return_value=subprocess.CompletedProcess([], 0, "12 unrelated\n", "")):
++                    if fail_at:
++                        with self.assertRaises(OSError):
++                            exec(compile(body, "prepare-offline.py", "exec"), context)
++                    else:
++                        exec(compile(body, "prepare-offline.py", "exec"), context)
++                self.assertEqual(fail_at is None, (root / "fixture").exists())
++                self.assertEqual(0 if fail_at == 1 else 1 if fail_at == 2 else 2, len(written))
++                self.assertFalse((root / "launch-identity.json").exists())
++
++    def test_cold_consumers_reuse_fixed_fact_but_refuse_tampered_bytes(self):
++        # Run the actual old frozen_check and actual candidate consumer guard
++        # statements, with synthetic frozen files. Not a Java/provider Gate.
++        candidate = Path.cwd().resolve()
++        old_support = candidate.parents[1] / "w09-fresh-eighth-gate-20261023" / "gate_support.py"
++        self.assertTrue(old_support.is_file())
++        for name in ["pre-dispatch-recheck.py", "run-one-step.py"]:
++            tree = ast.parse(Path(name).read_text())
++            selected = [n for n in tree.body if isinstance(n, ast.Assign)
++                        and any(isinstance(t, ast.Name) and t.id in {"release", "process_observation"}
++                                for t in n.targets)]
++            self.assertEqual(2, len(selected))
++            statements = ast.unparse(ast.Module(body=selected, type_ignores=[]))
++            with tempfile.TemporaryDirectory() as folder:
++                root = Path(folder)
++                record = root / "old-execution-recheck.json"
++                record.write_text(json.dumps({"known_pids": [{"pid": 83976, "absent": True}]}))
++                h = hashlib.sha256(record.read_bytes()).hexdigest()
++                source = root / "source.txt"; source.write_text("fixed source")
++                source_sha = hashlib.sha256(source.read_bytes()).hexdigest()
++                (root / "selected-release.json").write_text(json.dumps({
++                    "source_inputs": {"source.txt": source_sha}, "application_jars": {},
++                    "metadata_config_source_files": {}, "selected_acpx": {
++                        "wrapper": str(source), "wrapper_sha256": source_sha,
++                        "dist": str(source), "dist_sha256": source_sha}}))
++                (root / "launch-identity.json").write_text(json.dumps({
++                    "config_and_installed_sources": {}, "observer_inputs": {record.name: h}}))
++                snippet = f'''import sys,json,importlib.util
++from pathlib import Path
++sys.path.insert(0,{str(candidate)!r})
++from process_check import require_unresolved_pids_absent
++import process_check
++def forbidden(*args,**kwargs): raise AssertionError("No process table needed for a confirmed old absence")
++process_check.subprocess.run=forbidden
++spec=importlib.util.spec_from_file_location("actual_gate_support",{str(old_support)!r})
++g=importlib.util.module_from_spec(spec);spec.loader.exec_module(g)
++OUT=Path({str(root)!r});g.OUT=OUT;g.ROOT=OUT;g.RELEASE=OUT/"selected-release.json"
++read=g.read;frozen_check=g.frozen_check
++old=read(OUT/"old-execution-recheck.json")
++{statements}
++(OUT/"following-action").write_text("reached")
++print(json.dumps(process_observation))
++'''
++                child = root / "probe.py"; child.write_text(snippet)
++                result = subprocess.run([sys.executable, "-B", str(child)], capture_output=True, text=True)
++                self.assertEqual(0, result.returncode, result.stderr)
++                self.assertEqual("NO_UNRESOLVED_PIDS", json.loads(result.stdout)["status"])
++                (root / "following-action").unlink()
++                record.write_text(record.read_text() + " ")
++                result = subprocess.run([sys.executable, "-B", str(child)], capture_output=True, text=True)
++                self.assertNotEqual(0, result.returncode)
++                self.assertIn("Observer/Gate drift", result.stderr)
++                self.assertFalse((root / "following-action").exists())
++
++
+ if __name__ == "__main__":
+     unittest.main()

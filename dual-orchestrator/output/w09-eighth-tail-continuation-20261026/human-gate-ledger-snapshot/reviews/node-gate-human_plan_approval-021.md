@@ -1,0 +1,224 @@
+# Human Review Packet
+
+- Workstream: ws-20261023T005431Z-9YYF
+- Gate: gate.human_plan_approval
+- Gate Instance: node-gate-human_plan_approval-021
+- Stage: stage-gate
+- Iteration: iter-002
+- Source Outcome: VERIFICATION_READINESS_REQUIRED
+- Allowed Actions: approve, revise
+
+## Operator Guidance
+
+- Recommended Action: approve
+- Reason: The latest agent decision is positive. Approve only after checking the packet evidence.
+- Suggested Checks:
+  - Confirm the TaskContract objective, scope, non-goals, and acceptance criteria still match the task.
+  - Check whether the design or plan stays inside scope and avoids unnecessary implementation detail.
+
+## Review Focus
+
+- Read the complete referenced design and review sidecars before approving; the packet summary is not a substitute.
+- Use `approve` only when the current gate is good enough to continue.
+- Use `revise` when the agent should address concrete feedback first.
+
+## Review Summary
+
+- Objective: 在本地 Python 仓库提供 normalize_newlines(text: str) -> str：将 CRLF 与单独 CR 转换为 LF，其余字符、空串、已有 LF 与末尾换行有无全部原样保留，仅使用标准库实现，并以实际执行的 unittest 测试和与代码一致的 README 示例完成验收。
+- Stage Outcome: READY
+- Latest Decision: READY_TO_IMPLEMENT
+- Latest Summary: 计划与已审设计一致，实施步骤和验收取证完整，可提交精确 EXECUTION 范围审批后实施。
+- Blocking: false
+
+## Task Contract
+
+- Objective: 在本地 Python 仓库提供 normalize_newlines(text: str) -> str：将 CRLF 与单独 CR 转换为 LF，其余字符、空串、已有 LF 与末尾换行有无全部原样保留，仅使用标准库实现，并以实际执行的 unittest 测试和与代码一致的 README 示例完成验收。
+- Status: READY_FOR_REVIEW
+- Excluded Scope:
+  - 不创建或修改 .git/ 与 .agent/ 下的任何文件
+  - 不引入第三方依赖、网络访问、数据库、浏览器、后台服务或机器配置修改
+  - 不做 CRLF/单独 CR 转 LF 之外的换行处理（不转换 U+2028/U+2029 等 Unicode 行/段分隔符），不新增或删除末尾换行
+- Acceptance Criteria:
+  - Clause[id=AC-1, text=测试源码覆盖至少八类输入——空串、纯 LF、CRLF、单 CR、混合换行、Unicode 字符、末尾有换行、末尾无换行、连续空行——每类输入都有明确断言的期望输出，并断言重复规范化（对已规范化结果再次调用）保持相同结果。]
+  - Clause[id=AC-2, text=实际执行 unittest 测试并保留真实输出：输出明确显示覆盖的用例数（如 Ran N tests）且 failure=0、error=0，输出所列用例与测试源码中的案例相符；本任务不要求工具提供独立测量的真实退出码，但测试完成状态或文字结论本身不能替代实际输入/输出与测试结果。]
+  - Clause[id=AC-3, text=README 用法示例与 src/normalize_text.py 实际实现一致，至少包含函数导入语句和一个典型混合换行输入/输出示例；该一致性由实际读取源码/文档或实际执行示例支持。]
+- Test Requirements:
+  - Clause[id=TR-1, text=在 tests/test_normalize_text.py 中使用 unittest 编写测试，覆盖 AC-1 列出的全部输入类别，每类输入断言精确的期望输出字符串，并包含对已规范化结果再次调用的幂等性断言。]
+  - Clause[id=TR-2, text=实际执行测试（如 python -m unittest 或 python -m unittest discover，具体命令在 EXECUTION 计划中确认）并保留真实命令输出，输出须显示 Ran N tests 且 OK（零 failure、零 error），并与测试源码中的案例一一对应。]
+  - Clause[id=TR-3, text=通过实际读取 src/normalize_text.py 与 README.md（或实际运行示例）验证 README 示例与实现一致，验证范围包含导入语句和典型混合换行输入的逐字符输出（例如 "a\r\nb\rc\nd" 型输入的期望结果）。]
+- Constraints:
+  - normalize_newlines 语义边界精确为：将输入中每个 CRLF（"\r\n"）和单独 CR（"\r"）转换为 LF（"\n"）；除此之外不改变任何字符（包括 Unicode 字符与 U+2028/U+2029 等），空串返回空串，已有 LF 原样保留，末尾有/无换行的状态原样保留；函数为纯函数且重复调用幂等。
+  - 仅使用 Python 标准库；不引入任何第三方依赖，不使用网络、数据库、浏览器、后台服务，不做机器配置修改。
+  - src/normalize_text.py、tests/test_normalize_text.py、README.md 为 intake 提案路径，不构成写授权；最终具体文件与 CREATE/MODIFY 操作须在 EXECUTION 阶段经设计与计划确认并批准后实施。
+- Nonessential Operation Declarations:
+  - None
+
+## Requirement Resolution
+
+- Decision: APPROVE
+- Approved By: human_gate
+- Gate Ref: .agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json
+- Assumptions:
+  - Human approved the requirement review gate before canonical contract generation.
+
+## Latest Agent Decision
+
+- Node: plan.codex_plan_review
+- Stage Outcome: READY
+- Decision: READY_TO_IMPLEMENT
+- Summary: 计划与已审设计一致，实施步骤和验收取证完整，可提交精确 EXECUTION 范围审批后实施。
+- Blocking: false
+- Verification: 依据提供的完整计划与已审设计完成静态核对，未发现阻断实施计划审批的问题；未读取额外仓库文件、修改文件或执行测试。
+- Evidence State: {blocking=false, evidence_count=5, missing_evidence_count=0, must_fix_count=0, acceptance_note_count=4, open_risk_count=0}
+- Contract Sidecar: .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json
+
+## Authored Candidate And Revision History
+
+Historical obligations remain active until approval. Responses are claims, not verified closure. New must-fix items were raised after this candidate and enter its next revision.
+
+```json
+{
+  "candidate" : {
+    "sidecar" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719040009/outputs/plan-claude.contract.json",
+      "sha256" : "b2e9d853cc6d80f39b737950b1ae085310b87d916fd37f918c73bd4a2ee931bd"
+    },
+    "nodeInstanceId" : "node-plan-claude_plan-017",
+    "nodeId" : "plan.claude_plan",
+    "runId" : "run-1792719040009",
+    "artifactType" : "plan_result"
+  },
+  "contract" : {
+    "compileNodeInstanceId" : "node-contract-compile-007",
+    "approvalGateRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/gates/gate-node-gate-human_requirement_review-006.json",
+    "approvalEventId" : "evt-000007",
+    "contract" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/task-contract.json",
+      "sha256" : "fa7a65a2ffe8a8eb2cd6babf77a7ef45019e0855f1a1726afcf00d4c5e07171b"
+    },
+    "resolution" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile-007/contract-resolution.json",
+      "sha256" : "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417"
+    }
+  },
+  "reviewedDesign" : {
+    "decision" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/nodes/node-design-decision-016.json",
+      "sha256" : "e14f6e8c78b136449f68f13bd52e194bc31cfa44e57fd44f5ff34ef32389b45d"
+    },
+    "eventId" : "evt-000017",
+    "candidate" : {
+      "sidecar" : {
+        "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792718732583/outputs/design-claude.contract.json",
+        "sha256" : "107919da51a181a4e8fa14254d2158d2f28f5b08aa36c449fc783d00d7631bc8"
+      },
+      "nodeInstanceId" : "node-design-claude_design-012",
+      "nodeId" : "design.claude_design",
+      "runId" : "run-1792718732583",
+      "artifactType" : "design_result"
+    }
+  },
+  "activeObligations" : [ ],
+  "revisionResponses" : [ ],
+  "plannedFiles" : null,
+  "plan" : {
+    "artifact_type" : "plan_artifact",
+    "schema_version" : 2,
+    "implementation_steps" : [ "创建 src/normalize_text.py：定义带类型注解的纯函数 normalize_newlines(text: str) -> str，函数体按固定顺序执行 text = text.replace(\"\\r\\n\", \"\\n\") 再 text = text.replace(\"\\r\", \"\\n\") 并返回结果；附简短 docstring 说明语义（CRLF 与孤立 CR 转为 LF，其余字符含 U+2028/U+2029 不变，末尾换行有无状态原样保留）；仅标准库、无 I/O、无共享可变状态、重复调用幂等。", "创建 tests/test_normalize_text.py：文件顶部用 pathlib.Path 定位仓库 src/ 目录并加入 sys.path（不存在时才插入），支持从仓库根执行 python -m unittest discover -s tests -v；定义模块级共享 CASES 表，九项输入/期望为 \"\"→\"\"、\"a\\nb\\n\"→\"a\\nb\\n\"、\"a\\r\\nb\"→\"a\\nb\"、\"a\\rb\"→\"a\\nb\"、\"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、\"中文\\u2028😀\\r\\nx\"→\"中文\\u2028😀\\nx\"、\"end\\r\\n\"→\"end\\n\"、\"no newline\"→\"no newline\"、\"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"。", "在同一测试文件实现 11 个测试方法：test_empty_string_returns_empty、test_pure_lf_unchanged、test_crlf_becomes_single_lf、test_lone_cr_becomes_lf、test_mixed_newlines_normalized、test_unicode_and_line_separators_preserved、test_trailing_newline_present_kept、test_trailing_newline_absent_kept、test_consecutive_blank_lines_normalized、test_no_cr_left_in_output、test_idempotent_across_all_cases；其中 test_crlf_becomes_single_lf 显式断言 \"a\\r\\nb\"→\"a\\nb\"（而非 \"a\\n\\nb\"）以锁定替换顺序，test_no_cr_left_in_output 遍历全表断言输出不含 \"\\r\"，test_idempotent_across_all_cases 以 subTest 遍历 CASES 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。", "创建 README.md 中文用法文档：函数语义规则（CRLF/单 CR 转 LF，不转换 U+2028/U+2029，不新增或删除末尾换行）、导入方式（PYTHONPATH=src python 或与测试一致的 sys.path 做法）、doctest 风格示例（from normalize_text import normalize_newlines；normalize_newlines(\"a\\r\\nb\\rc\\nd\") 得 'a\\nb\\nc\\nd'；另含空串与末尾换行示例）、以及 python -m unittest discover -s tests -v 运行测试说明（注明 unittest 默认将报告写入 stderr，保存完整输出可用 2>&1 合并采集）；全部示例与 src/normalize_text.py 实现逐字符一致。", "实现完成后由 implement.claude_self_test_report 节点按 validation_plan 执行验证并采集证据；本计划阶段不执行任何命令、不产生执行证据。" ],
+    "edit_files" : [ "src/normalize_text.py", "tests/test_normalize_text.py", "README.md" ],
+    "files" : [ {
+      "path" : "src/normalize_text.py",
+      "operation" : "CREATE"
+    }, {
+      "path" : "tests/test_normalize_text.py",
+      "operation" : "CREATE"
+    }, {
+      "path" : "README.md",
+      "operation" : "CREATE"
+    } ],
+    "verification_bindings" : [ {
+      "criterion_id" : "AC-1",
+      "method" : "在仓库根执行 python -m unittest discover -s tests -v 2>&1 并采集实际输出；断言逐用例全部通过、结尾为 Ran 11 tests 与 OK（零 failure/零 error）；逐条核对 tests/test_normalize_text.py 中共享 CASES 表覆盖九类输入（空串、纯 LF、CRLF、单 CR、混合换行 \"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\"、Unicode 含 U+2028 保留、末尾有换行、末尾无换行、连续空行 \"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"），且 test_idempotent_across_all_cases 以 subTest 断言 normalize_newlines(normalize_newlines(x)) == normalize_newlines(x)。",
+      "executor" : "AGENT",
+      "environment_refs" : [ ],
+      "authority_refs" : [ ],
+      "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+      "feasibility_refs" : [ ],
+      "detail_owner" : "implement.claude_self_test_report",
+      "actual_exit_required" : false,
+      "expected_exit_code" : null
+    }, {
+      "criterion_id" : "AC-2",
+      "method" : "实际执行 python -m unittest discover -s tests -v 2>&1 并合并采集 stdout 与 stderr（unittest 默认将逐用例行、Ran 11 tests 与 OK/FAILED 写入 stderr）；实际输出须明确显示覆盖数（Ran 11 tests）与零 failure/error，并与测试源码中的 11 个方法名及 CASES 一一核对；不以完成状态或文字结论替代实际输入/输出与测试结果。",
+      "executor" : "AGENT",
+      "environment_refs" : [ ],
+      "authority_refs" : [ ],
+      "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+      "feasibility_refs" : [ ],
+      "detail_owner" : "implement.claude_self_test_report",
+      "actual_exit_required" : false,
+      "expected_exit_code" : null
+    }, {
+      "criterion_id" : "AC-3",
+      "method" : "实际读取 src/normalize_text.py 与 README.md，逐字符比对 README 中的导入语句（from normalize_text import normalize_newlines）与典型混合换行示例输入/输出（\"a\\r\\nb\\rc\\nd\" → 'a\\nb\\nc\\nd'，另含空串与末尾换行示例）与实现一致；或额外执行 PYTHONPATH=src python -m doctest README.md 作为支持证据（TR-3 允许任一途径）。",
+      "executor" : "AGENT",
+      "environment_refs" : [ ],
+      "authority_refs" : [ ],
+      "evidence_kind" : "PROGRAM_TOOL_EXECUTION_AND_ASSERTIONS",
+      "feasibility_refs" : [ ],
+      "detail_owner" : "implement.claude_self_test_report",
+      "actual_exit_required" : false,
+      "expected_exit_code" : null
+    } ],
+    "authority_refs" : [ ],
+    "reference_files" : [ ],
+    "file_level_changes" : [ "src/normalize_text.py: CREATE — 实现 normalize_newlines(text: str) -> str，两步 str.replace（先 \"\\r\\n\"→\"\\n\" 再 \"\\r\"→\"\\n\"）；空串返回空串、已有 LF 与其他字符原样保留、末尾换行有无状态不增不减；纯函数、仅标准库、无 I/O、无外部副作用、幂等。", "tests/test_normalize_text.py: CREATE — 顶部 pathlib/sys.path 注入 src；九项共享 CASES 表（含 \"a\\r\\nb\\rc\\nd\"→\"a\\nb\\nc\\nd\" 与 \"a\\r\\n\\r\\n\\rb\"→\"a\\n\\n\\nb\"）；11 个测试方法覆盖九类输入、CRLF 不拆双 LF 的顺序断言、全表无残留 CR 断言与 subTest 幂等性断言。", "README.md: CREATE — 中文文档：语义规则、导入方式（PYTHONPATH=src 或 sys.path）、doctest 风格示例（导入语句、混合换行 \"a\\r\\nb\\rc\\nd\"→'a\\nb\\nc\\nd'、空串、末尾换行）、unittest 运行命令与 stderr/2>&1 采集说明；示例与实现逐字符一致。" ],
+    "validation_plan" : [ "在仓库根执行 python -m unittest discover -s tests -v 2>&1，合并采集实际输出；不得只保存 stdout，也不得以预期成功文本或完成状态替代实际输入/输出与测试结果（若环境仅有 python3，等价替换并如实记录所用命令）。", "核对实际输出：包含全部 11 个测试方法逐用例行、结尾 Ran 11 tests 与 OK（零 failure、零 error），并与 tests/test_normalize_text.py 源码中的 CASES 与方法名一一核对（覆盖 AC-1 九类输入与幂等性、AC-2 覆盖数与实际输出相符）。", "实际读取 src/normalize_text.py 与 README.md，逐字符比对 README 的导入语句与示例（\"a\\r\\nb\\rc\\nd\"→'a\\nb\\nc\\nd'、空串、末尾换行）与实现语义一致（AC-3）；可选支持证据：PYTHONPATH=src python -m doctest README.md。", "若任一步失败：修复对应文件后重新执行上述检查并保留最终实际输出与核对记录，不以文字结论替代实测结果。" ],
+    "rollback_notes" : "三个文件均为 CREATE 且不覆盖任何现有文件（仓库现状无同名路径）；回滚仅需删除新建的 src/normalize_text.py、tests/test_normalize_text.py、README.md 或还原对应提交，不触碰 .git/ 与 .agent/ 下任何内容，无状态、无外部副作用需要补偿。",
+    "known_risks" : [ "src 布局导入依赖测试文件内 sys.path 注入或运行时 PYTHONPATH=src：本计划沿用设计的 sys.path 注入方案并在 README 说明 PYTHONPATH 方式，若计划评审改用其他布局须同步调整 README 导入说明（仍在同一批准文件集内）。", "测试方法数为 11：若实现阶段增删用例，须同步更新 README 与执行记录中的 Ran N tests 数量，避免 AC-2 覆盖数与测试源码不符。", "执行环境若无 python 命令仅有 python3，需等价使用 python3 -m unittest discover -s tests -v 2>&1 并如实记录，不视为验证强度变化。" ],
+    "human_review_checklist" : [ "确认三个 CREATE 路径与 GOAL 排除项一致：不涉及 .git/、.agent/、第三方依赖、网络、数据库、浏览器、后台服务或机器配置修改。", "确认实现保持两步替换顺序（先 \"\\r\\n\" 后 \"\\r\"），混合换行期望为 \"a\\nb\\nc\\nd\"，CRLF 不产生双 LF。", "确认 11 个测试方法与九类输入 CASES 覆盖 AC-1 全部类别及全表幂等性与无残留 CR 断言。", "确认 AC-2 取证方案：2>&1 合并采集实际输出并与测试源码核对，不以结论或完成状态替代，且 actual_exit_required=false 与任务不要求独立退出码的约定一致。", "确认 README 示例与实现逐字符一致（AC-3），导入说明与测试的 sys.path/PYTHONPATH 方案一致。" ]
+  },
+  "newMustFix" : [ ]
+}
+```
+
+## Input Artifacts
+
+Raw agent logs are not embedded here by default. Use the paths below when deeper debugging is needed.
+
+### .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.stderr.log
+
+- Status: available
+- Kind: stderr_log
+- Raw Artifact: .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.stderr.log
+
+### .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.transcript.log
+
+- Status: available
+- Kind: file
+- Raw Artifact: .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.transcript.log
+
+### .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.json
+
+- Status: available
+- Kind: json
+- Sidecar: .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json
+- Decision: READY_TO_IMPLEMENT
+- Summary: 计划与已审设计一致，实施步骤和验收取证完整，可提交精确 EXECUTION 范围审批后实施。
+- Raw Artifact: .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.json
+
+### .agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/binding.json
+
+- Status: available
+- Kind: json
+- Raw Artifact: .agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-019-run-1792719327299/binding.json
+
+### .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json
+
+- Status: available
+- Kind: contract_sidecar
+- Sidecar: .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json
+- Decision: READY_TO_IMPLEMENT
+- Summary: 计划与已审设计一致，实施步骤和验收取证完整，可提交精确 EXECUTION 范围审批后实施。
+- Raw Artifact: .agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792719327299/outputs/plan-codex-review.contract.json
+

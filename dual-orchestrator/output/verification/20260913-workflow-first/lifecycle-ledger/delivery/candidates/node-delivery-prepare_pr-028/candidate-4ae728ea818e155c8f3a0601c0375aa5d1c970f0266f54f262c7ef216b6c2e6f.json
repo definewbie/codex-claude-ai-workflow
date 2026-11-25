@@ -1,0 +1,26 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20260913T160342Z-TVXE",
+  "producerNodeInstanceId" : "node-delivery-prepare_pr-028",
+  "iterationId" : "iter-001",
+  "sourceWorkspaceId" : "wsp-20260913T160342Z-TA9R",
+  "sourceEffectiveWorkdir" : "/private/tmp/dual-smoke-lifecycle-74839-agent-runs/ws-20260913T160342Z-TVXE",
+  "baseCommit" : "224333137c4ecc9ad24f1549985993657b528c53",
+  "baseTree" : "aa28380a570d95e04f611146e54ec3de9aa12440",
+  "acceptedFiles" : [ "README.md", "main.py" ],
+  "excludedFiles" : [ ],
+  "patch" : {
+    "ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/candidates/node-delivery-prepare_pr-028/merge.patch",
+    "sha256" : "ad72365e513d54de6ef26d9923168f490f16f64517c4c260c3ab12b52bc96594"
+  },
+  "expectedResultTree" : "8f0721d88fe20e77c1dbcf8e9d5082d0fc04ac36",
+  "commitMessage" : {
+    "ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/candidates/node-delivery-prepare_pr-028/commit-message.txt",
+    "sha256" : "0a2f51af7748f0cd6c72ae1cd10eca52951d18de55d0b1ec8b0e600c1cb51175"
+  },
+  "prBody" : {
+    "ref" : ".agent/workstreams/ws-20260913T160342Z-TVXE/delivery/candidates/node-delivery-prepare_pr-028/pr-body.md",
+    "sha256" : "727a8642aced505f5397e9e17242704c0172675a0871c2ae9ac17040a3602591"
+  },
+  "createdAt" : "2026-09-13T16:05:26.601353Z"
+}

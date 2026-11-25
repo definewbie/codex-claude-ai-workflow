@@ -1,0 +1,19 @@
+test_whole_runner_denies_without_approval_before_any_step_or_process (test_continuation.AssemblyTest.test_whole_runner_denies_without_approval_before_any_step_or_process) ... FAIL
+
+======================================================================
+FAIL: test_whole_runner_denies_without_approval_before_any_step_or_process (test_continuation.AssemblyTest.test_whole_runner_denies_without_approval_before_any_step_or_process)
+----------------------------------------------------------------------
+AssertionError: Missing current approval evidence reference
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/tmp8tdicoqd/test_continuation.py", line 105, in test_whole_runner_denies_without_approval_before_any_step_or_process
+    with self.assertRaisesRegex(AssertionError,'new human run approval'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "new human run approval" does not match "Missing current approval evidence reference"
+
+----------------------------------------------------------------------
+Ran 1 test in 0.007s
+
+FAILED (failures=1)

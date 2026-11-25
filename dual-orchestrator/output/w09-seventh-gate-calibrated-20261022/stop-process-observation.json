@@ -1,0 +1,14 @@
+{
+  "checked_at": "2026-10-22T23:22:14.012417+08:00",
+  "ps_exit": 0,
+  "matching_processes": [],
+  "known_runner_pids": [
+    43505,
+    43532
+  ],
+  "scope": "Known runner PIDs and named workspace/session/adapter command patterns only; not proof that arbitrary descendants or remote work stopped",
+  "restricted_process_listing_failed": true,
+  "restricted_failure": "ps: Operation not permitted (os error 1)",
+  "restricted_ps_exit_1_is_not_evidence_of_process_absence": true,
+  "process_listing_succeeded_outside_restriction": true
+}

@@ -1,0 +1,28 @@
+{
+  "defaultAgent": "codex",
+  "defaultPermissions": "approve-all",
+  "nonInteractivePermissions": "deny",
+  "authPolicy": "skip",
+  "ttl": 300,
+  "timeout": null,
+  "queueMaxDepth": 16,
+  "format": "text",
+  "agents": {
+    "codex": {
+      "command": "npx -y @agentclientprotocol/codex-acp@1.10.0"
+    },
+    "claude": {
+      "command": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh npx -y @agentclientprotocol/claude-agent-acp@0.70.0"
+    }
+  },
+  "authMethods": [],
+  "disableExec": false,
+  "paths": {
+    "global": "/Users/kriswang/.acpx/config.json",
+    "project": "/private/tmp/dual-w09-newlines-20261011-fresh-05/worktree/.acpxrc.json"
+  },
+  "loaded": {
+    "global": true,
+    "project": false
+  }
+}

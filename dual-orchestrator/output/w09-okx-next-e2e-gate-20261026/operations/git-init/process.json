@@ -1,0 +1,9 @@
+{
+  "pid": 67918,
+  "argv": [
+    "/opt/homebrew/Cellar/git/2.47.0/bin/git",
+    "init",
+    "-b",
+    "main"
+  ]
+}

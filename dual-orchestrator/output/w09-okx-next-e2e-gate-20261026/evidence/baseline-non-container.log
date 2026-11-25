@@ -1,0 +1,124 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< app.cryptoincome:ai-crypto-arbitrage >----------------
+[INFO] Building ai-crypto-arbitrage 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ ai-crypto-arbitrage ---
+[INFO] Deleting /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/target
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ ai-crypto-arbitrage ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 20 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ ai-crypto-arbitrage ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 217 source files with javac [debug parameters release 25] to target/classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/main/java/app/cryptoincome/funding/infrastructure/okx/OkxPublicApiClient.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/main/java/app/cryptoincome/funding/infrastructure/okx/OkxPublicApiClient.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ ai-crypto-arbitrage ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ ai-crypto-arbitrage ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 44 source files with javac [debug parameters release 25] to target/test-classes
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/test/java/app/cryptoincome/assessment/MybatisFundingRateFactQueryTest.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-okx-next-e2e-gate-20261026/fixture/baseline/src/test/java/app/cryptoincome/assessment/MybatisFundingRateFactQueryTest.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ ai-crypto-arbitrage ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running app.cryptoincome.reporting.ReturnMetricsCalculatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.044 s -- in app.cryptoincome.reporting.ReturnMetricsCalculatorTest
+[INFO] Running app.cryptoincome.web.DecisionWorkbenchStaticAssetTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in app.cryptoincome.web.DecisionWorkbenchStaticAssetTest
+[INFO] Running app.cryptoincome.web.DecisionWorkbenchControllerTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (/Users/kriswang/.m2/repository/net/bytebuddy/byte-buddy-agent/1.18.10/byte-buddy-agent-1.18.10.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.473 s -- in app.cryptoincome.web.DecisionWorkbenchControllerTest
+[INFO] Running app.cryptoincome.web.MarketDataControllerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in app.cryptoincome.web.MarketDataControllerTest
+[INFO] Running app.cryptoincome.shadow.application.GridShadowStudyServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.191 s -- in app.cryptoincome.shadow.application.GridShadowStudyServiceTest
+[INFO] Running app.cryptoincome.income.OkxSimpleEarnMarketRateClientTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.176 s -- in app.cryptoincome.income.OkxSimpleEarnMarketRateClientTest
+[INFO] Running app.cryptoincome.income.SimpleEarnIncomeServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in app.cryptoincome.income.SimpleEarnIncomeServiceTest
+[INFO] Running app.cryptoincome.assessment.PhaseOneAssessmentServiceTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in app.cryptoincome.assessment.PhaseOneAssessmentServiceTest
+[INFO] Running app.cryptoincome.assessment.SmartArbitrageAllocationCalculatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in app.cryptoincome.assessment.SmartArbitrageAllocationCalculatorTest
+[INFO] Running app.cryptoincome.cli.GridCliRunnerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.049 s -- in app.cryptoincome.cli.GridCliRunnerTest
+[INFO] Running app.cryptoincome.cli.SyncProductCliRunnerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in app.cryptoincome.cli.SyncProductCliRunnerTest
+[INFO] Running app.cryptoincome.cli.AssessIncomeCliRunnerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in app.cryptoincome.cli.AssessIncomeCliRunnerTest
+[INFO] Running app.cryptoincome.scenario.ScenarioProductCalculatorTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in app.cryptoincome.scenario.ScenarioProductCalculatorTest
+[INFO] Running app.cryptoincome.scenario.ScenarioEvaluationControllerTest
+20:13:47.686 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+20:13:47.687 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+20:13:47.688 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 1 ms
+20:13:47.972 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+20:13:47.972 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+20:13:47.972 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.421 s -- in app.cryptoincome.scenario.ScenarioEvaluationControllerTest
+[INFO] Running app.cryptoincome.scenario.FrozenScenarioEvaluationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in app.cryptoincome.scenario.FrozenScenarioEvaluationTest
+[INFO] Running app.cryptoincome.scenario.ScenarioEvaluationServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.261 s -- in app.cryptoincome.scenario.ScenarioEvaluationServiceTest
+[INFO] Running app.cryptoincome.scenario.ProductQualificationPolicyTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in app.cryptoincome.scenario.ProductQualificationPolicyTest
+[INFO] Running app.cryptoincome.scenario.PortfolioCandidateGeneratorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in app.cryptoincome.scenario.PortfolioCandidateGeneratorTest
+[INFO] Running app.cryptoincome.portfolio.PhaseOnePortfolioRecommendationServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in app.cryptoincome.portfolio.PhaseOnePortfolioRecommendationServiceTest
+[INFO] Running app.cryptoincome.market.MarketDataStatusServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.049 s -- in app.cryptoincome.market.MarketDataStatusServiceTest
+[INFO] Running app.cryptoincome.market.OkxBtcMarketTickClientTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.061 s -- in app.cryptoincome.market.OkxBtcMarketTickClientTest
+[INFO] Running app.cryptoincome.funding.OkxPublicApiClientTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.032 s -- in app.cryptoincome.funding.OkxPublicApiClientTest
+[INFO] Running app.cryptoincome.grid.CandleSyncExecutionServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in app.cryptoincome.grid.CandleSyncExecutionServiceTest
+[INFO] Running app.cryptoincome.grid.SpotCandleTailRefreshServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in app.cryptoincome.grid.SpotCandleTailRefreshServiceTest
+[INFO] Running app.cryptoincome.grid.FixedGridAssessmentServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 24.80 s -- in app.cryptoincome.grid.FixedGridAssessmentServiceTest
+[INFO] Running app.cryptoincome.grid.GridParameterSnapshotServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in app.cryptoincome.grid.GridParameterSnapshotServiceTest
+[INFO] Running app.cryptoincome.grid.OkxGridParameterClientTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in app.cryptoincome.grid.OkxGridParameterClientTest
+[INFO] Running app.cryptoincome.grid.FixedGridBacktesterTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in app.cryptoincome.grid.FixedGridBacktesterTest
+[INFO] Running app.cryptoincome.grid.FixedGridPathSimulatorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in app.cryptoincome.grid.FixedGridPathSimulatorTest
+[INFO] Running app.cryptoincome.grid.OkxSpotCandleClientTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in app.cryptoincome.grid.OkxSpotCandleClientTest
+[INFO] Running app.cryptoincome.grid.SpotCandleBackfillServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in app.cryptoincome.grid.SpotCandleBackfillServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 114, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  30.816 s
+[INFO] Finished at: 2026-10-26T20:14:13+08:00
+[INFO] ------------------------------------------------------------------------

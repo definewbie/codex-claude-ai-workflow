@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261011T044656Z-BMDJ",
+  "node_instance_id" : "node-context-design_codex_arch_review-014",
+  "run_id" : "",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/file-relevance-plan.json",
+      "sha256" : "3e41367550d0416581143f82428ffdbe891bd092664b7bd9bf46f45d3b9c57be"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/stage-scope-policy.json",
+      "sha256" : "d01f3fa00987edbabcd1a3aaab159ad4938a7ee41a25e2a7fa3a16b06871e80c"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/file-summaries.json",
+      "sha256" : "2a0acd2053cdc7a353cadf249b0f5b1a5e53214515796df36b5be488ed5d423b"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/repo-map.json",
+      "sha256" : "941aaaa4e3ed0371734c80b7592af0f534c01606b5a6ae9b8044d61758c376c8"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/planned-report.json",
+      "sha256" : "31ade93c844839c1c05f837e324f6028a0a119347cdeb3c32d718302f61dd319"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/agent-capability-catalog.json",
+      "sha256" : "fbe3c9d553a28b566f23bf1057d466c2290e9ae0ad97d40930bbbec85af14521"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/read-reuse-contract.json",
+      "sha256" : "38c2faf4e3dc1a3e775fdfbd6c22f4c26953d11e664f9bf8ce9a3c8f4c9d1072"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261011T044656Z-BMDJ/artifacts/context-governance/occurrences/node-context-design_codex_arch_review-014/working-set.json",
+      "sha256" : "4394b648b6e0792676ba7ab7938176afc6b241e66a44c8b8ddf4c8643f6436ae"
+    }
+  }
+}

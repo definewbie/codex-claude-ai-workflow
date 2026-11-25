@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: dev.dual.runtime.handler.ArtifactContractValidatorTest
+-------------------------------------------------------------------------------
+Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.261 s -- in dev.dual.runtime.handler.ArtifactContractValidatorTest

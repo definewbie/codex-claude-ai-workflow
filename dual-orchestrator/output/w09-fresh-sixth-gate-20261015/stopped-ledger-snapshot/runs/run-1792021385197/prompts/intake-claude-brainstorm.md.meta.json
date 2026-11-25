@@ -1,0 +1,18 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "prompt",
+  "runId" : "run-1792021385197",
+  "workstreamId" : "ws-20261014T234009Z-RN9X",
+  "nodeId" : "intake.claude_brainstorm",
+  "agent" : "claude",
+  "session" : "claude-main-ws-20261014T234009Z-RN9X-run-1792021385197",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "workdir" : "/private/tmp/dual-w09-newlines-20261015-fresh-06/worktree",
+  "artifactPath" : ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021385197/prompts/intake-claude-brainstorm.md",
+  "contentType" : "text/markdown",
+  "byteSize" : 23931,
+  "estimatedTokens" : 5983,
+  "lineCount" : 298,
+  "sha256" : "466699e65e8c15d16a7b1ba0e1760d3b9409433a9b78680e5effe7d85ebee78e",
+  "generatedAt" : "2026-10-14T23:45:06.447543Z"
+}

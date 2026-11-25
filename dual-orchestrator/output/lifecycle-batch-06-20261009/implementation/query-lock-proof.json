@@ -1,0 +1,7 @@
+{
+  "positive_exit": 0,
+  "mutant_exit": 1,
+  "reversed_order_rejected": true,
+  "source_untouched": true,
+  "kind": "one-off compiled actual query proof; separate from Maven totals; actual initialized ledger, no target/provider invocation"
+}

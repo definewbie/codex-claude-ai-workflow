@@ -1,0 +1,36 @@
+        After interacting with tools, control flows back to the agent,
+        allowing it to integrate results and reflect before deciding whether
+         to continue or stop.
+
+This loop is the essence of ReAct: combining reasoning, action, and
+reflection in an iterative cycle. ReAct is more than “the model thinks and
+then acts.” The reasoning trace itself becomes part of the evolving state.
+That is, the ReAct agent alternates between reasoning traces and tool
+outputs, and those traces feed back into context.
+
+While this example is in the context of a single agent, the same structure
+extends naturally into larger MASs. Each agent can maintain its own cycle
+of reasoning and acting, with reasoning traces shared or exchanged across
+agents. This makes ReAct not only a tool for individual decision making,
+but also a foundation for collaboration and reflection in more complex
+agentic setups.
+
+Let’s make the math and the diagram concrete, and let me show you how
+this actually maps into code. The following listings turn the ReAct
+equations into code. Note that, as before, I’ll just show the important parts
+here, but the full running implementation will be in the accompanying
+notebook.
+
+Before we jump into the listings, remember the intent: we carry a growing
+conversation state ct while the model alternates between language traces L
+and task actions A. Each step appends either a thought, an action, or a tool
+observation back into the state. The code mirrors this loop. Therefore, you
+first create the state for the graph as in Example 2-7.
+
+Example 2-7. Create ReAct state
+class AgentState(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], add_messages]
+
+   The state of the agent.
+
+   Context ct is the message stream.

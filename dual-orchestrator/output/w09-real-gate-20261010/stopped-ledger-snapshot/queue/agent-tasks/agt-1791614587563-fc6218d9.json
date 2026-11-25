@@ -1,0 +1,37 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1791614587563-fc6218d9",
+  "workflowExecutionId" : "wfe-1791614587510-1b47aa52",
+  "nodeInstanceId" : "node-context-intake_claude_brainstorm-001",
+  "nodeDefinitionId" : "context.intake_claude_brainstorm",
+  "nodeKind" : "TASK",
+  "handlerType" : "context.build_package",
+  "status" : "SUCCEEDED",
+  "agent" : "",
+  "session" : "",
+  "promptTemplate" : "",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "context.build_package",
+    "agent" : "",
+    "session" : "",
+    "prompt_template" : "",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "target_node" : "intake.claude_brainstorm",
+      "profile" : "intake",
+      "purpose" : "Seed Claude intake with user request and repository scope guidance."
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 1
+  },
+  "nodeExecutionId" : "nxe-1791614587569-247629de",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-10T06:43:07.563117Z",
+  "claimedAt" : "2026-10-10T06:43:07.579808Z",
+  "completedAt" : "2026-10-10T06:43:07.631362Z"
+}

@@ -1,0 +1,786 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/Users/kriswang/work/opensource/maven/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] dual-orchestrator                                                  [pom]
+[INFO] dual-core                                                          [jar]
+[INFO] dual-ledger-file                                                   [jar]
+[INFO] dual-flow-liteflow                                                 [jar]
+[INFO] dual-adapter-git                                                   [jar]
+[INFO] dual-runtime                                                       [jar]
+[INFO] dual-adapter-acpx                                                  [jar]
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-orchestrator >---------------------
+[INFO] Building dual-orchestrator 0.1.0-SNAPSHOT                          [1/7]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------------< dev.dual:dual-core >-------------------------
+[INFO] Building dual-core 0.1.0-SNAPSHOT                                  [2/7]
+[INFO]   from dual-core/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-core ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-core ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-core ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-ledger-file >----------------------
+[INFO] Building dual-ledger-file 0.1.0-SNAPSHOT                           [3/7]
+[INFO]   from dual-ledger-file/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-ledger-file ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-ledger-file/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-ledger-file ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-ledger-file ---
+[INFO] 
+[INFO] --------------------< dev.dual:dual-flow-liteflow >---------------------
+[INFO] Building dual-flow-liteflow 0.1.0-SNAPSHOT                         [4/7]
+[INFO]   from dual-flow-liteflow/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-flow-liteflow ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-flow-liteflow ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-flow-liteflow/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-flow-liteflow ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-flow-liteflow ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-git >----------------------
+[INFO] Building dual-adapter-git 0.1.0-SNAPSHOT                           [5/7]
+[INFO]   from dual-adapter-git/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-git ---
+[INFO] skip non existing resourceDirectory /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-git/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-git ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-git ---
+[INFO] 
+[INFO] -----------------------< dev.dual:dual-runtime >------------------------
+[INFO] Building dual-runtime 0.1.0-SNAPSHOT                               [6/7]
+[INFO]   from dual-runtime/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-runtime ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-runtime ---
+[INFO] Copying 2 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-runtime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- jar:3.4.2:test-jar (shared-lifecycle-test-fixtures) @ dual-runtime ---
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-runtime ---
+[INFO] 
+[INFO] ---------------------< dev.dual:dual-adapter-acpx >---------------------
+[INFO] Building dual-adapter-acpx 0.1.0-SNAPSHOT                          [7/7]
+[INFO]   from dual-adapter-acpx/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ dual-adapter-acpx ---
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] Copying 11 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ dual-adapter-acpx ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ dual-adapter-acpx ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ dual-adapter-acpx ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 37 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.2:test (default-test) @ dual-adapter-acpx ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest
+[ERROR] Tests run: 49, Failures: 6, Errors: 4, Skipped: 0, Time elapsed: 29.91 s <<< FAILURE! -- in dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.typedPublicWebSearchApprovalAddsOnlyExactToolForOneRetry -- Time elapsed: 0.205 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.typedPublicWebSearchApprovalAddsOnlyExactToolForOneRetry(AcpxAgentTaskHandlerTest.java:1178)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.runMetadataRecordsSessionScopeStageAndIteration -- Time elapsed: 0.047 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+{
+  "schemaVersion" : 2,
+  "runId" : "run-1791285343530",
+  "workstreamId" : "ws-sess",
+  "nodeId" : "intake.claude_brainstorm",
+  "agent" : "claude",
+  "session" : "claude-main-ws-sess",
+  "sessionScope" : "workstream",
+  "sessionSegmentKey" : "ws:ws-sess",
+  "sessionScopeReason" : "default:workstream",
+  "stage" : "stage-intake",
+  "semanticIteration" : "iter-001",
+  "sessionCompactionMode" : "off",
+  "sessionCompactionEnabled" : false,
+  "sessionCompactionReason" : "default:off",
+  "sessionCompactionSeedKind" : "",
+  "sessionCompactionSeedPath" : "",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "workdir" : "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-17827531522291759613",
+  "promptPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/prompts/intake-claude-brainstorm.md",
+  "promptManifestPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/prompts/intake-claude-brainstorm.md.manifest.json",
+  "outputPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.json",
+  "transcriptPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.transcript.log",
+  "stderrPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.stderr.log",
+  "promptMetadataPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/prompts/intake-claude-brainstorm.md.meta.json",
+  "outputMetadataPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.json.meta.json",
+  "transcriptMetadataPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.transcript.log.meta.json",
+  "stderrMetadataPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.stderr.log.meta.json",
+  "command" : [ "acpx", "claude" ],
+  "startedAt" : "2026-06-01T00:00:00Z",
+  "finishedAt" : "2026-06-01T00:00:01Z",
+  "durationMs" : 1000,
+  "exitCode" : 0,
+  "status" : "process_exited",
+  "failureReason" : null,
+  "recoverable" : null,
+  "usage" : {
+    "inputTokens" : 0,
+    "outputTokens" : 0,
+    "cachedReadTokens" : 0,
+    "cachedWriteTokens" : 0,
+    "totalTokens" : 0,
+    "costAmount" : null,
+    "costCurrency" : "",
+    "source" : "not_available",
+    "measurementType" : "UNAVAILABLE",
+    "attribution" : "",
+    "cumulative" : false,
+    "contextUsedTokens" : 0,
+    "sessionCostAmount" : null,
+    "sessionCostCurrency" : "",
+    "providerId" : "zhipu",
+    "model" : "glm-5.3",
+    "billingMode" : "subscription_token_only",
+    "providerMetadataSource" : "claude_settings_env",
+    "unavailableReason" : "NO_ACPX_SESSION_ID"
+  },
+  "agentResultAcquisition" : {
+    "schemaVersion" : 2,
+    "correctionAttempted" : false,
+    "maxCorrectionAttempts" : 1,
+    "selectedCandidateOccurrence" : 1,
+    "correctionReason" : "NONE",
+    "correctionDisposition" : "NOT_NEEDED",
+    "occurrences" : [ {
+      "occurrence" : 1,
+      "sessionName" : "claude-main-ws-sess",
+      "requestId" : "fixture-prompt",
+      "promptPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/prompts/intake-claude-brainstorm.md",
+      "outputPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.json",
+      "transcriptPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.transcript.log",
+      "stderrPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.stderr.log",
+      "startedAt" : "2026-06-01T00:00:00Z",
+      "finishedAt" : "2026-06-01T00:00:01Z",
+      "durationMs" : 1000,
+      "exitCode" : 0,
+      "stopReason" : "end_turn",
+      "presentationDisposition" : "NOT_NEEDED",
+      "rawAssistantSha256" : "bcbdef9da163c082bfe386d849ded5fdf60381ef49418b2c6d13d17780d967c8",
+      "candidateSha256" : "bcbdef9da163c082bfe386d849ded5fdf60381ef49418b2c6d13d17780d967c8",
+      "contractDecodable" : true,
+      "parseErrorCode" : "",
+      "contractSchemaValid" : true,
+      "contractCorrectionDisposition" : "NONE",
+      "contractValidationErrors" : [ ],
+      "usage" : {
+        "inputTokens" : 0,
+        "outputTokens" : 0,
+        "cachedReadTokens" : 0,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 0,
+        "costAmount" : null,
+        "costCurrency" : "",
+        "source" : "not_available",
+        "measurementType" : "UNAVAILABLE",
+        "attribution" : "",
+        "cumulative" : false,
+        "contextUsedTokens" : 0,
+        "sessionCostAmount" : null,
+        "sessionCostCurrency" : "",
+        "providerId" : "zhipu",
+        "model" : "glm-5.3",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "claude_settings_env",
+        "unavailableReason" : "NO_ACPX_SESSION_ID"
+      },
+      "processResult" : {
+        "command" : "acpx claude",
+        "pid" : null,
+        "exitCode" : 0,
+        "usability" : "EXITED_ZERO",
+        "durationMs" : 1000,
+        "stdoutPath" : "",
+        "stderrPath" : "",
+        "interrupted" : false,
+        "timedOut" : false
+      },
+      "adapterSignals" : [ ]
+    } ]
+  },
+  "providerModelIdentity" : {
+    "billingMode" : "subscription_token_only",
+    "model" : "glm-5.3",
+    "confidence" : "high",
+    "source" : "claude_settings_env",
+    "provider" : "zhipu"
+  },
+  "toolUsage" : {
+    "schemaVersion" : 1,
+    "toolCallCount" : 1,
+    "readCount" : 1,
+    "writeCount" : 0,
+    "bashCount" : 0,
+    "otherCount" : 0,
+    "byTool" : {
+      "Read" : 1
+    },
+    "toolIds" : [ "Bash" ],
+    "readFiles" : [ "huge-file.md" ],
+    "directReadFiles" : [ "huge-file.md" ],
+    "writeFiles" : [ ],
+    "bashCommands" : [ ],
+    "commandExecutables" : [ ]
+  },
+  "contextGovernanceActualReportPath" : ".agent/workstreams/ws-sess/artifacts/context-governance/intake.claude_brainstorm-actual-run-1791285343530.json",
+  "executionAuthority" : {
+    "transportDisposition" : "NETWORK_AUTHORITY_NOT_CONFIGURED"
+  },
+  "processResult" : {
+    "command" : "acpx claude",
+    "pid" : null,
+    "exitCode" : 0,
+    "usability" : "EXITED_ZERO",
+    "durationMs" : 1000,
+    "stdoutPath" : "",
+    "stderrPath" : "",
+    "interrupted" : false,
+    "timedOut" : false
+  },
+  "adapterSignals" : [ ],
+  "agentResultContract" : null,
+  "artifactContractResults" : [ ],
+  "executionAttempt" : {
+    "attemptId" : "att-run-1791285343530",
+    "runId" : "run-1791285343530",
+    "workstreamId" : "ws-sess",
+    "nodeId" : "intake.claude_brainstorm",
+    "agent" : "claude",
+    "status" : "PROCESS_EXITED",
+    "processStatus" : "EXITED",
+    "failureSignal" : null,
+    "recoverable" : false,
+    "retrySafe" : false,
+    "message" : "process exited",
+    "stderrPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.stderr.log",
+    "transcriptPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.transcript.log",
+    "sessionName" : "claude-main-ws-sess",
+    "sessionId" : "",
+    "sessionScope" : "workstream",
+    "sessionSegmentKey" : "ws:ws-sess",
+    "startedAt" : "2026-06-01T00:00:00Z",
+    "finishedAt" : "2026-06-01T00:00:01Z"
+  },
+  "executionOutcome" : null,
+  "executionTimeline" : [ {
+    "sequence" : 1,
+    "observedAt" : "2026-10-06T11:15:43.546726Z",
+    "source" : "adapter",
+    "kind" : "artifact_extracted",
+    "elapsedMs" : 11013343546
+  } ]
+} ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.runMetadataRecordsSessionScopeStageAndIteration(AcpxAgentTaskHandlerTest.java:2628)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.adjacentE1ExecutionsDoNotReuseAConflictingPolicySession -- Time elapsed: 0.774 s <<< ERROR!
+java.io.IOException: test must complete/retry the previous execution before requesting another claim
+	at dev.dual.adapter.acpx.AcpxTestLedger.claim(AcpxTestLedger.java:24)
+	at dev.dual.adapter.acpx.AuthoredAdapterFixture.before(AuthoredAdapterFixture.java:27)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.taskContext(AcpxAgentTaskHandlerTest.java:2826)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.adjacentE1ExecutionsDoNotReuseAConflictingPolicySession(AcpxAgentTaskHandlerTest.java:181)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.startedRunIsClosedToTerminalWhenHandlerFailsBeforeFinalizer -- Time elapsed: 0.054 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: the closer must converge a dead-pid started run to INTERRUPTED ==> expected: <INTERRUPTED> but was: <>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.startedRunIsClosedToTerminalWhenHandlerFailsBeforeFinalizer(AcpxAgentTaskHandlerTest.java:1847)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.writesPromptAndReturnsPreparedWhenConfiguredForPrepareOnly -- Time elapsed: 0.074 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:31)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:183)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.writesPromptAndReturnsPreparedWhenConfiguredForPrepareOnly(AcpxAgentTaskHandlerTest.java:114)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.qualifiedAuthoredReviewStillExcludesUnvalidatedOutputFromMemory -- Time elapsed: 0.195 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: qualified contract scope remains available ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.qualifiedAuthoredReviewStillExcludesUnvalidatedOutputFromMemory(AcpxAgentTaskHandlerTest.java:2792)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteWorkspaceBaseAuthority -- Time elapsed: 0.003 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.validateIdentity(LedgerSession.java:330)
+	at dev.dual.ledger.file.LedgerSession.validateWorkstreamIdentity(LedgerSession.java:334)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:277)
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:286)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:164)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:332)
+	at dev.dual.adapter.acpx.AuthoredAdapterFixture.before(AuthoredAdapterFixture.java:18)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.taskContext(AcpxAgentTaskHandlerTest.java:2826)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteWorkspaceBaseAuthority(AcpxAgentTaskHandlerTest.java:1322)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotCreateWorkspaceAuthority -- Time elapsed: 0.003 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.validateIdentity(LedgerSession.java:330)
+	at dev.dual.ledger.file.LedgerSession.validateWorkstreamIdentity(LedgerSession.java:334)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:277)
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:286)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:164)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:332)
+	at dev.dual.adapter.acpx.AuthoredAdapterFixture.before(AuthoredAdapterFixture.java:18)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.taskContext(AcpxAgentTaskHandlerTest.java:2826)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotCreateWorkspaceAuthority(AcpxAgentTaskHandlerTest.java:1350)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.operatorGrantFlowsThroughRealHandlerPolicyAndDoesNotSurviveRetry -- Time elapsed: 0.076 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: not <null>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertNotNull.failNull(AssertNotNull.java:49)
+	at org.junit.jupiter.api.AssertNotNull.assertNotNull(AssertNotNull.java:35)
+	at org.junit.jupiter.api.AssertNotNull.assertNotNull(AssertNotNull.java:30)
+	at org.junit.jupiter.api.Assertions.assertNotNull(Assertions.java:304)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.operatorGrantFlowsThroughRealHandlerPolicyAndDoesNotSurviveRetry(AcpxAgentTaskHandlerTest.java:1254)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteTaskContractAuthority -- Time elapsed: 0.002 s <<< ERROR!
+java.io.IOException: INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+	at dev.dual.ledger.file.LedgerSession.invalid(LedgerSession.java:430)
+	at dev.dual.ledger.file.LedgerSession.validateIdentity(LedgerSession.java:330)
+	at dev.dual.ledger.file.LedgerSession.validateWorkstreamIdentity(LedgerSession.java:334)
+	at dev.dual.ledger.file.LedgerSession.<init>(LedgerSession.java:65)
+	at dev.dual.ledger.file.WorkflowFileLedger.openSession(WorkflowFileLedger.java:277)
+	at dev.dual.ledger.file.WorkflowFileLedger.initialize(WorkflowFileLedger.java:286)
+	at dev.dual.runtime.handler.VerificationReadinessTest$Fixture.<init>(VerificationReadinessTest.java:164)
+	at dev.dual.runtime.handler.AuthoredStageSequenceTest$Fixture.<init>(AuthoredStageSequenceTest.java:332)
+	at dev.dual.adapter.acpx.AuthoredAdapterFixture.before(AuthoredAdapterFixture.java:18)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.taskContext(AcpxAgentTaskHandlerTest.java:2826)
+	at dev.dual.adapter.acpx.AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteTaskContractAuthority(AcpxAgentTaskHandlerTest.java:1294)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest
+[ERROR] Tests run: 10, Failures: 0, Errors: 3, Skipped: 0, Time elapsed: 0.100 s <<< FAILURE! -- in dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest
+[ERROR] dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.typedDesignRetainsDecisionAndSummaryWithoutCopyingPlannedScope -- Time elapsed: 0.077 s <<< ERROR!
+java.lang.IllegalStateException: typed execution requires program-owned run metadata
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.finalizeRunMetadata(AgentRunMetadataFinalizer.java:105)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.resolveNodeResult(AgentRunMetadataFinalizer.java:71)
+	at dev.dual.runtime.handler.AgentRunMetadataFinalizer.assessPublication(AgentRunMetadataFinalizer.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator$Validation.complete(ArtifactContractValidator.java:436)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:63)
+	at dev.dual.runtime.handler.ArtifactContractValidator.validate(ArtifactContractValidator.java:51)
+	at dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.typedDesignRetainsDecisionAndSummaryWithoutCopyingPlannedScope(WorkstreamMemoryUpdaterTest.java:48)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.readFilesSummaryIsSemanticFromStructureNotMetadata -- Time elapsed: 0.002 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.MismatchedInputException: 
+Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/factory method to deserialize from String value ('refresh token on expiry')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 5, column: 41] (through reference chain: dev.dual.core.contract.TaskContract["acceptance_criteria"]->java.util.ArrayList[0])
+	at com.fasterxml.jackson.databind.exc.MismatchedInputException.from(MismatchedInputException.java:63)
+	at com.fasterxml.jackson.databind.DeserializationContext.reportInputMismatch(DeserializationContext.java:1754)
+	at com.fasterxml.jackson.databind.DeserializationContext.handleMissingInstantiator(DeserializationContext.java:1379)
+	at com.fasterxml.jackson.databind.deser.std.StdDeserializer._deserializeFromString(StdDeserializer.java:311)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromString(BeanDeserializerBase.java:1592)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeOther(BeanDeserializer.java:197)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:187)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer._deserializeFromArray(CollectionDeserializer.java:361)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer.deserialize(CollectionDeserializer.java:246)
+	at com.fasterxml.jackson.databind.deser.std.CollectionDeserializer.deserialize(CollectionDeserializer.java:30)
+	at com.fasterxml.jackson.databind.deser.SettableBeanProperty.deserialize(SettableBeanProperty.java:543)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeWithErrorWrapping(BeanDeserializer.java:585)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:447)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3733)
+	at dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.readFilesSummaryIsSemanticFromStructureNotMetadata(WorkstreamMemoryUpdaterTest.java:291)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.updateMemoryPopulatesDecidedScopeAndNonGoalsFromTaskContract -- Time elapsed: 0.002 s <<< ERROR!
+com.fasterxml.jackson.databind.exc.ValueInstantiationException: 
+Cannot construct instance of `dev.dual.core.contract.TaskContract`, problem: unsupported task contract schema: 0
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 11, column: 1]
+	at com.fasterxml.jackson.databind.exc.ValueInstantiationException.from(ValueInstantiationException.java:47)
+	at com.fasterxml.jackson.databind.DeserializationContext.instantiationException(DeserializationContext.java:2015)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.wrapAsJsonMappingException(StdValueInstantiator.java:622)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.rewrapCtorProblem(StdValueInstantiator.java:645)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:293)
+	at com.fasterxml.jackson.databind.deser.ValueInstantiator.createFromObjectWith(ValueInstantiator.java:301)
+	at com.fasterxml.jackson.databind.deser.impl.PropertyBasedCreator.build(PropertyBasedCreator.java:214)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer._deserializeUsingPropertyBased(BeanDeserializer.java:541)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.deserializeFromObjectUsingNonDefault(BeanDeserializerBase.java:1497)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserializeFromObject(BeanDeserializer.java:348)
+	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:185)
+	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
+	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3733)
+	at dev.dual.adapter.acpx.WorkstreamMemoryUpdaterTest.updateMemoryPopulatesDecidedScopeAndNonGoalsFromTaskContract(WorkstreamMemoryUpdaterTest.java:162)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+Caused by: java.lang.IllegalArgumentException: unsupported task contract schema: 0
+	at dev.dual.core.contract.TaskContract.<init>(TaskContract.java:35)
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:499)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:483)
+	at com.fasterxml.jackson.databind.introspect.AnnotatedConstructor.call(AnnotatedConstructor.java:126)
+	at com.fasterxml.jackson.databind.deser.std.StdValueInstantiator.createFromObjectWith(StdValueInstantiator.java:291)
+	... 13 more
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   AcpxAgentTaskHandlerTest.operatorGrantFlowsThroughRealHandlerPolicyAndDoesNotSurviveRetry:1254 expected: not <null>
+[ERROR]   AcpxAgentTaskHandlerTest.qualifiedAuthoredReviewStillExcludesUnvalidatedOutputFromMemory:2792 qualified contract scope remains available ==> expected: <true> but was: <false>
+[ERROR]   AcpxAgentTaskHandlerTest.runMetadataRecordsSessionScopeStageAndIteration:2628 {
+  "schemaVersion" : 2,
+  "runId" : "run-1791285343530",
+  "workstreamId" : "ws-sess",
+  "nodeId" : "intake.claude_brainstorm",
+  "agent" : "claude",
+  "session" : "claude-main-ws-sess",
+  "sessionScope" : "workstream",
+  "sessionSegmentKey" : "ws:ws-sess",
+  "sessionScopeReason" : "default:workstream",
+  "stage" : "stage-intake",
+  "semanticIteration" : "iter-001",
+  "sessionCompactionMode" : "off",
+  "sessionCompactionEnabled" : false,
+  "sessionCompactionReason" : "default:off",
+  "sessionCompactionSeedKind" : "",
+  "sessionCompactionSeedPath" : "",
+  "promptTemplate" : "intake-claude-brainstorm",
+  "workdir" : "/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/junit-17827531522291759613",
+  "promptPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/prompts/intake-claude-brainstorm.md",
+  "promptManifestPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/prompts/intake-claude-brainstorm.md.manifest.json",
+  "outputPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.json",
+  "transcriptPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.transcript.log",
+  "stderrPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.stderr.log",
+  "promptMetadataPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/prompts/intake-claude-brainstorm.md.meta.json",
+  "outputMetadataPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.json.meta.json",
+  "transcriptMetadataPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.transcript.log.meta.json",
+  "stderrMetadataPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.stderr.log.meta.json",
+  "command" : [ "acpx", "claude" ],
+  "startedAt" : "2026-06-01T00:00:00Z",
+  "finishedAt" : "2026-06-01T00:00:01Z",
+  "durationMs" : 1000,
+  "exitCode" : 0,
+  "status" : "process_exited",
+  "failureReason" : null,
+  "recoverable" : null,
+  "usage" : {
+    "inputTokens" : 0,
+    "outputTokens" : 0,
+    "cachedReadTokens" : 0,
+    "cachedWriteTokens" : 0,
+    "totalTokens" : 0,
+    "costAmount" : null,
+    "costCurrency" : "",
+    "source" : "not_available",
+    "measurementType" : "UNAVAILABLE",
+    "attribution" : "",
+    "cumulative" : false,
+    "contextUsedTokens" : 0,
+    "sessionCostAmount" : null,
+    "sessionCostCurrency" : "",
+    "providerId" : "zhipu",
+    "model" : "glm-5.3",
+    "billingMode" : "subscription_token_only",
+    "providerMetadataSource" : "claude_settings_env",
+    "unavailableReason" : "NO_ACPX_SESSION_ID"
+  },
+  "agentResultAcquisition" : {
+    "schemaVersion" : 2,
+    "correctionAttempted" : false,
+    "maxCorrectionAttempts" : 1,
+    "selectedCandidateOccurrence" : 1,
+    "correctionReason" : "NONE",
+    "correctionDisposition" : "NOT_NEEDED",
+    "occurrences" : [ {
+      "occurrence" : 1,
+      "sessionName" : "claude-main-ws-sess",
+      "requestId" : "fixture-prompt",
+      "promptPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/prompts/intake-claude-brainstorm.md",
+      "outputPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.json",
+      "transcriptPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.transcript.log",
+      "stderrPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.stderr.log",
+      "startedAt" : "2026-06-01T00:00:00Z",
+      "finishedAt" : "2026-06-01T00:00:01Z",
+      "durationMs" : 1000,
+      "exitCode" : 0,
+      "stopReason" : "end_turn",
+      "presentationDisposition" : "NOT_NEEDED",
+      "rawAssistantSha256" : "bcbdef9da163c082bfe386d849ded5fdf60381ef49418b2c6d13d17780d967c8",
+      "candidateSha256" : "bcbdef9da163c082bfe386d849ded5fdf60381ef49418b2c6d13d17780d967c8",
+      "contractDecodable" : true,
+      "parseErrorCode" : "",
+      "contractSchemaValid" : true,
+      "contractCorrectionDisposition" : "NONE",
+      "contractValidationErrors" : [ ],
+      "usage" : {
+        "inputTokens" : 0,
+        "outputTokens" : 0,
+        "cachedReadTokens" : 0,
+        "cachedWriteTokens" : 0,
+        "totalTokens" : 0,
+        "costAmount" : null,
+        "costCurrency" : "",
+        "source" : "not_available",
+        "measurementType" : "UNAVAILABLE",
+        "attribution" : "",
+        "cumulative" : false,
+        "contextUsedTokens" : 0,
+        "sessionCostAmount" : null,
+        "sessionCostCurrency" : "",
+        "providerId" : "zhipu",
+        "model" : "glm-5.3",
+        "billingMode" : "subscription_token_only",
+        "providerMetadataSource" : "claude_settings_env",
+        "unavailableReason" : "NO_ACPX_SESSION_ID"
+      },
+      "processResult" : {
+        "command" : "acpx claude",
+        "pid" : null,
+        "exitCode" : 0,
+        "usability" : "EXITED_ZERO",
+        "durationMs" : 1000,
+        "stdoutPath" : "",
+        "stderrPath" : "",
+        "interrupted" : false,
+        "timedOut" : false
+      },
+      "adapterSignals" : [ ]
+    } ]
+  },
+  "providerModelIdentity" : {
+    "billingMode" : "subscription_token_only",
+    "model" : "glm-5.3",
+    "confidence" : "high",
+    "source" : "claude_settings_env",
+    "provider" : "zhipu"
+  },
+  "toolUsage" : {
+    "schemaVersion" : 1,
+    "toolCallCount" : 1,
+    "readCount" : 1,
+    "writeCount" : 0,
+    "bashCount" : 0,
+    "otherCount" : 0,
+    "byTool" : {
+      "Read" : 1
+    },
+    "toolIds" : [ "Bash" ],
+    "readFiles" : [ "huge-file.md" ],
+    "directReadFiles" : [ "huge-file.md" ],
+    "writeFiles" : [ ],
+    "bashCommands" : [ ],
+    "commandExecutables" : [ ]
+  },
+  "contextGovernanceActualReportPath" : ".agent/workstreams/ws-sess/artifacts/context-governance/intake.claude_brainstorm-actual-run-1791285343530.json",
+  "executionAuthority" : {
+    "transportDisposition" : "NETWORK_AUTHORITY_NOT_CONFIGURED"
+  },
+  "processResult" : {
+    "command" : "acpx claude",
+    "pid" : null,
+    "exitCode" : 0,
+    "usability" : "EXITED_ZERO",
+    "durationMs" : 1000,
+    "stdoutPath" : "",
+    "stderrPath" : "",
+    "interrupted" : false,
+    "timedOut" : false
+  },
+  "adapterSignals" : [ ],
+  "agentResultContract" : null,
+  "artifactContractResults" : [ ],
+  "executionAttempt" : {
+    "attemptId" : "att-run-1791285343530",
+    "runId" : "run-1791285343530",
+    "workstreamId" : "ws-sess",
+    "nodeId" : "intake.claude_brainstorm",
+    "agent" : "claude",
+    "status" : "PROCESS_EXITED",
+    "processStatus" : "EXITED",
+    "failureSignal" : null,
+    "recoverable" : false,
+    "retrySafe" : false,
+    "message" : "process exited",
+    "stderrPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.stderr.log",
+    "transcriptPath" : ".agent/workstreams/ws-sess/runs/run-1791285343530/outputs/intake-claude-brainstorm.transcript.log",
+    "sessionName" : "claude-main-ws-sess",
+    "sessionId" : "",
+    "sessionScope" : "workstream",
+    "sessionSegmentKey" : "ws:ws-sess",
+    "startedAt" : "2026-06-01T00:00:00Z",
+    "finishedAt" : "2026-06-01T00:00:01Z"
+  },
+  "executionOutcome" : null,
+  "executionTimeline" : [ {
+    "sequence" : 1,
+    "observedAt" : "2026-10-06T11:15:43.546726Z",
+    "source" : "adapter",
+    "kind" : "artifact_extracted",
+    "elapsedMs" : 11013343546
+  } ]
+} ==> expected: <true> but was: <false>
+[ERROR]   AcpxAgentTaskHandlerTest.startedRunIsClosedToTerminalWhenHandlerFailsBeforeFinalizer:1847 the closer must converge a dead-pid started run to INTERRUPTED ==> expected: <INTERRUPTED> but was: <>
+[ERROR]   AcpxAgentTaskHandlerTest.typedPublicWebSearchApprovalAddsOnlyExactToolForOneRetry:1178 expected: <true> but was: <false>
+[ERROR]   AcpxAgentTaskHandlerTest.writesPromptAndReturnsPreparedWhenConfiguredForPrepareOnly:114 expected: <true> but was: <false>
+[ERROR] Errors: 
+[ERROR]   AcpxAgentTaskHandlerTest.adjacentE1ExecutionsDoNotReuseAConflictingPolicySession:181->taskContext:2826 » IO test must complete/retry the previous execution before requesting another claim
+[ERROR]   AcpxAgentTaskHandlerTest.implementationAgentCannotCreateWorkspaceAuthority:1350->taskContext:2826 » IO INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+[ERROR]   AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteTaskContractAuthority:1294->taskContext:2826 » IO INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+[ERROR]   AcpxAgentTaskHandlerTest.implementationAgentCannotRewriteWorkspaceBaseAuthority:1322->taskContext:2826 » IO INVALID_LOCAL_COMMIT: frozen runtime identity mismatch or absent
+[ERROR]   WorkstreamMemoryUpdaterTest.readFilesSummaryIsSemanticFromStructureNotMetadata:291 » MismatchedInput Cannot construct instance of `dev.dual.core.contract.TaskContract$Clause` (although at least one Creator exists): no String-argument constructor/factory method to deserialize from String value ('refresh token on expiry')
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 5, column: 41] (through reference chain: dev.dual.core.contract.TaskContract["acceptance_criteria"]->java.util.ArrayList[0])
+[ERROR]   WorkstreamMemoryUpdaterTest.typedDesignRetainsDecisionAndSummaryWithoutCopyingPlannedScope:48 » IllegalState typed execution requires program-owned run metadata
+[ERROR]   WorkstreamMemoryUpdaterTest.updateMemoryPopulatesDecidedScopeAndNonGoalsFromTaskContract:162 » ValueInstantiation Cannot construct instance of `dev.dual.core.contract.TaskContract`, problem: unsupported task contract schema: 0
+ at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 11, column: 1]
+[INFO] 
+[ERROR] Tests run: 59, Failures: 6, Errors: 7, Skipped: 0
+[INFO] 
+[ERROR] There are test failures.
+
+See /Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-adapter-acpx/target/surefire-reports for the individual test results.
+See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for dual-orchestrator 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] dual-orchestrator .................................. SUCCESS [  0.000 s]
+[INFO] dual-core .......................................... SUCCESS [  0.247 s]
+[INFO] dual-ledger-file ................................... SUCCESS [  0.029 s]
+[INFO] dual-flow-liteflow ................................. SUCCESS [  0.052 s]
+[INFO] dual-adapter-git ................................... SUCCESS [  0.015 s]
+[INFO] dual-runtime ....................................... SUCCESS [  0.207 s]
+[INFO] dual-adapter-acpx .................................. SUCCESS [ 31.414 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  32.109 s
+[INFO] Finished at: 2026-10-06T19:16:01+08:00
+[INFO] ------------------------------------------------------------------------

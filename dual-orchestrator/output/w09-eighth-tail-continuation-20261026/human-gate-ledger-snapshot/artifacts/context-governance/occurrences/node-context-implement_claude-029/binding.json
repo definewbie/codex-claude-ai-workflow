@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "node_instance_id" : "node-context-implement_claude-029",
+  "run_id" : "",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-implement_claude-029/agent-capability-catalog.json",
+      "sha256" : "e33b7ac494158fb39b34bf82cd9472c71dc1336505a00298ba34bc8294e27dc9"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-implement_claude-029/planned-report.json",
+      "sha256" : "4d2e36d627d808dfa8eb29efa17e7dfa6007109c2c3ba5f487b86f57035e3167"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-implement_claude-029/repo-map.json",
+      "sha256" : "bb4b66606a6e41bf5d39ddbd0dcb9e2b270ed2685606f6478cada22300e4b518"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-implement_claude-029/file-summaries.json",
+      "sha256" : "3e31b7a1b49d96706c282c40addf181fbae3e97b1adfb38ce41c819e313c140b"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-implement_claude-029/stage-scope-policy.json",
+      "sha256" : "fc4890dc9e4a3818e0e99907d1e262295e0f770fb52e7d0330e1816e05f48fe0"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-implement_claude-029/file-relevance-plan.json",
+      "sha256" : "f9708c1e4497b223a7e530cbaeaa274682852ae0721277ceeff19b9a12bb5cb7"
+    },
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-implement_claude-029/working-set.json",
+      "sha256" : "9f4a9a9c51e59b678435f1a653d229b89f3aefb0cdccc017032bb53a9b9fb638"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-context-implement_claude-029/read-reuse-contract.json",
+      "sha256" : "ec569d01c0e954c4ff100d7ac617c92b5d74521de6bd4668268f9d70fd92f11c"
+    }
+  }
+}

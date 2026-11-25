@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "nodeInstanceId": "node-contract-compile_execution-027",
+  "nodeDefinitionId": "contract.compile_execution",
+  "kind": "TASK",
+  "handlerType": "contract.compile",
+  "status": "COMPLETED",
+  "stageId": "stage-contract",
+  "iterationId": "iter-003",
+  "inputRefs": [
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.stderr.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.transcript.log",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-codex_plan_review-025-run-1792724491616/binding.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724491616/outputs/plan-codex-review.contract.json"
+  ],
+  "inputTransition": {
+    "required": true,
+    "source_node_instance_id": "node-plan-decision-026",
+    "source_node_sha256": "7cd1081dbf5e2f349a2ce47c08aad26ad6a66a829ade97a5f3cbbf825038bc08",
+    "purpose": "Seed the first Claude intake run with repo-scope context.",
+    "condition": "unconditional",
+    "transition_type": "normal"
+  },
+  "outputRefs": [
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.json",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/task-contract.md",
+    ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/contracts/node-contract-compile_execution-027/contract-resolution.json"
+  ],
+  "result": {
+    "contract_phase": "EXECUTION",
+    "contract_version": 1,
+    "contract_id": "tc-ws-20261023T005431Z-9YYF-node-contract-compile_execution-027",
+    "contract_resolution_sha256": "604cd8b2e5a5d1c3cec27cdf3addb656b8fbd119a8e0b7f0f05efa110a7df417",
+    "contract_epoch": 1,
+    "task_contract_sha256": "00eeb14896cb3b591fc84856dc9aebb5919a950f5c6f3ef6eb248956fdfd5505",
+    "contract_status": "READY_FOR_REVIEW",
+    "generated_at": "2026-10-25T22:22:52.814268Z",
+    "compilation_pass": 1
+  },
+  "runRef": null,
+  "latestExecutionId": "nxe-1792966972677-45f67930",
+  "startedAt": "2026-10-25T22:22:52.686787Z",
+  "finishedAt": "2026-10-25T22:22:52.827321Z"
+}

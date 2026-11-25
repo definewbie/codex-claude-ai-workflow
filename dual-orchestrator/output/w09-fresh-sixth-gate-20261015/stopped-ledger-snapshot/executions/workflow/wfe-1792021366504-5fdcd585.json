@@ -1,0 +1,13 @@
+{
+  "schemaVersion" : 1,
+  "workflowExecutionId" : "wfe-1792021366504-5fdcd585",
+  "workflowInstanceId" : "wf-ws-20261014T234009Z-RN9X",
+  "workstreamId" : "ws-20261014T234009Z-RN9X",
+  "trigger" : "resume",
+  "status" : "STOPPED",
+  "nodeExecutionIds" : [ "nxe-1792021366580-011dd372" ],
+  "stopReason" : "resumed workflow",
+  "startedAt" : "2026-10-14T23:42:46.504026Z",
+  "finishedAt" : "2026-10-14T23:42:46.873042Z",
+  "durationMs" : 369
+}

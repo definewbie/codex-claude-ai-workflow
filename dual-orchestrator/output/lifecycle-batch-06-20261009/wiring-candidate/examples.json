@@ -1,0 +1,212 @@
+{
+  "status": "SYNTHETIC_SCHEMA_EXAMPLES_NOT_RUN_NOT_AUTHORITY",
+  "target_observation": {
+    "repo": "/example/target",
+    "common_dir": "/example/target/.git",
+    "head": "1111111111111111111111111111111111111111",
+    "head_tree": "2222222222222222222222222222222222222222",
+    "index_tree": "2222222222222222222222222222222222222222",
+    "worktree_matches_index": true,
+    "clean": true,
+    "status_entries": [],
+    "untracked_entries": [],
+    "observed_at": "2026-10-09T08:00:00+08:00"
+  },
+  "target_identity": {
+    "repo": "/example/target",
+    "common_dir": "/example/target/.git",
+    "head": "1111111111111111111111111111111111111111",
+    "head_tree": "2222222222222222222222222222222222222222",
+    "index_tree": "2222222222222222222222222222222222222222",
+    "worktree_matches_index": true,
+    "clean": true,
+    "status_entries": [],
+    "untracked_entries": []
+  },
+  "canonical_target_identity_utf8": "{\"clean\":true,\"common_dir\":\"/example/target/.git\",\"head\":\"1111111111111111111111111111111111111111\",\"head_tree\":\"2222222222222222222222222222222222222222\",\"index_tree\":\"2222222222222222222222222222222222222222\",\"repo\":\"/example/target\",\"status_entries\":[],\"untracked_entries\":[],\"worktree_matches_index\":true}",
+  "target_observation_sha256": "3d0f530da6f487f7877fe742a040bbe30cc443dcccaf9bfac2bedd52deb0ef1b",
+  "cases": [
+    {
+      "name": "manual_new_apply",
+      "request": {
+        "schema": "dual.delivery-resolution.v1",
+        "request_id": "resolution-example-manual_new_apply",
+        "workstream_id": "example-workstream",
+        "frozen_runtime_identity": {
+          "identity_schema": "dual-runtime-content.v1",
+          "executable.cli": "0000000000000000000000000000000000000000000000000000000000000000",
+          "kernel.configured": "",
+          "kernel.effective": "builtin",
+          "java.runtime": "SYNTHETIC_NOT_AN_INSTALLED_RUNTIME"
+        },
+        "operation_id": "old-operation-example",
+        "plan_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+        "ledger_commit_sequence": 42,
+        "candidate": {
+          "ref": "artifacts/delivery-candidate.json",
+          "sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+        },
+        "approval": {
+          "node": "human_acceptance.example",
+          "ref": "gates/human_acceptance.example.json",
+          "sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+        },
+        "target": {
+          "repo": "/example/target",
+          "common_dir": "/example/target/.git"
+        },
+        "target_observation_sha256": "3d0f530da6f487f7877fe742a040bbe30cc443dcccaf9bfac2bedd52deb0ef1b",
+        "disposition": "AUTHORIZE_NEW_APPLY",
+        "operator_note": "Synthetic example: inspected old invocation and explicitly permits one new application.",
+        "stop_basis": {
+          "type": "OPERATOR_CONFIRMED_STOPPED",
+          "checked_at": "2026-10-09T08:01:00+08:00",
+          "checks_performed": [
+            "Inspected the old registered invocation and verified it stopped."
+          ],
+          "old_operation_stopped": true,
+          "accept_unknown_result_and_repeat_risk": true,
+          "material_refs": []
+        }
+      },
+      "canonical_request_sha256": "9ca7939965294526ff17a0c841e2104b229b860008516a2ea6f3cbe6fcc9d547",
+      "canonical_request_utf8": "{\"approval\":{\"node\":\"human_acceptance.example\",\"ref\":\"gates/human_acceptance.example.json\",\"sha256\":\"5555555555555555555555555555555555555555555555555555555555555555\"},\"candidate\":{\"ref\":\"artifacts/delivery-candidate.json\",\"sha256\":\"4444444444444444444444444444444444444444444444444444444444444444\"},\"disposition\":\"AUTHORIZE_NEW_APPLY\",\"frozen_runtime_identity\":{\"executable.cli\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"identity_schema\":\"dual-runtime-content.v1\",\"java.runtime\":\"SYNTHETIC_NOT_AN_INSTALLED_RUNTIME\",\"kernel.configured\":\"\",\"kernel.effective\":\"builtin\"},\"ledger_commit_sequence\":42,\"operation_id\":\"old-operation-example\",\"operator_note\":\"Synthetic example: inspected old invocation and explicitly permits one new application.\",\"plan_sha256\":\"3333333333333333333333333333333333333333333333333333333333333333\",\"request_id\":\"resolution-example-manual_new_apply\",\"schema\":\"dual.delivery-resolution.v1\",\"stop_basis\":{\"accept_unknown_result_and_repeat_risk\":true,\"checked_at\":\"2026-10-09T08:01:00+08:00\",\"checks_performed\":[\"Inspected the old registered invocation and verified it stopped.\"],\"material_refs\":[],\"old_operation_stopped\":true,\"type\":\"OPERATOR_CONFIRMED_STOPPED\"},\"target\":{\"common_dir\":\"/example/target/.git\",\"repo\":\"/example/target\"},\"target_observation_sha256\":\"3d0f530da6f487f7877fe742a040bbe30cc443dcccaf9bfac2bedd52deb0ef1b\",\"workstream_id\":\"example-workstream\"}",
+      "expected": "Candidate design only; real identities, authority, current facts and recorded stop basis remain mandatory. No request here is valid for a real run."
+    },
+    {
+      "name": "program_new_apply",
+      "request": {
+        "schema": "dual.delivery-resolution.v1",
+        "request_id": "resolution-example-program_new_apply",
+        "workstream_id": "example-workstream",
+        "frozen_runtime_identity": {
+          "identity_schema": "dual-runtime-content.v1",
+          "executable.cli": "0000000000000000000000000000000000000000000000000000000000000000",
+          "kernel.configured": "",
+          "kernel.effective": "builtin",
+          "java.runtime": "SYNTHETIC_NOT_AN_INSTALLED_RUNTIME"
+        },
+        "operation_id": "old-operation-example",
+        "plan_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+        "ledger_commit_sequence": 42,
+        "candidate": {
+          "ref": "artifacts/delivery-candidate.json",
+          "sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+        },
+        "approval": {
+          "node": "human_acceptance.example",
+          "ref": "gates/human_acceptance.example.json",
+          "sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+        },
+        "target": {
+          "repo": "/example/target",
+          "common_dir": "/example/target/.git"
+        },
+        "target_observation_sha256": "3d0f530da6f487f7877fe742a040bbe30cc443dcccaf9bfac2bedd52deb0ef1b",
+        "disposition": "AUTHORIZE_NEW_APPLY",
+        "operator_note": "Synthetic example: inspected old invocation and explicitly permits one new application.",
+        "stop_basis": {
+          "type": "PROGRAM_OBSERVED_TERMINATION",
+          "event_ref": "events.jsonl",
+          "event_id": "delivery-old-operation-example-exit",
+          "entry_sha256": "6666666666666666666666666666666666666666666666666666666666666666"
+        }
+      },
+      "canonical_request_sha256": "3e19fd21cca11317734144eb38a8d9d42e8147a9b937a7fd9a6b15bfe6346a40",
+      "canonical_request_utf8": "{\"approval\":{\"node\":\"human_acceptance.example\",\"ref\":\"gates/human_acceptance.example.json\",\"sha256\":\"5555555555555555555555555555555555555555555555555555555555555555\"},\"candidate\":{\"ref\":\"artifacts/delivery-candidate.json\",\"sha256\":\"4444444444444444444444444444444444444444444444444444444444444444\"},\"disposition\":\"AUTHORIZE_NEW_APPLY\",\"frozen_runtime_identity\":{\"executable.cli\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"identity_schema\":\"dual-runtime-content.v1\",\"java.runtime\":\"SYNTHETIC_NOT_AN_INSTALLED_RUNTIME\",\"kernel.configured\":\"\",\"kernel.effective\":\"builtin\"},\"ledger_commit_sequence\":42,\"operation_id\":\"old-operation-example\",\"operator_note\":\"Synthetic example: inspected old invocation and explicitly permits one new application.\",\"plan_sha256\":\"3333333333333333333333333333333333333333333333333333333333333333\",\"request_id\":\"resolution-example-program_new_apply\",\"schema\":\"dual.delivery-resolution.v1\",\"stop_basis\":{\"entry_sha256\":\"6666666666666666666666666666666666666666666666666666666666666666\",\"event_id\":\"delivery-old-operation-example-exit\",\"event_ref\":\"events.jsonl\",\"type\":\"PROGRAM_OBSERVED_TERMINATION\"},\"target\":{\"common_dir\":\"/example/target/.git\",\"repo\":\"/example/target\"},\"target_observation_sha256\":\"3d0f530da6f487f7877fe742a040bbe30cc443dcccaf9bfac2bedd52deb0ef1b\",\"workstream_id\":\"example-workstream\"}",
+      "expected": "Candidate design only; real identities, authority, current facts and recorded stop basis remain mandatory. No request here is valid for a real run."
+    },
+    {
+      "name": "pure_close",
+      "request": {
+        "schema": "dual.delivery-resolution.v1",
+        "request_id": "resolution-example-pure_close",
+        "workstream_id": "example-workstream",
+        "frozen_runtime_identity": {
+          "identity_schema": "dual-runtime-content.v1",
+          "executable.cli": "0000000000000000000000000000000000000000000000000000000000000000",
+          "kernel.configured": "",
+          "kernel.effective": "builtin",
+          "java.runtime": "SYNTHETIC_NOT_AN_INSTALLED_RUNTIME"
+        },
+        "operation_id": "old-operation-example",
+        "plan_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+        "ledger_commit_sequence": 42,
+        "candidate": {
+          "ref": "artifacts/delivery-candidate.json",
+          "sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+        },
+        "approval": {
+          "node": "human_acceptance.example",
+          "ref": "gates/human_acceptance.example.json",
+          "sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+        },
+        "target": {
+          "repo": "/example/target",
+          "common_dir": "/example/target/.git"
+        },
+        "target_observation_sha256": "3d0f530da6f487f7877fe742a040bbe30cc443dcccaf9bfac2bedd52deb0ef1b",
+        "disposition": "CLOSE_APPLICATION",
+        "operator_note": "Synthetic example: inspected old invocation and explicitly permits one new application.",
+        "stop_basis": null
+      },
+      "canonical_request_sha256": "289e585388908817f1e6ac1c140d76a2fffad4eec55263fe7c7950a0e340f54c",
+      "canonical_request_utf8": "{\"approval\":{\"node\":\"human_acceptance.example\",\"ref\":\"gates/human_acceptance.example.json\",\"sha256\":\"5555555555555555555555555555555555555555555555555555555555555555\"},\"candidate\":{\"ref\":\"artifacts/delivery-candidate.json\",\"sha256\":\"4444444444444444444444444444444444444444444444444444444444444444\"},\"disposition\":\"CLOSE_APPLICATION\",\"frozen_runtime_identity\":{\"executable.cli\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"identity_schema\":\"dual-runtime-content.v1\",\"java.runtime\":\"SYNTHETIC_NOT_AN_INSTALLED_RUNTIME\",\"kernel.configured\":\"\",\"kernel.effective\":\"builtin\"},\"ledger_commit_sequence\":42,\"operation_id\":\"old-operation-example\",\"operator_note\":\"Synthetic example: inspected old invocation and explicitly permits one new application.\",\"plan_sha256\":\"3333333333333333333333333333333333333333333333333333333333333333\",\"request_id\":\"resolution-example-pure_close\",\"schema\":\"dual.delivery-resolution.v1\",\"stop_basis\":null,\"target\":{\"common_dir\":\"/example/target/.git\",\"repo\":\"/example/target\"},\"target_observation_sha256\":\"3d0f530da6f487f7877fe742a040bbe30cc443dcccaf9bfac2bedd52deb0ef1b\",\"workstream_id\":\"example-workstream\"}",
+      "expected": "Candidate design only; real identities, authority, current facts and recorded stop basis remain mandatory. No request here is valid for a real run."
+    },
+    {
+      "name": "close_with_manual_stop",
+      "request": {
+        "schema": "dual.delivery-resolution.v1",
+        "request_id": "resolution-example-close_with_manual_stop",
+        "workstream_id": "example-workstream",
+        "frozen_runtime_identity": {
+          "identity_schema": "dual-runtime-content.v1",
+          "executable.cli": "0000000000000000000000000000000000000000000000000000000000000000",
+          "kernel.configured": "",
+          "kernel.effective": "builtin",
+          "java.runtime": "SYNTHETIC_NOT_AN_INSTALLED_RUNTIME"
+        },
+        "operation_id": "old-operation-example",
+        "plan_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+        "ledger_commit_sequence": 42,
+        "candidate": {
+          "ref": "artifacts/delivery-candidate.json",
+          "sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+        },
+        "approval": {
+          "node": "human_acceptance.example",
+          "ref": "gates/human_acceptance.example.json",
+          "sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+        },
+        "target": {
+          "repo": "/example/target",
+          "common_dir": "/example/target/.git"
+        },
+        "target_observation_sha256": "3d0f530da6f487f7877fe742a040bbe30cc443dcccaf9bfac2bedd52deb0ef1b",
+        "disposition": "CLOSE_APPLICATION",
+        "operator_note": "Synthetic example: inspected old invocation and explicitly permits one new application.",
+        "stop_basis": {
+          "type": "OPERATOR_CONFIRMED_STOPPED",
+          "checked_at": "2026-10-09T08:01:00+08:00",
+          "checks_performed": [
+            "Inspected the old registered invocation and verified it stopped."
+          ],
+          "old_operation_stopped": true,
+          "accept_unknown_result_and_repeat_risk": true,
+          "material_refs": []
+        }
+      },
+      "canonical_request_sha256": "4894fdad700445e67c733925b51cd0e1e2087fcfb1ffc60ca2c4bfa1ba32abbb",
+      "canonical_request_utf8": "{\"approval\":{\"node\":\"human_acceptance.example\",\"ref\":\"gates/human_acceptance.example.json\",\"sha256\":\"5555555555555555555555555555555555555555555555555555555555555555\"},\"candidate\":{\"ref\":\"artifacts/delivery-candidate.json\",\"sha256\":\"4444444444444444444444444444444444444444444444444444444444444444\"},\"disposition\":\"CLOSE_APPLICATION\",\"frozen_runtime_identity\":{\"executable.cli\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"identity_schema\":\"dual-runtime-content.v1\",\"java.runtime\":\"SYNTHETIC_NOT_AN_INSTALLED_RUNTIME\",\"kernel.configured\":\"\",\"kernel.effective\":\"builtin\"},\"ledger_commit_sequence\":42,\"operation_id\":\"old-operation-example\",\"operator_note\":\"Synthetic example: inspected old invocation and explicitly permits one new application.\",\"plan_sha256\":\"3333333333333333333333333333333333333333333333333333333333333333\",\"request_id\":\"resolution-example-close_with_manual_stop\",\"schema\":\"dual.delivery-resolution.v1\",\"stop_basis\":{\"accept_unknown_result_and_repeat_risk\":true,\"checked_at\":\"2026-10-09T08:01:00+08:00\",\"checks_performed\":[\"Inspected the old registered invocation and verified it stopped.\"],\"material_refs\":[],\"old_operation_stopped\":true,\"type\":\"OPERATOR_CONFIRMED_STOPPED\"},\"target\":{\"common_dir\":\"/example/target/.git\",\"repo\":\"/example/target\"},\"target_observation_sha256\":\"3d0f530da6f487f7877fe742a040bbe30cc443dcccaf9bfac2bedd52deb0ef1b\",\"workstream_id\":\"example-workstream\"}",
+      "expected": "Candidate design only; real identities, authority, current facts and recorded stop basis remain mandatory. No request here is valid for a real run."
+    }
+  ],
+  "expected_refusals": [
+    "known live original process even with manual confirmation",
+    "application_closed=true plus new authorization",
+    "same request id with any changed semantic field",
+    "stale target HEAD/index/status/untracked or stale plan/sequence on a new request"
+  ],
+  "duplicate_rule": "Recorded same-id/same-payload returns original decision and current view only; no new operation."
+}

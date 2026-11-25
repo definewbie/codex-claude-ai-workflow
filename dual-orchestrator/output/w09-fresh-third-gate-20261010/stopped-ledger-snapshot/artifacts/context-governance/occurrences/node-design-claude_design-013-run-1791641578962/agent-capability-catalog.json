@@ -1,0 +1,11 @@
+{
+  "schemaVersion" : 1,
+  "artifactType" : "agent_capability_catalog",
+  "workstreamId" : "ws-20261010T124812Z-XCZL",
+  "nodeDefinitionId" : "design.claude_design",
+  "capabilities" : [ {
+    "kind" : "direct_file_read",
+    "provider" : "Read",
+    "description" : "Direct file content retrieval tool."
+  } ]
+}

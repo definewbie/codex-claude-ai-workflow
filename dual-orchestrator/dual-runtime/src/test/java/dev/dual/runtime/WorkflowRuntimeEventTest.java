@@ -36,55 +36,12 @@ class WorkflowRuntimeEventTest {
 
     @Test
     void contractCompile_emitsCompilationCompletedEvent() throws Exception {
+        var fixture = new dev.dual.runtime.handler.AuthoredStageSequenceTest.Fixture(tempDir, "src/auth.ext",
+                dev.dual.runtime.handler.AuthoredStageSequenceTest.PlanTopology.DIRECT_HUMAN,
+                "ws-evt-compile", null, RuntimeTestLedger.ledger());
         var paths = new WorkstreamPaths(tempDir, new DualId("ws-evt-compile"));
-        Files.createDirectories(paths.workstreamDir());
-        Files.writeString(paths.workstreamDir().resolve("requirement.md"),
-                "Add user authentication\n", StandardCharsets.UTF_8);
-        Files.writeString(tempDir.resolve("README.md"), "# Fixture\n", StandardCharsets.UTF_8);
-        var reviewRef = ApprovedTaskContractProposalFixture.publish(tempDir, "ws-evt-compile", """
-                {
-                  "artifact_type": "task_contract_proposal",
-                  "schema_version": 3,
-                  "objective": "Add user authentication",
-                  "scope": {
-                    "included": [{"path": "README.md", "operation": "MODIFY"}],
-                    "excluded": ["No external dependencies"]
-                  },
-                  "acceptance_criteria": [
-                    {"id": "AC-1", "text": "Authentication behavior is described"},
-                    {"id": "AC-2", "text": "Scope remains narrow"}
-                  ],
-                  "constraints": [{"id": "CONSTRAINT-1", "text": "Keep implementation focused"}],
-                  "non_goals": [{"id": "NON_GOAL-1", "text": "No external dependencies"}],
-                  "risk_areas": [{"id": "RISK-1", "text": "Authentication flow correctness"}],
-                  "test_requirements": [{"id": "TEST-1", "text": "Run relevant tests"}],
-                  "evidence_refs": ["README.md"],
-                  "open_questions": [],
-                  "revision_responses": []
-                }
-                """);
-
-        var definition = new WorkflowDefinition(
-                "test-events", 1, "proposal.seed",
-                List.of(
-                        new NodeDefinition("proposal.seed", NodeKind.TASK, "proposal.seed", Map.of("review_ref", reviewRef)),
-                        new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile",
-                                Map.of("required_subject", "approved_task_contract_proposal"))
-                ),
-                List.of(new EdgeDefinition("proposal.seed", "completed", "contract.compile"))
-        );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-evt-compile", definition);
-
-        var runtime = new WorkflowRuntime(
-                ledger,
-                new HandlerRegistry(
-                        List.of(new ProposalSeedHandler(), new dev.dual.runtime.handler.ContractCompileHandler()),
-                        List.of(), List.of())
-        );
-        runtime.resume(new WorkflowCommand(tempDir, "ws-evt-compile"));
-        runtime.resume(new WorkflowCommand(tempDir, "ws-evt-compile"));
-
+        // After the GOAL compiler fixture, EXECUTION compilation uses the actual handler and reviewed plan.
+        fixture.before("implement.claude_implement");
         var events = Files.readString(paths.eventsJsonl(), StandardCharsets.UTF_8);
         assertTrue(events.contains("contract_compilation_completed"),
                 "events.jsonl should contain contract_compilation_completed event");
@@ -106,18 +63,32 @@ class WorkflowRuntimeEventTest {
         Files.createDirectories(artifactsDir);
         var mapper = new ObjectMapper().registerModule(
                 new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-        var contract = new dev.dual.core.contract.TaskContract(
-                "tc-test", 1, java.time.Instant.parse("2026-05-30T10:00:00Z"),
+        var contract = new dev.dual.core.contract.TaskContract(2,
+                dev.dual.core.contract.TaskContract.Phase.EXECUTION,
+                1,
+                "tc-test",
+                1,
+                java.time.Instant.parse("2026-05-30T10:00:00Z"),
                 "Test objective",
                 new dev.dual.core.contract.TaskContract.Scope(
                         List.of(new dev.dual.core.contract.TaskContract.ScopeEntry(
                                 "src/", dev.dual.core.contract.TaskContract.ScopeOperation.MODIFY)),
                         List.of()),
-                List.of("AC1", "AC2"), List.of(), List.of(), List.of(), List.of(),
-                List.of(), List.of(),
-                dev.dual.core.contract.ContractStatus.READY_FOR_REVIEW, 1,
-                new dev.dual.core.contract.TaskContract.Source("req.md", "test")
-        );
+                dev.dual.runtime.RuntimeTestLedger.clauses("AC-", List.of("AC1", "AC2")),
+                dev.dual.runtime.RuntimeTestLedger.clauses("TR-", List.of()),
+                List.of(),
+                List.of(),
+                List.of(),
+                java.util.List.of(),
+                List.of(),
+                List.of(),
+                dev.dual.core.contract.ContractStatus.READY_FOR_REVIEW,
+                1,
+                new dev.dual.core.contract.TaskContract.Source("req.md", "test", null, null),
+                null,
+                java.util.List.of(),
+                java.util.List.of(),
+                java.util.List.of());
         mapper.writerWithDefaultPrettyPrinter().writeValue(
                 artifactsDir.resolve("task-contract.json").toFile(), contract);
 
@@ -128,8 +99,8 @@ class WorkflowRuntimeEventTest {
                         NodeKind.TASK, "acceptance.failure_classify", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-evt-classify", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-evt-classify", definition);
 
         var runtime = new WorkflowRuntime(
                 ledger,
@@ -158,8 +129,8 @@ class WorkflowRuntimeEventTest {
                 List.of(new NodeDefinition("artifact.validate", NodeKind.TASK, "artifact.validate", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-evt-unknown", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-evt-unknown", definition);
 
         var runtime = new WorkflowRuntime(
                 ledger,
@@ -188,8 +159,8 @@ class WorkflowRuntimeEventTest {
                 List.of(new NodeDefinition("contract.compile", NodeKind.TASK, "contract.compile", Map.of())),
                 List.of()
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-evt-failed", definition);
+        var ledger = dev.dual.runtime.RuntimeTestLedger.ledger();
+        dev.dual.runtime.RuntimeTestLedger.initialize(ledger, paths, "wf-evt-failed", definition);
 
         var runtime = new WorkflowRuntime(
                 ledger,

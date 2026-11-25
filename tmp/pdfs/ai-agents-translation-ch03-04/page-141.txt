@@ -1,0 +1,50 @@
+for i in range(5):
+    search_tree = algo.step(search_tree, {'LLM-Refine': generate})
+    if (i + 1) % 5 == 0:
+        best, _ = tq.top_k(search_tree, algo, k=1)[0]
+        print(f"[Step {i+1}] Best so far: {best.llm_answer} (score=
+{best.score:.2f})")
+
+best_state, _ = tq.top_k(search_tree, algo, k=1)[0]
+print(f"\n Final Best Answer: {best_state.llm_answer} (score=
+{best_state.score:.2f})")
+
+   Run a small number of steps (five here). Increase gradually in real use.
+
+    Inspect best-so-far periodically.
+
+    Final selection.
+
+Part of the printout for me looks as follows:
+
+
+  [Step 5] Best so far: Certainly! Let's refine the explanation and the
+  code
+  to make it more informative, accurate, and clear.
+
+  ### Improved Code
+  Here's the revised version of the code with additional comments for
+  clarity:
+
+  ```python
+  def fibonacci(n):
+      """
+      Generate the first n terms of the Fibonacci sequence.
+
+      Parameters:
+      n (int): The number of terms to generate.
+
+      Returns:
+      list: A list containing the first n terms of the Fibonacci
+  sequence.
+      """
+      # Initialize the sequence list and the first two Fibonacci numbers
+      sequence = []
+      a, b = 0, 1
+
+      # Generate Fibonacci numbers up to n terms
+      while len(sequence) < n:
+          sequence.append(a)  # Append the current number to the sequence
+          a, b = b, a + b # Update a + b to the next two numbers in the
+  sequence
+      return sequence

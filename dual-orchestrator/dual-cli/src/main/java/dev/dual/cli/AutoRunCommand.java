@@ -143,8 +143,8 @@ public final class AutoRunCommand implements Callable<Integer> {
     }
 
     private Snapshot loadSnapshot(WorkstreamPaths paths) throws Exception {
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "autorun inspect"))) {
-            var ledger = CliLedgerFactory.create();
+        try (var snapshot = CliLedgerFactory.create().readSession(paths)) {
+            var ledger = snapshot.ledger();
             var current = ledger.loadCurrent(paths);
             NodeInstanceDocument node = null;
             if (!current.activeNodeInstanceIds().isEmpty()) {
@@ -170,10 +170,9 @@ public final class AutoRunCommand implements Callable<Integer> {
         }
         var action = gateActionFor(node.nodeDefinitionId());
         System.out.println("Gate " + gateCount + ": " + node.nodeDefinitionId() + " -> " + action);
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "autorun gate"))) {
-            var ledger = CliLedgerFactory.create();
-            ledger.resolveOpenGate(paths, ledger.loadDefinition(paths), action, "auto-resolved from autorun");
-        }
+        // Bind to the occurrence autorun inspected; if a person or another session moved the gate meanwhile, refuse.
+        dev.dual.runtime.handler.ReviewGateActions.resolve(CliLedgerFactory.create(), paths, action,
+                "auto-resolved from autorun", node.nodeInstanceId());
     }
 
     private int runUntilPause(Path workspaceRoot, WorkstreamPaths paths) throws Exception {
@@ -181,7 +180,7 @@ public final class AutoRunCommand implements Callable<Integer> {
         var heartbeat = new AtomicBoolean(true);
         var heartbeatThread = progressHeartbeat(workspaceRoot, heartbeat);
         heartbeatThread.start();
-        try (var ignored = WorkstreamLock.acquire(paths.workstreamDir(), LockOwner.currentProcess(workstreamId, "autorun run"))) {
+        try {
             return new CliWorkflowLoop().run(workspaceRoot, workstreamId, maxSteps);
         } finally {
             heartbeat.set(false);
@@ -233,7 +232,7 @@ public final class AutoRunCommand implements Callable<Integer> {
 
     private void registerOperatorWorkspace(Path workspaceRoot) {
         try {
-            new OperatorWorkspaceRegistry().registerFromLedger(workspaceRoot, workstreamId);
+            new OperatorWorkspaceRegistry().registerFromLedger(CliLedgerFactory.create(), workspaceRoot, workstreamId);
         } catch (Exception e) {
             System.err.println("Warning: failed to update operator workspace registry: " + e.getMessage());
         }

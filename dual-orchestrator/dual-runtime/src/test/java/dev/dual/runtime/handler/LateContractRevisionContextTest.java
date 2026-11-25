@@ -47,7 +47,7 @@ class LateContractRevisionContextTest {
         f.approve();
         f.until("gate.contract_review");
         var compileD = String.valueOf(active(f).result().get("source_node_instance_id"));
-        var d = new TaskContractRevisionContextResolver().proposalForCompile(root, f.ws, compileD);
+        var d = new TaskContractRevisionContextResolver(dev.dual.runtime.RuntimeTestLedger.ledger()).proposalForCompile(root, f.ws, compileD);
         decide(f, "clarify", "Clarify D note");
         var eIteration = active(f).iterationId();
         var eContext = context(f, eIteration);
@@ -90,6 +90,7 @@ class LateContractRevisionContextTest {
         var iteration = active(f).iterationId();
         var expected = context(f, iteration);
         Files.writeString(f.paths.workstreamDir().resolve("artifacts/contract-resolution.json"), "not authority");
+        Files.writeString(f.paths.workstreamDir().resolve("artifacts/task-contract.json"), "not authority");
         Files.delete(f.paths.workstreamDir().resolve("artifacts/task-contract.json"));
         assertEquals(expected, context(f, iteration));
         var cold = coldResolve(f, iteration);
@@ -245,7 +246,7 @@ class LateContractRevisionContextTest {
     }
 
     static TaskContractRevisionContextResolver.Result resolve(AcceptanceRepairSequenceTest.Fixture f, String iteration) {
-        return new TaskContractRevisionContextResolver().resolveForIteration(f.root, f.ws, iteration);
+        return new TaskContractRevisionContextResolver(dev.dual.runtime.RuntimeTestLedger.ledger()).resolveForIteration(f.root, f.ws, iteration);
     }
 
     static TaskContractRevisionContextResolver.Context context(AcceptanceRepairSequenceTest.Fixture f, String iteration) {
@@ -277,7 +278,7 @@ class LateContractRevisionContextTest {
     }
 
     public static void main(String[] args) throws Exception {
-        var result = new TaskContractRevisionContextResolver().resolveForIteration(Path.of(args[0]), args[1], args[2]);
+        var result = new TaskContractRevisionContextResolver(dev.dual.runtime.RuntimeTestLedger.ledger()).resolveForIteration(Path.of(args[0]), args[1], args[2]);
         var document = JSON.createObjectNode().put("valid", result.valid());
         document.set("errors", JSON.valueToTree(result.errors()));
         if (result.valid()) {

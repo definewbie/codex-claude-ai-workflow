@@ -1,0 +1,36 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1792718379335-114b9686",
+  "workflowExecutionId" : "wfe-1792718379278-77e6dc81",
+  "nodeInstanceId" : "node-contract-compile-007",
+  "nodeDefinitionId" : "contract.compile",
+  "nodeKind" : "TASK",
+  "handlerType" : "contract.compile",
+  "status" : "SUCCEEDED",
+  "agent" : "",
+  "session" : "",
+  "promptTemplate" : "",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "contract.compile",
+    "agent" : "",
+    "session" : "",
+    "prompt_template" : "",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "required_subject" : "approved_task_contract_proposal",
+      "contract_phase" : "GOAL"
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 4
+  },
+  "nodeExecutionId" : "nxe-1792718379338-0f765cde",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-23T01:19:39.335197Z",
+  "claimedAt" : "2026-10-23T01:19:39.346359Z",
+  "completedAt" : "2026-10-23T01:19:39.412124Z"
+}

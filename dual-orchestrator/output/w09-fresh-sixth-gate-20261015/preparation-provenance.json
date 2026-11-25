@@ -1,0 +1,15 @@
+{
+  "copied_from": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-fresh-fifth-gate-20261011",
+  "reviewed_observer_source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-current-transcript-forward-fix-20261011",
+  "accepted_gate_source": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/output/w09-revision-review-acceptance-20261015",
+  "original_refs_sha256": {
+    "gate_support.py": "037d09b61f1316aceb46abec24e5740aa79c8efa7aa7c77206267bfbafd1dd4d",
+    "run-one-step.py": "48c29654a1a149aa409f366b9bfbb234e3f1dd2e6333fef77151a8718cad8563",
+    "prepare-local.py": "e607d5e40e50486729bfc2c4785b4d0da59d336d514cbd3ed1acc195f0afea36"
+  },
+  "current_scripts_sha256": {
+    "gate_support.py": "51fd0e3ad610401af97fb3c29b8e52df4f04b5eec6b7246574e4bbce7cd120c1",
+    "run-one-step.py": "12421cae4997fba258e4c7b6400d13d90516408397f6098b8d9c69bbd4159b24",
+    "prepare-local.py": "b927012e411d8380d084fefd59cd40f7c795f45a6597b9c1dbf982723f8022f6"
+  }
+}

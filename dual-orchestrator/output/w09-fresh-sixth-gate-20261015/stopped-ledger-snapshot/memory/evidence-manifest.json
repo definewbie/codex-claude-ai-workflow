@@ -1,0 +1,19 @@
+{
+  "schemaVersion" : 1,
+  "workstreamId" : "ws-20261014T234009Z-RN9X",
+  "updatedAt" : "2026-10-14T23:43:05.257269Z",
+  "items" : [ {
+    "id" : "agent_output_contract:5c357a78",
+    "type" : "agent_output_contract",
+    "stageId" : "intake",
+    "iterationId" : "",
+    "nodeInstanceId" : "node-intake-codex_product_review-004",
+    "nodeExecutionId" : "",
+    "sourceRef" : ".agent/workstreams/ws-20261014T234009Z-RN9X/runs/run-1792021315581/outputs/intake-codex-product-review.contract.json",
+    "summary" : "功能语义与验收要求完整，但排除项提前锁定了文件集合，与文件须经后续设计、计划和执行批准的要求冲突。",
+    "claims" : [ "Decision: NEEDS_REVISION" ],
+    "files" : [ ],
+    "riskTags" : [ "删除或改写 scope.excluded 中固定三个文件集合的排除项，使建议路径保持提案性质；保留最终 EXECUTION scope.included 必须列出所有获准变更的精确路径和操作这一要求。" ],
+    "status" : "available"
+  } ]
+}

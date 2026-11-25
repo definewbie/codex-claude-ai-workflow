@@ -1,0 +1,13 @@
+Dual workstream started
+Workstream: ws-20261010T085617Z-8SVF
+Stage: design
+Mode: worktree
+Original repo: /private/tmp/dual-w09-newlines-20261010-fresh-02/target
+Workspace: /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree
+Branch: codex/w09-newlines-20261010-fresh-02
+
+Ledger: /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree/.agent/workstreams/ws-20261010T085617Z-8SVF
+Workflow: agent-lifecycle-terminal-delivery@5
+Prompt language: zh-CN
+Variant: terminal-delivery
+Next: dualctl run --workdir /private/tmp/dual-w09-newlines-20261010-fresh-02/worktree ws-20261010T085617Z-8SVF

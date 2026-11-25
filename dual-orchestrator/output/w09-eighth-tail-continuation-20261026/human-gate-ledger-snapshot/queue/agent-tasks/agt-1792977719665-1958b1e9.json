@@ -1,0 +1,35 @@
+{
+  "schemaVersion" : 1,
+  "agentTaskId" : "agt-1792977719665-1958b1e9",
+  "workflowExecutionId" : "wfe-1792977719558-ba24aab6",
+  "nodeInstanceId" : "node-delivery-prepare_pr-038",
+  "nodeDefinitionId" : "delivery.prepare_pr",
+  "nodeKind" : "TASK",
+  "handlerType" : "delivery.prepare_pr",
+  "status" : "SUCCEEDED",
+  "agent" : "",
+  "session" : "",
+  "promptTemplate" : "",
+  "contextPackageRef" : "",
+  "expectedContract" : "",
+  "dispatch" : {
+    "kind" : "TASK",
+    "handler_type" : "delivery.prepare_pr",
+    "agent" : "",
+    "session" : "",
+    "prompt_template" : "",
+    "context_package_ref" : "",
+    "expected_contract" : "",
+    "node_config" : {
+      "required_contract_phase" : "EXECUTION"
+    },
+    "outcome" : "completed",
+    "node_status" : "COMPLETED",
+    "output_ref_count" : 3
+  },
+  "nodeExecutionId" : "nxe-1792977719672-ea73b709",
+  "errorMessage" : "",
+  "createdAt" : "2026-10-26T01:21:59.665098Z",
+  "claimedAt" : "2026-10-26T01:21:59.682403Z",
+  "completedAt" : "2026-10-26T01:21:59.805307Z"
+}

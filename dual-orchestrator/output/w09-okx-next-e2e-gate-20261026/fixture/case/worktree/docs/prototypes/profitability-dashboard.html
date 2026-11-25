@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>收益决策中心｜AI Crypto Income Assistant</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22%23123e32%22/><text x=%2232%22 y=%2243%22 text-anchor=%22middle%22 font-size=%2236%22 fill=%22%23cce77b%22>盈</text></svg>">
+  <style>
+    :root {
+      --paper: #f3f1ea;
+      --surface: #fffdf8;
+      --ink: #17231f;
+      --muted: #68736d;
+      --line: #deddd5;
+      --forest: #123e32;
+      --forest-2: #1f5a48;
+      --mint: #dceadf;
+      --lime: #cce77b;
+      --amber: #d99027;
+      --amber-soft: #fff1d4;
+      --red: #b14c42;
+      --red-soft: #f8e5e1;
+      --blue: #3d6f82;
+      --shadow: 0 18px 50px rgba(32, 44, 38, .08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 80% -10%, rgba(204, 231, 123, .18), transparent 28rem),
+        var(--paper);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 224px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 26px 18px;
+      background: var(--forest);
+      color: #f6f5ed;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 8px 26px;
+      font-weight: 760;
+      letter-spacing: -.02em;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      color: var(--forest);
+      background: var(--lime);
+      box-shadow: inset 0 -5px 12px rgba(18, 62, 50, .12);
+    }
+
+    .brand small { display: block; margin-top: 2px; color: #a9c0b6; font-weight: 500; }
+
+    .nav-label {
+      padding: 0 10px;
+      color: #8eaea0;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .nav { margin-top: 10px; display: grid; gap: 5px; }
+
+    .nav a {
+      display: flex;
+      gap: 11px;
+      align-items: center;
+      padding: 11px 12px;
+      border-radius: 11px;
+      color: #c7d6cf;
+      font-size: 14px;
+    }
+
+    .nav a.active { color: white; background: rgba(255, 255, 255, .1); }
+    .nav a:not(.active):hover { background: rgba(255,255,255,.05); }
+    .nav-icon { width: 20px; text-align: center; opacity: .9; }
+
+    .sidebar-note {
+      margin-top: auto;
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 14px;
+      background: rgba(255,255,255,.05);
+      color: #bcd0c6;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .sidebar-note strong { display: block; margin-bottom: 4px; color: white; }
+
+    main { min-width: 0; padding: 28px 34px 48px; }
+    .container { width: min(1400px, 100%); margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow { margin: 0 0 4px; color: var(--forest-2); font-size: 12px; font-weight: 760; letter-spacing: .11em; }
+    h1 { margin: 0; font-size: clamp(24px, 3vw, 34px); letter-spacing: -.035em; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+
+    .status-button, .ghost-button, .primary-button, .soft-button {
+      border: 0;
+      border-radius: 11px;
+      padding: 10px 14px;
+      font-weight: 700;
+    }
+
+    .status-button {
+      color: #685126;
+      background: var(--amber-soft);
+      border: 1px solid #efd39b;
+    }
+
+    .status-dot { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--amber); }
+    .ghost-button { color: var(--forest); background: transparent; border: 1px solid var(--line); }
+    .primary-button { color: white; background: var(--forest); box-shadow: 0 8px 20px rgba(18, 62, 50, .18); }
+    .soft-button { color: var(--forest); background: var(--mint); }
+
+    .demo-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 10px 14px;
+      color: #675019;
+      background: #fff6d9;
+      border: 1px solid #eadc9f;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 26px 28px;
+      color: white;
+      background: linear-gradient(125deg, #123e32 0%, #1c5543 68%, #35705a 100%);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 340px;
+      height: 340px;
+      right: -120px;
+      top: -180px;
+      border: 60px solid rgba(204, 231, 123, .13);
+      border-radius: 50%;
+    }
+
+    .hero-controls {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 8px 7px 12px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 12px;
+      background: rgba(255,255,255,.08);
+      font-size: 12px;
+      color: #cfe0d8;
+    }
+
+    .control select {
+      border: 0;
+      outline: 0;
+      color: white;
+      background: transparent;
+      font-weight: 750;
+    }
+
+    .control option { color: var(--ink); }
+
+    .hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, .7fr);
+      gap: 24px;
+      align-items: end;
+    }
+
+    .hero-kicker { color: var(--lime); font-size: 13px; font-weight: 800; letter-spacing: .08em; }
+    .hero h2 { max-width: 740px; margin: 8px 0 10px; font-size: clamp(28px, 4vw, 46px); line-height: 1.08; letter-spacing: -.045em; }
+    .hero-copy { max-width: 720px; margin: 0; color: #cfe0d8; line-height: 1.7; }
+
+    .confidence {
+      padding: 17px 18px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 16px;
+      background: rgba(7, 33, 25, .26);
+    }
+
+    .confidence-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; }
+    .confidence strong { color: #ffe3a7; }
+    .confidence-track { height: 7px; margin: 12px 0 9px; overflow: hidden; border-radius: 10px; background: rgba(255,255,255,.13); }
+    .confidence-fill { width: 54%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--amber), var(--lime)); }
+    .confidence small { color: #b9cec4; line-height: 1.45; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .metric, .card {
+      background: var(--surface);
+      border: 1px solid rgba(218, 217, 208, .9);
+      box-shadow: 0 8px 28px rgba(40, 52, 46, .045);
+    }
+
+    .metric { padding: 18px; border-radius: 15px; }
+    .metric-label { color: var(--muted); font-size: 12px; }
+    .metric-value { margin: 8px 0 5px; font-size: clamp(21px, 2.5vw, 29px); font-weight: 800; letter-spacing: -.035em; }
+    .metric-foot { color: var(--muted); font-size: 11px; }
+    .metric-foot.positive { color: var(--forest-2); }
+    .metric-foot.warning { color: #9c6a1c; }
+
+    .card { border-radius: var(--radius); overflow: hidden; }
+    .section { margin-top: 14px; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 20px 22px 14px; }
+    .card-head h3 { margin: 0 0 5px; font-size: 18px; letter-spacing: -.02em; }
+    .card-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .text-button { border: 0; color: var(--forest-2); background: transparent; font-weight: 750; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { padding: 11px 18px; color: var(--muted); background: #f7f5ef; font-size: 11px; text-align: left; white-space: nowrap; }
+    td { padding: 15px 18px; border-top: 1px solid #ebe9e1; white-space: nowrap; }
+    tbody tr { cursor: pointer; transition: background .15s ease; }
+    tbody tr:hover, tbody tr.selected { background: #f2f7f2; }
+    .source-name { font-weight: 760; }
+    .source-code { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .amount-positive { color: var(--forest-2); font-weight: 780; }
+    .amount-unknown { color: var(--muted); }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 760;
+    }
+
+    .tag.verify { color: #6a501c; background: var(--amber-soft); }
+    .tag.keep { color: var(--forest); background: var(--mint); }
+    .tag.watch { color: var(--blue); background: #e4eef1; }
+    .tag.stop { color: var(--red); background: var(--red-soft); }
+    .evidence { display: flex; gap: 3px; }
+    .evidence i { width: 13px; height: 4px; border-radius: 2px; background: #dddcd4; }
+    .evidence i.on { background: var(--forest-2); }
+
+    .two-col { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(340px, .9fr); gap: 14px; }
+    .panel-body { padding: 0 22px 22px; }
+
+    .selected-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .selected-title strong { font-size: 15px; }
+    .selected-title span { color: var(--muted); font-size: 11px; }
+
+    .waterfall { display: grid; gap: 10px; margin-top: 16px; }
+    .flow-row { display: grid; grid-template-columns: minmax(130px, 1fr) 1.4fr 88px; gap: 12px; align-items: center; }
+    .flow-label { color: var(--muted); font-size: 12px; }
+    .flow-bar { height: 8px; overflow: hidden; border-radius: 10px; background: #eceae3; }
+    .flow-bar span { display: block; height: 100%; border-radius: inherit; }
+    .flow-bar .plus { background: var(--forest-2); }
+    .flow-bar .minus { background: #d9a253; }
+    .flow-value { text-align: right; font-size: 12px; font-weight: 760; }
+    .flow-total { margin-top: 5px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .flow-total .flow-label, .flow-total .flow-value { color: var(--ink); font-weight: 800; }
+
+    .allocation { display: grid; gap: 16px; }
+    .allocation-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .allocation-item { padding: 12px; border-radius: 12px; background: #f6f4ed; }
+    .allocation-item span { display: block; color: var(--muted); font-size: 11px; }
+    .allocation-item strong { display: block; margin-top: 4px; font-size: 17px; }
+    .allocation-track { display: flex; height: 18px; overflow: hidden; border-radius: 99px; background: #ece9df; }
+    .cash { width: 80%; background: var(--forest); }
+    .opportunity { width: 15%; background: var(--lime); }
+    .experiment { width: 5%; background: var(--amber); }
+
+    .benefit-box { padding: 14px 15px; border-radius: 13px; background: #f5f8f3; border: 1px solid #dce8dd; }
+    .benefit-box .formula { color: var(--muted); font-size: 11px; }
+    .benefit-box strong { display: block; margin-top: 5px; font-size: 20px; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 9px; }
+
+    .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .list li { display: flex; gap: 11px; align-items: flex-start; padding: 11px 0; border-top: 1px solid #ebe9e2; font-size: 13px; line-height: 1.45; }
+    .list li:first-child { border-top: 0; }
+    .list-mark { flex: 0 0 24px; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 8px; font-size: 11px; font-weight: 900; }
+    .list-mark.good { color: var(--forest); background: var(--mint); }
+    .list-mark.warn { color: #825d1d; background: var(--amber-soft); }
+    .list-mark.block { color: var(--red); background: var(--red-soft); }
+    .list small { display: block; margin-top: 3px; color: var(--muted); }
+
+    .validation-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 0 22px 22px;
+    }
+
+    .validation-item { padding: 13px; border: 1px solid var(--line); border-radius: 12px; }
+    .validation-item span { display: block; color: var(--muted); font-size: 11px; }
+    .validation-item strong { display: block; margin-top: 4px; font-size: 14px; }
+    .validation-item.locked { opacity: .58; background: #f4f2ec; }
+
+    footer { padding-top: 24px; color: var(--muted); font-size: 11px; text-align: center; }
+
+    dialog {
+      width: min(600px, calc(100% - 30px));
+      padding: 0;
+      color: var(--ink);
+      background: var(--surface);
+      border: 0;
+      border-radius: 20px;
+      box-shadow: 0 28px 80px rgba(12, 31, 24, .32);
+    }
+
+    dialog::backdrop { background: rgba(12, 27, 22, .58); backdrop-filter: blur(3px); }
+    .dialog-head { display: flex; justify-content: space-between; gap: 20px; padding: 21px 22px 14px; border-bottom: 1px solid var(--line); }
+    .dialog-head h3 { margin: 0; }
+    .close { width: 30px; height: 30px; border: 0; border-radius: 9px; background: #efede6; }
+    .dialog-body { padding: 20px 22px; color: #46514c; line-height: 1.65; }
+    .dialog-body ol { padding-left: 20px; }
+    .dialog-note { padding: 12px; border-radius: 11px; background: var(--amber-soft); color: #72551d; font-size: 12px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 0 22px 20px; }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 20;
+      max-width: 360px;
+      padding: 13px 16px;
+      color: white;
+      background: #17392f;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: .2s ease;
+      font-size: 13px;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1050px) {
+      .app { grid-template-columns: 74px minmax(0, 1fr); }
+      .sidebar { padding-inline: 10px; }
+      .brand { justify-content: center; padding-inline: 0; }
+      .brand div:last-child, .nav-label, .nav a span:last-child, .sidebar-note { display: none; }
+      .nav a { justify-content: center; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .hero-grid, .two-col { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .app { display: block; }
+      .sidebar { position: static; width: auto; height: auto; padding: 12px 16px; flex-direction: row; align-items: center; }
+      .brand { padding: 0; }
+      .nav { display: none; }
+      main { padding: 20px 14px 36px; }
+      .topbar { align-items: flex-start; }
+      .top-actions .ghost-button { display: none; }
+      .hero { padding: 20px; }
+      .metrics, .insight-grid, .validation-strip { grid-template-columns: 1fr; }
+      .allocation-legend { grid-template-columns: 1fr; }
+      .demo-banner { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="brand">
+        <div class="brand-mark">盈</div>
+        <div>Crypto Income<small>收益管理助手</small></div>
+      </div>
+      <div class="nav-label">决策空间</div>
+      <nav class="nav">
+        <a class="active" href="#decision"><span class="nav-icon">◉</span><span>今日决策</span></a>
+        <a href="#sources"><span class="nav-icon">◇</span><span>收益来源</span></a>
+        <a href="#portfolio"><span class="nav-icon">▦</span><span>资金组合</span></a>
+        <a href="#validation"><span class="nav-icon">↗</span><span>历史复盘</span></a>
+        <a href="#advisor"><span class="nav-icon">✦</span><span>AI 顾问</span></a>
+      </nav>
+      <div class="sidebar-note">
+        <strong>人工执行模式</strong>
+        系统只提供评估与清单，不连接交易权限，不自动调整 OKX 策略。
+      </div>
+    </aside>
+
+    <main>
+      <div class="container">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">PROFITABILITY DESK</p>
+            <h1>收益决策中心</h1>
+          </div>
+          <div class="top-actions">
+            <button class="status-button" data-dialog="data-dialog"><span class="status-dot"></span>数据待补充</button>
+            <button class="ghost-button" id="refresh-button">重新评估</button>
+          </div>
+        </header>
+
+        <div class="demo-banner" role="note">
+          <span><strong>原型演示数据</strong>　用于确认页面结构与交互，不代表真实市场收益，也不构成投资建议。</span>
+          <span>模式：SHADOW 模拟</span>
+        </div>
+
+        <section class="hero" id="decision">
+          <div class="hero-controls">
+            <label class="control">评估资金
+              <select id="capital-select" aria-label="评估资金">
+                <option value="5000">5,000 USDT</option>
+                <option value="20000" selected>20,000 USDT</option>
+                <option value="50000">50,000 USDT</option>
+                <option value="200000">200,000 USDT</option>
+              </select>
+            </label>
+            <label class="control">统一持有期
+              <select id="horizon-select" aria-label="统一持有期">
+                <option value="7">7 天</option>
+                <option value="30" selected>30 天</option>
+                <option value="90">90 天</option>
+              </select>
+            </label>
+            <label class="control">估计方式
+              <select aria-label="估计方式">
+                <option>保守</option>
+                <option>基准</option>
+                <option>压力情景</option>
+              </select>
+            </label>
+            <div class="control">数据截止　<strong>2026-08-16 12:30 CST</strong></div>
+          </div>
+
+          <div class="hero-grid">
+            <div>
+              <div class="hero-kicker">今日结论 · 保持为主</div>
+              <h2>暂不扩大投入，BTC 套利只做小额验证</h2>
+              <p class="hero-copy">资金费率可能带来正收益，但相对 USDT 现金管理多赚的钱还不足以覆盖真实手续费缺失、基差变化和估计误差。当前更好的决定，是保留大部分流动资金并验证真实成本。</p>
+            </div>
+            <div class="confidence">
+              <div class="confidence-row"><span>结论置信度</span><strong>中低 · 54%</strong></div>
+              <div class="confidence-track"><div class="confidence-fill"></div></div>
+              <small>资金费率覆盖充分；真实手续费、基差与滑点仍缺失，禁止扩大为核心仓位。</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="metrics" aria-label="核心收益指标">
+          <article class="metric">
+            <div class="metric-label" id="income-label">BTC 候选：预计 30 天净收益</div>
+            <div class="metric-value" id="income-value">94–168 USDT</div>
+            <div class="metric-foot warning">区间较宽，依赖待验证成本</div>
+          </article>
+          <article class="metric">
+            <div class="metric-label">相对现金管理多赚</div>
+            <div class="metric-value" id="increment-value">28–102 USDT</div>
+            <div class="metric-foot positive" id="increment-foot">中位增量约 65 USDT</div>
+          </article>
+          <article class="metric">
+            <div class="metric-label">保守净年化区间</div>
+            <div class="metric-value">5.7%–10.2%</div>
+            <div class="metric-foot">目标区间：10%–20%</div>
+          </article>
+          <article class="metric">
+            <div class="metric-label">不利情景损失</div>
+            <div class="metric-value" id="downside-value">约 226 USDT</div>
+            <div class="metric-foot warning">含基差扩大与退出成本</div>
+          </article>
+        </section>
+
+        <section class="card section" id="sources">
+          <div class="card-head">
+            <div><h3>现在有哪些钱值得赚？</h3><p>使用同一持有期比较净收益、机会成本、风险和证据，不按宣传 APR 排名。</p></div>
+            <button class="text-button" data-dialog="method-dialog">查看评估口径</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>收益来源</th><th>建议资金</th><th id="table-income-head">30天净收益</th><th>净年化</th><th>相对基准</th><th>证据</th><th>风险</th><th>结论</th></tr></thead>
+              <tbody id="source-table">
+                <tr class="selected" data-source="btc"><td><span class="source-name">BTC 资金费率套利</span><span class="source-code">BTC-USDT-SWAP · Delta 中性</span></td><td id="table-btc-allocation">3,000 USDT</td><td class="amount-positive" data-range="94,168">94–168</td><td>5.7%–10.2%</td><td class="amount-positive" data-range="28,102">+28–102</td><td><span class="evidence" title="中等"><i class="on"></i><i class="on"></i><i></i></span></td><td>中低</td><td><span class="tag verify">小额验证</span></td></tr>
+                <tr data-source="cash"><td><span class="source-name">USDT 现金管理</span><span class="source-code">简单赚币 · 流动资金基准</span></td><td id="table-cash-allocation">16,000 USDT</td><td class="amount-positive" data-range="66,66">66</td><td>4.0%</td><td>基准</td><td><span class="evidence" title="较可靠"><i class="on"></i><i class="on"></i><i class="on"></i></span></td><td>低</td><td><span class="tag keep">保持</span></td></tr>
+                <tr data-source="eth"><td><span class="source-name">ETH 资金费率套利</span><span class="source-code">ETH-USDT-SWAP · 波动较高</span></td><td>0 USDT</td><td class="amount-positive" data-range="118,236">118–236</td><td>7.2%–14.4%</td><td class="amount-positive" data-range="52,170">+52–170</td><td><span class="evidence" title="较弱"><i class="on"></i><i></i><i></i></span></td><td>中高</td><td><span class="tag watch">观察</span></td></tr>
+                <tr data-source="grid"><td><span class="source-name">BTC 现货网格</span><span class="source-code">方向风险尚未分离</span></td><td>0 USDT</td><td class="amount-unknown">无法计算</td><td>—</td><td>未知</td><td><span class="evidence" title="不足"><i></i><i></i><i></i></span></td><td>高</td><td><span class="tag stop">不投入</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="two-col section">
+          <article class="card">
+            <div class="card-head"><div><h3>净收益是怎么来的？</h3><p>当前选择：<span id="selected-source-name">BTC 资金费率套利</span></p></div><button class="text-button" data-dialog="method-dialog">公式说明</button></div>
+            <div class="panel-body">
+              <div class="selected-title"><strong id="breakdown-title">20,000 USDT 情景 · 30 天</strong><span>保守估计中位数</span></div>
+              <div class="waterfall">
+                <div class="flow-row"><span class="flow-label">预计资金费收入</span><div class="flow-bar"><span class="plus" style="width:92%"></span></div><span class="flow-value" data-flow="240">+240 USDT</span></div>
+                <div class="flow-row"><span class="flow-label">建仓与退出手续费</span><div class="flow-bar"><span class="minus" style="width:20%"></span></div><span class="flow-value" data-flow="-42">−42 USDT</span></div>
+                <div class="flow-row"><span class="flow-label">保守滑点</span><div class="flow-bar"><span class="minus" style="width:13%"></span></div><span class="flow-value" data-flow="-26">−26 USDT</span></div>
+                <div class="flow-row"><span class="flow-label">基差不利变化</span><div class="flow-bar"><span class="minus" style="width:17%"></span></div><span class="flow-value" data-flow="-35">−35 USDT</span></div>
+                <div class="flow-row"><span class="flow-label">现金管理机会成本</span><div class="flow-bar"><span class="minus" style="width:31%"></span></div><span class="flow-value" data-flow="-66">−66 USDT</span></div>
+                <div class="flow-row"><span class="flow-label">新增风险折扣</span><div class="flow-bar"><span class="minus" style="width:14%"></span></div><span class="flow-value" data-flow="-28">−28 USDT</span></div>
+                <div class="flow-row flow-total"><span class="flow-label">相对基准增量收益</span><div class="flow-bar"><span class="plus" style="width:22%"></span></div><span class="flow-value" data-flow="43">+43 USDT</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card" id="portfolio">
+            <div class="card-head"><div><h3>资金应该怎么放？</h3><p>建议配置不是订单，需由用户在 OKX 手工验证。</p></div><span class="tag verify">试验配置</span></div>
+            <div class="panel-body allocation">
+              <div class="allocation-track" id="allocation-track" aria-label="流动资金80%，BTC套利15%，实验储备5%"><div class="cash" id="cash-bar"></div><div class="opportunity" id="btc-bar"></div><div class="experiment" id="test-bar"></div></div>
+              <div class="allocation-legend">
+                <div class="allocation-item"><span id="cash-label">流动资金 · 80%</span><strong id="cash-allocation">16,000</strong><span>USDT</span></div>
+                <div class="allocation-item"><span id="btc-label">BTC 套利 · 15%</span><strong id="btc-allocation">3,000</strong><span>USDT · 上限 3,000</span></div>
+                <div class="allocation-item"><span id="test-label">实验储备 · 5%</span><strong id="test-allocation">1,000</strong><span>USDT · 上限 1,000</span></div>
+              </div>
+              <div class="benefit-box">
+                <div class="formula">新组合净收益 − 当前组合净收益 − 切换成本 − 风险折扣</div>
+                <strong id="benefit-value">增量净收益中位数：+43 USDT</strong>
+                <small>尚未明显超过估计误差，因此只允许小额验证，不允许扩大为核心仓位。</small>
+              </div>
+              <div class="actions">
+                <button class="soft-button" id="keep-button">保持当前配置</button>
+                <button class="primary-button" data-dialog="plan-dialog">生成小额验证清单</button>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="insight-grid section">
+          <article class="card">
+            <div class="card-head"><div><h3>为什么现在不扩大？</h3><p>收益证据与反对证据必须同时出现。</p></div></div>
+            <div class="panel-body">
+              <ul class="list">
+                <li><span class="list-mark good">+</span><div>资金费率多数时间为正<small>历史窗口内正费率占比较高，但不代表未来持续。</small></div></li>
+                <li><span class="list-mark good">+</span><div>BTC 永续流动性相对充足<small>小规模验证的预计容量暂不构成限制。</small></div></li>
+                <li><span class="list-mark warn">!</span><div>相对现金管理只多赚有限金额<small>收益不足以容忍手续费和基差估计出现较大偏差。</small></div></li>
+                <li><span class="list-mark block">×</span><div>账户真实手续费尚未核对<small>未知成本不能按零处理，因此阻止资金扩大。</small></div></li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head"><div><h3>哪些风险正在变大？</h3><p>风险用于否定收益，不是装饰性的综合评分。</p></div></div>
+            <div class="panel-body">
+              <ul class="list">
+                <li><span class="list-mark warn">!</span><div>ETH 费率稳定性下降<small>最近观察的波动扩大，不适合直接追逐更高 APR。</small></div></li>
+                <li><span class="list-mark warn">!</span><div>基差退出成本尚无可靠估计<small>极端行情下可能吞噬多个周期的资金费收入。</small></div></li>
+                <li><span class="list-mark good">✓</span><div>BTC 方向敞口目标接近零<small>这是策略目标，仍需真实持仓快照验证对冲误差。</small></div></li>
+                <li><span class="list-mark warn">!</span><div>单一交易所集中风险<small>当前只使用 OKX，不能把平台风险视为已分散。</small></div></li>
+              </ul>
+            </div>
+          </article>
+        </section>
+
+        <section class="card section" id="validation">
+          <div class="card-head"><div><h3>历史上真的赚到钱了吗？</h3><p>Backtest、Shadow 和 Live 必须独立；资金费率走势图不能代替收益证明。</p></div><span class="tag watch">尚未验证</span></div>
+          <div class="validation-strip">
+            <div class="validation-item"><span>资金费率历史覆盖</span><strong>约 78 天 · 已证明</strong></div>
+            <div class="validation-item locked"><span>Backtest 净收益</span><strong>等待回测模块</strong></div>
+            <div class="validation-item locked"><span>Shadow 模拟误差</span><strong>尚未开始跟踪</strong></div>
+            <div class="validation-item locked"><span>Live 真实收益</span><strong>尚未接入账户事实</strong></div>
+          </div>
+        </section>
+
+        <section class="card section" id="advisor">
+          <div class="card-head"><div><h3>AI 顾问解释</h3><p>AI 只解释确定性计算，不能修改金额、风险或建议动作。</p></div><span class="tag watch">AI 尚未启用</span></div>
+          <div class="panel-body">
+            <div class="benefit-box">
+              <div class="formula">规则结论的演示解释</div>
+              <p>BTC 资金费率近期具备正收益条件，但扣除建仓、退出和现金管理机会成本后，增量收益安全边际较薄。由于真实手续费与基差退出成本仍缺少验证，当前建议保持大部分 USDT 流动性，仅使用小额资金验证实际成本。</p>
+            </div>
+          </div>
+        </section>
+
+        <footer>AI Crypto Income Assistant · 收益第一，工程服务收益，AI 只做顾问 · 本页面不执行交易</footer>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="data-dialog">
+    <div class="dialog-head"><div><h3>数据如何影响收益结论</h3></div><button class="close" aria-label="关闭">×</button></div>
+    <div class="dialog-body">
+      <ul class="list">
+        <li><span class="list-mark good">✓</span><div>OKX 公共资金费率<small>历史回补和覆盖证明可用。</small></div></li>
+        <li><span class="list-mark block">×</span><div>账户真实手续费<small>尚未接入只读账户 API，当前结论不得扩大资金。</small></div></li>
+        <li><span class="list-mark warn">!</span><div>现货/永续基差和滑点<small>原型使用演示估计，正式评估必须来自可核对事实。</small></div></li>
+        <li><span class="list-mark block">×</span><div>真实现金流与持仓<small>尚未形成 Live Portfolio，页面只展示 SHADOW 情景。</small></div></li>
+      </ul>
+      <div class="dialog-note">数据维护属于二级能力。只有当缺失数据影响收益判断时，才在首页显示阻断信息。</div>
+    </div>
+    <div class="dialog-actions"><button class="soft-button close-action">知道了</button></div>
+  </dialog>
+
+  <dialog id="method-dialog">
+    <div class="dialog-head"><div><h3>统一收益评估口径</h3></div><button class="close" aria-label="关闭">×</button></div>
+    <div class="dialog-body">
+      <p><strong>预期净收益</strong>包含资金费、基差和利息收入，并扣除手续费、滑点、融资、对冲偏差及其他持有成本。</p>
+      <p><strong>增量净收益</strong>进一步扣除当前配置的收益、切换成本和新增风险折扣。只有结果显著为正且超过估计误差，才建议调整。</p>
+      <div class="dialog-note">宣传 APR、单日资金费率和 AI 评分都不能独立形成建议。</div>
+    </div>
+    <div class="dialog-actions"><button class="soft-button close-action">关闭</button></div>
+  </dialog>
+
+  <dialog id="plan-dialog">
+    <div class="dialog-head"><div><h3>BTC 套利小额验证清单</h3></div><button class="close" aria-label="关闭">×</button></div>
+    <div class="dialog-body">
+      <div class="dialog-note">这是人工验证草案，不会调用 OKX、创建订单或调整策略。</div>
+      <ol>
+        <li>验证金额上限：<strong id="plan-amount">3,000 USDT</strong>。</li>
+        <li>在 OKX 登录页面确认账户真实手续费、可用保证金和产品退出方式。</li>
+        <li>记录现货与永续两腿实际成交价、手续费和名义价值。</li>
+        <li>每日核对资金费现金流、对冲偏差和保证金安全。</li>
+        <li>若费率持续转负、方向敞口超限或实际成本明显高于估计，则停止验证。</li>
+        <li>退出后记录真实收益，并与本页预测逐项对账。</li>
+      </ol>
+    </div>
+    <div class="dialog-actions"><button class="ghost-button close-action">取消</button><button class="primary-button" id="copy-plan">复制清单</button></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const capitalSelect = document.querySelector('#capital-select');
+    const horizonSelect = document.querySelector('#horizon-select');
+    const toast = document.querySelector('#toast');
+
+    const fmt = value => Math.round(value).toLocaleString('zh-CN');
+    const signed = value => `${value >= 0 ? '+' : '−'}${fmt(Math.abs(value))} USDT`;
+
+    function scenarioScale() {
+      return (Number(capitalSelect.value) / 20000) * (Number(horizonSelect.value) / 30);
+    }
+
+    function updateScenario() {
+      const capital = Number(capitalSelect.value);
+      const horizon = Number(horizonSelect.value);
+      const scale = scenarioScale();
+      const validationAmount = Math.min(capital * .15, 3000);
+      const testReserve = Math.min(capital * .05, 1000);
+      const cashAmount = capital - validationAmount - testReserve;
+      const cashPct = cashAmount / capital * 100;
+      const validationPct = validationAmount / capital * 100;
+      const testPct = testReserve / capital * 100;
+      document.querySelector('#income-label').textContent = `BTC 候选：预计 ${horizon} 天净收益`;
+      document.querySelector('#table-income-head').textContent = `${horizon}天净收益`;
+      document.querySelector('#income-value').textContent = `${fmt(94 * scale)}–${fmt(168 * scale)} USDT`;
+      document.querySelector('#increment-value').textContent = `${fmt(28 * scale)}–${fmt(102 * scale)} USDT`;
+      document.querySelector('#increment-foot').textContent = `中位增量约 ${fmt(65 * scale)} USDT`;
+      document.querySelector('#downside-value').textContent = `约 ${fmt(226 * scale)} USDT`;
+      document.querySelector('#breakdown-title').textContent = `${fmt(capital)} USDT 情景 · ${horizon} 天`;
+      document.querySelector('#cash-allocation').textContent = fmt(cashAmount);
+      document.querySelector('#btc-allocation').textContent = fmt(validationAmount);
+      document.querySelector('#test-allocation').textContent = fmt(testReserve);
+      document.querySelector('#table-cash-allocation').textContent = `${fmt(cashAmount)} USDT`;
+      document.querySelector('#table-btc-allocation').textContent = `${fmt(validationAmount)} USDT`;
+      document.querySelector('#cash-label').textContent = `流动资金 · ${cashPct.toFixed(1)}%`;
+      document.querySelector('#btc-label').textContent = `BTC 套利 · ${validationPct.toFixed(1)}%`;
+      document.querySelector('#test-label').textContent = `实验储备 · ${testPct.toFixed(1)}%`;
+      document.querySelector('#cash-bar').style.width = `${cashPct}%`;
+      document.querySelector('#btc-bar').style.width = `${validationPct}%`;
+      document.querySelector('#test-bar').style.width = `${testPct}%`;
+      document.querySelector('#allocation-track').setAttribute('aria-label', `流动资金${cashPct.toFixed(1)}%，BTC套利${validationPct.toFixed(1)}%，实验储备${testPct.toFixed(1)}%`);
+      document.querySelector('#plan-amount').textContent = `${fmt(validationAmount)} USDT`;
+      document.querySelector('#benefit-value').textContent = `增量净收益中位数：+${fmt(43 * scale)} USDT`;
+
+      document.querySelectorAll('[data-range]').forEach(cell => {
+        const [low, high] = cell.dataset.range.split(',').map(Number);
+        const prefix = cell.textContent.trim().startsWith('+') ? '+' : '';
+        cell.textContent = low === high ? `${prefix}${fmt(low * scale)}` : `${prefix}${fmt(low * scale)}–${fmt(high * scale)}`;
+      });
+      document.querySelectorAll('[data-flow]').forEach(cell => {
+        cell.textContent = signed(Number(cell.dataset.flow) * scale);
+      });
+      showToast(`已切换为 ${fmt(capital)} USDT、${horizon} 天演示情景`);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    capitalSelect.addEventListener('change', updateScenario);
+    horizonSelect.addEventListener('change', updateScenario);
+
+    document.querySelectorAll('[data-dialog]').forEach(button => {
+      button.addEventListener('click', () => document.querySelector(`#${button.dataset.dialog}`).showModal());
+    });
+
+    document.querySelectorAll('dialog').forEach(dialog => {
+      dialog.querySelectorAll('.close, .close-action').forEach(button => button.addEventListener('click', () => dialog.close()));
+      dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
+      });
+    });
+
+    document.querySelectorAll('#source-table tr').forEach(row => {
+      row.addEventListener('click', () => {
+        document.querySelectorAll('#source-table tr').forEach(item => item.classList.remove('selected'));
+        row.classList.add('selected');
+        const name = row.querySelector('.source-name').textContent;
+        document.querySelector('#selected-source-name').textContent = name;
+        if (row.dataset.source !== 'btc') {
+          showToast(`${name} 的详细现金流在本原型中尚未展开`);
+        }
+      });
+    });
+
+    document.querySelector('#refresh-button').addEventListener('click', () => showToast('原型不会请求真实数据；正式版将调用统一收益评估 Read Model'));
+    document.querySelector('#keep-button').addEventListener('click', () => showToast('已演示记录“保持”决定；没有发生任何交易'));
+    document.querySelector('#copy-plan').addEventListener('click', () => {
+      document.querySelector('#plan-dialog').close();
+      showToast('验证清单已生成；原型不会访问剪贴板或 OKX');
+    });
+  </script>
+</body>
+</html>

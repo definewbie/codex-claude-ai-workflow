@@ -1,0 +1,11 @@
+{
+  ".tools/acpx-e1/source/src/acp/client.ts": "d727f05adfa38beadbc4214fbbc5a14c864dfa1eead4dd5e2a0a734a63e65a88",
+  ".tools/acpx-e1/source/src/agent-registry.ts": "ddc69460b85ca6af098ea1f7fc5467e808e85b207dde47639a15026ca7323f7d",
+  ".tools/acpx-e1/source/src/cli/build-info-command.ts": "37349dd7cfbed6fdb56b81c58a0beb195f3d2c38124ed62d94952d75bb48f660",
+  ".tools/acpx-e1/source/src/cli/config-command.ts": "347864a6a8c275f42cf50249df28cd19f30ad2fd9e32f99f6875f67b10b25294",
+  ".tools/acpx-e1/source/src/cli/config.ts": "766aabaa37a9f06be434c2eca7e3b7b33eeac3bee2c45654d4a5a9e89d211aee",
+  "dual-cli/src/main/java/dev/dual/cli/CliLedgerFactory.java": "4a6b3834cc50297f4eb412a8ec1042a146e345e8a43fc7e3a9c25c2ed0638bf7",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java": "90299628c5ccbc4e5c4a7fad5dca9fa43940f1a62ce8b2e46be733034b34ec28",
+  "dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java": "c9c9efd13cd334a9b10fcdf6e670e0086195b9fb5015fc330596fd91ac409651",
+  "dual-server/src/main/java/dev/dual/server/ServerLedgerFactory.java": "71b128cc6abbfe1206b766b786bd60f769da48d9132d09eafe911ab63596d885"
+}

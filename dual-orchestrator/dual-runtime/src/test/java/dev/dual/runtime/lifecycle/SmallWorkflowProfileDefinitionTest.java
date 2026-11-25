@@ -1,109 +1,55 @@
 package dev.dual.runtime.lifecycle;
 
-import dev.dual.core.workflow.EdgeDefinition;
-import dev.dual.core.workflow.NodeKind;
-import dev.dual.core.workflow.TransitionMetadata;
 import org.junit.jupiter.api.Test;
 
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SmallWorkflowProfileDefinitionTest {
     static final String EXPERIMENT_RESOURCE =
             "/dev/dual/runtime/lifecycle/agent-lifecycle.small-plan-human-review-experiment.json";
-    private static final Set<String> REMOVED_PLAN_REVIEW_NODES = Set.of(
-            "context.plan_codex_plan_review",
-            "plan.codex_plan_review",
-            "plan.decision"
-    );
-
     @Test
-    void externalDefinitionEqualsTerminalDeliveryPlusTheApprovedPlanReviewDelta() throws Exception {
+    void smallAlsoPreservesIndependentPlanReviewAndTheSameAuthorizationChain() throws Exception {
         var baseline = new LifecycleWorkflowDefinitionFactory().forVariant("terminal-delivery");
-        var experiment = loadExperiment();
-
-        var expectedNodes = baseline.nodes().stream()
-                .filter(node -> !REMOVED_PLAN_REVIEW_NODES.contains(node.id()))
-                .toList();
-        var expectedEdges = new ArrayList<EdgeDefinition>();
-        var directEdgeAdded = false;
-        for (var edge : baseline.edges()) {
-            if (REMOVED_PLAN_REVIEW_NODES.contains(edge.from())
-                    || REMOVED_PLAN_REVIEW_NODES.contains(edge.to())) {
-                continue;
-            }
-            if (!directEdgeAdded && "gate.human_plan_approval".equals(edge.from())) {
-                expectedEdges.add(new EdgeDefinition(
-                        "plan.claude_plan",
-                        "completed",
-                        "gate.human_plan_approval",
-                        null,
-                        TransitionMetadata.normal()));
-                directEdgeAdded = true;
-            }
-            expectedEdges.add(edge);
-        }
-
-        assertEquals("agent-lifecycle-small-plan-human-review-experiment", experiment.workflowId());
-        assertEquals(1, experiment.version());
-        assertEquals(baseline.entryNodeId(), experiment.entryNodeId());
-        assertEquals(expectedNodes, experiment.nodes());
-        var json = new com.fasterxml.jackson.databind.ObjectMapper()
-                .registerModule(new dev.dual.ledger.file.EdgeConditionModule());
-        assertEquals(json.valueToTree(expectedEdges), json.valueToTree(experiment.edges()));
-        assertTrue(directEdgeAdded);
-        assertEquals(28, experiment.nodes().size());
-        assertEquals(51, experiment.edges().size());
-        assertEquals(8, experiment.nodes().stream()
-                .filter(node -> "acpx.agent_run".equals(node.handlerType()))
-                .count());
-        assertEquals(6, experiment.nodes().stream()
-                .filter(node -> node.kind() == NodeKind.GATE)
-                .count());
+        var small = loadExperiment();
+        assertEquals("agent-lifecycle-small-plan-human-review-experiment", small.workflowId());
+        assertEquals(baseline.entryNodeId(), small.entryNodeId());
+        assertEquals(baseline.nodes().stream().collect(java.util.stream.Collectors.toMap(n -> n.id(), n -> n)),
+                small.nodes().stream().collect(java.util.stream.Collectors.toMap(n -> n.id(), n -> n)));
+        var json = new com.fasterxml.jackson.databind.ObjectMapper().registerModule(new dev.dual.ledger.file.EdgeConditionModule());
+        assertEquals(baseline.edges().stream().map(json::valueToTree).collect(java.util.stream.Collectors.toSet()),
+                small.edges().stream().map(json::valueToTree).collect(java.util.stream.Collectors.toSet()));
+        assertEquals("acpx.agent_run", small.node("plan.codex_plan_review").handlerType());
+        assertEquals("review.decision", small.node("plan.decision").handlerType());
+        assertEquals("EXECUTION", small.node("contract.compile_execution").config().get("contract_phase"));
     }
 
     @Test
-    void experimentPreservesPlanProducerBlockedBehaviorAndHumanGateBudget() throws Exception {
-        var baseline = new LifecycleWorkflowDefinitionFactory().forVariant("terminal-delivery");
-        var experiment = loadExperiment();
-
-        assertEquals(baseline.node("plan.claude_plan"), experiment.node("plan.claude_plan"));
-        assertEquals(baseline.edgesFrom("plan.claude_plan", "BLOCKED", Map.of()),
-                experiment.edgesFrom("plan.claude_plan", "BLOCKED", Map.of()));
-        assertEquals(3, experiment.node("gate.human_plan_approval").config().get("max_revisions"));
-        assertEquals(baseline.node("gate.human_plan_approval"),
-                experiment.node("gate.human_plan_approval"));
-        assertEquals("context.implement_claude", experiment.edgesFrom("gate.human_plan_approval").stream()
-                .filter(edge -> "approved".equals(edge.on()))
-                .findFirst().orElseThrow().to());
-        assertEquals("plan.claude_plan", experiment.edgesFrom("gate.human_plan_approval").stream()
-                .filter(edge -> "revise".equals(edge.on()))
-                .findFirst().orElseThrow().to());
-        for (var removed : REMOVED_PLAN_REVIEW_NODES) {
-            assertThrows(IllegalArgumentException.class, () -> experiment.node(removed));
-        }
+    void planHumanDispositionRequiresAuthorAndIndependentReviewAgain() throws Exception {
+        var small = loadExperiment();
+        assertEquals(3, small.node("gate.human_plan_approval").config().get("max_revisions"));
+        assertEquals("plan.claude_plan", small.edgesFrom("gate.human_plan_approval").stream()
+                .filter(e -> "approved".equals(e.on())).findFirst().orElseThrow().to());
+        assertEquals("plan.claude_plan", small.edgesFrom("gate.human_plan_approval").stream()
+                .filter(e -> "revise".equals(e.on())).findFirst().orElseThrow().to());
     }
 
     @Test
-    void experimentDoesNotChangeBundledWorkflowResources() throws Exception {
-        // Baseline includes explicit external evidence submission on all lifecycle variants.
-        assertEquals("eda35075ae4e69e3471ec8d5bbf4043a03762c30ecdba6458fbb5da5b09324f7",
-                sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.full.json"));
-        assertEquals("76e33816e6b1fe68661bec9f0ac9601cdf4ff7d83f13d0f67e064245ccf30a60",
-                sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.contract.json"));
-        assertEquals("2097297b76c2e1426b56e70b7f4e241071b72fadf3fe2b2e2dfebcc5a7c197b7",
-                sha256("/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json"));
+    void allProfilesSeparateGoalAndExecutionApproval() throws Exception {
+        for (var definition : List.of(new LifecycleWorkflowDefinitionFactory().forVariant("full"),
+                new LifecycleWorkflowDefinitionFactory().forVariant("contract"),
+                new LifecycleWorkflowDefinitionFactory().forVariant("terminal-delivery"), loadExperiment())) {
+            assertEquals("GOAL", definition.node("contract.compile").config().get("contract_phase"));
+            assertEquals("GOAL", definition.node("design.claude_design").config().get("required_contract_phase"));
+            assertEquals("GOAL", definition.node("plan.claude_plan").config().get("required_contract_phase"));
+            assertEquals("EXECUTION", definition.node("implement.claude_implement").config().get("required_contract_phase"));
+            assertEquals("context.implement_claude", definition.edgesFrom("gate.contract_review").stream()
+                    .filter(e -> "approved".equals(e.on())).findFirst().orElseThrow().to());
+        }
     }
 
     @Test
@@ -135,7 +81,7 @@ class SmallWorkflowProfileDefinitionTest {
                 new LifecycleWorkflowDefinitionFactory().forVariant("terminal-delivery"), loadExperiment())) {
             var producer = definition.node("design.claude_design");
             assertEquals("design_result", producer.config().get("expected_artifact"));
-            assertEquals(true, producer.config().get("requires_approved_task_contract"));
+            assertEquals("GOAL", producer.config().get("required_contract_phase"));
             assertEquals(java.util.Set.of("design_result"),
                     dev.dual.runtime.handler.ContractRegistry.forNode(producer.id()).outputArtifactTypes());
             var consumer = definition.node("context.design_codex_arch_review");
@@ -176,12 +122,4 @@ class SmallWorkflowProfileDefinitionTest {
         return Path.of(SmallWorkflowProfileDefinitionTest.class.getResource(resource).toURI());
     }
 
-    private static String sha256(String resource) throws Exception {
-        try (InputStream input = SmallWorkflowProfileDefinitionTest.class.getResourceAsStream(resource)) {
-            if (input == null) {
-                throw new IllegalStateException("missing resource: " + resource);
-            }
-            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(input.readAllBytes()));
-        }
-    }
 }

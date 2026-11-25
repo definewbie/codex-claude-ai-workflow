@@ -1,0 +1,70 @@
+{
+  "priorPackage": "d04-dispatch-probe-design-20260929",
+  "files": [
+    {
+      "path": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/material-verification.json",
+      "resolvedAt": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/material-verification.json",
+      "sha256": "1f03335cb6577c64f8582ea4984eb65fb320c3e54e94ac0fc72955ea513ab4db"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/documentation.diff",
+      "resolvedAt": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/documentation.diff",
+      "sha256": "632fcbf55d39b76df414065aa72f06699fcfa87cd98ba6326a91582169c899de"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/prior-manifest-resolution.json",
+      "resolvedAt": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/prior-manifest-resolution.json",
+      "sha256": "a3cd0775398d1524f0cbff0f1844faacdf0e8fa32a2099cc419bd2dbfb50ccec"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/baseline.json",
+      "resolvedAt": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/baseline.json",
+      "sha256": "818ee374092a7c03c4867889908bcaf155cd3a5e2e042eec1fee9c0f08f2bc55"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/probe-design.md",
+      "resolvedAt": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/probe-design.md",
+      "sha256": "8f21a6ea97ace591c35194810001a1cef4dbc0a1836849b6371b688268439143"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/cc-review.txt",
+      "resolvedAt": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/cc-review.txt",
+      "sha256": "727e86c0ac87720f905778df8cd8ef745f17e867661ec006dc467e88c2517d94"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/tool-contract-evidence.json",
+      "resolvedAt": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/tool-contract-evidence.json",
+      "sha256": "49e7721f1513119f22adac16ce5f7e07a5175021fb8d6ee511c6204baf79c56c"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "sha256": "e7aad8e25cbef31dccc7756be741018f03f417c0db39c2ed00ed597c36c4f691"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "sha256": "d5895a6018fa358cde919f659e4fe1d3a3b2e14502bb28b9daec3080b3d19e19"
+    },
+    {
+      "path": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-dispatch-probe-design-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "sha256": "8ba19285b004a41707c543cd1e7b55bfc3822f5f13bddfbd48fd73982687f2cf"
+    },
+    {
+      "path": "dual-orchestrator/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/before/20260928-dual-lifecycle-detailed-design.zh-CN.md",
+      "sha256": "ce1ee2dee5707ee96e0fe913c37b5cd3907258b48fe7273fa70a2bb994eff03d"
+    },
+    {
+      "path": "dual-orchestrator/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/before/20260927-dual-lifecycle-worklist.zh-CN.md",
+      "sha256": "1308aa35d8bb5293186a331c4f0ed488d1c5e91749adebb5161d88052dda687f"
+    },
+    {
+      "path": "dual-orchestrator/docs/plans/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "resolvedAt": "dual-orchestrator/output/d04-native-source-audit-20260929/before/__ACTIVE__real-case-driven-orchestrator-simplification.zh-CN.md",
+      "sha256": "82397b4c1e926044ee9b033107a3ecb881c73f2d63b77b6574ac1507bd395b7e"
+    }
+  ]
+}

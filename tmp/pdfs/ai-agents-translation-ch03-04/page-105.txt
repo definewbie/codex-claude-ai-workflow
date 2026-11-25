@@ -1,0 +1,8 @@
+                 Figure 3-2. Agent learning loop: from action to feedback to improvement.
+
+When you collect multiple trajectories, you get rollouts. Each rollout is one
+complete story of reasoning. Some reach the goal, some fail, but all of them teach
+the agent something about how its own decisions lead to different outcomes. RL
+turns these experiences into structure, by turning raw sequences of text into
+measurable cause and effect. Table 3-2 gives you a conceptual compass of these
+concepts before we start looking into how you can apply them.

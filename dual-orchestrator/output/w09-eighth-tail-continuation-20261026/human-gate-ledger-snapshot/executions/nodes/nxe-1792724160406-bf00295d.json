@@ -1,0 +1,81 @@
+{
+  "schemaVersion" : 1,
+  "nodeExecutionId" : "nxe-1792724160406-bf00295d",
+  "agentTaskId" : "agt-1792724160401-465e407f",
+  "workflowExecutionId" : "wfe-1792724160316-47019f56",
+  "nodeInstanceId" : "node-plan-claude_plan-022",
+  "nodeDefinitionId" : "plan.claude_plan",
+  "handlerType" : "acpx.agent_run",
+  "status" : "SUCCEEDED",
+  "pid" : 82060,
+  "outcome" : "completed",
+  "nodeStatus" : "COMPLETED",
+  "outputRefs" : [ ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.stderr.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.transcript.log", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1792724160451/binding.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.contract.json", ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.plan.json" ],
+  "result" : {
+    "claim" : {
+      "executor_pid" : 82060,
+      "input_identity" : "9439a7fed1316fbd006a5ea3a519f9df137f1827284608b36844e23e79f0b2b0",
+      "executor_started_at" : "2026-10-23T02:55:59.227Z"
+    },
+    "prepared_run" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/nxe-1792724160406-bf00295d-prepared.json",
+      "sha256" : "268d6c7acfe4995614f945537da0286894f71ee4f1c04d52d0b9d278f8592bea"
+    },
+    "adapter_signals" : [ ],
+    "agent" : "claude",
+    "agent_execution_artifact_contract_results" : [ {
+      "contractType" : "plan_result",
+      "errorCode" : "",
+      "errorMessage" : "",
+      "path" : "",
+      "present" : true,
+      "required" : true,
+      "valid" : true
+    } ],
+    "agent_execution_outcome" : {
+      "nodeMaySucceed" : true,
+      "operatorMessage" : "The agent produced valid result and artifact evidence.",
+      "primaryReason" : "completed",
+      "recoveryCategory" : "NONE",
+      "retryPolicy" : "NONE",
+      "secondarySignals" : [ ],
+      "status" : "SUCCESS"
+    },
+    "agent_execution_result_contract" : {
+      "decision" : "READY_FOR_PLAN_REVIEW",
+      "present" : true,
+      "summary" : "",
+      "valid" : true,
+      "validationError" : ""
+    },
+    "contract_sidecar_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.contract.json",
+    "contract_sidecar_sha256" : "7db15a9535462e8642d80db8eeb6857afa2865a040ff3210f8488e1b52118e06",
+    "decision" : "READY_FOR_PLAN_REVIEW",
+    "exit_code" : 0,
+    "output_complete" : true,
+    "permission_assessments" : [ ],
+    "plan_artifact_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.plan.json",
+    "process_usability" : "EXITED_ZERO",
+    "repository_fact_binding_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1792724160451/binding.json",
+    "repository_fact_binding_sha256" : "e7f9a06b1d33aa0748e10bb63f879c591e8f0bafe7881949d618d1f6b5b31cc4",
+    "run_id" : "run-1792724160451",
+    "run_metadata" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/run.json",
+    "session" : "claude-main-ws-20261023T005431Z-9YYF-run-1792724160451",
+    "summary" : "在已审计划基础上仅为 AC-1/AC-2/AC-3 三个 verification_binding 补齐 operator 已登记的 environment_refs 与 feasibility_refs，其余计划语义保持不变。",
+    "transcript_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/plan-claude.transcript.log",
+    "completion_ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/outputs/nxe-1792724160406-bf00295d-completion.json",
+    "completion_sha256" : "094a84b6a84e88489983d0772e3e35b1fa6653c83d1f4eeed81e17d09d885efa",
+    "permission_reply" : {
+      "closed" : true
+    }
+  },
+  "errorMessage" : "",
+  "runRef" : "run-1792724160451",
+  "agentRunRef" : ".agent/workstreams/ws-20261023T005431Z-9YYF/runs/run-1792724160451/run.json",
+  "agent" : "claude",
+  "session" : "claude-main-ws-20261023T005431Z-9YYF-run-1792724160451",
+  "exitCode" : 0,
+  "startedAt" : "2026-10-23T02:56:00.405893Z",
+  "finishedAt" : "2026-10-23T03:00:46.628502Z",
+  "durationMs" : 286222
+}

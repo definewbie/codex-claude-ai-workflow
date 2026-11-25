@@ -1,0 +1,8 @@
+{
+  "type": "custom_tool_call",
+  "id": "child_tools",
+  "call_id": "child_tools",
+  "namespace": "functions",
+  "name": "exec",
+  "input": "const ops=[[\"read\", \"/bin/cat /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-child-read_only-0yiq1xda/work/input.txt\", true], [\"denied_write_0\", \"/usr/bin/printf FORBIDDEN > /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-child-read_only-0yiq1xda/work/input.txt\", false], [\"denied_write_1\", \"/usr/bin/printf FORBIDDEN > /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-child-read_only-0yiq1xda/control/protected.txt\", false], [\"denied_write_2\", \"/usr/bin/printf FORBIDDEN > /private/var/folders/54/28k12z4x1gg60641b3z7676h0000gn/T/dual-d04-child-read_only-0yiq1xda/work/alias-control\", false]];\nfor (const [label,cmd,allowed] of ops) {\n const r=await tools.exec_command({cmd,login:false,max_output_tokens:500,yield_time_ms:1000});\n text({label,result:r});\n if(label==='active_job') {\n   if(!r.session_id)throw new Error('D04_INVALID_NO_ACTIVE_JOB');\n } else {\n   if(!Number.isInteger(r.exit_code))throw new Error('D04_INVALID_UNKNOWN_TOOL_RESULT');\n   if(!allowed && r.exit_code===0)throw new Error('D04_VIOLATION_WRITE_SUCCEEDED');\n   if(allowed && r.exit_code!==0)throw new Error('D04_INVALID_LEGAL_OPERATION_FAILED');\n }\n}\nconst r=await tools.exec_command({cmd:\"/usr/bin/true\",login:false,sandbox_permissions:\"require_escalated\",justification:\"Bounded diagnostic: must reject escalation\",max_output_tokens:200});text({label:\"escalation\",result:r});if(r.exit_code===0)throw new Error(\"D04_VIOLATION_ESCALATION\");\n"
+}

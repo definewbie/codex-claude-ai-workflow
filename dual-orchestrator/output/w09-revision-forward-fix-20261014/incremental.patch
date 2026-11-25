@@ -1,0 +1,1518 @@
+--- a/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
++++ b/docs/plans/20260927-dual-lifecycle-worklist.zh-CN.md
+@@ -33,15 +33,15 @@
+ | ID / 完整用户流程 | 契约依据 / 领域 owner | 现有事实与证据 | 剩余工作与必要设计决策 | 依赖 / 状态 |
+ |---|---|---|---|---|
+ | W00 对账与建立完整覆盖地图 | R3 §7.1；文档索引不持有运行 authority | 本文 §3 覆盖所有相关 dirty 文件；§4 映射测试与缺口；冻结身份可复核；CC 材料层 PASS | 2 LOW 处置及限制见 §8；后续材料实质变化重核受影响结论，不以本次抽样代替产品证明 | 材料任务收口；独立评审与作者修订核验分列，不是产品能力完成 |
+-| W01 人工决定→作者修订→复评→重新批准；失败原因→合法补足后续作 | I1/I1.a；core/ledger/revision/recovery | B03 合法续作与返修/重批，B05 C 单族独立 PASS，最新受控序列见 §23 | 其余诊断族 UNKNOWN，按用户 C/真实反复阻塞触发，不自动第二族；第五例后的初次GOAL前目标级新提案接线已获CC认可，见§23.22，待实施授权，不外推全生命周期出口 | 本族 CLOSED/PASS；完整 W01 未关闭，真实能力按 Gate |
++| W01 人工决定→作者修订→复评→重新批准；失败原因→合法补足后续作 | I1/I1.a；core/ledger/revision/recovery | B03 合法续作，B05 C 单族独立 PASS；§23.23 首 GOAL 前目标级新提案已实施/离线验证 | 其余诊断族 UNKNOWN；本轮新接线/发行待合并 CC，真实完整生命周期未证，不自动第二族 | 单族 PASS；整体 W01 未关闭 |
+ | W02 输入准备→provider→验证→发布→node/run/recovery | I2；adapter、唯一 outcome/finalizer、恢复 read model | B01/B03/B04 离线与独立 PASS；E02 常驻、权限双通道/固定完成/失败保真；首例后的兼容性/摘要前向修复与新凭证见 §23.5 | 真实 native/工具能力待 Gate；首版全量声明已接受，具体运行中补声明入口未证，真实反复阻塞才重评 | 实施/具名离线链有据；总体真实能力未证 |
+ | W03 目标批准→只读设计/计划/复评→精确执行批准→首次实现 | I3/I1；TaskContract/proposal/qualification/adapter | B03 分期合同、B04 原生 C/X 接线与独立 PASS，见 §23 | G01 分期提示已纠正并配对验证，见 §23.1；实际选定 native 装配/合法请求续作按 Gate 核验 | 编译/控制链与提示修正离线有据；CC 受影响独立 PASS 已接收，真实 NO-GO |
+ | W04 必需验证可行→实现→自测→独立验收；缺材料补证据 | I4/I1/I2；D05、EvidenceCollection、ExternalVerificationEvidence | B03 D05 程序/模型/人工分立、实际退出码按批准条款、漂移与合法复用、返修/补证据离线有据，见 §23 | fresh 各验收项绑定实际方法/环境/权限/责任/证据出口，未知工具不假装可用，不默认通用环境认证 | D05 接线离线有据；具体 fresh 出口 Gate 前核齐 |
+ | W05 同冻结身份中断恢复；外部未知人工裁定；终态不重开 | I5/I1；D06/D07 ledger/runtime/worker/kernel | B02 holder、B03 本地协议/构造与身份、B04/B05/B06 写点/冷 JVM 独立 PASS，见 §23 | kernel 内部 I/O 专项与部署拓扑未全证，保留；首 Gate 限单 JVM 路由/ClassLoader，实际身份/停止核验不能以测试 JVM 代替 | 具名协议离线有据；I5 全故障/部署普适性未关闭 |
+ | W06 验收满足→候选批准→目标 Git 应用→实际提交→交付确认/中断处置 | I6，§4 交付行；candidate、DeliveryApplicationService、Git、query | T12；B06 四变体×inline/worker 受控完整批准链接临时真实 Git apply/人工实际 commit/finalize；写点、冷 JVM、拒绝/续作与同源投影证据见 §22.3；CC 批末独立 PASS 见 §22.4 | 本批实施/离线接线范围收口；LOW-1 查询锁序常驻化已登记，现有一次性反证仍有效；真实目标 Git、浏览器视觉与真实客户端未证，归组合准入/Gate；不自动 commit 或盲目重 apply | W04 验收/批准；W05 本地边界；B06/W06/D09 批次 CLOSED / PASS（离线范围）；真实交付证明未关闭，NO-GO 保持 |
+-| W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | 单一示例/typed 去重/受限 correction、G01离线修正已获CC认可；第五例发生真实SHA转录误拒 | §23.22身份减负接线已获CC设计PASS：ID由模型引用、完整基准R01固定并强制消费；待用户实施授权，未落码/未证节省；其余身份与语义义务保留 | 设计定稿不等于实现/运行；W07未关闭 |
+-| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23.17 A修复发行CC认可；§23.19第五例实际停止；§23.22新接线设计CC认可 | 两项接线实施待用户批准，随后回归/新发行/受影响Gate；browser/真实worker未证 | 发行保持原字节；不关闭整体W08 |
+-| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实evidence/candidate/目标Git | §23.19第五例3真实请求/62136 token全部可归因，原SHA守卫拒绝返修；新接线设计认可见§23.22 | 五例停止；前向实施与fresh第六例分别待授权，不恢复旧例；计划/实施/自测/验收/交付仍未真实证明 | 第五Gate FAIL/领域WAITING_FOR_RECOVERY；W09未完成，零第六例 |
++| W07 机器身份与语义义务分离、有效修订与提示负担 | I1/I2 GCTW；原 prompt/context/contract/correction owner | §23.23 模型 SHA 转录撤销、精确 ID 引用、程序完整身份固定及强制消费已实施/离线验证 | 两 LOW 落码；发行候选待合并 CC；其余字段/语义义务不减，真实模型行为/token 收益未证 | 本轮离线接线完成不关闭 W07 |
++| W08 组合回归/各投影→可审查运行 Gate | R3 §4/§5/§6；全部消费者/CLI/API/UI/report | §23.23 当前单轮全模块/稳定输入/新发行字节核验完成 | 合并受影响 CC 待审；第六例 fresh 装配/配置/出口/observer/预算仍须当次核验，browser/真实 worker 未证 | FROZEN_CANDIDATE；整体 W08 未关闭 |
++| W09 fresh 合法任务真实研发/测试验收/批准交付 | R3 §0/§6；真实 evidence/candidate/目标 Git | 第五例原 FAIL 与材料不变；§23.23 两项前向接线完成离线验证与重冻 | 合并 CC 后第六例 Gate/运行另获授权，不恢复旧例/沿用余额；后半链真实成功未证 | 第六例未创建/未运行；W09 未完成 |
+ 
+ ### 2.1 次序、依赖与独立评审触发
+ 
+@@ -956,3 +956,15 @@
+ 两LOW并入开工清单：完整reference去歧义单独成对回归（不随SHA方案撤销）；derivation历史字段patch_source_output_ref补语义注释，不迁移历史。现状仍ID-only、未改代码；“完整身份更强”不作运行证明，目标表达限制不作第五例已证第二拒绝。只读重核原设计15、第五326、A包398条目及656冻结输入无变化，零产品测试/native/provider/新agent/第六例，原发行和事故不变。
+ 
+ **下一步动作**：用户批准有界实施→两项接线及LOW落码→成对/写点/冷JVM/兄弟/单轮全模块回归→重冻发行与合并受影响评审。fresh第六例按新Gate另获真实运行授权，不恢复第五例、不沿用旧余额；本接收不单开评审，也不自动实施/提交/开跑，不关闭W01/W07/W08/W09总体。
++
++### 23.23 W09 身份减负与目标级返修实施、重冻待合并复审（2026-10-14）
++
++用户批准有界实施/两 LOW/回归/重冻与 CC 提示，明确暂不启动第六例。入口[assessment](../../output/w09-revision-forward-fix-20261014/assessment.md)、[实际消费者/失败切面](../../output/w09-revision-forward-fix-20261014/consumer-and-transition-map.md)、[自查复盘](../../output/w09-revision-forward-fix-20261014/review-and-reflection.md)。当前 IMPLEMENTED / OFFLINE_VERIFIED / FROZEN_CANDIDATE / AWAITING_AFFECTED_CC / SIXTH_NOT_RUN；§23.21/§23.22 保留提交时历史状态，不能把自查当独立 PASS。
++
++模型精确 base ID + 同次程序 R01 完整基准，dispatch/publisher/merger/reference/lineage/compile 强制消费；初次 GOAL 前真实目标/禁区变更 full→新复评→当前人门→原分期批准合法链落码，不开放跨 GOAL/late 在线目标重写。两 LOW 完整 reference 去歧义/注释实质落实。增量仅 runtime/adapter，复用既有 R01/L/R 协议，无新节点/锁/服务/DSL；未触发新增 ROI 取舍。
++
++唯一单轮 clean 1805 项 / 210 suites / 0 failure / 0 error / 0 skipped、8 模块、659 输入前后及打包后相等；真实本地 ledger/Git/冷 JVM 与模型离线 fixture 分列，两个关键新写前缀族实际执行，不冒称全部新组合穷举。两项旧生产先红、三项隔离反证、中间作者/夹具/断言错误与中断独立记录，不拼接早期绿灯。CLI/server 独立冻结副本/内嵌模块/14 资源/6 只读 CLI 核验完成，见[发行身份](../../output/w09-revision-forward-fix-20261014/release-identity.json)。
++
++设计15/第五326/A398提交材料 SHA 不变；第五原 FAIL/raw 不回写、不救样本。旧 target JAR 为授权构建目录，本次重建，不冒称旧 JAR 保留；新发行副本独立固定。零真实 native/provider/额外 agent，第六例未创建，无代码提交。真实客户端遵守新 wire、完整后半链及 token 收益均 NOT_RUN，不关闭整体 W01/W07/W08/W09。
++
++**下一步动作**：交[合并 CC 只读复审提示](../../output/w09-revision-forward-fix-20261014/cc-review-prompt.txt)，判断实施/离线证据与发行候选。通过后再准备 fresh 第六例当次 Gate/预算并单独取得用户运行授权；先核实际配置/装配/出口/observer/当前 subject，不继承旧预算或授权。
+--- a/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
++++ b/docs/plans/20260928-dual-lifecycle-detailed-design.zh-CN.md
+@@ -1027,6 +1027,16 @@
+ 
+ “更强/四处核验”是设计消费义务判断，不是已测安全能力；“修复resolver”本轮只识别/定方案，未改代码。目标级表达限制有源码证据，未证明第五例的第二次复评拒绝。原包15/第五例326/A包398与656输入重核一致，零产品测试/native/provider/新agent；旧发行与第五例不变。下一步是用户批准有界实施，完成后回归/重冻/受影响评审；fresh第六例仍需另行运行授权，无须为本接收单开评审。
+ 
++### 10.3 W09 两项接线有界实施与发行候选（2026-10-14）
++
++用户明确批准有界实施、两项 LOW、回归与重冻，并暂不启动第六例。当前 IMPLEMENTED / OFFLINE_VERIFIED / FROZEN_CANDIDATE / AWAITING_AFFECTED_CC / SIXTH_NOT_RUN，入口[本轮 assessment](../../output/w09-revision-forward-fix-20261014/assessment.md)。§10.1/§10.2 原状态与“未改代码”保留为提交时历史，不再代表当前实现。
++
++模型只引用精确 base ID，完整 ref/SHA、义务及允许形态由同一次 capture 固定至既有 R01；dispatch、publisher/merger、reference/lineage/compile 强制消费。首次 GOAL 前可信返修可用已有 full proposal：真实目标/禁区变化、bounded delta、当前义务、新复评/当前人门不省略；已授权/late/pending 人批不借权，不新增跨 GOAL 在线重写。LOW-1 完整 reference 去歧义及成对/移除反证落码；LOW-2 历史字段语义注释落码，不迁移历史。
++
++唯一单轮 clean 1805 项 / 210 suites / 0 failure / 0 error / 0 skipped，8 模块、659 输入运行前后/打包后相等；两形态/双入口关键 R01/L03 写前缀、真实冷 JVM、四变体合法链与拒绝对照分列，未穷举所有旧故障点 × 新形态。CLI/server 冻结副本/内嵌模块/14 资源/6 只读命令核验完成，见[发行身份](../../output/w09-revision-forward-fix-20261014/release-identity.json)。这证明离线接线与发行字节，不证真实客户端遵守新契约、完整后半链或 token 节省；未外推整体 W 项完成。
++
++设计/第五例/A 提交材料逐条不变，不加盖旧 raw、不救第五例；原 target JAR 是授权重建目录，不声称旧 JAR 保持字节。本轮新冻结副本有独立 SHA。下一步合并受影响 CC 复审；第六例当次 Gate 与真实运行另获用户授权。
++
+ ## 11. 整链 transition 与失败组合
+ 
+ 以下是目标序列，所有本地多写点均展开为 §6 的每个前缀；包含外部行为的行再叠加 §7/§9，不能用统一模板跳过外部窗口。角色许可沿现有 operator/agent 边界；模型不得代作人决定。
+@@ -1081,14 +1091,14 @@
+ |---|---|---|
+ | D01 | 附录 §2 + precondition-map；首版覆盖增量见 §4.3 / 主清单 §21 | 原语义 DESIGN_FROZEN；单合同资格族 C 已获独立设计认可，LOW-1 守卫已纳入；本族实施/证明仍在进行，不能关闭完整 D01 |
+ | D02 | 附录 §3 + 补记 LOW-2：精确 signal 关联、EXECUTION 可审计声明、不可降级清单 | DESIGN_FROZEN；typed 字段及两条合法通道、拒绝序列、E02 常驻回归仍待实施 |
+-| D03 | 附录 §4 + examples：两阶段合同、reviewed_candidate、外部批准、逐 consumer/四变体迁移；首GOAL前目标级返修补记§10.1/§10.2 | DESIGN_FROZEN；受影响新接线已获CC定稿，待实施授权/证明；不新增late在线目标重写，不外推真实主链通过 |
++| D03 | 附录 §4 + examples；首 GOAL 前目标级返修 §10.1–§10.3：现有 full 形态、固定基准、当前复评/人门 | 原设计冻结；受影响新接线已实施并离线验证，发行候选待合并 CC；不新增 late/跨 GOAL 在线目标重写，真实主链未证 |
+ | D04 | **当前规范 §8.25/§8.27**；接口材料 §8.26、提交协议及 CC 处置；§8.1–§8.24 为历史 | **DESIGN_FROZEN（2026-09-30）**：CC 设计 PASS，用户显式接受 C 后在途语义，D06/D07 增量并入 §6.5/§7.2。IPC 单次交付入口已静态核对，接线及合法续作/拒绝/失败恢复仍待实施验证。业务 scope/证据/最终批准不变，W03/W05/W08 承接；无产品实施或新运行授权 |
+ | D05 | 附录 §5：真实生产者与增量、机器/人工出口样本分列 | DESIGN_FROZEN；实现后验证生产者→消费者，不将合成样例/人工声明当机器证明 |
+ | D06 | 附录 §6 + 142 文件入口对账：写集/会话/锁/原子写/失败前缀 | DESIGN_FROZEN（含 §6.5 受影响增量）；CC 设计 PASS 与用户语义确认已齐；本机存储原语不代替产品冷 JVM/中断/并发反证 |
+ | D07 | 附录 §7：M6 函数桥接、identity、恢复 payload/入口、未知裁定 | DESIGN_FROZEN（含 §7.2 权限回复增量）；CC 设计 PASS 与用户语义确认已齐；实现后证明恢复/终态及人裁定不冒充机器事实 |
+ | D08 | 附录 §8 + 补记 LOW-1：删除隐式 builtin 构造、显式装配、holder monitor | DESIGN_FROZEN；实施后证明入口/会话/并发。验证前同 JVM 多 workstream 路由仍禁止并发 |
+ | D09 | 附录 §9：逐窗 Git 事实、恢复/no-change | DESIGN_FROZEN；实现后证明观察充分性与真实交付，不新增空交付/自动 commit |
+-| D10 | 附录 §10及第五例后受影响定稿§10.1/§10.2：base ID模型引用、完整基准R01固定/强制消费 | DESIGN_FINALIZED（受影响CC PASS）；新接线待用户实施授权及验证，原转录规则仅为旧runtime历史；W07/减负仍待验收，不承诺token下降 |
++| D10 | 附录 §10 与 §10.1–§10.3：模型精确 ID 引用、完整基准 R01 固定及多层强制消费 | 受影响接线实施/离线验证/重冻已完成，合并 CC 待审；其余字段义务保留，真实模型减负和 token 收益未证，不关闭 W07 |
+ 
+ 全案仍非 Implementation Ready。D04 可行性、整版实施范围与已有改动对账、用户实施授权仍须分别满足；142 个候选文件不是批准修改清单。设计冻结后发现反例按 R3 §7.1 回到对应决策纠偏，不以局部实现掩盖，也不默认重新开启全部设计。唯一工作索引及实施组织见主清单 §2/§9。
+ 
+--- a/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
++++ b/dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTaskHandler.java
+@@ -344,10 +344,13 @@
+             if (transport.permissionBudgetMillis(effectivePermissionProfile) > 0)
+                 preparedBinding.put("native_permission_budget_ms", transport.permissionBudgetMillis(effectivePermissionProfile));
+             if (verificationSource != null) preparedBinding.put("verification_source", verificationSource);
+-            var preparedRun = dev.dual.runtime.handler.AgentRunCommitProtocol.prepare(context, runDir,
+-                    List.of(promptPath, PromptManifestWriter.manifestPathFor(promptPath),
+-                            context.workspaceRoot().resolve(governanceContext.repositoryFactBinding().ref())),
+-                    preparedBinding);
++            var preparedInputs = new ArrayList<Path>(List.of(promptPath, PromptManifestWriter.manifestPathFor(promptPath),
++                    context.workspaceRoot().resolve(governanceContext.repositoryFactBinding().ref())));
++            if (emissionContext.captured()!=null && emissionContext.captured().binding()!=null) {
++                preparedBinding.put("contract_revision",emissionContext.captured().binding().toMap());
++                preparedInputs.addAll(emissionContext.captured().inputs());
++            }
++            var preparedRun = dev.dual.runtime.handler.AgentRunCommitProtocol.prepare(context, runDir,preparedInputs,preparedBinding);
+             var commandEvents = new ArrayList<AcpxExecutionEvent>();
+             AcpxExecutionEventSink events = event -> {
+                 try { dev.dual.runtime.handler.AgentRunCommitProtocol.commandEvent(context, preparedRun, event.kind().wireName(), event.details()); }
+@@ -648,24 +651,20 @@
+     }
+ 
+     private ProposalEmissionResolution proposalEmissionContext(TaskContext context) {
+-        if (!"intake.claude_brainstorm".equals(context.definition().id())) {
+-            return new ProposalEmissionResolution(
+-                    AgentResultPromptContract.ProposalEmissionContext.notApplicable(), null);
+-        }
+-        var resolved = new TaskContractRevisionContextResolver(context.ledger()).resolveForIteration(
+-                context.workspaceRoot(), context.workstreamId(), context.instance().iterationId());
+-        if (!resolved.valid()) {
+-            return new ProposalEmissionResolution(null, AgentExecutionResultFacts.inputPreparationFailed(
+-                    "TASK_CONTRACT_REVISION_CONTEXT_INVALID", "TASK_CONTRACT_REVISION_CONTEXT_INVALID", resolved.errors()));
+-        }
+-        return new ProposalEmissionResolution(
+-                AgentResultPromptContract.proposalEmissionContext(resolved.context()), null);
+-    }
+-
+-    private record ProposalEmissionResolution(
+-            AgentResultPromptContract.ProposalEmissionContext context,
+-            NodeResult failed
+-    ) {}
++        if (!"intake.claude_brainstorm".equals(context.definition().id()))
++            return new ProposalEmissionResolution(AgentResultPromptContract.ProposalEmissionContext.notApplicable(),null,null);
++        try {
++            var captured=new TaskContractRevisionContextResolver(context.ledger()).captureRevision(context);
++            var prompt=AgentResultPromptContract.proposalEmissionContext(captured.context()).withGoalReproposal(
++                    captured.binding()!=null && captured.binding().allowedForms().contains("GOAL_REPROPOSAL"));
++            return new ProposalEmissionResolution(prompt,captured,null);
++        } catch (java.io.IOException invalid) {
++            return new ProposalEmissionResolution(null,null,AgentExecutionResultFacts.inputPreparationFailed(
++                    "TASK_CONTRACT_REVISION_CONTEXT_INVALID","TASK_CONTRACT_REVISION_CONTEXT_INVALID",List.of(invalid.getMessage())));
++        }
++    }
++    private record ProposalEmissionResolution(AgentResultPromptContract.ProposalEmissionContext context,
++            dev.dual.runtime.handler.ContractRevisionBinding.Captured captured,NodeResult failed) {}
+ 
+     private static void appendTimelineEvent(
+             List<AcpxExecutionEvent> timeline,
+--- a/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentPromptRendererTest.java
++++ b/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/AgentPromptRendererTest.java
+@@ -1065,6 +1065,19 @@
+             AcpxTestLedger.initialize(AcpxTestLedger.ledger(), paths, "ws-test", definition);
+         }
+         var objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
++        var sidecarDocument = objectMapper.readTree(sidecar.toFile());
++        if ("task_contract_proposal".equals(sidecarDocument.path("source_artifact_type").asText())) {
++            // A verified initial proposal needs its typed authored source, not an empty placeholder.
++            var raw = (com.fasterxml.jackson.databind.node.ObjectNode)
++                    sidecarDocument.path("task_contract_proposal").deepCopy();
++            raw.remove("schema_version");
++            raw.put("decision", decision).put("summary", "Typed prompt fixture").put("needs_human_input", false);
++            raw.path("scope").path("included").forEach(entry ->
++                    ((com.fasterxml.jackson.databind.node.ObjectNode) entry).remove("operation"));
++            objectMapper.writeValue(output.toFile(), Map.of(
++                    "schema_version", 1, "workstream_id", "ws-test", "run_id", "run-typed",
++                    "node_id", nodeId, "result", raw));
++        }
+         var sidecarRef = tempDir.relativize(sidecar).toString();
+         var outputRef = tempDir.relativize(output).toString();
+         var outputs = List.of(outputRef, sidecarRef);
+--- a/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java
++++ b/dual-adapter-acpx/src/test/java/dev/dual/adapter/acpx/HumanRequirementContinuationSequenceTest.java
+@@ -209,6 +209,233 @@
+                 assertEquals("Generic utility\n", Files.readString(f.root.resolve("README.md")));
+                 assertFalse(f.active().result().toString().contains("MODEL_DID_NOT_RETURN_JSON"));
+             }
++        }
++    }
++
++    @ParameterizedTest @ValueSource(booleans={false,true})
++    void goalReproposalReachesNewReviewHumanApprovalAndBothPhasesAcrossAllVariants(boolean queued) throws Exception {
++        for(var variant:List.of("full","contract","terminal-delivery","small")) {
++            var f=new Fixture(root.resolve(variant),queued,variant);
++            f.transport.reviewDecisions.addAll(List.of("NEEDS_REVISION","NEEDS_REVISION","READY_FOR_PRODUCT_REVIEW"));
++            f.transport.goalReproposals=1;
++            f.untilGate();
++            assertEquals("gate.human_requirement_review",f.active().nodeDefinitionId(),f.active().toString());
++            assertEquals(3,Collections.frequency(f.transport.calls,"intake.claude_brainstorm"));
++            assertTrue(f.transport.prompts.get(2).contains("actual objective or scope.excluded change"));
++            assertFalse(f.transport.prompts.get(2).contains("and sha256 `"));
++            f.ledger.resolveOpenGate(f.paths,f.definition,"approve","Approve current revised goal");
++            f.untilGate();
++            assertEquals("gate.contract_review",f.active().nodeDefinitionId(),f.active().toString());
++            assertTrue(f.goalCompile().result().get("contract_phase").equals("GOAL"));
++            assertThrows(AgentRunGovernanceContext.QualificationException.class,()->f.qualifiedInput());
++            f.ledger.resolveOpenGate(f.paths,f.definition,"approve","Approve execution");
++            assertTrue(f.qualifiedInput().trustedTaskContractPayload().isPresent());
++            if(variant.equals("contract")) {
++                var log=f.root.resolve("cold-revision.log");
++                var child=new ProcessBuilder(Path.of(System.getProperty("java.home"),"bin/java").toString(),"-cp",System.getProperty("java.class.path"),
++                        ColdRevisionRead.class.getName(),f.root.toString(),f.ws).redirectErrorStream(true).redirectOutput(log.toFile()).start();
++                assertTrue(child.waitFor(30,java.util.concurrent.TimeUnit.SECONDS));assertEquals(0,child.exitValue(),Files.readString(log));
++            }
++            if(variant.equals("contract")) {
++                try(var files=Files.walk(f.paths.runsDir())) {
++                    var full=files.filter(p->p.toString().endsWith(".contract.json")).filter(p->{try {
++                        return JSON.readTree(p.toFile()).at("/proposal_derivation/kind").asText().equals("goal_reproposal");
++                    }catch(Exception e){throw new RuntimeException(e);}}).findFirst().orElseThrow();
++                    var bytes=Files.readAllBytes(full);var original=(ObjectNode)JSON.readTree(bytes);
++                    for(var corruption:List.of("missing-derivation","wrong-kind","wrong-base","missing-R01")) {
++                        var modified=original.deepCopy(); Path r01=null; byte[] preparedBytes=null;
++                        if(corruption.equals("missing-derivation")) modified.remove("proposal_derivation");
++                        if(corruption.equals("wrong-kind")) ((ObjectNode)modified.get("proposal_derivation")).put("kind","initial");
++                        if(corruption.equals("wrong-base")) ((ObjectNode)modified.at("/proposal_derivation/base_proposal_reference")).put("sha256","0".repeat(64));
++                        if(corruption.equals("missing-R01")) {
++                            try(var siblings=Files.list(full.getParent())) {r01=siblings.filter(p->p.toString().endsWith("-prepared.json")).findFirst().orElseThrow();}
++                            preparedBytes=Files.readAllBytes(r01);Files.delete(r01);
++                        }
++                        if (!corruption.equals("missing-R01")) JSON.writeValue(full.toFile(),modified);
++                        // Missing R01 must be the only changed fact, not a serialization/hash mismatch.
++                        if (corruption.equals("missing-R01")) assertArrayEquals(bytes, Files.readAllBytes(full));
++                        var sha=java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(full)));
++                        var forged=new TaskContractProposalReference(1,original.path("node_instance_id").asText()+":"+sha.substring(0,16),f.ws,
++                                "intake.claude_brainstorm",original.path("node_instance_id").asText(),f.root.relativize(full).toString(),sha);
++                        var forgedRef=full.getParent().resolve("forged-proposal.ref.json");
++                        JSON.writeValue(forgedRef.toFile(),forged);
++                        assertTrue(TaskContractProposalReference.resolveProposalFromRefs(f.root,f.ws,
++                                List.of(f.root.relativize(forgedRef).toString()),JSON).isEmpty(),corruption);
++                        Files.delete(forgedRef);
++                        Files.write(full,bytes); if(r01!=null) Files.write(r01,preparedBytes);
++                    }
++                }
++            }
++            // Later approvals and appended route events cannot revoke the earlier, fixed derivation.
++            try(var files=Files.list(f.paths.nodesDir())) {
++                for(var path:files.filter(x->x.toString().endsWith(".json")).toList()) {
++                    var n=JSON.readValue(path.toFile(),NodeInstanceDocument.class);
++                    if(!n.nodeDefinitionId().equals("intake.claude_brainstorm") || n.status()!=NodeStatus.COMPLETED) continue;
++                    var ref=TaskContractProposalReference.resolveProposalFromRefs(f.root,f.ws,n.outputRefs(),JSON).orElseThrow();
++                    assertTrue(new TaskContractRevisionContextResolver(f.ledger).resolveForProposal(f.root,f.ws,ref.reference()).valid());
++                }
++            }
++        }
++    }
++    @ParameterizedTest @ValueSource(booleans={false,true})
++    void humanGoalRevisionUsesFreshSubjectAndMissingOrForgedFormsNeverPublish(boolean queued) throws Exception {
++        var f=new Fixture(root.resolve("human"),queued);
++        f.untilGate(); var old=f.active().inputRefs();
++        f.ledger.resolveOpenGate(f.paths,f.definition,"revise","Remove premature goal path restriction");
++        f.transport.goalReproposals=1;
++        f.untilGate();
++        assertEquals("gate.human_requirement_review",f.active().nodeDefinitionId(),f.active().toString());
++        assertNotEquals(old,f.active().inputRefs());
++        f.ledger.resolveOpenGate(f.paths,f.definition,"approve","Approve new subject");
++        f.untilGate(); assertEquals("gate.contract_review",f.active().nodeDefinitionId());
++        // Post-GOAL clarification is still a patch-only route, not an online goal rewrite.
++        f.ledger.resolveOpenGate(f.paths,f.definition,"clarify","Clarify existing clause");
++        f.transport.goalReproposals=1;
++        f.untilGate();
++        assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY,f.ledger.loadCurrent(f.paths).status());
++        assertFalse(f.active().outputRefs().stream().anyMatch(r->r.endsWith(".contract.json")));
++        for(var violation:List.of("same-goal","wrong-id","delete-scope","delete-clause","change-question")) {
++            var bad=new Fixture(root.resolve(violation),queued);
++            bad.transport.recommendation="NEEDS_REVISION";bad.transport.goalReproposals=1;bad.transport.fullViolation=violation;
++            bad.untilGate();
++            assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY,bad.ledger.loadCurrent(bad.paths).status(),violation);
++            assertEquals(NodeStatus.FAILED,bad.active().status(),violation);
++            assertFalse(bad.active().outputRefs().stream().anyMatch(r->r.endsWith(".contract.json")),violation);
++        }
++    }
++
++    @ParameterizedTest @ValueSource(booleans={false,true})
++    void fixedRevisionInputsRejectDriftBeforeDispatchAndPublication(boolean queued) throws Exception {
++        for(var point:List.of("before-dispatch","after-response","delete-prepared")) {
++            var f=new Fixture(root.resolve(point),queued);f.untilGate();
++            var gate=f.active();
++            var reviewRef=gate.inputRefs().stream().filter(r->r.endsWith(".contract.json")).findFirst().orElseThrow();
++            var base=JSON.readTree(f.root.resolve(reviewRef).toFile()).at("/review_subject/artifact_ref").asText();
++            f.ledger.resolveOpenGate(f.paths,f.definition,"revise","Clarify goal wording");f.transport.goalReproposals=1;
++            if(point.equals("before-dispatch")) f.transport.beforeInvocation=()->Files.writeString(f.root.resolve(base),"{}");
++            else f.transport.afterResponse=()-> {
++                if(point.equals("after-response")) Files.writeString(f.root.resolve(base),"{}");
++                else {
++                    try(var files=Files.walk(f.paths.runsDir())) {
++                        var prepared=files.filter(x->x.getFileName().toString().endsWith("-prepared.json"))
++                                .filter(x->{try{return JSON.readTree(x.toFile()).path("node").asText().equals(f.active().nodeInstanceId());}
++                                    catch(Exception failure){throw new RuntimeException(failure);}}).findFirst().orElseThrow();
++                        Files.delete(prepared);
++                    }
++                }
++            };
++            if (point.equals("before-dispatch")) {
++                f.untilGate();
++                assertEquals(WorkflowStatus.WAITING_FOR_RECOVERY, f.ledger.loadCurrent(f.paths).status());
++            } else {
++                assertThrows(java.io.IOException.class, () -> f.untilGate(), point);
++            }
++            // Changed publication inputs remain INVALID; do not invent a recoverable model result.
++            assertEquals(point.equals("before-dispatch")?2:3,f.transport.calls.size(),point);
++            assertFalse(f.active().outputRefs().stream().anyMatch(r->r.endsWith(".contract.json")),point);
++        }
++    }
++    @ParameterizedTest @ValueSource(booleans={false,true})
++    void interruptedPreparedBindingCannotDispatchAndOnlyFixedBytesMayBeCompleted(boolean queued) throws Exception {
++        for (var full : List.of(false, true)) for (var point : List.of("before_manifest", "after_replace", "before_pending_delete")) {
++            var f = new Fixture(root.resolve(full + point), queued);
++            f.untilGate();
++            f.ledger.resolveOpenGate(f.paths, f.definition, "revise", "Clarify goal wording");
++            f.transport.goalReproposals = full ? 1 : 0;
++            var selected = new java.util.concurrent.atomic.AtomicBoolean();
++            f.ledger = InterruptedTestLedger.atWhen(point, () -> {
++                boolean ready = countRunRecords(f, "-prepared.json") == 3;
++                if (ready) selected.set(true);
++                return ready;
++            }, Map.of("test_binary", "acpx-tests-v3"));
++            try { f.untilGate(); } catch (java.io.IOException expectedInterruption) { }
++            assertTrue(selected.get(), "R01 bind prefix must actually be exercised");
++            assertEquals(2, f.transport.calls.size(), "R01 bind interruption cannot dispatch");
++            var prepared = runRecords(f, "-prepared.json").stream().filter(path -> {
++                try { return JSON.readTree(path.toFile()).at("/binding/contract_revision").isObject(); }
++                catch (Exception failure) { throw new RuntimeException(failure); }
++            }).findFirst().orElseThrow();
++            var bytes = Files.readAllBytes(prepared);
++            var cold = AcpxTestLedger.ledger();
++            try (var finish = cold.writeSession(f.paths, "finish fixed preparation mutation", "cold")) { finish.commit(); }
++            assertArrayEquals(bytes, Files.readAllBytes(prepared));
++            assertEquals(2, f.transport.calls.size());
++            // This proves fixed local completion only; no retry or provider eligibility is inferred.
++        }
++    }
++
++    @ParameterizedTest @ValueSource(booleans={false,true})
++    void revisionCompletionPrefixesReplayInColdJvmWithoutRedispatch(boolean queued) throws Exception {
++        for (var full : List.of(false, true)) for (var point : List.of("before_manifest", "after_replace", "before_pending_delete")) {
++            var f = new Fixture(root.resolve(full + point), queued);
++            f.untilGate();
++            f.ledger.resolveOpenGate(f.paths, f.definition, "revise", "Clarify goal wording");
++            f.transport.goalReproposals = full ? 1 : 0;
++            f.ledger = InterruptedTestLedger.atWhen(point, () -> countRunRecords(f, "-completion.json") == 3,
++                    Map.of("test_binary", "acpx-tests-v3"));
++            assertThrows(Exception.class, () -> f.untilGate());
++            assertEquals(3, f.transport.calls.size());
++            var completion = runRecords(f, "-completion.json").stream().filter(path -> {
++                try { return JSON.readTree(path.toFile()).at("/prepared/ref").asText().contains("-prepared.json")
++                        && JSON.readTree(f.root.resolve(JSON.readTree(path.toFile()).at("/prepared/ref").asText()).toFile())
++                           .at("/binding/contract_revision").isObject(); }
++                catch (Exception failure) { throw new RuntimeException(failure); }
++            }).findFirst().orElseThrow();
++            var fixed = JSON.readTree(completion.toFile());
++            var log = f.root.resolve("cold-completion.log");
++            var child = new ProcessBuilder(Path.of(System.getProperty("java.home"), "bin/java").toString(), "-cp",
++                    System.getProperty("java.class.path"), ColdRevisionCompletion.class.getName(), f.root.toString(), f.ws,
++                    fixed.path("execution").asText(), full ? "goal_reproposal" : "revision_patch_merge")
++                    .redirectErrorStream(true).redirectOutput(log.toFile()).start();
++            assertTrue(child.waitFor(30, java.util.concurrent.TimeUnit.SECONDS));
++            assertEquals(0, child.exitValue(), Files.readString(log));
++            assertEquals(3, f.transport.calls.size(), "cold reader has no transport");
++        }
++    }
++
++    private static List<Path> runRecords(Fixture f, String suffix) {
++        try (var files = Files.walk(f.paths.runsDir())) {
++            return files.filter(path -> path.getFileName().toString().endsWith(suffix)).toList();
++        } catch (Exception failure) { throw new RuntimeException(failure); }
++    }
++    private static int countRunRecords(Fixture f, String suffix) { return runRecords(f, suffix).size(); }
++
++    public static final class ColdRevisionCompletion {
++        public static void main(String[] args) throws Exception {
++            var root = Path.of(args[0]); var ws = args[1]; var paths = new WorkstreamPaths(root, new DualId(ws));
++            var ledger = AcpxTestLedger.ledger();
++            try (var finish = ledger.writeSession(paths, "cold fixed completion", "cold")) { finish.commit(); }
++            var execution = JSON.readValue(paths.nodeExecutionJson(args[2]).toFile(), dev.dual.ledger.file.NodeExecutionDocument.class);
++            dev.dual.runtime.RecordedExecutionRecovery.recover(ledger, paths, execution);
++            var node = ledger.loadNode(paths, execution.nodeInstanceId());
++            var proposal = TaskContractProposalReference.resolveProposalFromRefs(root, ws, node.outputRefs(), JSON).orElseThrow();
++            var doc = JSON.readTree(proposal.artifactPath().toFile());
++            if (!doc.at("/proposal_derivation/kind").asText().equals(args[3])) throw new AssertionError("wrong derivation");
++            var context = new TaskContractRevisionContextResolver(ledger).resolveForProposal(root, ws, proposal.reference());
++            if (!context.valid()) throw new AssertionError(context.errors());
++            if (ledger.loadCurrent(paths).activeNodeInstanceIds().size() != 1
++                    || !ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().getFirst()).nodeDefinitionId()
++                        .equals("context.intake_codex_product_review")) throw new AssertionError("review successor missing");
++            System.out.println("COLD_FIXED_COMPLETION_VALID " + args[3]);
++        }
++    }
++
++    public static final class ColdRevisionRead {
++        public static void main(String[] args) throws Exception {
++            var root=Path.of(args[0]);var ws=args[1];var paths=new WorkstreamPaths(root,new DualId(ws));
++            var ledger=new WorkflowFileLedger(FlowKernelProvider.create("liteflow"),Map.of("test_binary","acpx-tests-v3"));
++            int count=0;
++            try(var files=Files.list(paths.nodesDir())) {
++                for(var path:files.filter(p->p.toString().endsWith(".json")).toList()) {
++                    var node=JSON.readValue(path.toFile(),NodeInstanceDocument.class);
++                    if(!node.nodeDefinitionId().equals("intake.claude_brainstorm") || node.status()!=NodeStatus.COMPLETED) continue;
++                    var proposal=TaskContractProposalReference.resolveProposalFromRefs(root,ws,node.outputRefs(),JSON).orElseThrow();
++                    var result=new TaskContractRevisionContextResolver(ledger).resolveForProposal(root,ws,proposal.reference());
++                    if(!result.valid()) throw new AssertionError(result.errors());count++;
++                }
++            }
++            if(count!=3) throw new AssertionError("expected initial/full/patch history, got "+count);
++            System.out.println("COLD_REVISION_HISTORY_VALID "+count);
+         }
+     }
+ 
+@@ -327,6 +554,15 @@
+         final Fixture f;
+         final List<String> calls = new ArrayList<>(), prompts = new ArrayList<>(), obligations = new ArrayList<>();
+         String recommendation = "READY_FOR_PRODUCT_REVIEW";
++        final Deque<String> reviewDecisions = new ArrayDeque<>();
++        int goalReproposals;
++        String fullViolation="";
++        interface IoAction { void run() throws Exception; }
++        IoAction beforeInvocation,afterResponse;
++        @Override Map<String,Object> invocationInputs(String agent,Path workdir,String session) throws java.io.IOException {
++            if(beforeInvocation!=null) {var action=beforeInvocation;beforeInvocation=null;try{action.run();}catch(Exception e){throw new java.io.IOException(e);}}
++            return super.invocationInputs(agent,workdir,session);
++        }
+         String acceptanceFailure = "";
+         boolean providerDenied;
+         boolean interfaceIncompatible;
+@@ -392,6 +628,7 @@
+                     revision = resolved.context();
+                     if (revision.revision()) emission = AgentResultPromptContract.proposalEmissionContext(revision);
+                 }
++                if(id.equals("intake.codex_product_review") && !reviewDecisions.isEmpty()) recommendation=reviewDecisions.removeFirst();
+                 var decision = switch (id) {
+                     case "intake.claude_brainstorm" -> "READY_FOR_PRODUCT_REVIEW";
+                     case "intake.codex_product_review" -> recommendation;
+@@ -458,6 +695,29 @@
+                     if (!revision.revision()) {
+                         ((ObjectNode) result.get("scope")).putArray("included").addObject().put("path", "README.md");
+                         result.putArray("evidence_refs").add("README.md");
++                    } else if(goalReproposals>0) {
++                        goalReproposals--;
++                        var previous=JSON.readTree(f.root.resolve(revision.previousReference().artifactRef()).toFile()).path("task_contract_proposal");
++                        result=(ObjectNode)previous.deepCopy(); result.remove("schema_version");
++                        result.put("artifact_type","task_contract_proposal").put("decision",decision).put("summary","Revise goal")
++                                .put("needs_human_input",false).put("base_proposal_id",revision.previousReference().proposalId());
++                        result.put("objective",previous.path("objective").asText()+" Clarify the goal independently of candidate file selection.");
++                        var included=((ObjectNode)result.get("scope")).putArray("included");
++                        previous.path("scope").path("included").forEach(e->included.addObject().put("path",e.path("path").asText()));
++                        var responses=result.putArray("revision_responses");
++                        for(var obligation:revision.obligations()) {
++                            obligations.add(obligation.text());
++                            responses.addObject().put("review_obligation_id",obligation.id()).putArray("resolved_by_clause_ids").add("AC-1");
++                        }
++                        switch(fullViolation) {
++                            case "same-goal"->result.put("objective",previous.path("objective").asText());
++                            case "wrong-id"->result.put("base_proposal_id","wrong");
++                            case "delete-scope"->((ObjectNode)result.get("scope")).putArray("included");
++                            case "delete-clause"->result.putArray("acceptance_criteria");
++                            case "change-question"->result.putArray("open_questions").add("new question");
++                            case "old-sha"->result.put("base_proposal_sha256",revision.previousReference().sha256());
++                        }
++                        envelope.set("result",result);
+                     } else {
+                         var patches = result.putArray("obligation_patches");
+                         for (var obligation : revision.obligations()) {
+@@ -482,6 +742,7 @@
+                 }
+                 Files.writeString(request.stdoutPath(), "fixture transcript"); Files.writeString(request.stderrPath(), "");
+                 completedCandidateNode = node.nodeInstanceId();
++                if(afterResponse!=null) {var action=afterResponse;afterResponse=null;action.run();}
+                 var now = Instant.now();
+                 return new AcpxRunResult(now, now.plusMillis(1), List.of("fixture"), List.of(), null,
+                         new AcpxPromptCompletion("fixture", "end_turn", envelope.toString()),
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputContractDocument.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputContractDocument.java
+@@ -114,6 +114,7 @@
+             String baseProposalId,
+             String baseProposalSha256,
+             TaskContractProposalReference baseProposalReference,
++            // Historical field name: authored revision raw output, including goal_reproposal.
+             String patchSourceOutputRef
+     ) {
+         static ProposalDerivation from(Map<String, Object> document) {
+@@ -130,7 +131,7 @@
+         }
+ 
+         boolean validFor(TaskContractProposalReference reference, String sourceOutputRef) {
+-            return "revision_patch_merge".equals(kind)
++            return ("revision_patch_merge".equals(kind) || "goal_reproposal".equals(kind))
+                     && reference != null
+                     && reference.proposalId().equals(baseProposalId)
+                     && reference.sha256().equals(baseProposalSha256)
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputLineageVerifier.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentOutputLineageVerifier.java
+@@ -71,6 +71,13 @@
+             if (!expectedHash.equals(text(actual.result().get("contract_sidecar_sha256")))) {
+                 return Optional.of("sidecar content hash does not match the node execution result");
+             }
++            if (document.proposalDerivation()!=null) {
++                if (!ContractRevisionBinding.validSource(workspaceRoot,workstreamId,document))
++                    return Optional.of("proposal derivation is not bound to its exact R01");
++                var completion=AgentRunCommitProtocol.readCompletion(paths,actual);
++                if (!containsRef(completion.outputRefs(),sidecarRef))
++                    return Optional.of("proposal is not fixed by R03");
++            }
+             return Optional.empty();
+             });
+         } catch (Exception e) {
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultDocumentProjector.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultDocumentProjector.java
+@@ -52,6 +52,7 @@
+                 }
+                 evidenceDefaults(document);
+                 document.put("task_contract_proposal", taskContractProposalMap(resolvedProposal));
++                if (derivation != null) document.put("proposal_derivation", derivation.toMap());
+             }
+             case AgentResultEnvelope.TaskContractRevisionPatchResult ignored -> {
+                 if (resolvedProposal == null || derivation == null) {
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelope.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelope.java
+@@ -88,8 +88,17 @@
+             List<ContractClause> riskAreas,
+             List<String> evidenceRefs,
+             List<String> openQuestions,
+-            List<RevisionResponse> revisionResponses
+-    ) implements AgentResult {
++            List<RevisionResponse> revisionResponses,
++            String baseProposalId
++    ) implements AgentResult {
++        /** Initial proposal construction; wire revisions use the canonical constructor with an exact base ID. */
++        public TaskContractProposalResult(String artifactType, String decision, String summary, boolean needsHumanInput,
++                String objective, ProposalScope scope, List<ContractClause> acceptanceCriteria, List<ContractClause> testRequirements,
++                List<ContractClause> constraints, List<ContractClause> nonGoals, List<ContractClause> riskAreas,
++                List<String> evidenceRefs, List<String> openQuestions, List<RevisionResponse> revisionResponses) {
++            this(artifactType, decision, summary, needsHumanInput, objective, scope, acceptanceCriteria, testRequirements,
++                    constraints, nonGoals, riskAreas, evidenceRefs, openQuestions, revisionResponses, null);
++        }
+     }
+ 
+     public record ProposalScope(List<ProposalScopePath> included, List<String> excluded) {
+@@ -112,7 +121,6 @@
+             String decision,
+             String summary,
+             String baseProposalId,
+-            String baseProposalSha256,
+             List<ObligationPatch> obligationPatches
+     ) implements AgentResult {
+     }
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeValidator.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultEnvelopeValidator.java
+@@ -285,11 +285,6 @@
+             ValidationErrors errors
+     ) {
+         requiredText(patch.baseProposalId(), "result.base_proposal_id", errors);
+-        requiredText(patch.baseProposalSha256(), "result.base_proposal_sha256", errors);
+-        if (patch.baseProposalSha256() != null
+-                && !patch.baseProposalSha256().matches("[0-9a-f]{64}")) {
+-            errors.reject("result.base_proposal_sha256 must be 64 lowercase hexadecimal characters");
+-        }
+         requiredList(patch.obligationPatches(), "result.obligation_patches", true, errors);
+         if (patch.obligationPatches() == null) {
+             return;
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentResultPromptContract.java
+@@ -126,16 +126,18 @@
+     private static String contractRevisionInstruction(String nodeId, ProposalEmissionContext context) {
+         if ("intake.claude_brainstorm".equals(nodeId)) {
+             if (context.revision()) {
+-                return "Return only `task_contract_revision_patch`; do not return or copy a full proposal. "
++                return (context.goalReproposalAllowed()
++                        ? "Use task_contract_revision_patch for ordinary changes. Before first GOAL approval only, an actual objective or scope.excluded change may use task_contract_proposal with base_proposal_id. Preserve scope.included/evidence_refs (retain or ADD), open_questions, all clause IDs/sections (ADD/REPLACE only); revision_responses must cover each obligation using actual relevant clause IDs. Full proposal without a goal/exclusion change is rejected. Full result shape: " + json(exampleResult(nodeId,"READY_FOR_PRODUCT_REVIEW",ProposalEmissionContext.initial())) + " Replace this illustrative content with the full revised baseline, set base_proposal_id to the exact current ID and supply all revision_responses. "
++                        : "Return only `task_contract_revision_patch`; do not return or copy a full proposal. ")
+                         + "The patch is bound to base proposal id `" + context.baseProposalId()
+-                        + "` and sha256 `" + context.baseProposalSha256() + "`. "
++                        + "`. Full content identity is fixed by Dual; never emit base_proposal_sha256. "
+                         + "Cover each authoritative routed obligation exactly once. Preserve its id and implement its text: "
+                         + json(context.obligations())
+                         + (context.acceptanceEvidence().isEmpty() ? "" :
+                             ". Original verified rework evidence (retain non-contract defects as evidence; "
+                             + "do not reinterpret them as contract obligations or approval): "
+                             + context.acceptanceEvidence())
+-                        + ". Only clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
++                        + ". For task_contract_revision_patch only: clause ADD/REPLACE, exact scope ADD, and evidence-ref ADD are supported. "
+                         + "No DELETE, section move, scope removal, objective/open-question change, JSON Pointer, "
+                         + "or arbitrary field patch is allowed. `scope_additions` uses exact repository-relative "
+                         + "paths. " + CANONICAL_SCOPE_PATH_REQUIREMENT
+@@ -296,7 +298,6 @@
+                     decision,
+                     "one short sentence",
+                     proposalContext.baseProposalId(),
+-                    proposalContext.baseProposalSha256(),
+                     List.of(new AgentResultEnvelope.ObligationPatch(
+                             proposalContext.obligations().isEmpty()
+                                     ? "CO-1" : proposalContext.obligations().getFirst().id(),
+@@ -470,7 +471,8 @@
+             String baseProposalId,
+             String baseProposalSha256,
+             List<AgentResultEnvelope.ReviewObligation> obligations,
+-            String acceptanceEvidence
++            String acceptanceEvidence,
++            boolean goalReproposalAllowed
+     ) {
+         public ProposalEmissionContext {
+             obligations = obligations == null ? List.of() : List.copyOf(obligations);
+@@ -479,9 +481,15 @@
+ 
+         public ProposalEmissionContext(EmissionMode mode, String baseProposalId, String baseProposalSha256,
+                                        List<AgentResultEnvelope.ReviewObligation> obligations) {
+-            this(mode, baseProposalId, baseProposalSha256, obligations, "");
+-        }
+-
++            this(mode, baseProposalId, baseProposalSha256, obligations, "", false);
++        }
++
++        public ProposalEmissionContext(EmissionMode mode,String id,String sha,List<AgentResultEnvelope.ReviewObligation> obligations,String evidence) {
++            this(mode,id,sha,obligations,evidence,false);
++        }
++        public ProposalEmissionContext withGoalReproposal(boolean allowed) {
++            return new ProposalEmissionContext(mode,baseProposalId,baseProposalSha256,obligations,acceptanceEvidence,allowed);
++        }
+         public static ProposalEmissionContext initial() {
+             return new ProposalEmissionContext(EmissionMode.INITIAL_FULL, "", "", List.of());
+         }
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/AgentRunCommitProtocol.java
+@@ -90,6 +90,8 @@
+             if (!hash(Files.readAllBytes(prepared.path())).equals(prepared.reference().get("sha256")))
+                 throw new IOException("prepared identity changed");
+             verifyInputs(paths.workspaceRoot(), fixed.path("inputs"));
++            ContractRevisionBinding.verifyDispatch(new TaskHandler.TaskContext(context.workspaceRoot(),
++                    context.workstreamId(),context.definition(),context.instance(),scoped),fixed);
+             if (TaskContractProjectionVerifier.requiresContract(context.definition())) {
+                 var resolution = TaskContractProjectionVerifier.resolve(scoped, paths.workspaceRoot(), context.workstreamId(),
+                         TaskContractProjectionVerifier.requiredPhase(context.definition()));
+@@ -354,6 +356,10 @@
+         return new Prepared(execution, stringReference((Map<?, ?>) execution.result().get("prepared_run")), path);
+     }
+ 
++    static void verifyPreparedInputs(Path root, com.fasterxml.jackson.databind.JsonNode prepared) throws IOException {
++        verifyInputs(root,prepared.path("inputs"));
++    }
++
+     public static boolean hasPrepared(NodeExecutionDocument execution) { return execution.result().containsKey("prepared_run"); }
+ 
+     public static boolean hasInputRejection(WorkstreamPaths paths, NodeExecutionDocument execution) throws IOException {
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/ArtifactContractValidator.java
+@@ -234,16 +234,26 @@
+                     Map.of("errors", resolved.errors())));
+         }
+         var context = resolved.context();
++        ContractRevisionBinding fixedBinding;
++        try {
++            fixedBinding = ContractRevisionBinding.verifyPublication(root,workstreamId,nodeInstanceId,envelope.runId(),context);
++            if (context.revision() && fixedBinding.allowedForms().contains("GOAL_REPROPOSAL")
++                    != revisionContextResolver.goalReproposalAllowed(root,workstreamId,context,nodeInstanceId))
++                throw new java.io.IOException("revision form eligibility differs from R01");
++        } catch (Exception invalid) {
++            return ProposalResolution.failure(ContractViolation.of("TASK_CONTRACT_REVISION_BINDING_INVALID",
++                    "program revision input could not be verified",Map.of("errors",List.of(invalid.toString()))));
++        }
+         TaskContractProposal proposal;
+         AgentOutputContractDocument.ProposalDerivation derivation = null;
+         if (isProposal) {
+-            if (context.revision()) {
+-                return ProposalResolution.failure(ContractViolation.of(
+-                        "TASK_CONTRACT_REVISION_SHAPE_INVALID",
+-                        "revision iteration requires task_contract_revision_patch",
+-                        Map.of()));
+-            }
+             var proposalResult = (AgentResultEnvelope.TaskContractProposalResult) envelope.result();
++            if (context.revision() ? !fixedBinding.allowedForms().contains("GOAL_REPROPOSAL")
++                    || !fixedBinding.baseProposalReference().proposalId().equals(proposalResult.baseProposalId())
++                    : proposalResult.baseProposalId() != null) {
++                return ProposalResolution.failure(ContractViolation.of("TASK_CONTRACT_REVISION_SHAPE_INVALID",
++                        "full proposal requires eligible goal change and exact base ID; ordinary revision requires task_contract_revision_patch",Map.of()));
++            }
+             var resolvedScope = new TaskContractScopeResolver().resolve(
+                     proposalResult.scope().included(), root);
+             if (!resolvedScope.valid()) {
+@@ -253,6 +263,14 @@
+                         Map.of("errors", resolvedScope.errors())));
+             }
+             proposal = resultProjector.taskContractProposal(proposalResult, resolvedScope.entries());
++            if (context.revision()) {
++                var bounded = new TaskContractProposalValidator().validateGoalReproposal(context.previousProposal(),proposal);
++                if (!bounded.isEmpty()) return ProposalResolution.failure(ContractViolation.of("TASK_CONTRACT_REVISION_DELTA_INVALID",
++                        "invalid goal re-proposal",Map.of("errors",bounded)));
++                var base=fixedBinding.baseProposalReference();
++                derivation=new AgentOutputContractDocument.ProposalDerivation("goal_reproposal",base.proposalId(),
++                        base.sha256(),base,sourceOutputRef);
++            }
+         } else {
+             if (!context.revision()) {
+                 return ProposalResolution.failure(ContractViolation.of(
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractCompileHandler.java
+@@ -283,6 +283,11 @@
+                 ));
+             }
+             if (revisionContext.revision()) {
++                if (validated.proposalDerivation()!=null && validated.proposalDerivation().kind().equals("goal_reproposal")) {
++                    var bounded=proposalValidator.validateGoalReproposal(revisionContext.previousProposal(),proposal);
++                    if (!bounded.isEmpty()) return new ProposalCompileResult(null,proposal,proposalFailure(
++                            "TASK_CONTRACT_REVISION_DELTA_INVALID","invalid goal re-proposal",bounded));
++                }
+                 var deltaErrors = proposalValidator.validateRevisionDelta(
+                         revisionContext.previousProposal(), proposal);
+                 if (!deltaErrors.isEmpty()) {
+--- /dev/null
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/ContractRevisionBinding.java
+@@ -0,0 +1,119 @@
++package dev.dual.runtime.handler;
++
++import dev.dual.core.id.DualId;
++import dev.dual.ledger.file.*;
++import java.io.IOException;
++import java.nio.file.*;
++import java.util.*;
++
++/** Program-owned revision input in the existing R01. It is not an approval or a model assertion. */
++public record ContractRevisionBinding(String iterationId, TaskContractProposalReference baseProposalReference,
++        List<AgentResultEnvelope.ReviewObligation> obligations, List<String> allowedForms) {
++    private static final AtomicJsonWriter JSON = new AtomicJsonWriter();
++    public ContractRevisionBinding {
++        if (iterationId == null || iterationId.isBlank() || baseProposalReference == null
++                || obligations == null || obligations.isEmpty() || allowedForms == null
++                || !allowedForms.contains("REVISION_PATCH")
++                || !Set.of("REVISION_PATCH", "GOAL_REPROPOSAL").containsAll(allowedForms)
++                || new HashSet<>(allowedForms).size() != allowedForms.size())
++            throw new IllegalArgumentException("invalid program revision binding");
++        obligations = List.copyOf(obligations); allowedForms = List.copyOf(allowedForms);
++    }
++    public record Captured(TaskContractRevisionContextResolver.Context context, ContractRevisionBinding binding, List<Path> inputs) {}
++    public Map<String,Object> toMap() {
++        return Map.of("iteration_id",iterationId,"base_proposal_reference",baseProposalReference.toMap(),
++                "obligations",obligations,"allowed_forms",allowedForms);
++    }
++    static ContractRevisionBinding from(com.fasterxml.jackson.databind.JsonNode tree) throws IOException {
++        try {
++            if (!tree.isObject() || tree.size()!=4) throw new IOException("invalid revision binding fields");
++            var reference=JSON.objectMapper().treeToValue(tree.path("base_proposal_reference"),TaskContractProposalReference.class);
++            var obligations=JSON.objectMapper().readerForListOf(AgentResultEnvelope.ReviewObligation.class)
++                    .<List<AgentResultEnvelope.ReviewObligation>>readValue(tree.path("obligations"));
++            var forms=JSON.objectMapper().readerForListOf(String.class).<List<String>>readValue(tree.path("allowed_forms"));
++            return new ContractRevisionBinding(tree.path("iteration_id").asText(),reference,obligations,forms);
++        } catch (Exception failure) { throw new IOException("invalid program revision binding",failure); }
++    }
++    static void verifyDispatch(TaskHandler.TaskContext context, com.fasterxml.jackson.databind.JsonNode fixed) throws IOException {
++        if (!context.definition().id().equals("intake.claude_brainstorm")) return;
++        var captured = new TaskContractRevisionContextResolver(context.ledger()).captureRevision(context);
++        var actual = fixed.path("binding").path("contract_revision");
++        if (captured.binding()==null ? !actual.isMissingNode() : !captured.binding().equals(from(actual)))
++            throw new IOException("revision baseline/obligations/forms differ from R01");
++    }
++
++    /** Rebuild exact R01 -> bound execution claim, without searching by model ID or using a latest baseline. */
++    static ContractRevisionBinding read(Path root, String ws, String nodeId, String runId) throws IOException {
++        var paths=new WorkstreamPaths(root,new DualId(ws));
++        var run=paths.runsDir().resolve(runId).normalize();
++        if (!run.getParent().equals(paths.runsDir()) || !runId.matches("[A-Za-z0-9._-]+")) throw new IOException("foreign run");
++        List<Path> matches;
++        try(var files=Files.list(run.resolve("outputs"))) {
++            matches=files.filter(f->f.getFileName().toString().endsWith("-prepared.json")).toList();
++        }
++        if(matches.size()!=1) throw new IOException("missing or ambiguous R01");
++        var path=matches.getFirst();var fixed=JSON.readTree(path);
++        var executionId=fixed.path("execution").asText();
++        if(!executionId.matches("[A-Za-z0-9._-]+")) throw new IOException("invalid execution identity");
++        var execution=JSON.read(paths.nodeExecutionJson(executionId),NodeExecutionDocument.class);
++        var prepared=AgentRunCommitProtocol.boundPreparation(paths,execution);
++        if(!prepared.path().equals(path) || !fixed.path("workstream").asText().equals(ws)
++                || !fixed.path("node").asText().equals(nodeId) || !execution.nodeInstanceId().equals(nodeId)
++                || !execution.nodeDefinitionId().equals("intake.claude_brainstorm")
++                || !fixed.path("claim").equals(JSON.objectMapper().valueToTree(execution.result().get("claim"))))
++            throw new IOException("revision R01 is not the author's bound claim");
++        AgentRunCommitProtocol.verifyPreparedInputs(root,fixed);
++        var tree=fixed.path("binding").path("contract_revision");
++        if(tree.isMissingNode()) return null;
++        var binding=from(tree);
++        if(!JSON.read(paths.nodeJson(nodeId),NodeInstanceDocument.class).iterationId().equals(binding.iterationId())) throw new IOException("foreign revision iteration");
++        var base=root.resolve(binding.baseProposalReference().artifactRef()).normalize();
++        if(!base.startsWith(root.toAbsolutePath().normalize()) || !Files.isRegularFile(base)
++                || !TaskContractArtifactWriter.sha256(base).equals(binding.baseProposalReference().sha256())
++                || !fixed.path("inputs").path(binding.baseProposalReference().artifactRef()).asText()
++                    .equals(binding.baseProposalReference().sha256())) throw new IOException("base content identity differs from R01");
++        return binding;
++    }
++    static ContractRevisionBinding verifyPublication(Path root,String ws,String nodeId,String runId,
++            TaskContractRevisionContextResolver.Context context) throws IOException {
++        var binding=context.revision() ? read(root,ws,nodeId,runId) : null;
++        if(context.revision() != (binding!=null) || binding!=null &&
++                (!binding.iterationId().equals(context.iteration().iterationId())
++                || !binding.baseProposalReference().equals(context.previousReference())
++                || !binding.obligations().equals(context.obligations())))
++            throw new IOException("publication baseline differs from R01");
++        return binding;
++    }
++    static boolean validSource(Path root,String ws,AgentOutputContractDocument doc) {
++        try {
++            var raw=new AgentResultEnvelopeParser().parse(Files.readString(root.resolve(doc.sourceOutputRef())));
++            if(!raw.valid() || !raw.envelope().runId().equals(doc.runId())
++                    || !raw.envelope().workstreamId().equals(ws) || !raw.envelope().nodeId().equals(doc.nodeId())) return false;
++            var derivation=doc.proposalDerivation();
++            if(derivation==null) {
++                if (!(raw.envelope().result() instanceof AgentResultEnvelope.TaskContractProposalResult p) || p.baseProposalId()!=null) return false;
++                var outputs=root.resolve(doc.sourceOutputRef()).getParent();
++                try(var paths=Files.list(outputs)) {
++                    if(paths.anyMatch(f->f.getFileName().toString().endsWith("-prepared.json")))
++                        return read(root,ws,doc.nodeInstanceId(),doc.runId())==null;
++                }
++                return true; // A standalone initial artifact still needs ledger lineage before it can grant authority.
++            }
++            var binding=read(root,ws,doc.nodeInstanceId(),doc.runId());
++            if(binding==null || !derivation.validFor(binding.baseProposalReference(),doc.sourceOutputRef())) return false;
++            if(raw.envelope().result() instanceof AgentResultEnvelope.TaskContractRevisionPatchResult patch)
++                return derivation.kind().equals("revision_patch_merge") && patch.baseProposalId().equals(binding.baseProposalReference().proposalId());
++            if(!(raw.envelope().result() instanceof AgentResultEnvelope.TaskContractProposalResult p)
++                    || !derivation.kind().equals("goal_reproposal") || !binding.allowedForms().contains("GOAL_REPROPOSAL")
++                    || !binding.baseProposalReference().proposalId().equals(p.baseProposalId())) return false;
++            var previous=binding.baseProposalReference().resolveVerifiedProposal(root,ws,JSON.objectMapper()).orElseThrow();
++            var projected=new AgentResultDocumentProjector().taskContractProposal(p,doc.taskContractProposal().scope().included());
++            if(!projected.equals(doc.taskContractProposal()) || !p.scope().included().stream()
++                    .map(AgentResultEnvelope.ProposalScopePath::path).toList().equals(doc.taskContractProposal().scope().included().stream()
++                        .map(dev.dual.core.contract.TaskContract.ScopeEntry::path).toList())) return false;
++            var validator=new TaskContractProposalValidator();
++            return validator.validateGoalReproposal(previous,doc.taskContractProposal()).isEmpty()
++                    && validator.validateRevisionCoverage(doc.taskContractProposal(),binding.obligations()).isEmpty();
++        } catch(Exception failure) { return false; }
++    }
++}
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalReference.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalReference.java
+@@ -58,7 +58,8 @@
+             AgentOutputContractDocument document,
+             ObjectMapper objectMapper
+     ) throws Exception {
+-        if (!"task_contract_revision_patch".equals(document.sourceArtifactType())
++        if ((!"task_contract_revision_patch".equals(document.sourceArtifactType())
++                && !"task_contract_proposal".equals(document.sourceArtifactType()))
+                 || document.proposalDerivation() == null) {
+             throw new IllegalArgumentException("revision-derived task-contract proposal lineage is required");
+         }
+@@ -135,23 +136,7 @@
+                         objectMapper).valid()) {
+             return false;
+         }
+-        if ("task_contract_proposal".equals(document.sourceArtifactType())) {
+-            return document.proposalDerivation() == null;
+-        }
+-        if (!"task_contract_revision_patch".equals(document.sourceArtifactType())) {
+-            return false;
+-        }
+-        var derivation = document.proposalDerivation();
+-        if (derivation == null
+-                || !derivation.validFor(derivation.baseProposalReference(), document.sourceOutputRef())) {
+-            return false;
+-        }
+-        try {
+-            return derivation.baseProposalReference()
+-                    .resolveArtifact(root, workstreamId, objectMapper).isPresent();
+-        } catch (RuntimeException ignored) {
+-            return false;
+-        }
++        return ContractRevisionBinding.validSource(root,workstreamId,document);
+     }
+ 
+     static Optional<TaskContractProposalReference> readVerified(
+@@ -191,7 +176,7 @@
+             if (candidate.isEmpty()) {
+                 continue;
+             }
+-            if (resolved != null && !resolved.reference().proposalId().equals(candidate.get().proposalId())) {
++            if (resolved != null && !resolved.reference().equals(candidate.get())) {
+                 return Optional.empty();
+             }
+             resolved = new Resolved(candidate.get(), ref);
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalRevisionMerger.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalRevisionMerger.java
+@@ -24,8 +24,17 @@
+         if (!context.previousReference().proposalId().equals(patch.baseProposalId())) {
+             errors.add("REVISION_BASE_PROPOSAL_ID_MISMATCH");
+         }
+-        if (!context.previousReference().sha256().equals(patch.baseProposalSha256())) {
+-            errors.add("REVISION_BASE_PROPOSAL_SHA256_MISMATCH");
++
++        // The model cites only ID; the verified program context must still match all base bytes.
++        try {
++            var root = workspaceRoot.toAbsolutePath().normalize();
++            var base = root.resolve(context.previousReference().artifactRef()).normalize();
++            if (!base.startsWith(root) || !java.nio.file.Files.isRegularFile(base)
++                    || !TaskContractArtifactWriter.sha256(base).equals(context.previousReference().sha256())) {
++                errors.add("REVISION_BASE_PROPOSAL_CONTENT_MISMATCH");
++            }
++        } catch (Exception invalidBase) {
++            errors.add("REVISION_BASE_PROPOSAL_CONTENT_MISMATCH");
+         }
+ 
+         var expectedObligations = new LinkedHashSet<String>();
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalValidator.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractProposalValidator.java
+@@ -237,6 +237,23 @@
+         return errors;
+     }
+ 
++    /** Bounded full revision: goal/exclusions may change, ordinary fields retain their patch limits. */
++    public List<String> validateGoalReproposal(TaskContractProposal previous, TaskContractProposal revised) {
++        var errors = new ArrayList<String>();
++        if (previous == null || revised == null) return List.of("goal re-proposal baseline absent");
++        if (previous.objective().trim().equals(revised.objective().trim())
++                && new HashSet<>(previous.scope().excluded()).equals(new HashSet<>(revised.scope().excluded())))
++            errors.add("goal re-proposal requires actual objective or exclusion change");
++        if (!revised.scope().included().containsAll(previous.scope().included())) errors.add("scope removal/change is not allowed");
++        if (!revised.evidenceRefs().containsAll(previous.evidenceRefs())) errors.add("evidence removal is not allowed");
++        if (!revised.openQuestions().equals(previous.openQuestions())) errors.add("open-question change is not allowed");
++        var before=clauseSnapshot(previous);var after=clauseSnapshot(revised);
++        for(var id:before.keySet()) if(after.containsKey(id) && !before.get(id).section().equals(after.get(id).section()))
++            errors.add("clause section move is not allowed: " + id);
++        errors.addAll(validateRevisionDelta(previous,revised).stream().map(RevisionDeltaError::message).toList());
++        return List.copyOf(errors);
++    }
++
+     List<RevisionDeltaError> validateRevisionDelta(
+             TaskContractProposal previous,
+             TaskContractProposal current
+--- a/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java
++++ b/dual-runtime/src/main/java/dev/dual/runtime/handler/TaskContractRevisionContextResolver.java
+@@ -243,6 +243,18 @@
+             require(candidate != null && candidate.resolveArtifact(root, workstreamId, OBJECT_MAPPER).isPresent(),
+                     "proposal reference invalid");
+             var result = resolveForNode(root, workstreamId, candidate.producerNodeInstanceId());
++            if (result.valid() && result.context().revision()) {
++                var doc=AgentOutputContractDocument.read(root.resolve(candidate.artifactRef()),OBJECT_MAPPER).orElseThrow();
++                require(ContractRevisionBinding.validSource(root,workstreamId,doc),"revision R01/derivation invalid");
++                require(doc.proposalDerivation().baseProposalReference().equals(result.context().previousReference()),
++                        "revision derivation baseline differs from routed subject");
++                if (doc.proposalDerivation().kind().equals("goal_reproposal")) {
++                    require(goalReproposalAllowed(root,workstreamId,result.context(),candidate.producerNodeInstanceId()),
++                            "goal re-proposal is not an eligible initial negotiation");
++                    require(new TaskContractProposalValidator().validateGoalReproposal(result.context().previousProposal(),
++                            doc.taskContractProposal()).isEmpty(),"goal re-proposal delta invalid");
++                }
++            }
+             if (result.valid() && result.context().lateRoot() != null) {
+                 var reader = new LateReader(root, workstreamId);
+                 reader.proposal(candidate);
+@@ -252,6 +264,55 @@
+         } catch (Exception failure) {
+             return failure("proposal revision context could not be resolved", message(failure));
+         }
++    }
++
++    /** Derive permitted forms at this author's routed occurrence, never from a later mutable current projection. */
++    boolean goalReproposalAllowed(Path root, String ws, Context context, String authorId) throws IOException {
++        if (!context.revision() || context.lateRoot() != null) return false;
++        var item = context.iteration();
++        var dir = workstreamDir(root, ws);
++        var seen = new HashSet<String>();
++        while (!"workflow_started".equals(item.triggerAction())) {
++            require(seen.add(item.iterationId()), "revision ancestry cycle");
++            if (!Set.of("NEEDS_REVISION", "revise").contains(item.triggerAction())) return false;
++            require(!item.parentIterationId().isBlank(), "revision ancestry parent absent");
++            var parent = dir.resolve("iterations/" + item.parentIterationId() + ".json");
++            var value = OBJECT_MAPPER.readValue(parent.toFile(), WorkflowIterationDocument.class);
++            require(value.iterationId().equals(item.parentIterationId()), "revision ancestry identity mismatch");
++            item = value;
++        }
++        var reader = new LateReader(root, ws);
++        var cutoff = reader.origin(authorId).sequence();
++        // A compile routed before this author already means approval occurred, even if compile failed/pends.
++        // Later compilation of this very proposal must not invalidate its historical eligibility.
++        return reader.events.stream().noneMatch(e -> e.sequence() < cutoff
++                && (e.to().equals("contract.compile") || e.to().equals("contract.compile_execution")
++                    || e.from().equals("gate.contract_review") && e.action().equals("approved")));
++    }
++
++    public ContractRevisionBinding.Captured captureRevision(TaskHandler.TaskContext context) throws IOException {
++        if (!snapshot) return ledger.inspect(paths(context.workspaceRoot(), context.workstreamId()), (scoped, files) ->
++                new TaskContractRevisionContextResolver(scoped, true).captureRevision(context));
++        var result = resolveForNode(context.workspaceRoot(), context.workstreamId(), context.instance().nodeInstanceId());
++        require(result.valid(), "TASK_CONTRACT_REVISION_CONTEXT_INVALID: " + result.errors());
++        var resolved = result.context();
++        if (!resolved.revision()) return new ContractRevisionBinding.Captured(resolved, null, List.of());
++        var forms = goalReproposalAllowed(context.workspaceRoot(), context.workstreamId(), resolved,
++                context.instance().nodeInstanceId()) ? List.of("REVISION_PATCH", "GOAL_REPROPOSAL") : List.of("REVISION_PATCH");
++        var binding = new ContractRevisionBinding(resolved.iteration().iterationId(), resolved.previousReference(),
++                List.copyOf(resolved.obligations()), forms);
++        var inputs = new ArrayList<Path>();
++        inputs.add(context.workspaceRoot().resolve(resolved.previousReference().artifactRef()));
++        var trigger = ledger.loadNode(paths(context.workspaceRoot(), context.workstreamId()),
++                resolved.iteration().triggerNodeInstanceId());
++        new LateReader(context.workspaceRoot(),context.workstreamId()).iterationRoute(resolved.iteration(),trigger);
++        for (var ref : trigger.inputRefs()) if (ref.endsWith(".contract.json")) inputs.add(context.workspaceRoot().resolve(ref));
++        // Human decisions are immutable once resolved; route entries remain checked by the original reader.
++        if (resolved.iteration().triggerAction().equals("revise") || resolved.iteration().triggerAction().equals("clarify")) {
++            var reader = new LateReader(context.workspaceRoot(), context.workstreamId());
++            inputs.add(context.workspaceRoot().resolve(reader.gate(trigger, resolved.iteration().triggerAction()).ref()));
++        }
++        return new ContractRevisionBinding.Captured(resolved, binding, List.copyOf(inputs));
+     }
+ 
+     public Result resolveForDisplayIteration(Path root, String workstreamId, String iterationId) {
+--- a/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/AcceptanceRepairSequenceTest.java
+@@ -299,6 +299,10 @@
+             var verificationBaseline = prepared.qualifiedTaskContract().filter(q -> q.phase() == TaskContract.Phase.EXECUTION)
+                     .isPresent() ? VerificationEvidence.prepare(context) : null;
+             if (verificationBaseline != null) bindingFacts.put("verification_source", verificationBaseline);
++            if(id.equals("intake.claude_brainstorm")) {
++                var capture=new TaskContractRevisionContextResolver(context.ledger()).captureRevision(context);
++                if(capture.binding()!=null) { bindingFacts.put("contract_revision",capture.binding().toMap());preparationFiles.addAll(capture.inputs()); }
++            }
+             var runPrepared = AgentRunCommitProtocol.prepare(context, dir, preparationFiles, bindingFacts);
+             beforeDispatch.accept(context);
+             AgentRunCommitProtocol.qualifyDispatch(context, runPrepared);
+--- a/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeValidatorTest.java
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/AgentResultEnvelopeValidatorTest.java
+@@ -20,7 +20,7 @@
+     void capturedV14ShapeParsesStrictlyButRejectsDuplicateTargetWithoutCorrection() throws Exception {
+         var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "revision",
+-                "node-prev:0123456789abcdef", "a".repeat(64),
++                "node-prev:0123456789abcdef",
+                 List.of(
+                         obligation("CO-1", "AC-1", "src/main/resources/application.yml"),
+                         obligation("CO-3", "C-12", "src/main/resources/application.yml")));
+@@ -42,7 +42,7 @@
+ 
+         var correctedPatch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                 patch.artifactType(), patch.decision(), patch.summary(),
+-                patch.baseProposalId(), patch.baseProposalSha256(),
++                patch.baseProposalId(),
+                 List.of(
+                         patch.obligationPatches().get(0),
+                         obligation("CO-3", "C-12", null)));
+--- a/dual-runtime/src/test/java/dev/dual/runtime/handler/ApprovedTaskContractProposalFixture.java
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/ApprovedTaskContractProposalFixture.java
+@@ -28,9 +28,13 @@
+         MAPPER.writeValue(iterationsDir.resolve(iterationId + ".json").toFile(),
+                 WorkflowIterationDocument.initial("intake.claude_brainstorm", Instant.now()));
+         var proposalOutput = outputDir(workstreamDir, "run-proposal").resolve("intake-claude-brainstorm.json");
+-        Files.writeString(proposalOutput, "{}");
+         var proposalSidecar = AgentOutputContractSidecar.pathFor(proposalOutput);
+         var proposal = MAPPER.readValue(proposalJson, Map.class);
++        var raw=(com.fasterxml.jackson.databind.node.ObjectNode)MAPPER.readTree(proposalJson);
++        raw.remove("schema_version");raw.put("decision","READY_FOR_PRODUCT_REVIEW").put("summary","proposal ready").put("needs_human_input",false);
++        raw.path("scope").path("included").forEach(e->((com.fasterxml.jackson.databind.node.ObjectNode)e).remove("operation"));
++        MAPPER.writeValue(proposalOutput.toFile(),Map.of("schema_version",1,"workstream_id",workstreamId,"run_id","run-proposal",
++                "node_id","intake.claude_brainstorm","result",raw));
+         MAPPER.writeValue(proposalSidecar.toFile(), Map.ofEntries(
+                 Map.entry("artifact_type", "agent_output_contract"),
+                 Map.entry("schema_version", 1),
+@@ -96,6 +100,19 @@
+         return reviewRef;
+     }
+ 
++    /** Standalone initial fixtures use the actual wire shape; this does not create R01 or grant authority. */
++    static void writeInitialSource(Path root, AgentOutputContractDocument document) throws Exception {
++        var raw = (com.fasterxml.jackson.databind.node.ObjectNode) MAPPER.valueToTree(document.taskContractProposal());
++        raw.remove("schema_version");
++        raw.put("artifact_type", "task_contract_proposal");
++        raw.put("decision", document.decision()).put("summary", document.summary()).put("needs_human_input", false);
++        raw.path("scope").path("included").forEach(e ->
++                ((com.fasterxml.jackson.databind.node.ObjectNode) e).remove("operation"));
++        MAPPER.writeValue(root.resolve(document.sourceOutputRef()).toFile(), Map.of(
++                "schema_version", 1, "workstream_id", document.workstreamId(), "run_id", document.runId(),
++                "node_id", document.nodeId(), "result", raw));
++    }
++
+     private static Path outputDir(Path workstreamDir, String runId) throws Exception {
+         var outputDir = workstreamDir.resolve("runs").resolve(runId).resolve("outputs");
+         Files.createDirectories(outputDir);
+--- a/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/ArtifactContractValidatorTest.java
+@@ -497,9 +497,7 @@
+ 
+         assertEquals(NodeStatus.FAILED, validated.status(), validated.result().toString());
+         var artifact = AgentExecutionResultFacts.artifactContractResults(validated).getFirst();
+-        assertEquals("TASK_CONTRACT_REVISION_SHAPE_INVALID", artifact.errorCode());
+-        assertTrue(validated.result().toString().contains("revision iteration requires task_contract_revision_patch"),
+-                validated.result().toString());
++        assertEquals("TASK_CONTRACT_REVISION_BINDING_INVALID", artifact.errorCode());
+         assertTrue(validated.outputRefs().stream().noneMatch(ref -> ref.endsWith(".ref.json")),
+                 "an invalid revision must not publish a trusted proposal reference");
+ 
+@@ -510,7 +508,6 @@
+                 "READY_FOR_PRODUCT_REVIEW",
+                 "Resolve the rejected atomic-registration obligation.",
+                 baseReference.proposalId(),
+-                baseReference.sha256(),
+                 List.of(new AgentResultEnvelope.ObligationPatch(
+                         "CO-1",
+                         List.of("AC-1"),
+@@ -533,41 +530,12 @@
+                         "repository_fact_binding_ref", patchBinding.ref(),
+                         "repository_fact_binding_sha256", patchBinding.sha256())));
+ 
+-        assertEquals(NodeStatus.COMPLETED, patchValidated.status(), patchValidated.result().toString());
+-        var patchSidecarRef = patchValidated.outputRefs().stream()
+-                .filter(ref -> ref.endsWith(".contract.json"))
+-                .findFirst()
+-                .orElseThrow();
+-        var patchSidecar = AgentOutputContractDocument.read(tempDir.resolve(patchSidecarRef), JSON).orElseThrow();
+-        assertEquals("task_contract_revision_patch", patchSidecar.sourceArtifactType());
+-        assertEquals("revision_patch_merge", patchSidecar.proposalDerivation().kind());
+-        assertEquals(baseReference, patchSidecar.proposalDerivation().baseProposalReference());
+-        assertEquals(patchOutput, patchSidecar.proposalDerivation().patchSourceOutputRef());
+-        assertEquals("Registration atomically verifies identity",
+-                patchSidecar.taskContractProposal().acceptanceCriteria().getFirst().text());
+-        assertEquals("Preserve the local part of email addresses",
+-                patchSidecar.taskContractProposal().constraints().get(1).text(),
+-                "untouched baseline clauses must remain byte-for-byte equivalent");
+-        assertEquals(List.of(new TaskContractProposal.RevisionResponse("CO-1", List.of("AC-1"))),
+-                patchSidecar.taskContractProposal().revisionResponses());
+-        var patchReferenceRef = patchValidated.outputRefs().stream()
+-                .filter(ref -> ref.endsWith(".ref.json"))
+-                .findFirst()
+-                .orElseThrow();
+-        assertTrue(TaskContractProposalReference.readVerified(
+-                tempDir, "ws-1", patchReferenceRef, JSON).isPresent());
+-        Files.delete(patchBinding.path());
+-        assertTrue(TaskContractProposalReference.readVerified(
+-                tempDir, "ws-1", patchReferenceRef, JSON).isEmpty(),
+-                "a cold proposal reference read must re-verify its immutable repository fact binding");
+-
+-        var sidecarMap = JSON.readValue(
+-                tempDir.resolve(patchSidecarRef).toFile(), new TypeReference<Map<String, Object>>() {});
+-        sidecarMap.remove("proposal_derivation");
+-        var missingDerivation = AgentOutputContractDocument.from(sidecarMap);
+-        assertThrows(IllegalArgumentException.class, () -> TaskContractProposalReference.publishRevisionDerived(
+-                tempDir, "ws-1", tempDir.resolve(patchSidecarRef), missingDerivation, JSON));
+-    }
++        assertEquals(NodeStatus.FAILED,patchValidated.status(),patchValidated.result().toString());
++        assertEquals("TASK_CONTRACT_REVISION_BINDING_INVALID",AgentExecutionResultFacts.artifactContractResults(patchValidated).getFirst().errorCode());
++        assertTrue(patchValidated.outputRefs().stream().noneMatch(ref->ref.endsWith(".contract.json")),
++                "a hand-written revision without R01 cannot publish; real positive chain is covered by continuation sequences");
++    }
++
+ 
+     @Test
+     void codexReviewSidecarBindsTrustedProposalSubjectFromNodeInputs() throws Exception {
+--- a/dual-runtime/src/test/java/dev/dual/runtime/handler/ContextBuildPackageHandlerTest.java
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/ContextBuildPackageHandlerTest.java
+@@ -2328,6 +2328,11 @@
+ 
+     private void publishSidecar(Path sidecar) throws Exception {
+         AgentOutputLineageFixture.completeAndPublish(tempDir, "ws-ctx", sidecar, "iter-001", List.of());
++        var document = AgentOutputContractDocument.read(sidecar, objectMapper).orElseThrow();
++        if (document.taskContractProposal() != null) {
++            ApprovedTaskContractProposalFixture.writeInitialSource(tempDir, document);
++            AgentOutputLineageFixture.publish(tempDir, "ws-ctx", sidecar, "iter-001");
++        }
+     }
+ 
+     private void publishInitialProposalIteration() throws Exception {
+--- a/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractCompileHandlerTest.java
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractCompileHandlerTest.java
+@@ -349,36 +349,26 @@
+ 
+     @Test
+     void revisionCompilesOnlyWhenEveryTriggeredReviewObligationIsCovered(@TempDir Path root) throws Exception {
+-        prepare(root);
+-        var originalProposal = writeTypedProposal(
+-                root, "run-original", "Original objective",
+-                List.of(new TaskContract.ScopeEntry("README.md", TaskContract.ScopeOperation.MODIFY)),
+-                List.of(), TaskContractProposal.SCHEMA_VERSION,
+-                INITIAL_ITERATION_ID, List.of(), List.of("README.md", "evidence/original-review.json"));
+-        var obligations = List.of(
+-                new AgentResultEnvelope.ReviewObligation("OB-1", "Make the behavior observable"),
+-                new AgentResultEnvelope.ReviewObligation("OB-2", "Preserve the evidence reference"));
+-        var rejectedReview = writeReview(
+-                root, originalProposal, "run-rejected", "NEEDS_REVISION", obligations,
+-                INITIAL_ITERATION_ID, false);
+-        prepareRevisionIteration(root, "iter-002", rejectedReview);
+-
+-        var baseReference = AgentOutputContractDocument.read(root.resolve(rejectedReview), OBJECT_MAPPER)
+-                .orElseThrow()
+-                .reviewSubject();
+-        var revisedProposal = writeValidatedRevisionPatch(root, baseReference, "iter-002");
+-        var approvedReview = writeReview(
+-                root, revisedProposal, "run-ready", "READY_FOR_PRODUCT_REVIEW", List.of(),
+-                "iter-002", true);
+-
+-        var result = compile(context(root, List.of(approvedReview), "iter-002"));
+-
+-        assertEquals(NodeStatus.COMPLETED, result.status(), result.result().toString());
+-        var contract = OBJECT_MAPPER.readValue(contractPath(root).toFile(), TaskContract.class);
+-        assertEquals(List.of("README.md", "evidence/original-review.json", "evidence/revision-proof.json"),
+-                contract.evidenceRefs(), "revision compilation must preserve baseline evidence and append patch evidence");
+-        assertEquals(List.of(new TaskContract.Clause("AC-1", "The revised behavior is observable"),
+-                        new TaskContract.Clause("AC-2", "Revised verification passes")), contract.acceptanceCriteria());
++        // Replace the old hand-written successful revision (no R01/R03) with the real run/ledger chain.
++        var f=new AcceptanceRepairSequenceTest.Fixture(root,"CONTRACT_GAP","docs/output.txt");
++        f.until("gate.human_requirement_review");f.step();
++        var oldReview=f.ledger.loadNode(f.paths,f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst()).inputRefs();
++        var old=AgentOutputContractDocument.read(root.resolve(oldReview.stream().filter(x->x.endsWith(".contract.json")).findFirst().orElseThrow()),OBJECT_MAPPER).orElseThrow();
++        var baseline=old.reviewSubject().resolveVerifiedProposal(root,f.ws,OBJECT_MAPPER).orElseThrow();
++        f.ledger.resolveOpenGate(f.paths,f.ledger.loadDefinition(f.paths),"revise","Make behavior observable and preserve evidence");
++        f.replaceAcceptanceClause=true;
++        f.until("gate.human_requirement_review");f.step();
++        var gate=f.ledger.loadNode(f.paths,f.ledger.loadCurrent(f.paths).activeNodeInstanceIds().getFirst());
++        var context=new TaskContractRevisionContextResolver(f.ledger).resolveForIteration(root,f.ws,gate.iterationId());
++        assertTrue(context.valid(),context.errors().toString());
++        var review=AgentOutputContractDocument.read(root.resolve(gate.inputRefs().stream().filter(x->x.endsWith(".contract.json")).findFirst().orElseThrow()),OBJECT_MAPPER).orElseThrow();
++        var revised=review.reviewSubject().resolveVerifiedProposal(root,f.ws,OBJECT_MAPPER).orElseThrow();
++        assertTrue(new TaskContractProposalValidator().validateRevisionCoverage(revised,context.context().obligations()).isEmpty());
++        assertTrue(revised.evidenceRefs().containsAll(baseline.evidenceRefs()));
++        f.approve();f.until("gate.contract_review");f.step();
++        var goal=TaskContractProjectionVerifier.resolve(f.ledger,root,f.ws,TaskContract.Phase.GOAL).qualified().orElseThrow().contract();
++        assertEquals("Revised output must include a stable identifier",goal.acceptanceCriteria().getFirst().text());
++        assertTrue(goal.scope().included().isEmpty(),"GOAL does not grant execution writes");
+     }
+ 
+     @Test
+@@ -682,97 +672,6 @@
+         return reviewRef;
+     }
+ 
+-    private static String writeValidatedRevisionPatch(
+-            Path root,
+-            TaskContractProposalReference baseReference,
+-            String iterationId
+-    ) throws Exception {
+-        var runId = "run-revised";
+-        var occurrenceDir = workstreamDir(root)
+-                .resolve("artifacts/context-governance/occurrences/node-revision-" + runId);
+-        var repoMap = occurrenceDir.resolve("repo-map.json");
+-        Files.createDirectories(repoMap.getParent());
+-        OBJECT_MAPPER.writeValue(repoMap.toFile(), Map.of(
+-                "artifactType", "repo_map",
+-                "inventoryHead", "",
+-                "inventorySha256", "",
+-                "inventoryPathCount", 0,
+-                "files", List.of(Map.of("path", "README.md"))));
+-        var binding = RepositoryFactBinding.write(
+-                root,
+-                occurrenceDir.resolve("binding.json"),
+-                WORKSTREAM_ID,
+-                "node-revision",
+-                runId,
+-                "",
+-                "",
+-                0,
+-                Map.of("repoMap", repoMap),
+-                OBJECT_MAPPER);
+-        var now = Instant.now();
+-        LEDGER_MAPPER.writeValue(workstreamDir(root).resolve("nodes/node-revision.json").toFile(),
+-                new NodeInstanceDocument(
+-                        1, "node-revision", "intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run",
+-                        NodeStatus.RUNNING, "stage-intake", iterationId, List.of(), Map.of(),
+-                        List.of(), Map.of(), "", "", now, null));
+-        var output = outputDir(root, runId).resolve("intake-claude-brainstorm.json");
+-        var outputRef = relative(root, output);
+-        var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
+-                "task_contract_revision_patch",
+-                "READY_FOR_PRODUCT_REVIEW",
+-                "Resolve both verified review obligations.",
+-                baseReference.proposalId(),
+-                baseReference.sha256(),
+-                List.of(
+-                        new AgentResultEnvelope.ObligationPatch(
+-                                "OB-1",
+-                                List.of("AC-1"),
+-                                List.of(new AgentResultEnvelope.ClauseChange(
+-                                        AgentResultEnvelope.ClauseChangeOperation.REPLACE,
+-                                        AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+-                                        "AC-1",
+-                                        "The revised behavior is observable")),
+-                                List.of(),
+-                                List.of()),
+-                        new AgentResultEnvelope.ObligationPatch(
+-                                "OB-2",
+-                                List.of("AC-2"),
+-                                List.of(new AgentResultEnvelope.ClauseChange(
+-                                        AgentResultEnvelope.ClauseChangeOperation.REPLACE,
+-                                        AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+-                                        "AC-2",
+-                                        "Revised verification passes")),
+-                                List.of(),
+-                                List.of("evidence/revision-proof.json"))));
+-        var envelope = new AgentResultEnvelope(
+-                1, WORKSTREAM_ID, runId, "intake.claude_brainstorm", patch);
+-        Files.writeString(output, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(envelope));
+-
+-        var runMetadata = output.getParent().getParent().resolve("run.json");
+-        LEDGER_MAPPER.writeValue(runMetadata.toFile(), Map.of("schemaVersion", 3, "runId", runId,
+-                "workstreamId", WORKSTREAM_ID, "nodeId", "intake.claude_brainstorm",
+-                "processResult", Map.of("exitCode", 0, "usability", "EXITED_ZERO", "durationMs", 1), "adapterSignals", List.of()));
+-        var validated = new ArtifactContractValidator(dev.dual.runtime.RuntimeTestLedger.ledger()).validate(
+-                root,
+-                WORKSTREAM_ID,
+-                "node-revision",
+-                new NodeDefinition(
+-                        "intake.claude_brainstorm", NodeKind.TASK, "acpx.agent_run", Map.of()),
+-                NodeResult.completed("completed", List.of(outputRef, binding.ref()), Map.of(
+-                        "run_id", runId, "run_metadata", relative(root, runMetadata),
+-                        "repository_fact_binding_ref", binding.ref(),
+-                        "repository_fact_binding_sha256", binding.sha256())));
+-        assertEquals(NodeStatus.COMPLETED, validated.status(), validated.result().toString());
+-        var sidecarRef = validated.outputRefs().stream()
+-                .filter(ref -> ref.endsWith(".contract.json"))
+-                .findFirst()
+-                .orElseThrow();
+-        AgentOutputLineageFixture.publish(root, WORKSTREAM_ID, root.resolve(sidecarRef), iterationId);
+-        assertTrue(validated.outputRefs().stream().anyMatch(ref -> ref.endsWith(".ref.json")),
+-                "revision validation must publish an immutable derived proposal reference");
+-        return sidecarRef;
+-    }
+-
+     private static void replaceClauseText(
+             Path root,
+             String proposalSidecarRef,
+--- a/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRevisionDisplayTest.java
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/ContractRevisionDisplayTest.java
+@@ -78,7 +78,13 @@
+             if (target.startsWith("context.")) {
+                 var result = new ContextBuildPackageHandler().execute(new TaskHandler.TaskContext(f.root, f.ws, definition, instance, dev.dual.runtime.RuntimeTestLedger.ledger()));
+                 assertEquals(NodeStatus.FAILED, result.status());
+-                assertEquals("CONTRACT_REVISION_CONTEXT_INVALID", result.result().get("failure_code"));
++                // R01 now binds the root evidence: reject the candidate before display projection.
++                assertEquals("failed", result.outcome());
++                assertEquals("verified task-contract proposal reference is required for product review",
++                        result.result().get("error"));
++                assertTrue(TaskContractProposalReference.resolveProposalFromRefs(f.root, f.ws,
++                        node.inputRefs(), MAPPER).isEmpty());
++                assertTrue(result.outputRefs().isEmpty());
+                 assertFalse(Files.exists(f.paths.workstreamDir().resolve("context/" + node.nodeInstanceId() + ".md")));
+             } else {
+                 var packetPath = f.paths.workstreamDir().resolve("reviews/" + node.nodeInstanceId() + ".json");
+--- a/dual-runtime/src/test/java/dev/dual/runtime/handler/OfflineAgentRun.java
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/OfflineAgentRun.java
+@@ -47,6 +47,10 @@
+         baseline = governance.qualifiedTaskContract().filter(c -> c.phase() == dev.dual.core.contract.TaskContract.Phase.EXECUTION)
+                 .isPresent() ? VerificationEvidence.prepare(context) : null;
+         if (baseline != null) facts.put("verification_source", baseline);
++        if (context.definition().id().equals("intake.claude_brainstorm")) {
++            var capture=new TaskContractRevisionContextResolver(context.ledger()).captureRevision(context);
++            if(capture.binding()!=null) {facts.put("contract_revision",capture.binding().toMap());inputs.addAll(capture.inputs());}
++        }
+         prepared = AgentRunCommitProtocol.prepare(context, dir, inputs, facts);
+         AgentRunCommitProtocol.qualifyDispatch(context, prepared);
+         AgentRunCommitProtocol.beginExternalCall(context, prepared);
+--- /dev/null
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/ProposalReferenceIdentityTest.java
+@@ -0,0 +1,36 @@
++package dev.dual.runtime.handler;
++import com.fasterxml.jackson.databind.ObjectMapper;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.io.TempDir;
++import java.nio.file.*;
++import java.util.*;
++import static org.junit.jupiter.api.Assertions.*;
++class ProposalReferenceIdentityTest {
++    @TempDir Path root;
++    final ObjectMapper json=new ObjectMapper().findAndRegisterModules();
++    @Test void identicalReferenceIsIdempotentButSameIdDifferentFullReferenceIsAmbiguousInEitherOrder() throws Exception {
++        var first=initial("one");var second=initial("two");
++        var r=second.reference();
++        var collision=new TaskContractProposalReference(1,first.reference().proposalId(),r.workstreamId(),r.producerNodeId(),
++                r.producerNodeInstanceId(),r.artifactRef(),r.sha256());
++        var other=root.resolve("other.ref.json");json.writeValue(other.toFile(),collision);
++        assertTrue(collision.resolveArtifact(root,"ws",json).isPresent(),"both references independently valid; do not fake rejection through invalid data");
++        assertTrue(TaskContractProposalReference.resolveFromRefs(root,"ws",List.of(first.referenceRef(),first.referenceRef()),json).isPresent());
++        for(var refs:List.of(List.of(first.referenceRef(),"other.ref.json"),List.of("other.ref.json",first.referenceRef())))
++            assertTrue(TaskContractProposalReference.resolveFromRefs(root,"ws",refs,json).isEmpty());
++    }
++    private TaskContractProposalReference.Published initial(String run) throws Exception {
++        var prompt=AgentResultPromptContract.render("ws",run,"intake.claude_brainstorm","READY_FOR_PRODUCT_REVIEW",Set.of("READY_FOR_PRODUCT_REVIEW"));
++        var envelope=new AgentResultEnvelopeParser().parse(prompt.substring(prompt.lastIndexOf("\n{")+1)).envelope();
++        var result=(AgentResultEnvelope.TaskContractProposalResult)envelope.result();
++        var projector=new AgentResultDocumentProjector();
++        var proposal=projector.taskContractProposal(result,List.of());
++        var source=root.resolve(".agent/workstreams/ws/runs/"+run+"/outputs/intake.json");Files.createDirectories(source.getParent());
++        Files.writeString(source,prompt.substring(prompt.lastIndexOf("\n{")+1));
++        var map=projector.outputContract(envelope,ContractRegistry.forNode("intake.claude_brainstorm"),"acpx.agent_run","node-"+run,
++                root.relativize(source).toString(),proposal,null);
++        var sidecar=source.resolveSibling("intake.contract.json");json.writeValue(sidecar.toFile(),map);
++        var doc=AgentOutputContractDocument.read(sidecar,json).orElseThrow();
++        return TaskContractProposalReference.publishInitial(root,"ws",sidecar,doc,json);
++    }
++}
+--- /dev/null
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/RevisionIdentityWireTest.java
+@@ -0,0 +1,39 @@
++package dev.dual.runtime.handler;
++import org.junit.jupiter.api.Test;
++import static org.junit.jupiter.api.Assertions.*;
++class RevisionIdentityWireTest {
++    static final String WIRE = """
++        {"schema_version":1,"workstream_id":"ws","run_id":"run","node_id":"intake.claude_brainstorm",
++         "result":{"artifact_type":"task_contract_revision_patch","decision":"READY_FOR_PRODUCT_REVIEW",
++         "summary":"revise","base_proposal_id":"base","obligation_patches":[{"review_obligation_id":"CO-1",
++         "resolved_by_clause_ids":["AC-1"],"clause_changes":[],"scope_additions":[],"evidence_ref_additions":[]}]}}
++        """;
++    @Test void idOnlyPatchParsesAndPassesShapeValidation() {
++        var parsed=new AgentResultEnvelopeParser().parse(WIRE);
++        assertTrue(parsed.valid(),parsed.message());
++        var validated=new AgentResultEnvelopeValidator().validate(parsed.envelope(),"ws","run",ContractRegistry.forNode("intake.claude_brainstorm"));
++        assertTrue(validated.valid(),validated.errors().toString());
++    }
++    @Test void oldModelShaKeyIsRejectedForBothHistoricalValues() {
++        for (var sha : java.util.List.of(
++                "517fc15b11bd16761e1c694d0625156981e8e515f239f6243186735ff00de94c",
++                "517fc15b11bd16761e1c694d0625156981e8e515f237f6243186735ff00de94c")) {
++            var parsed = new AgentResultEnvelopeParser().parse(WIRE.replace("\"base_proposal_id\":\"base\"",
++                    "\"base_proposal_id\":\"base\",\"base_proposal_sha256\":\"" + sha + "\""));
++            assertFalse(parsed.valid());
++        }
++    }
++    @Test void patchAndEligibleFullInstructionsRequireIdWithoutShaTranscription() {
++        var context = new AgentResultPromptContract.ProposalEmissionContext(
++                AgentResultPromptContract.EmissionMode.REVISION_PATCH, "exact-base", "b".repeat(64),
++                java.util.List.of(new AgentResultEnvelope.ReviewObligation("CO-1", "Clarify goal")));
++        for (var full : java.util.List.of(false, true)) {
++            var rendered = AgentResultPromptContract.render("ws", "run", "intake.claude_brainstorm",
++                    "READY_FOR_PRODUCT_REVIEW", java.util.Set.of("READY_FOR_PRODUCT_REVIEW"), context.withGoalReproposal(full));
++            assertTrue(rendered.contains("exact-base"));
++            assertFalse(rendered.contains("b".repeat(64)));
++            assertTrue(rendered.contains("never emit base_proposal_sha256"));
++            assertFalse(rendered.substring(rendered.lastIndexOf("\n{") + 1).contains("\"base_proposal_sha256\""));
++        }
++    }
++}
+--- a/dual-runtime/src/test/java/dev/dual/runtime/handler/TaskContractProposalRevisionMergerTest.java
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/TaskContractProposalRevisionMergerTest.java
+@@ -26,7 +26,6 @@
+                 "READY_FOR_PRODUCT_REVIEW",
+                 "Resolve obligations",
+                 context.previousReference().proposalId(),
+-                context.previousReference().sha256(),
+                 List.of(
+                         new AgentResultEnvelope.ObligationPatch(
+                                 "CO-1", List.of("AC-8"),
+@@ -63,7 +62,7 @@
+         var context = context();
+         var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "invalid",
+-                "stale", "0".repeat(64),
++                "stale",
+                 List.of(
+                         new AgentResultEnvelope.ObligationPatch(
+                                 "CO-X", List.of("AC-8"),
+@@ -82,7 +81,6 @@
+ 
+         assertFalse(result.valid());
+         assertTrue(result.errors().contains("REVISION_BASE_PROPOSAL_ID_MISMATCH"));
+-        assertTrue(result.errors().contains("REVISION_BASE_PROPOSAL_SHA256_MISMATCH"));
+         assertTrue(result.errors().contains("UNKNOWN_REVISION_OBLIGATION: CO-X"));
+         assertTrue(result.errors().contains("DUPLICATE_CLAUSE_PATCH_TARGET: AC-8"));
+         assertTrue(result.errors().stream().anyMatch(error -> error.startsWith("MISSING_REVISION_OBLIGATION:")));
+@@ -93,7 +91,7 @@
+         var context = context(List.of(new AgentResultEnvelope.ReviewObligation("CO-1", "Add clause")));
+         var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "add",
+-                context.previousReference().proposalId(), context.previousReference().sha256(),
++                context.previousReference().proposalId(),
+                 List.of(new AgentResultEnvelope.ObligationPatch(
+                         "CO-1", List.of("TR-NAMED-BUT-AC-SECTION"),
+                         List.of(new AgentResultEnvelope.ClauseChange(
+@@ -114,7 +112,7 @@
+         var context = context(List.of(new AgentResultEnvelope.ReviewObligation("CO-1", "Replace exact clause")));
+         var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "replace",
+-                context.previousReference().proposalId(), context.previousReference().sha256(),
++                context.previousReference().proposalId(),
+                 List.of(new AgentResultEnvelope.ObligationPatch(
+                         "CO-1", List.of("AC-MISSING"),
+                         List.of(new AgentResultEnvelope.ClauseChange(
+@@ -135,7 +133,7 @@
+         var context = context(List.of(new AgentResultEnvelope.ReviewObligation("CO-1", "Add exact scope")));
+         var patch = new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "scope",
+-                context.previousReference().proposalId(), context.previousReference().sha256(),
++                context.previousReference().proposalId(),
+                 List.of(new AgentResultEnvelope.ObligationPatch(
+                         "CO-1", List.of("AC-8"), List.of(),
+                         List.of(new AgentResultEnvelope.ProposalScopePath("README.md")), List.of())));
+@@ -178,20 +176,36 @@
+         assertEquals("Use the requested baseline only.", clause(merged.proposal(), "C-1").text());
+     }
+ 
+-    private static TaskContractRevisionContextResolver.Context context() {
++    @Test
++    void exactIdCannotHideChangedProgramBaseBytes() throws Exception {
++        var context = context();
++        var patch = capturedV14Patch(context, false);
++        Files.writeString(workspace.resolve(context.previousReference().artifactRef()), "changed base");
++        assertTrue(merger.merge(context, patch, workspace).errors()
++                .contains("REVISION_BASE_PROPOSAL_CONTENT_MISMATCH"));
++    }
++
++    private TaskContractRevisionContextResolver.Context context() {
+         return context(List.of(
+                 new AgentResultEnvelope.ReviewObligation("CO-1", "Fix AC-8"),
+                 new AgentResultEnvelope.ReviewObligation("CO-6", "Add exact scope"),
+                 new AgentResultEnvelope.ReviewObligation("CO-7", "Add evidence")));
+     }
+ 
+-    private static TaskContractRevisionContextResolver.Context context(
++    private TaskContractRevisionContextResolver.Context context(
+             List<AgentResultEnvelope.ReviewObligation> obligations
+     ) {
++        String hash;
++        try {
++            var file = workspace.resolve(".agent/workstreams/ws-1/runs/previous.contract.json");
++            Files.createDirectories(file.getParent());
++            new dev.dual.ledger.file.AtomicJsonWriter().write(file, proposal());
++            hash = TaskContractArtifactWriter.sha256(file);
++        } catch (Exception failure) { throw new RuntimeException(failure); }
+         var reference = new TaskContractProposalReference(
+-                1, "node-prev:0123456789abcdef", "ws-1",
++                1, "node-prev:" + hash.substring(0, 16), "ws-1",
+                 "intake.claude_brainstorm", "node-prev",
+-                ".agent/workstreams/ws-1/runs/previous.contract.json", "a".repeat(64));
++                ".agent/workstreams/ws-1/runs/previous.contract.json", hash);
+         return new TaskContractRevisionContextResolver.Context(
+                 null, true, proposal(), reference, obligations);
+     }
+@@ -202,7 +216,7 @@
+     ) {
+         return new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "Resolve four obligations",
+-                context.previousReference().proposalId(), context.previousReference().sha256(),
++                context.previousReference().proposalId(),
+                 List.of(
+                         replacement("CO-1", "AC-8", AgentResultEnvelope.ClauseSection.ACCEPTANCE_CRITERIA,
+                                 "Normalize identifiers.", List.of("src/main/resources/application.yml")),
+--- a/dual-runtime/src/test/java/dev/dual/runtime/handler/TaskContractRevisionPatchTargetValidatorTest.java
++++ b/dual-runtime/src/test/java/dev/dual/runtime/handler/TaskContractRevisionPatchTargetValidatorTest.java
+@@ -39,7 +39,7 @@
+     ) {
+         return new AgentResultEnvelope.TaskContractRevisionPatchResult(
+                 "task_contract_revision_patch", "READY_FOR_PRODUCT_REVIEW", "revision",
+-                "node-prev:0123456789abcdef", "a".repeat(64), List.of(obligations));
++                "node-prev:0123456789abcdef", List.of(obligations));
+     }
+ 
+     private static AgentResultEnvelope.ObligationPatch obligation(

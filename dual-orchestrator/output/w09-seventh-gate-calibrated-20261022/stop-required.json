@@ -1,0 +1,9 @@
+{
+  "recorded_at": "2026-10-22T23:24:11.820175+08:00",
+  "reason": "INVALID_STARTUP_PROCESS_VERIFICATION_AND_SESSION_BOOTSTRAP_TIMEOUT",
+  "primary_domain_reason": "session_bootstrap_failed",
+  "next_dispatch": "FORBIDDEN_PENDING_REASSESSMENT",
+  "gate_result": "INVALID",
+  "retry_performed": false,
+  "note": "Pre-dispatch process check treated restricted ps exit 1 as process absence; later strict observation cannot prove startup precondition retroactively"
+}

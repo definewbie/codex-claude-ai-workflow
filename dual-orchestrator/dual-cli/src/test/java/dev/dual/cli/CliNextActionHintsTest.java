@@ -136,8 +136,8 @@ class CliNextActionHintsTest {
                 ),
                 List.of(new EdgeDefinition("first", "completed", "gate.human_design_approval"))
         );
-        var ledger = new WorkflowFileLedger();
-        ledger.initialize(paths, "wf-review-hints", definition);
+        var ledger = CliLedgerFactory.create();
+        CliTestLedger.initialize(ledger, paths, "wf-review-hints", definition);
         var first = ledger.loadNode(paths, ledger.loadCurrent(paths).activeNodeInstanceIds().get(0));
         ledger.completeAndRoute(paths, definition, first.nodeInstanceId(), NodeStatus.COMPLETED,
                 "completed", List.of("runs/run-1/outputs/codex-review.md"), Map.of());

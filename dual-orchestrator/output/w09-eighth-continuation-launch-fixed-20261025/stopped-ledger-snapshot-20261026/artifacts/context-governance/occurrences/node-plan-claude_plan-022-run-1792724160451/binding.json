@@ -1,0 +1,43 @@
+{
+  "schema_version" : 1,
+  "workstream_id" : "ws-20261023T005431Z-9YYF",
+  "node_instance_id" : "node-plan-claude_plan-022",
+  "run_id" : "run-1792724160451",
+  "inventory_head" : "",
+  "inventory_sha256" : "",
+  "inventory_path_count" : 0,
+  "artifacts" : {
+    "workingSet" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1792724160451/working-set.json",
+      "sha256" : "b3797ff7c4031d32528fda41fba745731f5a177ee033dcddd20780bdf1dfd290"
+    },
+    "readReuseContract" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1792724160451/read-reuse-contract.json",
+      "sha256" : "7b812e61ffe692bb8f78f6bd1141f4759be71adb3ddcb3d219bfbfe2c9b3c2e3"
+    },
+    "agentCapabilityCatalog" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1792724160451/agent-capability-catalog.json",
+      "sha256" : "3e838f3ce067d783aa69ed5d30064ee0a91fa79b9475dbf9edeac19495d74521"
+    },
+    "plannedReport" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1792724160451/planned-report.json",
+      "sha256" : "126cae5d221d9b2201fe36f1446b83276916dd440f52d87dbc0f731824d181d3"
+    },
+    "repoMap" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1792724160451/repo-map.json",
+      "sha256" : "7f6eede230de221fdd4a89558c3d0b373e7c3c44fa18288ccb992906c54ebd6d"
+    },
+    "fileSummaries" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1792724160451/file-summaries.json",
+      "sha256" : "8ec06dcc4e5e996010d5c5f27979cbd2f540f381020fe5085b15325a4da9d759"
+    },
+    "stageScopePolicy" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1792724160451/stage-scope-policy.json",
+      "sha256" : "bec9ca6ab84a1642392e31349149848854d9e9ba7a8d2ae307e1ec1767593752"
+    },
+    "fileRelevancePlan" : {
+      "ref" : ".agent/workstreams/ws-20261023T005431Z-9YYF/artifacts/context-governance/occurrences/node-plan-claude_plan-022-run-1792724160451/file-relevance-plan.json",
+      "sha256" : "eb6688b0fd355c7d0420fb8e623ce7fcfd8a06f18a3091b3e64dee24e91d2cd8"
+    }
+  }
+}

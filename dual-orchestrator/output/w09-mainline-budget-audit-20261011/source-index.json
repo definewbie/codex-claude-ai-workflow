@@ -1,0 +1,197 @@
+[
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/scripts/acpx-claude-agent-env.sh",
+    "sha256": "cfd47f649d0f940f3d5c4fb4a8808b34264dbd017f58cd4a5ada4fec07eb6c9f",
+    "ranges": [
+      [
+        36,
+        68
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/agent-command.ts",
+    "sha256": "ccaaf63f555803452ff27a3c8fabb1ea5ec9fefe72d59876b5b0111446a8d91d",
+    "ranges": [
+      [
+        301,
+        327
+      ],
+      [
+        350,
+        369
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/claude-execution-policy.ts",
+    "sha256": "aa33163a96b7edcdb843d8e870f57df07c9ef7bfdae2d662a9ade0e8b050887b",
+    "ranges": [
+      [
+        50,
+        90
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/acp/client.ts",
+    "sha256": "3f4204143fd1de4d160d74f4b74a966ffa6e5a12b9b682bb5a594a9309c443b5",
+    "ranges": [
+      [
+        1180,
+        1200
+      ],
+      [
+        1429,
+        1449
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/runtime/engine/session-options.ts",
+    "sha256": "35c82adba710abba47d026c21109197fd9b1452c7e3ff1ca02282c40443c2fd9",
+    "ranges": [
+      [
+        1,
+        38
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/flags.ts",
+    "sha256": "d1da4ef7f21567e8e541f97d5d9f13d8215bea2b0e0b17cf1bc4a5ef8dd77d06",
+    "ranges": [
+      [
+        338,
+        350
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/command-handlers.ts",
+    "sha256": "f5043c98f9f3b2312baed8d48ed0ffb4e2d40b14583e42a580abb3119b629ff4",
+    "ranges": [
+      [
+        185,
+        202
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/.tools/acpx-e1/source/src/cli/command-registration.ts",
+    "sha256": "da85215e7b28d0416ac7d1c659bdbfb908be97882e048a509737b6533599f89a",
+    "ranges": [
+      [
+        267,
+        291
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/work/projects/ai/codex-claude-ai-workflow/dual-orchestrator/dual-runtime/src/main/resources/dev/dual/runtime/lifecycle/agent-lifecycle.terminal-delivery.json",
+    "sha256": "d9cdcf71b8974d1ed023150dc1c2146d79769d6ac6aea994b0305d2d6b895fa2",
+    "ranges": [],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/acp-agent.js",
+    "sha256": "f0cbbe408bb758cc4bacdae9a244bcac6efbdb6413f680195d017648abc6d816",
+    "ranges": [
+      [
+        233,
+        266
+      ],
+      [
+        4764,
+        4773
+      ],
+      [
+        4866,
+        4890
+      ],
+      [
+        5120,
+        5129
+      ],
+      [
+        5617,
+        5643
+      ],
+      [
+        7065,
+        7079
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/dist/settings.js",
+    "sha256": "629348525ddd007ace9c06a16a19af6877af2a090b58255dd7f5974a6bdf2932",
+    "ranges": [
+      [
+        74,
+        103
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.d.ts",
+    "sha256": "65ec4f17eb95dc6fa85d964249d4d27e31a150e4bfbaf94c531090862b7a1fd7",
+    "ranges": [
+      [
+        1665,
+        1719
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/dist/index.js",
+    "sha256": "4602784c5896fbf05a7d89b09655bacc768d0bf281e0d03a10333ff81da45268",
+    "ranges": [
+      [
+        28406,
+        28427
+      ],
+      [
+        28655,
+        28672
+      ],
+      [
+        33165,
+        33183
+      ]
+    ],
+    "evidence_boundary": "current installed/source bytes; not reproducible-build proof of third native subprocess"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@agentclientprotocol/claude-agent-acp/package.json",
+    "sha256": "dc85a06d256602b6ad40429b69bc7920ee4297839136b0e722199e4c7daf8567",
+    "version": "0.70.0"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/package.json",
+    "sha256": "7f06dfa738cd0e505aa6fb8fd4f038e37629fce6d67906adfdc64655a095285c",
+    "version": "0.3.232"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/208e725ef8df0f5d/node_modules/@agentclientprotocol/codex-acp/package.json",
+    "sha256": "7addfe1ad54d5a39a6961dd9918b9256fcc22c5a1dbdd4c83f91a41dda182965",
+    "version": "1.10.0"
+  },
+  {
+    "path": "/Users/kriswang/.npm/_npx/fca12915ff656968/node_modules/@anthropic-ai/claude-agent-sdk/sdk.mjs",
+    "sha256": "cae60ea6827d5f9b113c88b911388983fe96e7d565a382bf25904df78ab9d0fc",
+    "character_offset": 885521,
+    "scope": "environment schema symbol only, not native/provider enforcement proof"
+  }
+]

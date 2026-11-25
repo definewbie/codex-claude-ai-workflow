@@ -1,0 +1,63 @@
+{
+  "scope": "read-only research; no implementation or execution authorization",
+  "relay_commit": "c3a92d9c179972963756ebce3fcd106679302934",
+  "dual_anchors": [
+    {
+      "file": "dual-adapter-acpx/src/main/java/dev/dual/adapter/acpx/AcpxAgentTransport.java",
+      "lines": [
+        172,
+        183,
+        245,
+        262,
+        518,
+        669
+      ],
+      "reason": "existing session, prompt, invocation inputs and permission owner"
+    },
+    {
+      "file": "output/w09-eighth-continuation-gate-20261024/continuation.py",
+      "lines": [
+        12,
+        49,
+        65,
+        66
+      ],
+      "reason": "run authorization, stop, frozen checks, PATH metadata gate"
+    },
+    {
+      "file": "output/w09-eighth-continuation-gate-20261024/gate_support.py",
+      "lines": [
+        19,
+        42,
+        52
+      ],
+      "reason": "config exception and fixed installed inputs"
+    },
+    {
+      "file": "output/w09-eighth-continuation-gate-20261024/run-one-step.py",
+      "lines": [
+        50,
+        52,
+        58
+      ],
+      "reason": "actual child environment and Java invocation"
+    },
+    {
+      "file": ".tools/acpx-e1/bin/acpx",
+      "lines": [
+        2
+      ],
+      "reason": "actual wrapper uses env node"
+    }
+  ],
+  "decision": "LOCAL_FIX_ONLY for proposed operator design; defer Relay integration",
+  "boundary_review": "WARN: current run prerequisites unresolved; proposed fix not implemented",
+  "facts": "See effective-program-comparison and installed-input-differences; configuration exception does not match",
+  "no_claims": [
+    "no model cost saving measured",
+    "no Relay native runtime tested",
+    "no current Codex compatibility verdict",
+    "no Gate resumed",
+    "no new authority created"
+  ]
+}
