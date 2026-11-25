@@ -1,4 +1,0 @@
-3   Chujie Zheng et al. “Group Sequence Policy Optimization” (2025).
-
-4   Yuichi Inoue et al. “Wider or Deeper? Scaling LLM Inference-Time Compute with Adaptive
-  Branching Tree Search” (2025).

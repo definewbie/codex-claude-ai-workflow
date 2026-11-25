@@ -1,3 +1,0 @@
-   Figure 4-1. Overview of a decoder-only architecture, where y + L represents the final output
-transformation, meaning that the decoder’s hidden state y is passed through the learned output layer
-                 L to produce the logits for the next token.

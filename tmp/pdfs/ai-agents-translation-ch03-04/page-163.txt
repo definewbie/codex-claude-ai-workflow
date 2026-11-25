@@ -1,9 +1,0 @@
-    Figure 4-3. Throughput comparison of the two most recent modernized BERT architectures,
-     ModernBERT and NeoBERT. Image taken from NeoBERT, Lola Le Breton et al. (2025).
-
-So, even though encoder-only models once seemed overshadowed by the
-rise of decoder-only architectures, their evolution has quietly continued.
-Modern variants such as NomicBERT, ModernBERT,5 and NeoBERT
-integrate SOTA techniques like rotary positional encodings for extended
-context windows and FlashAttention kernels for faster training and
-inference.

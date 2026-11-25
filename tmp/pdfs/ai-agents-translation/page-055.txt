@@ -1,5 +1,0 @@
-2   Shunyu Yao et al. “Tree of Thoughts: Deliberate Problem Solving with Large Language
-  Models” (2023).
-
-3   Yutaro Yamada et al. “The AI Scientist-v2: Workshop-Level Automated Scientific Discovery
-  via Agentic Tree Search” (2025).
